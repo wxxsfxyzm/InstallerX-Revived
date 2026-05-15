@@ -813,4 +813,15 @@
     <string name="home_device_info_system">Sistema</string>
     <string name="home_device_info_active_authorizer">Autorizador em uso</string>
     <string name="home_device_info_default_installer">Atividade do Instalador Padrão</string>
+    <string name="installer_settings_xposed_detection">Detecção do Xposed</string>
+    <string name="config_detect_xposed_module">Detectar módulos Xposed</string>
+    <string name="config_detect_xposed_module_desc">Detectar e exibir informações de módulo Xposed durante a instalação</string>
+    <string name="config_quick_open_lsposed">Abrir rapidamente o LSPosed</string>
+    <string name="config_quick_open_lsposed_desc">Mostrar o botão \"Abrir LSPosed\" após a instalação de módulo Xposed</string>
+    <string name="exception_install_failed_blocked_by_profile">Instalação bloqueada pela política do perfil</string>
+    <string name="config_allow_sig_mismatch">Permitir Assinatura Incompatível</string>
+    <string name="config_allow_sig_mismatch_desc">Permitir a instalação de apps com uma assinatura diferente da versão instalada (requer o Core Patch)</string>
+    <string name="config_allow_sig_unknown">Permitir Assinatura Desconhecida</string>
+    <string name="config_allow_sig_unknown_desc">Permitir a instalação de apps cuja assinatura não possa ser verificada (requer o Core Patch)</string>
+    <string name="suggestion_install_anyway_desc">Ignorar temporariamente a restrição de perfil e tentar novamente</string>
 </resources>

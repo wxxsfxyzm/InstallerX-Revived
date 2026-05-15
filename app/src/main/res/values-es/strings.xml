@@ -823,4 +823,15 @@
     <string name="shizuku_not_authorized">Por favor, conceded permiso para acceder a Sui o Shizuku</string>
     <string name="shizuku_not_available">Por favor, activa a Sui o Shizuku</string>
     <string name="exception_initiator_not_visible">Permiso denegado debido a restricciones de visibilidad de paquetes. La aplicación que solicita la instalación está oculta para InstallerX. Si estás usando módulos como \'Hide My Applist\', añade InstallerX a la lista de permitidos</string>
+    <string name="installer_settings_xposed_detection">Detección de Xposed</string>
+    <string name="config_detect_xposed_module">Detectar módulos de Xposed</string>
+    <string name="config_detect_xposed_module_desc">Detectar y mostrar la información del módulo Xposed durante la instalación</string>
+    <string name="config_quick_open_lsposed">Abrir LSPosed rápidamente</string>
+    <string name="config_quick_open_lsposed_desc">Mostrar el botón \"Abrir LSPosed\" después de instalar el módulo Xposed</string>
+    <string name="exception_install_failed_blocked_by_profile">Instalación bloqueada por la política del perfil</string>
+    <string name="config_allow_sig_mismatch">Permitir discrepancia de firma</string>
+    <string name="config_allow_sig_mismatch_desc">Permitir la instalación de aplicaciones que tengan una firma diferente a la versión instalada (se requiere Core Patch)</string>
+    <string name="config_allow_sig_unknown">Permitir firma desconocida</string>
+    <string name="config_allow_sig_unknown_desc">Permitir la instalación de aplicaciones cuya firma no pueda verificarse (se requiere Core Patch)</string>
+    <string name="suggestion_install_anyway_desc">Omitir temporalmente la restricción del perfil y volver a intentarlo</string>
 </resources>

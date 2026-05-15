@@ -804,13 +804,24 @@
     <string name="dhizuku_not_available">Активируйте Dhizuku</string>
     <string name="default_installer">Установщик по умолчанию</string>
     <string name="priv_page_what_is_this_title">Что это?</string>
-    <string name="priv_page_what_is_this_desc">В этом разделе отображаются все доступные методы авторизации на вашем устройстве. Пожалуйста, выберите один из них, которое будет использоваться для выполнения привилегированных операций. Функции, отображаемые в приложении, изменятся в зависимости от вашего выбора.</string>
+    <string name="priv_page_what_is_this_desc">В этом разделе указаны все методы авторизации, доступные для этого приложения и вы можете выбрать тот, который используется по умолчанию для привилегированных операций. Здесь проверяется только доступность, т.е. необходимое разрешение будет запрошено, когда приложению действительно оно потребуется.</string>
     <string name="priv_page_notice_title">Отличие от профилей установки</string>
-    <string name="priv_page_notice_desc">В профилях установки вы можете переопределить эту глобальную настройку и выбрать конкретный авторизатор. Таким образом, этот раздел определяет доступность всех методов авторизации для вас.</string>
+    <string name="priv_page_notice_desc">Эта настройка управляет авторизатором, используемым самим приложением для привилегированных операций. Профили установки управляют авторизатором, используемым при установке приложений и могут переопределять этот глобальный параметр для этой цели.</string>
     <string name="home_device_info_title">Информация об устройстве</string>
     <string name="home_device_info_model">Модель</string>
     <string name="home_device_info_system">Система</string>
     <string name="home_device_info_active_authorizer">Используется авторизатор</string>
     <string name="home_device_info_default_installer">Действия установщика по умолчанию</string>
     <string name="exception_initiator_not_visible">Доступ запрещен из-за ограничений видимости пакета. Приложение, запрашивающее установку, скрыто от InstallerX. Если вы используете такие модули, как \'Скрыть мой список приложений\', добавьте InstallerX в список разрешенных</string>
+    <string name="installer_settings_xposed_detection">Обнаружение Xposed</string>
+    <string name="config_detect_xposed_module">Обнаружение модулей Xposed</string>
+    <string name="config_detect_xposed_module_desc">Обнаружение и отображение информации о модуле Xposed во время установки</string>
+    <string name="config_quick_open_lsposed">Запуск LSPosed</string>
+    <string name="config_quick_open_lsposed_desc">После установки модуля Xposed отобразится кнопка \"Запуск LSPosed\"</string>
+    <string name="exception_install_failed_blocked_by_profile">Установка заблокирована политикой профиля</string>
+    <string name="config_allow_sig_mismatch">Разрешить несоответствие подписи</string>
+    <string name="config_allow_sig_mismatch_desc">Разрешить установку приложений с подписью, отличающейся от установленной версии (требуется Core Patch)</string>
+    <string name="config_allow_sig_unknown">Разрешить без подписи</string>
+    <string name="config_allow_sig_unknown_desc">Разрешить установку приложений, подпись которых не может быть проверена (требуется Core Patch)</string>
+    <string name="suggestion_install_anyway_desc">Временно обойти ограничение профиля и повторить попытку</string>
 </resources>

@@ -342,10 +342,10 @@
     <string name="sort_by_package_name">パッケージ名</string>
     <string name="sort_by_install_time">インストール時間</string>
     <string name="sort_by_reverse_order">逆順</string>
-    <string name="installer_settings_require_biometric_auth">インストールには生体認証が必要です</string>
-    <string name="installer_settings_require_biometric_auth_desc">インストール時に生体認証を要求する</string>
-    <string name="uninstaller_settings_require_biometric_auth">アンインストールには生体認証が必要です</string>
-    <string name="uninstaller_settings_require_biometric_auth_desc">アンインストール時に生体認証を要求する</string>
+    <string name="installer_settings_require_biometric_auth">インストールに生体認証を要求する</string>
+    <string name="installer_settings_require_biometric_auth_desc">パッケージをインストールする際に生体認証を要求します</string>
+    <string name="uninstaller_settings_require_biometric_auth">アンインストールに生体認証を要求する</string>
+    <string name="uninstaller_settings_require_biometric_auth_desc">アンインストールする際に生体認証を要求します</string>
     <string name="use_biometric_confirm_change_auth_settings">この設定を変更してもよろしいですか</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">続行するには、デバイス認証をしてこの操作を確認してください</string>
     <string name="sort_by_show_system_app">システムアプリを表示する</string>
@@ -729,4 +729,22 @@
     <string name="lab_mi_island_bypass_restriction_desc">HyperIsland の認証制限をバイパスします</string>
     <string name="lab_mi_island_outer_glow">外側のグロー</string>
     <string name="lab_mi_island_outer_glow_desc">HyperIsland の縁にシステムアプリ風の光るエフェクトを追加します</string>
+    <string name="config_detect_xposed_module">Xposed モジュールを検出</string>
+    <string name="config_detect_xposed_module_desc">インストール時に Xposed モジュールの情報を検出して表示します</string>
+    <string name="config_quick_open_lsposed_desc">Xposed モジュールをインストールした後、「LSPosed を起動する」ボタンを表示します</string>
+    <string name="installer_settings_xposed_detection">Xposed の検出</string>
+    <string name="config_quick_open_lsposed">LSPosed を直ちに起動</string>
+    <string name="installer_biometric_auth_mode_disable">生体認証を無効にする</string>
+    <string name="installer_biometric_auth_mode_enable">生体認証を有効にする</string>
+    <string name="installer_biometric_auth_mode_follow_config">プロファイルに従う</string>
+    <string name="available">利用可能</string>
+    <string name="unavailable">利用不可</string>
+    <string name="running">実行中</string>
+    <string name="working_status_default_installer">デフォルトのインストーラーとして動作中</string>
+    <string name="working_status_not_default_installer">デフォルトのインストーラーとして設定されていません</string>
+    <string name="working_status_default_installer_desc">このアプリは現在、デフォルトのパッケージインストーラーです</string>
+    <string name="working_status_system_installer">システムパッケージインストーラーとして動作中</string>
+    <string name="working_status_system_installer_desc">アプリはシステムパッケージインストーラーとして実行されています</string>
+    <string name="working_status_not_default_installer_click_details">詳細を表示するにはクリックしてください</string>
+    <string name="working_status_default_installer_tip">このアプリをデフォルトのパッケージインストーラーとして設定すると、ほとんどのインストール要求が処理されます。ただし、以下のケースは処理できませんのでご注意ください：\n- OEM がデフォルトのインストーラーの変更を制限している場合\n- イニシエータがターゲットコンポーネントを指定している場合\n- イニシエータがセッションインストールを使用する場合</string>
 </resources>
