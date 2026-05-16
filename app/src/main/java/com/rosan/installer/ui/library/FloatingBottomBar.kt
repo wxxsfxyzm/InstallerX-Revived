@@ -434,7 +434,6 @@ fun FloatingBottomBar(
                         .then(interactiveHighlight?.modifier ?: Modifier)
                         .height(56.dp)
                         .padding(horizontal = 4.dp),
-                    // .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     content()

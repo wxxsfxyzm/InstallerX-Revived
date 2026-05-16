@@ -5,7 +5,6 @@ package com.rosan.installer.ui.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import androidx.activity.ComponentActivity
@@ -59,9 +58,6 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
-        // Compat Navigation Bar color for Xiaomi Devices
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            window.isNavigationBarContrastEnforced = false
         super.onCreate(savedInstanceState)
         Timber.d("UninstallerActivity onCreate.")
 

@@ -2,7 +2,6 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,9 +32,6 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
         val splashScreen = installSplashScreen()
         // Enable edge-to-edge mode for immersive experience
         enableEdgeToEdge()
-        // Compat Navigation Bar color for Xiaomi Devices
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            window.isNavigationBarContrastEnforced = false
 
         var isThemeLoaded = false
         // Keep splash screen visible until data is safely loaded
