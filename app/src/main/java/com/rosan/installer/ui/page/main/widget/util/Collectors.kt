@@ -5,7 +5,6 @@ package com.rosan.installer.ui.page.main.widget.util
 import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +19,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rosan.installer.R
 import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Navigator
+import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.installer.InstallerViewEvent
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
@@ -58,25 +59,33 @@ fun LogEventCollector(viewModel: AboutViewModel) {
 }
 
 @Composable
-fun DeleteEventCollector(viewModel: AllViewModel, snackBarHostState: SnackbarHostState) {
-    val snackbarString = stringResource(R.string.delete_success)
-    val actionLabel = stringResource(R.string.restore)
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { event ->
+fun AllViewEventCollector(
+    viewModel: AllViewModel,
+    navigator: Navigator,
+    onShowSnackbar: suspend (message: String, actionLabel: String) -> Boolean
+) {
+    val deleteSuccessString = stringResource(id = R.string.delete_success)
+    val restoreString = stringResource(id = R.string.restore)
+
+    LaunchedEffect(viewModel, navigator) {
+        viewModel.eventFlow.collect { event ->
             when (event) {
                 is AllViewEvent.DeletedConfig -> {
-                    val result = snackBarHostState.showSnackbar(
-                        message = snackbarString,
-                        actionLabel = actionLabel,
-                        withDismissAction = true
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
+                    // Trigger the UI-specific snackbar and check if action was clicked
+                    val actionPerformed = onShowSnackbar(deleteSuccessString, restoreString)
+                    if (actionPerformed) {
                         viewModel.dispatch(
-                            AllViewAction.RestoreDataConfig(
-                                configModel = event.configModel
-                            )
+                            AllViewAction.RestoreDataConfig(configModel = event.configModel)
                         )
                     }
+                }
+
+                is AllViewEvent.NavigateToEditConfig -> {
+                    navigator.push(Route.EditConfig(event.id))
+                }
+
+                is AllViewEvent.NavigateToApplyConfig -> {
+                    navigator.push(Route.ApplyConfig(event.id))
                 }
             }
         }

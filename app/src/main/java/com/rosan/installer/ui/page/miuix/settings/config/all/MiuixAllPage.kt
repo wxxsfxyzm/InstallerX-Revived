@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,17 +37,15 @@ import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewEvent
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
+import com.rosan.installer.ui.page.main.widget.util.AllViewEventCollector
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
 import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
-import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
@@ -72,40 +69,27 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 fun MiuixAllPage(
     enableBlur: Boolean,
     navigator: Navigator = LocalNavigator.current,
-    viewModel: AllViewModel = koinViewModel { parametersOf(navigator) },
+    viewModel: AllViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.navigator = navigator
-    }
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyGridState()
     val scrollBehavior = MiuixScrollBehavior()
 
-    val deleteSuccessString = stringResource(id = R.string.delete_success)
-    val restoreString = stringResource(id = R.string.restore)
-
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { event ->
-            when (event) {
-                is AllViewEvent.DeletedConfig -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message = deleteSuccessString,
-                        actionLabel = restoreString,
-                        withDismissAction = true
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        viewModel.dispatch(
-                            AllViewAction.RestoreDataConfig(configModel = event.configModel)
-                        )
-                    }
-                }
-            }
+    AllViewEventCollector(
+        viewModel = viewModel,
+        navigator = navigator,
+        onShowSnackbar = { message, actionLabel ->
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = actionLabel,
+                withDismissAction = true
+            )
+            result == SnackbarResult.ActionPerformed
         }
-    }
+    )
 
     val layoutDirection = LocalLayoutDirection.current
 
@@ -258,7 +242,7 @@ private fun DataItemWidget(
                     contentDescription = stringResource(id = R.string.edit)
                 )
             }
-            if (!isDefault)
+            if (!isDefault) {
                 IconButton(
                     minHeight = 35.dp,
                     minWidth = 35.dp,
@@ -271,34 +255,35 @@ private fun DataItemWidget(
                         contentDescription = stringResource(id = R.string.delete)
                     )
                 }
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                minHeight = 35.dp,
-                minWidth = 35.dp,
-                backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
-                onClick = { viewModel.dispatch(AllViewAction.ApplyConfig(entity)) }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(
+                    minHeight = 35.dp,
+                    minWidth = 35.dp,
+                    backgroundColor = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                    onClick = { viewModel.dispatch(AllViewAction.ApplyConfig(entity)) }
                 ) {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        imageVector = MiuixIcons.Regular.SelectAll,
-                        tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
-                        contentDescription = stringResource(id = R.string.apply)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        modifier = Modifier.padding(end = 3.dp),
-                        text = stringResource(R.string.config_scope),
-                        color = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(20.dp),
+                            imageVector = MiuixIcons.Regular.SelectAll,
+                            tint = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                            contentDescription = stringResource(id = R.string.apply)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            modifier = Modifier.padding(end = 3.dp),
+                            text = stringResource(R.string.config_scope),
+                            color = MiuixTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 15.sp
+                        )
+                    }
                 }
             }
         }

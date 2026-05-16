@@ -9,8 +9,6 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import com.rosan.installer.domain.settings.util.ConfigOrder
-import com.rosan.installer.ui.navigation.Navigator
-import com.rosan.installer.ui.navigation.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,7 +22,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 class AllViewModel(
-    var navigator: Navigator,
     private val repo: ConfigRepository,
     private val appSettingsRepo: AppSettingsRepository
 ) : ViewModel(), KoinComponent {
@@ -103,11 +100,8 @@ class AllViewModel(
 
     private fun editDataConfig(configModel: ConfigModel) {
         viewModelScope.launch {
-            navigator.push(
-                Route.EditConfig(
-                    configModel.id
-                )
-            )
+            // Emit navigation event instead of calling navigator directly
+            _eventFlow.emit(AllViewEvent.NavigateToEditConfig(configModel.id))
         }
     }
 
@@ -126,11 +120,8 @@ class AllViewModel(
 
     private fun applyConfig(configModel: ConfigModel) {
         viewModelScope.launch {
-            navigator.push(
-                Route.ApplyConfig(
-                    configModel.id
-                )
-            )
+            // Emit navigation event instead of calling navigator directly
+            _eventFlow.emit(AllViewEvent.NavigateToApplyConfig(configModel.id))
         }
     }
 }
