@@ -8,7 +8,6 @@ import com.rosan.installer.domain.settings.model.BiometricAuthMode
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
@@ -33,7 +32,7 @@ class InstallerSettingsViewModel(
         InstallerSettingsState(
             authorizer = prefs.authorizer,
             alwaysUseRootInSystem = prefs.alwaysUseRootInSystem,
-            dhizukuAutoCloseCountDown = prefs.dhizukuAutoCloseCountDown,
+            closeSessionCountDown = prefs.closeSessionCountDown,
             installerRequireBiometricAuth = prefs.installerRequireBiometricAuth,
             showOPPOSpecial = prefs.showOPPOSpecial,
             detectXposedModule = prefs.detectXposedModule,
@@ -41,7 +40,8 @@ class InstallerSettingsViewModel(
             managedInstallerPackages = prefs.managedInstallerPackages,
             managedBlacklistPackages = prefs.managedBlacklistPackages,
             managedSharedUserIdBlacklist = prefs.managedSharedUserIdBlacklist,
-            managedSharedUserIdExemptedPackages = prefs.managedSharedUserIdExemptedPackages
+            managedSharedUserIdExemptedPackages = prefs.managedSharedUserIdExemptedPackages,
+            setInstallRequester = prefs.labSetInstallRequester
         )
     }.stateIn(
         scope = viewModelScope,
@@ -56,17 +56,6 @@ class InstallerSettingsViewModel(
                     StringSetting.Authorizer,
                     action.authorizer.value
                 )
-            }
-
-            is InstallerSettingsAction.ChangeAlwaysUseRootInSystem -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.AlwaysUseRootInSystem,
-                    action.alwaysUseRootInSystem
-                )
-            }
-
-            is InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown -> {
-                if (action.countDown in 1..10) viewModelScope.launch { updateSetting(IntSetting.DialogAutoCloseCountdown, action.countDown) }
             }
 
             is InstallerSettingsAction.ChangeBiometricAuth -> changeBiometricAuth(action.mode)
@@ -89,6 +78,13 @@ class InstallerSettingsViewModel(
                 updateSetting(
                     BooleanSetting.QuickOpenLSPosed,
                     action.open
+                )
+            }
+
+            is InstallerSettingsAction.ChangeSetInstallRequester -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.LabSetInstallRequester,
+                    action.enable
                 )
             }
 

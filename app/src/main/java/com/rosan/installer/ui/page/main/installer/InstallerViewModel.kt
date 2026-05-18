@@ -85,7 +85,7 @@ class InstallerViewModel(
         local.copy(
             viewSettings = local.viewSettings.copy(
                 useBlur = prefs.useBlur,
-                autoCloseCountDown = prefs.dhizukuAutoCloseCountDown,
+                closeSessionCountDown = prefs.closeSessionCountDown,
                 showExtendedMenu = prefs.showDialogInstallExtendedMenu,
                 showSmartSuggestion = prefs.showSmartSuggestion,
                 disableNotificationOnDismiss = prefs.disableNotificationForDialogInstall,

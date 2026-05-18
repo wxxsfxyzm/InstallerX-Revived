@@ -290,8 +290,8 @@
     <string name="extended_menu">القائمة الموسعة</string>
     <string name="disable_notification_on_dismiss">إغلاق عند إغفال نافذة الحوار</string>
     <string name="close_notification_immediately_on_dialog_dismiss">إغفال نافذة الحوار سيؤدي إلى الخروج الصامت</string>
-    <string name="set_countdown">ضبط العد التنازلي</string>
-    <string name="dhizuku_auto_close_countdown_desc">عد تنازلي للإغلاق التلقائي بعد نجاح التثبيت عبر Dhizuku</string>
+    <string name="close_session_countdown">ضبط العد التنازلي</string>
+    <string name="close_session_countdown_desc">عد تنازلي للإغلاق التلقائي بعد نجاح التثبيت عبر Dhizuku</string>
     <string name="dhizuku_cannot_set_installer_desc">وضع Dhizuku لا يدعم تعيين المُثبِّت!</string>
     <string name="grant_permission_after_install">انقر لمنح الإذن بعد التثبيت</string>
     <string name="show_intelligent_suggestion">عرض الاقتراحات الذكية (تجريبي)</string>

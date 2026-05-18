@@ -45,8 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
@@ -55,14 +53,12 @@ import com.rosan.installer.ui.page.main.settings.preferred.ManagedPackagesWidget
 import com.rosan.installer.ui.page.main.settings.preferred.ManagedUidsWidget
 import com.rosan.installer.ui.page.main.settings.preferred.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
-import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -74,7 +70,6 @@ fun InstallerGlobalSettingsPage(
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
@@ -140,31 +135,6 @@ fun InstallerGlobalSettingsPage(
                 SegmentedColumn(
                     title = stringResource(R.string.installer_settings_global_installer)
                 ) {
-                    item(animatedVisibility = uiState.authorizer == Authorizer.None && capabilityProvider.isSystemApp) {
-                        SwitchWidget(
-                            icon = AppIcons.FlashPreferRoot,
-                            title = stringResource(R.string.config_always_use_root_in_system),
-                            description = stringResource(R.string.config_always_use_root_in_system_desc),
-                            checked = uiState.alwaysUseRootInSystem,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeAlwaysUseRootInSystem(it)) }
-                        )
-                    }
-
-                    item(animatedVisibility = uiState.authorizer == Authorizer.Dhizuku) {
-                        IntNumberPickerWidget(
-                            icon = AppIcons.Working,
-                            title = stringResource(R.string.set_countdown),
-                            description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                            value = uiState.dhizukuAutoCloseCountDown,
-                            startInt = 1,
-                            endInt = 10,
-                            stepSize = 1,
-                            onValueChange = {
-                                viewModel.dispatch(InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it))
-                            }
-                        )
-                    }
-
                     item {
                         SettingsNavigationItemWidget(
                             icon = AppIcons.Dialog,
@@ -183,11 +153,32 @@ fun InstallerGlobalSettingsPage(
                         )
                     }
 
-                    item(animatedVisibility = biometricAvailable) {
+                    item {
+                        SettingsNavigationItemWidget(
+                            icon = AppIcons.Authorizer,
+                            title = stringResource(R.string.authorizer_customization),
+                            description = stringResource(R.string.authorizer_customization_desc),
+                            onClick = { navigator.push(Route.AuthorizerCust) }
+                        )
+                    }
+
+                    if (biometricAvailable) item {
                         DataInstallerBiometricAuthWidget(
                             currentMode = uiState.installerRequireBiometricAuth,
                             onModeChange = {
                                 viewModel.dispatch(InstallerSettingsAction.ChangeBiometricAuth(it))
+                            }
+                        )
+                    }
+
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.InstallRequester,
+                            title = stringResource(R.string.lab_set_install_requester),
+                            description = stringResource(R.string.lab_set_install_requester_desc),
+                            checked = uiState.setInstallRequester,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeSetInstallRequester(it))
                             }
                         )
                     }
@@ -240,7 +231,7 @@ fun InstallerGlobalSettingsPage(
                 }
             }
 
-            // --- Group 3: Preset Installer Packages ---
+            // --- Group 4: Preset Installer Packages ---
             item {
                 SegmentedColumn(
                     modifier = Modifier.padding(top = 8.dp),
@@ -261,7 +252,7 @@ fun InstallerGlobalSettingsPage(
                 }
             }
 
-            // --- Group 4: Managed Blacklist ---
+            // --- Group 5: Managed Blacklist ---
             item {
                 SegmentedColumn(
                     title = stringResource(id = R.string.config_managed_blacklist_by_package_name_title),
@@ -281,7 +272,7 @@ fun InstallerGlobalSettingsPage(
                 }
             }
 
-            // --- Group 5: Managed Shared User IDs ---
+            // --- Group 6: Managed Shared User IDs ---
             item {
                 SegmentedColumn(
                     title = stringResource(R.string.config_managed_blacklist_by_shared_user_id_title),

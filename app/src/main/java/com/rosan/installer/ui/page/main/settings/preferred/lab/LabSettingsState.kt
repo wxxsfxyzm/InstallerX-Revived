@@ -14,8 +14,6 @@ data class LabSettingsState(
     val labHttpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
     val labHttpSaveFile: Boolean = false,
     val labTapIconToShare: Boolean = false,
-    val labShowFilePath: Boolean = false,
-    val labShowInstallInitiator: Boolean = false,
     val labAllowInstallWithoutUserAction: Boolean = false,
     val githubUpdateChannel: GithubUpdateChannel = GithubUpdateChannel.OFFICIAL,
     val customGithubProxyUrl: String = ""

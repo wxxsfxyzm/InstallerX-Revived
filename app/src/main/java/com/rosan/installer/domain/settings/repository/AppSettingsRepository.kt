@@ -27,7 +27,7 @@ enum class IntSetting {
     ThemeSeedColor,
     ShowMiIslandBlockingInterval,
     NotificationSuccessAutoClearSeconds,
-    DialogAutoCloseCountdown,
+    CloseSessionCountdown,
     UninstallFlags
 }
 

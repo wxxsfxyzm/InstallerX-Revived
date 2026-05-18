@@ -44,6 +44,9 @@ sealed interface Route : NavKey {
     data object Priv : Route
 
     @Serializable
+    data object AuthorizerCust : Route
+
+    @Serializable
     data class EditConfig(
         val id: Long
     ) : Route

@@ -41,8 +41,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.model.Manufacturer
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.BiometricAuthMode
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
@@ -51,6 +49,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerSe
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixManagedPackagesWidget
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixManagedUidsWidget
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixNavigationItemWidget
+import com.rosan.installer.ui.page.miuix.settings.preferred.installer.authorizer.MiuixAuthorizerCustPage
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
@@ -80,7 +79,6 @@ fun MiuixInstallerGlobalSettingsPage(
     val context = LocalContext.current
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = MiuixScrollBehavior()
 
     val layoutDirection = LocalLayoutDirection.current
@@ -123,36 +121,6 @@ fun MiuixInstallerGlobalSettingsPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp)
                 ) {
-
-                    AnimatedVisibility(
-                        visible = uiState.authorizer == Authorizer.None && capabilityProvider.isSystemApp,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.config_always_use_root_in_system),
-                            description = stringResource(R.string.config_always_use_root_in_system_desc),
-                            checked = uiState.alwaysUseRootInSystem,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeAlwaysUseRootInSystem(it)) }
-                        )
-                    }
-                    AnimatedVisibility(
-                        visible = uiState.authorizer == Authorizer.Dhizuku,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        MiuixIntNumberPickerWidget(
-                            title = stringResource(R.string.set_countdown),
-                            description = stringResource(R.string.dhizuku_auto_close_countdown_desc),
-                            value = uiState.dhizukuAutoCloseCountDown,
-                            startInt = 1,
-                            endInt = 10
-                        ) {
-                            viewModel.dispatch(
-                                InstallerSettingsAction.ChangeDhizukuAutoCloseCountDown(it)
-                            )
-                        }
-                    }
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.dialog_settings),
                         description = stringResource(R.string.dialog_settings_desc),
@@ -162,6 +130,11 @@ fun MiuixInstallerGlobalSettingsPage(
                         title = stringResource(R.string.notification_settings),
                         description = stringResource(R.string.notification_settings_desc),
                         onClick = { navigator.push(Route.NotificationSettings) }
+                    )
+                    MiuixNavigationItemWidget(
+                        title = stringResource(R.string.authorizer_customization),
+                        description = stringResource(R.string.authorizer_customization_desc),
+                        onClick = { navigator.push(Route.AuthorizerCust) }
                     )
 
                     if (BiometricManager
@@ -207,6 +180,12 @@ fun MiuixInstallerGlobalSettingsPage(
                                     InstallerSettingsAction.ChangeBiometricAuth(biometricModes[index])
                                 )
                             }
+                        )
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.lab_set_install_requester),
+                            description = stringResource(R.string.lab_set_install_requester_desc),
+                            checked = uiState.setInstallRequester,
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeSetInstallRequester(it)) }
                         )
                     }
                 }

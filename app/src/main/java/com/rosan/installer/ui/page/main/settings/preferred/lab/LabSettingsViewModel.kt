@@ -28,8 +28,6 @@ class LabSettingsViewModel(
             labHttpProfile = prefs.labHttpProfile,
             labHttpSaveFile = prefs.labHttpSaveFile,
             labTapIconToShare = prefs.labTapIconToShare,
-            labShowFilePath = prefs.labShowFilePath,
-            labShowInstallInitiator = prefs.labShowInstallInitiator,
             labAllowInstallWithoutUserAction = prefs.labInstallWithoutUserAction,
             githubUpdateChannel = prefs.githubUpdateChannel,
             customGithubProxyUrl = prefs.customGithubProxyUrl
@@ -87,20 +85,6 @@ class LabSettingsViewModel(
             is LabSettingsAction.LabChangeTapIconToShare -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.LabTapIconToShare,
-                    action.enable
-                )
-            }
-
-            is LabSettingsAction.LabChangeShowFilePath -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.LabShowFilePath,
-                    action.enable
-                )
-            }
-
-            is LabSettingsAction.LabChangeShowInstallInitiator -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.LabShowInstallInitiator,
                     action.enable
                 )
             }

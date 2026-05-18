@@ -12,6 +12,7 @@ import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerSettingsViewModel
+import com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer.AuthorizerCustViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.installer.dialog.DialogSettingsViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabSettingsViewModel
@@ -28,6 +29,7 @@ val viewModelModule = module {
     viewModelOf(::PreferredViewModel)
     viewModelOf(::ThemeSettingsViewModel)
     viewModelOf(::InstallerSettingsViewModel)
+    viewModelOf(::AuthorizerCustViewModel)
     viewModelOf(::DialogSettingsViewModel)
     viewModelOf(::NotificationSettingsViewModel)
     viewModelOf(::UninstallerSettingsViewModel)

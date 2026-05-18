@@ -2,7 +2,6 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.lab
 
-import android.os.Build
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.GithubUpdateChannel
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
@@ -57,7 +55,6 @@ import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -68,7 +65,6 @@ fun LabPage(
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val showRootImplementationDialog = remember { mutableStateOf(false) }
@@ -210,7 +206,7 @@ fun LabPage(
                 }
             }
             item {
-                SegmentedColumn(
+                /*SegmentedColumn(
                     title = stringResource(R.string.lab_unstable_features)
                 ) {
                     item {
@@ -243,16 +239,7 @@ fun LabPage(
                             }
                         )
                     }
-                    if (!capabilityProvider.isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) item {
-                        SwitchWidget(
-                            icon = AppIcons.InstallSilent,
-                            title = stringResource(R.string.lab_install_without_user_action),
-                            description = stringResource(R.string.lab_install_without_user_action_desc),
-                            checked = uiState.labAllowInstallWithoutUserAction,
-                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeAllowInstallWithoutUserAction(it)) }
-                        )
-                    }
-                }
+                }*/
             }
 
             if (AppConfig.isInternetAccessEnabled)

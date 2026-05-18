@@ -63,7 +63,7 @@ class AppSettingsRepositoryImpl(
             showSmartSuggestion = prefs[AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION] ?: true,
             disableNotificationForDialogInstall = prefs[AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS] ?: false,
             showDialogWhenPressingNotification = prefs[AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION] ?: true,
-            dhizukuAutoCloseCountDown = prefs[AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN] ?: 3,
+            closeSessionCountDown = prefs[AppDataStore.CLOSE_SESSION_COUNTDOWN] ?: 3,
             notificationSuccessAutoClearSeconds = prefs[AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS] ?: 0,
             versionCompareInSingleLine = prefs[AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE] ?: false,
             sdkCompareInMultiLine = prefs[AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE] ?: false,
@@ -214,7 +214,7 @@ class AppSettingsRepositoryImpl(
             IntSetting.ThemeSeedColor -> AppDataStore.THEME_SEED_COLOR
             IntSetting.ShowMiIslandBlockingInterval -> AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS
             IntSetting.NotificationSuccessAutoClearSeconds -> AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS
-            IntSetting.DialogAutoCloseCountdown -> AppDataStore.DIALOG_AUTO_CLOSE_COUNTDOWN
+            IntSetting.CloseSessionCountdown -> AppDataStore.CLOSE_SESSION_COUNTDOWN
             IntSetting.UninstallFlags -> AppDataStore.UNINSTALL_FLAGS
         }
 

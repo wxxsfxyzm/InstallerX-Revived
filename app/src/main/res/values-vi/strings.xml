@@ -625,8 +625,8 @@
     <string name="auto_silent_install_desc">Tự động cài đặt im lặng khi bắt đầu hộp thoại cài đặt</string>
     <string name="disable_notification_on_dismiss">Hủy Cài đặt khi Bỏ qua</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Bỏ qua hộp thoại sẽ hủy cài đặt thay vì thu nhỏ nó thành thông báo</string>
-    <string name="set_countdown">Đặt đếm ngược</string>
-    <string name="dhizuku_auto_close_countdown_desc">Đếm ngược để tự động đóng sau khi cài đặt Dhizuku thành công</string>
+    <string name="close_session_countdown">Đặt đếm ngược</string>
+    <string name="close_session_countdown_desc">Đếm ngược để tự động đóng sau khi cài đặt Dhizuku thành công</string>
     <string name="dhizuku_cannot_set_package_source_desc">Chế độ Dhizuku không hỗ trợ tùy chỉnh nguồn gói!</string>
     <string name="dhizuku_cannot_set_installer_desc">Chế độ Dhizuku không hỗ trợ cài đặt trình cài đặt!</string>
     <string name="dhizuku_cannot_set_user_desc">Chế độ Dhizuku không hỗ trợ cài đặt người dùng đích!</string>

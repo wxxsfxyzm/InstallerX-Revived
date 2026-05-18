@@ -2,7 +2,6 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.settings.preferred.lab
 
-import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -35,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.HttpProfile
 import com.rosan.installer.domain.settings.model.RootMode
@@ -52,7 +50,6 @@ import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownItem
@@ -72,7 +69,6 @@ fun MiuixLabPage(
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val scrollBehavior = MiuixScrollBehavior()
     val showRootImplementationDialog = remember { mutableStateOf(false) }
     val showChannelDialog = remember { mutableStateOf(false) }
@@ -218,28 +214,8 @@ fun MiuixLabPage(
                     }
                 }
             }
-            item { SmallTitle(stringResource(R.string.lab_ui_settings)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.lab_show_apk_path),
-                        description = stringResource(R.string.lab_show_apk_path_desc),
-                        checked = uiState.labShowFilePath,
-                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeShowFilePath(it)) }
-                    )
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.lab_show_install_initiator),
-                        description = stringResource(R.string.lab_show_install_initiator_desc),
-                        checked = uiState.labShowInstallInitiator,
-                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeShowInstallInitiator(it)) }
-                    )
-                }
-            }
-            item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
+            // item { SmallTitle(stringResource(R.string.lab_ui_settings)) }
+            /*item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
             item {
                 Card(
                     modifier = Modifier
@@ -258,15 +234,8 @@ fun MiuixLabPage(
                         checked = uiState.labSetInstallRequester,
                         onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
                     )
-                    if (!capabilityProvider.isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.lab_install_without_user_action),
-                            description = stringResource(R.string.lab_install_without_user_action_desc),
-                            checked = uiState.labAllowInstallWithoutUserAction,
-                            onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeAllowInstallWithoutUserAction(it)) }
-                        )
                 }
-            }
+            }*/
             if (AppConfig.isInternetAccessEnabled) {
                 item { SmallTitle(stringResource(R.string.internet_access_enabled)) }
                 item {

@@ -43,6 +43,7 @@
     <string name="menu">菜单</string>
     <string name="about">关于</string>
     <string name="other">其它</string>
+    <string name="extras">附加功能</string>
     <string name="performance">性能</string>
     <string name="debug">调试</string>
     <string name="lab">实验室</string>
@@ -221,6 +222,8 @@
     <string name="config_info">信息</string>
     <string name="config_scope">作用域</string>
     <string name="config_description">描述</string>
+    <string name="authorizer_customization">授权器参数微调</string>
+    <string name="authorizer_customization_desc">微调部分授权器的相关参数和偏好</string>
     <string name="config_authorizer">授权器</string>
     <string name="config_app_authorizer_desc">用于执行特权操作的授权器</string>
     <string name="config_install_authorizer_desc">用于安装应用的授权器</string>
@@ -235,7 +238,7 @@
     <string name="config_authorizer_customize">自定义</string>
     <string name="config_customize_authorizer">自定义授权器</string>
     <string name="config_always_use_root_in_system">使用 root 执行特权操作</string>
-    <string name="config_always_use_root_in_system_desc">作为系统安装器运行时，始终使用 root 执行特权操作，例如刷写模块、删除文件等</string>
+    <string name="config_always_use_root_in_system_desc">作为系统安装器发起安装时，始终使用 root 执行需要特权的操作，例如刷写模块、删除文件等</string>
     <string name="config_install_mode">安装方式</string>
     <string name="config_install_mode_desc">默认的安装模式以及相关个性化设置</string>
     <string name="config_install_mode_global">跟随全局</string>
@@ -627,8 +630,8 @@
     <string name="auto_silent_install_desc">对话框安装开始时自动静默安装</string>
     <string name="disable_notification_on_dismiss">对话框隐藏时退出安装</string>
     <string name="close_notification_immediately_on_dialog_dismiss">主动隐藏对话框将取消本次安装，而不是挂起到通知栏</string>
-    <string name="set_countdown">设定倒计时</string>
-    <string name="dhizuku_auto_close_countdown_desc">Dhizuku 安装成功后自动关闭的倒计时</string>
+    <string name="close_session_countdown">设定倒计时</string>
+    <string name="close_session_countdown_desc">在无特权情况下，部分 CN 定制系统会拦截关联启动，修改该值可以增加系统拦截弹窗驻留时的反应时间。</string>
     <string name="dhizuku_cannot_set_package_source_desc">Dhizuku 模式不支持自定义软件包来源！</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku 模式下不支持设置安装器！</string>
     <string name="dhizuku_cannot_set_user_desc">Dhizuku 模式下不支持设置用户！</string>
@@ -804,9 +807,9 @@
     <string name="lab_show_install_initiator_label">安装发起方</string>
     <string name="lab_show_install_initiator_desc">显示由哪个应用发起安装</string>
     <string name="lab_set_install_requester">设置安装请求方</string>
-    <string name="lab_set_install_requester_desc">向安装会话填写 OriginatingUid 字段来记录发起安装的应用，匹配系统包管理器行为</string>
+    <string name="lab_set_install_requester_desc">配置文件将在启用该选项后显示 OriginatingUid 字段自定义设置</string>
     <string name="lab_install_without_user_action">无需确认即可安装</string>
-    <string name="lab_install_without_user_action_desc">尝试在无需用户操作的情况下安装应用。此功能仅在不使用授权器时有效</string>
+    <string name="lab_install_without_user_action_desc">尝试在无需用户操作的情况下安装应用。在 OEM 破坏包管理 API 的系统上，启用该选项可能会导致完全无法安装应用</string>
     <string name="lab_mi_island">小米超级岛</string>
     <string name="lab_mi_island_countdown">XMSF 断网时长</string>
     <string name="lab_mi_island_countdown_desc">设置 XMSF 断网时长。仅对 Shizuku 生效。请仅在明确影响时修改！</string>

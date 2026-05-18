@@ -87,7 +87,7 @@
     <string name="delete">ลบ</string>
     <string name="delete_success">ลบสำเร็จ</string>
     <string name="details">รายละเอียด</string>
-    <string name="dhizuku_auto_close_countdown_desc">นับถอยหลังเพื่อปิดอัตโนมัติหลังจากติดตั้ง Dhizuku สำเร็จ</string>
+    <string name="close_session_countdown_desc">นับถอยหลังเพื่อปิดอัตโนมัติหลังจากติดตั้ง Dhizuku สำเร็จ</string>
     <string name="dhizuku_cannot_set_installer_desc">โหมด Dhizuku ไม่รองรับการตั้งค่าตัวติดตั้ง!</string>
     <string name="disable_adb_install_verify">ปิดใช้งานการยืนยันการติดตั้ง ADB</string>
     <string name="disable_adb_install_verify_desc">ปิดใช้งานการยืนยันการติดตั้ง ADB ซึ่งมีประโยชน์ในบางระบบที่การติดตั้งจะเรียกใช้การสแกน (Play Protect)</string>
@@ -303,7 +303,7 @@
     <string name="retry">ลองอีกครั้ง</string>
     <string name="save">บันทึก</string>
     <string name="search">ค้นหา</string>
-    <string name="set_countdown">ตั้งเวลานับถอยหลัง</string>
+    <string name="close_session_countdown">ตั้งเวลานับถอยหลัง</string>
     <string name="show_dialog_install_extended_menu">แสดงเมนูขยาย</string>
     <string name="show_dialog_install_extended_menu_desc">แสดงตัวเลือกเพิ่มเติมในไดอะล็อกการติดตั้ง</string>
     <string name="show_dialog_when_pressing_notification">แสดงไดอะล็อกเมื่อกดการแจ้งเตือน</string>

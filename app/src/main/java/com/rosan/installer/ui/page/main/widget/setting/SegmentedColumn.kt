@@ -18,17 +18,27 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -157,7 +167,7 @@ class SegmentedColumnScope {
  * This layout dynamically calculates and animates the corner radii of its children to maintain
  * a unified rounded appearance for the outermost edges of the group, while adjusting interior
  * connections. It leverages a custom [Layout] to efficiently measure, place, and animate
- * entering/exiting children.
+ * entering/exiting children item(s).
  *
  * @param modifier The modifier to be applied to the group container.
  * @param title An optional title string displayed above the group of items.
@@ -202,6 +212,8 @@ fun SegmentedColumn(
         val firstVisibleIndex = allItems.indexOfFirst { it.visible }
         val lastVisibleIndex = allItems.indexOfLast { it.visible }
 
+        val focusManager = LocalFocusManager.current
+
         Layout(
             content = {
                 allItems.forEachIndexed { index, itemData ->
@@ -242,11 +254,25 @@ fun SegmentedColumn(
                             animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding").value
                         } else targetTopPadding
 
+                        var hasFocus by remember { mutableStateOf(false) }
+
+                        // Actively clear focus when the item is transitioning to a hidden state
+                        LaunchedEffect(itemData.visible) {
+                            if (!itemData.visible && hasFocus) {
+                                focusManager.clearFocus()
+                            }
+                        }
+
                         Box(
                             modifier = Modifier
                                 .zIndex(if (itemData.visible) (allItems.size - index).toFloat() else -index.toFloat())
+                                .onFocusChanged { hasFocus = it.hasFocus }
+                                .semantics {
+                                    // Remove from accessibility and focus traversal completely when hidden
+                                    if (!itemData.visible) hideFromAccessibility()
+                                }
                                 .graphicsLayer {
-                                    // Crucial performance fix: Defer state reading into the drawing phase.
+                                    // Defer state reading into the drawing phase.
                                     // This prevents the animation progression from causing frame-by-frame recompositions.
                                     val currentProgress = progresses[index].value
                                     val safeProgress = currentProgress.coerceAtLeast(0f)

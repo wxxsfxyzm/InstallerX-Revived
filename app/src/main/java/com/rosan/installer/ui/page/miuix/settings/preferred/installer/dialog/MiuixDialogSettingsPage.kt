@@ -147,6 +147,34 @@ fun MiuixDialogSettingsPage(
                     )
                 }
             }
+
+            item { SmallTitle(stringResource(R.string.extras)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.lab_tap_icon_to_share),
+                        description = stringResource(R.string.lab_tap_icon_to_share_desc),
+                        checked = uiState.tapIconToShare,
+                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeTapIconToShare(it)) }
+                    )
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.lab_show_apk_path),
+                        description = stringResource(R.string.lab_show_apk_path_desc),
+                        checked = uiState.showFilePath,
+                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeShowFilePath(it)) }
+                    )
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.lab_show_install_initiator),
+                        description = stringResource(R.string.lab_show_install_initiator_desc),
+                        checked = uiState.showInstallInitiator,
+                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeShowInstallInitiator(it)) }
+                    )
+                }
+            }
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }

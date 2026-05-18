@@ -81,7 +81,7 @@
     <string name="delete">Удалить</string>
     <string name="delete_success">Успешно удалено</string>
     <string name="details">Подробности</string>
-    <string name="dhizuku_auto_close_countdown_desc">Обратный отсчет до автоматического закрытия после успешной установки Dhizuku</string>
+    <string name="close_session_countdown_desc">Обратный отсчет до автоматического закрытия после успешной установки Dhizuku</string>
     <string name="dhizuku_cannot_set_installer_desc">Режим Dhizuku не поддерживает настройку установщика!</string>
     <string name="disable_adb_install_verify">Отключить проверку ADB</string>
     <string name="disable_adb_install_verify_desc">Отключить проверку установки ADB, полезно на некоторых системах, где установка запускает сканирование (Play Защита)</string>
@@ -293,7 +293,7 @@
     <string name="retry">Повторить попытку</string>
     <string name="save">Сохранить</string>
     <string name="search">Поиск</string>
-    <string name="set_countdown">Установите обратный отсчет</string>
+    <string name="close_session_countdown">Установите обратный отсчет</string>
     <string name="show_dialog_install_extended_menu">Расширенное меню</string>
     <string name="show_dialog_install_extended_menu_desc">Дополнительное меню с параметрами в диалоговом окне установки</string>
     <string name="show_dialog_when_pressing_notification">Показать диалоговое окно при нажатии на уведомление</string>

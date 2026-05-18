@@ -41,6 +41,7 @@ import com.rosan.installer.ui.page.main.settings.home.priv.PrivPage
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutPage
 import com.rosan.installer.ui.page.main.settings.preferred.about.OpenSourceLicensePage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer.AuthorizerCustPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.dialog.DialogSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabPage
@@ -51,6 +52,7 @@ import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.about.MiuixAboutPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.about.ossLicensePage.MiuixOpenSourceLicensePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.MiuixInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.installer.authorizer.MiuixAuthorizerCustPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.dialog.MiuixDialogSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.notification.MiuixNotificationSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.lab.MiuixLabPage
@@ -185,6 +187,13 @@ fun InstallerNavContainer(uiState: ThemeState) {
                             MiuixInstallerGlobalSettingsPage(useBlur)
                         } else {
                             InstallerGlobalSettingsPage(useBlur)
+                        }
+                    }
+                    entry<Route.AuthorizerCust> {
+                        if (uiState.useMiuix) {
+                            MiuixAuthorizerCustPage(useBlur)
+                        } else {
+                            AuthorizerCustPage(useBlur)
                         }
                     }
                     entry<Route.DialogSettings> {

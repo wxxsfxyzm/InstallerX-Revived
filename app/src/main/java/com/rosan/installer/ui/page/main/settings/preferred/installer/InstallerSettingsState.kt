@@ -11,7 +11,7 @@ import com.rosan.installer.domain.settings.model.SharedUid
 data class InstallerSettingsState(
     val authorizer: Authorizer = Authorizer.Shizuku,
     val alwaysUseRootInSystem: Boolean = false,
-    val dhizukuAutoCloseCountDown: Int = 5,
+    val closeSessionCountDown: Int = 5,
     val installerRequireBiometricAuth: BiometricAuthMode = BiometricAuthMode.FollowConfig,
     val showOPPOSpecial: Boolean = false,
     val detectXposedModule: Boolean = true,
@@ -19,5 +19,6 @@ data class InstallerSettingsState(
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
     val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
-    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList()
+    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
+    val setInstallRequester: Boolean = false
 )

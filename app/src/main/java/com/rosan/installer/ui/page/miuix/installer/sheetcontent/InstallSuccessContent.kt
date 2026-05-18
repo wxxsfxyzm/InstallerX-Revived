@@ -27,7 +27,6 @@ import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase.Companion.PRIVILEGED_START_TIMEOUT_MS
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
-import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.isPrivileged
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoSlot
@@ -47,7 +46,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 fun InstallSuccessContent(
     appInfo: AppInfoState,
     viewModel: InstallerViewModel,
-    dhizukuAutoClose: Int,
+    closeSessionCountDown: Int,
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
@@ -58,7 +57,9 @@ fun InstallSuccessContent(
     val openAppUseCase: OpenAppUseCase = koinInject()
     val openLSPosedUseCase: OpenLSPosedUseCase = koinInject()
 
-    val isXposedModule = uiState.viewSettings.detectXposedModule && if (appInfo.primaryEntity is AppEntity.BaseEntity) appInfo.primaryEntity.isXposedModule else false
+    val isXposedModule =
+        uiState.viewSettings.detectXposedModule && if (appInfo.primaryEntity is AppEntity.BaseEntity) appInfo.primaryEntity.isXposedModule else false
+    val hasPrivilege = config.isPrivileged(capabilityProvider)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -78,7 +79,7 @@ fun InstallSuccessContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (isXposedModule && uiState.viewSettings.quickOpenLSPosed && config.isPrivileged(capabilityProvider)) {
+        if (isXposedModule && uiState.viewSettings.quickOpenLSPosed && hasPrivilege) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -144,8 +145,8 @@ fun InstallSuccessContent(
                                     launch(Dispatchers.Main) {
                                         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
-                                        if (config.authorizer == Authorizer.Dhizuku) {
-                                            delay(dhizukuAutoClose * 1000L)
+                                        if (!hasPrivilege) {
+                                            delay(closeSessionCountDown * 1000L)
                                         } else {
                                             delay(PRIVILEGED_START_TIMEOUT_MS)
                                         }

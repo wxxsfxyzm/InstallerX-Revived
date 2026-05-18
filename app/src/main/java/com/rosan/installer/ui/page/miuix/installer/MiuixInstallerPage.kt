@@ -553,7 +553,7 @@ fun MiuixInstallerPage(
                             InstallSuccessContent(
                                 appInfo = appInfoState,
                                 viewModel = viewModel,
-                                dhizukuAutoClose = settings.autoCloseCountDown,
+                                closeSessionCountDown = settings.closeSessionCountDown,
                                 onClose = closeSheet
                             )
                         }

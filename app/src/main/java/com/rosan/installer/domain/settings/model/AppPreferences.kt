@@ -17,7 +17,7 @@ data class AppPreferences(
     val showSmartSuggestion: Boolean,
     val disableNotificationForDialogInstall: Boolean,
     val showDialogWhenPressingNotification: Boolean,
-    val dhizukuAutoCloseCountDown: Int,
+    val closeSessionCountDown: Int,
     val notificationSuccessAutoClearSeconds: Int,
     val versionCompareInSingleLine: Boolean,
     val sdkCompareInMultiLine: Boolean,

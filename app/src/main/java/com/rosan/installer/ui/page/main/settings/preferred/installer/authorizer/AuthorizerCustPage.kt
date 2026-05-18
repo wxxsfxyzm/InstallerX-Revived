@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2026 InstallerX Revived contributors
-package com.rosan.installer.ui.page.main.settings.preferred.installer.dialog
+package com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer
 
+import android.os.Build
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,29 +37,35 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
+import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DialogSettingsPage(
+fun AuthorizerCustPage(
     useBlur: Boolean,
-    viewModel: DialogSettingsViewModel = koinViewModel()
+    viewModel: AuthorizerCustViewModel = koinViewModel()
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
-    // Expand the top app bar by default
+    val isSystemApp = capabilityProvider.isSystemApp
+
     LaunchedEffect(Unit) {
         topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
     }
@@ -78,7 +85,7 @@ fun DialogSettingsPage(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = {
-                    Text(stringResource(R.string.dialog_settings))
+                    Text(stringResource(R.string.authorizer_customization))
                 },
                 navigationIcon = {
                     Row {
@@ -113,84 +120,29 @@ fun DialogSettingsPage(
         ) {
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.installer_settings_dialog_mode_options)
+                    title = if (isSystemApp) stringResource(R.string.working_status_system_installer)
+                    else stringResource(R.string.config_authorizer_none)
                 ) {
-                    // 1. Version Compare
-                    item {
+                    if (isSystemApp) item {
                         SwitchWidget(
-                            icon = AppIcons.SingleLineSettingIcon,
-                            title = stringResource(id = R.string.version_compare_in_single_line),
-                            description = stringResource(id = R.string.version_compare_in_single_line_desc),
-                            checked = uiState.versionCompareInSingleLine,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeVersionCompareInSingleLine(it))
-                            }
+                            icon = AppIcons.FlashPreferRoot,
+                            title = stringResource(R.string.config_always_use_root_in_system),
+                            description = stringResource(R.string.config_always_use_root_in_system_desc),
+                            checked = uiState.alwaysUseRootInSystem,
+                            onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAlwaysUseRootInSystem(it)) }
                         )
                     }
 
-                    // 2. SDK Compare
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.MultiLineSettingIcon,
-                            title = stringResource(id = R.string.sdk_compare_in_multi_line),
-                            description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
-                            checked = uiState.sdkCompareInMultiLine,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeSdkCompareInMultiLine(it))
-                            }
-                        )
-                    }
-
-                    // 3. Extended Menu
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.MenuOpen,
-                            title = stringResource(id = R.string.show_dialog_install_extended_menu),
-                            description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
-                            checked = uiState.showDialogInstallExtendedMenu,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeShowDialogInstallExtendedMenu(it))
-                            }
-                        )
-                    }
-
-                    // 4. Smart Suggestion
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Suggestion,
-                            title = stringResource(id = R.string.show_intelligent_suggestion),
-                            description = stringResource(id = R.string.show_intelligent_suggestion_desc),
-                            checked = uiState.showSmartSuggestion,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeShowSuggestion(it))
-                            }
-                        )
-                    }
-
-                    // 5. Auto Silent Install
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Silent,
-                            title = stringResource(id = R.string.auto_silent_install),
-                            description = stringResource(id = R.string.auto_silent_install_desc),
-                            checked = uiState.autoSilentInstall,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeAutoSilentInstall(it))
-                            }
-                        )
-                    }
-
-                    // 6. Disable Notification
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.NotificationDisabled,
-                            title = stringResource(id = R.string.disable_notification_on_dismiss),
-                            description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
-                            checked = uiState.disableNotificationForDialogInstall,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeShowDisableNotification(it))
-                            }
-                        )
+                    if (!isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        item {
+                            SwitchWidget(
+                                icon = AppIcons.InstallSilent,
+                                title = stringResource(R.string.lab_install_without_user_action),
+                                description = stringResource(R.string.lab_install_without_user_action_desc),
+                                checked = uiState.allowInstallWithoutUserAction,
+                                onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAllowInstallWithoutUserAction(it)) }
+                            )
+                        }
                     }
                 }
             }
@@ -199,16 +151,21 @@ fun DialogSettingsPage(
                 SegmentedColumn(
                     title = stringResource(R.string.extras)
                 ) {
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Share,
-                            title = stringResource(R.string.lab_tap_icon_to_share),
-                            description = stringResource(R.string.lab_tap_icon_to_share_desc),
-                            checked = uiState.tapIconToShare,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeTapIconToShare(it))
-                            }
-                        )
+                    if (!isSystemApp) item {
+                        BaseItemContainer {
+                            IntNumberPickerWidget(
+                                icon = AppIcons.Working,
+                                title = stringResource(R.string.close_session_countdown),
+                                description = stringResource(R.string.close_session_countdown_desc),
+                                value = uiState.closeSessionCountDown,
+                                startInt = 1,
+                                endInt = 10,
+                                stepSize = 1,
+                                onValueChange = {
+                                    viewModel.dispatch(AuthorizerCustAction.ChangeCloseSessionCountDown(it))
+                                }
+                            )
+                        }
                     }
                 }
             }

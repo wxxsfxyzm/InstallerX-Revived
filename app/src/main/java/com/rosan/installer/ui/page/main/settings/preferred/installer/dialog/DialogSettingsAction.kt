@@ -9,4 +9,7 @@ sealed interface DialogSettingsAction {
     data class ChangeShowSuggestion(val showSuggestion: Boolean) : DialogSettingsAction
     data class ChangeAutoSilentInstall(val autoSilentInstall: Boolean) : DialogSettingsAction
     data class ChangeShowDisableNotification(val disable: Boolean) : DialogSettingsAction
+    data class ChangeTapIconToShare(val enable: Boolean) : DialogSettingsAction
+    data class ChangeShowFilePath(val enable: Boolean) : DialogSettingsAction
+    data class ChangeShowInstallInitiator(val enable: Boolean) : DialogSettingsAction
 }

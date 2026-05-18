@@ -25,7 +25,10 @@ class DialogSettingsViewModel(
             showDialogInstallExtendedMenu = prefs.showDialogInstallExtendedMenu,
             showSmartSuggestion = prefs.showSmartSuggestion,
             autoSilentInstall = prefs.autoSilentInstall,
-            disableNotificationForDialogInstall = prefs.disableNotificationForDialogInstall
+            disableNotificationForDialogInstall = prefs.disableNotificationForDialogInstall,
+            tapIconToShare = prefs.labTapIconToShare,
+            showFilePath = prefs.labShowFilePath,
+            showInstallInitiator = prefs.labShowInstallInitiator
         )
     }.stateIn(
         scope = viewModelScope,
@@ -57,6 +60,18 @@ class DialogSettingsViewModel(
 
             is DialogSettingsAction.ChangeShowDisableNotification -> viewModelScope.launch {
                 updateSetting(BooleanSetting.DialogDisableNotificationOnDismiss, action.disable)
+            }
+
+            is DialogSettingsAction.ChangeTapIconToShare -> viewModelScope.launch {
+                updateSetting(BooleanSetting.LabTapIconToShare, action.enable)
+            }
+
+            is DialogSettingsAction.ChangeShowFilePath -> viewModelScope.launch {
+                updateSetting(BooleanSetting.LabShowFilePath, action.enable)
+            }
+
+            is DialogSettingsAction.ChangeShowInstallInitiator -> viewModelScope.launch {
+                updateSetting(BooleanSetting.LabShowInstallInitiator, action.enable)
             }
         }
     }

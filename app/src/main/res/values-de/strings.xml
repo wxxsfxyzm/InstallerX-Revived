@@ -320,8 +320,8 @@
     <string name="extended_menu">Erweitertes Menü</string>
     <string name="disable_notification_on_dismiss">Schließen beim Dialog schließen</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Schließen des Dialogs schließt die Benachrichtigung</string>
-    <string name="set_countdown">Countdown setzen</string>
-    <string name="dhizuku_auto_close_countdown_desc">Countdown zum Automatischen schließen nach erfolgreicher Installation</string>
+    <string name="close_session_countdown">Countdown setzen</string>
+    <string name="close_session_countdown_desc">Countdown zum Automatischen schließen nach erfolgreicher Installation</string>
     <string name="dhizuku_cannot_set_installer_desc">Der Dhizuku-Modus unterstützt es nicht, sich als installer zu setzen!</string>
     <string name="grant_permission_after_install">Klicken, um die Berechtigung nach der Installation zu geben</string>
     <string name="show_intelligent_suggestion">Intelligente Vorschläge anzeigen (Experimentell)</string>

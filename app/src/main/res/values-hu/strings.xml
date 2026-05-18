@@ -505,8 +505,8 @@
     <string name="auto_silent_install_desc">Automatikus csendes telepítés a telepítési párbeszédpanel indításakor</string>
     <string name="disable_notification_on_dismiss">Párbeszédpanel bezárása</string>
     <string name="close_notification_immediately_on_dialog_dismiss">A párbeszédpanel bezárása csendben kilép</string>
-    <string name="set_countdown">Visszaszámlálás beállítása</string>
-    <string name="dhizuku_auto_close_countdown_desc">Visszaszámlálás az automatikus bezárásig a Dhizuku sikeres telepítése után</string>
+    <string name="close_session_countdown">Visszaszámlálás beállítása</string>
+    <string name="close_session_countdown_desc">Visszaszámlálás az automatikus bezárásig a Dhizuku sikeres telepítése után</string>
     <string name="dhizuku_cannot_set_package_source_desc">A Dhizuku mód nem támogatja a csomag forrásának testreszabását!</string>
     <string name="dhizuku_cannot_set_installer_desc">A Dhizuku mód nem támogatja a telepítő beállítását!</string>
     <string name="dhizuku_cannot_set_user_desc">A Dhizuku mód nem támogatja a célfelhasználó beállítását!</string>

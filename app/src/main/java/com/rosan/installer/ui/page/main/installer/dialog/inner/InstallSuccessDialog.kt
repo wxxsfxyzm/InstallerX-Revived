@@ -18,7 +18,6 @@ import com.rosan.installer.domain.engine.model.AppEntity
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase.Companion.PRIVILEGED_START_TIMEOUT_MS
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
-import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.isPrivileged
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -56,7 +55,9 @@ fun installSuccessDialog(
     val effectivePrimaryEntity = selectedEntities?.filterIsInstance<AppEntity.BaseEntity>()?.firstOrNull()
         ?: selectedEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
 
-    val isXposedModule = settings.detectXposedModule && if (effectivePrimaryEntity is AppEntity.BaseEntity) effectivePrimaryEntity.isXposedModule else false
+    val isXposedModule =
+        settings.detectXposedModule && if (effectivePrimaryEntity is AppEntity.BaseEntity) effectivePrimaryEntity.isXposedModule else false
+    val hasPrivilege = config.isPrivileged(deviceCapabilityProvider)
 
     val baseParams = installInfoDialog(
         viewModel = viewModel,
@@ -103,8 +104,8 @@ fun installSuccessDialog(
                                         withContext(Dispatchers.Main) {
                                             context.startActivity(launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
-                                            if (config.authorizer == Authorizer.Dhizuku) {
-                                                delay(settings.autoCloseCountDown * 1000L)
+                                            if (!hasPrivilege) {
+                                                delay(settings.closeSessionCountDown * 1000L)
                                             } else {
                                                 delay(PRIVILEGED_START_TIMEOUT_MS)
                                             }
@@ -116,7 +117,7 @@ fun installSuccessDialog(
                         }
                     )
                 }
-                if (isXposedModule && settings.quickOpenLSPosed && config.isPrivileged(deviceCapabilityProvider)) {
+                if (isXposedModule && settings.quickOpenLSPosed && hasPrivilege) {
                     add(
                         DialogButton(stringResource(R.string.open_lsposed)) {
                             coroutineScope.launch(Dispatchers.IO) {
