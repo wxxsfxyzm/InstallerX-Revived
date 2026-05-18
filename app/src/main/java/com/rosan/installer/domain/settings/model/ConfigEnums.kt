@@ -26,6 +26,19 @@ enum class Authorizer(
 }
 
 /**
+ * Define Toast Modes used by InstallerX
+ */
+enum class ToastMode(val value: Int) {
+    Disable(0),
+    Always(1),
+    BackgroundOnly(2);
+
+    companion object {
+        fun fromValue(value: Int): ToastMode = entries.find { it.value == value } ?: Disable
+    }
+}
+
+/**
  * Define Install Modes used by InstallerX
  */
 enum class InstallMode(val value: String) {

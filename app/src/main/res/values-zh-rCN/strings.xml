@@ -249,7 +249,10 @@
     <string name="config_install_mode_auto_notification">通知栏自动</string>
     <string name="config_install_mode_ignore">忽略</string>
     <string name="config_install_show_toast">显示 Toast</string>
-    <string name="config_install_show_toast_desc">安装完成后显示 Toast</string>
+    <string name="config_install_show_toast_desc">控制安装完成后是否显示 Toast</string>
+    <string name="config_toast_mode_disable">从不显示 Toast</string>
+    <string name="config_toast_mode_background_only">仅在对话框不可见时</string>
+    <string name="config_toast_mode_always">始终显示 Toast</string>
     <string name="config_customize_install_reason">自定义安装原因</string>
     <string name="config_customize_install_reason_desc">指定安装原因。对于新安装的应用，选择“用户”原因通常会触发启动器自动创建桌面图标</string>
     <string name="config_install_reason">安装原因</string>

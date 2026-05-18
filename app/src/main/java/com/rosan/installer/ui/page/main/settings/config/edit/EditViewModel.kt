@@ -13,6 +13,7 @@ import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.InstallerMode
 import com.rosan.installer.domain.settings.model.PackageSource
+import com.rosan.installer.domain.settings.model.ToastMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
@@ -93,7 +94,7 @@ class EditViewModel(
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
                     is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(action.customizeAuthorizer)
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
-                    is EditViewAction.ChangeDataShowToast -> changeDataShowToast(action.showToast)
+                    is EditViewAction.ChangeDataToastMode -> changeDataToastMode(action.toastMode)
                     is EditViewAction.ChangeDataEnableCustomizePackageSource -> changeDataEnableCustomPackageSource(action.enable)
                     is EditViewAction.ChangeDataPackageSource -> changeDataPackageSource(action.packageSource)
                     is EditViewAction.ChangeDataEnableCustomizeInstallReason -> changeDataEnableCustomInstallReason(action.enable)
@@ -178,8 +179,8 @@ class EditViewModel(
         _data.update { it.copy(installMode = installMode) }
     }
 
-    private fun changeDataShowToast(showToast: Boolean) {
-        _data.update { it.copy(showToast = showToast) }
+    private fun changeDataToastMode(toastMode: ToastMode) {
+        _data.update { it.copy(toastMode = toastMode) }
     }
 
     private fun changeDataEnableCustomInstallReason(enable: Boolean) {

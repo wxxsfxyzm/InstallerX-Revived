@@ -257,7 +257,10 @@
     <string name="config_install_mode_auto_notification">Auto notification</string>
     <string name="config_install_mode_ignore">Ignore</string>
     <string name="config_install_show_toast">Show Toast</string>
-    <string name="config_install_show_toast_desc">Show toast after install</string>
+    <string name="config_install_show_toast_desc">Controls whether to show toast after install</string>
+    <string name="config_toast_mode_disable">Never show toast</string>
+    <string name="config_toast_mode_background_only">Only when dialog is hidden</string>
+    <string name="config_toast_mode_always">Always show Toast</string>
     <string name="config_customize_install_reason">Customize Install Reason</string>
     <string name="config_customize_install_reason_desc">Specify the install reason. For new installations, selecting "User" usually triggers the launcher to create a desktop icon</string>
     <string name="config_install_reason">Install Reason</string>

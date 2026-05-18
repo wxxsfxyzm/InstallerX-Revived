@@ -25,6 +25,7 @@ import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.InstallerMode
 import com.rosan.installer.domain.settings.model.PackageSource
+import com.rosan.installer.domain.settings.model.ToastMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
@@ -200,13 +201,37 @@ fun MiuixDataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) 
 }
 
 @Composable
-fun MiuixShowToastWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
-    MiuixSwitchWidget(
-        title = stringResource(id = R.string.config_install_show_toast),
-        description = stringResource(R.string.config_install_show_toast_desc),
-        checked = state.data.showToast,
-        onCheckedChange = {
-            dispatch(EditViewAction.ChangeDataShowToast(it))
+fun MiuixToastModeWidget(
+    state: EditViewState,
+    dispatch: (EditViewAction) -> Unit
+) {
+    val currentMode = state.data.toastMode
+
+    val data = mapOf(
+        ToastMode.Disable to stringResource(R.string.config_toast_mode_disable),
+        ToastMode.BackgroundOnly to stringResource(R.string.config_toast_mode_background_only),
+        ToastMode.Always to stringResource(R.string.config_toast_mode_always)
+    )
+
+    val spinnerEntries = remember(data) {
+        data.values.map { modeName ->
+            DropdownItem(title = modeName)
+        }
+    }
+
+    val selectedIndex = remember(currentMode, data) {
+        data.keys.toList().indexOf(currentMode).coerceAtLeast(0)
+    }
+
+    WindowSpinnerPreference(
+        title = stringResource(R.string.config_install_show_toast),
+        summary = stringResource(R.string.config_install_show_toast_desc),
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            data.keys.elementAtOrNull(newIndex)?.let { mode ->
+                dispatch(EditViewAction.ChangeDataToastMode(mode))
+            }
         }
     )
 }

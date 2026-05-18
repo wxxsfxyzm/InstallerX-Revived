@@ -21,12 +21,14 @@ import com.rosan.installer.data.session.handler.ProgressHandler
 import com.rosan.installer.data.session.manager.InstallerSessionManager
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
+import com.rosan.installer.domain.settings.model.ToastMode
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import timber.log.Timber
@@ -282,7 +284,7 @@ class InstallerService : Service() {
         serviceScope.launch {
             session.progress.collect { progress ->
                 // Disable toast according to user preference
-                if (!session.config.showToast) return@collect
+                if (!session.shouldShowToast()) return@collect
                 when (progress) {
                     is ProgressEntity.InstallSuccess -> {
                         toast(R.string.installer_install_success)
@@ -315,4 +317,11 @@ class InstallerService : Service() {
             }
         }
     }
+
+    private suspend fun InstallerSessionRepository.shouldShowToast() =
+        when (this.config.toastMode) {
+            ToastMode.Disable -> false
+            ToastMode.BackgroundOnly -> this.background.first()
+            ToastMode.Always -> true
+        }
 }

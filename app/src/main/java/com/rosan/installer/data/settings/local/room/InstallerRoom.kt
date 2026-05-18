@@ -22,6 +22,7 @@ import com.rosan.installer.data.settings.local.room.entity.converter.InstallMode
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallerModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.PackageSourceConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.ToastModeConverter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -49,7 +50,8 @@ import org.koin.core.component.get
     InstallerModeConverter::class,
     DexoptModeConverter::class,
     PackageSourceConverter::class,
-    InstallReasonConverter::class
+    InstallReasonConverter::class,
+    ToastModeConverter::class
 )
 abstract class InstallerRoom : RoomDatabase() {
     companion object : KoinComponent {

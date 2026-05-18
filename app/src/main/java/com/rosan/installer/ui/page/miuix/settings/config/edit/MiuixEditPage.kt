@@ -188,7 +188,7 @@ fun MiuixEditPage(
                     MiuixDataInstallModeWidget(state = state, dispatch = dispatch)
                     if (state.globalInstallerBiometricAuthMode == BiometricAuthMode.FollowConfig)
                         MiuixDataRequireBiometricAuthWidget(state = state, dispatch = dispatch)
-                    MiuixShowToastWidget(state = state, dispatch = dispatch)
+                    MiuixToastModeWidget(state = state, dispatch = dispatch)
                 }
             }
             if (isNoneActive(stateAuthorizer, globalAuthorizer))

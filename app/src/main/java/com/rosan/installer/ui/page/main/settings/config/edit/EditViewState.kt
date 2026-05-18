@@ -12,6 +12,7 @@ import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.InstallerMode
 import com.rosan.installer.domain.settings.model.NamedPackage
 import com.rosan.installer.domain.settings.model.PackageSource
+import com.rosan.installer.domain.settings.model.ToastMode
 
 data class EditViewState(
     val data: Data = Data.build(ConfigModel.default),
@@ -50,7 +51,7 @@ data class EditViewState(
         val authorizer: Authorizer,
         val customizeAuthorizer: String,
         val installMode: InstallMode,
-        val showToast: Boolean,
+        val toastMode: ToastMode,
         val enableCustomizePackageSource: Boolean,
         val packageSource: PackageSource,
         val enableCustomizeInstallReason: Boolean,
@@ -93,7 +94,7 @@ data class EditViewState(
             authorizer = this.authorizer,
             customizeAuthorizer = if (this.authorizerCustomize) this.customizeAuthorizer else "",
             installMode = this.installMode,
-            showToast = this.showToast,
+            toastMode = this.toastMode,
             enableCustomizeInstallReason = this.enableCustomizeInstallReason,
             installReason = this.installReason,
             enableCustomizePackageSource = this.enableCustomizePackageSource,
@@ -129,7 +130,7 @@ data class EditViewState(
                 description = config.description,
                 authorizer = config.authorizer,
                 customizeAuthorizer = config.customizeAuthorizer,
-                showToast = config.showToast,
+                toastMode = config.toastMode,
                 installMode = config.installMode,
                 enableCustomizePackageSource = config.enableCustomizePackageSource,
                 enableCustomizeInstallReason = config.enableCustomizeInstallReason,

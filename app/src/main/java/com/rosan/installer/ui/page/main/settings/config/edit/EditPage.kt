@@ -202,7 +202,7 @@ fun EditPage(
                     item { DataInstallModeWidget(state, dispatch) }
                     if (state.globalInstallerBiometricAuthMode == BiometricAuthMode.FollowConfig)
                         item { DataRequireBiometricAuthWidget(state, dispatch) }
-                    item { DataShowToastWidget(state, dispatch) }
+                    item { DataToastModeWidget(state, dispatch) }
                 }
             }
 

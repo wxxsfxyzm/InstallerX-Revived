@@ -49,6 +49,7 @@ import com.rosan.installer.domain.settings.model.InstallMode
 import com.rosan.installer.domain.settings.model.InstallReason
 import com.rosan.installer.domain.settings.model.InstallerMode
 import com.rosan.installer.domain.settings.model.PackageSource
+import com.rosan.installer.domain.settings.model.ToastMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
@@ -229,16 +230,28 @@ fun DataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) -> Un
 }
 
 @Composable
-fun DataShowToastWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
-    SwitchWidget(
-        icon = AppIcons.Toast,
-        title = stringResource(id = R.string.config_install_show_toast),
-        description = stringResource(R.string.config_install_show_toast_desc),
-        checked = state.data.showToast,
-        onCheckedChange = {
-            dispatch(EditViewAction.ChangeDataShowToast(it))
-        }
+fun DataToastModeWidget(
+    state: EditViewState,
+    dispatch: (EditViewAction) -> Unit
+) {
+    val currentMode = state.data.toastMode
+    val data = mapOf(
+        ToastMode.Disable to stringResource(R.string.config_toast_mode_disable),
+        ToastMode.BackgroundOnly to stringResource(R.string.config_toast_mode_background_only),
+        ToastMode.Always to stringResource(R.string.config_toast_mode_always)
     )
+
+    DropDownMenuWidget(
+        icon = AppIcons.Toast,
+        title = stringResource(R.string.config_install_show_toast),
+        description = data[currentMode],
+        choice = data.keys.toList().indexOf(currentMode),
+        data = data.values.toList(),
+    ) { index ->
+        data.keys.toList().getOrNull(index)?.let { mode ->
+            dispatch(EditViewAction.ChangeDataToastMode(mode))
+        }
+    }
 }
 
 // Extension to integrate directly with the physics layout engine
