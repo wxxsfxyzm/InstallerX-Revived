@@ -805,9 +805,9 @@
     <string name="default_installer">Instalador Padrão</string>
     <string name="exception_initiator_not_visible">Permissão negada devido a restrições de visibilidade do pacote. O app que está solicitando a instalação está escondido do InstallerX. Se você estiver usando módulos como o \'Hide My Applist\', adicione o InstallerX à lista de permissões</string>
     <string name="priv_page_what_is_this_title">O que é isso?</string>
-    <string name="priv_page_what_is_this_desc">Esta seção identifica todos os métodos de autorização disponíveis no seu dispositivo. Selecione um para que o app utilize em operações privilegiadas. Os recursos exibidos no app mudarão de acordo com a sua escolha.</string>
+    <string name="priv_page_what_is_this_desc">Esta seção identifica todos os métodos de autorização disponíveis para este app e permite que você escolha o método padrão a ser usado para operações privilegiadas. Ela verifica a disponibilidade apenas aqui; qualquer permissão necessária será solicitada quando o app realmente precisar utilizá-la.</string>
     <string name="priv_page_notice_title">Diferença dos perfis de instalação</string>
-    <string name="priv_page_notice_desc">Nos perfis de instalação, é possível substituir essa configuração global e selecionar um autorizador específico. Portanto, esta seção verifica a disponibilidade de todos os métodos de autorização para você.</string>
+    <string name="priv_page_notice_desc">Essa configuração controla o autorizador utilizado pelo próprio app para operações privilegiadas. Os perfis de instalação controlam o autorizador utilizado durante a instalação de apps e podem substituir essa configuração global para esse fim.</string>
     <string name="home_device_info_title">Informações Sobre o Dispositivo</string>
     <string name="home_device_info_model">Modelo</string>
     <string name="home_device_info_system">Sistema</string>

@@ -81,7 +81,7 @@
     <string name="delete">Удалить</string>
     <string name="delete_success">Успешно удалено</string>
     <string name="details">Подробности</string>
-    <string name="close_session_countdown_desc">Обратный отсчет до автоматического закрытия после успешной установки Dhizuku</string>
+    <string name="close_session_countdown_desc">Без соответствующих привилегий некоторые системы, настроенные под CN, будут блокировать запуск соответствующего приложения. Изменение этого значения может увеличить время отклика системы при блокировке постоянного отображения всплывающих окон.</string>
     <string name="dhizuku_cannot_set_installer_desc">Режим Dhizuku не поддерживает настройку установщика!</string>
     <string name="disable_adb_install_verify">Отключить проверку ADB</string>
     <string name="disable_adb_install_verify_desc">Отключить проверку установки ADB, полезно на некоторых системах, где установка запускает сканирование (Play Защита)</string>
@@ -293,7 +293,7 @@
     <string name="retry">Повторить попытку</string>
     <string name="save">Сохранить</string>
     <string name="search">Поиск</string>
-    <string name="close_session_countdown">Установите обратный отсчет</string>
+    <string name="close_session_countdown">Таймер закрытия сессии</string>
     <string name="show_dialog_install_extended_menu">Расширенное меню</string>
     <string name="show_dialog_install_extended_menu_desc">Дополнительное меню с параметрами в диалоговом окне установки</string>
     <string name="show_dialog_when_pressing_notification">Показать диалоговое окно при нажатии на уведомление</string>
@@ -646,7 +646,7 @@
     <string name="lab_http_profile_all">Разрешить всё (небезопасно)</string>
     <string name="lab_unstable_features">Нестабильные функции</string>
     <string name="lab_set_install_requester">Задать инициатора установки</string>
-    <string name="lab_set_install_requester_desc">В поле «Original Uid» сессии установки указывается приложение, инициировавшее установку, что соответствует поведению системного менеджера пакетов</string>
+    <string name="lab_set_install_requester_desc">При включении этой функции отображать настройки поля OriginatingUid в профилях</string>
     <string name="performance">Производительность</string>
     <string name="uninstaller_settings_desc">Изменить общие настройки деинсталлятора</string>
     <string name="open_source_license_settings_description">Просмотр сторонних библиотек с открытым исходным кодом и их лицензии</string>
@@ -701,12 +701,12 @@
     <string name="theme_settings_use_apple_floating_bar_desc">Отображать плавающую панель навигации в нижней части экрана</string>
     <string name="theme_settings_use_apple_floating_bar">Плавающая панель снизу</string>
     <string name="copied_format">Скопировано: %1$s</string>
-    <string name="config_install_show_toast_desc">Показывать всплывающее сообщение после установки</string>
+    <string name="config_install_show_toast_desc">Определяет, отображать ли всплывающее уведомление после установки</string>
     <string name="config_install_show_toast">Всплывающее сообщение</string>
     <string name="batch_install_result_message">Пакетная установка: %1$d/%2$d выполнена</string>
     <string name="config_status_inactive">Неактивный</string>
     <string name="config_always_use_root_in_system">Root-права для привилегированных операций</string>
-    <string name="config_always_use_root_in_system_desc">При запуске от имени системного установщика всегда используйте root для привилегированных операций, таких как прошивка модулей и удаление файлов</string>
+    <string name="config_always_use_root_in_system_desc">При работе в качестве системного установщика всегда используйте root для привилегированных операций, таких как прошивка модулей и удаление файлов</string>
     <string name="lab_mi_island_countdown">Период блокирования XMSF</string>
     <string name="lab_mi_island_countdown_desc">Период отключения XMSF от сети. Применяется только с Shizuku. Изменяйте только в том случае, если вы понимаете последствия！</string>
     <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
@@ -775,7 +775,7 @@
     <string name="install_confirm_question_update_owner_reminder">Это приложение обычно обновляется из %1$s. При его смене обновления станут возможны из любого источника. Функциональность приложения может измениться.</string>
     <string name="install_confirm_external_request_tip">Подтвердить запрос на установку из %1$s?</string>
     <string name="lab_install_without_user_action">Установка без участия пользователя</string>
-    <string name="lab_install_without_user_action_desc">Попытка обновления приложений без подтверждения пользователя. Работает только, если авторизатор не указан</string>
+    <string name="lab_install_without_user_action_desc">Попытка установки приложения без вмешательства пользователя. На системах, где производитель нарушил работу API управления пакетами, включение этой опции может привести к тому, что установка приложения вообще не удастся</string>
     <string name="inactivate">Не активировано</string>
     <string name="activate">Активировано</string>
     <string name="available">Доступно</string>
@@ -824,4 +824,10 @@
     <string name="config_allow_sig_unknown">Разрешить без подписи</string>
     <string name="config_allow_sig_unknown_desc">Разрешить установку приложений, подпись которых не может быть проверена (требуется Core Patch)</string>
     <string name="suggestion_install_anyway_desc">Временно обойти ограничение профиля и повторить попытку</string>
+    <string name="extras">Дополнительные функции</string>
+    <string name="authorizer_customization">Настройки авторизатора</string>
+    <string name="authorizer_customization_desc">Тонкие настройки параметров для поддерживаемых авторизаторов</string>
+    <string name="config_toast_mode_disable">Не отображать всплывающие уведомления</string>
+    <string name="config_toast_mode_background_only">Только при скрытом диалоговом окне</string>
+    <string name="config_toast_mode_always">Всегда показывать уведомления</string>
 </resources>

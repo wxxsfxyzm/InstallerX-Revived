@@ -105,7 +105,7 @@
     <string name="config_install_authorizer_desc">Trình uỷ quyền để cài đặt ứng dụng</string>
     <string name="config_authorizer_global">Toàn cầu</string>
     <string name="config_authorizer_global_desc">Toàn cầu (%1$s)</string>
-    <string name="config_authorizer_none">Không có Đặc quyền</string>
+    <string name="config_authorizer_none">Không Đặc quyền</string>
     <string name="config_authorizer_none_system_app_tips">Đang chạy như trình cài đặt gói hệ thống, hầu hết các tùy chọn đều không cần thiết.</string>
     <string name="config_authorizer_none_tips">Khi không sử dụng các đặc quyền, hầu hết các tùy chọn đều không hợp lệ.</string>
     <string name="config_authorizer_root">Root</string>
@@ -806,15 +806,15 @@
     <string name="config_allow_sig_unknown_desc">Cho phép cài đặt các ứng dụng mà có chữ ký không thể xác minh (yêu cầu Core Patch)</string>
     <string name="suggestion_install_anyway_desc">Tạm thời bỏ qua hạn chế hồ sơ và thử lại</string>
     <string name="priv_page_what_is_this_title">Đây là cái gì?</string>
-    <string name="priv_page_what_is_this_desc">Phần này sẽ phát hiện tất cả các phương thức xác thực khả dụng trên thiết bị của bạn. Vui lòng chọn một cái để ứng dụng sử dụng cho các thao tác có đặc quyền. Các tính năng được hiển thị trong ứng dụng sẽ thay đổi dựa trên lựa chọn của bạn.</string>
+    <string name="priv_page_what_is_this_desc">Phần này phát hiện tất cả các phương thức ủy quyền khả dụng cho ứng dụng này và để bạn chọn phương thức mặc định được sử dụng cho các thao tác có đặc quyền. Nó chỉ kiểm tra tính khả dụng ở đây; bất kỳ quyền cần thiết nào sẽ được yêu cầu khi ứng dụng thực sự cần sử dụng nó.</string>
     <string name="priv_page_notice_title">Sự khác biệt so với các hồ sơ cài đặt</string>
-    <string name="priv_page_notice_desc">Trong các hồ sơ cài đặt, bạn có thể ghi đè cài đặt toàn cầu này và chọn một trình ủy quyền cụ thể. Do đó, phần này sẽ phát hiện sự khả dụng của tất cả các phương thức xác thực cho bạn.</string>
+    <string name="priv_page_notice_desc">Cài đặt này kiểm soát trình ủy quyền được sử dụng bởi ứng dụng cho các thao tác có đặc quyền. Hồ sơ cài đặt kiểm soát trình ủy quyền được sử dụng khi cài đặt ứng dụng, và có thể ghi đè thiết lập toàn cầu này cho mục đích đó.</string>
     <string name="home_device_info_title">Thông tin Thiết bị</string>
     <string name="home_device_info_model">Kiểu mẫu</string>
     <string name="home_device_info_system">Hệ thống</string>
     <string name="home_device_info_active_authorizer">Trình ủy quyền đang sử dụng</string>
     <string name="home_device_info_default_installer">Hoạt động Trình cài đặt Mặc định</string>
-    <string name="working_status_none_authorizer_desc">Không nên sử dụng bất kỳ đặc quyền nào, yêu cầu quyền Nguồn Không xác định để cài đặt các ứng dụng</string>
+    <string name="working_status_none_authorizer_desc">Không sử dụng bất kỳ đặc quyền nào, yêu cầu quyền Nguồn Không xác định để cài đặt các ứng dụng</string>
     <string name="working_status_not_default_installer_click_details">Nhấn để xem chi tiết</string>
     <string name="working_status_default_installer_tip">Đặt ứng dụng này làm trình cài đặt gói mặc định để tiếp quản hầu hết các yêu cầu cài đặt. Lưu ý rằng các trường hợp sau không thể bị chặn:\n- OEM hạn chế việc sửa đổi trình cài đặt mặc định\n- Người khởi tạo chỉ định một Thành phần đích\n- Người khởi tạo sử dụng một Cài đặt Phiên</string>
     <string name="setting_lsposed_module_title">Mô-đun LSPosed Đã bật</string>

@@ -55,7 +55,7 @@
     <string name="clear_cache">Limpiar caché</string>
     <string name="success">Éxito</string>
     <string name="details">Detalles</string>
-    <string name="add">Agregar</string>
+    <string name="add">Añadir</string>
     <string name="update">Actualizar</string>
     <string name="save">Guardar</string>
     <string name="more">Más</string>
@@ -106,9 +106,9 @@
     <string name="config_managed_blacklist_by_package_name_title">Aplicaciones restringidas de instalación por nombre de paquete</string>
     <string name="config_no_preset_install_sources">No hay fuentes de instalación preestablecidas</string>
     <string name="config_no_managed_blacklist">No hay aplicaciones cuya instalación esté prohibida por nombre de paquete</string>
-    <string name="config_managed_packages_desc">Agregar o eliminar paquetes gestionados</string>
-    <string name="config_add_one_to_get_started">Haz clic en \'Agregar\' abajo para comenzar</string>
-    <string name="config_add_new_package">Agregar nuevo paquete</string>
+    <string name="config_managed_packages_desc">Añadir o eliminar paquetes gestionados</string>
+    <string name="config_add_one_to_get_started">Haz clic en \"Añadir\" abajo para comenzar</string>
+    <string name="config_add_new_package">Añadir nuevo paquete</string>
     <string name="config_package_name">Nombre del Paquete</string>
     <string name="config_confirm_deletion">Confirmar eliminación</string>
     <string name="config_confirm_deletion_desc">¿Quieres eliminar \'%1$s\'? Esto no se puede deshacer.</string>
@@ -799,9 +799,9 @@
     <string name="dhizuku_not_available">Por favor, activa Dhizuku</string>
     <string name="default_installer">Instalador predeterminado</string>
     <string name="priv_page_what_is_this_title">¿Qué es esto?</string>
-    <string name="priv_page_what_is_this_desc">Esta sección detecta todos los métodos de autorización disponibles en tu dispositivo. Por favor, selecciona uno para que la aplicación lo use en operaciones con privilegios. Las funciones que se muestran en la aplicación cambiarán según tu selección.</string>
+    <string name="priv_page_what_is_this_desc">Esta sección detecta todos los métodos de autorización disponibles para esta aplicación y te permite elegir el predeterminado que se usará para operaciones con privilegios. Aquí solo se comprueba su disponibilidad; cualquier permiso necesario se solicitará cuando la aplicación realmente lo necesite.</string>
     <string name="priv_page_notice_title">Diferencia con los perfiles de instalación</string>
-    <string name="priv_page_notice_desc">En los perfiles de instalación, puedes anular este ajuste global y elegir un autorizador específico. Por lo tanto, esta sección detecta la disponibilidad de todos los métodos de autorización para ti.</string>
+    <string name="priv_page_notice_desc">Este ajuste controla el autorizador que utiliza la propia aplicación para las operaciones con privilegios. Los perfiles de instalación controlan el autorizador usado al instalar aplicaciones y pueden anular esta configuración global para ese propósito.</string>
     <string name="home_device_info_title">Información del dispositivo</string>
     <string name="home_device_info_model">Modelo</string>
     <string name="home_device_info_system">Sistema</string>
