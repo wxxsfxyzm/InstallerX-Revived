@@ -6,7 +6,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -77,12 +77,14 @@ fun DialogPage(
                 // Capturing a changing local variable causes the lambda below to change,
                 // which forces rememberModalBottomSheetState to recreate the state, resetting the sheet.
 
-                val sheetState = rememberModalBottomSheetState(
-                    skipPartiallyExpanded = true,
+                val sheetState = rememberBottomSheetState(
+                    initialValue = SheetValue.Hidden,
+                    enabledValues = setOf(
+                        SheetValue.Hidden,
+                        SheetValue.Expanded
+                    ),
                     confirmValueChange = { sheetValue ->
                         if (sheetValue == SheetValue.Hidden) {
-                            // Access the property directly from the stable viewModel.
-                            // This ensures the lambda instance remains stable across state changes.
                             viewModel.uiState.value.isDismissible
                         } else {
                             true
