@@ -5,8 +5,8 @@ package com.rosan.installer.ui.icons
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAddCheck
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.Article
 import androidx.compose.material.icons.automirrored.twotone.FactCheck
@@ -133,7 +133,7 @@ object AppIcons {
     // --- Navigation icons set ---
     val RoomPreferences = Icons.TwoTone.RoomPreferences
     val SettingsSuggest = Icons.TwoTone.SettingsSuggest
-    val ArrowBack = Icons.AutoMirrored.TwoTone.ArrowBack
+    val ArrowBack = Icons.AutoMirrored.Rounded.ArrowBack
     // --- Navigation icons end ---
 
     // --- Authorizer icons set ---

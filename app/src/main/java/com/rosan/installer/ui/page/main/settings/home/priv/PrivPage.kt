@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +43,7 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
 import com.rosan.installer.ui.page.main.widget.card.TitleTipCard
-import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.RadioButtonWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
@@ -89,12 +87,7 @@ fun PrivPage(
                 },
                 navigationIcon = {
                     Row {
-                        AppBackButton(
-                            onClick = { navigator.pop() },
-                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
-                        )
+                        ExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },

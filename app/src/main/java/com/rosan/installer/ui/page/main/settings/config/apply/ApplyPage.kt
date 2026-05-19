@@ -39,7 +39,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Sort
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.Shield
@@ -98,7 +97,7 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.chip.Chip
-import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
@@ -195,12 +194,7 @@ fun ApplyPage(
                 ),
                 navigationIcon = {
                     Row {
-                        AppBackButton(
-                            onClick = { navigator.pop() },
-                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
-                        )
+                        ExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },

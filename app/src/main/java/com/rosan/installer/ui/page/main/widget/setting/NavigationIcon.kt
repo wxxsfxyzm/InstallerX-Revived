@@ -1,5 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.widget.setting
 
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,34 +22,35 @@ import com.rosan.installer.ui.icons.AppIcons
  * This composable encapsulates the specific styling for the navigation icon,
  * making it reusable across different screens.
  *
- * @param onClick The lambda to be executed when the button is clicked.
  * @param modifier The Modifier to be applied to this button.
- * @param icon The vector asset to be displayed inside the button. Defaults to a back arrow.
+ * @param icon The vector asset to be displayed inside the button.
+ * Defaults to a back arrow.
+ * @param containerColor The background color of the button.
+ * @param contentColor The color of the icon inside the button.
  * @param contentDescription The content description for accessibility.
+ * @param onClick The lambda to be executed when the button is clicked.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AppBackButton(
-    onClick: () -> Unit,
+fun ExpressiveBackButton(
     modifier: Modifier = Modifier,
-    icon: ImageVector = AppIcons.ArrowBack, // Default icon is ArrowBack
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.1f),
-    contentDescription: String = stringResource(id = R.string.back)
+    icon: ImageVector = AppIcons.ArrowBack,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    contentDescription: String = stringResource(id = R.string.back),
+    onClick: () -> Unit,
 ) {
     IconButton(
         onClick = onClick,
         modifier = modifier,
         // Consistent shapes for the button.
         shapes = IconButtonDefaults.shapes(
-            // shape = CircleShape
+            shape = CircleShape
         ),
         // Consistent colors for the button.
         colors = IconButtonDefaults.iconButtonColors(
-            // The color of the icon inside the button.
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            // The background color of the button.
-            // Using a more standard color for a filled icon button variant.
             containerColor = containerColor,
+            contentColor = contentColor
         )
     ) {
         Icon(

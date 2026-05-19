@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -66,7 +65,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.DefaultInstaller
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.card.TitleTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
-import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
+import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.snackbar.SwipeableSnackbarHost
@@ -136,12 +135,7 @@ fun DefaultInstallerPage(
                 },
                 navigationIcon = {
                     Row {
-                        AppBackButton(
-                            onClick = { navigator.pop() },
-                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
-                        )
+                        ExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },

@@ -37,7 +37,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.twotone.Colorize
 import androidx.compose.material.icons.twotone.InvertColors
@@ -73,9 +72,9 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.main.widget.dialog.BlurWarningDialog
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
-import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
+import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.RadioButtonWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
@@ -197,12 +196,7 @@ fun ThemeSettingsPage(
                 },
                 navigationIcon = {
                     Row {
-                        AppBackButton(
-                            onClick = { navigator.pop() },
-                            icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                            modifier = Modifier.size(36.dp),
-                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
-                        )
+                        ExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },
