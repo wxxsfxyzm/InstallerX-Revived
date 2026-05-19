@@ -62,14 +62,26 @@ class AnalyserRepositoryImpl(
         processedGroups.forEach { group ->
             Timber.d("  Group: ${group.packageName} contains ${group.entities.size} entities")
         }
+
         val hasMultipleBasesInAnyGroup = processedGroups.any { group ->
             group.entities.count { it is AppEntity.BaseEntity } > 1
         }
-        val detectedMode = if (processedGroups.size > 1 || hasMultipleBasesInAnyGroup) {
+
+        val hasMixedModuleAndApkInAnyGroup = processedGroups.any { group ->
+            group.entities.any { it is AppEntity.ModuleEntity } &&
+                    group.entities.any { it !is AppEntity.ModuleEntity }
+        }
+
+        val detectedMode = if (
+            processedGroups.size > 1 ||
+            hasMultipleBasesInAnyGroup ||
+            hasMixedModuleAndApkInAnyGroup
+        ) {
             SessionMode.Batch
         } else {
             SessionMode.Single
         }
+
         // Step 3: Determine Session Context
         val sessionDataType = PackagePreprocessor.determineSessionType(processedGroups, rawEntities)
         Timber.d("AnalyserRepo: Step 3 SessionType -> ${sessionDataType.sessionType}")
