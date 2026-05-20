@@ -319,7 +319,7 @@
     <string name="disable_notification_on_dismiss">Cancelar instalação ao Fechar</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Fechar a caixa de diálogo cancelará a instalação em vez de minimizá-la para as notificações</string>
     <string name="close_session_countdown">Definir contagem regressiva</string>
-    <string name="close_session_countdown_desc">Contagem regressiva para fechamento automático após instalação bem-sucedida do Dhizuku</string>
+    <string name="close_session_countdown_desc">Na ausência de privilégios, alguns sistemas personalizados da China interceptarão o processo de inicialização associado. A alteração desse valor pode aumentar o tempo de resposta quando o sistema de interceptar popups se manter.</string>
     <string name="dhizuku_cannot_set_installer_desc">O modo Dhizuku não suporta a configuração do instalador!</string>
     <string name="grant_permission_after_install">Clique para conceder permissão após a instalação</string>
     <string name="show_intelligent_suggestion">Exibir sugestões inteligentes (Experimental)</string>
@@ -607,7 +607,7 @@
     <string name="exception_uninstall_failed_aborted">Desinstalação cancelada pelo usuário</string>
     <string name="lab_unstable_features">Funções instáveis</string>
     <string name="lab_set_install_requester">Definir Solicitante de Instalação</string>
-    <string name="lab_set_install_requester_desc">Preencha o campo OriginatingUid com o pacote do chamador para corresponder ao comportamento do sistema</string>
+    <string name="lab_set_install_requester_desc">Mostrar a personalização do campo OriginatingUid nos perfis quando ativada</string>
     <string name="config_error_package_not_found">Pacote não encontrado</string>
     <string name="config_customize_install_reason_desc">Especifique o motivo da instalação. Para novas instalações, selecionar Usuário geralmente faz com que o launcher crie um ícone na área de trabalho</string>
     <string name="config_install_reason_unknown">Motivo Desconhecido</string>
@@ -704,11 +704,11 @@
     <string name="theme_settings_use_apple_floating_bar_desc">Exibir uma barra de navegação flutuante na parte inferior da tela</string>
     <string name="config_status_inactive">Inativo</string>
     <string name="config_install_show_toast">Mostrar mensagem de aviso</string>
-    <string name="config_install_show_toast_desc">Mostrar mensagem de notificação após a instalação</string>
+    <string name="config_install_show_toast_desc">Determina se uma notificação pop-up deve ser exibida após a instalação</string>
     <string name="copied_format">Copiado: %1$s</string>
     <string name="batch_install_result_message">Instalação em lote: %1$d de %2$d concluídos com sucesso</string>
     <string name="config_always_use_root_in_system">Usar root para executar operações privilegiadas</string>
-    <string name="config_always_use_root_in_system_desc">Ao executar como instalador de pacotes do sistema, usar sempre o usuário root para algumas operações que exigem privilégios, como atualizar módulos e excluir arquivos</string>
+    <string name="config_always_use_root_in_system_desc">Ao funcionar como instalador de pacotes do sistema, usar sempre o usuário root para algumas operações que exigem privilégios, como atualizar módulos e excluir arquivos</string>
     <string name="lab_mi_island_countdown">Duração do bloqueio XMSF (Apenas Shizuku)</string>
     <string name="lab_mi_island_countdown_desc">Define por quanto tempo o acesso à rede do XMSF fica bloqueado pelo Shizuku; não funcionará se o Shizuku estiver ativado com privilégios de root. Altere apenas se compreender as consequências!</string>
     <string name="exception_uninstall_failed_device_policy">Desinstalação bloqueada pela política do dispositivo</string>
@@ -775,7 +775,7 @@
     <string name="lab_show_install_initiator_label">Iniciador da Instalação</string>
     <string name="lab_show_install_initiator_desc">Mostrar qual app iniciou a instalação</string>
     <string name="lab_install_without_user_action">Instalar sem intervenção do usuário</string>
-    <string name="lab_install_without_user_action_desc">Tentar atualizar apps sem a confirmação do usuário. Esse recurso só funciona quando o autorizador está definido como “Nenhum”</string>
+    <string name="lab_install_without_user_action_desc">Tentar atualizar apps sem a confirmação do usuário. Ativar esta opção pode impedir completamente a instalação em sistemas nos quais os fabricantes (OEMs) tenham corrompido as APIs do PackageInstaller</string>
     <string name="inactivate">Desativar</string>
     <string name="activate">Ativar</string>
     <string name="available">Disponível</string>
@@ -824,4 +824,10 @@
     <string name="config_allow_sig_unknown">Permitir Assinatura Desconhecida</string>
     <string name="config_allow_sig_unknown_desc">Permitir a instalação de apps cuja assinatura não possa ser verificada (requer o Core Patch)</string>
     <string name="suggestion_install_anyway_desc">Ignorar temporariamente a restrição de perfil e tentar novamente</string>
+    <string name="extras">Extras</string>
+    <string name="authorizer_customization">Ajustes no Autorizador</string>
+    <string name="authorizer_customization_desc">Ajustar as opções para os autorizadores compatíveis</string>
+    <string name="config_toast_mode_disable">Nunca mostrar notificações</string>
+    <string name="config_toast_mode_background_only">Somente quando a caixa de diálogo estiver oculta</string>
+    <string name="config_toast_mode_always">Sempre exibir Toast</string>
 </resources>
