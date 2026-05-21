@@ -277,7 +277,7 @@
     <string name="disable_notification_on_dismiss">Cancelar instalación al descartar</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Al cerrar el diálogo, la instalación se cancelará en vez de minimizarla en las notificaciones</string>
     <string name="close_session_countdown">Establecer cuenta regresiva</string>
-    <string name="close_session_countdown_desc">Cuenta regresiva para cerrar después de instalación con Dhizuku</string>
+    <string name="close_session_countdown_desc">En ausencia de privilegios, algunos sistemas personalizados de China interceptarán el inicio asociado. Modificar este valor puede aumentar el tiempo de reacción cuando persisten las ventanas emergentes de interceptación del sistema.</string>
     <string name="dhizuku_cannot_set_installer_desc">¡El modo Dhizuku no soporta establecer instalador!</string>
     <string name="grant_permission_after_install">Otorgar permisos después de instalar</string>
     <string name="show_intelligent_suggestion">Mostrar sugerencias inteligentes</string>
@@ -643,7 +643,7 @@
     <string name="lab_http_profile_all">Permitir todo (Inseguro)</string>
     <string name="lab_unstable_features">Características inestables</string>
     <string name="lab_set_install_requester">Configurar solicitud del instalador</string>
-    <string name="lab_set_install_requester_desc">Rellena el campo originatingUid con el paquete del llamador para que coincida con el comportamiento del sistema</string>
+    <string name="lab_set_install_requester_desc">Mostrar la personalización del campo OriginatingUid en los perfiles cuando esté activada</string>
     <string name="uninstall_system_app_disabled">Se deshabilitó la eliminación de la aplicación del sistema</string>
     <string name="performance">Rendimiento</string>
     <string name="installer_notification_tap_to_disable">Notificación de servicio en primer plano, toca para desactivar</string>
@@ -708,7 +708,7 @@
     <string name="theme_settings_use_apple_floating_bar_desc">Muestra una barra de navegación flotante en la parte inferior de la pantalla</string>
     <string name="config_status_inactive">Inactivo</string>
     <string name="config_install_show_toast">Mostrar Toast</string>
-    <string name="config_install_show_toast_desc">Mostrar tosast tras la instalación</string>
+    <string name="config_install_show_toast_desc">Controla si se muestra una notificación emergente después de la instalación</string>
     <string name="copied_format">Copiado: %1$s</string>
     <string name="installer_xposed_min_api">Api Mínimo:</string>
     <string name="installer_xposed_target_api">API objetivo:</string>
@@ -718,7 +718,7 @@
     <string name="lab_tap_icon_to_share">Toca el icono para compartir apk</string>
     <string name="lab_tap_icon_to_share_desc">Toca el icono en la página de preparación para compartir apk</string>
     <string name="config_always_use_root_in_system">Usar root para operaciones privilegiadas</string>
-    <string name="config_always_use_root_in_system_desc">Cuando se ejecute como instalador del sistema, usa siempre root para operaciones privilegiadas, como flashear módulos y eliminar archivos</string>
+    <string name="config_always_use_root_in_system_desc">Cuando se trabaje como instalador de paquetes del sistema, usar siempre root para ciertas operaciones privilegiadas, como flashear módulos y eliminar archivos</string>
     <string name="config_installer_mode_self">Por defecto</string>
     <string name="config_installer_mode_initiator">Iniciando app</string>
     <string name="config_installer_mode_custom">Personalizado</string>
@@ -785,7 +785,7 @@
     <string name="install_confirm_question_update_owner_reminder">Esta aplicación suele ser actualizada por %1$s. Si la actualizas desde otra fuente, tu teléfono podría recibir futuras actualizaciones desde cualquier origen. La funcionalidad de la aplicación podría cambiar.</string>
     <string name="install_confirm_external_request_tip">¿Aprobar la solicitud de instalación de %1$s?</string>
     <string name="lab_install_without_user_action">Instalar sin intervención del usuario</string>
-    <string name="lab_install_without_user_action_desc">Intentar actualizar aplicaciones sin confirmación del usuario. Esta función solo es efectiva cuando el autorizador está establecido en Ninguno</string>
+    <string name="lab_install_without_user_action_desc">Intentar actualizar aplicaciones sin confirmación del usuario. Activar esta opción puede impedir por completo la instalación en sistemas donde los fabricantes (OEM) hayan alterado las APIs de PackageInstaller</string>
     <string name="inactivate">Desactivar</string>
     <string name="activate">Activar</string>
     <string name="available">Disponible</string>
@@ -834,4 +834,10 @@
     <string name="config_allow_sig_unknown">Permitir firma desconocida</string>
     <string name="config_allow_sig_unknown_desc">Permitir la instalación de aplicaciones cuya firma no pueda verificarse (se requiere Core Patch)</string>
     <string name="suggestion_install_anyway_desc">Omitir temporalmente la restricción del perfil y volver a intentarlo</string>
+    <string name="extras">Extras</string>
+    <string name="authorizer_customization">Ajustes del autorizador</string>
+    <string name="authorizer_customization_desc">Ajustar opciones para los autorizadores compatibles</string>
+    <string name="config_toast_mode_disable">No mostrar notificaciones emergentes nunca</string>
+    <string name="config_toast_mode_background_only">Solo cuando el diálogo esté oculto</string>
+    <string name="config_toast_mode_always">Mostrar siempre las notificaciones emergentes</string>
 </resources>
