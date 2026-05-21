@@ -59,8 +59,8 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
-import com.rosan.installer.ui.page.main.settings.preferred.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
+import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.middleShape
@@ -191,7 +191,7 @@ private fun ChoiceContent(
                 baseSelectableEntity?.let { entity ->
                     item {
                         val baseEntityInfo = entity.app as AppEntity.BaseEntity
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             iconPlaceholder = false,
                             title = baseEntityInfo.label ?: "N/A",
                             description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
@@ -221,7 +221,7 @@ private fun ChoiceContent(
                 moduleSelectableEntity?.let { entity ->
                     item {
                         val moduleEntityInfo = entity.app as AppEntity.ModuleEntity
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             iconPlaceholder = false,
                             title = moduleEntityInfo.name,
                             description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
@@ -258,7 +258,7 @@ private fun ChoiceContent(
                 moduleSelectableEntity?.let { entity ->
                     item {
                         val moduleEntityInfo = entity.app as AppEntity.ModuleEntity
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             iconPlaceholder = false,
                             title = stringResource(R.string.installer_choice_install_as_module),
                             description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
@@ -288,7 +288,7 @@ private fun ChoiceContent(
                 }
                 if (baseSelectableEntity != null) {
                     item {
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             iconPlaceholder = false,
                             title = stringResource(R.string.installer_choice_install_as_app),
                             description = stringResource(R.string.installer_choice_install_as_app_desc),

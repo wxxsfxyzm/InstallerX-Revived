@@ -119,7 +119,7 @@ fun <T> DraggableList(
                 icon = leadingIcon,
                 iconPlaceholder = leadingIcon != null,
                 iconColor = MaterialTheme.colorScheme.primary,
-                content = { trailingContent?.invoke(item) }
+                trailingContent = { trailingContent?.invoke(item) }
             )
         } else {
             Column(

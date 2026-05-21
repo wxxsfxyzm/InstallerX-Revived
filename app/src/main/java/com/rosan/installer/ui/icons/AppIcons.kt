@@ -3,12 +3,12 @@
 package com.rosan.installer.ui.icons
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAddCheck
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.twotone.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.Article
+import androidx.compose.material.icons.automirrored.twotone.CompareArrows
 import androidx.compose.material.icons.automirrored.twotone.FactCheck
 import androidx.compose.material.icons.automirrored.twotone.MenuOpen
 import androidx.compose.material.icons.automirrored.twotone.PlaylistAdd
@@ -16,14 +16,6 @@ import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.DoNotDisturbOn
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.NotificationsActive
-import androidx.compose.material.icons.outlined.NotificationsOff
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.SmartDisplay
-import androidx.compose.material.icons.outlined.Tag
-import androidx.compose.material.icons.outlined.WebAsset
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.AdminPanelSettings
@@ -47,6 +39,7 @@ import androidx.compose.material.icons.twotone.Compress
 import androidx.compose.material.icons.twotone.Copyright
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
+import androidx.compose.material.icons.twotone.DoNotDisturbOn
 import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
 import androidx.compose.material.icons.twotone.Download
 import androidx.compose.material.icons.twotone.Downloading
@@ -70,6 +63,9 @@ import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.NoEncryption
+import androidx.compose.material.icons.twotone.Notifications
+import androidx.compose.material.icons.twotone.NotificationsActive
+import androidx.compose.material.icons.twotone.NotificationsOff
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.PermDeviceInformation
 import androidx.compose.material.icons.twotone.Refresh
@@ -83,14 +79,17 @@ import androidx.compose.material.icons.twotone.SecurityUpdateWarning
 import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.material.icons.twotone.SettingsSuggest
 import androidx.compose.material.icons.twotone.Share
+import androidx.compose.material.icons.twotone.SmartDisplay
 import androidx.compose.material.icons.twotone.Source
 import androidx.compose.material.icons.twotone.Style
 import androidx.compose.material.icons.twotone.SwapHoriz
 import androidx.compose.material.icons.twotone.SystemUpdate
+import androidx.compose.material.icons.twotone.Tag
 import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material.icons.twotone.Timer
 import androidx.compose.material.icons.twotone.VerifiedUser
+import androidx.compose.material.icons.twotone.WebAsset
 import androidx.compose.material.icons.twotone.Widgets
 
 /**
@@ -137,19 +136,19 @@ object AppIcons {
     // --- Navigation icons end ---
 
     // --- Authorizer icons set ---
-    val None = Icons.Outlined.DoNotDisturbOn
-    val Root = Icons.Outlined.Tag
+    val None = Icons.TwoTone.DoNotDisturbOn
+    val Root = Icons.TwoTone.Tag
     val Shizuku = null // Shizuku icon
     val Dhizuku = null // Dhizuku icon
-    val Customize = Icons.Outlined.Settings
+    val Customize = Icons.TwoTone.Settings
     // --- Authorizer icons end ---
 
     // --- Installation mode icons set ---
-    val Dialog = Icons.Outlined.WebAsset
-    val AutoDialog = Icons.Outlined.SmartDisplay
-    val Notification = Icons.Outlined.Notifications
-    val NotificationDisabled = Icons.Outlined.NotificationsOff
-    val AutoNotification = Icons.Outlined.NotificationsActive
+    val Dialog = Icons.TwoTone.WebAsset
+    val AutoDialog = Icons.TwoTone.SmartDisplay
+    val Notification = Icons.TwoTone.Notifications
+    val NotificationDisabled = Icons.TwoTone.NotificationsOff
+    val AutoNotification = Icons.TwoTone.NotificationsActive
 
     // val Ignore = Icons.Outlined.NotInterested
     val Timer = Icons.TwoTone.Timer
@@ -174,7 +173,7 @@ object AppIcons {
     val Silent = Icons.TwoTone.DoNotDisturbOnTotalSilence
     val Settings = Icons.TwoTone.Settings
     val OEMSpecial = Icons.TwoTone.FindInPage
-    val ShowSize = Icons.AutoMirrored.Filled.CompareArrows
+    val ShowSize = Icons.AutoMirrored.TwoTone.CompareArrows
     val Bypass = Icons.TwoTone.NoEncryption
     val Glow = Icons.TwoTone.Flare
     val PredictiveBack = Icons.TwoTone.Animation

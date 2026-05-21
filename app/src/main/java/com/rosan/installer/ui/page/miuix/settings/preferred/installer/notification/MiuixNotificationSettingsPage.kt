@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -37,7 +38,6 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationStyle
-import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixAutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
@@ -237,4 +237,46 @@ fun MiuixNotificationSettingsPage(
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
+}
+
+/**
+ * Widget for selecting notification auto-clear time.
+ */
+@Composable
+private fun MiuixAutoClearNotificationTimeWidget(
+    modifier: Modifier = Modifier,
+    currentValue: Int,
+    onValueChange: (Int) -> Unit
+) {
+    val context = LocalContext.current
+    val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) } // 0 means "Never"
+
+    val entries = remember(options) {
+        options.map { time ->
+            val text = if (time == 0) {
+                context.getString(R.string.installer_settings_auto_clear_time_never)
+            } else {
+                context.getString(R.string.installer_settings_auto_clear_time_seconds_format, time)
+            }
+            DropdownItem(title = text)
+        }
+    }
+
+    val selectedIndex = remember(currentValue, options) {
+        options.indexOf(currentValue).coerceAtLeast(0)
+    }
+
+    WindowSpinnerPreference(
+        modifier = modifier,
+        title = stringResource(id = R.string.installer_settings_auto_clear_success_notification),
+        summary = stringResource(id = R.string.installer_settings_auto_clear_success_notification_desc),
+        items = entries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            val newValue = options[newIndex]
+            if (currentValue != newValue) {
+                onValueChange(newValue)
+            }
+        }
+    )
 }

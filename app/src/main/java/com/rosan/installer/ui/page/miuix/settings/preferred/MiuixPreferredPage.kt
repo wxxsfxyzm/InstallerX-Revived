@@ -39,12 +39,15 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -220,13 +223,12 @@ fun MiuixPreferredPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp)
                 ) {
-                    MiuixSettingsAboutItemWidget(
+                    BasicComponent(
                         title = stringResource(R.string.lab),
-                        summary = stringResource(R.string.lab_desc)
-                    ) {
-                        navigator.push(Route.Lab)
-                    }
-                    MiuixSettingsAboutItemWidget(
+                        summary = stringResource(R.string.lab_desc),
+                        onClick = { navigator.push(Route.Lab) }
+                    )
+                    BasicComponent(
                         title = stringResource(R.string.about_detail),
                         summary = if (uiState.hasUpdate) stringResource(
                             R.string.update_available,
@@ -235,10 +237,9 @@ fun MiuixPreferredPage(
                         summaryColor = BasicComponentColors(
                             color = if (uiState.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant
-                        )
-                    ) {
-                        navigator.push(Route.About)
-                    }
+                        ),
+                        onClick = { navigator.push(Route.About) }
+                    )
                 }
             }
         }
@@ -257,5 +258,43 @@ fun MiuixPreferredPage(
             title = stringResource(dialogInfo.titleResId)
         )
     }
+}
 
+@Composable
+private fun MiuixDisableAdbVerify(
+    checked: Boolean,
+    isError: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    MiuixSwitchWidget(
+        title = stringResource(R.string.disable_adb_install_verify),
+        description = if (!isError) stringResource(R.string.disable_adb_install_verify_desc)
+        else stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc),
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange
+    )
+}
+
+/**
+ * A setting pkg for requesting to ignore battery optimizations.
+ *
+ * @param checked Whether the app is currently ignoring battery optimizations.
+ * @param onCheckedChange Callback invoked when the user toggles the switch.
+ */
+@Composable
+private fun MiuixIgnoreBatteryOptimizationSetting(
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    MiuixSwitchWidget(
+        title = stringResource(R.string.ignore_battery_optimizations),
+        description = if (enabled) stringResource(R.string.ignore_battery_optimizations_desc)
+        else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange
+    )
 }

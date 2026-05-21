@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -37,15 +39,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.settings.model.GithubUpdateChannel
+import com.rosan.installer.domain.settings.model.HttpProfile
+import com.rosan.installer.domain.settings.model.RootMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.preferred.LabHttpProfileWidget
-import com.rosan.installer.ui.page.main.settings.preferred.LabRootImplementationWidget
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelectionDialog
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
+import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
@@ -272,4 +275,73 @@ fun LabPage(
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
+}
+
+/**
+ * Widget for selecting the Root Implementation (Magisk/KernelSU/APatch).
+ * Mimics the logic from MiuixRootImplementationDialog but uses DropDownMenuWidget.
+ */
+@Composable
+private fun LabRootImplementationWidget(viewModel: LabSettingsViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val currentRootImpl = uiState.labRootMode
+
+    val data = remember {
+        mapOf(
+            RootMode.Magisk to "Magisk",
+            RootMode.KernelSU to "KernelSU",
+            RootMode.APatch to "APatch"
+        )
+    }
+
+    val options = data.values.toList()
+    val keys = data.keys.toList()
+
+    val selectedIndex = keys.indexOf(currentRootImpl).coerceAtLeast(0)
+
+    DropDownMenuWidget(
+        icon = AppIcons.RootMethod,
+        title = stringResource(R.string.lab_module_select_root_impl),
+        description = options.getOrNull(selectedIndex),
+        choice = selectedIndex,
+        data = options,
+        onChoiceChange = { newIndex ->
+            keys.getOrNull(newIndex)?.let { impl ->
+                viewModel.dispatch(LabSettingsAction.LabChangeRootImplementation(impl))
+            }
+        }
+    )
+}
+
+@Composable
+private fun LabHttpProfileWidget(viewModel: LabSettingsViewModel) {
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val profiles = remember {
+        listOf(
+            HttpProfile.ALLOW_SECURE,
+            HttpProfile.ALLOW_LOCAL,
+            HttpProfile.ALLOW_ALL
+        )
+    }
+    val options = profiles.map { profile ->
+        when (profile) {
+            HttpProfile.ALLOW_SECURE -> stringResource(R.string.lab_http_profile_secure)
+            HttpProfile.ALLOW_LOCAL -> stringResource(R.string.lab_http_profile_local)
+            HttpProfile.ALLOW_ALL -> stringResource(R.string.lab_http_profile_all)
+        }
+    }
+
+    val currentIndex = profiles.indexOf(uiState.labHttpProfile).coerceAtLeast(0)
+
+    DropDownMenuWidget(
+        icon = Icons.Default.Security,
+        title = stringResource(R.string.lab_http_profile),
+        description = options.getOrNull(currentIndex),
+        choice = currentIndex,
+        data = options,
+        onChoiceChange = { index ->
+            val selectedProfile = profiles.getOrElse(index) { HttpProfile.ALLOW_SECURE }
+            viewModel.dispatch(LabSettingsAction.LabChangeHttpProfile(selectedProfile))
+        }
+    )
 }

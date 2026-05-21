@@ -17,12 +17,14 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
+private const val CONNECTION_TIMEOUT = 15L
+
 val networkModule = module {
     single {
         OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)       // Connection Timeout
-            .readTimeout(15, TimeUnit.SECONDS)          // Read Timeout
-            .writeTimeout(15, TimeUnit.SECONDS)         // Write Timeout
+            .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)       // Connection Timeout
+            .readTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)          // Read Timeout
+            .writeTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)         // Write Timeout
             .followRedirects(true)                             // Allow Redirect
             .followSslRedirects(true)  // Allow SSL Redirect
             .connectionSpecs(

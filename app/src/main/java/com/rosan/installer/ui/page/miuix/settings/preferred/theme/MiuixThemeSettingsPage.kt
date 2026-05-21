@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -55,14 +56,13 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
-import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixColorSpecWidget
-import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPaletteStyleWidget
-import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixThemeEngineWidget
-import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixThemeModeWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
+import com.rosan.installer.ui.theme.material.PaletteStyle
+import com.rosan.installer.ui.theme.material.ThemeColorSpec
+import com.rosan.installer.ui.theme.material.ThemeMode
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -600,6 +600,205 @@ fun MiuixBlurWarningDialog(
                         colors = ButtonDefaults.textButtonColorsPrimary()
                     )
                 }
+            }
+        }
+    )
+}
+
+/**
+ * Theme Engine selection widget using WindowSpinnerPreference, following the provided pattern.
+ * Simplified version without data class and icons.
+ *
+ * @param currentThemeIsMiuix True if MIUIX theme is selected, false if Google theme is selected.
+ * @param onThemeChange Callback when the selection changes. Boolean parameter indicates new selection (true = MIUIX).
+ */
+@SuppressLint("LocalContextGetResourceValueCall")
+@Composable
+private fun MiuixThemeEngineWidget(
+    modifier: Modifier = Modifier,
+    currentThemeIsMiuix: Boolean,
+    onThemeChange: (Boolean) -> Unit,
+) {
+    val context = LocalContext.current
+
+    val themeOptions = remember {
+        mapOf(
+            true to R.string.theme_settings_miuix_ui, // Key = true -> MIUIX UI string resource
+            false to R.string.theme_settings_google_ui // Key = false -> Google UI string resource
+        )
+    }
+
+    // Convert map entries to List<DropdownItem> for WindowSpinnerPreference.
+    // Ensure the order matches the keys: index 0 = true, index 1 = false.
+    val spinnerEntries = remember(themeOptions) {
+        themeOptions.entries.sortedByDescending { it.key }.map { entry ->
+            DropdownItem(
+                title = context.getString(entry.value)
+            )
+        }
+    }
+
+    // Determine selected index based on currentThemeIsMiuix state.
+    // Index 0 corresponds to true (MIUIX), Index 1 corresponds to false (Google).
+    val selectedIndex = remember(currentThemeIsMiuix) {
+        if (currentThemeIsMiuix) 0 else 1
+    }
+
+    WindowSpinnerPreference(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_ui_engine),
+        // summary = spinnerEntries[selectedIndex].title,
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            // Convert index back to boolean key (0 -> true, 1 -> false)
+            val newModeIsMiuix = themeOptions.keys.sortedDescending().elementAt(newIndex)
+            if (currentThemeIsMiuix != newModeIsMiuix) {
+                onThemeChange(newModeIsMiuix)
+            }
+        }
+    )
+}
+
+/**
+ * A WindowSpinnerPreference widget for selecting the application's theme mode (Light, Dark, or System).
+ *
+ * @param modifier The modifier to be applied to the WindowSpinnerPreference.
+ * @param currentThemeMode The currently selected ThemeMode.
+ * @param onThemeModeChange A callback that is invoked when the theme mode selection changes.
+ */
+@SuppressLint("LocalContextGetResourceValueCall")
+@Composable
+fun MiuixThemeModeWidget(
+    modifier: Modifier = Modifier,
+    currentThemeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
+) {
+    val context = LocalContext.current
+
+    // Map of ThemeMode enum to its corresponding string resource ID.
+    val themeModeOptions = remember {
+        // The order in the map definition determines the order in the spinner.
+        mapOf(
+            ThemeMode.LIGHT to R.string.theme_settings_theme_mode_light,
+            ThemeMode.DARK to R.string.theme_settings_theme_mode_dark,
+            ThemeMode.SYSTEM to R.string.theme_settings_theme_mode_system
+        )
+    }
+
+    // Convert the map of options to a list of DropdownItem for the WindowSpinnerPreference component.
+    // The order of items in the list is important for index mapping.
+    val spinnerEntries = remember(themeModeOptions) {
+        themeModeOptions.entries.map { entry ->
+            DropdownItem(title = context.getString(entry.value))
+        }
+    }
+
+    // Calculate the selected index based on the current theme mode.
+    // It finds the index of the currentThemeMode in the ordered list of keys.
+    val selectedIndex = remember(currentThemeMode, themeModeOptions) {
+        themeModeOptions.keys.indexOf(currentThemeMode).coerceAtLeast(0)
+    }
+
+    WindowSpinnerPreference(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_theme_mode),
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            // Retrieve the new ThemeMode based on the selected index.
+            val newMode = themeModeOptions.keys.elementAt(newIndex)
+            // Invoke the callback only if the mode has actually changed.
+            if (currentThemeMode != newMode) {
+                onThemeModeChange(newMode)
+            }
+        }
+    )
+}
+
+/**
+ * WindowSpinnerPreference widget for selecting the Palette Style.
+ */
+@Composable
+fun MiuixPaletteStyleWidget(
+    modifier: Modifier = Modifier,
+    currentPaletteStyle: PaletteStyle,
+    onPaletteStyleChange: (PaletteStyle) -> Unit
+) {
+    val options = remember { PaletteStyle.entries }
+    val spinnerEntries = remember(options) {
+        options.map { DropdownItem(title = it.displayName) }
+    }
+    val selectedIndex = remember(currentPaletteStyle, options) {
+        options.indexOf(currentPaletteStyle).coerceAtLeast(0)
+    }
+
+    WindowSpinnerPreference(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_palette_style),
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            val newStyle = options[newIndex]
+            if (currentPaletteStyle != newStyle) {
+                onPaletteStyleChange(newStyle)
+            }
+        }
+    )
+}
+
+/**
+ * WindowSpinnerPreference widget for selecting the Theme Color Spec.
+ * Includes fallback logic to gracefully handle styles that do not support SPEC_2025.
+ */
+@Composable
+fun MiuixColorSpecWidget(
+    modifier: Modifier = Modifier,
+    currentColorSpec: ThemeColorSpec,
+    currentPaletteStyle: PaletteStyle,
+    onColorSpecChange: (ThemeColorSpec) -> Unit
+) {
+    // 1. Check if the current PaletteStyle supports SPEC_2025
+    val isSpec2025Supported = currentPaletteStyle in listOf(
+        PaletteStyle.TonalSpot,
+        PaletteStyle.Neutral,
+        PaletteStyle.Vibrant,
+        PaletteStyle.Expressive
+    )
+
+    // 2. Filter available specs based on support
+    val availableSpecs = if (isSpec2025Supported) {
+        ThemeColorSpec.entries
+    } else {
+        listOf(ThemeColorSpec.SPEC_2021)
+    }
+
+    // 3. Determine the actual spec being applied to match the fallback logic
+    val activeSpec = if (!isSpec2025Supported) ThemeColorSpec.SPEC_2021 else currentColorSpec
+
+    // 4. Use a static localized string for the unsupported state
+    val descriptionText = if (!isSpec2025Supported) {
+        stringResource(id = R.string.theme_settings_color_spec_only_2021)
+    } else null
+
+    val spinnerEntries = remember(availableSpecs) {
+        availableSpecs.map { DropdownItem(title = it.displayName) }
+    }
+
+    val selectedIndex = remember(activeSpec, availableSpecs) {
+        availableSpecs.indexOf(activeSpec).coerceAtLeast(0)
+    }
+
+    WindowSpinnerPreference(
+        modifier = modifier,
+        title = stringResource(id = R.string.theme_settings_color_spec),
+        summary = descriptionText,
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            val selectedSpec = availableSpecs[newIndex]
+            if (currentColorSpec != selectedSpec) {
+                onColorSpecChange(selectedSpec)
             }
         }
     )

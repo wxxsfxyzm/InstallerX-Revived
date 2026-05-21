@@ -40,9 +40,9 @@ fun SwitchWidget(
     title: String,
     description: String? = null,
     enabled: Boolean = true,
+    isError: Boolean = false,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    isError: Boolean = false
+    onCheckedChange: (Boolean) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 

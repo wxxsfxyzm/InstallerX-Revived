@@ -41,21 +41,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.Level
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
+import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
+import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
+import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.snackbar.SwipeableSnackbarHost
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @SuppressLint("LocalContextGetResourceValueCall")
@@ -71,7 +72,6 @@ fun PreferredPage(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
@@ -172,7 +172,7 @@ fun PreferredPage(
                     title = stringResource(R.string.personalization)
                 ) {
                     item {
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             icon = AppIcons.Theme,
                             title = stringResource(R.string.theme_settings),
                             description = stringResource(R.string.theme_settings_desc),
@@ -182,7 +182,7 @@ fun PreferredPage(
                         )
                     }
                     item {
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             icon = AppIcons.InstallMode,
                             title = stringResource(R.string.installer_settings),
                             description = stringResource(R.string.installer_settings_desc),
@@ -192,7 +192,7 @@ fun PreferredPage(
                         )
                     }
                     item {
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             icon = AppIcons.Delete,
                             title = stringResource(R.string.uninstaller_settings),
                             description = stringResource(R.string.uninstaller_settings_desc),
@@ -210,20 +210,27 @@ fun PreferredPage(
                     title = stringResource(R.string.basic)
                 ) {
                     item {
-                        DisableAdbVerify(
+                        val isError = uiState.authorizer == Authorizer.Dhizuku
+                        SwitchWidget(
+                            icon = AppIcons.DisableAdbVerify,
+                            title = stringResource(R.string.disable_adb_install_verify),
+                            description = if (!isError) stringResource(R.string.disable_adb_install_verify_desc)
+                            else stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc),
                             checked = !uiState.adbVerifyEnabled,
-                            isError = uiState.authorizer == Authorizer.Dhizuku,
+                            isError = isError,
                             enabled = uiState.authorizer != Authorizer.Dhizuku &&
-                                    uiState.authorizer != Authorizer.None,
-                            onCheckedChange = { isDisabled ->
-                                viewModel.dispatch(PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled))
-                            }
-                        )
+                                    uiState.authorizer != Authorizer.None
+                        ) { viewModel.dispatch(PreferredViewAction.SetAdbVerifyEnabledState(!it)) }
                     }
                     item {
-                        IgnoreBatteryOptimizationSetting(
+                        val enabled = !uiState.isIgnoringBatteryOptimizations
+                        SwitchWidget(
+                            icon = AppIcons.BatteryOptimization,
+                            title = stringResource(R.string.ignore_battery_optimizations),
+                            description = if (enabled) stringResource(R.string.ignore_battery_optimizations_desc)
+                            else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
                             checked = uiState.isIgnoringBatteryOptimizations,
-                            enabled = !uiState.isIgnoringBatteryOptimizations,
+                            enabled = enabled,
                         ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                     }
                 }
@@ -234,27 +241,23 @@ fun PreferredPage(
                     title = stringResource(R.string.other)
                 ) {
                     item {
-                        SettingsAboutItemWidget(
-                            imageVector = AppIcons.Lab,
-                            headlineContentText = stringResource(R.string.lab),
-                            supportingContentText = stringResource(R.string.lab_desc),
-                            onClick = {
-                                navigator.push(Route.Lab)
-                            }
+                        BaseWidget(
+                            icon = AppIcons.Lab,
+                            title = stringResource(R.string.lab),
+                            description = stringResource(R.string.lab_desc),
+                            onClick = { navigator.push(Route.Lab) }
                         )
                     }
                     item {
-                        SettingsAboutItemWidget(
-                            imageVector = AppIcons.Info,
-                            headlineContentText = stringResource(R.string.about_detail),
-                            supportingContentText = if (uiState.hasUpdate) stringResource(
+                        BaseWidget(
+                            icon = AppIcons.Info,
+                            title = stringResource(R.string.about_detail),
+                            description = if (uiState.hasUpdate) stringResource(
                                 R.string.update_available,
                                 uiState.remoteVersion
                             ) else "$revLevel ${AppConfig.VERSION_NAME}",
-                            supportingContentColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            onClick = {
-                                navigator.push(Route.About)
-                            }
+                            descriptionColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            onClick = { navigator.push(Route.About) }
                         )
                     }
                 }

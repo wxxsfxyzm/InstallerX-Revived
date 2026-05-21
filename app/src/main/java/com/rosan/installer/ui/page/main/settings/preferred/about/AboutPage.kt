@@ -3,6 +3,7 @@
 package com.rosan.installer.ui.page.main.settings.preferred.about
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,14 +14,18 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -35,11 +40,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.BuildConfig
@@ -48,11 +57,10 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
-import com.rosan.installer.ui.page.main.settings.preferred.BottomSheetContent
-import com.rosan.installer.ui.page.main.settings.preferred.ExportLogsWidget
-import com.rosan.installer.ui.page.main.settings.preferred.SettingsNavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
+import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
+import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
@@ -137,7 +145,7 @@ fun AboutPage(
                     title = stringResource(R.string.about)
                 ) {
                     item {
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             icon = AppIcons.ViewSourceCode,
                             title = stringResource(R.string.get_source_code),
                             description = stringResource(R.string.get_source_code_detail),
@@ -145,7 +153,7 @@ fun AboutPage(
                         )
                     }
                     item {
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             icon = AppIcons.OpenSourceLicense,
                             title = stringResource(R.string.open_source_license),
                             description = stringResource(R.string.open_source_license_settings_description),
@@ -153,7 +161,7 @@ fun AboutPage(
                         )
                     }
                     item {
-                        SettingsNavigationItemWidget(
+                        NavigationItemWidget(
                             icon = AppIcons.Update,
                             title = stringResource(R.string.get_update),
                             description = stringResource(R.string.get_update_detail),
@@ -162,7 +170,7 @@ fun AboutPage(
                     }
                     if (uiState.hasUpdate)
                         item {
-                            SettingsNavigationItemWidget(
+                            NavigationItemWidget(
                                 icon = AppIcons.Download,
                                 title = stringResource(R.string.get_update_directly),
                                 description = stringResource(R.string.get_update_directly_desc),
@@ -186,7 +194,12 @@ fun AboutPage(
                             )
                         }
                         item(animatedVisibility = uiState.enableFileLogging) {
-                            ExportLogsWidget(viewModel)
+                            BaseWidget(
+                                icon = AppIcons.BugReport,
+                                title = stringResource(R.string.export_logs),
+                                description = stringResource(R.string.export_logs_desc),
+                                onClick = { viewModel.dispatch(AboutAction.ShareLog) }
+                            )
                         }
                     }
                 }
@@ -206,4 +219,79 @@ fun AboutPage(
         }
     }
     UpdateLoadingIndicator(backdrop = upgradeIndicatorBackdrop, viewModel = viewModel)
+}
+
+@Composable
+private fun BottomSheetContent(
+    title: String,
+    hasUpdate: Boolean,
+    canDirectUpdate: Boolean = true,
+    onDirectUpdateClick: () -> Unit
+) {
+    val uriHandler = LocalUriHandler.current
+    val haptic = LocalHapticFeedback.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp, 0.dp, 16.dp, 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 20.dp)
+        )
+
+        if (hasUpdate && canDirectUpdate) {
+            Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    onDirectUpdateClick()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = AppIcons.Update,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.get_update_directly),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
+        Button(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived/releases")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_github),
+                contentDescription = "GitHub Icon",
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "GitHub")
+        }
+        Button(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                uriHandler.openUri("https://t.me/installerx_revived")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_telegram),
+                contentDescription = "Telegram Icon",
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Telegram")
+        }
+        Spacer(modifier = Modifier.size(60.dp))
+    }
 }

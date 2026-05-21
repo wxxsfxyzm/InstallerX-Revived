@@ -39,7 +39,6 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.preferred.AutoClearNotificationTimeWidget
 import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
@@ -226,4 +225,51 @@ fun NotificationSettingsPage(
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
+}
+
+/**
+ * A DropDownMenuWidget for selecting the auto-clear time for success notifications.
+ */
+@Composable
+private fun AutoClearNotificationTimeWidget(
+    currentValue: Int,
+    onValueChange: (Int) -> Unit
+) {
+    val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) }
+
+    val selectedIndex = remember(currentValue, options) {
+        options.indexOf(currentValue).coerceAtLeast(0)
+    }
+    val currentOption = options.getOrElse(selectedIndex) { 0 }
+
+    val descriptionText = if (currentOption == 0) {
+        stringResource(R.string.installer_settings_auto_clear_time_never_desc)
+    } else {
+        stringResource(
+            R.string.installer_settings_auto_clear_time_seconds_format_desc,
+            currentOption
+        )
+    }
+
+    val dropdownItems = options.map { time ->
+        if (time == 0) {
+            stringResource(R.string.installer_settings_auto_clear_time_never)
+        } else {
+            stringResource(R.string.installer_settings_auto_clear_time_seconds_format, time)
+        }
+    }
+
+    DropDownMenuWidget(
+        icon = AppIcons.Timer,
+        title = stringResource(id = R.string.installer_settings_auto_clear_success_notification),
+        description = descriptionText,
+        choice = selectedIndex,
+        data = dropdownItems,
+        onChoiceChange = { newIndex ->
+            val newValue = options.getOrElse(newIndex) { 0 }
+            if (currentValue != newValue) {
+                onValueChange(newValue)
+            }
+        }
+    )
 }
