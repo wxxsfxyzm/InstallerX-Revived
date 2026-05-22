@@ -215,7 +215,7 @@
     <string name="installer_installing">Installation…</string>
     <string name="installer_install_failed">Échec de l\'installation</string>
     <string name="installer_install_success">Installation réussie</string>
-    <string name="installer_silent_install">Installation silencieuse</string>
+    <string name="installer_move_to_background">Installation silencieuse</string>
     <string name="installer_error_reason">Raison de l\'erreur</string>
     <string name="installer_unknown_error">Erreur inconnue</string>
     <string name="installer_channel_name">Notification d\'installation</string>

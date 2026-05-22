@@ -284,7 +284,7 @@
     <string name="installer_install_failed">Gagal memasang</string>
     <string name="installer_install_success">Berhasil memasang</string>
     <string name="installer_install_complete">Pemasangan selesai</string>
-    <string name="installer_silent_install">Instalasi Senyap</string>
+    <string name="installer_move_to_background">Instalasi Senyap</string>
     <string name="installer_error_reason">Alasan Kesalahan</string>
     <string name="installer_unknown_error">Kesalahan tidak diketahui</string>
     <string name="installer_notification_tap_to_disable">Notifikasi layanan latar depan, ketuk untuk menonaktifkan</string>

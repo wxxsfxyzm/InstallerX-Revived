@@ -444,7 +444,7 @@
     <string name="installer_install_success">Install success</string>
     <string name="installer_install_complete">Install complete</string>
     <string name="batch_install_result_message">Batch installation: %1$d/%2$d successful</string>
-    <string name="installer_silent_install">Silent Install</string>
+    <string name="installer_move_to_background">Run in background</string>
     <string name="installer_error_reason">Error Reason</string>
     <string name="installer_unknown_error">Unknown Error</string>
     <string name="install_confirm_question_update_owner_reminder">This app is usually updated by %1$s. If you update it from another source, your phone may receive future updates from any source. App functionality may change.</string>

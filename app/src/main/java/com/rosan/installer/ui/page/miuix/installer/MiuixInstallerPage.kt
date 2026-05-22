@@ -199,6 +199,20 @@ fun MiuixInstallerPage(
                     miuixSheetColorDark else miuixSheetColorLight,
                 startAction = {
                     when (stage) {
+                        is InstallerStage.Preparing -> {
+                            MiuixBackButton(
+                                icon = AppMiuixIcons.Close,
+                                iconTint = MiuixTheme.colorScheme.onSurface,
+                                onClick = {
+                                    showBottomSheet.value = false
+                                    scope.launch {
+                                        delay(SHEET_ANIMATION_DURATION)
+                                        viewModel.dispatch(InstallerViewAction.Cancel)
+                                    }
+                                }
+                            )
+                        }
+
                         is InstallerStage.InstallChoice -> {
                             // Check the new flag from uiState
                             if (uiState.navigatedFromPrepareToChoice) {
@@ -464,11 +478,11 @@ fun MiuixInstallerPage(
                         is InstallerStage.Preparing -> {
                             InstallPreparingContent(
                                 viewModel = viewModel,
-                                onCancel = {
+                                onBackground = {
                                     showBottomSheet.value = false
                                     scope.launch {
                                         delay(SHEET_ANIMATION_DURATION)
-                                        viewModel.dispatch(InstallerViewAction.Cancel)
+                                        viewModel.dispatch(InstallerViewAction.Background)
                                     }
                                 }
                             )

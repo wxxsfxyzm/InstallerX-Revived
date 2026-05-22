@@ -389,7 +389,7 @@
     <string name="installer_install_failed">インストールに失敗しました</string>
     <string name="installer_install_success">インストールに成功しました</string>
     <string name="installer_install_complete">インストール完了</string>
-    <string name="installer_silent_install">サイレントインストール</string>
+    <string name="installer_move_to_background">サイレントインストール</string>
     <string name="installer_error_reason">エラー理由</string>
     <string name="installer_unknown_error">不明なエラー</string>
     <string name="installer_notification_tap_to_disable">フォアグラウンドサービスの通知。タップして無効にします</string>

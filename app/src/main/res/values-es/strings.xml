@@ -162,7 +162,7 @@
     <string name="installer_installing">Instalando…</string>
     <string name="installer_install_failed">Error al instalar</string>
     <string name="installer_install_success">Instalación exitosa</string>
-    <string name="installer_silent_install">Instalación Silenciosa</string>
+    <string name="installer_move_to_background">Instalación Silenciosa</string>
     <string name="installer_error_reason">Motivo del error</string>
     <string name="installer_unknown_error">Error desconocido</string>
     <string name="installer_channel_name">Notificación de instalación</string>

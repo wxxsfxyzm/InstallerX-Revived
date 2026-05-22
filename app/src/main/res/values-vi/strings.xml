@@ -463,7 +463,7 @@
     <string name="installer_install_failed">Cài đặt thất bại</string>
     <string name="installer_install_success">Cài đặt thành công</string>
     <string name="installer_install_complete">Hoàn thành cài đặt</string>
-    <string name="installer_silent_install">Cài đặt trong nền</string>
+    <string name="installer_move_to_background">Cài đặt trong nền</string>
     <string name="installer_error_reason">Lý do lỗi</string>
     <string name="installer_unknown_error">Không rõ lỗi</string>
     <string name="installer_notification_tap_to_disable">Dịch vụ thông báo đẩy, chạm để tắt</string>

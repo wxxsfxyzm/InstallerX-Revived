@@ -59,7 +59,9 @@ fun preparingDialog(
         text = DialogInnerParams(
             DialogParamsType.InstallerPreparing.id,
         ) {
-            Column {
+            Column(
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.installer_preparing_desc),
                     style = MaterialTheme.typography.bodyMedium,
@@ -97,10 +99,14 @@ fun preparingDialog(
         buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
-            listOf(DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(InstallerViewAction.Cancel)
-            })
-            //emptyList()
+            listOf(
+                DialogButton(stringResource(R.string.installer_move_to_background)) {
+                    viewModel.dispatch(InstallerViewAction.Background)
+                },
+                DialogButton(stringResource(R.string.cancel)) {
+                    viewModel.dispatch(InstallerViewAction.Cancel)
+                }
+            )
         }
     )
 }

@@ -327,7 +327,7 @@
     <string name="installer_install_failed">A telepítés sikertelen</string>
     <string name="installer_install_success">Sikeres telepítés</string>
     <string name="installer_install_complete">Telepítés befejezve</string>
-    <string name="installer_silent_install">Csendes telepítés</string>
+    <string name="installer_move_to_background">Csendes telepítés</string>
     <string name="installer_error_reason">Hiba oka</string>
     <string name="installer_unknown_error">Ismeretlen hiba</string>
     <string name="installer_notification_tap_to_disable">Előtérben megjelenő szolgáltatásértesítés, koppintson a letiltáshoz.</string>

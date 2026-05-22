@@ -213,7 +213,7 @@
     <string name="installer_settings_dialog_mode_options">ตัวเลือกสำหรับไดอะล็อก</string>
     <string name="installer_settings_global_installer">ทั่วโลก</string>
     <string name="installer_settings_notification_mode_options">ตัวเลือกสำหรับการแจ้งเตือน</string>
-    <string name="installer_silent_install">ติดตั้งแบบเงียบ</string>
+    <string name="installer_move_to_background">ติดตั้งแบบเงียบ</string>
     <string name="installer_unknown_error">ข้อผิดพลาดที่ไม่รู้จัก</string>
     <string name="installer_version">เวอร์ชัน: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>

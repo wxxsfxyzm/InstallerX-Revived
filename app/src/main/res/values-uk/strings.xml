@@ -180,7 +180,7 @@
     <string name="installer_installing">Встановлення…</string>
     <string name="installer_install_failed">Не вдалося встановити</string>
     <string name="installer_install_success">Успішно встановлено</string>
-    <string name="installer_silent_install">Тихе встановлення</string>
+    <string name="installer_move_to_background">Тихе встановлення</string>
     <string name="installer_error_reason">Причина помилки</string>
     <string name="installer_unknown_error">Невідома помилка</string>
     <string name="installer_channel_name">Сповіщення про встановлення</string>

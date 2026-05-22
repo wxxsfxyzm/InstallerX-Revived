@@ -199,7 +199,7 @@
     <string name="installer_installing">Installiere…</string>
     <string name="installer_install_failed">Installation fehlgeschlagen</string>
     <string name="installer_install_success">Installation erfolgreich</string>
-    <string name="installer_silent_install">Stumme Installation</string>
+    <string name="installer_move_to_background">Stumme Installation</string>
     <string name="installer_error_reason">Fehlergrund</string>
     <string name="installer_unknown_error">Unbekannter Fehler</string>
     <string name="installer_channel_name">Installationsbenachrichtigung</string>

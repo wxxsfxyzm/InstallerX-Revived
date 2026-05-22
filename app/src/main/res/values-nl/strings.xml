@@ -292,7 +292,7 @@
     <string name="installer_install_failed">Installatie mislukt</string>
     <string name="installer_install_success">Installatie succesvol</string>
     <string name="installer_install_complete">Installatie voltooid</string>
-    <string name="installer_silent_install">Stille installatie</string>
+    <string name="installer_move_to_background">Stille installatie</string>
     <string name="installer_error_reason">Reden voor fout</string>
     <string name="installer_unknown_error">Onbekende fout</string>
     <string name="installer_channel_name">Installatiemelding</string>

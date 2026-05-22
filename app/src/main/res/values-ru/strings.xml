@@ -205,7 +205,7 @@
     <string name="installer_settings_dialog_mode_options">Настройки диалога</string>
     <string name="installer_settings_global_installer">Основные</string>
     <string name="installer_settings_notification_mode_options">Настройки уведомления</string>
-    <string name="installer_silent_install">Тихая установка</string>
+    <string name="installer_move_to_background">Тихая установка</string>
     <string name="installer_unknown_error">Неизвестная ошибка</string>
     <string name="installer_version">Версия: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>

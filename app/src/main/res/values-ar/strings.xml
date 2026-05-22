@@ -169,7 +169,7 @@
     <string name="installer_installing">جارٍ التثبيت…</string>
     <string name="installer_install_failed">فشل التثبيت</string>
     <string name="installer_install_success">نجح التثبيت</string>
-    <string name="installer_silent_install">تثبيت صامت</string>
+    <string name="installer_move_to_background">تثبيت صامت</string>
     <string name="installer_error_reason">سبب الخطأ</string>
     <string name="installer_unknown_error">خطأ غير معروف</string>
     <string name="installer_channel_name">إشعار التثبيت</string>

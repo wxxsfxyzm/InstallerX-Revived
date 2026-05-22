@@ -100,7 +100,7 @@ fun installingDialog(
         buttons = dialogButtons(DialogParamsType.ButtonsCancel.id) {
             // Provides a button to move to background
             listOf(
-                DialogButton(stringResource(R.string.installer_silent_install)) {
+                DialogButton(stringResource(R.string.installer_move_to_background)) {
                     viewModel.dispatch(InstallerViewAction.Background)
                 }
             )

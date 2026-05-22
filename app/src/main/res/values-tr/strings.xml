@@ -209,7 +209,7 @@
     <string name="installer_installing">İndiriliyor…</string>
     <string name="installer_install_failed">Yükleme başarısız oldu</string>
     <string name="installer_install_success">Yükleme başarılı</string>
-    <string name="installer_silent_install">Sessiz Yükleme</string>
+    <string name="installer_move_to_background">Sessiz Yükleme</string>
     <string name="installer_error_reason">Hata Nedeni</string>
     <string name="installer_unknown_error">Bilinmeyen Hata</string>
     <string name="installer_channel_name">Yükleme Bildirimi</string>

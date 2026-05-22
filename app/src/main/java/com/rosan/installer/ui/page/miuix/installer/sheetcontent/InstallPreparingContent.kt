@@ -31,7 +31,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @Composable
 fun InstallPreparingContent(
     viewModel: InstallerViewModel,
-    onCancel: () -> Unit
+    onBackground: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
@@ -77,7 +77,7 @@ fun InstallPreparingContent(
 
         ProgressButton(
             progress = animatedProgress,
-            onClick = onCancel,
+            onClick = onBackground,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
