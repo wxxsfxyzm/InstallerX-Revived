@@ -553,7 +553,7 @@
     <string name="exception_install_failed_invalid_apk">无效的 APK（安装包已损坏），请重新下载安装包</string>
     <string name="exception_install_failed_invalid_uri">无效的 URI</string>
     <string name="exception_install_failed_insufficient_storage">存储空间不足，请先清理空间或卸载无用应用</string>
-    <string name="exception_install_failed_duplicate_package">签名冲突（包名相同、签名不同），请先卸载原应用</string>
+    <string name="exception_install_failed_duplicate_package">设备上已存在相同包名的应用</string>
     <string name="exception_install_failed_no_shared_user">共享 UID 的程序不存在，请先下载主 UID 应用</string>
     <string name="exception_install_failed_update_incompatible">更新失败（签名或其他原因），请卸载后安装</string>
     <string name="exception_install_failed_shared_user_incompatible">与共享 UID 的程序签名不一致</string>

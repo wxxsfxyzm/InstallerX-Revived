@@ -576,7 +576,7 @@
     <string name="exception_install_failed_invalid_apk">Invalid APK (package corrupted). Please redownload and try again</string>
     <string name="exception_install_failed_invalid_uri">Invalid URI</string>
     <string name="exception_install_failed_insufficient_storage">Storage full, try clearing some space</string>
-    <string name="exception_install_failed_duplicate_package">Package signature changed, ensure your package is safe and uninstall the application, then try again</string>
+    <string name="exception_install_failed_duplicate_package">An app with the same package name already exists</string>
     <string name="exception_install_failed_no_shared_user">The base.apk with a matching UID couldn\'t be found, please download it and try again</string>
     <string name="exception_install_failed_update_incompatible">Update incompatible, please uninstall and try again</string>
     <string name="exception_install_failed_shared_user_incompatible">Package signatures don\'t match</string>
