@@ -612,7 +612,6 @@
     <string name="export_logs_desc">Uygulama günlüklerini dışa aktarır</string>
     <string name="theme_settings_use_blur">Bulanıklığı Etkinleştir</string>
     <string name="theme_settings_use_blur_desc">Uygulama için bulanıklığı etkinleştirir</string>
-    <string name="theme_settings_use_blur_warning">Bulanıklaştırma efekti, Android 11 ve altı sürümlerde kararsız olabilir ve beklenmedik sorunlara neden olabilir. Sorunlar oluşursa uygulama verilerini temizlemeniz gerekebilir. Devam etmek istiyor musunuz?</string>
     <string name="uninstaller_settings">Kaldırıcı Ayarları</string>
     <string name="uninstaller_settings_desc">Kaldırıcının genel ayarlarını değiştirin</string>
     <string name="installer_settings_require_biometric_auth">Yükleme için biyometrik kimlik doğrulama gerekli</string>

@@ -678,7 +678,6 @@
     <string name="installer_notification_desc">Notificação de serviço em segundo plano, inútil</string>
     <string name="installer_live_channel_name_desc">Mostrar o progresso da instalação em tempo real</string>
     <string name="installer_live_channel_short_text_pending_install">Pendente</string>
-    <string name="theme_settings_use_blur_warning">O efeito de desfoque pode ser instável e causar problemas inesperados no Android 11 e versões anteriores. Pode ser necessário limpar os dados do app se ocorrerem problemas. Deseja continuar?</string>
     <string name="installer_analyse_success">Sucesso na análise</string>
     <string name="installer_live_channel_short_text_analyse_failed">Falha</string>
     <string name="exception_resolve_failed_link_not_valid">Este link não contém um arquivo válido</string>

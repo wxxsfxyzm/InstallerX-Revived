@@ -92,7 +92,6 @@ fun MiuixThemeSettingsPage(
     val transition = LocalNavAnimatedContentScope.current.transition
 
     val showHideLauncherIconDialog = remember { mutableStateOf(false) }
-    val showBlurWarningDialog = remember { mutableStateOf(false) }
 
     MiuixHideLauncherIconWarningDialog(
         showState = showHideLauncherIconDialog,
@@ -100,15 +99,6 @@ fun MiuixThemeSettingsPage(
         onConfirm = {
             showHideLauncherIconDialog.value = false
             viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(false))
-        }
-    )
-
-    MiuixBlurWarningDialog(
-        showState = showBlurWarningDialog,
-        onDismiss = { showBlurWarningDialog.value = false },
-        onConfirm = {
-            showBlurWarningDialog.value = false
-            viewModel.dispatch(ThemeSettingsAction.SetUseBlur(true))
         }
     )
 
@@ -181,18 +171,14 @@ fun MiuixThemeSettingsPage(
                             viewModel.dispatch(ThemeSettingsAction.SetThemeMode(newMode))
                         }
                     )
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_use_blur),
-                        description = stringResource(R.string.theme_settings_use_blur_desc),
-                        checked = uiState.useBlur,
-                        onCheckedChange = { isChecked ->
-                            if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-                                showBlurWarningDialog.value = true
-                            } else {
-                                viewModel.dispatch(ThemeSettingsAction.SetUseBlur(isChecked))
-                            }
-                        }
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.theme_settings_use_blur),
+                            description = stringResource(R.string.theme_settings_use_blur_desc),
+                            checked = uiState.useBlur,
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseBlur(it)) }
+                        )
+                    }
                     MiuixSwitchWidget(
                         title = stringResource(R.string.theme_settings_miuix_custom_colors),
                         description = stringResource(R.string.theme_settings_miuix_custom_colors_desc),
@@ -338,46 +324,48 @@ fun MiuixThemeSettingsPage(
             }
 
             // Predictive Back Section
-            item { SmallTitle(stringResource(R.string.theme_settings_predictive_back)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixPredictiveBackAnimationWidget(
-                        currentAnimation = uiState.predictiveBackAnimation,
-                        onAnimationChange = { newAnim ->
-                            // Hey Google
-                            // Why you keep playing the animation even we are already play completed?
-                            // This is very dirty, We are using RestrictedApi, but we don't have other choice
-                            transition.setPlaytimeAfterInitialAndTargetStateEstablished(
-                                transition.targetState,
-                                transition.targetState,
-                                transition.playTimeNanos
-                            )
-
-                            viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(newAnim))
-                        }
-                    )
-
-                    AnimatedVisibility(
-                        visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
-                                uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                item { SmallTitle(stringResource(R.string.theme_settings_predictive_back)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp)
                     ) {
-                        MiuixPredictiveBackExitDirectionWidget(
-                            currentDirection = uiState.predictiveBackExitDirection,
-                            onDirectionChange = {
+                        MiuixPredictiveBackAnimationWidget(
+                            currentAnimation = uiState.predictiveBackAnimation,
+                            onAnimationChange = { newAnim ->
+                                // Hey Google
+                                // Why you keep playing the animation even we are already play completed?
+                                // This is very dirty, We are using RestrictedApi, but we don't have other choice
                                 transition.setPlaytimeAfterInitialAndTargetStateEstablished(
                                     transition.targetState,
                                     transition.targetState,
                                     transition.playTimeNanos
                                 )
-                                viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackExitDirection(it))
+
+                                viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(newAnim))
                             }
                         )
+
+                        AnimatedVisibility(
+                            visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
+                                    uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            MiuixPredictiveBackExitDirectionWidget(
+                                currentDirection = uiState.predictiveBackExitDirection,
+                                onDirectionChange = {
+                                    transition.setPlaytimeAfterInitialAndTargetStateEstablished(
+                                        transition.targetState,
+                                        transition.targetState,
+                                        transition.playTimeNanos
+                                    )
+                                    viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackExitDirection(it))
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -552,52 +540,6 @@ private fun MiuixHideLauncherIconWarningDialog(
                         onClick = onConfirm,
                         text = stringResource(R.string.confirm),
                         colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
-                    )
-                }
-            }
-        }
-    )
-}
-
-/**
- * A miuix-style dialog to warn the user about unstable blur effects on Android 11 and below.
- */
-@Composable
-fun MiuixBlurWarningDialog(
-    showState: MutableState<Boolean>,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    WindowDialog(
-        show = showState.value,
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.warning),
-        content = {
-            Column {
-                Text(
-                    text = stringResource(R.string.theme_settings_use_blur_warning),
-                    color = MiuixTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onConfirm,
-                        text = stringResource(R.string.confirm),
-                        colors = ButtonDefaults.textButtonColorsPrimary()
                     )
                 }
             }

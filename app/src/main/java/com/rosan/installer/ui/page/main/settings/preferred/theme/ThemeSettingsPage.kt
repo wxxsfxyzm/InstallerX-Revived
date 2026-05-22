@@ -70,7 +70,6 @@ import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
-import com.rosan.installer.ui.page.main.widget.dialog.BlurWarningDialog
 import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -100,7 +99,6 @@ fun ThemeSettingsPage(
     var showHideLauncherIconDialog by remember { mutableStateOf(false) }
     var showPaletteDialog by remember { mutableStateOf(false) }
     var showThemeModeDialog by remember { mutableStateOf(false) }
-    var showBlurWarningDialog by remember { mutableStateOf(false) }
     var showPredictiveBackAnimationDialog by remember { mutableStateOf(false) }
     var showPredictiveBackExitDirectionDialog by remember { mutableStateOf(false) }
     val transition = LocalNavAnimatedContentScope.current.transition
@@ -165,15 +163,6 @@ fun ThemeSettingsPage(
         onConfirm = {
             showHideLauncherIconDialog = false
             viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(false))
-        }
-    )
-
-    BlurWarningDialog(
-        show = showBlurWarningDialog,
-        onDismiss = { showBlurWarningDialog = false },
-        onConfirm = {
-            showBlurWarningDialog = false
-            viewModel.dispatch(ThemeSettingsAction.SetUseBlur(true))
         }
     )
 
@@ -277,20 +266,16 @@ fun ThemeSettingsPage(
                 SegmentedColumn(
                     title = stringResource(R.string.theme_settings_google_ui)
                 ) {
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Blur,
-                            title = stringResource(R.string.theme_settings_use_blur),
-                            description = stringResource(R.string.theme_settings_use_blur_desc),
-                            checked = uiState.useBlur,
-                            onCheckedChange = { isChecked ->
-                                if (isChecked && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-                                    showBlurWarningDialog = true
-                                } else {
-                                    viewModel.dispatch(ThemeSettingsAction.SetUseBlur(isChecked))
-                                }
-                            }
-                        )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        item {
+                            SwitchWidget(
+                                icon = AppIcons.Blur,
+                                title = stringResource(R.string.theme_settings_use_blur),
+                                description = stringResource(R.string.theme_settings_use_blur_desc),
+                                checked = uiState.useBlur,
+                                onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseBlur(it)) }
+                            )
+                        }
                     }
                     item {
                         BaseWidget(
@@ -418,16 +403,18 @@ fun ThemeSettingsPage(
             }
 
             // --- Group 4: Predictive Back ---
-            item {
-                SegmentedColumn(
-                    title = stringResource(R.string.theme_settings_predictive_back)
-                ) {
-                    item { PredictiveBackAnimationWidget(uiState) { showPredictiveBackAnimationDialog = true } }
-                    item(
-                        animatedVisibility = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
-                                uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                item {
+                    SegmentedColumn(
+                        title = stringResource(R.string.theme_settings_predictive_back)
                     ) {
-                        PredictiveBackAnimationDirectionWidget(uiState) { showPredictiveBackExitDirectionDialog = true }
+                        item { PredictiveBackAnimationWidget(uiState) { showPredictiveBackAnimationDialog = true } }
+                        item(
+                            animatedVisibility = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
+                                    uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
+                        ) {
+                            PredictiveBackAnimationDirectionWidget(uiState) { showPredictiveBackExitDirectionDialog = true }
+                        }
                     }
                 }
             }

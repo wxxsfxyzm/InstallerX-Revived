@@ -682,7 +682,6 @@
     <string name="installer_live_channel_name_desc">Mostrar el progreso de la instalación como actualización en vivo</string>
     <string name="installer_live_channel_short_text_pending_install">Pendiente</string>
     <string name="exception_zip_exception">No se ha conseguido abrir zip como archivo</string>
-    <string name="theme_settings_use_blur_warning">El efecto de desenfoque puede ser inestable y causar problemas inesperados en Android 11 y versiones posteriores. Puede que necesites borrar los datos de la app si surgen problemas. ¿Quieres continuar?</string>
     <string name="tag_downgrade">Degradación</string>
     <string name="tag_signature">Firma</string>
     <string name="tag_arch_32">32-Bit</string>

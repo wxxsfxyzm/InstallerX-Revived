@@ -487,6 +487,5 @@
     <string name="dhizuku_not_available">يرجى تفعيل Dhizuku</string>
     <string name="theme_settings_use_apple_floating_bar_desc">اعرض شريط تنقل عائم في أسفل الشاشة</string>
     <string name="theme_settings_use_blur_desc">قم بتفعيل خاصية التمويه للتطبيق</string>
-    <string name="theme_settings_use_blur_warning">قد يكون تأثير التمويه غير مستقر ويسبب مشاكل غير متوقعة على نظام Android 11 والإصدارات الأقدم. قد تحتاج إلى مسح بيانات التطبيق في حال حدوث مشاكل. هل تريد المتابعة؟</string>
     <string name="theme_settings_color_spec">مواصفات اللون</string>
 </resources>
