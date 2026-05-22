@@ -114,7 +114,7 @@
     <string name="exception_install_failed_cpu_abi_incompatible">Несовместимость архитектур, пожалуйста, загрузите поддерживаемый пакет</string>
     <string name="exception_install_failed_deprecated_sdk_version">Целевой SDK слишком низкий, для продолжения включите соответствующий флаг</string>
     <string name="exception_install_failed_dexopt">Не удалось оптимизировать DEX</string>
-    <string name="exception_install_failed_duplicate_package">Подпись пакета изменена, убедитесь, что ваш пакет безопасен, удалите приложение и повторите попытку</string>
+    <string name="exception_install_failed_duplicate_package">Приложение с таким именем пакета уже установлено</string>
     <string name="exception_install_failed_duplicate_permission">Пакет повторно запрашивает разрешение, уже заявленное другим приложением!</string>
     <string name="exception_install_failed_hyperos_isolation_violation">Добавьте правильный источник для установки системного приложения Xiaomi</string>
     <string name="exception_install_failed_insufficient_storage">Хранилище заполнено, попробуйте освободить немного места</string>
@@ -527,8 +527,8 @@
     <string name="exception_module_install_failed_incompatible_authorizer">Несовместимый авторизатор</string>
     <string name="sdk_compare_in_multi_line">Требуемые SDK в две строки</string>
     <string name="sdk_compare_in_multi_line_desc">Отображать требуемые версии SDK в две строки при установке</string>
-    <string name="auto_background_install">Тихая автоустановка</string>
-    <string name="auto_background_install_desc">Автоматическая установка в тихом режиме при запуске установки через диалоговое окно</string>
+    <string name="auto_background_install">Установка в фоне</string>
+    <string name="auto_background_install_desc">Автоматическая установка в фоне при нажатии кнопки \'Установить\'</string>
     <string name="dhizuku_cannot_set_package_source_desc">Режим Dhizuku не разрешает кастомизацию источника пакета!</string>
     <string name="dhizuku_cannot_set_user_desc">Режим Dhizuku не поддерживает настройку для данного пользователя!</string>
     <string name="dhizuku_cannot_set_dexopt_desc">Режим Dhizuku не поддерживает dexopt!</string>
@@ -830,4 +830,7 @@
     <string name="config_toast_mode_disable">Не отображать всплывающие уведомления</string>
     <string name="config_toast_mode_background_only">Только при скрытом диалоговом окне</string>
     <string name="config_toast_mode_always">Всегда показывать уведомления</string>
+    <string name="installer_settings_dialog_automation_options">Варианты автоматизации</string>
+    <string name="long_click_background_install">Длительное нажатие для установки в фоне</string>
+    <string name="long_click_background_install_desc">Фоновый режим при длительном нажатии кнопки \'Установить\'</string>
 </resources>
