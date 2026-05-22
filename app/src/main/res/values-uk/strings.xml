@@ -270,7 +270,6 @@
     <string name="theme_settings_use_expressive_ui_desc">Використовуйте новий експресивний UI</string>
     <string name="theme_settings_use_blur">Увімкнути розмиття</string>
     <string name="theme_settings_use_blur_desc">Увімкніть розмиття для програми</string>
-    <string name="theme_settings_use_blur_warning">Ефект розмиття може бути нестабільним і викликати несподівані проблеми на Android 11 і старіших версіях. У разі виникнення проблем вам може знадобитися очистити дані програми. Ви хочете продовжити?</string>
     <string name="theme_settings_google_ui_style">Стиль Google UI</string>
     <string name="theme_settings_theme_mode">Стиль теми</string>
     <string name="theme_settings_theme_mode_desc">Виберіть стиль теми</string>

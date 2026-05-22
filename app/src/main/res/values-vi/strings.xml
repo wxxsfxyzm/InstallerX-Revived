@@ -63,7 +63,6 @@
     <string name="theme_settings_use_expressive_ui_desc">Sử dụng kiểu M3 Expressive mới</string>
     <string name="theme_settings_use_blur">Bật Mờ</string>
     <string name="theme_settings_use_blur_desc">Bật mờ cho ứng dụng</string>
-    <string name="theme_settings_use_blur_warning">Hiệu ứng mờ có thể không ổn định và gây ra các sự cố không mong muốn trên Android 11 trở xuống. Bạn có thể cần xoá dữ liệu ứng dụng nếu sự cố diễn ra. Bạn có muốn tiếp tục không?</string>
     <string name="theme_settings_google_ui_style">Kiểu UI Google</string>
     <string name="theme_settings_theme_mode">Chế độ Chủ đề</string>
     <string name="theme_settings_theme_mode_desc">Chọn chế độ chủ đề</string>

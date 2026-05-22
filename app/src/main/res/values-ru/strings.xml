@@ -657,7 +657,6 @@
     <string name="export_logs_desc">Отправить журнал событий приложения</string>
     <string name="theme_settings_use_blur">Эффект размытия</string>
     <string name="theme_settings_use_blur_desc">Включить эффект размытия в приложении</string>
-    <string name="theme_settings_use_blur_warning">Эффект размытия может работать нестабильно и вызывать проблемы на Android 11 и более ранних версиях. При возникновении проблем может потребоваться очистка данных приложения. Продолжить?</string>
     <string name="config_authorizer_none_system_app_tips">При использовании в качестве системного установщика большинство указанных опций не требуются.</string>
     <string name="config_auto_delete_zip">Автоудаление zip-файлов</string>
     <string name="config_auto_delete_zip_desc">Удалить архив с содержащимся в нем установочным пакетом.</string>

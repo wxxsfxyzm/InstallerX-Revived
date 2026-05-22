@@ -513,7 +513,6 @@
     <string name="export_logs_desc">Ekspor catatan aplikasi</string>
     <string name="theme_settings_use_blur">Aktifkan Blur</string>
     <string name="theme_settings_use_blur_desc">Aktifkan blur untuk aplikasi</string>
-    <string name="theme_settings_use_blur_warning">Efek blur mungkin tidak stabil dan menyebabkan masalah tak terduga pada Android 11 dan di bawahnya. Anda mungkin perlu menghapus data aplikasi jika masalah terjadi. Apakah Anda ingin melanjutkan?</string>
     <string name="config_authorizer_none_system_app_tips">Berjalan sebagai penginstal paket sistem, sebagian besar opsi tidak diperlukan.</string>
     <string name="config_auto_delete_zip">Hapus berkas zip secara otomatis</string>
     <string name="config_auto_delete_zip_desc">Selain menghapus paket instalasi, juga hapus file terkompresi yang berisi paket instalasi.</string>

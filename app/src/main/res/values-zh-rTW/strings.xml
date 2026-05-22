@@ -666,7 +666,6 @@
     <string name="export_logs_desc">匯出應用程式日誌</string>
     <string name="theme_settings_use_blur">啟用模糊效果</string>
     <string name="theme_settings_use_blur_desc">為應用程式啟用模糊效果</string>
-    <string name="theme_settings_use_blur_warning">模糊效果在 Android 11 及以下版本可能不穩定，並可能導致非預期的問題。若發生異常，您可能需要清除應用程式資料。是否要繼續？</string>
     <string name="uninstaller_settings_require_biometric_auth">解除安裝時需進行生物辨識驗證</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">解除安裝時需要進行系統指紋或臉部辨識驗證</string>
     <string name="use_biometric_confirm_change_auth_settings">您確定要更改此設定嗎</string>

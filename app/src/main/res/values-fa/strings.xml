@@ -61,7 +61,6 @@
     <string name="theme_settings_use_expressive_ui_desc">استفاده از سبک جدید M3 Expressive</string>
     <string name="theme_settings_use_blur">فعال‌سازی حالت محو</string>
     <string name="theme_settings_use_blur_desc">فعال‌سازی حالت محو برای برنامه</string>
-    <string name="theme_settings_use_blur_warning">اثر حالت محو ممکن است ناپایدار باشد و باعث بروز مشکلات غیرمنتظره در اندروید ۱۱ و نسخه‌های پایین‌تر شود. در صورت بروز مشکل، ممکن است نیاز باشد داده‌های برنامه را پاک کنید. آیا می‌خواهید ادامه دهید؟</string>
     <string name="theme_settings_google_ui_style">سبک رابط کاربری گوگل</string>
     <string name="theme_settings_theme_mode">حالت پوسته</string>
     <string name="theme_settings_theme_mode_desc">انتخاب حالت پوسته</string>
