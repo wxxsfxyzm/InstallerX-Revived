@@ -342,7 +342,7 @@
     <string name="disable_notification_on_dismiss">Kapatıldığında Yüklemeyi İptal Et</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Diyaloğu kapatmak bildirim görünümüne geçmek yerine yüklemeyi iptal edecektir</string>
     <string name="close_session_countdown">Geri sayım ayarla</string>
-    <string name="close_session_countdown_desc">Dhizuku yüklemesi başarılı olduktan sonra otomatik kapanma için geri sayım</string>
+    <string name="close_session_countdown_desc">Ayrıcalıkların yokluğunda, bazı CN özelleştirilmiş sistemler ilgili başlatma işlemini engelleyecektir. Bu değeri değiştirmek, sistem açılır penceriyi engellediğindeki tepki süresini artırabilir.</string>
     <string name="dhizuku_cannot_set_package_source_desc">Dhizuku modu paket kaynağının özelleştirilmesini desteklemiyor!</string>
     <string name="dhizuku_cannot_set_installer_desc">Dhizuku modu yükleme ayarlarını desteklemiyor!</string>
     <string name="dhizuku_cannot_set_user_desc">Dhizuku modu hedef kullanıcı belirlemeyi desteklemiyor!</string>
@@ -824,4 +824,10 @@
     <string name="config_allow_sig_unknown">Bilinmeyen İmzaya İzin ver</string>
     <string name="config_allow_sig_unknown_desc">İmzası doğrulanamayan uygulamaların yüklenmesine izin ver (Çekirdek Yama gereklidir)</string>
     <string name="suggestion_install_anyway_desc">Profil kısıtlamasını geçici olarak atla ve yeniden dene</string>
+    <string name="extras">Ekstralar</string>
+    <string name="authorizer_customization">Yetkilendirici Ayarları</string>
+    <string name="authorizer_customization_desc">Desteklenen yetkilendiriciler için seçeneklere ince ayar yapın</string>
+    <string name="config_toast_mode_background_only">Yalnızca diyalog gizlendiğinde</string>
+    <string name="config_toast_mode_disable">Asla durum mesajı gösterme</string>
+    <string name="config_toast_mode_always">Durum mesajı her zaman göster</string>
 </resources>
