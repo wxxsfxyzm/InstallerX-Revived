@@ -79,6 +79,7 @@ class AppSettingsRepositoryImpl(
             useMiIslandBlockingIntervalMs = prefs[AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS] ?: 100,
             autoLockInstaller = prefs[AppDataStore.AUTO_LOCK_INSTALLER] ?: false,
             autoSilentInstall = prefs[AppDataStore.DIALOG_AUTO_SILENT_INSTALL] ?: false,
+            longClickBackgroundInstall = prefs[AppDataStore.DIALOG_LONG_CLICK_BACKGROUND_INSTALL] ?: true,
             showMiuixUI = prefs[AppDataStore.UI_USE_MIUIX] ?: false,
             preferSystemIcon = prefs[AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL] ?: false,
             showLauncherIcon = prefs[AppDataStore.SHOW_LAUNCHER_ICON] ?: true,
@@ -250,6 +251,7 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.DialogDisableNotificationOnDismiss -> AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS
             BooleanSetting.DialogShowOppoSpecial -> AppDataStore.DIALOG_SHOW_OPPO_SPECIAL
             BooleanSetting.DialogAutoSilentInstall -> AppDataStore.DIALOG_AUTO_SILENT_INSTALL
+            BooleanSetting.DialogLongClickBackgroundInstall -> AppDataStore.DIALOG_LONG_CLICK_BACKGROUND_INSTALL
             BooleanSetting.LabEnableModuleFlash -> AppDataStore.LAB_ENABLE_MODULE_FLASH
             BooleanSetting.LabModuleFlashShowArt -> AppDataStore.LAB_MODULE_FLASH_SHOW_ART
             BooleanSetting.LabHttpSaveFile -> AppDataStore.LAB_HTTP_SAVE_FILE

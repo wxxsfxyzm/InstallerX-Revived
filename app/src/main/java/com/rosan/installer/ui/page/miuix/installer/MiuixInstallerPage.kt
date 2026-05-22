@@ -522,7 +522,7 @@ fun MiuixInstallerPage(
                                                 // Trigger install directly
                                                 viewModel.dispatch(InstallerViewAction.Install(true))
                                                 // Force background auto silent install regardless of settings
-                                                if (!viewModel.isInstallingModule) {
+                                                if (settings.longClickBackgroundInstall && !viewModel.isInstallingModule) {
                                                     showBottomSheet.value = false
                                                     scope.launch {
                                                         delay(SHEET_ANIMATION_DURATION)

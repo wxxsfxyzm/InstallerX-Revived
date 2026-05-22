@@ -497,8 +497,8 @@
     <string name="uninstall_delete_system_app_desc">Permitir a exclusão de apps do sistema para o usuário atual</string>
     <string name="uninstall_failed_message">Falha na Desinstalação</string>
     <string name="exception_package_manager_name_not_found">Nome do pacote não encontrado</string>
-    <string name="auto_silent_install">Instalação Silenciosa Automática</string>
-    <string name="auto_silent_install_desc">Instalação silenciosa automática ao exibir a caixa de diálogo</string>
+    <string name="auto_background_install">Instalação Silenciosa Automática</string>
+    <string name="auto_background_install_desc">Instalação silenciosa automática ao exibir a caixa de diálogo</string>
     <string name="suggestion_uninstall_and_retry_desc">Isso desinstalará a versão atual do app e tentará instalar a nova versão</string>
     <string name="suggestion_uninstall_and_retry_keep_data_desc">Isso desinstalará a versão atual do app, mantendo seus dados, e tentará instalar a nova versão</string>
     <string name="suggestion_allow_downgrade_desc">Permitir Temporariamente o Downgrade e repetir</string>

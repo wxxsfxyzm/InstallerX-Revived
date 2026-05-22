@@ -549,8 +549,8 @@
     <string name="exception_http_restricted_for_localhost">Klartext-HTTP beschränkt auf localhost</string>
     <string name="sdk_compare_in_multi_line">SDK-Vergleich in mehreren Zeilen anzeigen</string>
     <string name="sdk_compare_in_multi_line_desc">SDK-Vergleich in mehreren Zeilen im Installationsdialog anzeigen</string>
-    <string name="auto_silent_install">Automatische stille Installation</string>
-    <string name="auto_silent_install_desc">Automatische stille Installation beim Start des Installationsdialogs</string>
+    <string name="auto_background_install">Automatische stille Installation</string>
+    <string name="auto_background_install_desc">Automatische stille Installation beim Start des Installationsdialogs</string>
     <string name="installer_oppo_related">OPPO bezogen</string>
     <string name="installer_show_oem_special">OEM-Zusatzinformationen anzeigen</string>
     <string name="installer_show_oem_special_desc">Analysieren und zeigen Sie einen bestimmten Wert für OEM-Apk(s) bei der Installation im Dialog</string>

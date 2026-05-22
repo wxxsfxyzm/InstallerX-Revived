@@ -18,12 +18,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
@@ -33,6 +36,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.ui.theme.CornerRadius
+
+/**
+ * A [CompositionLocal] that provides the dynamically calculated [Shape] for items
+ * inside a [SegmentedColumn]. Defaults to a rounded corner shape with [CornerRadius].
+ */
+val LocalSegmentedItemShape = compositionLocalOf<Shape> { RoundedCornerShape(CornerRadius) }
 
 /**
  * A base widget component designed for setting items and list entries.
@@ -127,6 +136,12 @@ fun BaseWidget(
         leadingContentColor = resolvedIconColor,
         trailingContentColor = resolvedIconColor,
         supportingContentColor = finalDescriptionColor,
+
+        selectedContainerColor = backgroundColor,
+        selectedContentColor = baseContentColor,
+        selectedLeadingContentColor = resolvedIconColor,
+        selectedTrailingContentColor = resolvedIconColor,
+        selectedSupportingContentColor = finalDescriptionColor,
 
         disabledContainerColor = backgroundColor,
         disabledContentColor = baseContentColor,

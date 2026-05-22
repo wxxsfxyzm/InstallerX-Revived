@@ -25,7 +25,6 @@ import androidx.compose.material.icons.twotone.ArrowDropDown
 import androidx.compose.material.icons.twotone.ArrowUpward
 import androidx.compose.material.icons.twotone.AutoAwesome
 import androidx.compose.material.icons.twotone.AutoFixHigh
-import androidx.compose.material.icons.twotone.Autorenew
 import androidx.compose.material.icons.twotone.Badge
 import androidx.compose.material.icons.twotone.BatterySaver
 import androidx.compose.material.icons.twotone.BlurOn
@@ -40,7 +39,6 @@ import androidx.compose.material.icons.twotone.Copyright
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeveloperMode
 import androidx.compose.material.icons.twotone.DoNotDisturbOn
-import androidx.compose.material.icons.twotone.DoNotDisturbOnTotalSilence
 import androidx.compose.material.icons.twotone.Download
 import androidx.compose.material.icons.twotone.Downloading
 import androidx.compose.material.icons.twotone.Edit
@@ -58,6 +56,7 @@ import androidx.compose.material.icons.twotone.History
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.Info
+import androidx.compose.material.icons.twotone.InstallMobile
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.LocalPolice
@@ -88,6 +87,7 @@ import androidx.compose.material.icons.twotone.Tag
 import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Terminal
 import androidx.compose.material.icons.twotone.Timer
+import androidx.compose.material.icons.twotone.TouchApp
 import androidx.compose.material.icons.twotone.VerifiedUser
 import androidx.compose.material.icons.twotone.WebAsset
 import androidx.compose.material.icons.twotone.Widgets
@@ -170,7 +170,8 @@ object AppIcons {
     val Palette = Icons.TwoTone.Style
     val BiometricAuth = Icons.TwoTone.Badge
     val IconPack = Icons.TwoTone.Widgets
-    val Silent = Icons.TwoTone.DoNotDisturbOnTotalSilence
+    val InstallWithOutAction = Icons.TwoTone.InstallMobile
+    val PressInstallBackground = Icons.TwoTone.TouchApp
     val Settings = Icons.TwoTone.Settings
     val OEMSpecial = Icons.TwoTone.FindInPage
     val ShowSize = Icons.AutoMirrored.TwoTone.CompareArrows
@@ -230,5 +231,4 @@ object AppIcons {
 
     // Lab Icons
     val InstallRequester = Icons.AutoMirrored.TwoTone.FactCheck
-    val InstallSilent = Icons.TwoTone.Autorenew
 }

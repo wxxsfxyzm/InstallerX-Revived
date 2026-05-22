@@ -527,8 +527,8 @@
     <string name="exception_module_install_failed_incompatible_authorizer">Несовместимый авторизатор</string>
     <string name="sdk_compare_in_multi_line">Требуемые SDK в две строки</string>
     <string name="sdk_compare_in_multi_line_desc">Отображать требуемые версии SDK в две строки при установке</string>
-    <string name="auto_silent_install">Тихая автоустановка</string>
-    <string name="auto_silent_install_desc">Автоматическая установка в тихом режиме при запуске установки через диалоговое окно</string>
+    <string name="auto_background_install">Тихая автоустановка</string>
+    <string name="auto_background_install_desc">Автоматическая установка в тихом режиме при запуске установки через диалоговое окно</string>
     <string name="dhizuku_cannot_set_package_source_desc">Режим Dhizuku не разрешает кастомизацию источника пакета!</string>
     <string name="dhizuku_cannot_set_user_desc">Режим Dhizuku не поддерживает настройку для данного пользователя!</string>
     <string name="dhizuku_cannot_set_dexopt_desc">Режим Dhizuku не поддерживает dexopt!</string>

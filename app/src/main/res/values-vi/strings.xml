@@ -621,8 +621,8 @@
     <string name="show_dialog_install_extended_menu">Hiện menu mở rộng</string>
     <string name="show_dialog_install_extended_menu_desc">Hiện thêm tùy chọn trong hộp thoại cài đặt</string>
     <string name="extended_menu">Menu Mở rộng</string>
-    <string name="auto_silent_install">Tự động Cài đặt Im lặng</string>
-    <string name="auto_silent_install_desc">Tự động cài đặt im lặng khi bắt đầu hộp thoại cài đặt</string>
+    <string name="auto_background_install">Tự động Cài đặt Im lặng</string>
+    <string name="auto_background_install_desc">Tự động cài đặt im lặng khi bắt đầu hộp thoại cài đặt</string>
     <string name="disable_notification_on_dismiss">Hủy Cài đặt khi Bỏ qua</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Bỏ qua hộp thoại sẽ hủy cài đặt thay vì thu nhỏ nó thành thông báo</string>
     <string name="close_session_countdown">Đặt đếm ngược</string>

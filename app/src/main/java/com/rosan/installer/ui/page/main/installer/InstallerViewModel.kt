@@ -95,6 +95,7 @@ class InstallerViewModel(
                 detectXposedModule = prefs.detectXposedModule,
                 quickOpenLSPosed = prefs.quickOpenLSPosed,
                 autoSilentInstall = prefs.autoSilentInstall,
+                longClickBackgroundInstall = prefs.longClickBackgroundInstall,
                 labTapIconToShare = prefs.labTapIconToShare,
                 labShowFilePath = local.tempLabShowFilePath ?: prefs.labShowFilePath,
                 labShowInstallInitiator = local.tempLabShowInstallInitiator ?: prefs.labShowInstallInitiator

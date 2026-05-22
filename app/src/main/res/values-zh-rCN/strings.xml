@@ -160,6 +160,9 @@
     <string name="config_quick_open_lsposed_desc">开启后可以在安装成功后提供打开 LSPosed 的按钮</string>
     <string name="installer_settings_require_biometric_auth">安装需要通过设备生物认证</string>
     <string name="installer_settings_require_biometric_auth_desc">在安装时请求系统进行生物识别认证</string>
+    <string name="installer_settings_dialog_automation_options">自动化选项</string>
+    <string name="long_click_background_install">长按按钮触发后台安装</string>
+    <string name="long_click_background_install_desc">长按安装按钮时自动切换到后台执行安装</string>
     <string name="installer_biometric_auth_mode_disable">禁用生物识别</string>
     <string name="installer_biometric_auth_mode_enable">启用生物识别</string>
     <string name="installer_biometric_auth_mode_follow_config">跟随配置文件</string>
@@ -629,8 +632,8 @@
     <string name="show_dialog_install_extended_menu">显示扩展菜单</string>
     <string name="show_dialog_install_extended_menu_desc">在安装对话框中显示更多操作选项</string>
     <string name="extended_menu">扩展菜单</string>
-    <string name="auto_silent_install">自动静默安装</string>
-    <string name="auto_silent_install_desc">对话框安装开始时自动静默安装</string>
+    <string name="auto_background_install">触发后台安装</string>
+    <string name="auto_background_install_desc">点击安装按钮后自动切换到后台安装</string>
     <string name="disable_notification_on_dismiss">对话框隐藏时退出安装</string>
     <string name="close_notification_immediately_on_dialog_dismiss">主动隐藏对话框将取消本次安装，而不是挂起到通知栏</string>
     <string name="close_session_countdown">设定倒计时</string>

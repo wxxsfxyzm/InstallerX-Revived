@@ -496,8 +496,8 @@
     <string name="uninstall_failed_message">Échec de la désinstallation</string>
     <string name="exception_install_parse_failed_unexpected_exception">Échec de l\'analyse</string>
     <string name="exception_package_manager_name_not_found">Nom du paquet introuvable</string>
-    <string name="auto_silent_install">Installation silencieuse auto</string>
-    <string name="auto_silent_install_desc">Installer silencieusement dès que le dialogue d\'installation apparaît</string>
+    <string name="auto_background_install">Installation silencieuse auto</string>
+    <string name="auto_background_install_desc">Installer silencieusement dès que le dialogue d\'installation apparaît</string>
     <string name="installer_mixed_module_zip_description">Ce fichier contient un module et des applications. Choisissez le mode d\'installation</string>
     <string name="smart_suggestions">Suggestions</string>
     <string name="suggestion_uninstall_and_retry_desc">Cela désinstallera la version actuelle de l\'appli et tentera d\'installer la nouvelle</string>

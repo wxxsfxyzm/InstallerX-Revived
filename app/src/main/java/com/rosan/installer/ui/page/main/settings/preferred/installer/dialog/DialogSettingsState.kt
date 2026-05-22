@@ -8,6 +8,7 @@ data class DialogSettingsState(
     val showDialogInstallExtendedMenu: Boolean = false,
     val showSmartSuggestion: Boolean = true,
     val autoSilentInstall: Boolean = false,
+    val longClickBackgroundInstall: Boolean = true,
     val disableNotificationForDialogInstall: Boolean = false,
     val tapIconToShare: Boolean = false,
     val showFilePath: Boolean = false,

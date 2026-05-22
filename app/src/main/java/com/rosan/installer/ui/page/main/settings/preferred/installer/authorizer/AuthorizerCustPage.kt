@@ -129,7 +129,7 @@ fun AuthorizerCustPage(
                     if (!isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         item {
                             SwitchWidget(
-                                icon = AppIcons.InstallSilent,
+                                icon = AppIcons.InstallWithOutAction,
                                 title = stringResource(R.string.lab_install_without_user_action),
                                 description = stringResource(R.string.lab_install_without_user_action_desc),
                                 checked = uiState.allowInstallWithoutUserAction,

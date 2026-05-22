@@ -35,7 +35,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.ConfigModel
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
@@ -68,12 +67,12 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 @Composable
 fun MiuixAllPage(
     enableBlur: Boolean,
-    navigator: Navigator = LocalNavigator.current,
     viewModel: AllViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyGridState()
     val scrollBehavior = MiuixScrollBehavior()

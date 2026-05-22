@@ -13,6 +13,7 @@ data class InstallerViewSettings(
     val sdkCompareInMultiLine: Boolean = false,
     val showOPPOSpecial: Boolean = false,
     val autoSilentInstall: Boolean = false,
+    val longClickBackgroundInstall: Boolean = true,
     val enableModuleInstall: Boolean = false,
     val useDynColorFollowPkgIcon: Boolean = false,
     val detectXposedModule: Boolean = true,

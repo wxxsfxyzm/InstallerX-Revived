@@ -168,6 +168,9 @@
     <string name="config_quick_open_lsposed_desc">Show \"Open LSPosed\" button after installing Xposed module</string>
     <string name="installer_settings_require_biometric_auth">Require Biometric Auth to Install</string>
     <string name="installer_settings_require_biometric_auth_desc">Require biometric auth when installing packages</string>
+    <string name="installer_settings_dialog_automation_options">Automation Options</string>
+    <string name="long_click_background_install">Long click to background install</string>
+    <string name="long_click_background_install_desc">Background when long clicking the install button</string>
     <string name="installer_biometric_auth_mode_disable">Disable Biometric Auth</string>
     <string name="installer_biometric_auth_mode_enable">Enable Biometric Auth</string>
     <string name="installer_biometric_auth_mode_follow_config">Follow Profile</string>
@@ -650,8 +653,8 @@
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
     <string name="extended_menu">Extended Menu</string>
-    <string name="auto_silent_install">Auto Silent Install</string>
-    <string name="auto_silent_install_desc">Auto silent install on dialog install start</string>
+    <string name="auto_background_install">Trigger Background Install</string>
+    <string name="auto_background_install_desc">Start install in background when pressing install button</string>
     <string name="disable_notification_on_dismiss">Cancel Installation on Dismiss</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Dismissing the dialog will cancel the installation instead of minimizing it to the notifications</string>
     <string name="close_session_countdown">Close session countdown</string>

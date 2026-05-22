@@ -31,6 +31,7 @@ data class AppPreferences(
     val useMiIslandBlockingIntervalMs: Int,
     val autoLockInstaller: Boolean,
     val autoSilentInstall: Boolean,
+    val longClickBackgroundInstall: Boolean,
     val showMiuixUI: Boolean,
     val preferSystemIcon: Boolean,
     val showLauncherIcon: Boolean,

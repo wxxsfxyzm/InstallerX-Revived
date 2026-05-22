@@ -453,8 +453,8 @@
     <string name="show_dialog_install_extended_menu">Tampilkan menu lengkap</string>
     <string name="show_dialog_install_extended_menu_desc">Tampilkan lebih banyak opsi di dialog instalasi</string>
     <string name="extended_menu">Menu Lengkap</string>
-    <string name="auto_silent_install">Instalasi Otomatis Senyap</string>
-    <string name="auto_silent_install_desc">Instalasi senyap otomatis pada dialog awal instalasi</string>
+    <string name="auto_background_install">Instalasi Otomatis Senyap</string>
+    <string name="auto_background_install_desc">Instalasi senyap otomatis pada dialog awal instalasi</string>
     <string name="disable_notification_on_dismiss">Batalkan Pemasangan pada Abaikan</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Mengabaikan dialog tersebut akan membatalkan proses pemasangan, alih-alih meminimalkannya ke area pemberitahuan</string>
     <string name="close_session_countdown">Atur hitung mundur</string>

@@ -382,7 +382,7 @@ fun installPrepareDialog(
                                 // Trigger install directly
                                 viewModel.dispatch(InstallerViewAction.Install(true))
                                 // Force background auto silent install regardless of settings
-                                if (!viewModel.isInstallingModule) {
+                                if (settings.longClickBackgroundInstall && !viewModel.isInstallingModule) {
                                     viewModel.dispatch(InstallerViewAction.Background)
                                 }
                             },

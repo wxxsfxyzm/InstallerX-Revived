@@ -48,7 +48,6 @@ import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.RootMode
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.AnimatedFluidBackground
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -63,7 +62,6 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage(
-    navigator: Navigator = LocalNavigator.current,
     useBlur: Boolean,
     viewModel: HomePageViewModel = koinViewModel(),
     title: String,
@@ -72,6 +70,7 @@ fun HomePage(
     onNavigateToProfiles: () -> Unit = {},
     windowInsetsSides: WindowInsetsSides? = null
 ) {
+    val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val layoutDirection = LocalLayoutDirection.current

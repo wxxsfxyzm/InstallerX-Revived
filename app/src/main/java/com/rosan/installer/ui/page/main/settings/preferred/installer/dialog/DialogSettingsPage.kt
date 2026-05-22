@@ -160,20 +160,7 @@ fun DialogSettingsPage(
                         )
                     }
 
-                    // 5. Auto Silent Install
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Silent,
-                            title = stringResource(id = R.string.auto_silent_install),
-                            description = stringResource(id = R.string.auto_silent_install_desc),
-                            checked = uiState.autoSilentInstall,
-                            onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeAutoSilentInstall(it))
-                            }
-                        )
-                    }
-
-                    // 6. Disable Notification
+                    // 5. Disable Notification
                     item {
                         SwitchWidget(
                             icon = AppIcons.NotificationDisabled,
@@ -182,6 +169,38 @@ fun DialogSettingsPage(
                             checked = uiState.disableNotificationForDialogInstall,
                             onCheckedChange = {
                                 viewModel.dispatch(DialogSettingsAction.ChangeShowDisableNotification(it))
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.installer_settings_dialog_automation_options)
+                ) {
+                    // 1. Auto Silent Install
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.PressInstallBackground,
+                            title = stringResource(id = R.string.auto_background_install),
+                            description = stringResource(id = R.string.auto_background_install_desc),
+                            checked = uiState.autoSilentInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(DialogSettingsAction.ChangeAutoSilentInstall(it))
+                            }
+                        )
+                    }
+
+                    // 2. Long Click Background Install
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.PressInstallBackground,
+                            title = stringResource(id = R.string.long_click_background_install),
+                            description = stringResource(id = R.string.long_click_background_install_desc),
+                            checked = uiState.longClickBackgroundInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(DialogSettingsAction.ChangeLongClickBackgroundInstall(it))
                             }
                         )
                     }

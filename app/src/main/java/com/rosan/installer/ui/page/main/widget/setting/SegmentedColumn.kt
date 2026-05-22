@@ -18,11 +18,9 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -53,12 +51,6 @@ private const val PADDING_VERTICAL = 8
 
 private const val bouncyStiffness = 800f
 private const val bouncyDamping = 0.5f
-
-/**
- * A [CompositionLocal] that provides the dynamically calculated [Shape] for items
- * inside a [SegmentedColumn]. Defaults to a rounded corner shape with [CornerRadius].
- */
-val LocalSegmentedItemShape = compositionLocalOf<Shape> { RoundedCornerShape(CornerRadius) }
 
 @DslMarker
 annotation class SegmentedColumnDsl
@@ -279,9 +271,8 @@ fun SegmentedColumn(
 
                                     clip = true
                                     this.shape = object : Shape {
-                                        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-                                            return Outline.Rectangle(Rect(0f, 0f, size.width, size.height * safeProgress))
-                                        }
+                                        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density) =
+                                            Outline.Rectangle(Rect(0f, 0f, size.width, size.height * safeProgress))
                                     }
                                     alpha = (currentProgress * 1.5f).coerceIn(0f, 1f)
                                 }

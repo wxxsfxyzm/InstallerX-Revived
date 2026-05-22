@@ -42,7 +42,6 @@ import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.domain.settings.model.RootMode
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewEvent
@@ -75,7 +74,6 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun MiuixHomePage(
     enableBlur: Boolean,
-    navigator: Navigator = LocalNavigator.current,
     viewModel: HomePageViewModel = koinViewModel(),
     title: String,
     configCount: Int = 0,
@@ -83,6 +81,7 @@ fun MiuixHomePage(
     snackbarHostState: SnackbarHostState,
     onNavigateToProfiles: () -> Unit = {}
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()

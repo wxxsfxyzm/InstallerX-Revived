@@ -25,6 +25,7 @@ class DialogSettingsViewModel(
             showDialogInstallExtendedMenu = prefs.showDialogInstallExtendedMenu,
             showSmartSuggestion = prefs.showSmartSuggestion,
             autoSilentInstall = prefs.autoSilentInstall,
+            longClickBackgroundInstall = prefs.longClickBackgroundInstall,
             disableNotificationForDialogInstall = prefs.disableNotificationForDialogInstall,
             tapIconToShare = prefs.labTapIconToShare,
             showFilePath = prefs.labShowFilePath,
@@ -56,6 +57,10 @@ class DialogSettingsViewModel(
 
             is DialogSettingsAction.ChangeAutoSilentInstall -> viewModelScope.launch {
                 updateSetting(BooleanSetting.DialogAutoSilentInstall, action.autoSilentInstall)
+            }
+
+            is DialogSettingsAction.ChangeLongClickBackgroundInstall -> viewModelScope.launch {
+                updateSetting(BooleanSetting.DialogLongClickBackgroundInstall, action.enable)
             }
 
             is DialogSettingsAction.ChangeShowDisableNotification -> viewModelScope.launch {

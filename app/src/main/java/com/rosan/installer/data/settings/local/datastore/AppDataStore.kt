@@ -99,6 +99,8 @@ class AppDataStore(
             booleanPreferencesKey("show_oppo_special")
         val DIALOG_AUTO_SILENT_INSTALL =
             booleanPreferencesKey("auto_silent_install")
+        val DIALOG_LONG_CLICK_BACKGROUND_INSTALL =
+            booleanPreferencesKey("long_click_background_install")
         val DETECT_XPOSED_MODULE =
             booleanPreferencesKey("detect_xposed_module")
         val QUICK_OPEN_LSPOSED =

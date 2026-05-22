@@ -32,7 +32,6 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewAction
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
@@ -66,12 +65,12 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun MiuixPreferredPage(
     enableBlur: Boolean,
-    navigator: Navigator = LocalNavigator.current,
     viewModel: PreferredViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()

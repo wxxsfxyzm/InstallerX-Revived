@@ -497,8 +497,8 @@
     <string name="uninstall_delete_system_app_desc">Geçerli kullanıcı için sistem uygulamalarının silinmesine izin verir</string>
     <string name="uninstall_failed_message">Kaldırma Başarısız</string>
     <string name="exception_package_manager_name_not_found">Paket adı bulunamadı</string>
-    <string name="auto_silent_install">Otomatik Sessiz Yükleme</string>
-    <string name="auto_silent_install_desc">Yükleme diyaloğunda otomatik sessiz yükleme başlatır</string>
+    <string name="auto_background_install">Otomatik Sessiz Yükleme</string>
+    <string name="auto_background_install_desc">Yükleme diyaloğunda otomatik sessiz yükleme başlatır</string>
     <string name="exception_dhizuku_dead_service">Dhizuku uzaktan hizmeti sona erdi</string>
     <string name="smart_suggestions">Öneriler</string>
     <string name="suggestion_uninstall_and_retry_desc">Bu, uygulamanın mevcut sürümünü kaldıracak ve yeni sürümü yüklemeyi deneyecektir</string>

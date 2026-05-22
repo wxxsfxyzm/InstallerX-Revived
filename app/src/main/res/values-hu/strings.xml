@@ -501,8 +501,8 @@
     <string name="show_dialog_install_extended_menu">Bővített menü megjelenítése</string>
     <string name="show_dialog_install_extended_menu_desc">További lehetőségek megjelenítése a telepítési párbeszédpanelen</string>
     <string name="extended_menu">Bővített menü</string>
-    <string name="auto_silent_install">Automatikus csendes telepítés</string>
-    <string name="auto_silent_install_desc">Automatikus csendes telepítés a telepítési párbeszédpanel indításakor</string>
+    <string name="auto_background_install">Automatikus csendes telepítés</string>
+    <string name="auto_background_install_desc">Automatikus csendes telepítés a telepítési párbeszédpanel indításakor</string>
     <string name="disable_notification_on_dismiss">Párbeszédpanel bezárása</string>
     <string name="close_notification_immediately_on_dialog_dismiss">A párbeszédpanel bezárása csendben kilép</string>
     <string name="close_session_countdown">Visszaszámlálás beállítása</string>

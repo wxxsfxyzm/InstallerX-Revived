@@ -61,6 +61,7 @@ enum class BooleanSetting {
     DialogDisableNotificationOnDismiss,
     DialogShowOppoSpecial,
     DialogAutoSilentInstall,
+    DialogLongClickBackgroundInstall,
     LabEnableModuleFlash,
     LabModuleFlashShowArt,
     LabHttpSaveFile,

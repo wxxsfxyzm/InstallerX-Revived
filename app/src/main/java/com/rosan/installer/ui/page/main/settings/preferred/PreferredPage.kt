@@ -44,7 +44,6 @@ import com.rosan.installer.domain.device.model.Level
 import com.rosan.installer.domain.settings.model.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -63,13 +62,13 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PreferredPage(
-    navigator: Navigator = LocalNavigator.current,
     useBlur: Boolean,
     viewModel: PreferredViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues = PaddingValues(0.dp),
     windowInsetsSides: WindowInsetsSides? = null
 ) {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()

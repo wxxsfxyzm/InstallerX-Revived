@@ -489,8 +489,8 @@
     <string name="exception_dhizuku_dead_service">El servicio remoto Dhizuku dejó de funcionar</string>
     <string name="sdk_compare_in_multi_line">Mostrar comparación de SDK en varias líneas</string>
     <string name="sdk_compare_in_multi_line_desc">Mostrar comparación de SDK en varias líneas en el cuadro de diálogo de instalación</string>
-    <string name="auto_silent_install">Instalación automática silenciosa</string>
-    <string name="auto_silent_install_desc">Instalación automática silenciosa al iniciar el cuadro de diálogo de instalación</string>
+    <string name="auto_background_install">Instalación automática silenciosa</string>
+    <string name="auto_background_install_desc">Instalación automática silenciosa al iniciar el cuadro de diálogo de instalación</string>
     <string name="dhizuku_cannot_set_package_source_desc">¡El modo Dhizuku no admite la personalización de la fuente del paquete!</string>
     <string name="dhizuku_cannot_set_user_desc">¡El modo Dhizuku no admite la configuración de usuarios objetivo!</string>
     <string name="dhizuku_cannot_set_dexopt_desc">¡El modo Dhizuku no admite la configuración de dexopt!</string>

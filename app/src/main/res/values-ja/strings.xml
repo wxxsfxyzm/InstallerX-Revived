@@ -548,8 +548,8 @@
     <string name="show_dialog_install_extended_menu">拡張メニューを表示</string>
     <string name="show_dialog_install_extended_menu_desc">インストールダイアログにその他のオプションを表示する</string>
     <string name="extended_menu">拡張メニュー</string>
-    <string name="auto_silent_install">自動サイレントインストール</string>
-    <string name="auto_silent_install_desc">ダイアログインストール開始時に自動サイレントインストール</string>
+    <string name="auto_background_install">自動サイレントインストール</string>
+    <string name="auto_background_install_desc">ダイアログインストール開始時に自動サイレントインストール</string>
     <string name="disable_notification_on_dismiss">ダイアログを閉じたときにインストールをキャンセル</string>
     <string name="close_notification_immediately_on_dialog_dismiss">ダイアログを閉じると、通知に最小化されるのではなく、インストールがキャンセルされます</string>
     <string name="close_session_countdown">カウントダウンを設定</string>
