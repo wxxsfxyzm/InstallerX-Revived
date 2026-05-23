@@ -13,7 +13,7 @@ Este README localizado se mantiene breve porque el proyecto avanza rápido y las
 
 Para obtener la información más reciente y completa, consulta:
 
-- Documentación: https://wxxsfxyzm.github.io/InstallerX-Revived-Website/
+- [Documentación](https://wxxsfxyzm.github.io/InstallerX-Revived-Website/)
 - README en inglés: [README.md](README.md)
 - README en chino simplificado: [README_CN.md](README_CN.md)
 
@@ -43,6 +43,8 @@ Para obtener la información más reciente y completa, consulta:
 
 Al reportar errores, intenta reproducirlos con la versión Alpha o CI más reciente siempre que sea posible, porque el problema puede estar ya corregido respecto a Stable.
 
+Usa [GitHub Issues](https://github.com/wxxsfxyzm/InstallerX-Revived/issues) para bugs reproducibles y feature requests concretas. Las buenas sugerencias también son bienvenidas. Usa [GitHub Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) o el [canal de Telegram](https://t.me/installerx_revived) para preguntas generales y discusiones de compatibilidad.
+
 ## Compilación
 
 Para una compilación debug local:
@@ -59,8 +61,6 @@ Para una compilación de prueba estilo PR con un identificador de aplicación se
 
 ## Localización
 
-Ayuda a traducir InstallerX Revived en Weblate:
-
-https://hosted.weblate.org/engage/installerx-revived/
+Ayuda a traducir InstallerX Revived en [Weblate](https://hosted.weblate.org/engage/installerx-revived/).
 
 [![Estado de localización](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)
