@@ -2,165 +2,141 @@
 
 [English](README.md) | [简体中文](README_CN.md) | [Español](README_ES.md) | **日本語** | [Deutsch](README_DE.md)
 
-[![ライセンス: GPL v3](https://img.shields.io/badge/ライセンス-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)[![安定版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=安定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)[![ベータ版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=ベータ版)](https://github.com/wxxsfxyzm/InstallerX/releases)[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![安定版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?label=安定版)](https://github.com/wxxsfxyzm/InstallerX/releases/latest)
+[![ベータ版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=ベータ版)](https://github.com/wxxsfxyzm/InstallerX/releases)
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
-- これは、作者によって[元のプロジェクト](https://github.com/iamr0s/InstallerX)がアーカイブされた後にコミュニティによって維持されているフォークです
-- 限定的なオープンソースの更新とサポートを提供します
-- GNU GPLv3 ライセンスを厳格に遵守 - 全ての変更はオープンソースで公開されています
-- コミュニティの皆様からのご貢献を心から歓迎いたします！
+> モダンで機能的な Android アプリインストーラー。（鳥の中には、檻に入れるべきではないものもいます。その羽はあまりにも鮮やかだからです。）
 
-## はじめに
+より良いアプリインストーラーを探していますか？ **InstallerX** を試してみてください。
 
-> モダンで機能的なAndroidアプリインストーラー （鳥の中には、羽が派手すぎるので檻に入れるべきではない鳥もいます）
+InstallerX Revived は、モダンな Android パッケージインストーラーであり、元の [InstallerX](https://github.com/iamr0s/InstallerX) プロジェクトをコミュニティで継続しているものです。
 
-優れたアプリインストーラーをお探しですか？ **InstallerX**をお試しください！
+制限の多い標準または OEM インストーラーを置き換え、より分かりやすい UI、幅広いパッケージ形式、設定可能なインストールプロファイル、Shizuku / Root / Dhizuku / システムインストーラーモードによる特権ワークフローを提供します。
 
-多くのカスタマイズされた中国製ROMには、デフォルトよりも劣ったインストーラーが搭載されていますが、それらを**InstallerX Revived**に置き換えることができます。
+## ドキュメント
 
-デフォルトインストーラーと比較して、**InstallerX Revived**はより多くの機能を提供します:
-- 豊富なインストール形式：APK、APKS、APKM、XAPK、ZIP内APK、バッチAPK
-- ダイアログベースのインストール
-- 通知ベースのインストール（Live Activity API 対応）
-- 自動インストール
-- インストーラー宣言
-- インストールフラグの設定（プロファイル設定を継承可能）
-- 特定ユーザー/全ユーザー向けインストール
-- インストール成功後のDex2oat処理
-- 特定アプリのpackageNameまたはsharedUIDによるインストールブロック
-- インストール後のAPK自動削除
-- シェルコマンド不要、ネイティブAPI呼び出しのみ
+完全なユーザーガイド、インストール手順、高度なオプション、システム統合の注意事項、FAQ は [ドキュメントサイト](https://wxxsfxyzm.github.io/InstallerX-Revived-Website/) で管理されています。
 
-## サポートされているAndroidバージョン
+## 主な機能
 
-- **完全サポート：** Android SDK 34 - 36.1 (Android 14 - 16)
-- **限定サポート：** Android SDK 26 - 33 (Android 8.0 - 13) (不具合があれば報告してください)
+- **パッケージ形式:** APK、APKS、APKM、XAPK、ZIP 内 APK、一括 APK インストール。
+- **インストール方式:** ダイアログ、バックグラウンド通知、自動インストール、権限がある場合のサイレントインストール、対応システムでの Android 16+ Live Activity 進捗表示。
+- **認可方式:**
+  - **Root:** すべての特権操作を実行できますが、`app_process` のコールドスタートにより遅くなる場合があります。
+  - **Shizuku:** 起動方式に応じて shell または root 相当の権限を取得し、通常は直接 Root より高速です。
+  - **Dhizuku:** DevicePolicyManager ベースの操作、たとえばデフォルトインストーラーの固定やアプリのインストールを実行できますが、その他の特権操作には制限があります。
+  - **None:** 完全にシステムの制限を受けますが、InstallerX がシステムインストーラーとして動作している場合はサイレントインストールできます。
+- **プロファイル:** インストール/アンインストール要求の処理方法を定義します。インストールモード、認可方式の上書き、インストーラー/要求元メタデータ、対象ユーザー、DexOpt、自動削除、split 選択、ブラックリスト、署名ポリシーを含みます。
+- **システム統合:** ホーム画面のステータスカードからデフォルトインストーラーとして固定でき、[InxLocker](https://github.com/Chimioo/InxLocker) などの LSPosed モジュールと併用できます。上級者はシステムインストーラーの置き換えとしても導入できます。
+- **モダン UI:** Material 3 Expressive と Miuix、ダークモード、動的カラー、高度なパレット、システムアイコンパック、カラフルなダイアログ、標準通知、Live Activity、対応 Xiaomi デバイスでの Xiaomi HyperOS 風アイランド通知。
+- **安全制御:** パッケージ名/SharedUID ブラックリスト、署名不一致/不明署名ポリシー、権限プレビュー、インストールフラグ、一部のブロックに対する一回限りのスマート提案。
 
-## 主な変更点と新機能
+## 対応 Android バージョン
 
-- **UIオプション:** Material 3 Expressive ベースの新UIデザインと、HyperOSに似たMiuixデザインを切り替え可能。
-- **カスタマイズ性の向上:** インターフェース設定のカスタマイズ項目を拡充。
-- **バグ修正:** 特定システムにおけるオリジナルプロジェクトのAPK削除問題を解決。
-- **パフォーマンス:** パース速度を最適化、各種パッケージタイプの解析を改善。
-- **多言語対応:** 対応言語を拡充。新規言語の追加貢献を歓迎します！
-- **ダイアログ最適化:** インストールダイアログの表示を改善。
-- **システムアイコン:** インストール時のシステムアイコンパック表示をサポート。トグルスイッチでAPKアイコンとシステムアイコンパックを切り替え可能。
-- **バージョン比較:** バージョン番号比較を単一行または複数行形式で表示可能に。
-- **SDK情報の表示:** インストールダイアログでtargetSDKとminSDKを単一行または複数行形式で表示。
-- **セッションインストール確認:** [InxLocker](https://github.com/Chimioo/InxLocker)と連携し、ストアアプリ（Aurora Store、F-Droidなど）からのインストール確認をサポート。
-- **インターセプト回避:** Shizuku/Rootは、インストール後のアプリ起動時にカスタムOSのチェーン起動制限を回避できます。
-    - 現在はダイアログインストール時のみ有効です。
-    - Dhizukuには十分な権限がないため、アプリ起動アクションに時間を確保するカスタマイズ可能なカウントダウンオプションを追加しました。
-- **拡張メニュー:** ダイアログインストール時（設定で有効化可能）:
-    - アプリケーションが要求する権限を表示します。
-    - InstallFlags設定（グローバルプロファイル設定を継承可能）。
-      - **重要:** InstallFlagsの設定は、常に機能することを**保証しません**。システムによっては、一部のオプションがセキュリティリスクを引き起こす可能性があります。
-- **プリセットソース:** 設定でインストールソースのパッケージ名を事前設定可能。プロファイルやダイアログインストールメニューでの迅速な選択を実現。
-- **ZIPからのインストール:** ZIPアーカイブ内のAPKファイルのインストールをサポート（ダイアログインストールのみ）。
-    - 無制限の数量と複数のZIPファイルをサポート。
-    - ZIP内のネストされたディレクトリ内のAPKファイルをサポート（ルートディレクトリに限定されません）。
-    - 同一パッケージの複数バージョンの自動処理をサポート：
-        - 重複排除
-        - インストールに最適なパッケージの自動選択。
-- **一括インストール:** 複数APKの同時インストールをサポート（複数選択とInstallerXへの共有）。
-    - ダイアログインストールのみ対応。
-    - 数量制限なし。
-    - APKファイルのみ対応。
-    - 同一パッケージの複数バージョンの自動処理をサポート（重複排除と自動選択）。
-- **APKS/APKM/XAPK ファイル:** 最適な分割パケットの自動選択をサポート。
-    - 通知とダイアログの両方のインストール方式に対応。
-        - 通知内の「インストール」をクリックすると最適なオプションが選択され、インストールが実行されます。
-        - ダイアログでは最適なオプションがデフォルトで選択されますが、手動で選択することも可能です。
-    - 分割パケット選択画面には分かりやすい説明が表示されます。
-- **アーキテクチャサポート:** arm64-v8a専用システムでのarmeabi-v7aパッケージインストールを許可（実際の機能はランタイム変換を提供するシステムに依存）。
-- **データ保持の有無によるダウングレード:** 一部のOEM Android 15システムにおいて、データ保持の有無を選択してアプリのダウングレードを実行する機能をサポートします。
-    - この機能はAndroid 15のみをサポートします。Android 14以下の場合は、インストールオプション内の`ダウングレードを許可`オプションをお試しください。
-    - この機能は、ダイアログインストールのスマート提案で利用可能です。使用するには、まず`スマート提案を表示`オプションを有効にしてください。
-    - **システムアプリではこの機能を極度に慎重に使用してください！** システムアプリのデータ損失は端末の使用不能を招く可能性があります。
-    - OneUI 7.0、RealmeUI、一部のColorOSバージョン（AOSPは修正済み）とは互換性がありません。データ保持なしのダウングレードオプションのみ表示される場合、お使いのシステムはデータ保持付きダウングレードをサポートしていません。
-- **ブラックリスト：** 設定でインストール禁止パッケージ名のリストを構成する機能をサポート。
-    - packageName / sharedUID によるブラックリストをサポート（例外設定可）
-    - スマート提案内の「一度だけ許可」
-- **DexOpt:** インストール成功後、設定されたプロファイル設定に基づき、インストール済みアプリケーションに対して自動的にdex2oatを実行します。
-    - Dhizukuには対応していません
-- **署名検証：** インストール済みアプリおよびインストール対象APKの署名を検証し、一致しない場合に警告を表示します。
-- **対象ユーザー選択：** 特定のユーザーへのアプリインストールをサポート。
-    - 動的に現在のユーザー情報を取得。
-    - Dhizukuには非対応
-    - `全ユーザー向けインストール`オプションで上書き可能
-- **アンインストーラーとして宣言：** 特定のOSでアンインストールインテントを受信。カスタムOSでは非対応の場合あり。
-- [実験的機能] **ダウンロードリンクからの直接インストール:** オンライン版では、APKファイルのダウンロードリンクを直接InstallerXに共有してインストールできます。現在はAPKをローカルに保存しませんが、インストールパッケージを保持するオプションは将来追加予定です。
+- **完全サポート:** Android SDK 34 - 37.0
+- **限定サポート:** Android SDK 26 - 33
+
+限定サポートでは InstallerX が動作する可能性はありますが、Android フレームワーク、OEM、認可方式の制限により一部機能が使えない、または異なる挙動になる場合があります。
+
+## ダウンロード
+
+- **安定版:** https://github.com/wxxsfxyzm/InstallerX-Revived/releases/latest
+- **Alpha ビルド:** https://github.com/wxxsfxyzm/InstallerX/releases
+- **CI ビルド:** https://github.com/wxxsfxyzm/InstallerX-Revived/actions/workflows/auto-preview-dev.yml
+- **Telegram チャンネル:** https://t.me/installerx_revived
+
+不具合を報告する場合は、Stable では既に修正済みの可能性があるため、可能な限り最新の Alpha または CI ビルドで再現してください。
+
+InstallerX は 2 つのバリアントで公開されます:
+
+- **Online:** APK 直接ダウンロードリンクとオンライン更新機能をサポートします。ネットワーク権限はインストール関連機能にのみ使用されます。
+- **Offline:** ネットワーク権限を要求しません。Online 専用機能を使うと明確なエラーが表示されます。
+
+両バリアントは同じパッケージ名、バージョンコード、署名を共有するため、同時インストールではなく相互に置き換えられます。
+
+## ビルド
+
+InstallerX Revived は Android Gradle プロジェクトです。
+
+### 前提条件
+
+- **JDK 25** と正しく設定された `JAVA_HOME`。
+- 必要な platform と build tools を含む Android SDK / Android Studio。
+- snapshot `miuix` 依存関係用の GitHub Packages 認証情報。
+
+### GitHub Packages 認証
+
+GitHub Packages は公開パッケージでも認証が必要です。`read:packages` scope を持つ classic personal access token と GitHub ユーザー名をグローバル Gradle properties に追加してください:
+
+- Linux / macOS: `~/.gradle/gradle.properties`
+- Windows: `%USERPROFILE%\.gradle\gradle.properties`
+
+```properties
+gpr.user=YOUR_GITHUB_USERNAME
+gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
+```
+
+これらの認証情報をこのリポジトリにコミットしないでください。
+
+### ビルドコマンド
+
+ローカル debug ビルド:
+
+```bash
+./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug
+```
+
+別のアプリ ID を使う PR 向けテストビルド:
+
+```bash
+./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+```
 
 ## よくある質問
 
-> [!NOTE]
-> フィードバックを送信する前に、必ずFAQをお読みください。
-> フィードバックを送信する際は、お使いのスマートフォンメーカー、システムバージョン、ソフトウェアバージョン、および具体的な操作内容を明記してください。
+### 不具合報告や質問はどこで行えばよいですか？
 
-- **Dhizukuが正常に動作しない場合**
-    - **公式Dhizuku**のサポートは限定的です。SDK 34以上のAVDでテスト済みです。SDK 34未満での動作は保証されません。
-    - `OwnDroid`使用時、`インストール後自動削除`機能が正常に動作しない場合があります。
-    - 中国製ROMでは、システムがDhizukuのバックグラウンド動作を制限していることが原因でエラーが発生することがあります。まずDhizukuアプリを再起動することをお勧めします。
-    - Dhizukuの権限は制限されています。多くの操作（システムインテントインターセプターのバイパスやインストールソースの指定など）は不可能です。可能な場合はShizukuの使用を推奨します。
+再現可能な不具合や具体的な feature request は [GitHub Issues](https://github.com/wxxsfxyzm/InstallerX-Revived/issues) に投稿してください。良い提案も歓迎します。一般的な質問や互換性に関する相談は [GitHub Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) または [Telegram チャンネル](https://t.me/installerx_revived) を利用してください。
 
-- **InstallerXをデフォルトインストーラーとしてロックできない？**
-    - 一部のシステムではパッケージインストーラーに関するポリシーが非常に厳格です。この場合、LSPosedモジュールを使用してインテントをインターセプトし、インストーラーに転送する必要があります。
-    - 最適な動作環境: [Chimioo/InxLocker](https://github.com/Chimioo/InxLocker)
-    - LSPosedとして動作する他のロッカーは推奨されなくなりました
+Issue を作成する前に、必要なログと再現情報について [CONTRIBUTING.md](../CONTRIBUTING.md) を読んでください。
 
-- 解決フェーズでエラーが発生しました: `No Content Provider` または `reading provider` が `Permission Denial` を報告？
-    - アプリリスト非表示機能などを有効にしている可能性があります。ホワイトリストを設定してください。
+### InstallerX をデフォルトインストーラーとして固定できない
 
-- **HyperOSで「システムアプリのインストールには有効なインストーラーの宣言が必要です」エラーが表示される**
-    - これはシステムセキュリティ制限です。システムアプリであるインストーラーを宣言する必要があります（推奨：HyperOSの場合は`com.android.fileexplorer`または`com.android.vending`、Vivoの場合はアプリストア）。
-    - Shizuku/Root に対応。**Dhizuku は非対応**。
-    - 新機能：InstallerXがHyperOSを自動検知し、デフォルト設定（`com.miui.packageinstaller`）を追加します。必要に応じて設定で変更可能です。
+一部の OEM システムはデフォルトインストーラーを厳しく制御します。ホーム画面のステータスカードからデフォルトインストーラーページを開き、そこで固定を試してください。ROM がまだ阻止する場合は、[InxLocker](https://github.com/Chimioo/InxLocker) などの LSPosed モジュールを使用してください。
 
-- **HyperOSがデフォルトインストーラーを再インストールする／ロックが失敗する**
-    - 設定で`Auto Lock Installer`を有効化してください。
-    - 一部のHyperOSバージョンではロック失敗が想定されます。
-    - HyperOSはUSBインストール要求（ADB/Shizuku）をダイアログで遮断します。ユーザーが新規アプリのインストールを拒否した場合、システムはインストーラー設定を無効化しデフォルトを強制します。この場合、InstallerXを再度ロックしてください。
+### HyperOS でシステムアプリのインストールに有効なインストーラーが必要と表示される
 
-- **通知の進捗バーが固まる**
-    - 一部のカスタムOSではバックグラウンドアプリの制御が非常に厳格です。この現象が発生した場合は、アプリに対して「バックグラウンド制限なし」を設定してください。
-    - アプリは最適化されています：インストールタスク完了後（ユーザーが「完了」をクリックするか通知を消去した時点）、すべてのバックグラウンドサービスを終了し1秒後に閉じます。フォアグラウンドサービス通知を有効にすると監視可能です。
+これは OEM のセキュリティ制限です。InstallerX はプロファイルを通じてインストーラーメタデータを宣言でき、HyperOS では互換用のデフォルトインストーラーパッケージとして `com.android.shell` を使用します。このワークフローには Shizuku または Root が必要で、Dhizuku では不十分です。
 
-- **Oppo/Vivo/Lenovo/...システムでの問題？**
-    - 当社ではこれらのブランドの端末をテスト用として保有しておりません。[ディスカッション](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions)で議論するか、[Telegramチャンネル](https://t.me/installerx_revived)から報告してください。
-    - Oppo/Vivo端末でインストーラーをロックするには、ロックツールを使用してください。
-    - Honor端末でshizuku経由にアプリをインストールするには、開発者向け設定で`Monitor ADB install`を無効化してください。
+### 通知インストールの進捗が止まる
 
-## リリースについて
+一部の ROM はバックグラウンドサービスを厳しく制限します。通知インストールが止まる場合は、InstallerX のバックグラウンド/バッテリー制限を解除してください。InstallerX はインストール完了後すぐにフォアグラウンドサービスを整理します。
 
-> [!WARNING]
-> 開発版は不安定な場合があり、機能は予告なく変更または削除される可能性があります。
-> ビルドチャネルの切り替えには、データの消去や再インストールが必要になる場合があります。
+### システムインストーラーを置き換えるには？
 
-- **`dev` ブランチ:** 開発中の機能が含まれます。テストする場合は、Github Actions で対応する CI ビルドを探してください。
-- **`main` ブランチ:** `dev` から安定した変更がマージされると、CI/CD システムが自動的にビルドを行い、新しいアルファ版を公開します。
-- **安定版リリース:** 開発/テストフェーズ終了時に手動で公開されます。CI/CDは自動的にリリースとして公開します。
-- **ネットワーク権限について:** 機能拡張に伴い、ネットワーク関連機能が導入されました。ただし、多くのユーザーはネットワークアクセスを必要としない純粋なローカル環境でのインストーラーを望んでいます。そのため、**オンライン版**と**オフライン版**の2バージョンをリリースします。両バージョンはパッケージ名、バージョンコード、署名を共有するため、並行インストールはできません（直接置き換えは可能です）。ご自身のニーズに合わせてダウンロードしてください。
-  - **オンライン版**：InstallerXの直接ダウンロードリンク共有によるインストールをサポート。今後ネットワーク関連ユーティリティが追加される可能性がありますが、ネットワーク許可はインストール目的以外で**一切**使用されません。安全にご利用いただけます。
-  - **オフライン版**：ネットワーク許可を一切要求しません。オンライン機能を使用しようとすると明確なエラーメッセージが表示されます。純粋にローカルなインストーラーとして機能します。
+これは高リスクな上級者向けワークフローです。概要としては、Core Patch で APK を上書きする、対応モジュールをフラッシュする、または該当パッケージを `super` / ROM ビルドに組み込みます。フラッシュや組み込みの前に、ROM のパッケージ名、マウントパス、権限ファイルを確認してください。
 
-## ローカライゼーション(多言語対応)について
+詳細はシステム統合ガイドを参照してください: https://wxxsfxyzm.github.io/InstallerX-Revived-Website/guide/system-integration
 
-このプロジェクトの翻訳にご協力ください！以下のURLから貢献できます: https://hosted.weblate.org/engage/installerx-revived/
+## ローカライズ
 
-### ローカライゼーション(多言語対応)ステータス
+[Weblate](https://hosted.weblate.org/engage/installerx-revived/) で InstallerX Revived の翻訳に協力できます。
 
-[![ローカライゼーション(多言語対応)ステータス](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)
+[![ローカライズ状況](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)
 
 ## ライセンス
 
-Copyright © [iamr0s](https://github.com/iamr0s) and [contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
+Copyright (C) [iamr0s](https://github.com/iamr0s) and [InstallerX Revived Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
-InstallerX は現在 [**GNU General Public License v3 (GPL-3)**](http://www.gnu.org/licenses/gpl-3.0) の下で公開されていますが、この方針は将来変更される可能性があります。メンテナンス担当者は、ライセンス条項またはプロジェクトのオープンソースステータスを変更する権利を留保します。
+InstallerX Revived は [GNU General Public License v3](http://www.gnu.org/licenses/gpl-3.0) の下で公開されています。
 
-InstallerX をベースに開発を行う場合、メインプロジェクトに将来行われる変更にかかわらず、ベースとして使用するソースコードの特定バージョンのオープンソースライセンス条項を遵守しなければなりません。
+InstallerX Revived を基に作業する場合、使用する特定のソースバージョンのオープンソースライセンス条件に従う必要があります。
 
 ## 謝辞
 
-本プロジェクトは、以下のプロジェクトのコードを使用しているか、またはその実装に基づいています:
+このプロジェクトは、以下のプロジェクトのコードを使用、または実装を参考にしています:
 
 - [iamr0s/InstallerX](https://github.com/iamr0s/InstallerX)
 - [tiann/KernelSU](https://github.com/tiann/KernelSU)
