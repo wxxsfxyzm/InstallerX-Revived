@@ -7,6 +7,10 @@
 [![Prerelease](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=测试版)](https://github.com/wxxsfxyzm/InstallerX/releases)
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
+> A modern and functional Android app installer. (You know some birds are not meant to be caged, their feathers are just too bright.)
+
+一款应用安装程序，为什么不试试 **InstallerX**？
+
 InstallerX Revived 是一款现代 Android 软件包安装器，也是原 [InstallerX](https://github.com/iamr0s/InstallerX) 项目的社区维护续作。
 
 它旨在替代功能受限的原生或 OEM 安装器，提供更完整的包格式支持、更清晰的安装界面、可按来源定制的配置文件，以及基于 Shizuku、Root、Dhizuku 或系统包管理器模式的特权工作流。

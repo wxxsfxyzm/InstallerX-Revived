@@ -7,6 +7,10 @@
 [![ベータ版](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=ベータ版)](https://github.com/wxxsfxyzm/InstallerX/releases)
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
+> モダンで機能的な Android アプリインストーラー。（鳥の中には、檻に入れるべきではないものもいます。その羽はあまりにも鮮やかだからです。）
+
+より良いアプリインストーラーを探していますか？ **InstallerX** を試してみてください。
+
 InstallerX Revived は、モダンな Android パッケージインストーラーであり、元の [InstallerX](https://github.com/iamr0s/InstallerX) プロジェクトをコミュニティで継続しているものです。
 
 制限の多い標準または OEM インストーラーを置き換え、より分かりやすい UI、幅広いパッケージ形式、設定可能なインストールプロファイル、Shizuku / Root / Dhizuku / システムインストーラーモードによる特権ワークフローを提供します。

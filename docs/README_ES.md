@@ -7,6 +7,10 @@
 [![Beta](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=Beta)](https://github.com/wxxsfxyzm/InstallerX/releases)
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
+> Un instalador de aplicaciones Android moderno y funcional. (Sabes que algunos pájaros no están hechos para estar enjaulados, sus plumas son demasiado brillantes.)
+
+¿Buscas un mejor instalador de aplicaciones? Prueba **InstallerX**.
+
 InstallerX Revived es un instalador moderno de paquetes Android y la continuación mantenida por la comunidad del proyecto original [InstallerX](https://github.com/iamr0s/InstallerX).
 
 Está diseñado para reemplazar instaladores stock u OEM limitados con una interfaz más clara, soporte de paquetes más amplio, perfiles de instalación configurables y flujos privilegiados mediante Shizuku, Root, Dhizuku o el modo de instalador del sistema.
