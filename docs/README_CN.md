@@ -11,9 +11,9 @@ InstallerX Revived 是一款现代 Android 软件包安装器，也是原 [Insta
 
 它旨在替代功能受限的原生或 OEM 安装器，提供更完整的包格式支持、更清晰的安装界面、可按来源定制的配置文件，以及基于 Shizuku、Root、Dhizuku 或系统包管理器模式的特权工作流。
 
-## 官方文档
+## 文档
 
-完整用户指南、安装说明、高级选项、系统集成和 FAQ 统一维护在官方文档站：
+完整用户指南、安装说明、高级选项、系统集成和 FAQ 统一维护在文档站：
 
 **https://wxxsfxyzm.github.io/InstallerX-Revived-Website/zh/**
 
@@ -128,7 +128,7 @@ https://hosted.weblate.org/engage/installerx-revived/
 
 ## 开源协议
 
-Copyright (C) [iamr0s](https://github.com/iamr0s) and InstallerX Revived Contributors
+Copyright (C) [iamr0s](https://github.com/iamr0s) and [InstallerX Revived Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
 InstallerX Revived 基于 [GNU General Public License v3](http://www.gnu.org/licenses/gpl-3.0) 开源。
 

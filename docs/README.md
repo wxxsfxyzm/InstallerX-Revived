@@ -128,7 +128,7 @@ https://hosted.weblate.org/engage/installerx-revived/
 
 ## License
 
-Copyright (C) [iamr0s](https://github.com/iamr0s) and InstallerX Revived Contributors
+Copyright (C) [iamr0s](https://github.com/iamr0s) and [InstallerX Revived Contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
 
 InstallerX Revived is released under the [GNU General Public License v3](http://www.gnu.org/licenses/gpl-3.0).
 

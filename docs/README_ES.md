@@ -13,7 +13,7 @@ Este README localizado se mantiene breve porque el proyecto avanza rápido y las
 
 Para obtener la información más reciente y completa, consulta:
 
-- Documentación oficial: https://wxxsfxyzm.github.io/InstallerX-Revived-Website/
+- Documentación: https://wxxsfxyzm.github.io/InstallerX-Revived-Website/
 - README en inglés: [README.md](README.md)
 - README en chino simplificado: [README_CN.md](README_CN.md)
 
