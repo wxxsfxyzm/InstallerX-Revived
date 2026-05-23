@@ -96,7 +96,7 @@ For a PR-style test build with a separate application id:
 
 ### Where should I report bugs or ask questions?
 
-Use [GitHub Issues](https://github.com/wxxsfxyzm/InstallerX-Revived/issues) for reproducible bugs, and use [GitHub Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) or the [Telegram channel](https://t.me/installerx_revived) for general questions, compatibility discussion, and feature ideas.
+Use [GitHub Issues](https://github.com/wxxsfxyzm/InstallerX-Revived/issues) for reproducible bugs and concrete feature requests. Good suggestions are welcome. Use [GitHub Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) or the [Telegram channel](https://t.me/installerx_revived) for general questions and compatibility discussion.
 
 Before opening an issue, please read [CONTRIBUTING.md](../CONTRIBUTING.md) for the required logs and reproduction details.
 

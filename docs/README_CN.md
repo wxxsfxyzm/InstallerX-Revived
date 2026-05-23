@@ -13,9 +13,7 @@ InstallerX Revived 是一款现代 Android 软件包安装器，也是原 [Insta
 
 ## 文档
 
-完整用户指南、安装说明、高级选项、系统集成和 FAQ 统一维护在文档站：
-
-**https://wxxsfxyzm.github.io/InstallerX-Revived-Website/zh/**
+完整用户指南、安装说明、高级选项、系统集成和 FAQ 统一维护在[文档站](https://wxxsfxyzm.github.io/InstallerX-Revived-Website/zh/)。
 
 ## 核心能力
 
@@ -96,7 +94,7 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 
 ### 应该在哪里反馈问题或提问？
 
-可复现的 bug 请提交到 [GitHub Issues](https://github.com/wxxsfxyzm/InstallerX-Revived/issues)。一般问题、兼容性讨论和功能想法可以使用 [GitHub Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) 或 [Telegram 频道](https://t.me/installerx_revived)。
+可复现的 bug 和明确的 feature request 请提交到 [GitHub Issues](https://github.com/wxxsfxyzm/InstallerX-Revived/issues)，如果有好的建议也欢迎提出。一般问题和兼容性讨论可以使用 [GitHub Discussions](https://github.com/wxxsfxyzm/InstallerX-Revived/discussions) 或 [Telegram 频道](https://t.me/installerx_revived)。
 
 提交 issue 前请先阅读 [CONTRIBUTING.md](../CONTRIBUTING.md)，并按要求提供日志和复现信息。
 
@@ -120,9 +118,7 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 
 ## 本地化
 
-欢迎通过 Weblate 参与翻译：
-
-https://hosted.weblate.org/engage/installerx-revived/
+欢迎通过 [Weblate](https://hosted.weblate.org/engage/installerx-revived/) 参与翻译。
 
 [![翻译状态](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)
 
