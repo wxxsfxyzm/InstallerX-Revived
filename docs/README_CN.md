@@ -91,7 +91,7 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 使用单独应用 ID 的 PR 检查构建：
 
 ```bash
-./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
 
 ## 常见问题

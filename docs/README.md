@@ -91,7 +91,7 @@ For a local debug build:
 For a PR-style test build with a separate application id:
 
 ```bash
-./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
 
 ## Common Questions
