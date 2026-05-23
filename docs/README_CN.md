@@ -9,9 +9,6 @@
 - 此分支严格遵循 GNU GPLv3，所有修改均开放源代码。
 - 我们欢迎社区参与共建！
 
-> [!NOTE]
-> 本项目目前正处于大规模重构阶段，因此短期内不会发布稳定版本，而是以 Pre-release（预发布）的形式进行持续更新。在此期间，部分功能和接口可能会在不另行通知的情况下随时发生变更。我们将在下一个稳定版发布前，根据社区的反馈最终敲定 UI 界面。如果您希望体验最新功能并获取最新修复，建议下载 Pre-release 版本，并期待您随时向我们提供宝贵的反馈意见。
-
 ## 介绍
 
 > A modern and functional Android app installer. (You know some birds are not meant to be caged,
@@ -36,7 +33,7 @@
 
 ## 支持版本
 
-支持 Android SDK 34 - 36.1（Android 14 - 16）
+支持 Android SDK 34 - 37.0（Android 14 - 17）
 
 对 Android SDK 26 - 33（Android 8.0 - Android 13）提供有限支持，如有问题请提交 issue
 

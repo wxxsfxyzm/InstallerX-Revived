@@ -9,9 +9,6 @@
 - Strictly follows GNU GPLv3 - all modifications are open source
 - We welcome community contributions!
 
-> [!NOTE]
-> This project is currently undergoing a major refactoring. As a result, a new stable release will not be available in the short term. Instead, continuous updates will be rolled out via pre-releases. Please note that certain features may be modified at any time without prior notice. The user interface will be finalized based on community feedback before the next stable release. If you wish to experience the latest features and bug fixes, we encourage you to download the pre-release versions and actively share your feedback with us.
-
 ## Introduction
 
 > A modern and functional Android app installer. (You know some birds are not meant to be caged, their feathers are just too bright.)
@@ -36,7 +33,7 @@ Compared to stock installers, **InstallerX Revived** offers more installation fe
 
 ## Supported Versions
 
-- **Full support:** Android SDK 34 - 36.1 (Android 14 - 16)
+- **Full support:** Android SDK 34 - 37.0 (Android 14 - 17)
 - **Limited support:** Android SDK 26 - 33 (Android 8.0 - 13) (please report issues)
 
 ## Key Changes and Features
