@@ -17,8 +17,6 @@ The full user guide, installation instructions, advanced options, system integra
 
 **https://wxxsfxyzm.github.io/InstallerX-Revived-Website/**
 
-Use the documentation site as the source of truth for detailed behavior. This README is only the project overview.
-
 ## Highlights
 
 - **Package formats:** APK, APKS, APKM, XAPK, APK files inside ZIP archives, and batch APK installation.
@@ -130,7 +128,7 @@ https://hosted.weblate.org/engage/installerx-revived/
 
 ## License
 
-Copyright (C) [iamr0s](https://github.com/iamr0s) and [contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
+Copyright (C) [iamr0s](https://github.com/iamr0s) and InstallerX Revived Contributors
 
 InstallerX Revived is released under the [GNU General Public License v3](http://www.gnu.org/licenses/gpl-3.0).
 

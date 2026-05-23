@@ -7,60 +7,60 @@
 [![Beta](https://img.shields.io/github/v/release/wxxsfxyzm/InstallerX?include_prereleases&label=Beta)](https://github.com/wxxsfxyzm/InstallerX/releases)
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/installerx_revived)
 
-InstallerX Revived is a modern Android package installer and the community-maintained continuation of the original [InstallerX](https://github.com/iamr0s/InstallerX) project.
+InstallerX Revived es un instalador moderno de paquetes Android y la continuación mantenida por la comunidad del proyecto original [InstallerX](https://github.com/iamr0s/InstallerX).
 
-This localized README is intentionally brief because the project is moving quickly and older translated feature lists can become inaccurate.
+Este README localizado se mantiene breve porque el proyecto avanza rápido y las listas de funciones traducidas pueden quedar desactualizadas.
 
-For the latest and most complete information, please use:
+Para obtener la información más reciente y completa, consulta:
 
-- Official documentation: https://wxxsfxyzm.github.io/InstallerX-Revived-Website/
-- English README: [README.md](README.md)
-- Simplified Chinese README: [README_CN.md](README_CN.md)
+- Documentación oficial: https://wxxsfxyzm.github.io/InstallerX-Revived-Website/
+- README en inglés: [README.md](README.md)
+- README en chino simplificado: [README_CN.md](README_CN.md)
 
-## Key Capabilities
+## Capacidades principales
 
-- APK, APKS, APKM, XAPK, ZIP-contained APK, and batch APK installation.
-- Dialog, notification, automatic, and privileged silent installation flows.
-- Authorizers:
-  - **Root:** can perform all privileged operations, but may be slower because of cold `app_process` startup.
-  - **Shizuku:** obtains shell or root capabilities depending on how it is activated, and is usually faster than direct Root.
-  - **Dhizuku:** can perform DevicePolicyManager-based operations such as default installer locking and app installation, but is limited for other privileged tasks.
-  - **None:** is fully limited by the system, but can silently install when InstallerX is running as the system package installer.
-- Per-source installation profiles, install flags, target-user control, DexOpt, blacklists, and signature policy gates.
-- Material 3 Expressive and Miuix interface styles, Live Activity, and Xiaomi HyperOS-style island notifications on supported Xiaomi devices.
+- Instalación de APK, APKS, APKM, XAPK, APK dentro de ZIP e instalación por lotes.
+- Flujos de instalación mediante diálogo, notificación, instalación automática e instalación silenciosa con privilegios.
+- Autorizadores:
+  - **Root:** puede ejecutar todas las operaciones privilegiadas, pero puede ser más lento por el arranque en frío de `app_process`.
+  - **Shizuku:** obtiene capacidades shell o root según su modo de activación, y normalmente responde más rápido que Root directo.
+  - **Dhizuku:** puede realizar operaciones basadas en DevicePolicyManager, como bloquear el instalador predeterminado e instalar aplicaciones, pero está limitado en otras tareas privilegiadas.
+  - **None:** queda completamente limitado por el sistema, pero puede instalar silenciosamente cuando InstallerX funciona como instalador del sistema.
+- Perfiles por origen, flags de instalación, control de usuario de destino, DexOpt, listas negras y reglas de política de firma.
+- Estilos de interfaz Material 3 Expressive y Miuix, Live Activity y notificaciones estilo isla de Xiaomi HyperOS en dispositivos Xiaomi compatibles.
 
-## Supported Android Versions
+## Versiones de Android compatibles
 
-- **Full support:** Android SDK 34 - 37.0
-- **Limited support:** Android SDK 26 - 33
+- **Soporte completo:** Android SDK 34 - 37.0
+- **Soporte limitado:** Android SDK 26 - 33
 
-## Downloads
+## Descargas
 
-- **Stable releases:** https://github.com/wxxsfxyzm/InstallerX-Revived/releases/latest
-- **Alpha builds:** https://github.com/wxxsfxyzm/InstallerX/releases
-- **CI builds:** https://github.com/wxxsfxyzm/InstallerX-Revived/actions/workflows/auto-preview-dev.yml
-- **Telegram channel:** https://t.me/installerx_revived
+- **Versiones estables:** https://github.com/wxxsfxyzm/InstallerX-Revived/releases/latest
+- **Versiones Alpha:** https://github.com/wxxsfxyzm/InstallerX/releases
+- **Compilaciones CI:** https://github.com/wxxsfxyzm/InstallerX-Revived/actions/workflows/auto-preview-dev.yml
+- **Canal de Telegram:** https://t.me/installerx_revived
 
-When reporting bugs, please reproduce them on the latest Alpha or CI build whenever possible, because issues in Stable may already be fixed.
+Al reportar errores, intenta reproducirlos con la versión Alpha o CI más reciente siempre que sea posible, porque el problema puede estar ya corregido respecto a Stable.
 
-## Building
+## Compilación
 
-For a local debug build:
+Para una compilación debug local:
 
 ```bash
 ./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug
 ```
 
-For a PR-style test build with a separate application id:
+Para una compilación de prueba estilo PR con un identificador de aplicación separado:
 
 ```bash
 ./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
 
-## Localization
+## Localización
 
-Help translate InstallerX Revived on Weblate:
+Ayuda a traducir InstallerX Revived en Weblate:
 
 https://hosted.weblate.org/engage/installerx-revived/
 
-[![Localization Status](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)
+[![Estado de localización](https://hosted.weblate.org/widget/installerx-revived/strings/multi-auto.svg)](https://hosted.weblate.org/engage/installerx-revived/)

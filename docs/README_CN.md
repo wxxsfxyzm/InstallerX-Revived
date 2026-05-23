@@ -17,8 +17,6 @@ InstallerX Revived 是一款现代 Android 软件包安装器，也是原 [Insta
 
 **https://wxxsfxyzm.github.io/InstallerX-Revived-Website/zh/**
 
-详细功能行为请以文档站为准。README 只作为项目概览和入口。
-
 ## 核心能力
 
 - **安装包格式：** APK、APKS、APKM、XAPK、ZIP 压缩包内 APK，以及批量 APK 安装。
@@ -102,7 +100,7 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 
 提交 issue 前请先阅读 [CONTRIBUTING.md](../CONTRIBUTING.md)，并按要求提供日志和复现信息。
 
-### 没法锁定 InstallerX 为默认安装器？
+### 无法锁定 InstallerX 为默认安装器？
 
 部分 OEM 系统会严格限制默认安装器。请从首页状态卡进入默认安装器页面后尝试锁定。如果 ROM 仍然阻止锁定，请配合 [InxLocker](https://github.com/Chimioo/InxLocker) 等 LSPosed 模块使用。
 
@@ -130,7 +128,7 @@ https://hosted.weblate.org/engage/installerx-revived/
 
 ## 开源协议
 
-Copyright (C) [iamr0s](https://github.com/iamr0s) and [contributors](https://github.com/wxxsfxyzm/InstallerX-Revived/graphs/contributors)
+Copyright (C) [iamr0s](https://github.com/iamr0s) and InstallerX Revived Contributors
 
 InstallerX Revived 基于 [GNU General Public License v3](http://www.gnu.org/licenses/gpl-3.0) 开源。
 
