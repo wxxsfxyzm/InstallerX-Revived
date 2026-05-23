@@ -13,9 +13,7 @@ It is designed to replace limited stock or OEM package installers with a cleaner
 
 ## Documentation
 
-The full user guide, installation instructions, advanced options, system integration notes, and FAQ are maintained on the official documentation site:
-
-**https://wxxsfxyzm.github.io/InstallerX-Revived-Website/**
+The full user guide, installation instructions, advanced options, system integration notes, and FAQ are maintained on the [documentation site](https://wxxsfxyzm.github.io/InstallerX-Revived-Website/).
 
 ## Highlights
 
