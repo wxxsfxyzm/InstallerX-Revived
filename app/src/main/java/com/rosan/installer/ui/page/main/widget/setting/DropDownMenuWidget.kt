@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
@@ -19,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DropDownMenuWidget(
     icon: ImageVector? = null,
@@ -31,9 +30,7 @@ fun DropDownMenuWidget(
     data: List<String>,
     onChoiceChange: (Int) -> Unit
 ) {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
+    var expanded by remember { mutableStateOf(false) }
 
     BaseWidget(
         icon = icon,
@@ -41,13 +38,10 @@ fun DropDownMenuWidget(
         description = description,
         enabled = enabled,
         isError = isError,
-        onClick = {
-            expanded = !expanded
-        },
+        onClick = { expanded = !expanded },
         foreContent = {
             Box(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
+                modifier = Modifier.align(Alignment.CenterStart)
             ) {
                 // Use DropdownMenuPopup to provide the foundation for building a custom menu
                 DropdownMenuPopup(
