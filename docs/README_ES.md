@@ -144,3 +144,13 @@ Este proyecto usa código de, o se basa en la implementación de, los siguientes
 - [zacharee/InstallWithOptions](https://github.com/zacharee/InstallWithOptions)
 - [vvb2060/PackageInstaller](https://github.com/vvb2060/PackageInstaller)
 - [compose-miuix-ui/miuix](https://github.com/compose-miuix-ui/miuix)
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=wxxsfxyzm%2FInstallerX-Revived&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left" />
+ </picture>
+</a>
