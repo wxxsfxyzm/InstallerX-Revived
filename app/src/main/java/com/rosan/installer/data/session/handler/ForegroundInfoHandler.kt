@@ -5,7 +5,7 @@ package com.rosan.installer.data.session.handler
 import com.rosan.installer.domain.notification.SessionNotifier
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.IntSetting
 import kotlinx.coroutines.CoroutineScope
@@ -20,9 +20,9 @@ import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 class ForegroundInfoHandler(
-    scope: CoroutineScope,
-    session: InstallerSessionRepository
-) : Handler(scope, session), KoinComponent {
+    override val scope: CoroutineScope,
+    override val session: InstallerSessionRepository
+) : Handler, KoinComponent {
 
     private var job: Job? = null
 

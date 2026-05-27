@@ -4,7 +4,7 @@ package com.rosan.installer.data.settings.mapper
 
 import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.local.room.entity.ConfigWithScopeCount
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 
 /**
  * Map Room database entity to pure business domain model

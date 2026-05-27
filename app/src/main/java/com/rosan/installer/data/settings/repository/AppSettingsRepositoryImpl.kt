@@ -3,30 +3,28 @@
 package com.rosan.installer.data.settings.repository
 
 import android.os.Build
-import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.Preferences
 import com.rosan.installer.data.settings.local.datastore.AppDataStore
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.settings.model.AppPreferences
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.BiometricAuthMode
-import com.rosan.installer.domain.settings.model.GithubUpdateChannel
-import com.rosan.installer.domain.settings.model.HttpProfile
-import com.rosan.installer.domain.settings.model.NamedPackage
-import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
-import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
-import com.rosan.installer.domain.settings.model.RootMode
-import com.rosan.installer.domain.settings.model.SharedUid
+import com.rosan.installer.domain.settings.model.preferences.AppPreferences
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
+import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.app.NamedPackage
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
+import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.ui.theme.material.PaletteStyle
-import com.rosan.installer.ui.theme.material.PresetColors
-import com.rosan.installer.ui.theme.material.ThemeColorSpec
-import com.rosan.installer.ui.theme.material.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -132,7 +130,7 @@ class AppSettingsRepositoryImpl(
             useDynamicColor = prefs[AppDataStore.THEME_USE_DYNAMIC_COLOR] ?: true,
             useMiuixMonet = prefs[AppDataStore.UI_USE_MIUIX_MONET] ?: false,
             useAppleFloatingBar = prefs[AppDataStore.UI_USE_APPLE_FLOATING_BAR] ?: false,
-            seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: PresetColors.first().color.toArgb(),
+            seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: DEFAULT_SEED_COLOR,
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useDynColorFollowPkgIconForLiveActivity = prefs[AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useBlur = prefs[AppDataStore.UI_USE_BLUR] ?: (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
@@ -276,4 +274,8 @@ class AppSettingsRepositoryImpl(
         when (setting) {
             SharedUidListSetting.ManagedSharedUserIdBlacklist -> AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST
         }
+
+    private companion object {
+        private const val DEFAULT_SEED_COLOR = 0xFF6750A4.toInt()
+    }
 }

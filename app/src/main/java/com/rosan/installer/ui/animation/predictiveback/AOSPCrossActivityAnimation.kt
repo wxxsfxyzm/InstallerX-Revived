@@ -33,7 +33,7 @@ import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEvent.Companion.EDGE_LEFT
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
-import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.ui.util.rememberDeviceCornerRadius
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

@@ -3,7 +3,7 @@
 package com.rosan.installer.core.env
 
 import com.rosan.installer.BuildConfig
-import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.core.device.model.Level
 
 object AppConfig {
     val LEVEL: Level = when (BuildConfig.BUILD_LEVEL) {

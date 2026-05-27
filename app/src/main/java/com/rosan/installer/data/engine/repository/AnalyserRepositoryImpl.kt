@@ -6,14 +6,14 @@ import com.rosan.installer.data.engine.parser.FileTypeDetector
 import com.rosan.installer.data.engine.parser.PackagePreprocessor
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataEntity
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.PackageAnalysisResult
-import com.rosan.installer.domain.engine.model.SessionMode
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -24,6 +24,7 @@ import java.util.zip.ZipException
 class AnalyserRepositoryImpl(
     private val fileTypeDetector: FileTypeDetector,
     private val unifiedContainerAnalyser: UnifiedContainerAnalyser,
+    private val packagePreprocessor: PackagePreprocessor,
     private val selectOptimalSplitsUseCase: SelectOptimalSplitsUseCase
 ) : AnalyserRepository {
     override suspend fun doWork(
@@ -56,7 +57,7 @@ class AnalyserRepositoryImpl(
         }
 
         // Step 2: Group, Deduplicate
-        val processedGroups = PackagePreprocessor.process(rawEntities)
+        val processedGroups = packagePreprocessor.process(rawEntities)
 
         Timber.d("AnalyserRepo: Step 2 Processed. Groups count: ${processedGroups.size}")
         processedGroups.forEach { group ->
@@ -83,7 +84,7 @@ class AnalyserRepositoryImpl(
         }
 
         // Step 3: Determine Session Context
-        val sessionDataType = PackagePreprocessor.determineSessionType(processedGroups, rawEntities)
+        val sessionDataType = packagePreprocessor.determineSessionType(processedGroups, rawEntities)
         Timber.d("AnalyserRepo: Step 3 SessionType -> ${sessionDataType.sessionType}")
 
         // Step 4: Apply Selection Strategy and Build Result
@@ -105,13 +106,13 @@ class AnalyserRepositoryImpl(
             val baseEntity = group.entities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
 
             // Execute the signature check.
-            val signatureStatus = PackagePreprocessor.checkSignature(
+            val signatureStatus = packagePreprocessor.checkSignature(
                 baseEntity,
                 group.installedInfo
             )
 
             // Execute the identity check.
-            val identityStatus = PackagePreprocessor.checkPackageIdentity(
+            val identityStatus = packagePreprocessor.checkPackageIdentity(
                 baseEntity,
                 group.installedInfo,
                 sessionDataType.sessionType

@@ -5,14 +5,14 @@ package com.rosan.installer.data.engine.executor.appInstaller
 import android.content.Context
 import android.os.IBinder
 import com.rosan.installer.core.reflection.ReflectionProvider
-import com.rosan.installer.data.privileged.repository.recycler.ProcessHookRecycler
-import com.rosan.installer.data.privileged.util.SHELL_ROOT
-import com.rosan.installer.data.privileged.util.SHELL_SH
+import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
+import com.rosan.installer.framework.privileged.util.SHELL_ROOT
+import com.rosan.installer.framework.privileged.util.SHELL_SH
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.engine.model.InstallEntity
+import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
 

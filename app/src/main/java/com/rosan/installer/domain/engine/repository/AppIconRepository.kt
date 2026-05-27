@@ -4,7 +4,7 @@ package com.rosan.installer.domain.engine.repository
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.repository.AppIconRepository.Companion.SETTINGS_APP_LIST
 
 /**

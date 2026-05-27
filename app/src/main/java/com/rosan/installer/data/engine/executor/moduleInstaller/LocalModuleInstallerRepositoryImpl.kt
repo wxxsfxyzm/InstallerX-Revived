@@ -1,15 +1,15 @@
 package com.rosan.installer.data.engine.executor.moduleInstaller
 
 import com.rosan.installer.data.engine.executor.ModuleInstallerUtils
-import com.rosan.installer.data.privileged.util.SHELL_ROOT
-import com.rosan.installer.data.privileged.util.SU_ARGS
+import com.rosan.installer.framework.privileged.util.SHELL_ROOT
+import com.rosan.installer.framework.privileged.util.SU_ARGS
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.ModuleInstallErrorType
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

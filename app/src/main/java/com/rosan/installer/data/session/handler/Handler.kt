@@ -5,8 +5,11 @@ package com.rosan.installer.data.session.handler
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import kotlinx.coroutines.CoroutineScope
 
-abstract class Handler(val scope: CoroutineScope, open val session: InstallerSessionRepository) {
-    abstract suspend fun onStart()
+interface Handler {
+    val scope: CoroutineScope
+    val session: InstallerSessionRepository
 
-    abstract suspend fun onFinish()
+    suspend fun onStart()
+
+    suspend fun onFinish()
 }

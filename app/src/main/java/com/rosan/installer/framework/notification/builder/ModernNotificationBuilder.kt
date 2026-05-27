@@ -11,20 +11,20 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
+import com.materialkolor.dynamicColorScheme
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.rosan.installer.R
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.getInfo
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.packageinfo.getInfo
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.config.InstallMode
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.framework.notification.NotificationHelper
-import com.rosan.installer.ui.theme.material.PaletteStyle
-import com.rosan.installer.ui.theme.material.dynamicColorScheme
-import com.rosan.installer.ui.theme.primaryDark
-import com.rosan.installer.ui.theme.primaryLight
 import com.rosan.installer.util.getErrorMessage
-import com.rosan.installer.util.hasFlag
+import com.rosan.installer.core.bitmask.hasFlag
 import kotlin.reflect.KClass
+import com.materialkolor.PaletteStyle as MaterialKolorPaletteStyle
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 class ModernNotificationBuilder(
@@ -34,6 +34,8 @@ class ModernNotificationBuilder(
 ) : InstallerNotificationBuilder {
 
     companion object {
+        private const val BRAND_COLOR_LIGHT = 0xFF4A672D
+        private const val BRAND_COLOR_DARK = 0xFFAFD18C
         private const val M3_ERROR_COLOR_LIGHT = 0xFFB3261E
         private const val M3_ERROR_COLOR_DARK = 0xFFF2B8B5
     }
@@ -114,7 +116,7 @@ class ModernNotificationBuilder(
         }
 
         val isDarkTheme = context.resources.configuration.uiMode.hasFlag(Configuration.UI_MODE_NIGHT_YES)
-        val brandColor = if (isDarkTheme) primaryDark else primaryLight
+        val brandColor = Color(if (isDarkTheme) BRAND_COLOR_DARK else BRAND_COLOR_LIGHT)
 
         baseBuilder
             .setColor(brandColor.toArgb())
@@ -124,7 +126,7 @@ class ModernNotificationBuilder(
         val seedColorInt = getCurrentSeedColor(progress)
         val dynamicColorScheme = if (preferDynamicColor) {
             seedColorInt?.let { color ->
-                dynamicColorScheme(keyColor = Color(color), isDark = isDarkTheme, style = PaletteStyle.TonalSpot)
+                dynamicNotificationColorScheme(keyColor = Color(color), isDark = isDarkTheme, style = PaletteStyle.TonalSpot)
             }
         } else null
 
@@ -338,6 +340,31 @@ class ModernNotificationBuilder(
             }
             segment
         }
+    }
+
+    private fun dynamicNotificationColorScheme(
+        keyColor: Color,
+        isDark: Boolean,
+        style: PaletteStyle
+    ): ColorScheme {
+        val mkStyle = when (style) {
+            PaletteStyle.TonalSpot -> MaterialKolorPaletteStyle.TonalSpot
+            PaletteStyle.Neutral -> MaterialKolorPaletteStyle.Neutral
+            PaletteStyle.Vibrant -> MaterialKolorPaletteStyle.Vibrant
+            PaletteStyle.Expressive -> MaterialKolorPaletteStyle.Expressive
+            PaletteStyle.Rainbow -> MaterialKolorPaletteStyle.Rainbow
+            PaletteStyle.FruitSalad -> MaterialKolorPaletteStyle.FruitSalad
+            PaletteStyle.Monochrome -> MaterialKolorPaletteStyle.Monochrome
+            PaletteStyle.Fidelity -> MaterialKolorPaletteStyle.Fidelity
+            PaletteStyle.Content -> MaterialKolorPaletteStyle.Content
+        }
+
+        return dynamicColorScheme(
+            seedColor = keyColor,
+            isDark = isDark,
+            style = mkStyle,
+            specVersion = ColorSpec.SpecVersion.SPEC_2025
+        )
     }
 
     private fun getCurrentSeedColor(progress: ProgressEntity): Int? {

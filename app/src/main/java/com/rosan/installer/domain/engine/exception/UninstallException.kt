@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.engine.exception
 
 import com.rosan.installer.core.exception.InstallerException
-import com.rosan.installer.domain.engine.model.UninstallErrorType
+import com.rosan.installer.domain.engine.model.error.UninstallErrorType
 
 /**
  * Unified exception for all uninstallation failures.

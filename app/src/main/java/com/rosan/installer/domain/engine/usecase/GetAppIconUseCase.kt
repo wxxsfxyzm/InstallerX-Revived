@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.engine.usecase
 
 import android.graphics.Bitmap
-import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.repository.AppIconRepository
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber

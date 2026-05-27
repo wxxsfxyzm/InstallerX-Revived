@@ -6,7 +6,7 @@ import androidx.room3.RoomRawQuery
 import com.rosan.installer.data.settings.local.room.dao.ConfigDao
 import com.rosan.installer.data.settings.mapper.toDomainModel
 import com.rosan.installer.data.settings.mapper.toEntity
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import com.rosan.installer.domain.settings.util.ConfigOrder
 import com.rosan.installer.domain.settings.util.OrderType

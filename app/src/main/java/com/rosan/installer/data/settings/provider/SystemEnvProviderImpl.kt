@@ -16,7 +16,7 @@ import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
-import com.rosan.installer.ui.common.auth.safeBiometricAuth
+import com.rosan.installer.framework.auth.safeBiometricAuth
 import com.rosan.installer.util.timber.FileLoggingTree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

@@ -3,8 +3,8 @@
 package com.rosan.installer.ui.page.main.settings.home
 
 import com.rosan.installer.domain.device.model.ShizukuMode
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 
 class HomePageViewState(
     val globalAuthorizer: Authorizer = Authorizer.Shizuku,

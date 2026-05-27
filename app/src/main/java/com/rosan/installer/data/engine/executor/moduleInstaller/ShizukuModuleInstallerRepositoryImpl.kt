@@ -2,14 +2,14 @@ package com.rosan.installer.data.engine.executor.moduleInstaller
 
 import com.rosan.installer.ICommandOutputListener
 import com.rosan.installer.data.engine.executor.ModuleInstallerUtils
-import com.rosan.installer.data.privileged.util.useUserService
+import com.rosan.installer.framework.privileged.util.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.ModuleInstallErrorType
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
-import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -62,8 +62,7 @@ class ShizukuModuleInstallerRepositoryImpl(
         try {
             useUserService(
                 isSystemApp = capabilityProvider.isSystemApp,
-                authorizer = config.authorizer,
-                useHookMode = false
+                authorizer = config.authorizer
             ) { userService ->
                 userService.privileged.execArrWithCallback(command, listener)
             }

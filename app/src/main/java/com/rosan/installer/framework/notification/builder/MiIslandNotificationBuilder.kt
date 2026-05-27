@@ -9,11 +9,11 @@ import android.graphics.Color
 import android.graphics.drawable.Icon
 import androidx.core.app.NotificationCompat
 import com.rosan.installer.R
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.getInfo
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.packageinfo.getInfo
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.framework.notification.NotificationHelper
 import com.rosan.installer.util.getErrorMessage
 import com.xzakota.hyper.notification.focus.FocusNotification

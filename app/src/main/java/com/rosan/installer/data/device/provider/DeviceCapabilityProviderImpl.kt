@@ -14,11 +14,11 @@ import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.invokeStatic
-import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.domain.device.model.ShizukuMode
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.settings.model.RootMode
-import com.rosan.installer.util.hasFlag
+import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.core.bitmask.hasFlag
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

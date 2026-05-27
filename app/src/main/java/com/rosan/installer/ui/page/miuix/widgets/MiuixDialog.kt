@@ -28,8 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.domain.settings.model.GithubUpdateChannel
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card

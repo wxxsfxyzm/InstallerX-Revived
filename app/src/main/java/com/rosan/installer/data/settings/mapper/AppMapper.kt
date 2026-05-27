@@ -3,7 +3,7 @@
 package com.rosan.installer.data.settings.mapper
 
 import com.rosan.installer.data.settings.local.room.entity.AppEntity
-import com.rosan.installer.domain.settings.model.AppModel
+import com.rosan.installer.domain.settings.model.app.AppModel
 
 // Extension function to map Entity to Domain Model
 fun AppEntity.toDomainModel(): AppModel {

@@ -26,8 +26,8 @@ import androidx.navigation3.ui.NavDisplayTransitionEffects
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
-import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.ui.animation.predictiveback.AOSPCrossActivityAnimation
 import com.rosan.installer.ui.animation.predictiveback.ClassicPredictiveBackAnimation
 import com.rosan.installer.ui.animation.predictiveback.MiuixPredictiveBackAnimation

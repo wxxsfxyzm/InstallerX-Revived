@@ -2,7 +2,7 @@
 // Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.domain.settings.repository
 
-import com.rosan.installer.domain.settings.model.AppModel
+import com.rosan.installer.domain.settings.model.app.AppModel
 import com.rosan.installer.domain.settings.util.AppOrder
 import com.rosan.installer.domain.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow

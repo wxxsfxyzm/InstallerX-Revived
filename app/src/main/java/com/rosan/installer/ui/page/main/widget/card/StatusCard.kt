@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

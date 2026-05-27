@@ -1,0 +1,135 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.domain.settings.model.config
+
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.core.device.model.Manufacturer
+
+/**
+ * Represents the complete business object for a configuration
+ */
+data class ConfigModel(
+    val id: Long = 0L,
+    val name: String = "Default",
+    val description: String,
+    val authorizer: Authorizer,
+    val customizeAuthorizer: String,
+    val installMode: InstallMode,
+    val toastMode: ToastMode = ToastMode.Disable,
+    val enableCustomizeInstallReason: Boolean = false,
+    val installReason: InstallReason = InstallReason.UNKNOWN,
+    val enableCustomizePackageSource: Boolean = false,
+    val packageSource: PackageSource = PackageSource.OTHER,
+    val installRequester: String? = null,
+    val installerMode: InstallerMode = InstallerMode.Self,
+    val installer: String?,
+    val enableCustomizeUser: Boolean = false,
+    val targetUserId: Int = 0,
+    val enableManualDexopt: Boolean = false,
+    val forceDexopt: Boolean = false,
+    val dexoptMode: DexoptMode = DexoptMode.SpeedProfile,
+    val autoDelete: Boolean = false,
+    val autoDeleteZip: Boolean = false,
+    val displaySize: Boolean = false,
+    val displaySdk: Boolean = false,
+    val forAllUser: Boolean = false,
+    val allowTestOnly: Boolean = false,
+    val allowDowngrade: Boolean = false,
+    val bypassLowTargetSdk: Boolean = false,
+    val allowAllRequestedPermissions: Boolean = false,
+    val allowSigMismatch: Boolean = false,
+    val allowSigUnknown: Boolean = false,
+    val requestUpdateOwnership: Boolean = false,
+    val splitChooseAll: Boolean = false,
+    val apkChooseAll: Boolean = false,
+    val requireBiometricAuth: Boolean = false,
+
+    val createdAt: Long = System.currentTimeMillis(),
+    val modifiedAt: Long = System.currentTimeMillis(),
+
+    // Added field to store the number of associated apps (scopes)
+    val scopeCount: Int = 0,
+
+    // Runtime fields that are not saved in the database but needed for business logic
+    val installFlags: Int = 0,
+    val bypassBlacklistInstallSetByUser: Boolean = false,
+    val bypassProfileRestriction: Boolean = false,
+    val uninstallFlags: Int = 0,
+    val callingFromUid: Int? = null,
+    val initiatorPackageName: String? = null,
+    val allowInstallWithoutUserAction: Boolean = false
+) {
+    companion object {
+        var default = ConfigModel(
+            description = "",
+            authorizer = Authorizer.Global,
+            customizeAuthorizer = "",
+            installMode = InstallMode.Dialog,
+            toastMode = ToastMode.Disable,
+            enableCustomizeInstallReason = false,
+            installReason = InstallReason.UNKNOWN,
+            enableCustomizePackageSource = false,
+            packageSource = PackageSource.OTHER,
+            installerMode = InstallerMode.Self,
+            installer = null,
+            enableCustomizeUser = false,
+            targetUserId = 0,
+            enableManualDexopt = false,
+            forceDexopt = false,
+            dexoptMode = DexoptMode.SpeedProfile,
+            autoDelete = false,
+            autoDeleteZip = false,
+            displaySize = false,
+            displaySdk = false,
+            forAllUser = false,
+            allowTestOnly = false,
+            allowDowngrade = false,
+            bypassLowTargetSdk = false,
+            allowAllRequestedPermissions = false,
+            requestUpdateOwnership = false,
+            splitChooseAll = false,
+            apkChooseAll = false,
+            allowSigMismatch = false,
+            allowSigUnknown = false
+        )
+
+        val XiaomiDefault = ConfigModel(
+            description = "",
+            authorizer = Authorizer.Global,
+            customizeAuthorizer = "",
+            installMode = InstallMode.Dialog,
+            toastMode = ToastMode.Disable,
+            enableCustomizeInstallReason = false,
+            installReason = InstallReason.UNKNOWN,
+            enableCustomizePackageSource = false,
+            packageSource = PackageSource.OTHER,
+            installerMode = InstallerMode.Custom,
+            installer = "com.android.shell",
+            enableCustomizeUser = false,
+            targetUserId = 0,
+            enableManualDexopt = false,
+            forceDexopt = false,
+            dexoptMode = DexoptMode.SpeedProfile,
+            autoDelete = false,
+            autoDeleteZip = false,
+            displaySize = false,
+            displaySdk = false,
+            forAllUser = false,
+            allowTestOnly = false,
+            allowDowngrade = false,
+            bypassLowTargetSdk = false,
+            allowAllRequestedPermissions = false,
+            requestUpdateOwnership = false,
+            splitChooseAll = false,
+            apkChooseAll = false,
+            allowSigMismatch = false,
+            allowSigUnknown = false
+        )
+
+        fun generateOptimalDefault(): ConfigModel =
+            when (DeviceConfig.currentManufacturer) {
+                Manufacturer.XIAOMI -> XiaomiDefault
+                else -> default
+            }
+    }
+}

@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.data.engine.executor.PackageManagerUtil
+import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -28,7 +28,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 import com.rosan.installer.ui.page.main.widget.chip.Chip
-import com.rosan.installer.util.hasFlag
+import com.rosan.installer.core.bitmask.hasFlag
 
 /**
  * Displays the initial confirmation screen for an uninstall operation.
@@ -50,9 +50,9 @@ fun uninstallReadyDialog(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val uninstallFlags = uiState.config.uninstallFlags
 
-    val deleteKeepData = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA)
-    val deleteAllUsers = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)
-    val deleteSystemApp = uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
+    val deleteKeepData = uninstallFlags.hasFlag(UninstallFlags.DELETE_KEEP_DATA)
+    val deleteAllUsers = uninstallFlags.hasFlag(UninstallFlags.DELETE_ALL_USERS)
+    val deleteSystemApp = uninstallFlags.hasFlag(UninstallFlags.DELETE_SYSTEM_APP)
 
     // Override the 'text' and 'buttons' sections of the base parameters.
     return baseParams.copy(
@@ -72,7 +72,7 @@ fun uninstallReadyDialog(
                             // Dispatch the action to toggle the flag in the ViewModel.
                             viewModel.dispatch(
                                 InstallerViewAction.ToggleUninstallFlag(
-                                    flag = PackageManagerUtil.DELETE_KEEP_DATA,
+                                    flag = UninstallFlags.DELETE_KEEP_DATA,
                                     enable = !deleteKeepData
                                 )
                             )
@@ -86,7 +86,7 @@ fun uninstallReadyDialog(
                             // Dispatch the action to toggle the flag in the ViewModel.
                             viewModel.dispatch(
                                 InstallerViewAction.ToggleUninstallFlag(
-                                    flag = PackageManagerUtil.DELETE_ALL_USERS,
+                                    flag = UninstallFlags.DELETE_ALL_USERS,
                                     enable = !deleteAllUsers
                                 )
                             )
@@ -100,7 +100,7 @@ fun uninstallReadyDialog(
                             // Dispatch the action to toggle the flag in the ViewModel.
                             viewModel.dispatch(
                                 InstallerViewAction.ToggleUninstallFlag(
-                                    flag = PackageManagerUtil.DELETE_SYSTEM_APP,
+                                    flag = UninstallFlags.DELETE_SYSTEM_APP,
                                     enable = !deleteSystemApp
                                 )
                             )

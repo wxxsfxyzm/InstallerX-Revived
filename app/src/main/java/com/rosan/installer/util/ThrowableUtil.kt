@@ -12,9 +12,9 @@ import com.rosan.installer.core.exception.InstallerException
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
-import com.rosan.installer.domain.engine.model.AnalyseErrorType
-import com.rosan.installer.domain.engine.model.InstallErrorType
-import com.rosan.installer.domain.engine.model.ModuleInstallErrorType
+import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
+import com.rosan.installer.domain.engine.model.error.InstallErrorType
+import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import java.util.zip.ZipException

@@ -5,9 +5,9 @@ package com.rosan.installer.core.env
 import android.content.res.Resources
 import android.os.Build
 import android.text.TextUtils
-import com.rosan.installer.domain.device.model.Architecture
-import com.rosan.installer.domain.device.model.Density
-import com.rosan.installer.domain.device.model.Manufacturer
+import com.rosan.installer.core.device.model.Architecture
+import com.rosan.installer.core.device.model.Density
+import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.util.convertLegacyLanguageCode
 
 object DeviceConfig {

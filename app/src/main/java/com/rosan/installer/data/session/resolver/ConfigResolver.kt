@@ -4,11 +4,11 @@ package com.rosan.installer.data.session.resolver
 
 import android.app.Activity
 import android.content.Intent
-import com.rosan.installer.domain.engine.model.InstallOption
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.core.app.ActivityContracts
+import com.rosan.installer.domain.engine.model.install.InstallOption
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
-import com.rosan.installer.ui.activity.UninstallerActivity
-import com.rosan.installer.util.addFlag
+import com.rosan.installer.core.bitmask.addFlag
 import timber.log.Timber
 
 class ConfigResolver(
@@ -27,7 +27,7 @@ class ConfigResolver(
     suspend fun resolve(activity: Activity): ConfigModel {
         Timber.tag(TAG).d("resolveConfig: Starting.")
         // 0. Special Check: Is this UninstallerActivity?
-        if (activity is UninstallerActivity) {
+        if (activity::class.java.name == ActivityContracts.UNINSTALLER_ACTIVITY) {
             Timber.tag(TAG).d("Activity is UninstallerActivity. Returning default config immediately.")
             return getConfigForPackage(null)
         }

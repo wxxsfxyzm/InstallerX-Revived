@@ -9,8 +9,9 @@ import androidx.core.content.IntentCompat
 import com.rosan.installer.data.engine.executor.appInstaller.LocalIntentReceiver
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.exception.UninstallException
-import com.rosan.installer.domain.engine.model.InstallErrorType
-import com.rosan.installer.domain.engine.model.UninstallErrorType
+import com.rosan.installer.domain.engine.model.error.InstallErrorType
+import com.rosan.installer.domain.engine.model.error.UninstallErrorType
+import com.rosan.installer.domain.engine.model.install.UninstallFlags
 
 object PackageManagerUtil {
     private const val EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS"
@@ -18,17 +19,17 @@ object PackageManagerUtil {
     /**
      * Flag parameter to indicate keeping the package's data directory.
      */
-    const val DELETE_KEEP_DATA = 0x00000001
+    const val DELETE_KEEP_DATA = UninstallFlags.DELETE_KEEP_DATA
 
     /**
      * Flag parameter to indicate deleting the package for all users.
      */
-    const val DELETE_ALL_USERS = 0x00000002
+    const val DELETE_ALL_USERS = UninstallFlags.DELETE_ALL_USERS
 
     /**
      * Flag parameter to mark the app as uninstalled for the current user only.
      */
-    const val DELETE_SYSTEM_APP = 0x00000004
+    const val DELETE_SYSTEM_APP = UninstallFlags.DELETE_SYSTEM_APP
 
     suspend fun installResultVerify(
         context: Context,

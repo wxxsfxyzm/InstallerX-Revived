@@ -6,15 +6,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.rosan.installer.ui.activity.SettingsActivity
+import com.rosan.installer.core.app.ActivityContracts
+import com.rosan.installer.core.app.SecretCodeActions.SECRET_CODE_ACTION
+import com.rosan.installer.core.app.SecretCodeActions.SECRET_CODE_ACTION_OLD
 import timber.log.Timber
 
 class SecretCodeReceiver : BroadcastReceiver() {
-    companion object {
-        const val SECRET_CODE_ACTION_OLD = "android.provider.Telephony.SECRET_CODE"
-        const val SECRET_CODE_ACTION = "android.telephony.action.SECRET_CODE"
-    }
-
     // This method is called when the BroadcastReceiver receives an Intent broadcast.
     override fun onReceive(context: Context, intent: Intent) {
         Timber.Forest.d("onReceive: $intent, action: ${intent.action}")
@@ -26,7 +23,8 @@ class SecretCodeReceiver : BroadcastReceiver() {
         if (isSecretCodeAction) {
             // The action is correct, proceed to launch the activity.
             // Create an intent to launch the SettingsActivity.
-            val i = Intent(context, SettingsActivity::class.java).apply {
+            val i = Intent().apply {
+                setClassName(context.packageName, ActivityContracts.SETTINGS_ACTIVITY)
                 // Since we are starting an Activity from a non-Activity context,
                 // we must set the FLAG_ACTIVITY_NEW_TASK flag.
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

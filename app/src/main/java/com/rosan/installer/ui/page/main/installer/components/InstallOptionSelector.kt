@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.engine.model.InstallOption
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.engine.model.install.InstallOption
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import org.koin.compose.koinInject
 
 @SuppressLint("LocalContextResourcesRead")

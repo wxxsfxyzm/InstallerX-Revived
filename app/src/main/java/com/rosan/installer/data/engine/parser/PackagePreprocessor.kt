@@ -2,13 +2,14 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataEntity
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.InstalledAppInfo
-import com.rosan.installer.domain.engine.model.PackageIdentityStatus
-import com.rosan.installer.domain.engine.model.SignatureMatchStatus
-import com.rosan.installer.domain.engine.model.sourcePath
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
+import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
+import com.rosan.installer.domain.engine.model.install.sourcePath
+import com.rosan.installer.domain.engine.provider.InstalledAppInfoProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -16,7 +17,9 @@ import kotlinx.coroutines.coroutineScope
 import java.io.File
 import java.util.zip.ZipFile
 
-object PackagePreprocessor {
+class PackagePreprocessor(
+    private val installedAppInfoProvider: InstalledAppInfoProvider
+) {
 
     data class ProcessedGroup(
         val packageName: String,
@@ -41,7 +44,7 @@ object PackagePreprocessor {
                     // 1. Parallel Deduplication (IO intensive)
                     val deduplicated = deduplicateEntities(entities)
                     // 2. Parallel fetching of system info (IPC/IO intensive)
-                    val installedInfo = InstalledAppInfo.buildByPackageName(packageName)
+                    val installedInfo = installedAppInfoProvider.getByPackageName(packageName)
 
                     ProcessedGroup(packageName, deduplicated, installedInfo)
                 }

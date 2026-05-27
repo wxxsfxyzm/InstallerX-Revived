@@ -2,7 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.usecase.config
 
-import com.rosan.installer.domain.settings.model.AppModel
+import com.rosan.installer.domain.settings.model.app.AppModel
 import com.rosan.installer.domain.settings.repository.AppRepository
 
 class ToggleAppTargetConfigUseCase(

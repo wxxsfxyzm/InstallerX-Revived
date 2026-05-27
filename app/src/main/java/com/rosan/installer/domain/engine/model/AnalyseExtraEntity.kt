@@ -1,5 +1,7 @@
 package com.rosan.installer.domain.engine.model
 
+import com.rosan.installer.domain.engine.model.source.DataType
+
 /**
  * Includes extra data during analyse
  * @param cacheDirectory Cache directory to store files

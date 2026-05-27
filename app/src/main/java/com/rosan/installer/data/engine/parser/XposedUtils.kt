@@ -2,7 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
-import com.rosan.installer.domain.engine.model.XposedModuleInfo
+import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
 import java.util.Properties
 import java.util.zip.ZipFile
 

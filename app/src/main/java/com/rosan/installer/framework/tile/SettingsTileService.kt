@@ -7,14 +7,15 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.TileService
-import com.rosan.installer.ui.activity.SettingsActivity
+import com.rosan.installer.core.app.ActivityContracts
 
 class SettingsTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
 
-        val intent = Intent(this, SettingsActivity::class.java).apply {
+        val intent = Intent().apply {
+            setClassName(this@SettingsTileService.packageName, ActivityContracts.SETTINGS_ACTIVITY)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 

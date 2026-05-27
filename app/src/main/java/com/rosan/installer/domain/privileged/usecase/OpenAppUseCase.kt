@@ -5,8 +5,8 @@ package com.rosan.installer.domain.privileged.usecase
 import android.content.Intent
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 

@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.device.provider
 
 import com.rosan.installer.domain.device.model.ShizukuMode
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 import kotlinx.coroutines.flow.StateFlow
 
 interface DeviceCapabilityProvider {

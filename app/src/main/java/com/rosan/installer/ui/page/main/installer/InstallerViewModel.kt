@@ -8,12 +8,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.engine.executor.PackageManagerUtil
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.PackageAnalysisResult
-import com.rosan.installer.domain.engine.model.SessionMode
-import com.rosan.installer.domain.engine.model.sourcePath
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.install.SessionMode
+import com.rosan.installer.domain.engine.model.install.UninstallFlags
+import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppLabelUseCase
@@ -21,15 +21,15 @@ import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.model.InstallMode
-import com.rosan.installer.domain.settings.model.InstallerMode
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.config.InstallMode
+import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.util.addFlag
-import com.rosan.installer.util.hasFlag
-import com.rosan.installer.util.removeFlag
+import com.rosan.installer.core.bitmask.addFlag
+import com.rosan.installer.core.bitmask.hasFlag
+import com.rosan.installer.core.bitmask.removeFlag
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
@@ -649,11 +649,11 @@ class InstallerViewModel(
             val currentFlags = currentConfig.uninstallFlags
             var newFlags = if (enable) currentFlags.addFlag(flag) else currentFlags.removeFlag(flag)
 
-            if (enable && flag == PackageManagerUtil.DELETE_ALL_USERS && currentFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP)) {
-                newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_SYSTEM_APP)
+            if (enable && flag == UninstallFlags.DELETE_ALL_USERS && currentFlags.hasFlag(UninstallFlags.DELETE_SYSTEM_APP)) {
+                newFlags = newFlags.removeFlag(UninstallFlags.DELETE_SYSTEM_APP)
                 toast(R.string.uninstall_system_app_disabled)
-            } else if (enable && flag == PackageManagerUtil.DELETE_SYSTEM_APP && currentFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS)) {
-                newFlags = newFlags.removeFlag(PackageManagerUtil.DELETE_ALL_USERS)
+            } else if (enable && flag == UninstallFlags.DELETE_SYSTEM_APP && currentFlags.hasFlag(UninstallFlags.DELETE_ALL_USERS)) {
+                newFlags = newFlags.removeFlag(UninstallFlags.DELETE_ALL_USERS)
                 toast(R.string.uninstall_all_users_disabled)
             }
 
@@ -668,7 +668,7 @@ class InstallerViewModel(
             return
         }
 
-        updateConfig { it.copy(uninstallFlags = if (keepData) PackageManagerUtil.DELETE_KEEP_DATA else 0) }
+        updateConfig { it.copy(uninstallFlags = if (keepData) UninstallFlags.DELETE_KEEP_DATA else 0) }
 
         isRetryingInstall = true
         Timber.d("Uninstalling conflicting/old package: $targetPackageName for retry")

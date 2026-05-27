@@ -5,7 +5,7 @@ package com.rosan.installer.data.engine.executor.appInstaller
 import android.content.Context
 import android.os.IBinder
 import com.rosan.installer.core.reflection.ReflectionProvider
-import com.rosan.installer.data.privileged.util.requireShizukuPermissionGranted
+import com.rosan.installer.framework.privileged.util.requireShizukuPermissionGranted
 
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider

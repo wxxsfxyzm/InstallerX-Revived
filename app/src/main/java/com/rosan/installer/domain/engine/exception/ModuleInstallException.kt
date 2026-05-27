@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.engine.exception
 
 import com.rosan.installer.core.exception.InstallerException
-import com.rosan.installer.domain.engine.model.ModuleInstallErrorType
+import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
 
 /**
  * Unified exception for all module installation failures.

@@ -2,8 +2,8 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.provider
 
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp // 建议把这个实体移到 domain 层
+import com.rosan.installer.domain.settings.model.app.InstalledAppTarget
 
 interface SystemAppProvider {
-    suspend fun getInstalledApps(): List<ApplyViewApp>
+    suspend fun getInstalledApps(): List<InstalledAppTarget>
 }

@@ -10,13 +10,13 @@ import com.rosan.installer.data.engine.executor.appInstaller.ProcessAppInstaller
 import com.rosan.installer.data.engine.executor.appInstaller.ShizukuAppInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appInstaller.SystemAppInstallerRepoImpl
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.engine.model.InstallEntity
+import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 
 class AppInstallerRepositoryImpl(
     private val context: Context,
