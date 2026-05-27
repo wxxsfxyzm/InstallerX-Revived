@@ -2,7 +2,7 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.settings.local.room
 
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

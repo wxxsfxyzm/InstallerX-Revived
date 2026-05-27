@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.privileged.provider
 
 import android.content.Intent
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 
 /**
  * Provider for executing privileged Android component operations via Binder/IPC.

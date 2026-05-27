@@ -82,7 +82,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.domain.device.model.Level
+import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.ui.library.blend.ColorBlendToken
 import com.rosan.installer.ui.library.effect.BgEffectBackground
 import com.rosan.installer.ui.navigation.LocalNavigator

@@ -3,12 +3,12 @@
 package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.domain.device.model.Architecture
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.PackageAnalysisResult
-import com.rosan.installer.domain.engine.model.PackageIdentityStatus
-import com.rosan.installer.domain.engine.model.SignatureMatchStatus
+import com.rosan.installer.core.device.model.Architecture
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.state.DomainInstallState
 import com.rosan.installer.domain.engine.model.state.InstallActionType
 import com.rosan.installer.domain.engine.model.state.InstallNotice

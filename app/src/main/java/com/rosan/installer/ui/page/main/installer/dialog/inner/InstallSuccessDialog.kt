@@ -14,11 +14,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase.Companion.PRIVILEGED_START_TIMEOUT_MS
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
-import com.rosan.installer.domain.settings.model.isPrivileged
+import com.rosan.installer.domain.settings.model.config.isPrivileged
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton

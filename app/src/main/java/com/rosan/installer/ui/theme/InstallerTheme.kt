@@ -24,9 +24,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
-import com.rosan.installer.ui.theme.material.PaletteStyle
-import com.rosan.installer.ui.theme.material.ThemeColorSpec
-import com.rosan.installer.ui.theme.material.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 import com.rosan.installer.ui.theme.material.animateAsState
 import com.rosan.installer.ui.theme.material.dynamicColorScheme
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode

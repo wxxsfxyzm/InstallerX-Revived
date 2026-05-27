@@ -2,7 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.updater.usecase
 
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.updater.model.UpdateInfo
 import com.rosan.installer.domain.updater.provider.InAppInstallProvider
 import com.rosan.installer.domain.updater.repository.UpdateRepository

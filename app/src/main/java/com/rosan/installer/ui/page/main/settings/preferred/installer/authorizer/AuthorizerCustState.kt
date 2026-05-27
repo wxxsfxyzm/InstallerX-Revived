@@ -2,7 +2,7 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer
 
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.config.Authorizer
 
 data class AuthorizerCustState(
     val authorizer: Authorizer = Authorizer.Shizuku,

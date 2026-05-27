@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.config.all
 
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.util.ConfigOrder
 
 sealed interface AllViewAction {

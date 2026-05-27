@@ -6,7 +6,10 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.domain.device.model.Architecture
+import com.rosan.installer.core.device.model.Architecture
+import com.rosan.installer.domain.engine.model.source.FilterType
+import com.rosan.installer.domain.engine.model.source.SplitMetadata
+import com.rosan.installer.domain.engine.model.source.SplitType
 import java.util.Locale
 
 private const val BASE_PREFIX = "base-"
@@ -14,39 +17,6 @@ private const val SPLIT_PREFIX = "split-"
 private const val SPLIT_CONFIG_PREFIX = "split_config."
 private const val CONFIG_PREFIX = "config."
 private const val CONFIG_INFIX = ".config." // Identifies config section in features
-
-/**
- * UI categorization for splits.
- */
-enum class SplitType {
-    ARCHITECTURE,
-    LANGUAGE,
-    DENSITY,
-    FEATURE
-}
-
-/**
- * Selection logic for splits.
- */
-enum class FilterType {
-    NONE,       // Generic feature
-    ABI,
-    DENSITY,
-    LANGUAGE
-}
-
-/**
- * Holds parsed split metadata.
- *
- * @property type UI grouping category.
- * @property filterType Selection algorithm category.
- * @property configValue Specific value (e.g., "arm64-v8a", "zh-CN").
- */
-data class SplitMetadata(
-    val type: SplitType,
-    val filterType: FilterType,
-    val configValue: String?
-)
 
 /**
  * Parses the split filename into metadata.

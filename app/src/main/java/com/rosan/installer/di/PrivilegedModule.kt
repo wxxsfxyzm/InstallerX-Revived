@@ -2,22 +2,23 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.di
 
-import com.rosan.installer.data.privileged.provider.AppOpsProviderImpl
-import com.rosan.installer.data.privileged.provider.ComponentOpsProviderImpl
-import com.rosan.installer.data.privileged.provider.PermissionProviderImpl
-import com.rosan.installer.data.privileged.provider.PostInstallTaskProviderImpl
-import com.rosan.installer.data.privileged.provider.ShellExecutionProviderImpl
-import com.rosan.installer.data.privileged.provider.SystemInfoProviderImpl
-import com.rosan.installer.data.privileged.repository.recyclable.RecyclerManager
-import com.rosan.installer.data.privileged.repository.recycler.AppProcessRecycler
-import com.rosan.installer.data.privileged.repository.recycler.DhizukuUserServiceRecycler
-import com.rosan.installer.data.privileged.repository.recycler.ProcessHookRecycler
-import com.rosan.installer.data.privileged.repository.recycler.ProcessUserServiceRecycler
-import com.rosan.installer.data.privileged.repository.recycler.ShizukuHookRecycler
-import com.rosan.installer.data.privileged.repository.recycler.ShizukuUserServiceRecycler
-import com.rosan.installer.data.privileged.service.AutoLockService
+import com.rosan.installer.framework.privileged.provider.AppOpsProviderImpl
+import com.rosan.installer.framework.privileged.provider.ComponentOpsProviderImpl
+import com.rosan.installer.framework.privileged.provider.PermissionProviderImpl
+import com.rosan.installer.framework.privileged.provider.PostInstallTaskProviderImpl
+import com.rosan.installer.framework.privileged.provider.SessionDetailsProviderImpl
+import com.rosan.installer.framework.privileged.provider.ShellExecutionProviderImpl
+import com.rosan.installer.framework.privileged.provider.SystemInfoProviderImpl
+import com.rosan.installer.framework.privileged.lifecycle.RecyclerManager
+import com.rosan.installer.framework.privileged.recycler.AppProcessRecycler
+import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
+import com.rosan.installer.framework.privileged.recycler.ProcessUserServiceRecycler
+import com.rosan.installer.framework.privileged.recycler.ShizukuHookRecycler
+import com.rosan.installer.framework.privileged.recycler.ShizukuUserServiceRecycler
+import com.rosan.installer.framework.service.AutoLockService
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
+import com.rosan.installer.domain.engine.provider.SessionDetailsProvider
 import com.rosan.installer.domain.privileged.provider.PermissionProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
@@ -44,6 +45,7 @@ val privilegedModule = module {
     singleOf(::ShellExecutionProviderImpl) { bind<ShellExecutionProvider>() }
     singleOf(::PostInstallTaskProviderImpl) { bind<PostInstallTaskProvider>() }
     singleOf(::SystemInfoProviderImpl) { bind<SystemInfoProvider>() }
+    singleOf(::SessionDetailsProviderImpl) { bind<SessionDetailsProvider>() }
 
     // Services
     singleOf(::AutoLockService)
@@ -77,7 +79,6 @@ val privilegedModule = module {
     // 2. Stateless / Permission-based Recyclers (Singletons)
     // Replaces the old 'object' declarations. Koin now manages their lifecycle.
     singleOf(::ShizukuUserServiceRecycler)
-    singleOf(::DhizukuUserServiceRecycler)
     singleOf(::ShizukuHookRecycler)
 
     // 3. Shell-dependent Recyclers (Factories)

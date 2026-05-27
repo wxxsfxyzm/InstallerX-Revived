@@ -19,9 +19,10 @@ import com.rosan.installer.data.session.handler.BroadcastHandler
 import com.rosan.installer.data.session.handler.ForegroundInfoHandler
 import com.rosan.installer.data.session.handler.ProgressHandler
 import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.ToastMode
+import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -134,7 +135,7 @@ class InstallerService : Service() {
         }
     }
 
-    private fun setupSessionScope(session: InstallerSessionRepository) {
+    private fun setupSessionScope(session: InstallerSessionRepositoryImpl) {
         val id = session.id
 
         synchronized(sessionScopes) {

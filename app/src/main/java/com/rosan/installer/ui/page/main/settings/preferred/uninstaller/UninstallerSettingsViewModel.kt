@@ -5,7 +5,7 @@ package com.rosan.installer.ui.page.main.settings.preferred.uninstaller
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
-import com.rosan.installer.data.engine.executor.PackageManagerUtil
+import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
@@ -62,7 +62,7 @@ class UninstallerSettingsViewModel(
     private fun toggleGlobalUninstallFlag(flag: Int, enable: Boolean) = viewModelScope.launch {
         val disabledFlag = toggleUninstallFlagUseCase(flag, enable)
         if (disabledFlag != null) {
-            val resId = if (disabledFlag == PackageManagerUtil.DELETE_SYSTEM_APP)
+            val resId = if (disabledFlag == UninstallFlags.DELETE_SYSTEM_APP)
                 R.string.uninstall_system_app_disabled
             else
                 R.string.uninstall_all_users_disabled

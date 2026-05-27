@@ -13,8 +13,8 @@ import androidx.core.graphics.scale
 import com.materialkolor.quantize.QuantizerCelebi
 import com.materialkolor.score.Score
 import com.rosan.installer.data.engine.repository.AppIconRepositoryImpl.Companion.QUANTIZE_BITMAP_MAX_SIZE
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataEntity
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.repository.AppIconRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

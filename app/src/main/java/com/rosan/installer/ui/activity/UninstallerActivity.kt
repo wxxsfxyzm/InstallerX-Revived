@@ -22,9 +22,9 @@ import com.rosan.installer.domain.device.model.PermissionType
 import com.rosan.installer.domain.device.provider.PermissionChecker
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
-import com.rosan.installer.ui.common.auth.BiometricAuthBridge
+import com.rosan.installer.framework.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
@@ -212,7 +212,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 colorSpec = uiState.colorSpec,
                 useDynamicColor = uiState.useDynamicColor,
                 useMiuixMonet = uiState.useMiuixMonet,
-                seedColor = uiState.seedColor
+                seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor)
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (uiState.useMiuix) {

@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.privileged.usecase
 
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

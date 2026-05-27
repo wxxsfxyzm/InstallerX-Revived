@@ -8,11 +8,11 @@ import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import com.rosan.installer.R
 import com.rosan.installer.data.session.handler.BroadcastHandler
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.config.Authorizer
 
 class NotificationHelper(
     private val context: Context,

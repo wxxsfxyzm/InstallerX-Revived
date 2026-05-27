@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.config.Authorizer
 
 data class PreferredViewState(
     val authorizer: Authorizer = Authorizer.Shizuku,

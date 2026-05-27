@@ -5,9 +5,9 @@ package com.rosan.installer.data.engine.parser.strategy
 import android.graphics.drawable.Drawable
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataEntity
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi

@@ -4,14 +4,16 @@ package com.rosan.installer.data.session.handler
 
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.config.InstallMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class ProgressHandler(scope: CoroutineScope, session: InstallerSessionRepository) :
-    Handler(scope, session) {
+class ProgressHandler(
+    override val scope: CoroutineScope,
+    override val session: InstallerSessionRepository
+) : Handler {
 
     private var job: Job? = null
 

@@ -31,9 +31,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.rosan.installer.ui.theme.material.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.ui.theme.material.RawColor
-import com.rosan.installer.ui.theme.material.ThemeColorSpec
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.ui.theme.material.dynamicColorScheme
 import com.rosan.installer.ui.util.getDisplayName
 import kotlinx.coroutines.Dispatchers

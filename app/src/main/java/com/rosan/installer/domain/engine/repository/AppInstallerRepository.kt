@@ -2,8 +2,8 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.domain.engine.repository
 
-import com.rosan.installer.domain.engine.model.InstallEntity
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.engine.model.install.InstallEntity
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 
 /**
  * Interface for the installer repository.

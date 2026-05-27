@@ -109,14 +109,19 @@ Never commit credentials, inline them into tracked files, or weaken the existing
 
 ### Standard smoke build
 
-The default repository-level verification target is the same pair used by pull request CI:
+For changes that do not affect connectivity flavors or variant-specific behavior, prefer the faster single-variant smoke build:
+
+```bash
+./gradlew assembleOnlineUnstableDebug \
+  -PAPP_ID="com.rosan.installer.x.revived.test"
+```
+
+Use the full PR-CI pair when the change can reasonably affect app compilation across connectivity flavors, resources, dependency wiring, or variant-sensitive behavior:
 
 ```bash
 ./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug \
   -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
-
-Run this when the change can reasonably affect app compilation, resources, dependency wiring, or variant-sensitive behavior.
 
 ### Report verification honestly
 

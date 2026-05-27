@@ -2,7 +2,7 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.all
 
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.util.ConfigOrder
 import com.rosan.installer.domain.settings.util.OrderType
 

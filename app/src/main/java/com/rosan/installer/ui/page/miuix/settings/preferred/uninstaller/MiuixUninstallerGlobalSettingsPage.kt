@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.data.engine.executor.PackageManagerUtil
+import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.ui.activity.UninstallerActivity
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
@@ -49,7 +49,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallPackageDialog
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
-import com.rosan.installer.util.hasFlag
+import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
@@ -136,25 +136,25 @@ fun MiuixUninstallerGlobalSettingsPage(
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.uninstall_keep_data),
                         description = stringResource(id = R.string.uninstall_keep_data_desc),
-                        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_KEEP_DATA),
+                        checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_KEEP_DATA),
                         onCheckedChange = {
-                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_KEEP_DATA, it))
+                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_KEEP_DATA, it))
                         }
                     )
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.uninstall_all_users),
                         description = stringResource(id = R.string.uninstall_all_users_desc),
-                        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_ALL_USERS),
+                        checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_ALL_USERS),
                         onCheckedChange = {
-                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_ALL_USERS, it))
+                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_ALL_USERS, it))
                         }
                     )
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.uninstall_delete_system_app),
                         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
-                        checked = uiState.uninstallFlags.hasFlag(PackageManagerUtil.DELETE_SYSTEM_APP),
+                        checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_SYSTEM_APP),
                         onCheckedChange = {
-                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(PackageManagerUtil.DELETE_SYSTEM_APP, it))
+                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_SYSTEM_APP, it))
                         }
                     )
                     if (BiometricManager

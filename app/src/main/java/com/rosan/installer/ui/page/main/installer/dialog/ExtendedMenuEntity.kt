@@ -1,7 +1,7 @@
 package com.rosan.installer.ui.page.main.installer.dialog
 
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.rosan.installer.domain.engine.model.InstallOption
+import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedSubMenuId
 

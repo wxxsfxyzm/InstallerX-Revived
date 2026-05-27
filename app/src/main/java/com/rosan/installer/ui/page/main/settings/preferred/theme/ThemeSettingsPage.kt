@@ -65,8 +65,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.rosan.installer.R
-import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
-import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
@@ -79,8 +79,8 @@ import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.material.PaletteStyle
-import com.rosan.installer.ui.theme.material.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop

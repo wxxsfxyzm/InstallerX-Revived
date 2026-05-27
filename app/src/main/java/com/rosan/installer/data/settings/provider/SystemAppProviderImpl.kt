@@ -4,19 +4,19 @@ package com.rosan.installer.data.settings.provider
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import com.rosan.installer.domain.settings.model.app.InstalledAppTarget
 import com.rosan.installer.domain.settings.provider.SystemAppProvider
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
-import com.rosan.installer.util.hasFlag
+import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.util.pm.compatVersionCode
 import com.rosan.installer.util.pm.getCompatInstalledPackages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class SystemAppProviderImpl(private val context: Context) : SystemAppProvider {
-    override suspend fun getInstalledApps(): List<ApplyViewApp> = withContext(Dispatchers.IO) {
+    override suspend fun getInstalledApps(): List<InstalledAppTarget> = withContext(Dispatchers.IO) {
         val packageManager = context.packageManager
         packageManager.getCompatInstalledPackages(0).map {
-            ApplyViewApp(
+            InstalledAppTarget(
                 packageName = it.packageName,
                 versionName = it.versionName,
                 versionCode = it.compatVersionCode,

@@ -6,18 +6,18 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import com.rosan.installer.R
-import com.rosan.installer.data.privileged.service.AutoLockService
+import com.rosan.installer.framework.service.AutoLockService
 import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.data.session.resolver.ConfigResolver
 import com.rosan.installer.data.session.resolver.SourceResolver
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.exception.AuthenticationFailedException
-import com.rosan.installer.domain.engine.model.AnalyseErrorType
+import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
-import com.rosan.installer.domain.engine.model.PackageAnalysisResult
-import com.rosan.installer.domain.engine.model.SessionMode
-import com.rosan.installer.domain.engine.model.sourcePath
+import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.install.SessionMode
+import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
 import com.rosan.installer.domain.engine.usecase.ApproveSessionUseCase
 import com.rosan.installer.domain.engine.usecase.ClearAppIconCacheUseCase
@@ -32,14 +32,14 @@ import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.session.repository.NetworkResolver
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.BiometricAuthMode
-import com.rosan.installer.domain.settings.model.ConfigModel.Companion.default
-import com.rosan.installer.domain.settings.model.InstallMode
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.config.ConfigModel.Companion.default
+import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.ui.common.auth.safeBiometricAuthOrThrow
+import com.rosan.installer.framework.auth.safeBiometricAuthOrThrow
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,9 +57,10 @@ import org.koin.core.component.inject
 import timber.log.Timber
 import java.io.File
 
-class ActionHandler(scope: CoroutineScope, session: InstallerSessionRepository) :
-    Handler(scope, session), KoinComponent {
-    override val session: InstallerSessionRepositoryImpl = super.session as InstallerSessionRepositoryImpl
+class ActionHandler(
+    override val scope: CoroutineScope,
+    override val session: InstallerSessionRepositoryImpl
+) : Handler, KoinComponent {
     private val mutableProgressFlow: MutableSharedFlow<ProgressEntity>
         get() = session.progress
 

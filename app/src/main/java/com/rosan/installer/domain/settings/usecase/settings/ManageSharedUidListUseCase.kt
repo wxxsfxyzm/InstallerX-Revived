@@ -2,7 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.usecase.settings
 
-import com.rosan.installer.domain.settings.model.SharedUid
+import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import kotlinx.coroutines.flow.firstOrNull

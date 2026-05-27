@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import timber.log.Timber
 
 /**

@@ -3,7 +3,7 @@
 package com.rosan.installer.data.settings.local.room.entity.converter
 
 import androidx.room3.TypeConverter
-import com.rosan.installer.domain.settings.model.InstallerMode
+import com.rosan.installer.domain.settings.model.config.InstallerMode
 
 object InstallerModeConverter {
     @TypeConverter

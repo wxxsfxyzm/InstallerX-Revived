@@ -4,10 +4,10 @@ package com.rosan.installer.data.settings.provider
 
 import android.content.ComponentName
 import android.content.Context
+import com.rosan.installer.core.app.ActivityContracts
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
-import com.rosan.installer.ui.activity.InstallerActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -23,7 +23,7 @@ class PrivilegedProviderImpl(
 
     override suspend fun setDefaultInstaller(authorizer: Authorizer, lock: Boolean) {
         withContext(Dispatchers.IO) {
-            val component = ComponentName(context, InstallerActivity::class.java)
+            val component = ComponentName(context.packageName, ActivityContracts.INSTALLER_ACTIVITY)
             appOpsProvider.setDefaultInstaller(authorizer, component, lock)
         }
     }

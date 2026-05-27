@@ -3,9 +3,9 @@
 package com.rosan.installer.domain.settings.usecase.config
 
 import android.content.Context
-import com.rosan.installer.domain.settings.model.AppModel
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.app.AppModel
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.repository.AppRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting

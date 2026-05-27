@@ -4,7 +4,7 @@ package com.rosan.installer.ui.page.main.settings.preferred.installer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.domain.settings.model.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting

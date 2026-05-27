@@ -7,10 +7,10 @@ import android.os.Build
 import androidx.core.net.toUri
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.framework.receiver.SecretCodeReceiver.Companion.SECRET_CODE_ACTION
-import com.rosan.installer.framework.receiver.SecretCodeReceiver.Companion.SECRET_CODE_ACTION_OLD
+import com.rosan.installer.core.app.SecretCodeActions.SECRET_CODE_ACTION
+import com.rosan.installer.core.app.SecretCodeActions.SECRET_CODE_ACTION_OLD
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.withTimeoutOrNull
 
 class OpenLSPosedUseCase(

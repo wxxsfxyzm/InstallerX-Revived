@@ -2,9 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.usecase.config
 
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.model.InstallerMode
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 
 class SaveConfigUseCase(private val configRepo: ConfigRepository) {

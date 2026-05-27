@@ -33,11 +33,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.data.engine.parser.getDisplayName
 import com.rosan.installer.data.engine.parser.getSplitDisplayName
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.MmzSelectionMode
-import com.rosan.installer.domain.engine.model.PackageAnalysisResult
-import com.rosan.installer.domain.engine.model.SessionMode
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.install.MmzSelectionMode
+import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget

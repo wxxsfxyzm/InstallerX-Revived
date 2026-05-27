@@ -4,10 +4,10 @@ package com.rosan.installer.data.engine.parser
 
 import android.os.Build
 import com.rosan.installer.domain.engine.exception.AnalyseException
-import com.rosan.installer.domain.engine.model.AnalyseErrorType
+import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
-import com.rosan.installer.domain.engine.model.DataEntity
-import com.rosan.installer.domain.engine.model.DataType
+import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.util.isZipArchive
 import dalvik.system.ZipPathValidator
 import kotlinx.serialization.json.Json

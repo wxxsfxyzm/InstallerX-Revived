@@ -3,7 +3,7 @@
 package com.rosan.installer.domain.privileged.provider
 
 import android.os.Bundle
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.config.Authorizer
 
 interface SystemInfoProvider {
     suspend fun getUsers(authorizer: Authorizer): Map<Int, String>

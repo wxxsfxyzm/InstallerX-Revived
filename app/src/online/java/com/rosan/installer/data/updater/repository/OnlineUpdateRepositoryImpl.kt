@@ -6,8 +6,8 @@ import android.content.Context
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.env.AppConfig.OFFICIAL_PACKAGE_NAME
 import com.rosan.installer.data.updater.model.GithubRelease
-import com.rosan.installer.domain.device.model.Level
-import com.rosan.installer.domain.settings.model.GithubUpdateChannel
+import com.rosan.installer.core.device.model.Level
+import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.updater.model.UpdateInfo
 import com.rosan.installer.domain.updater.repository.UpdateRepository

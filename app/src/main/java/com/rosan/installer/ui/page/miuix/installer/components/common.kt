@@ -27,9 +27,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.PackageAnalysisResult
-import com.rosan.installer.domain.engine.model.sortedBest
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Text

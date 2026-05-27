@@ -1,8 +1,8 @@
 package com.rosan.installer.domain.engine.repository
 
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 import kotlinx.coroutines.flow.Flow
 
 /**

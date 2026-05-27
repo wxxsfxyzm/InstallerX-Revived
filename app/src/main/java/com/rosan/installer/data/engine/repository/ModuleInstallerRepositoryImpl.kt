@@ -6,14 +6,14 @@ import com.rosan.installer.data.engine.executor.moduleInstaller.LocalModuleInsta
 import com.rosan.installer.data.engine.executor.moduleInstaller.ShizukuModuleInstallerRepositoryImpl
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.ModuleInstallErrorType
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.ConfigModel
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

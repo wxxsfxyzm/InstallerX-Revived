@@ -2,13 +2,13 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.config.edit
 
-import com.rosan.installer.domain.settings.model.Authorizer
-import com.rosan.installer.domain.settings.model.DexoptMode
-import com.rosan.installer.domain.settings.model.InstallMode
-import com.rosan.installer.domain.settings.model.InstallReason
-import com.rosan.installer.domain.settings.model.InstallerMode
-import com.rosan.installer.domain.settings.model.PackageSource
-import com.rosan.installer.domain.settings.model.ToastMode
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.DexoptMode
+import com.rosan.installer.domain.settings.model.config.InstallMode
+import com.rosan.installer.domain.settings.model.config.InstallReason
+import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.domain.settings.model.config.PackageSource
+import com.rosan.installer.domain.settings.model.config.ToastMode
 
 sealed interface EditViewAction {
     data class ChangeDataName(val name: String) : EditViewAction

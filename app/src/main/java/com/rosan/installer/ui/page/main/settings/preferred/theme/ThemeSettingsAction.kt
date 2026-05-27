@@ -3,11 +3,11 @@
 package com.rosan.installer.ui.page.main.settings.preferred.theme
 
 import androidx.compose.ui.graphics.Color
-import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
-import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
-import com.rosan.installer.ui.theme.material.PaletteStyle
-import com.rosan.installer.ui.theme.material.ThemeColorSpec
-import com.rosan.installer.ui.theme.material.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 
 sealed interface ThemeSettingsAction {
     data class ChangeUseMiuix(val useMiuix: Boolean) : ThemeSettingsAction

@@ -9,13 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.settings.model.PredictiveBackAnimation
-import com.rosan.installer.domain.settings.model.PredictiveBackExitDirection
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
-import com.rosan.installer.ui.theme.material.PaletteStyle
-import com.rosan.installer.ui.theme.material.ThemeColorSpec
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 
 @Composable
 fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {

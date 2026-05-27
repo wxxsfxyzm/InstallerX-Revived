@@ -5,11 +5,9 @@ package com.rosan.installer.data.session.manager
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
+import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.framework.service.InstallerService
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
-import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -20,10 +18,10 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class InstallerSessionManager(
     private val context: Context
-) : KoinComponent {
+) {
 
     // Thread-safe map to store active installer sessions
-    private val sessions = ConcurrentHashMap<String, InstallerSessionRepository>()
+    private val sessions = ConcurrentHashMap<String, InstallerSessionRepositoryImpl>()
 
     /**
      * Retrieves an existing session or creates a new one.
@@ -44,7 +42,10 @@ class InstallerSessionManager(
             remove(newId)
         }
 
-        val repo: InstallerSessionRepository = get { parametersOf(newId, onCloseAction) }
+        val repo = InstallerSessionRepositoryImpl(
+            id = newId,
+            onClose = onCloseAction
+        )
         sessions[newId] = repo
 
         // Ensure Service is running and aware of this session
@@ -52,13 +53,13 @@ class InstallerSessionManager(
         return repo
     }
 
-    fun get(id: String): InstallerSessionRepository? = sessions[id]
+    fun get(id: String): InstallerSessionRepositoryImpl? = sessions[id]
 
     /**
      * Returns a snapshot of all active sessions.
      * Crucial for the Service to restore handlers if the process was restarted.
      */
-    fun getAllSessions(): List<InstallerSessionRepository> = sessions.values.toList()
+    fun getAllSessions(): List<InstallerSessionRepositoryImpl> = sessions.values.toList()
 
     /**
      * Removes a session from the manager.

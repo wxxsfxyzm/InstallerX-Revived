@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.domain.device.model.Manufacturer
-import com.rosan.installer.domain.settings.model.GithubUpdateChannel
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.core.device.model.Manufacturer
+import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.util.help
 

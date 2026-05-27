@@ -2,9 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.lab
 
-import com.rosan.installer.domain.settings.model.GithubUpdateChannel
-import com.rosan.installer.domain.settings.model.HttpProfile
-import com.rosan.installer.domain.settings.model.RootMode
+import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
+import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.RootMode
 
 sealed interface LabSettingsAction {
     data class LabChangeRootModuleFlash(val enable: Boolean) : LabSettingsAction

@@ -65,10 +65,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.domain.device.model.Manufacturer
-import com.rosan.installer.domain.settings.model.BiometricAuthMode
-import com.rosan.installer.domain.settings.model.NamedPackage
-import com.rosan.installer.domain.settings.model.SharedUid
+import com.rosan.installer.core.device.model.Manufacturer
+import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.app.NamedPackage
+import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route

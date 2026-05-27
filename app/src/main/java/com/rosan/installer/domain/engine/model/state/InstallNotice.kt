@@ -2,7 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.engine.model.state
 
-import com.rosan.installer.domain.device.model.Architecture
+import com.rosan.installer.core.device.model.Architecture
 
 /**
  * Represents specific notices (warnings or informational messages)

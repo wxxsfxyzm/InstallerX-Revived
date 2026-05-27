@@ -3,9 +3,8 @@
 package com.rosan.installer.data.settings.provider
 
 import android.os.Build
-import androidx.compose.ui.graphics.Color
 import com.kieronquinn.monetcompat.core.MonetCompat
-import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -27,10 +26,10 @@ class ThemeStateProviderImpl(
         appSettingsRepo.preferencesFlow,
         getWallpaperColorsFlow()
     ) { prefs, wallpaperColors ->
-        val manualSeedColor = Color(prefs.seedColorInt)
+        val manualSeedColor = prefs.seedColorInt
         val effectiveSeedColor =
             if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                if (!wallpaperColors.isNullOrEmpty()) Color(wallpaperColors[0]) else manualSeedColor
+                if (!wallpaperColors.isNullOrEmpty()) wallpaperColors[0] else manualSeedColor
             } else manualSeedColor
 
         ThemeState(

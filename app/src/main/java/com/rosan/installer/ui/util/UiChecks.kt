@@ -1,6 +1,6 @@
 package com.rosan.installer.ui.util
 
-import com.rosan.installer.domain.settings.model.Authorizer
+import com.rosan.installer.domain.settings.model.config.Authorizer
 
 /**
  * Returns true if the Dhizuku authorizer is active, which disables certain features.

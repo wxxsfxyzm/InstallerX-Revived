@@ -3,7 +3,7 @@
 package com.rosan.installer.data.session.resolver
 
 import android.net.Uri
-import com.rosan.installer.domain.engine.model.DataEntity
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.NetworkResolver
 import kotlinx.coroutines.flow.MutableSharedFlow

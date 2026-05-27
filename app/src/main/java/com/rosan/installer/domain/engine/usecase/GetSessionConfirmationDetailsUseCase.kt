@@ -5,10 +5,9 @@ package com.rosan.installer.domain.engine.usecase
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
-import com.rosan.installer.data.privileged.util.useUserService
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.engine.provider.SessionDetailsProvider
 import com.rosan.installer.domain.session.model.ConfirmationDetails
-import com.rosan.installer.domain.settings.model.ConfigModel
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import timber.log.Timber
 
 /**
@@ -16,7 +15,7 @@ import timber.log.Timber
  * Utilizes IPC services depending on the application's current authorization level.
  */
 class GetSessionConfirmationDetailsUseCase(
-    private val capabilityProvider: DeviceCapabilityProvider
+    private val sessionDetailsProvider: SessionDetailsProvider
 ) {
     /**
      * Retrieves session details based on the provided configuration.
@@ -39,12 +38,7 @@ class GetSessionConfirmationDetailsUseCase(
 
         var bundle: Bundle? = null
         try {
-            useUserService(
-                isSystemApp = capabilityProvider.isSystemApp,
-                authorizer = config.authorizer,
-                customizeAuthorizer = config.customizeAuthorizer,
-                useHookMode = false
-            ) { bundle = it.privileged.getSessionDetails(sessionId) }
+            bundle = sessionDetailsProvider.getSessionDetails(sessionId, config)
         } catch (e: Exception) {
             Timber.e(e, "Failed to get session details via ${config.authorizer}")
         }

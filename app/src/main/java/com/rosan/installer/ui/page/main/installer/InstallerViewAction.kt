@@ -3,10 +3,10 @@
 package com.rosan.installer.ui.page.main.installer
 
 import androidx.annotation.StringRes
-import com.rosan.installer.domain.engine.model.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.InstallerMode
+import com.rosan.installer.domain.settings.model.config.InstallerMode
 
 sealed interface InstallerViewAction {
     data class CollectSession(val session: InstallerSessionRepository) : InstallerViewAction

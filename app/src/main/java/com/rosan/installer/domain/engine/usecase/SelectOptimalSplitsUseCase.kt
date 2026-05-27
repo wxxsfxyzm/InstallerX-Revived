@@ -3,10 +3,10 @@
 package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.data.engine.parser.FilterType
-import com.rosan.installer.domain.engine.model.AppEntity
-import com.rosan.installer.domain.engine.model.DataType
-import com.rosan.installer.domain.engine.model.SessionMode
+import com.rosan.installer.domain.engine.model.source.FilterType
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.util.convertLegacyLanguageCode
 import timber.log.Timber

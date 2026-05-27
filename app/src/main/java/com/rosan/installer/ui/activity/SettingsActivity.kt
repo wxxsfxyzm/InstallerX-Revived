@@ -15,7 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rosan.installer.domain.settings.model.ThemeState
+import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.ui.navigation.InstallerNavContainer
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -57,7 +57,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     colorSpec = uiState.colorSpec,
                     useDynamicColor = uiState.useDynamicColor,
                     useMiuixMonet = uiState.useMiuixMonet,
-                    seedColor = uiState.seedColor
+                    seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor)
                 ) {
                     val backgroundColor =
                         if (uiState.useMiuix)
