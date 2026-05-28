@@ -30,9 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -96,8 +94,6 @@ fun DefaultInstallerPage(
         mutableStateOf<HomePageViewEvent.ShowDefaultInstallerErrorDetail?>(null)
     }
 
-    val detailLabel = stringResource(id = R.string.details)
-
     @SuppressLint("LocalContextGetResourceValueCall") LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             snackBarHostState.currentSnackbarData?.dismiss()
@@ -107,14 +103,7 @@ fun DefaultInstallerPage(
                 }
 
                 is HomePageViewEvent.ShowDefaultInstallerErrorDetail -> {
-                    val snackbarResult = snackBarHostState.showSnackbar(
-                        message = context.getString(event.titleResId),
-                        actionLabel = detailLabel,
-                        duration = SnackbarDuration.Short
-                    )
-                    if (snackbarResult == SnackbarResult.ActionPerformed) {
-                        errorDialogInfo = event
-                    }
+                    errorDialogInfo = event
                 }
             }
         }

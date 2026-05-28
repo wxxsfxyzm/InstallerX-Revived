@@ -100,6 +100,8 @@ fun Throwable.hasErrorType(vararg types: AnalyseErrorType): Boolean =
  * Returns a [Boolean] indicating whether this [Throwable]
  * has a specific [PrivilegedErrorType].
  *
+ * @param types The [PrivilegedErrorType] to check for.
+ * @return `true` if the [PrivilegedErrorType] is found, `false` otherwise.
  */
 fun Throwable.hasErrorType(vararg types: PrivilegedErrorType): Boolean =
     this is PrivilegedException && this.errorType in types

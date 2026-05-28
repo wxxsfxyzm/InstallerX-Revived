@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class HomePageViewModel(
     private val appSettingsRepo: AppSettingsRepository,
@@ -140,7 +141,6 @@ class HomePageViewModel(
                 )
             }
 
-            // 处理新增的 Action
             is HomePageViewAction.ChangeUserSetLSPosedActive -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.UserSetLSPosedActive,
@@ -159,6 +159,7 @@ class HomePageViewModel(
             _uiEvents.emit(HomePageViewEvent.ShowDefaultInstallerResult(successResId))
         }.onFailure { e ->
             val errorResId = if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed
+            Timber.e(e, "Failed to ${if (lock) "lock" else "unlock"} default installer")
             _uiEvents.emit(HomePageViewEvent.ShowDefaultInstallerErrorDetail(errorResId, e, action))
         }
     }

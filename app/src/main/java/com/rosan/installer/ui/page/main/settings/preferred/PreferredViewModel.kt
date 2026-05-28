@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class PreferredViewModel(
     appSettingsRepo: AppSettingsRepository,
@@ -105,6 +106,7 @@ class PreferredViewModel(
         }.onSuccess {
             adbVerifyEnabledFlow.value = enabled
         }.onFailure { e ->
+            Timber.e(e, "Failed to set ADB install verification to $enabled")
             _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerErrorDetail(R.string.disable_adb_install_verify_failed, e, action))
         }
     }
@@ -127,6 +129,7 @@ class PreferredViewModel(
             _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerResult(successResId))
         }.onFailure { e ->
             val errorResId = if (lock) R.string.lock_default_installer_failed else R.string.unlock_default_installer_failed
+            Timber.e(e, "Failed to ${if (lock) "lock" else "unlock"} default installer")
             _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerErrorDetail(errorResId, e, action))
         }
     }

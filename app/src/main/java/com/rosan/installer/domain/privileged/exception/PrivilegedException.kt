@@ -12,6 +12,6 @@ class PrivilegedException(
     val errorType: PrivilegedErrorType,
     message: String? = null,
     cause: Throwable? = null
-) : InstallerException(message, cause) {
+) : InstallerException(message ?: cause?.message ?: cause?.toString(), cause) {
     override fun getStringResId() = errorType.stringResId
 }
