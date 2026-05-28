@@ -865,4 +865,7 @@
     <string name="home_device_info_system">System</string>
     <string name="home_device_info_active_authorizer">Authorizer in use</string>
     <string name="home_device_info_default_installer">Default Installer Activity</string>
+    <string name="home_learn_more_title">Learn More</string>
+    <string name="home_learn_more_installerx_title">Learn about InstallerX Revived</string>
+    <string name="home_learn_more_installerx_desc">Learn how to configure and use InstallerX</string>
 </resources>

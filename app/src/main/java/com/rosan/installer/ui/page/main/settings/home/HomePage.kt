@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,6 +72,7 @@ fun HomePage(
     windowInsetsSides: WindowInsetsSides? = null
 ) {
     val navigator = LocalNavigator.current
+    val uriHandler = LocalUriHandler.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val layoutDirection = LocalLayoutDirection.current
@@ -216,7 +218,21 @@ fun HomePage(
                     }
                 }
             }
-
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.home_learn_more_title),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 8.dp)
+                ) {
+                    item {
+                        BaseWidget(
+                            iconPlaceholder = false,
+                            title = stringResource(R.string.home_learn_more_installerx_title),
+                            description = stringResource(R.string.home_learn_more_installerx_desc),
+                            onClick = { uriHandler.openUri("https://wxxsfxyzm.github.io/InstallerX-Revived-Website/") }
+                        )
+                    }
+                }
+            }
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }

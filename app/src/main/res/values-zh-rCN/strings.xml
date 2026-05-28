@@ -843,4 +843,7 @@
     <string name="home_device_info_system">系统</string>
     <string name="home_device_info_active_authorizer">正在使用的特权</string>
     <string name="home_device_info_default_installer">当前系统使用的安装活动</string>
+    <string name="home_learn_more_title">了解更多</string>
+    <string name="home_learn_more_installerx_title">了解 InstallerX Revived</string>
+    <string name="home_learn_more_installerx_desc">了解如何配置和使用 InstallerX</string>
 </resources>
