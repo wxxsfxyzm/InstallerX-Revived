@@ -359,7 +359,7 @@
     <string name="exception_authentication_failed">Xác thực người dùng thất bại</string>
     <string name="exception_install_failed_invalid_uri">URI Không hợp lệ</string>
     <string name="exception_install_failed_already_exists">Phiên bản ứng dụng này đã được cài đặt, vui lòng gỡ cài đặt và thử lại</string>
-    <string name="exception_install_failed_duplicate_package">Chữ ký gói đã thay đổi, hãy đảm bảo gói của bạn an toàn và gỡ cài đặt ứng dụng, sau đó thử lại</string>
+    <string name="exception_install_failed_duplicate_package">Một ứng dụng với cùng tên gói đã tồn tại</string>
     <string name="exception_install_failed_insufficient_storage">Bộ nhớ đầy, hãy dọn bớt dung lượng</string>
     <string name="exception_install_failed_invalid_apk">APK không hợp lệ (gói bị hỏng). Vui lòng tải xuống lại và thử lại</string>
     <string name="exception_install_failed_blacklisted_package">Bạn không cho phép cài đặt ứng dụng!</string>
@@ -594,7 +594,7 @@
     <string name="exception_module_install_failed_incompatible_authorizer">Trình ủy quyền không tương thích</string>
     <string name="exception_module_install_exit_code_non_zero">Mã thoát khác 0!</string>
     <string name="exception_http_not_allowed">HTTP dạng văn bản thuần không được phép</string>
-    <string name="lab_set_install_requester_desc">Điền vào trường OriginatingUid với gói gọi để khớp với hành vi hệ thống</string>
+    <string name="lab_set_install_requester_desc">Hiện tùy chỉnh trường OriginatingUid trong hồ sơ khi được bật</string>
     <string name="lab_mi_island">Mi Super Island</string>
     <string name="lab_tap_icon_to_share">Nhấn vào biểu tượng để chia sẻ apk</string>
     <string name="lab_tap_icon_to_share_desc">Nhấn vào biểu tượng trên trang chuẩn bị để chia sẻ gói cài đặt</string>
@@ -703,11 +703,11 @@
     <string name="split_name_density">Mật độ màn hình: %1$s</string>
     <string name="split_dpi_ldpi">Thấp (~120 DPI)</string>
     <string name="config_install_show_toast">Hiện Toast</string>
-    <string name="config_install_show_toast_desc">Hiện toast sau khi cài đặt</string>
+    <string name="config_install_show_toast_desc">Kiểm soát việc hiện toast sau khi cài đặt</string>
     <string name="batch_install_result_message">Cài đặt hàng loạt: %1$d/%2$d thành công</string>
     <string name="config_status_inactive">Không hoạt động</string>
     <string name="config_always_use_root_in_system">Sử dụng root cho các thao tác có đặc quyền</string>
-    <string name="config_always_use_root_in_system_desc">Khi đang chạy như trình cài đặt gói hệ thống, luôn sử dụng root cho một số thao tác có đặc quyền, chẳng hạn như flash mô-đun và xóa tệp</string>
+    <string name="config_always_use_root_in_system_desc">Khi đang hoạt động như trình cài đặt gói hệ thống, luôn sử dụng root cho một số thao tác có đặc quyền, chẳng hạn như flash mô-đun và xóa tệp</string>
     <string name="lab_mi_island_countdown">Thời lượng chặn XMSF</string>
     <string name="lab_mi_island_countdown_desc">Đặt thời lượng chặn mạng XMSF. Chỉ áp dụng cho Shizuku. Chỉ sửa đổi nếu bạn hiểu rõ hậu quả!</string>
     <string name="theme_settings_predictive_back">Quay lại Dự đoán</string>
@@ -767,7 +767,7 @@
     <string name="install_confirm_question_update_owner_reminder">Ứng dụng này thường được cập nhật qua %1$s. Nếu bạn cập nhật từ nguồn khác, điện thoại có thể nhận các bản cập nhật sau này từ bất kỳ nguồn nào. Chức năng của ứng dụng có thể thay đổi.</string>
     <string name="installer_temp_settings_tip">Các cài đặt này chỉ tạm thời cho phiên này. Để giữ lại, hãy vào Cài đặt</string>
     <string name="lab_install_without_user_action">Cập nhật không cần xác nhận của người dùng</string>
-    <string name="lab_install_without_user_action_desc">Thử cập nhật ứng dụng mà không cần người dùng xác nhận. Tính năng này chỉ có hiệu lực khi trình uỷ quyền được đặt là Không có</string>
+    <string name="lab_install_without_user_action_desc">Cố gắng cập nhật ứng dụng mà không cần xác nhận của người dùng. Bật tùy chọn này có thể ngăn chặn hoàn toàn quá trình cài đặt trên các hệ thống mà OEM đã làm hỏng API PackageInstaller</string>
     <string name="lab_show_apk_path">Hiển thị đường dẫn tệp</string>
     <string name="lab_show_apk_path_desc">Hiển thị đường dẫn tệp trong chi tiết ứng dụng</string>
     <string name="lab_show_apk_path_label">Đường dẫn tệp</string>
@@ -823,4 +823,13 @@
     <string name="home_root_mode">Root: %s</string>
     <string name="home_label_lsp_link">Đang tìm một mô-đun?</string>
     <string name="home_system_app">Ứng dụng Hệ thống</string>
+    <string name="extras">Bổ sung</string>
+    <string name="installer_settings_dialog_automation_options">Tùy chọn Tự động</string>
+    <string name="long_click_background_install">Bấm lâu để cài đặt ở nền</string>
+    <string name="long_click_background_install_desc">Ở nền khi bấm lâu nút cài đặt</string>
+    <string name="authorizer_customization">Tinh chỉnh Trình ủy quyền</string>
+    <string name="authorizer_customization_desc">Tùy chỉnh tùy chọn cho các trình ủy quyền được hỗ trợ</string>
+    <string name="config_toast_mode_disable">Không bao giờ hiện toast</string>
+    <string name="config_toast_mode_background_only">Chỉ khi hộp thoại bị ẩn</string>
+    <string name="config_toast_mode_always">Luôn hiện Toast</string>
 </resources>

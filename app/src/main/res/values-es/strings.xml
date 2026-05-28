@@ -232,7 +232,7 @@
     <string name="exception_install_failed_invalid_apk">APK inválido (paquete corrupto). Por favor, vuelve a descargarlo e inténtalo de nuevo</string>
     <string name="exception_install_failed_invalid_uri">URI inválido</string>
     <string name="exception_install_failed_insufficient_storage">Almacenamiento lleno, libera espacio</string>
-    <string name="exception_install_failed_duplicate_package">Firma del paquete cambiada, asegúrate de que el paquete sea seguro y desinstala la aplicación, luego vuelve a intentarlo</string>
+    <string name="exception_install_failed_duplicate_package">Ya existe una aplicación con el mismo nombre de paquete</string>
     <string name="exception_install_failed_no_shared_user">No se encontró el base.apk con UID coincidente</string>
     <string name="exception_install_failed_update_incompatible">Actualización incompatible</string>
     <string name="exception_install_failed_shared_user_incompatible">Las firmas no coinciden</string>
@@ -839,4 +839,7 @@
     <string name="config_toast_mode_disable">No mostrar notificaciones emergentes nunca</string>
     <string name="config_toast_mode_background_only">Solo cuando el diálogo esté oculto</string>
     <string name="config_toast_mode_always">Mostrar siempre las notificaciones emergentes</string>
+    <string name="installer_settings_dialog_automation_options">Opciones de automatización</string>
+    <string name="long_click_background_install">Mantén pulsado para instalar en segundo plano</string>
+    <string name="long_click_background_install_desc">En segundo plano al mantener pulsado el botón de instalar</string>
 </resources>
