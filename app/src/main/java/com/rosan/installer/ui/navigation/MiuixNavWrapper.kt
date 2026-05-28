@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.repository.ConfigRepository
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.miuix.settings.SettingsCompactLayout
 import com.rosan.installer.ui.page.miuix.settings.SettingsWideScreenLayout
@@ -49,9 +50,10 @@ fun MiuixMainPageWrapper(
     val homeLabel = stringResource(R.string.home)
     val homeIcon = ImageVector.vectorResource(R.drawable.ic_tile_icon)
     val configLabel = stringResource(R.string.config)
+    val historyLabel = stringResource(R.string.history)
     val preferredLabel = stringResource(R.string.preferred)
 
-    val navigationItems = remember(homeLabel, configLabel, preferredLabel) {
+    val navigationItems = remember(homeLabel, configLabel, historyLabel, preferredLabel) {
         listOf(
             NavigationItem(
                 label = homeLabel,
@@ -60,6 +62,10 @@ fun MiuixMainPageWrapper(
             NavigationItem(
                 label = configLabel,
                 icon = Icons.Rounded.RoomPreferences
+            ),
+            NavigationItem(
+                label = historyLabel,
+                icon = AppIcons.History
             ),
             NavigationItem(
                 label = preferredLabel,
@@ -73,9 +79,12 @@ fun MiuixMainPageWrapper(
         pageCount = { navigationItems.size }
     )
     val mainPagerState = rememberMainPagerState(pagerState)
+    val currentPage = mainPagerState.pagerState.currentPage
     val settledPage = mainPagerState.pagerState.settledPage
-    LaunchedEffect(settledPage) {
+    LaunchedEffect(currentPage) {
         mainPagerState.syncPage()
+    }
+    LaunchedEffect(settledPage) {
         if (sharedState.lastMainPageIndex != settledPage) {
             sharedViewModel.updateLastMainPageIndex(settledPage)
         }

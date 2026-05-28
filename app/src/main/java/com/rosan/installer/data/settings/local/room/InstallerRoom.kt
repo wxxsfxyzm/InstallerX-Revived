@@ -14,8 +14,10 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.rosan.installer.data.settings.local.room.dao.AppDao
 import com.rosan.installer.data.settings.local.room.dao.ConfigDao
+import com.rosan.installer.data.settings.local.room.dao.OperationHistoryDao
 import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.OperationHistoryEntity
 import com.rosan.installer.data.settings.local.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.DexoptModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallModeConverter
@@ -27,8 +29,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
 @Database(
-    entities = [AppEntity::class, ConfigEntity::class],
-    version = 15,
+    entities = [AppEntity::class, ConfigEntity::class, OperationHistoryEntity::class],
+    version = 16,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -42,6 +44,7 @@ import org.koin.core.component.get
         AutoMigration(from = 11, to = 12),
         AutoMigration(from = 13, to = 14),
         AutoMigration(from = 14, to = 15),
+        AutoMigration(from = 15, to = 16),
     ]
 )
 @TypeConverters(
@@ -79,6 +82,8 @@ abstract class InstallerRoom : RoomDatabase() {
     abstract val appDao: AppDao
 
     abstract val configDao: ConfigDao
+
+    abstract val operationHistoryDao: OperationHistoryDao
 
     @DeleteColumn(tableName = "config", columnName = "allow_restricted_permissions")
     class Migration7To8 : AutoMigrationSpec

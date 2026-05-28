@@ -17,6 +17,8 @@ import com.rosan.installer.data.settings.provider.ThemeStateProviderImpl
 import com.rosan.installer.data.settings.repository.AppRepositoryImpl
 import com.rosan.installer.data.settings.repository.AppSettingsRepositoryImpl
 import com.rosan.installer.data.settings.repository.ConfigRepositoryImpl
+import com.rosan.installer.data.settings.repository.OperationHistoryRepositoryImpl
+import com.rosan.installer.domain.history.repository.OperationHistoryRepository
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import com.rosan.installer.domain.settings.provider.SystemAppProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
@@ -34,6 +36,7 @@ import com.rosan.installer.domain.settings.usecase.settings.ManageSharedUidListU
 import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
 import com.rosan.installer.domain.settings.usecase.settings.ToggleUninstallFlagUseCase
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
+import com.rosan.installer.domain.history.usecase.RecordOperationHistoryUseCase
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
@@ -47,9 +50,11 @@ val settingsModule = module {
 
     single { get<InstallerRoom>().appDao }
     single { get<InstallerRoom>().configDao }
+    single { get<InstallerRoom>().operationHistoryDao }
 
     singleOf(::AppRepositoryImpl) { bind<AppRepository>() }
     singleOf(::ConfigRepositoryImpl) { bind<ConfigRepository>() }
+    singleOf(::OperationHistoryRepositoryImpl) { bind<OperationHistoryRepository>() }
 
     single(createdAtStart = true) {
         DatabaseInitializer(
@@ -101,4 +106,5 @@ val settingsModule = module {
     factoryOf(::ManagePackageListUseCase)
     factoryOf(::ManageSharedUidListUseCase)
     factoryOf(::GetPackageUidUseCase)
+    factoryOf(::RecordOperationHistoryUseCase)
 }

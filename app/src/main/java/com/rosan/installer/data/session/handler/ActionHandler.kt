@@ -539,7 +539,8 @@ class ActionHandler(
         approveSession(
             sessionId = sessionId,
             granted = granted,
-            config = session.config
+            config = session.config,
+            details = session.confirmationDetails.value
         )
 
         val details = session.confirmationDetails.value
