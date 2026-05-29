@@ -108,6 +108,17 @@ class DeviceCapabilityProviderImpl(
         if (!subApi.isNullOrEmpty()) "$api.$subApi" else api
     }
 
+    override val deviceName: String by lazy {
+        val globalDeviceName =
+            Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
+
+        if (!globalDeviceName.isNullOrBlank()) {
+            globalDeviceName
+        } else {
+            DeviceConfig.deviceName
+        }
+    }
+
     override var isLSPosedActive: Boolean = false
 
     // --- Shizuku Dynamic Flow ---

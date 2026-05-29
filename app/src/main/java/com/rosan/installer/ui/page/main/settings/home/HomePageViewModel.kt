@@ -47,7 +47,8 @@ class HomePageViewModel(
         val dhizukuAvailable: Boolean,
         val dhizukuAuthorized: Boolean,
         val rootMode: RootMode,
-        val defaultInstaller: String
+        val defaultInstaller: String,
+        val deviceName: String
     )
 
     // Combine all capability flows into a single bundled state flow
@@ -65,7 +66,8 @@ class HomePageViewModel(
             dhizukuAvailable = array[2] as Boolean,
             dhizukuAuthorized = array[3] as Boolean,
             rootMode = array[4] as RootMode,
-            defaultInstaller = array[5] as String
+            defaultInstaller = array[5] as String,
+            deviceName = capabilityProvider.deviceName
         )
     }
 
@@ -108,7 +110,8 @@ class HomePageViewModel(
             availableAuthorizerCount = availableCount,
             userSetLSPosedActive = prefs.userSetLSPosedActive,
             autoLockInstaller = prefs.autoLockInstaller,
-            defaultInstaller = caps.defaultInstaller
+            defaultInstaller = caps.defaultInstaller,
+            deviceName = caps.deviceName
         )
     }.stateIn(
         scope = viewModelScope,
