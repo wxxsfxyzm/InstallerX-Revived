@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface OperationHistoryDao {
+    @Query("select * from operation_history order by timestamp desc, id desc")
+    suspend fun all(): List<OperationHistoryEntity>
+
     @Query("select * from operation_history order by timestamp desc, id desc limit :limit")
     suspend fun all(limit: Int): List<OperationHistoryEntity>
 

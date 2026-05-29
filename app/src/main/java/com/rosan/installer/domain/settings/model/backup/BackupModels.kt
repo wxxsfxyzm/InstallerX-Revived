@@ -7,6 +7,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BackupEnvelope(
+    /**
+     * The schema version of the backup format.
+     * Used to ensure forward compatibility and handle breaking changes in the backup structure.
+     */
     val formatVersion: Int = 1,
     val appVersionName: String = "",
     val appVersionCode: Long = 0L,
@@ -14,7 +18,29 @@ data class BackupEnvelope(
     val createdAt: Long = 0L,
     val profiles: List<BackupProfile> = emptyList(),
     val scopes: List<BackupProfileScope> = emptyList(),
-    val settings: List<BackupSettingEntry> = emptyList()
+    val settings: List<BackupSettingEntry> = emptyList(),
+    val history: List<BackupHistoryEntry> = emptyList()
+)
+
+@Serializable
+data class BackupHistoryEntry(
+    val operationType: String,
+    val status: String,
+    val packageName: String,
+    val appLabel: String? = null,
+    val timestamp: Long,
+    val isFreshInstall: Boolean? = null,
+    val versionChange: String,
+    val oldVersionName: String? = null,
+    val oldVersionCode: Long? = null,
+    val newVersionName: String? = null,
+    val newVersionCode: Long? = null,
+    val initiatorPackageName: String? = null,
+    val installMethod: String,
+    val authorizer: String,
+    val installMode: String,
+    val errorSummary: String? = null,
+    val errorType: String? = null
 )
 
 @Serializable
@@ -88,6 +114,7 @@ data class RestoreResult(
     val restoredProfiles: Int,
     val restoredScopes: Int,
     val restoredSettings: Int,
+    val restoredHistory: Int = 0,
     val ignoredSettings: Int,
     val rolledBack: Boolean = false
 )

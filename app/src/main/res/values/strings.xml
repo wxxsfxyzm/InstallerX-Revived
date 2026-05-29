@@ -55,6 +55,7 @@
     <string name="history_version_same">Same version</string>
     <string name="history_method_package_manager">Package manager</string>
     <string name="history_method_session">Session confirmation</string>
+    <string name="history_operation_type">Operation Type</string>
     <string name="history_time">Time</string>
     <string name="history_version_change">Version change</string>
     <string name="history_versions">%1$s → %2$s</string>

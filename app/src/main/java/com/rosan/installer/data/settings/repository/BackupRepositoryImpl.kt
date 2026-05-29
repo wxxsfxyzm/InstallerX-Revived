@@ -11,9 +11,12 @@ import com.rosan.installer.data.settings.local.datastore.AppDataStore
 import com.rosan.installer.data.settings.local.room.INSTALLER_ROOM_SCHEMA_VERSION
 import com.rosan.installer.data.settings.local.room.dao.AppDao
 import com.rosan.installer.data.settings.local.room.dao.ConfigDao
+import com.rosan.installer.data.settings.local.room.dao.OperationHistoryDao
 import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
+import com.rosan.installer.data.settings.local.room.entity.OperationHistoryEntity
 import com.rosan.installer.domain.settings.model.backup.BackupEnvelope
+import com.rosan.installer.domain.settings.model.backup.BackupHistoryEntry
 import com.rosan.installer.domain.settings.model.backup.BackupProfile
 import com.rosan.installer.domain.settings.model.backup.BackupProfileScope
 import com.rosan.installer.domain.settings.model.backup.BackupSettingEntry
@@ -33,12 +36,14 @@ import timber.log.Timber
 class BackupRepositoryImpl(
     private val configDao: ConfigDao,
     private val appDao: AppDao,
+    private val historyDao: OperationHistoryDao,
     private val appDataStore: AppDataStore,
     private val dataStore: DataStore<Preferences>
 ) : BackupRepository {
     override suspend fun exportBackup(): BackupEnvelope {
         val configs = configDao.all()
         val apps = appDao.allSuspend()
+        val history = historyDao.all()
         val preferences = appDataStore.data.first()
 
         return BackupEnvelope(
@@ -49,7 +54,8 @@ class BackupRepositoryImpl(
             createdAt = System.currentTimeMillis(),
             profiles = configs.map { it.toBackupProfile() },
             scopes = apps.map { it.toBackupProfileScope() },
-            settings = preferences.toBackupSettings()
+            settings = preferences.toBackupSettings(),
+            history = history.map { it.toBackupHistoryEntry() }
         )
     }
 
@@ -73,12 +79,14 @@ class BackupRepositoryImpl(
         PreRestoreSnapshot(
             configs = configDao.all(),
             apps = appDao.allSuspend(),
+            history = historyDao.all(),
             settings = appDataStore.data.first().toBackupSettings()
         )
 
     private suspend fun applyImportPlan(importPlan: ImportPlan): RestoreResult {
         appDao.deleteAll()
         configDao.deleteAll()
+        historyDao.clear()
 
         val configIdMap = linkedMapOf<Long, Long>()
         importPlan.profiles.forEach { profile ->
@@ -92,12 +100,17 @@ class BackupRepositoryImpl(
         }
         appDao.insertAll(restoredApps)
 
+        importPlan.history.forEach { entry ->
+            historyDao.insert(entry.toEntity())
+        }
+
         val settingsResult = writeSettings(importPlan.settings)
 
         return RestoreResult(
             restoredProfiles = importPlan.profiles.size,
             restoredScopes = restoredApps.size,
             restoredSettings = settingsResult.restored,
+            restoredHistory = importPlan.history.size,
             ignoredSettings = settingsResult.ignored,
             rolledBack = false
         )
@@ -107,6 +120,7 @@ class BackupRepositoryImpl(
         try {
             appDao.deleteAll()
             configDao.deleteAll()
+            historyDao.clear()
 
             val configIdMap = linkedMapOf<Long, Long>()
             snapshot.configs.forEach { config ->
@@ -120,6 +134,10 @@ class BackupRepositoryImpl(
                 app.copy(configId = configId)
             }
             appDao.insertAll(restoredApps)
+
+            snapshot.history.forEach { entity ->
+                historyDao.insert(entity.copy(id = 0L))
+            }
 
             writeSettings(snapshot.settings)
         } catch (rollbackException: Throwable) {
@@ -181,6 +199,7 @@ class BackupRepositoryImpl(
         return ImportPlan(
             profiles = profiles,
             scopes = scopes,
+            history = history,
             settings = settings
         )
     }
@@ -231,6 +250,27 @@ class BackupRepositoryImpl(
             packageName = packageName,
             createdAt = createdAt,
             modifiedAt = modifiedAt
+        )
+
+    private fun OperationHistoryEntity.toBackupHistoryEntry(): BackupHistoryEntry =
+        BackupHistoryEntry(
+            operationType = operationType,
+            status = status,
+            packageName = packageName,
+            appLabel = appLabel,
+            timestamp = timestamp,
+            isFreshInstall = isFreshInstall,
+            versionChange = versionChange,
+            oldVersionName = oldVersionName,
+            oldVersionCode = oldVersionCode,
+            newVersionName = newVersionName,
+            newVersionCode = newVersionCode,
+            initiatorPackageName = initiatorPackageName,
+            installMethod = installMethod,
+            authorizer = authorizer,
+            installMode = installMode,
+            errorSummary = errorSummary,
+            errorType = errorType
         )
 
     private fun BackupProfile.toEntity(): ConfigEntity {
@@ -286,6 +326,28 @@ class BackupRepositoryImpl(
         )
     }
 
+    private fun BackupHistoryEntry.toEntity(): OperationHistoryEntity =
+        OperationHistoryEntity(
+            id = 0L,
+            operationType = operationType,
+            status = status,
+            packageName = packageName,
+            appLabel = appLabel,
+            timestamp = timestamp,
+            isFreshInstall = isFreshInstall,
+            versionChange = versionChange,
+            oldVersionName = oldVersionName,
+            oldVersionCode = oldVersionCode,
+            newVersionName = newVersionName,
+            newVersionCode = newVersionCode,
+            initiatorPackageName = initiatorPackageName,
+            installMethod = installMethod,
+            authorizer = authorizer,
+            installMode = installMode,
+            errorSummary = errorSummary,
+            errorType = errorType
+        )
+
     @Suppress("UNCHECKED_CAST")
     private fun MutablePreferences.writeSupportedSetting(entry: BackupSettingEntry): Boolean {
         val supportedKey = AppDataStore.supportedKeys[entry.key] ?: return false
@@ -315,12 +377,14 @@ class BackupRepositoryImpl(
     private data class PreRestoreSnapshot(
         val configs: List<ConfigEntity>,
         val apps: List<AppEntity>,
+        val history: List<OperationHistoryEntity>,
         val settings: List<BackupSettingEntry>
     )
 
     private data class ImportPlan(
         val profiles: List<ImportProfile>,
         val scopes: List<ImportScope>,
+        val history: List<BackupHistoryEntry>,
         val settings: List<BackupSettingEntry>
     )
 
@@ -340,6 +404,16 @@ class BackupRepositoryImpl(
     )
 
     private companion object {
+        /**
+         * The current supported backup format version.
+         *
+         * Increment this value only when introducing breaking changes to the [BackupEnvelope]
+         * structure that cannot be handled by the default JSON configuration (e.g., removing
+         * non-optional fields or changing field types).
+         *
+         * Non-breaking additions should keep this version unchanged to maintain
+         * cross-version compatibility.
+         */
         const val CURRENT_FORMAT_VERSION = 1
     }
 }

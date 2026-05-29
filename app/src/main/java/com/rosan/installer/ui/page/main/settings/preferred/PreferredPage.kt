@@ -63,8 +63,10 @@ import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
-import org.koin.androidx.compose.koinViewModel
+import com.rosan.installer.ui.util.readBackupText
+import com.rosan.installer.ui.util.writeBackupText
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @SuppressLint("LocalContextGetResourceValueCall")

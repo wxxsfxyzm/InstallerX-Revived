@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2026 InstallerX Revived contributors
-package com.rosan.installer.ui.page.main.settings.preferred
+package com.rosan.installer.ui.util
 
 import android.content.Context
 import android.net.Uri

@@ -15,11 +15,11 @@ class HistoryViewModel(
     private val repository: OperationHistoryRepository
 ) : ViewModel() {
     val state: StateFlow<HistoryViewState> = repository.flowAll()
-        .map { HistoryViewState(records = it) }
+        .map { HistoryViewState(records = it, isLoading = false) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = HistoryViewState()
+            initialValue = HistoryViewState(isLoading = true)
         )
 
     fun dispatch(action: HistoryViewAction) {
