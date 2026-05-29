@@ -17,6 +17,8 @@ interface DeviceCapabilityProvider {
     val isSupportMiIsland: Boolean
     val oplusOSdkVersion: String?
 
+    val deviceName: String
+
     var isLSPosedActive: Boolean
 
     /**

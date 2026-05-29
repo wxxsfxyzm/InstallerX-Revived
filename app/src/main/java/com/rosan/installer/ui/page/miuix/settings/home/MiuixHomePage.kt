@@ -151,7 +151,7 @@ fun MiuixHomePage(
                 Card(modifier = Modifier.padding(vertical = 12.dp)) {
                     BasicComponent(
                         title = stringResource(R.string.home_device_info_model),
-                        summary = DeviceConfig.deviceName
+                        summary = uiState.deviceName
                     )
                     BasicComponent(
                         title = stringResource(R.string.home_device_info_system),

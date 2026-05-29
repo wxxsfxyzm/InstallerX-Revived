@@ -25,7 +25,8 @@ class HomePageViewState(
     val userSetLSPosedActive: Boolean = false,
     val autoLockInstaller: Boolean = false,
     val customizeAuthorizer: String = "",
-    val defaultInstaller: String = "Unknown"
+    val defaultInstaller: String = "Unknown",
+    val deviceName: String = ""
 ) {
     val activate: Boolean get() = isDefaultInstaller
 }

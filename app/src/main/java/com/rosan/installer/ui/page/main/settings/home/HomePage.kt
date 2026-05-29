@@ -165,7 +165,7 @@ fun HomePage(
                     item {
                         BaseWidget(
                             title = stringResource(R.string.home_device_info_model),
-                            description = DeviceConfig.deviceName,
+                            description = uiState.deviceName,
                             iconPlaceholder = false
                         )
                     }
