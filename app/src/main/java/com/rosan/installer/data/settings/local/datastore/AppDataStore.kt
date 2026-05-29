@@ -22,124 +22,158 @@ class AppDataStore(
     // Expose the raw data flow for synchronous mapping in the repository layer
     val data: Flow<Preferences> = dataStore.data
 
+    enum class PreferenceValueType {
+        STRING,
+        INT,
+        BOOLEAN
+    }
+
+    data class SupportedPreferenceKey<T>(
+        val key: Preferences.Key<T>,
+        val type: PreferenceValueType
+    )
+
     companion object {
+        private val mutableSupportedKeys = linkedMapOf<String, SupportedPreferenceKey<*>>()
+
+        val supportedKeys: Map<String, SupportedPreferenceKey<*>>
+            get() = mutableSupportedKeys
+
+        private fun <T> register(
+            key: Preferences.Key<T>,
+            type: PreferenceValueType
+        ): Preferences.Key<T> {
+            mutableSupportedKeys[key.name] = SupportedPreferenceKey(key, type)
+            return key
+        }
+
         // UI Related
-        val UI_USE_BLUR = booleanPreferencesKey("ui_use_blur")
-        val THEME_MODE = stringPreferencesKey("theme_mode")
-        val THEME_PALETTE_STYLE = stringPreferencesKey("theme_palette_style")
-        val THEME_COLOR_SPEC = stringPreferencesKey("theme_color_spec")
-        val THEME_USE_DYNAMIC_COLOR = booleanPreferencesKey("theme_use_dynamic_color")
-        val THEME_SEED_COLOR = intPreferencesKey("theme_seed_color")
-        val UI_USE_MIUIX = booleanPreferencesKey("ui_use_miui_x")
-        val UI_USE_MIUIX_MONET = booleanPreferencesKey("ui_use_miui_x_monet")
-        val UI_USE_APPLE_FLOATING_BAR = booleanPreferencesKey("ui_use_apple_floating_bar")
-        val UI_DYN_COLOR_FOLLOW_PKG_ICON = booleanPreferencesKey("ui_dyn_color_follow_pkg_icon")
-        val LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON = booleanPreferencesKey("live_activity_dyn_color_follow_pkg_icon")
-        val PREDICTIVE_BACK_ANIMATION = stringPreferencesKey("predictive_back_animation")
-        val PREDICTIVE_BACK_EXIT_DIRECTION = stringPreferencesKey("predictive_back_exit_direction")
+        val UI_USE_BLUR = register(booleanPreferencesKey("ui_use_blur"), PreferenceValueType.BOOLEAN)
+        val THEME_MODE = register(stringPreferencesKey("theme_mode"), PreferenceValueType.STRING)
+        val THEME_PALETTE_STYLE = register(stringPreferencesKey("theme_palette_style"), PreferenceValueType.STRING)
+        val THEME_COLOR_SPEC = register(stringPreferencesKey("theme_color_spec"), PreferenceValueType.STRING)
+        val THEME_USE_DYNAMIC_COLOR = register(booleanPreferencesKey("theme_use_dynamic_color"), PreferenceValueType.BOOLEAN)
+        val THEME_SEED_COLOR = register(intPreferencesKey("theme_seed_color"), PreferenceValueType.INT)
+        val UI_USE_MIUIX = register(booleanPreferencesKey("ui_use_miui_x"), PreferenceValueType.BOOLEAN)
+        val UI_USE_MIUIX_MONET = register(booleanPreferencesKey("ui_use_miui_x_monet"), PreferenceValueType.BOOLEAN)
+        val UI_USE_APPLE_FLOATING_BAR = register(booleanPreferencesKey("ui_use_apple_floating_bar"), PreferenceValueType.BOOLEAN)
+        val UI_DYN_COLOR_FOLLOW_PKG_ICON = register(booleanPreferencesKey("ui_dyn_color_follow_pkg_icon"), PreferenceValueType.BOOLEAN)
+        val LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON =
+            register(booleanPreferencesKey("live_activity_dyn_color_follow_pkg_icon"), PreferenceValueType.BOOLEAN)
+        val PREDICTIVE_BACK_ANIMATION = register(stringPreferencesKey("predictive_back_animation"), PreferenceValueType.STRING)
+        val PREDICTIVE_BACK_EXIT_DIRECTION =
+            register(stringPreferencesKey("predictive_back_exit_direction"), PreferenceValueType.STRING)
 
         // Show Live Activity
-        val SHOW_LIVE_ACTIVITY = booleanPreferencesKey("show_live_activity")
+        val SHOW_LIVE_ACTIVITY = register(booleanPreferencesKey("show_live_activity"), PreferenceValueType.BOOLEAN)
 
         // Show Mi Island
-        val SHOW_MI_ISLAND = booleanPreferencesKey("show_mi_island")
-        val SHOW_MI_ISLAND_BYPASS_RESTRICTION = booleanPreferencesKey("show_mi_island_bypass_restriction")
-        val SHOW_MI_ISLAND_OUTER_GLOW = booleanPreferencesKey("show_mi_island_outer_glow")
+        val SHOW_MI_ISLAND = register(booleanPreferencesKey("show_mi_island"), PreferenceValueType.BOOLEAN)
+        val SHOW_MI_ISLAND_BYPASS_RESTRICTION =
+            register(booleanPreferencesKey("show_mi_island_bypass_restriction"), PreferenceValueType.BOOLEAN)
+        val SHOW_MI_ISLAND_OUTER_GLOW = register(booleanPreferencesKey("show_mi_island_outer_glow"), PreferenceValueType.BOOLEAN)
 
         // The duration to keep the network blocked to bypass Xiaomi's notification scanner
-        val SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS = intPreferencesKey("show_mi_island_blocking_interval")
+        val SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS =
+            register(intPreferencesKey("show_mi_island_blocking_interval"), PreferenceValueType.INT)
 
         // Use Biometric Auth Install
-        val INSTALLER_REQUIRE_BIOMETRIC_AUTH = stringPreferencesKey("installer_require_biometric_auth_mode")
+        val INSTALLER_REQUIRE_BIOMETRIC_AUTH =
+            register(stringPreferencesKey("installer_require_biometric_auth_mode"), PreferenceValueType.STRING)
 
         // Use Biometric Auth Uninstall
-        val UNINSTALLER_REQUIRE_BIOMETRIC_AUTH = booleanPreferencesKey("uninstaller_use_biometric_auth")
+        val UNINSTALLER_REQUIRE_BIOMETRIC_AUTH =
+            register(booleanPreferencesKey("uninstaller_use_biometric_auth"), PreferenceValueType.BOOLEAN)
 
         // Show Launcher Icon
-        val SHOW_LAUNCHER_ICON = booleanPreferencesKey("show_launcher_icon")
+        val SHOW_LAUNCHER_ICON = register(booleanPreferencesKey("show_launcher_icon"), PreferenceValueType.BOOLEAN)
 
         // Show System Icon for Packages
-        val PREFER_SYSTEM_ICON_FOR_INSTALL = booleanPreferencesKey("prefer_system_icon_for_updates")
+        val PREFER_SYSTEM_ICON_FOR_INSTALL =
+            register(booleanPreferencesKey("prefer_system_icon_for_updates"), PreferenceValueType.BOOLEAN)
 
         // ForegroundInfoHandler
-        val SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION = booleanPreferencesKey("show_dialog_when_pressing_notification")
-        val NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS = intPreferencesKey("notification_success_auto_clear_seconds")
+        val SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION =
+            register(booleanPreferencesKey("show_dialog_when_pressing_notification"), PreferenceValueType.BOOLEAN)
+        val NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS =
+            register(intPreferencesKey("notification_success_auto_clear_seconds"), PreferenceValueType.INT)
 
         // Auto Lock Installer
-        val AUTO_LOCK_INSTALLER = booleanPreferencesKey("auto_lock_installer")
+        val AUTO_LOCK_INSTALLER = register(booleanPreferencesKey("auto_lock_installer"), PreferenceValueType.BOOLEAN)
 
         // ConfigUtil
-        val AUTHORIZER = stringPreferencesKey("authorizer")
-        val CUSTOMIZE_AUTHORIZER = stringPreferencesKey("customize_authorizer")
-        val UNINSTALL_FLAGS = intPreferencesKey("uninstall_flags")
-        val USER_SET_LSPOSED_ACTIVE = booleanPreferencesKey("is_lsposed_active")
+        val AUTHORIZER = register(stringPreferencesKey("authorizer"), PreferenceValueType.STRING)
+        val CUSTOMIZE_AUTHORIZER = register(stringPreferencesKey("customize_authorizer"), PreferenceValueType.STRING)
+        val UNINSTALL_FLAGS = register(intPreferencesKey("uninstall_flags"), PreferenceValueType.INT)
+        val USER_SET_LSPOSED_ACTIVE = register(booleanPreferencesKey("is_lsposed_active"), PreferenceValueType.BOOLEAN)
 
         // ApplyViewModel
-        val USER_READ_SCOPE_TIPS = booleanPreferencesKey("user_read_scope_tips")
-        val APPLY_ORDER_TYPE = stringPreferencesKey("apply_order_type")
-        val APPLY_ORDER_IN_REVERSE = booleanPreferencesKey("apply_order_in_reverse")
-        val APPLY_SELECTED_FIRST = booleanPreferencesKey("apply_selected_first")
-        val APPLY_SHOW_SYSTEM_APP = booleanPreferencesKey("apply_show_system_app")
-        val APPLY_SHOW_PACKAGE_NAME = booleanPreferencesKey("apply_show_package_name")
+        val USER_READ_SCOPE_TIPS = register(booleanPreferencesKey("user_read_scope_tips"), PreferenceValueType.BOOLEAN)
+        val APPLY_ORDER_TYPE = register(stringPreferencesKey("apply_order_type"), PreferenceValueType.STRING)
+        val APPLY_ORDER_IN_REVERSE = register(booleanPreferencesKey("apply_order_in_reverse"), PreferenceValueType.BOOLEAN)
+        val APPLY_SELECTED_FIRST = register(booleanPreferencesKey("apply_selected_first"), PreferenceValueType.BOOLEAN)
+        val APPLY_SHOW_SYSTEM_APP = register(booleanPreferencesKey("apply_show_system_app"), PreferenceValueType.BOOLEAN)
+        val APPLY_SHOW_PACKAGE_NAME = register(booleanPreferencesKey("apply_show_package_name"), PreferenceValueType.BOOLEAN)
 
         // InstallerViewModel
         val DIALOG_VERSION_COMPARE_SINGLE_LINE =
-            booleanPreferencesKey("show_dialog_version_compare_single_line")
+            register(booleanPreferencesKey("show_dialog_version_compare_single_line"), PreferenceValueType.BOOLEAN)
         val DIALOG_SDK_COMPARE_MULTI_LINE =
-            booleanPreferencesKey("show_dialog_sdk_compare_multi_line")
+            register(booleanPreferencesKey("show_dialog_sdk_compare_multi_line"), PreferenceValueType.BOOLEAN)
         val CLOSE_SESSION_COUNTDOWN =
-            intPreferencesKey("show_dhizuku_auto_close_count_down_menu")
+            register(intPreferencesKey("show_dhizuku_auto_close_count_down_menu"), PreferenceValueType.INT)
         val DIALOG_SHOW_EXTENDED_MENU =
-            booleanPreferencesKey("show_dialog_install_extended_menu")
+            register(booleanPreferencesKey("show_dialog_install_extended_menu"), PreferenceValueType.BOOLEAN)
         val DIALOG_SHOW_INTELLIGENT_SUGGESTION =
-            booleanPreferencesKey("show_dialog_install_intelligent_suggestion")
+            register(booleanPreferencesKey("show_dialog_install_intelligent_suggestion"), PreferenceValueType.BOOLEAN)
         val DIALOG_DISABLE_NOTIFICATION_ON_DISMISS =
-            booleanPreferencesKey("show_disable_notification_for_dialog_install")
+            register(booleanPreferencesKey("show_disable_notification_for_dialog_install"), PreferenceValueType.BOOLEAN)
         val DIALOG_SHOW_OPPO_SPECIAL =
-            booleanPreferencesKey("show_oppo_special")
+            register(booleanPreferencesKey("show_oppo_special"), PreferenceValueType.BOOLEAN)
         val DIALOG_AUTO_SILENT_INSTALL =
-            booleanPreferencesKey("auto_silent_install")
+            register(booleanPreferencesKey("auto_silent_install"), PreferenceValueType.BOOLEAN)
         val DIALOG_LONG_CLICK_BACKGROUND_INSTALL =
-            booleanPreferencesKey("long_click_background_install")
+            register(booleanPreferencesKey("long_click_background_install"), PreferenceValueType.BOOLEAN)
         val DETECT_XPOSED_MODULE =
-            booleanPreferencesKey("detect_xposed_module")
+            register(booleanPreferencesKey("detect_xposed_module"), PreferenceValueType.BOOLEAN)
         val QUICK_OPEN_LSPOSED =
-            booleanPreferencesKey("quick_open_lsposed")
+            register(booleanPreferencesKey("quick_open_lsposed"), PreferenceValueType.BOOLEAN)
 
         // Customize Installer
         val MANAGED_INSTALLER_PACKAGES_LIST =
-            stringPreferencesKey("managed_packages_list")
+            register(stringPreferencesKey("managed_packages_list"), PreferenceValueType.STRING)
         val DEFAULT_MANAGED_INSTALLER_PACKAGES = listOf(
             NamedPackage("Google Play Store", "com.android.vending"),
             NamedPackage("Shell", "com.android.shell")
         )
         val MANAGED_BLACKLIST_PACKAGES_LIST =
-            stringPreferencesKey("managed_blacklist_packages_list")
+            register(stringPreferencesKey("managed_blacklist_packages_list"), PreferenceValueType.STRING)
         val MANAGED_SHARED_USER_ID_BLACKLIST =
-            stringPreferencesKey("managed_shared_user_id_blacklist")
+            register(stringPreferencesKey("managed_shared_user_id_blacklist"), PreferenceValueType.STRING)
         val MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST =
-            stringPreferencesKey("managed_shared_user_id_blacklist_exempted_packages_list")
+            register(stringPreferencesKey("managed_shared_user_id_blacklist_exempted_packages_list"), PreferenceValueType.STRING)
         val ALWAYS_USE_ROOT_IN_SYSTEM =
-            booleanPreferencesKey("always_use_root_in_system")
+            register(booleanPreferencesKey("always_use_root_in_system"), PreferenceValueType.BOOLEAN)
 
         // Lab
-        val LAB_ENABLE_MODULE_FLASH = booleanPreferencesKey("enable_module_flash")
-        val LAB_MODULE_FLASH_SHOW_ART = booleanPreferencesKey("module_flash_show_art")
-        val LAB_ROOT_IMPLEMENTATION = stringPreferencesKey("lab_root_implementation")
-        val LAB_HTTP_PROFILE = stringPreferencesKey("lab_http_profile")
-        val LAB_HTTP_SAVE_FILE = booleanPreferencesKey("lab_http_save_file")
-        val LAB_SET_INSTALL_REQUESTER = booleanPreferencesKey("lab_set_install_requester")
-        val LAB_TAP_ICON_TO_SHARE = booleanPreferencesKey("lab_tap_icon_to_share")
-        val LAB_SHOW_FILE_PATH = booleanPreferencesKey("lab_show_file_path")
-        val LAB_SHOW_INSTALL_INITIATOR = booleanPreferencesKey("lab_show_install_initiator")
-        val LAB_INSTALL_WITHOUT_USER_ACTION = booleanPreferencesKey("lab_install_without_user_action")
+        val LAB_ENABLE_MODULE_FLASH = register(booleanPreferencesKey("enable_module_flash"), PreferenceValueType.BOOLEAN)
+        val LAB_MODULE_FLASH_SHOW_ART = register(booleanPreferencesKey("module_flash_show_art"), PreferenceValueType.BOOLEAN)
+        val LAB_ROOT_IMPLEMENTATION = register(stringPreferencesKey("lab_root_implementation"), PreferenceValueType.STRING)
+        val LAB_HTTP_PROFILE = register(stringPreferencesKey("lab_http_profile"), PreferenceValueType.STRING)
+        val LAB_HTTP_SAVE_FILE = register(booleanPreferencesKey("lab_http_save_file"), PreferenceValueType.BOOLEAN)
+        val LAB_SET_INSTALL_REQUESTER = register(booleanPreferencesKey("lab_set_install_requester"), PreferenceValueType.BOOLEAN)
+        val LAB_TAP_ICON_TO_SHARE = register(booleanPreferencesKey("lab_tap_icon_to_share"), PreferenceValueType.BOOLEAN)
+        val LAB_SHOW_FILE_PATH = register(booleanPreferencesKey("lab_show_file_path"), PreferenceValueType.BOOLEAN)
+        val LAB_SHOW_INSTALL_INITIATOR = register(booleanPreferencesKey("lab_show_install_initiator"), PreferenceValueType.BOOLEAN)
+        val LAB_INSTALL_WITHOUT_USER_ACTION =
+            register(booleanPreferencesKey("lab_install_without_user_action"), PreferenceValueType.BOOLEAN)
 
         // Debug
-        val ENABLE_FILE_LOGGING = booleanPreferencesKey("enable_file_logging")
+        val ENABLE_FILE_LOGGING = register(booleanPreferencesKey("enable_file_logging"), PreferenceValueType.BOOLEAN)
 
         // Updater
-        val GITHUB_UPDATE_CHANNEL = stringPreferencesKey("github_update_channel")
-        val CUSTOM_GITHUB_PROXY_URL = stringPreferencesKey("custom_github_proxy_url")
+        val GITHUB_UPDATE_CHANNEL = register(stringPreferencesKey("github_update_channel"), PreferenceValueType.STRING)
+        val CUSTOM_GITHUB_PROXY_URL = register(stringPreferencesKey("custom_github_proxy_url"), PreferenceValueType.STRING)
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {

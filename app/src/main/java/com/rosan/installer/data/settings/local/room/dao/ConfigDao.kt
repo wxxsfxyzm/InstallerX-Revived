@@ -44,6 +44,12 @@ interface ConfigDao {
     @Insert
     suspend fun insert(entity: ConfigEntity)
 
+    @Insert
+    suspend fun insertAndReturnId(entity: ConfigEntity): Long
+
     @Delete
     suspend fun delete(entity: ConfigEntity)
+
+    @Query("delete from config")
+    suspend fun deleteAll()
 }

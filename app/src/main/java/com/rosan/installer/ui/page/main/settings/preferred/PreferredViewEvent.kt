@@ -14,4 +14,18 @@ sealed interface PreferredViewEvent {
         val exception: Throwable,
         val retryAction: PreferredViewAction
     ) : PreferredViewEvent
+
+    data class LaunchBackupExport(
+        val fileName: String,
+        val content: String
+    ) : PreferredViewEvent
+
+    data class ShowBackupMessage(
+        @param:StringRes val messageResId: Int
+    ) : PreferredViewEvent
+
+    data class ShowBackupError(
+        @param:StringRes val titleResId: Int,
+        val exception: Throwable
+    ) : PreferredViewEvent
 }

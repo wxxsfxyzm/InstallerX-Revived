@@ -8,4 +8,6 @@ sealed interface PreferredViewAction {
     data object RequestIgnoreBatteryOptimization : PreferredViewAction
     data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction
     data class SetDefaultInstaller(val lock: Boolean) : PreferredViewAction
+    data object RequestExportBackup : PreferredViewAction
+    data class RestoreBackupFromJson(val rawJson: String) : PreferredViewAction
 }

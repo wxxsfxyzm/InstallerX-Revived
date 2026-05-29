@@ -16,6 +16,7 @@ import com.rosan.installer.data.settings.provider.SystemEnvProviderImpl
 import com.rosan.installer.data.settings.provider.ThemeStateProviderImpl
 import com.rosan.installer.data.settings.repository.AppRepositoryImpl
 import com.rosan.installer.data.settings.repository.AppSettingsRepositoryImpl
+import com.rosan.installer.data.settings.repository.BackupRepositoryImpl
 import com.rosan.installer.data.settings.repository.ConfigRepositoryImpl
 import com.rosan.installer.data.settings.repository.OperationHistoryRepositoryImpl
 import com.rosan.installer.domain.history.repository.OperationHistoryRepository
@@ -25,7 +26,11 @@ import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
+import com.rosan.installer.domain.settings.repository.BackupRepository
 import com.rosan.installer.domain.settings.repository.ConfigRepository
+import com.rosan.installer.domain.settings.usecase.backup.ExportBackupUseCase
+import com.rosan.installer.domain.settings.usecase.backup.ParseBackupUseCase
+import com.rosan.installer.domain.settings.usecase.backup.RestoreBackupUseCase
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
@@ -55,6 +60,7 @@ val settingsModule = module {
     singleOf(::AppRepositoryImpl) { bind<AppRepository>() }
     singleOf(::ConfigRepositoryImpl) { bind<ConfigRepository>() }
     singleOf(::OperationHistoryRepositoryImpl) { bind<OperationHistoryRepository>() }
+    singleOf(::BackupRepositoryImpl) { bind<BackupRepository>() }
 
     single(createdAtStart = true) {
         DatabaseInitializer(
@@ -99,6 +105,9 @@ val settingsModule = module {
     factoryOf(::GetResolvedConfigUseCase)
     factoryOf(::GetConfigDraftUseCase)
     factoryOf(::SaveConfigUseCase)
+    factoryOf(::ExportBackupUseCase)
+    factoryOf(::ParseBackupUseCase)
+    factoryOf(::RestoreBackupUseCase)
     factoryOf(::UpdateSettingUseCase)
     factoryOf(::ToggleUninstallFlagUseCase)
     factoryOf(::SetLauncherIconUseCase)
