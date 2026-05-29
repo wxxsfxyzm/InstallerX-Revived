@@ -9,7 +9,7 @@ object BuildConfig {
     const val MIN_SDK = 26
     const val JDK_VERSION = 25
 
-    const val VERSION_CODE = 52
+    const val VERSION_CODE = 53
 }
 
 // Get git commit hash safely, compatible with configuration cache
