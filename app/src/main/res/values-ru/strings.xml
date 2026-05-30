@@ -832,4 +832,7 @@
     <string name="installer_settings_dialog_automation_options">Варианты автоматизации</string>
     <string name="long_click_background_install">Длительное нажатие для установки в фоне</string>
     <string name="long_click_background_install_desc">Фоновый режим при длительном нажатии кнопки \'Установить\'</string>
+    <string name="home_learn_more_title">Узнать больше</string>
+    <string name="home_learn_more_installerx_title">Узнайте больше о InstallerX Revived</string>
+    <string name="home_learn_more_installerx_desc">Узнайте, как настроить и использовать InstallerX</string>
 </resources>
