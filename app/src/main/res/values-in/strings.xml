@@ -390,7 +390,7 @@
     <string name="exception_install_failed_invalid_apk">APK tidak sah (paket rusak). Silakan unduh ulang dan coba lagi</string>
     <string name="exception_install_failed_invalid_uri">URI tidak valid</string>
     <string name="exception_install_failed_insufficient_storage">Penyimpanan penuh, coba kosongkan ruang</string>
-    <string name="exception_install_failed_duplicate_package">Tanda tangan paket telah berubah, pastikan paket Anda aman dan hapus instalasi aplikasi, lalu coba lagi</string>
+    <string name="exception_install_failed_duplicate_package">Aplikasi dengan nama paket yang sama sudah ada</string>
     <string name="exception_install_failed_no_shared_user">File base.apk dengan UID yang cocok tidak dapat ditemukan, silakan unduh dan coba lagi</string>
     <string name="exception_install_failed_update_incompatible">Pembaruan tidak kompatibel, harap hapus instalasi dan coba lagi</string>
     <string name="exception_install_failed_shared_user_incompatible">Tanda tangan paket tidak cocok</string>
@@ -829,4 +829,7 @@
     <string name="home_device_info_system">Sistem</string>
     <string name="home_device_info_active_authorizer">Authorizer yang digunakan</string>
     <string name="home_device_info_default_installer">Aktivitas Penginstal Default</string>
+    <string name="installer_settings_dialog_automation_options">Pilihan Otomatisasi</string>
+    <string name="long_click_background_install">Tekan lama untuk memasang di latar belakang</string>
+    <string name="long_click_background_install_desc">Latar belakang saat menekan lama tombol pasang</string>
 </resources>

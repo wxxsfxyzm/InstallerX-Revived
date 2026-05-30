@@ -196,7 +196,7 @@
     <string name="installer_installing">Instalando…</string>
     <string name="installer_install_failed">Falha na instalação</string>
     <string name="installer_install_success">Instalação bem sucedida</string>
-    <string name="installer_move_to_background">Instalação silenciosa</string>
+    <string name="installer_move_to_background">Executar em segundo plano</string>
     <string name="installer_error_reason">Motivo do erro</string>
     <string name="installer_unknown_error">Erro Desconhecido</string>
     <string name="installer_channel_name">Notificação de Instalação</string>
@@ -272,7 +272,7 @@
     <string name="exception_install_failed_invalid_apk">APK inválido (pacote corrompido). Baixe-o novamente e repita a operação</string>
     <string name="exception_install_failed_invalid_uri">URI inválida</string>
     <string name="exception_install_failed_insufficient_storage">Armazenamento cheio, tente liberar espaço</string>
-    <string name="exception_install_failed_duplicate_package">Assinatura do pacote alterada, certifique-se de que seu pacote é seguro e desinstale o app, depois tente novamente</string>
+    <string name="exception_install_failed_duplicate_package">Já existe um aplicativo com o mesmo nome de pacote</string>
     <string name="exception_install_failed_no_shared_user">Não foi possível encontrar o base.apk com o UID correspondente. Baixe-o e tente novamente</string>
     <string name="exception_install_failed_update_incompatible">Atualização incompatível, por gentileza desinstale e tente novamente</string>
     <string name="exception_install_failed_shared_user_incompatible">Assinaturas do pacote não correspondem</string>
@@ -497,8 +497,8 @@
     <string name="uninstall_delete_system_app_desc">Permitir a exclusão de apps do sistema para o usuário atual</string>
     <string name="uninstall_failed_message">Falha na Desinstalação</string>
     <string name="exception_package_manager_name_not_found">Nome do pacote não encontrado</string>
-    <string name="auto_background_install">Instalação Silenciosa Automática</string>
-    <string name="auto_background_install_desc">Instalação silenciosa automática ao exibir a caixa de diálogo</string>
+    <string name="auto_background_install">Iniciar Instalação em Segundo Plano</string>
+    <string name="auto_background_install_desc">Iniciar a instalação em segundo plano ao pressionar o botão “Instalar”</string>
     <string name="suggestion_uninstall_and_retry_desc">Isso desinstalará a versão atual do app e tentará instalar a nova versão</string>
     <string name="suggestion_uninstall_and_retry_keep_data_desc">Isso desinstalará a versão atual do app, mantendo seus dados, e tentará instalar a nova versão</string>
     <string name="suggestion_allow_downgrade_desc">Permitir Temporariamente o Downgrade e repetir</string>
@@ -829,4 +829,7 @@
     <string name="config_toast_mode_disable">Nunca mostrar notificações</string>
     <string name="config_toast_mode_background_only">Somente quando a caixa de diálogo estiver oculta</string>
     <string name="config_toast_mode_always">Sempre exibir Toast</string>
+    <string name="installer_settings_dialog_automation_options">Opções de Automação</string>
+    <string name="long_click_background_install">Pressionar para instalar em segundo plano</string>
+    <string name="long_click_background_install_desc">O que acontece ao pressionar o botão de instalação</string>
 </resources>

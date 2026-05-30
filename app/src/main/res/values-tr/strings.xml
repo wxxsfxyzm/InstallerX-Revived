@@ -829,4 +829,7 @@
     <string name="config_toast_mode_background_only">Yalnızca diyalog gizlendiğinde</string>
     <string name="config_toast_mode_disable">Asla durum mesajı gösterme</string>
     <string name="config_toast_mode_always">Durum mesajı her zaman göster</string>
+    <string name="installer_settings_dialog_automation_options">Otomasyon Seçenekleri</string>
+    <string name="long_click_background_install">Arka planda yükleme için uzun basın</string>
+    <string name="long_click_background_install_desc">Yükle düğmesine uzun basıldığında arka plan</string>
 </resources>
