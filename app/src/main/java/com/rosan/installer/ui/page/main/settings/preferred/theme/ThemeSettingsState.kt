@@ -14,7 +14,7 @@ import com.rosan.installer.ui.theme.material.ThemeMode
 
 data class ThemeSettingsState(
     val showMiuixUI: Boolean = false,
-    val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+    val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,

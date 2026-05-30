@@ -171,7 +171,7 @@ fun MiuixThemeSettingsPage(
                             viewModel.dispatch(ThemeSettingsAction.SetThemeMode(newMode))
                         }
                     )
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.theme_settings_use_blur),
                             description = stringResource(R.string.theme_settings_use_blur_desc),
@@ -240,7 +240,7 @@ fun MiuixThemeSettingsPage(
                             }
                         )
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && uiState.showLiveActivity)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && uiState.showLiveActivity)
                         MiuixSwitchWidget(
                             title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
                             description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),

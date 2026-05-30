@@ -135,7 +135,7 @@ class AppSettingsRepositoryImpl(
             seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: PresetColors.first().color.toArgb(),
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useDynColorFollowPkgIconForLiveActivity = prefs[AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
-            useBlur = prefs[AppDataStore.UI_USE_BLUR] ?: (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+            useBlur = prefs[AppDataStore.UI_USE_BLUR] ?: (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU),
             predictiveBackAnimation = PredictiveBackAnimation.fromValueOrDefault(
                 prefs[AppDataStore.PREDICTIVE_BACK_ANIMATION] ?: PredictiveBackAnimation.MIUIX.value
             ),

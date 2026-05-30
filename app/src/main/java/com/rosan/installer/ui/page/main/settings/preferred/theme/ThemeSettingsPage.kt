@@ -266,7 +266,7 @@ fun ThemeSettingsPage(
                 SegmentedColumn(
                     title = stringResource(R.string.theme_settings_google_ui)
                 ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         item {
                             SwitchWidget(
                                 icon = AppIcons.Blur,

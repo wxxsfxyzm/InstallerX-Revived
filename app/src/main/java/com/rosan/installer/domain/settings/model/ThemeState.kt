@@ -20,7 +20,7 @@ data class ThemeState(
     val useMiuixMonet: Boolean = false,
     val useAppleFloatingBar: Boolean = false,
     val seedColor: Color = PresetColors.first().color,
-    val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+    val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
     val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.MIUIX,
     val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.ALWAYS_RIGHT
 )
