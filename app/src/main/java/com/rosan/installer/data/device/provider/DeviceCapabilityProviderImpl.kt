@@ -9,16 +9,18 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import android.text.TextUtils
 import androidx.core.net.toUri
 import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.installer.core.bitmask.hasFlag
+import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.reflection.ReflectionProvider
+import com.rosan.installer.core.reflection.invoke
 import com.rosan.installer.core.reflection.invokeStatic
-import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.domain.device.model.ShizukuMode
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.preferences.RootMode
-import com.rosan.installer.core.bitmask.hasFlag
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import timber.log.Timber
+import java.io.File
 
 class DeviceCapabilityProviderImpl(
     private val context: Context,
@@ -43,9 +46,31 @@ class DeviceCapabilityProviderImpl(
         private const val KEY_MI_OS_VERSION_NAME = "ro.mi.os.version.name"
         private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
         private const val KEY_OPLUS_SUB_API = "ro.build.version.oplus.sub_api"
+
+        private const val SAMSUNG_FLOATING_FEATURE_CLASS =
+            "com.samsung.android.feature.SemFloatingFeature"
+        private const val KEY_SAMSUNG_PRODUCT_NAME =
+            "SEC_FLOATING_FEATURE_SETTINGS_CONFIG_BRAND_NAME"
+
+        private val SAMSUNG_FLOATING_FEATURE_PATHS = listOf(
+            "/vendor/etc/floating_feature.xml",
+            "/system/etc/floating_feature.xml",
+            "/system/system/etc/floating_feature.xml",
+            "/product/etc/floating_feature.xml",
+            "/odm/etc/floating_feature.xml"
+        )
+
+        private val OEM_MARKET_NAME_PROPERTY_KEYS = listOf(
+            "ro.product.marketname",
+            "ro.vendor.oplus.market.name",
+            "ro.vivo.market.name"
+        )
     }
 
-    private val systemPropertiesClass by lazy { @SuppressLint("PrivateApi") Class.forName("android.os.SystemProperties") }
+    private val systemPropertiesClass by lazy {
+        @SuppressLint("PrivateApi")
+        Class.forName("android.os.SystemProperties")
+    }
 
     override val isSessionInstallSupported: Boolean by lazy {
         calculateSessionInstallSupport() || isSystemApp
@@ -64,7 +89,10 @@ class DeviceCapabilityProviderImpl(
                     "content://storage/emulated/0/test.apk".toUri(),
                     "application/vnd.android.package-archive"
                 )
-            val resolveInfo = context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+            val resolveInfo = context.packageManager.resolveActivity(
+                intent,
+                PackageManager.MATCH_DEFAULT_ONLY
+            )
             Timber.d("ResolveInfo: $resolveInfo")
             return resolveInfo?.activityInfo?.packageName == context.packageName
         }
@@ -109,14 +137,11 @@ class DeviceCapabilityProviderImpl(
     }
 
     override val deviceName: String by lazy {
-        val globalDeviceName =
-            Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
-
-        if (!globalDeviceName.isNullOrBlank()) {
-            globalDeviceName
-        } else {
-            DeviceConfig.deviceName
-        }
+        getSamsungProductName()
+            ?: OEM_MARKET_NAME_PROPERTY_KEYS.firstNotNullOfOrNull { key ->
+                getSystemProperty(key, Build.UNKNOWN).takeIfValidDeviceName()
+            }
+            ?: DeviceConfig.deviceName
     }
 
     override var isLSPosedActive: Boolean = false
@@ -188,7 +213,8 @@ class DeviceCapabilityProviderImpl(
                 if (Shizuku.pingBinder()) {
                     val mode = ShizukuMode.fromUid(Shizuku.getUid())
                     _shizukuModeFlow.value = mode
-                    _shizukuAuthorizedFlow.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+                    _shizukuAuthorizedFlow.value =
+                        Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
                     Timber.d("Shizuku binder received. Status updated to: $mode")
                 } else {
                     _shizukuModeFlow.value = ShizukuMode.NONE
@@ -260,7 +286,9 @@ class DeviceCapabilityProviderImpl(
         val miPackageManagerVersion = getMiuiPackageInstallerVersion()
         return if (miPackageManagerVersion != null) {
             miPackageManagerVersion.second >= MIN_SUPPORTED_MIUI_VERSION_CODE
-        } else true
+        } else {
+            true
+        }
     }
 
     private fun getMiuiPackageInstallerVersion(): Pair<String, Long>? =
@@ -270,7 +298,8 @@ class DeviceCapabilityProviderImpl(
             val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 info.longVersionCode
             } else {
-                @Suppress("DEPRECATION") info.versionCode.toLong()
+                @Suppress("DEPRECATION")
+                info.versionCode.toLong()
             }
             versionName to versionCode
         } catch (_: PackageManager.NameNotFoundException) {
@@ -280,11 +309,79 @@ class DeviceCapabilityProviderImpl(
             null
         }
 
-    private fun getSystemProperty(key: String): String? =
+    private fun getSamsungProductName(): String? {
+        if (DeviceConfig.currentManufacturer != Manufacturer.SAMSUNG) return null
+
+        val productName = getSamsungProductNameFromFloatingFeature()
+            ?: getSamsungProductNameFromFloatingFeatureFile()
+
+        return productName.withManufacturerPrefix(Manufacturer.SAMSUNG)
+    }
+
+    private fun getSamsungProductNameFromFloatingFeature(): String? =
+        try {
+            val clazz = Class.forName(SAMSUNG_FLOATING_FEATURE_CLASS)
+            val instance = reflect.invokeStatic<Any>("getInstance", clazz) ?: return null
+            val value = reflect.invoke<String>(
+                instance,
+                "getString",
+                clazz,
+                arrayOf(String::class.java),
+                KEY_SAMSUNG_PRODUCT_NAME
+            )
+
+            value.takeIfValidDeviceName()
+        } catch (e: Throwable) {
+            Timber.d(e, "Failed to read Samsung product name from SemFloatingFeature")
+            null
+        }
+
+    private fun getSamsungProductNameFromFloatingFeatureFile(): String? {
+        val pattern = Regex(
+            "<$KEY_SAMSUNG_PRODUCT_NAME>\\s*(.*?)\\s*</$KEY_SAMSUNG_PRODUCT_NAME>",
+            RegexOption.DOT_MATCHES_ALL
+        )
+
+        return SAMSUNG_FLOATING_FEATURE_PATHS.firstNotNullOfOrNull { path ->
+            try {
+                pattern.find(File(path).readText())
+                    ?.groupValues
+                    ?.getOrNull(1)
+                    .takeIfValidDeviceName()
+            } catch (_: Throwable) {
+                null
+            }
+        }
+    }
+
+    private fun String?.takeIfValidDeviceName(): String? =
+        this?.trim()
+            ?.takeIf {
+                it.isNotEmpty() &&
+                        !TextUtils.equals(it, Build.UNKNOWN) &&
+                        !TextUtils.equals(it, "unknown") &&
+                        !TextUtils.equals(it, "null")
+            }
+
+    private fun String?.withManufacturerPrefix(manufacturer: Manufacturer): String? {
+        val name = this.takeIfValidDeviceName() ?: return null
+        val displayName = manufacturer.displayName
+
+        if (manufacturer == Manufacturer.UNKNOWN) return name
+
+        return if (name.startsWith(displayName, ignoreCase = true)) {
+            name
+        } else {
+            "$displayName $name"
+        }
+    }
+
+    private fun getSystemProperty(key: String, defaultValue: String = ""): String? =
         reflect.invokeStatic<String>(
             "get",
             systemPropertiesClass,
             arrayOf(String::class.java, String::class.java),
-            key, ""
+            key,
+            defaultValue
         )?.takeIf { it.isNotEmpty() }
 }
