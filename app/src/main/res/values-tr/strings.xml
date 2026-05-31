@@ -832,4 +832,7 @@
     <string name="installer_settings_dialog_automation_options">Otomasyon Seçenekleri</string>
     <string name="long_click_background_install">Arka planda yükleme için uzun basın</string>
     <string name="long_click_background_install_desc">Yükle düğmesine uzun basıldığında arka plan</string>
+    <string name="home_learn_more_title">Daha fazla bilgi edin</string>
+    <string name="home_learn_more_installerx_title">InstallerX Revived hakkında bilgi edin</string>
+    <string name="home_learn_more_installerx_desc">InstallerX\'i nasıl yapılandıracağınızı ve kullanacağınızı öğrenin</string>
 </resources>
