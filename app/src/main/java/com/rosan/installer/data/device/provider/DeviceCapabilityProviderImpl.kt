@@ -61,9 +61,10 @@ class DeviceCapabilityProviderImpl(
         )
 
         private val OEM_MARKET_NAME_PROPERTY_KEYS = listOf(
-            "ro.product.marketname",
-            "ro.vendor.oplus.market.name",
-            "ro.vivo.market.name"
+            "ro.product.marketname",        // Xiaomi
+            "ro.vendor.oplus.market.name",  // Oppo
+            "ro.vivo.market.name",          // Vivo
+            "ro.config.marketing_name"      // Huawei/Honor
         )
     }
 
