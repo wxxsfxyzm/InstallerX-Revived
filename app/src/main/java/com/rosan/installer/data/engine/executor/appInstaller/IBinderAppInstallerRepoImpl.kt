@@ -4,6 +4,7 @@ package com.rosan.installer.data.engine.executor.appInstaller
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.IPackageInstaller
 import android.content.pm.IPackageInstallerSession
 import android.content.pm.IPackageManager
@@ -33,6 +34,7 @@ import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
+import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
@@ -52,7 +54,8 @@ abstract class IBinderAppInstallerRepoImpl(
     protected val context: Context,
     protected val reflect: ReflectionProvider,
     protected val capabilityProvider: DeviceCapabilityProvider,
-    protected val postInstallTaskProvider: PostInstallTaskProvider
+    protected val postInstallTaskProvider: PostInstallTaskProvider,
+    protected val componentOpsProvider: ComponentOpsProvider
 ) : AppInstallerRepository {
     private val taskScope = CoroutineScope(Dispatchers.IO)
 
@@ -198,7 +201,11 @@ abstract class IBinderAppInstallerRepoImpl(
         )
 
         // The result verification logic remains the same.
-        PackageManagerUtil.uninstallResultVerify(context, receiver)
+        PackageManagerUtil.uninstallResultVerify(
+            context = context,
+            receiver = receiver,
+            activityStarter = pendingUserActionStarter(config)
+        )
     }
 
     private suspend fun doInnerWork(
@@ -240,7 +247,7 @@ abstract class IBinderAppInstallerRepoImpl(
         try {
             session = createSession(config, entities, packageInstaller, packageName)
             installIts(entities, session)
-            commit(session)
+            commit(session, config)
         } catch (e: Exception) {
             session?.abandon()
             throw e
@@ -380,11 +387,29 @@ abstract class IBinderAppInstallerRepoImpl(
     }
 
     @SuppressLint("RequestInstallPackagesPolicy")
-    private suspend fun commit(session: Session) {
+    private suspend fun commit(session: Session, config: ConfigModel) {
         val receiver = LocalIntentReceiver(reflect)
         session.commit(receiver.getIntentSender())
-        PackageManagerUtil.installResultVerify(context, receiver)
+        PackageManagerUtil.installResultVerify(
+            context = context,
+            receiver = receiver,
+            activityStarter = pendingUserActionStarter(config)
+        )
     }
+
+    private fun pendingUserActionStarter(config: ConfigModel): PackageManagerUtil.ActivityStarter =
+        PackageManagerUtil.ActivityStarter { intent ->
+            val startedPrivileged = runCatching {
+                componentOpsProvider.startActivityPrivileged(config, intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }.getOrElse { error ->
+                Timber.w(error, "Privileged confirmation launch failed. Falling back to app context.")
+                false
+            }
+
+            if (!startedPrivileged) {
+                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
+        }
 
     open suspend fun doFinishWork(
         config: ConfigModel,

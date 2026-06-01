@@ -14,6 +14,7 @@ import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
+import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
@@ -22,7 +23,8 @@ class AppInstallerRepositoryImpl(
     private val context: Context,
     private val reflect: ReflectionProvider,
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
-    private val postInstallTaskProvider: PostInstallTaskProvider
+    private val postInstallTaskProvider: PostInstallTaskProvider,
+    private val componentOpsProvider: ComponentOpsProvider
 ) : AppInstallerRepository {
     override suspend fun doInstallWork(
         config: ConfigModel,
@@ -92,17 +94,17 @@ class AppInstallerRepositoryImpl(
      */
     private fun resolveRepo(config: ConfigModel): AppInstallerRepository {
         return when (config.authorizer) {
-            Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
-            Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+            Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, componentOpsProvider)
+            Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, componentOpsProvider)
             Authorizer.None -> {
                 if (deviceCapabilityProvider.isSystemApp) {
-                    SystemAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+                    SystemAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, componentOpsProvider)
                 } else {
                     NoneAppInstallerRepoImpl(context, reflect, postInstallTaskProvider)
                 }
             }
 
-            else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+            else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, componentOpsProvider)
         }
     }
 }

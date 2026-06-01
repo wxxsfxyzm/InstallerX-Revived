@@ -250,4 +250,7 @@ dependencies {
     implementation(libs.focus.api)
 
     implementation(libs.materialKolor)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
 }

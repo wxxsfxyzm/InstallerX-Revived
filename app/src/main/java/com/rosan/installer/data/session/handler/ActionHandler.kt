@@ -97,7 +97,8 @@ class ActionHandler(
         context = context,
         networkResolver = networkResolver,
         cacheDirectory = cacheDirectory,
-        progressFlow = mutableProgressFlow
+        progressFlow = mutableProgressFlow,
+        shellExecutionProvider = shellExecutionProvider
     )
 
     override suspend fun onStart() {
@@ -235,7 +236,7 @@ class ActionHandler(
 
         // Resolve Data (IO Heavy - Cancellable via SourceResolver)
         Timber.d("[id=$sessionId] resolve: Resolving data URIs...")
-        val resolveResult = sourceResolver.resolve(activity.intent)
+        val resolveResult = sourceResolver.resolve(activity.intent, session.config)
 
         // Check active after IO
         if (!currentCoroutineContext().isActive) throw CancellationException()

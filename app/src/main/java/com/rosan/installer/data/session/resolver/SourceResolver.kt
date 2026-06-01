@@ -18,7 +18,10 @@ import com.rosan.installer.data.session.util.getRealPathFromUri
 import com.rosan.installer.data.session.util.pathUnify
 import com.rosan.installer.data.session.util.transferWithProgress
 import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.session.exception.ResolveException
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.model.ResolveResult
@@ -40,13 +43,14 @@ class SourceResolver(
     private val context: Context,
     private val networkResolver: NetworkResolver,
     private val cacheDirectory: String,
-    private val progressFlow: MutableSharedFlow<ProgressEntity>
+    private val progressFlow: MutableSharedFlow<ProgressEntity>,
+    private val shellExecutionProvider: ShellExecutionProvider
 ) {
     private val closeables = mutableListOf<Closeable>()
 
     fun getTrackedCloseables(): List<Closeable> = closeables
 
-    suspend fun resolve(intent: Intent): ResolveResult {
+    suspend fun resolve(intent: Intent, config: ConfigModel): ResolveResult {
         val uris = extractUris(intent)
         Timber.d("resolve: URIs extracted from intent (${uris.size}).")
 
@@ -54,7 +58,7 @@ class SourceResolver(
         for (uri in uris) {
             // Check cancellation between items
             if (!currentCoroutineContext().isActive) throw CancellationException()
-            data.addAll(resolveSingleUri(uri))
+            data.addAll(resolveSingleUri(uri, config))
         }
 
         // Return the packaged result
@@ -158,7 +162,7 @@ class SourceResolver(
         return uris
     }
 
-    private suspend fun resolveSingleUri(uri: Uri): List<DataEntity> {
+    private suspend fun resolveSingleUri(uri: Uri, config: ConfigModel): List<DataEntity> {
         Timber.d("Source URI: $uri")
 
         // Handle null scheme (unlikely but safe to handle)
@@ -171,7 +175,7 @@ class SourceResolver(
                 listOf(DataEntity.FileEntity(path).apply { source = DataEntity.FileEntity(path) })
             }
 
-            "content" -> resolveContentUri(uri)
+            "content" -> resolveContentUri(uri, config)
 
             "http", "https" -> {
                 if (!AppConfig.isInternetAccessEnabled) {
@@ -192,7 +196,7 @@ class SourceResolver(
         }
     }
 
-    private suspend fun resolveContentUri(uri: Uri): List<DataEntity> {
+    private suspend fun resolveContentUri(uri: Uri, config: ConfigModel): List<DataEntity> {
         val afd = try {
             context.contentResolver?.openAssetFileDescriptor(uri, "r")
                 ?: throw IOException("Cannot open file descriptor: $uri")
@@ -208,7 +212,12 @@ class SourceResolver(
                 )
             }
 
-            // Rethrow if it doesn't match the signature or initiator is unknown
+            if (shouldAttemptPrivilegedCopy(e, config)) {
+                Timber.w(e, "SecurityException caught for private content URI. Trying privileged copy fallback.")
+                tryPrivilegedCopyContentUriToCache(uri, config)?.let { return it }
+            }
+
+            // Rethrow if privileged fallback failed or is unavailable.
             throw e
         }
         // Resolve real path
@@ -243,6 +252,47 @@ class SourceResolver(
 
         return cacheStream(uri, afd, realPath)
     }
+
+    private suspend fun tryPrivilegedCopyContentUriToCache(uri: Uri, config: ConfigModel): List<DataEntity>? =
+        withContext(Dispatchers.IO) {
+            val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
+            val escapedUri = uri.toString().shellQuote()
+            val escapedTempPath = tempFile.absolutePath.shellQuote()
+            val command = "content read --uri $escapedUri > $escapedTempPath && [ -s $escapedTempPath ]"
+            val result = runCatching {
+                shellExecutionProvider.executeCommandArray(config, arrayOf("sh", "-c", command))
+            }.getOrElse { error ->
+                Timber.w(error, "Privileged copy command failed for $uri")
+                tempFile.delete()
+                return@withContext null
+            }
+
+            if (result.startsWith("Exit Code", ignoreCase = true) || !tempFile.exists() || tempFile.length() <= 0L) {
+                Timber.w("Privileged copy fallback failed for $uri: $result")
+                tempFile.delete()
+                return@withContext null
+            }
+
+            listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(tempFile.absolutePath) })
+        }
+
+    internal fun shouldAttemptPrivilegedCopy(e: SecurityException, config: ConfigModel): Boolean {
+        val supportsPrivilegedCopy = when (config.authorizer) {
+            Authorizer.Root,
+            Authorizer.Customize,
+            Authorizer.Shizuku,
+            Authorizer.Dhizuku -> true
+            else -> false
+        }
+        if (!supportsPrivilegedCopy) {
+            return false
+        }
+
+        val message = e.message?.lowercase() ?: return false
+        return "permission denial" in message && "not exported" in message && "fileprovider" in message
+    }
+
+    private fun String.shellQuote(): String = "'" + replace("'", "'\\''") + "'"
 
     private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> =
         withContext(Dispatchers.IO) {

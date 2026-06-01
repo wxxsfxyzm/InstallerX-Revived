@@ -16,6 +16,10 @@ import com.rosan.installer.domain.engine.model.install.UninstallFlags
 object PackageManagerUtil {
     private const val EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS"
 
+    fun interface ActivityStarter {
+        suspend fun start(intent: Intent)
+    }
+
     /**
      * Flag parameter to indicate keeping the package's data directory.
      */
@@ -33,7 +37,10 @@ object PackageManagerUtil {
 
     suspend fun installResultVerify(
         context: Context,
-        receiver: LocalIntentReceiver
+        receiver: LocalIntentReceiver,
+        activityStarter: ActivityStarter = ActivityStarter { intent ->
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
     ) {
         val intent = receiver.getResult()
         val status =
@@ -41,9 +48,8 @@ object PackageManagerUtil {
         val action =
             IntentCompat.getParcelableExtra(intent, Intent.EXTRA_INTENT, Intent::class.java)
 
-        if (status == PackageInstaller.STATUS_PENDING_USER_ACTION && action != null) {
-            context.startActivity(action.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            installResultVerify(context, receiver)
+        if (handlePendingUserAction(status, action, activityStarter)) {
+            installResultVerify(context, receiver, activityStarter)
             return
         }
 
@@ -58,9 +64,25 @@ object PackageManagerUtil {
         throw InstallException(errorType, ecpMsg)
     }
 
+    internal suspend fun handlePendingUserAction(
+        status: Int,
+        action: Intent?,
+        activityStarter: ActivityStarter
+    ): Boolean {
+        if (status != PackageInstaller.STATUS_PENDING_USER_ACTION || action == null) {
+            return false
+        }
+
+        activityStarter.start(action)
+        return true
+    }
+
     suspend fun uninstallResultVerify(
         context: Context,
-        receiver: LocalIntentReceiver
+        receiver: LocalIntentReceiver,
+        activityStarter: ActivityStarter = ActivityStarter { intent ->
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
     ) {
         val intent = receiver.getResult()
         val status =
@@ -68,9 +90,8 @@ object PackageManagerUtil {
         val action =
             IntentCompat.getParcelableExtra(intent, Intent.EXTRA_INTENT, Intent::class.java)
 
-        if (status == PackageInstaller.STATUS_PENDING_USER_ACTION && action != null) {
-            context.startActivity(action.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            uninstallResultVerify(context, receiver)
+        if (handlePendingUserAction(status, action, activityStarter)) {
+            uninstallResultVerify(context, receiver, activityStarter)
             return
         }
 
