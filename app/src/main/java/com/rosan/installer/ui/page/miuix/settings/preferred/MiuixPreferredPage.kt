@@ -3,6 +3,7 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,8 @@ import com.rosan.installer.R
 import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.settings.model.backup.BackupRestorePreview
+import com.rosan.installer.domain.settings.model.backup.BackupValidationIssue
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
@@ -109,8 +112,9 @@ fun MiuixPreferredPage(
     }
     val showErrorSheetState = remember { mutableStateOf(false) }
     var pendingExportContent by remember { mutableStateOf<String?>(null) }
-    var pendingRestoreContent by remember { mutableStateOf<String?>(null) }
+    var pendingRestorePreview by remember { mutableStateOf<BackupRestorePreview?>(null) }
     val showRestoreConfirmDialog = remember { mutableStateOf(false) }
+    var backupValidationErrorText by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -141,8 +145,7 @@ fun MiuixPreferredPage(
             runCatching {
                 context.readBackupText(uri)
             }.onSuccess { content ->
-                pendingRestoreContent = content
-                showRestoreConfirmDialog.value = true
+                viewModel.dispatch(PreferredViewAction.PrepareRestoreBackup(content))
             }.onFailure {
                 snackbarHostState.showSnackbar(context.getString(R.string.backup_settings_file_read_failed))
             }
@@ -181,6 +184,15 @@ fun MiuixPreferredPage(
 
                 is PreferredViewEvent.ShowBackupError -> {
                     snackbarHostState.showSnackbar(context.getString(event.titleResId))
+                }
+
+                is PreferredViewEvent.ShowBackupRestorePreview -> {
+                    pendingRestorePreview = event.preview
+                    showRestoreConfirmDialog.value = true
+                }
+
+                is PreferredViewEvent.ShowBackupValidationError -> {
+                    backupValidationErrorText = event.issues.formatBackupValidationIssues(context)
                 }
             }
         }
@@ -349,26 +361,31 @@ fun MiuixPreferredPage(
     }
     MiuixRestoreBackupConfirmDialog(
         show = showRestoreConfirmDialog.value,
+        preview = pendingRestorePreview,
         onDismiss = {
             showRestoreConfirmDialog.value = false
-            pendingRestoreContent = null
+            pendingRestorePreview = null
         },
         onConfirm = {
-            pendingRestoreContent?.let {
-                viewModel.dispatch(PreferredViewAction.RestoreBackupFromJson(it))
-            }
-            pendingRestoreContent = null
+            viewModel.dispatch(PreferredViewAction.ConfirmRestoreBackup)
+            pendingRestorePreview = null
             showRestoreConfirmDialog.value = false
         }
+    )
+    MiuixBackupValidationErrorDialog(
+        errorText = backupValidationErrorText,
+        onDismiss = { backupValidationErrorText = null }
     )
 }
 
 @Composable
 private fun MiuixRestoreBackupConfirmDialog(
     show: Boolean,
+    preview: BackupRestorePreview?,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
+    val context = LocalContext.current
     WindowDialog(
         show = show,
         onDismissRequest = onDismiss,
@@ -376,7 +393,8 @@ private fun MiuixRestoreBackupConfirmDialog(
         content = {
             Column {
                 Text(
-                    text = stringResource(R.string.backup_settings_restore_confirm_desc),
+                    text = preview?.formatBackupRestorePreview(context)
+                        ?: stringResource(R.string.backup_settings_restore_confirm_desc),
                     color = MiuixTheme.colorScheme.onSurface
                 )
 
@@ -405,6 +423,63 @@ private fun MiuixRestoreBackupConfirmDialog(
         }
     )
 }
+
+@Composable
+private fun MiuixBackupValidationErrorDialog(
+    errorText: String?,
+    onDismiss: () -> Unit
+) {
+    WindowDialog(
+        show = errorText != null,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.backup_settings_validation_failed_title),
+        content = {
+            Column {
+                Text(
+                    text = errorText.orEmpty(),
+                    color = MiuixTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onDismiss,
+                    text = stringResource(R.string.confirm),
+                    colors = ButtonDefaults.textButtonColorsPrimary()
+                )
+            }
+        }
+    )
+}
+
+private fun BackupRestorePreview.formatBackupRestorePreview(context: Context): String =
+    buildString {
+        append(
+            context.getString(
+                R.string.backup_settings_restore_preview_desc,
+                profileCount,
+                scopeCount,
+                settingCount,
+                historyCount
+            )
+        )
+        if (ignoredSettingCount > 0) {
+            append("\n")
+            append(context.getString(R.string.backup_settings_restore_ignored_settings, ignoredSettingCount))
+        }
+        if (warnings.isNotEmpty()) {
+            append("\n\n")
+            append(context.getString(R.string.backup_settings_restore_warnings_title))
+            append("\n")
+            append(warnings.formatBackupValidationIssues(context))
+        }
+    }
+
+private fun List<BackupValidationIssue>.formatBackupValidationIssues(context: Context): String =
+    joinToString(separator = "\n") { issue ->
+        context.getString(issue.messageResId, *issue.args.toTypedArray())
+    }
 
 @Composable
 private fun MiuixDisableAdbVerify(

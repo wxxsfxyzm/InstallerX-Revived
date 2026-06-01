@@ -8,6 +8,7 @@ import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
+import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
@@ -236,6 +237,10 @@ class ProcessInstallationUseCase(
         selectedEntities: List<SelectInstallEntity>,
         result: Result<Unit>
     ) {
+        val installerPackageName = runCatching {
+            appInstaller.resolveInstallerPackageName(config)
+        }.getOrNull()
+
         selectedEntities
             .groupBy { it.app.packageName }
             .forEach { (packageName, selectedForPackage) ->
@@ -250,6 +255,9 @@ class ProcessInstallationUseCase(
                 val installed = analysis?.installedAppInfo?.takeUnless { it.isUninstalled }
                 val oldVersionCode = installed?.versionCode
                 val newVersionCode = base?.versionCode
+                val sourcePaths = selectedForPackage
+                    .mapNotNull { it.app.data.sourcePath() }
+                    .distinct()
 
                 runCatching {
                     recordOperationHistory(
@@ -264,7 +272,9 @@ class ProcessInstallationUseCase(
                         oldVersionCode = oldVersionCode,
                         newVersionName = base?.versionName,
                         newVersionCode = newVersionCode,
+                        sourcePaths = sourcePaths,
                         initiatorPackageName = config.initiatorPackageName,
+                        installerPackageName = installerPackageName,
                         installMethod = InstallMethod.PACKAGE_MANAGER,
                         authorizer = config.authorizer,
                         installMode = config.installMode,

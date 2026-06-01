@@ -24,6 +24,7 @@ import com.rosan.installer.data.settings.local.room.entity.converter.InstallMode
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallerModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.PackageSourceConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.StringListConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.ToastModeConverter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -56,6 +57,7 @@ const val INSTALLER_ROOM_SCHEMA_VERSION = 16
     DexoptModeConverter::class,
     PackageSourceConverter::class,
     InstallReasonConverter::class,
+    StringListConverter::class,
     ToastModeConverter::class
 )
 abstract class InstallerRoom : RoomDatabase() {

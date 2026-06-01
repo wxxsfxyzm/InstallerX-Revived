@@ -64,6 +64,7 @@ class ApproveSessionUseCase(
                     isFreshInstall = details?.isUpdate?.let { !it },
                     versionChange = VersionChange.UNKNOWN,
                     initiatorPackageName = config.initiatorPackageName,
+                    installerPackageName = details?.installerPackageName,
                     installMethod = InstallMethod.SESSION,
                     authorizer = config.authorizer,
                     installMode = config.installMode,

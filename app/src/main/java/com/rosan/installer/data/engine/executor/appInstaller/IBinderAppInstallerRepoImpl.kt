@@ -58,6 +58,17 @@ abstract class IBinderAppInstallerRepoImpl(
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
+    override suspend fun resolveInstallerPackageName(config: ConfigModel): String =
+        when (config.authorizer) {
+            Authorizer.Dhizuku -> getDhizukuComponentName()
+            Authorizer.None -> if (capabilityProvider.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
+            else -> when (config.installerMode) {
+                InstallerMode.Self -> BuildConfig.APPLICATION_ID
+                InstallerMode.Initiator -> config.initiatorPackageName ?: BuildConfig.APPLICATION_ID
+                InstallerMode.Custom -> config.installer ?: BuildConfig.APPLICATION_ID
+            }
+        }
+
     private suspend fun getPackageInstaller(config: ConfigModel): PackageInstaller {
         val iPackageManager =
             IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
@@ -67,17 +78,7 @@ abstract class IBinderAppInstallerRepoImpl(
         // Resolve the target user ID based on config
         val finalUserId = if (config.enableCustomizeUser) config.targetUserId else AndroidProcess.myUid() / 100000
 
-        val installerPackageName = when (config.authorizer) {
-            Authorizer.Dhizuku -> getDhizukuComponentName()
-            Authorizer.None -> if (capabilityProvider.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
-            else -> when (config.installerMode) {
-                InstallerMode.Self -> BuildConfig.APPLICATION_ID
-                // Initiator mode: use the dedicated runtime field; fall back to self if null.
-                InstallerMode.Initiator -> config.initiatorPackageName ?: BuildConfig.APPLICATION_ID
-                // Custom mode: use the user-provided value as-is; fall back to self if null.
-                InstallerMode.Custom -> config.installer ?: BuildConfig.APPLICATION_ID
-            }
-        }
+        val installerPackageName = resolveInstallerPackageName(config)
 
         return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             reflect.getDeclaredConstructor(

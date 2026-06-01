@@ -11,6 +11,7 @@ data class ConfirmationDetails(
     val isOwnershipConflict: Boolean = false,
     // A generic label for the related app (either the update owner or the initiator)
     val sourceAppLabel: CharSequence? = null,
+    val installerPackageName: String? = null,
 
     // Flag to determine if this confirmation belongs to our own active installation
     val isSelfSession: Boolean = false,

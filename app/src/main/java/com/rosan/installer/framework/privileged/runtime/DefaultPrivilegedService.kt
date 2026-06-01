@@ -742,6 +742,7 @@ class DefaultPrivilegedService(
         return Bundle().apply {
             putCharSequence("appLabel", finalLabel)
             putString("packageName", packageName)
+            putString("installerPackageName", sessionInfo.installerPackageName)
             putBoolean("isUpdate", isUpdate)
             putBoolean("isOwnershipConflict", isOwnershipConflict)
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -32,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -76,6 +78,7 @@ fun HistoryPage(
 
     // State to track which record is currently selected for the detail sheet
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
+    var showClearConfirmDialog by remember { mutableStateOf(false) }
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
@@ -102,7 +105,7 @@ fun HistoryPage(
                 actions = {
                     IconButton(
                         enabled = state.records.isNotEmpty(),
-                        onClick = { viewModel.dispatch(HistoryViewAction.ClearHistory) }
+                        onClick = { showClearConfirmDialog = true }
                     ) {
                         Icon(
                             imageVector = AppIcons.Delete,
@@ -180,6 +183,29 @@ fun HistoryPage(
                 }
             }
         }
+    }
+
+    if (showClearConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirmDialog = false },
+            title = { Text(stringResource(R.string.history_clear_confirm_title)) },
+            text = { Text(stringResource(R.string.history_clear_confirm_desc)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showClearConfirmDialog = false
+                        viewModel.dispatch(HistoryViewAction.ClearHistory)
+                    }
+                ) {
+                    Text(stringResource(R.string.clear))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearConfirmDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 
     // Detail BottomSheet
@@ -319,12 +345,24 @@ fun HistoryRecordDetailContent(
                 value = stringResource(record.versionChange.labelRes())
             )
             HistoryInfoLine(
-                title = stringResource(R.string.history_versions),
-                value = versionText(record)
+                title = stringResource(R.string.history_version_name),
+                value = versionNameText(record)
+            )
+            HistoryInfoLine(
+                title = stringResource(R.string.history_version_code),
+                value = versionCodeText(record)
             )
             HistoryInfoLine(
                 title = stringResource(R.string.history_initiator),
                 value = record.initiatorPackageName ?: stringResource(R.string.history_unknown)
+            )
+            HistoryInfoLine(
+                title = stringResource(R.string.history_installer_package),
+                value = record.installerPackageName ?: stringResource(R.string.history_unknown)
+            )
+            HistoryInfoLine(
+                title = stringResource(R.string.history_apk_path),
+                value = sourcePathText(record)
             )
             HistoryInfoLine(
                 title = stringResource(R.string.history_method),
@@ -344,7 +382,7 @@ fun HistoryRecordDetailContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp)) // Bottom padding for visual balance
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -370,12 +408,22 @@ private fun HistoryInfoLine(
 }
 
 @Composable
-private fun versionText(record: OperationHistoryModel): String {
-    val oldVersion = record.oldVersionName?.takeIf { it.isNotBlank() }
-        ?: record.oldVersionCode?.toString()
+private fun versionNameText(record: OperationHistoryModel): String =
+    stringResource(
+        R.string.history_version_pair,
+        record.oldVersionName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.history_none),
+        record.newVersionName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.history_none)
+    )
+
+@Composable
+private fun versionCodeText(record: OperationHistoryModel): String =
+    stringResource(
+        R.string.history_version_pair,
+        record.oldVersionCode?.toString() ?: stringResource(R.string.history_none),
+        record.newVersionCode?.toString() ?: stringResource(R.string.history_none)
+    )
+
+@Composable
+private fun sourcePathText(record: OperationHistoryModel): String =
+    record.sourcePaths.takeIf { it.isNotEmpty() }?.joinToString(separator = "\n")
         ?: stringResource(R.string.history_none)
-    val newVersion = record.newVersionName?.takeIf { it.isNotBlank() }
-        ?: record.newVersionCode?.toString()
-        ?: stringResource(R.string.history_none)
-    return stringResource(R.string.history_version_pair, oldVersion, newVersion)
-}

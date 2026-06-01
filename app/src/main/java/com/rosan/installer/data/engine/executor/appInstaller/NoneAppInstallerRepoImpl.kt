@@ -34,6 +34,8 @@ class NoneAppInstallerRepoImpl(
 ) : AppInstallerRepository {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
+    override suspend fun resolveInstallerPackageName(config: ConfigModel): String = context.packageName
+
     @SuppressLint("RequestInstallPackagesPolicy")
     override suspend fun doInstallWork(
         config: ConfigModel,

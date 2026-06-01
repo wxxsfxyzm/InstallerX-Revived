@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 16,
-    "identityHash": "2b0ed6194b098e9427ed674ac0ebe48f",
+    "identityHash": "ad2d098120aa40b1e50d8ae1c04b68ad",
     "entities": [
       {
         "tableName": "app",
@@ -333,7 +333,7 @@
       },
       {
         "tableName": "operation_history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `operation_type` TEXT NOT NULL, `status` TEXT NOT NULL, `package_name` TEXT NOT NULL, `app_label` TEXT, `timestamp` INTEGER NOT NULL, `is_fresh_install` INTEGER, `version_change` TEXT NOT NULL, `old_version_name` TEXT, `old_version_code` INTEGER, `new_version_name` TEXT, `new_version_code` INTEGER, `initiator_package_name` TEXT, `install_method` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `error_summary` TEXT, `error_type` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `operation_type` TEXT NOT NULL, `status` TEXT NOT NULL, `package_name` TEXT NOT NULL, `app_label` TEXT, `timestamp` INTEGER NOT NULL, `is_fresh_install` INTEGER, `version_change` TEXT NOT NULL, `old_version_name` TEXT, `old_version_code` INTEGER, `new_version_name` TEXT, `new_version_code` INTEGER, `source_paths` TEXT NOT NULL, `initiator_package_name` TEXT, `installer_package_name` TEXT, `install_method` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `error_summary` TEXT, `error_type` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -402,8 +402,19 @@
             "affinity": "INTEGER"
           },
           {
+            "fieldPath": "sourcePaths",
+            "columnName": "source_paths",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "initiatorPackageName",
             "columnName": "initiator_package_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "installerPackageName",
+            "columnName": "installer_package_name",
             "affinity": "TEXT"
           },
           {
@@ -465,7 +476,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b0ed6194b098e9427ed674ac0ebe48f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ad2d098120aa40b1e50d8ae1c04b68ad')"
     ]
   }
 }

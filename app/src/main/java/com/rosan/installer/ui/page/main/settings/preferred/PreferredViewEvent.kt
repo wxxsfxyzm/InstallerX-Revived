@@ -3,6 +3,8 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 import androidx.annotation.StringRes
+import com.rosan.installer.domain.settings.model.backup.BackupRestorePreview
+import com.rosan.installer.domain.settings.model.backup.BackupValidationIssue
 
 sealed interface PreferredViewEvent {
     data class ShowDefaultInstallerResult(
@@ -27,5 +29,13 @@ sealed interface PreferredViewEvent {
     data class ShowBackupError(
         @param:StringRes val titleResId: Int,
         val exception: Throwable
+    ) : PreferredViewEvent
+
+    data class ShowBackupRestorePreview(
+        val preview: BackupRestorePreview
+    ) : PreferredViewEvent
+
+    data class ShowBackupValidationError(
+        val issues: List<BackupValidationIssue>
     ) : PreferredViewEvent
 }

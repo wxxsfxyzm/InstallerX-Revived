@@ -30,7 +30,9 @@ import com.rosan.installer.domain.settings.repository.BackupRepository
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import com.rosan.installer.domain.settings.usecase.backup.ExportBackupUseCase
 import com.rosan.installer.domain.settings.usecase.backup.ParseBackupUseCase
+import com.rosan.installer.domain.settings.usecase.backup.PrepareBackupRestoreUseCase
 import com.rosan.installer.domain.settings.usecase.backup.RestoreBackupUseCase
+import com.rosan.installer.domain.settings.usecase.backup.ValidateBackupUseCase
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
@@ -107,6 +109,8 @@ val settingsModule = module {
     factoryOf(::SaveConfigUseCase)
     factoryOf(::ExportBackupUseCase)
     factoryOf(::ParseBackupUseCase)
+    factoryOf(::ValidateBackupUseCase)
+    factoryOf(::PrepareBackupRestoreUseCase)
     factoryOf(::RestoreBackupUseCase)
     factoryOf(::UpdateSettingUseCase)
     factoryOf(::ToggleUninstallFlagUseCase)

@@ -5,13 +5,15 @@ package com.rosan.installer.ui.page.main.settings.preferred
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.R
+import com.rosan.installer.domain.settings.model.backup.BackupRestorePreview
+import com.rosan.installer.domain.settings.model.backup.BackupValidationException
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.backup.ExportBackupUseCase
-import com.rosan.installer.domain.settings.usecase.backup.ParseBackupUseCase
+import com.rosan.installer.domain.settings.usecase.backup.PrepareBackupRestoreUseCase
 import com.rosan.installer.domain.settings.usecase.backup.RestoreBackupUseCase
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import com.rosan.installer.domain.updater.repository.UpdateRepository
@@ -37,7 +39,7 @@ class PreferredViewModel(
     private val privilegedProvider: PrivilegedProvider,
     private val updateSetting: UpdateSettingUseCase,
     private val exportBackup: ExportBackupUseCase,
-    private val parseBackup: ParseBackupUseCase,
+    private val prepareBackupRestore: PrepareBackupRestoreUseCase,
     private val restoreBackup: RestoreBackupUseCase
 ) : ViewModel() {
 
@@ -51,6 +53,7 @@ class PreferredViewModel(
     private val adbVerifyEnabledFlow = MutableStateFlow(true)
     private val isIgnoringBatteryOptFlow = MutableStateFlow(true)
     private val backupBusyFlow = MutableStateFlow(false)
+    private var pendingRestorePreview: BackupRestorePreview? = null
 
     val state: StateFlow<PreferredViewState> = combine(
         appSettingsRepo.preferencesFlow,
@@ -97,7 +100,8 @@ class PreferredViewModel(
             is PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus -> refreshIgnoreBatteryOptStatus()
             is PreferredViewAction.SetDefaultInstaller -> setDefaultInstaller(action.lock, action)
             is PreferredViewAction.RequestExportBackup -> requestExportBackup()
-            is PreferredViewAction.RestoreBackupFromJson -> restoreBackupFromJson(action.rawJson)
+            is PreferredViewAction.PrepareRestoreBackup -> prepareRestoreBackup(action.rawJson)
+            PreferredViewAction.ConfirmRestoreBackup -> confirmRestoreBackup()
         }
     }
 
@@ -151,32 +155,67 @@ class PreferredViewModel(
     private fun requestExportBackup() = viewModelScope.launch(Dispatchers.IO) {
         if (backupBusyFlow.value) return@launch
         backupBusyFlow.value = true
-        runCatching {
-            PreferredViewEvent.LaunchBackupExport(
-                fileName = buildBackupFileName(),
-                content = exportBackup()
-            )
-        }.onSuccess { event ->
-            _uiEvents.emit(event)
-        }.onFailure { e ->
-            Timber.e(e, "Failed to export backup.")
-            _uiEvents.emit(PreferredViewEvent.ShowBackupError(R.string.backup_settings_export_failed, e))
+        try {
+            runCatching {
+                PreferredViewEvent.LaunchBackupExport(
+                    fileName = buildBackupFileName(),
+                    content = exportBackup()
+                )
+            }.onSuccess { event ->
+                _uiEvents.emit(event)
+            }.onFailure { e ->
+                Timber.e(e, "Failed to export backup.")
+                _uiEvents.emit(PreferredViewEvent.ShowBackupError(R.string.backup_settings_export_failed, e))
+            }
+        } finally {
+            backupBusyFlow.value = false
         }
-        backupBusyFlow.value = false
     }
 
-    private fun restoreBackupFromJson(rawJson: String) = viewModelScope.launch(Dispatchers.IO) {
+    private fun prepareRestoreBackup(rawJson: String) = viewModelScope.launch(Dispatchers.IO) {
         if (backupBusyFlow.value) return@launch
         backupBusyFlow.value = true
-        runCatching {
-            restoreBackup(parseBackup(rawJson))
-        }.onSuccess {
-            _uiEvents.emit(PreferredViewEvent.ShowBackupMessage(R.string.backup_settings_restore_success))
-        }.onFailure { e ->
-            Timber.e(e, "Failed to restore backup.")
-            _uiEvents.emit(PreferredViewEvent.ShowBackupError(R.string.backup_settings_restore_failed, e))
+        try {
+            runCatching {
+                prepareBackupRestore(rawJson)
+            }.onSuccess { preview ->
+                pendingRestorePreview = preview
+                _uiEvents.emit(PreferredViewEvent.ShowBackupRestorePreview(preview))
+            }.onFailure { e ->
+                pendingRestorePreview = null
+                if (e is BackupValidationException) {
+                    _uiEvents.emit(PreferredViewEvent.ShowBackupValidationError(e.issues))
+                } else {
+                    Timber.e(e, "Failed to prepare backup restore.")
+                    _uiEvents.emit(PreferredViewEvent.ShowBackupError(R.string.backup_settings_restore_failed, e))
+                }
+            }
+        } finally {
+            backupBusyFlow.value = false
         }
-        backupBusyFlow.value = false
+    }
+
+    private fun confirmRestoreBackup() = viewModelScope.launch(Dispatchers.IO) {
+        if (backupBusyFlow.value) return@launch
+        val preview = pendingRestorePreview ?: return@launch
+        backupBusyFlow.value = true
+        try {
+            runCatching {
+                restoreBackup(preview.envelope)
+            }.onSuccess {
+                pendingRestorePreview = null
+                _uiEvents.emit(PreferredViewEvent.ShowBackupMessage(R.string.backup_settings_restore_success))
+            }.onFailure { e ->
+                if (e is BackupValidationException) {
+                    _uiEvents.emit(PreferredViewEvent.ShowBackupValidationError(e.issues))
+                } else {
+                    Timber.e(e, "Failed to restore backup.")
+                    _uiEvents.emit(PreferredViewEvent.ShowBackupError(R.string.backup_settings_restore_failed, e))
+                }
+            }
+        } finally {
+            backupBusyFlow.value = false
+        }
     }
 
     private fun buildBackupFileName(): String {

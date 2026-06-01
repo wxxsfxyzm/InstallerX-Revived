@@ -33,6 +33,7 @@ class GetSessionConfirmationDetailsUseCase(
         var isUpdate = false
         var isOwnershipConflict = false
         var sourceAppLabel: CharSequence? = null
+        var installerPackageName: String? = null
 
         Timber.d("Getting session details via service (Authorizer: ${config.authorizer})")
 
@@ -49,6 +50,7 @@ class GetSessionConfirmationDetailsUseCase(
             isUpdate = bundle.getBoolean("isUpdate", false)
             isOwnershipConflict = bundle.getBoolean("isOwnershipConflict", false)
             sourceAppLabel = bundle.getCharSequence("sourceAppLabel")
+            installerPackageName = bundle.getString("installerPackageName")
 
             try {
                 icon = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -72,6 +74,7 @@ class GetSessionConfirmationDetailsUseCase(
             isUpdate = isUpdate,
             isOwnershipConflict = isOwnershipConflict,
             sourceAppLabel = sourceAppLabel,
+            installerPackageName = installerPackageName,
             isSelfSession = isSelfSession,
             currentProgress = currentProgress,
             totalProgress = totalProgress

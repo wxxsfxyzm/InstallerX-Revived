@@ -2,8 +2,20 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.model.backup
 
+import androidx.annotation.StringRes
+import com.rosan.installer.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+object BackupConstants {
+    /**
+     * The current supported backup format version.
+     *
+     * Increment this value only when introducing breaking changes to the [BackupEnvelope]
+     * structure that cannot be handled by the default JSON configuration.
+     */
+    const val CURRENT_FORMAT_VERSION = 1
+}
 
 @Serializable
 data class BackupEnvelope(
@@ -35,7 +47,9 @@ data class BackupHistoryEntry(
     val oldVersionCode: Long? = null,
     val newVersionName: String? = null,
     val newVersionCode: Long? = null,
+    val sourcePaths: List<String> = emptyList(),
     val initiatorPackageName: String? = null,
+    val installerPackageName: String? = null,
     val installMethod: String,
     val authorizer: String,
     val installMode: String,
@@ -118,3 +132,44 @@ data class RestoreResult(
     val ignoredSettings: Int,
     val rolledBack: Boolean = false
 )
+
+data class BackupRestorePreview(
+    val envelope: BackupEnvelope,
+    val profileCount: Int,
+    val scopeCount: Int,
+    val settingCount: Int,
+    val historyCount: Int,
+    val ignoredSettingCount: Int,
+    val issues: List<BackupValidationIssue>
+) {
+    val warnings: List<BackupValidationIssue>
+        get() = issues.filter { it.severity == BackupValidationSeverity.WARNING }
+}
+
+data class BackupValidationIssue(
+    val severity: BackupValidationSeverity,
+    val code: String,
+    @param:StringRes val messageResId: Int,
+    val args: List<String> = emptyList()
+)
+
+enum class BackupValidationSeverity {
+    ERROR,
+    WARNING
+}
+
+class BackupValidationException(
+    val issues: List<BackupValidationIssue>
+) : IllegalArgumentException(
+    issues.firstOrNull()?.code ?: "backup_validation_failed"
+) {
+    constructor(@StringRes messageResId: Int, code: String = "backup_validation_failed") : this(
+        listOf(
+            BackupValidationIssue(
+                severity = BackupValidationSeverity.ERROR,
+                code = code,
+                messageResId = messageResId
+            )
+        )
+    )
+}
