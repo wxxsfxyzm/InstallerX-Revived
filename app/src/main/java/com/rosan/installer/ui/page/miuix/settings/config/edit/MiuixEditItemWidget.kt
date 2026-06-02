@@ -36,6 +36,7 @@ import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.basic.TextFieldDefaults
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -386,7 +387,9 @@ fun MiuixDataInstallRequesterWidget(state: EditViewState, dispatch: (EditViewAct
                 onValueChange = {
                     dispatch(EditViewAction.ChangeDataInstallRequester(it))
                 },
-                borderColor = if (isError) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.primary,
+                colors = TextFieldDefaults.textFieldColors(
+                    borderColor = if (isError) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.primary
+                ),
                 label = stringResource(id = R.string.config_install_requester),
                 useLabelAsPlaceholder = true,
                 singleLine = true
@@ -484,7 +487,9 @@ fun MiuixDataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) ->
                 .focusable(),
             value = currentInstaller,
             onValueChange = { dispatch(EditViewAction.ChangeDataInstaller(it)) },
-            borderColor = if (isError) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.primary,
+            colors = TextFieldDefaults.textFieldColors(
+                borderColor = if (isError) MiuixTheme.colorScheme.error else MiuixTheme.colorScheme.primary
+            ),
             label = stringResource(id = R.string.config_installer),
             useLabelAsPlaceholder = true,
             singleLine = true
