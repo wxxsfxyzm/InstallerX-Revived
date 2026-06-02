@@ -86,7 +86,8 @@ class SourceResolver(
                     }
                 }
 
-                // 2. Fallback to Stream/ClipData if no URL found (Handles file sharing, including text files like logcat.txt)
+                // 2. Merge Stream + ClipData when no URL was found.
+                // Some installers put the primary APK in EXTRA_STREAM and the remaining split APKs in ClipData.
                 if (uris.isEmpty()) {
                     val streamUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
@@ -97,16 +98,13 @@ class SourceResolver(
 
                     if (streamUri != null) uris.add(streamUri)
 
-                    // 3. Check ClipData (Common in modern Android sharing)
-                    if (uris.isEmpty()) {
-                        intent.clipData?.let { clip ->
-                            for (i in 0 until clip.itemCount) {
-                                clip.getItemAt(i).uri?.let { uris.add(it) }
-                            }
+                    intent.clipData?.let { clip ->
+                        for (i in 0 until clip.itemCount) {
+                            clip.getItemAt(i).uri?.takeIf { it !in uris }?.let { uris.add(it) }
                         }
                     }
 
-                    // 4. Fallback to EXTRA_TEXT only if no file stream was found and type indicates text
+                    // 3. Fallback to EXTRA_TEXT only if no file stream was found and type indicates text
                     if (uris.isEmpty() && intent.type?.startsWith("text/") == true) {
                         val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()
                         if (!text.isNullOrBlank()) {
@@ -279,9 +277,7 @@ class SourceResolver(
     internal fun shouldAttemptPrivilegedCopy(e: SecurityException, config: ConfigModel): Boolean {
         val supportsPrivilegedCopy = when (config.authorizer) {
             Authorizer.Root,
-            Authorizer.Customize,
-            Authorizer.Shizuku,
-            Authorizer.Dhizuku -> true
+            Authorizer.Customize -> true
             else -> false
         }
         if (!supportsPrivilegedCopy) {
@@ -294,10 +290,41 @@ class SourceResolver(
 
     private fun String.shellQuote(): String = "'" + replace("'", "'\\''") + "'"
 
+    private fun createCacheFile(displayName: String?): File {
+        return createTempFile(displayName, File(cacheDirectory))
+    }
+
+    private fun createPrivilegedCopyTargetFile(displayName: String?): File {
+        val externalDir = context.externalCacheDir?.let { File(it, "installer_sessions") }
+        val targetDir = externalDir ?: File(cacheDirectory)
+        targetDir.mkdirs()
+        return createTempFile(displayName, targetDir)
+    }
+
+    private fun createTempFile(displayName: String?, directory: File): File {
+        val sanitizedName = displayName
+            ?.substringAfterLast('/')
+            ?.takeIf { it.isNotBlank() }
+            ?.replace(Regex("[^A-Za-z0-9._-]"), "_")
+            ?: "${UUID.randomUUID()}.cache"
+        val uniqueName = "${UUID.randomUUID()}_$sanitizedName"
+        return File(directory, uniqueName)
+    }
+
+    private fun resolveDisplayName(uri: Uri): String? = runCatching {
+        context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+            ?.use { cursor ->
+                if (!cursor.moveToFirst()) return@use null
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex == -1 || cursor.isNull(nameIndex)) null else cursor.getString(nameIndex)
+            }
+    }.getOrNull()
+
     private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> =
         withContext(Dispatchers.IO) {
             afd.use { descriptor ->
-                val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
+                val displayName = resolveDisplayName(uri)
+                val tempFile = createCacheFile(displayName)
                 val knownLength =
                     if (descriptor.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) descriptor.declaredLength else guessContentLength(
                         uri,
@@ -336,7 +363,13 @@ class SourceResolver(
                     }
                 }
 
-                listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+                listOf(DataEntity.FileEntity(tempFile.absolutePath).apply {
+                    source = DataEntity.FileEntity(
+                        displayName
+                            ?: sourcePath.takeIf { it.isNotBlank() }
+                            ?: tempFile.absolutePath
+                    )
+                })
             }
         }
 

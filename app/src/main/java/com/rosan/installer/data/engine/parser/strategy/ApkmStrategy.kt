@@ -71,7 +71,8 @@ class ApkmStrategy(
                                 sourceType = extra.dataType,
                                 type = metadata.type,
                                 filterType = metadata.filterType,
-                                configValue = metadata.configValue
+                                configValue = metadata.configValue,
+                                installName = file.name
                             )
                         } else {
                             AppEntity.BaseEntity(

@@ -73,7 +73,8 @@ class XApkStrategy(
                             sourceType = extra.dataType,
                             type = metadata.type,
                             filterType = metadata.filterType,
-                            configValue = metadata.configValue
+                            configValue = metadata.configValue,
+                            installName = file.name
                         )
                     } else {
                         // Handle Base APK

@@ -61,7 +61,9 @@ sealed class AppEntity {
         // and can be installed as long as the user wants it.
         val filterType: FilterType = FilterType.NONE,
         // Extracted config value ("zh", "xhdpi", "arm64-v8a")
-        val configValue: String? = null
+        val configValue: String? = null,
+        // Original archive entry name used when writing into PackageInstaller.Session.
+        val installName: String = "$splitName.apk"
     ) : AppEntity() {
         override val name = "$splitName.apk"
     }

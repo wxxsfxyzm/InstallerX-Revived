@@ -197,7 +197,7 @@ class ProcessInstallationUseCase(
 
         val installEntities = selectedEntities.map {
             InstallEntity(
-                name = it.app.name,
+                name = (it.app as? AppEntity.SplitEntity)?.installName ?: it.app.name,
                 packageName = it.app.packageName,
                 sharedUserId = (it.app as? AppEntity.BaseEntity)?.sharedUserId,
                 arch = it.app.arch,
