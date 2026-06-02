@@ -832,4 +832,7 @@
     <string name="config_toast_mode_disable">Không bao giờ hiện toast</string>
     <string name="config_toast_mode_background_only">Chỉ khi hộp thoại bị ẩn</string>
     <string name="config_toast_mode_always">Luôn hiện Toast</string>
+    <string name="home_learn_more_title">Tìm hiểu Thêm</string>
+    <string name="home_learn_more_installerx_title">Tìm hiểu về InstallerX Revived</string>
+    <string name="home_learn_more_installerx_desc">Tìm hiểu cách để cấu hình và sử dụng InstallerX Revived</string>
 </resources>

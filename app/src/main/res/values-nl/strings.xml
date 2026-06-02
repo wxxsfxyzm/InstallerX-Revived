@@ -704,9 +704,9 @@
     <string name="lab_tap_icon_to_share_desc">Klik het icoon op het voorbereidscherm om de installatiepakketten te delen</string>
     <string name="config_status_inactive">Inactief</string>
     <string name="config_always_use_root_in_system">Root gebruiken voor gemachtigde functies</string>
-    <string name="config_always_use_root_in_system_desc">Bij uitvoeren als een systeeminstallateur, altijd root gebruiken voor gemachtigde functies, zoals het flashen van modules en het verwijderen van bestanden</string>
+    <string name="config_always_use_root_in_system_desc">Werkend als een systeeminstallateur, altijd root gebruiken voor gemachtigde functies, zoals het flashen van modules en het verwijderen van bestanden</string>
     <string name="config_install_show_toast">Laat toast zien</string>
-    <string name="config_install_show_toast_desc">Laat een toastbericht zien na installatie</string>
+    <string name="config_install_show_toast_desc">Bepaalt of er een toastbericht wordt weergegeven na installatie</string>
     <string name="batch_install_result_message">Meerdere installeren: %1$d/%2$d succesvol</string>
     <string name="lab_mi_island_countdown">XMSF-blokkeringsduur</string>
     <string name="lab_mi_island_countdown_desc">Stelt de blokkeerduur van de XMSF-netwerktoegang in. Geldt alleen voor Shizuku. Verander dit alleen als je de gevolgen begrijpt!</string>
@@ -805,4 +805,12 @@
     <string name="config_detect_xposed_module">Detecteer Xposed-modules</string>
     <string name="config_detect_xposed_module_desc">Detecteer en laat info van Xposed-modules zien tijdens installatie</string>
     <string name="config_quick_open_lsposed">Open snel LSPosed</string>
+    <string name="extras">Extra\'s</string>
+    <string name="config_quick_open_lsposed_desc">Laat de \"LSPosed openen\" knop zien nadat de Xposed-module is geïnstalleerd</string>
+    <string name="installer_settings_dialog_automation_options">Opties voor automatisatie</string>
+    <string name="long_click_background_install">Lang indrukken om te installeren in de achtergrond</string>
+    <string name="long_click_background_install_desc">Achtergrond wanneer je de installatieknop lang ingedrukt houdt</string>
+    <string name="default_installer">Standaard installateur</string>
+    <string name="authorizer_customization">Aanpassingen voor autorisatiegever</string>
+    <string name="authorizer_customization_desc">Haarfijn opties instellen voor ondersteunde autorisatiegevers</string>
 </resources>
