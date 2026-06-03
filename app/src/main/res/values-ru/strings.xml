@@ -35,8 +35,8 @@
     <string name="config_authorizer_none">Без привилегий</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
-    <string name="config_auto_delete">Автоматическое удаление</string>
-    <string name="config_auto_delete_desc">Автоматическое удаление apk-файла после его установки</string>
+    <string name="config_auto_delete">Автоудаление apk-файла</string>
+    <string name="config_auto_delete_desc">Автоматически удалять apk-файл после его установки</string>
     <string name="config_bypass_low_target_sdk">Обход ограничений SDK</string>
     <string name="config_bypass_low_target_sdk_desc">Разрешить установку приложений для более старых версий SDK</string>
     <string name="config_confirm_deletion">Подтвердите удаление</string>
@@ -700,7 +700,7 @@
     <string name="theme_settings_use_apple_floating_bar_desc">Отображать плавающую панель навигации в нижней части экрана</string>
     <string name="theme_settings_use_apple_floating_bar">Плавающая панель снизу</string>
     <string name="copied_format">Скопировано: %1$s</string>
-    <string name="config_install_show_toast_desc">Определяет, отображать ли всплывающее уведомление после установки</string>
+    <string name="config_install_show_toast_desc">Показывать всплывающее уведомление после установки</string>
     <string name="config_install_show_toast">Всплывающее сообщение</string>
     <string name="batch_install_result_message">Пакетная установка: %1$d/%2$d выполнена</string>
     <string name="config_status_inactive">Неактивный</string>
@@ -773,8 +773,8 @@
     <string name="lab_show_install_initiator_desc">Отображать, какое приложение инициировало установку</string>
     <string name="install_confirm_question_update_owner_reminder">Это приложение обычно обновляется из %1$s. При его смене обновления станут возможны из любого источника. Функциональность приложения может измениться.</string>
     <string name="install_confirm_external_request_tip">Подтвердить запрос на установку из %1$s?</string>
-    <string name="lab_install_without_user_action">Установка без участия пользователя</string>
-    <string name="lab_install_without_user_action_desc">Попытка установки приложения без вмешательства пользователя. На системах, где производитель нарушил работу API управления пакетами, включение этой опции может привести к тому, что установка приложения вообще не удастся</string>
+    <string name="lab_install_without_user_action">Установка без подтверждения</string>
+    <string name="lab_install_without_user_action_desc">Автоматическое обновление приложений без подтверждения. Включение этой функции может сделать установку невозможной, если производитель устройства (OEM) повредил компоненты PackageInstaller API</string>
     <string name="inactivate">Не активировано</string>
     <string name="activate">Активировано</string>
     <string name="available">Доступно</string>
@@ -787,7 +787,7 @@
     <string name="working_status_system_installer_desc">Приложение является установщиком системных пакетов</string>
     <string name="working_status_none_authorizer_desc">Для установки приложений необходимо предоставить разрешение на установку из неизвестных источников</string>
     <string name="working_status_not_default_installer_click_details">Нажмите для просмотра подробностей</string>
-    <string name="working_status_default_installer_tip">Назначьте это приложение в качестве установщика пакетов по умолчанию для выполнения большинства запросов на установку. Обратите внимание, что перехват невозможен в следующих случаях:\n- OEM-производитель ограничивает изменение установщика по умолчанию\n- Инициатор определяет целевой компонент\n- Инициатор использует установку сессии</string>
+    <string name="working_status_default_installer_tip">Назначьте это приложение установщиком по умолчанию для обработки большинства запросов. Перехват невозможен, если:\n- OEM-производитель запрещает замену установщика\n- Инициатор определяет целевой компонент\n- Инициатор использует установку через сессию</string>
     <string name="setting_lsposed_module_title">Модуль LSPosed включен</string>
     <string name="setting_lsposed_module_desc">Включите эту опцию, если вы принудительно активировали установщик по умолчанию с помощью стороннего модуля LSPosed. Это отключит внутреннюю проверку статуса и на главной странице будет постоянно отображаться статус Активировано</string>
     <string name="home_stat_authorizers">Доступные привилегии</string>
@@ -803,9 +803,9 @@
     <string name="dhizuku_not_available">Активируйте Dhizuku</string>
     <string name="default_installer">Установщик по умолчанию</string>
     <string name="priv_page_what_is_this_title">Что это?</string>
-    <string name="priv_page_what_is_this_desc">В этом разделе указаны все методы авторизации, доступные для этого приложения и вы можете выбрать тот, который используется по умолчанию для привилегированных операций. Здесь проверяется только доступность, т.е. необходимое разрешение будет запрошено, когда приложению действительно оно потребуется.</string>
+    <string name="priv_page_what_is_this_desc">Здесь отображаются доступные методы авторизации и выбирается вариант по умолчанию для выполнения привилегированных операций. На этом этапе проверяется только доступность методов; разрешения запрашиваются в момент, когда они требуются приложению.</string>
     <string name="priv_page_notice_title">Отличие от профилей установки</string>
-    <string name="priv_page_notice_desc">Эта настройка управляет авторизатором, используемым самим приложением для привилегированных операций. Профили установки управляют авторизатором, используемым при установке приложений и могут переопределять этот глобальный параметр для этой цели.</string>
+    <string name="priv_page_notice_desc">Этот параметр определяет способ авторизации самого приложения для выполнения привилегированных операций. При этом профили установки имеют собственный выбор авторизатора и могут заменять эту глобальную настройку.</string>
     <string name="home_device_info_title">Информация об устройстве</string>
     <string name="home_device_info_model">Модель</string>
     <string name="home_device_info_system">Система</string>
@@ -834,5 +834,5 @@
     <string name="long_click_background_install_desc">Фоновый режим при длительном нажатии кнопки \'Установить\'</string>
     <string name="home_learn_more_title">Узнать больше</string>
     <string name="home_learn_more_installerx_title">Узнайте больше о InstallerX Revived</string>
-    <string name="home_learn_more_installerx_desc">Узнайте, как настроить и использовать InstallerX</string>
+    <string name="home_learn_more_installerx_desc">Руководство по настройке и использованию InstallerX Revived</string>
 </resources>

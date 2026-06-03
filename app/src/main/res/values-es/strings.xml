@@ -807,9 +807,9 @@
     <string name="home_device_info_active_authorizer">Autorizador en uso</string>
     <string name="home_device_info_default_installer">Actividad del instalador predeterminado</string>
     <string name="working_status_system_installer_desc">La app se ejecuta como instalador del paquete del sistema</string>
-    <string name="working_status_none_authorizer_desc">No hagas uso de ningún privilegio, se requiere permiso de Fuentes Desconocidas para instalar aplicaciones</string>
+    <string name="working_status_none_authorizer_desc">No hagas uso de ningún privilegio, se requiere el permiso de Fuentes desconocidas para instalar aplicaciones</string>
     <string name="working_status_not_default_installer_click_details">Haz clic para ver los detalles</string>
-    <string name="working_status_default_installer_tip">Configura esta app como instalador de paquetes por defecto para que se encargue de la mayoría de las solicitudes de instalación. Tenga en cuenta que los siguientes casos no pueden ser interceptados:\n- OEM restringe la modificación del instalador por defecto\n- El iniciador especifica un componente objetivo\n- El iniciador utiliza una Instalación de Sesión</string>
+    <string name="working_status_default_installer_tip">Configura esta aplicación como instalador de paquetes por defecto para que se encargue de la mayoría de las solicitudes de instalación. Tenga en cuenta que los siguientes casos no pueden ser interceptados:\n- OEM restringe la modificación del instalador por defecto\n- El iniciador especifica un componente objetivo\n- El iniciador utiliza una instalación de sesión</string>
     <string name="setting_lsposed_module_title">Módulo LSPosed habilitado</string>
     <string name="setting_lsposed_module_desc">Activa esto si has forzado la toma de control por defecto del instalador mediante un módulo LSPosed de terceros. Esto desactiva la comprobación interna de estado y la página principal mostrará constantemente como Activado</string>
     <string name="home_stat_authorizers">Privilegios disponibles</string>
@@ -844,5 +844,5 @@
     <string name="long_click_background_install_desc">En segundo plano al mantener pulsado el botón de instalar</string>
     <string name="home_learn_more_title">Más información</string>
     <string name="home_learn_more_installerx_title">Más información sobre InstallerX Revived</string>
-    <string name="home_learn_more_installerx_desc">Aprende a configurar y usar InstallerX</string>
+    <string name="home_learn_more_installerx_desc">Aprende a configurar y usar InstallerX Revived</string>
 </resources>

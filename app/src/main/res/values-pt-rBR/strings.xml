@@ -832,4 +832,7 @@
     <string name="installer_settings_dialog_automation_options">Opções de Automação</string>
     <string name="long_click_background_install">Pressionar para instalar em segundo plano</string>
     <string name="long_click_background_install_desc">O que acontece ao pressionar o botão de instalação</string>
+    <string name="home_learn_more_title">Saiba Mais</string>
+    <string name="home_learn_more_installerx_title">Saiba mais sobre o InstallerX Revived</string>
+    <string name="home_learn_more_installerx_desc">Saiba como configurar e usar o InstallerX</string>
 </resources>

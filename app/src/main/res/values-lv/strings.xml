@@ -76,4 +76,18 @@
     <string name="uninstall_keep_data_desc">Nedzēst, bet paturēt lietotnes datus un kešatmiņu</string>
     <string name="uninstall_all_users">Visiem lietotājiem</string>
     <string name="uninstall_all_users_desc">Noņem šo lietotni visiem šīs ierīces lietotājiem</string>
+    <string name="color_default">Noklusējuma</string>
+    <string name="config_install_mode_ignore">Neņemt vērā</string>
+    <string name="previous">Atpakaļ</string>
+    <string name="clear">Notīrīt</string>
+    <string name="installer_live_channel_short_text_installing">Uzstāda</string>
+    <string name="installer_live_channel_short_text_resolve_failed">Neizdevās</string>
+    <string name="installer_live_channel_short_text_install_failed">Neizdevās</string>
+    <string name="uninstall_progress_text">Noņem…</string>
+    <string name="permission_camera">Piekļuve kamerai</string>
+    <string name="permission_internet">Piekļuve internetam</string>
+    <string name="permission_vibrate">Piekļuve vibrācijai</string>
+    <string name="permission_bluetooth">Piekļuve Bluetooth</string>
+    <string name="permission_nfc">Piekļuve NFC</string>
+    <string name="installer_package_size_label">Izmērs:</string>
 </resources>
