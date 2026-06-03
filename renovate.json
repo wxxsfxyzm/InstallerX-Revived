@@ -12,6 +12,13 @@
   ],
   "packageRules": [
     {
+      "description": "Disable all Miuix dependency updates",
+      "matchPackageNames": [
+        "/^top\\.yukonga\\.miuix\\.kmp:/"
+      ],
+      "enabled": false
+    },
+    {
       "matchUpdateTypes": [
         "minor",
         "patch"
