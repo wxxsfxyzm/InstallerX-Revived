@@ -22,7 +22,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.IUserManager
+import android.os.Parcel
+import android.os.ParcelFileDescriptor
 import android.os.RemoteException
+import android.os.ResultReceiver
 import android.os.ServiceManager
 import android.provider.Settings
 import androidx.core.graphics.drawable.toBitmap
@@ -32,12 +35,12 @@ import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.getValue
 import com.rosan.installer.core.reflection.invoke
 import com.rosan.installer.core.reflection.invokeStatic
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.framework.privileged.util.ShizukuContext
 import com.rosan.installer.framework.privileged.util.ShizukuHook
 import com.rosan.installer.framework.privileged.util.SystemContext
 import com.rosan.installer.framework.privileged.util.deletePaths
 import com.rosan.installer.framework.privileged.util.resolveSettingsBinder
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.util.pm.REASON_REMIND_OWNERSHIP
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -52,6 +55,8 @@ class DefaultPrivilegedService(
 ) : BasePrivilegedService(), PrivilegedOperations {
     companion object {
         private const val TAG = "PrivilegedService"
+
+        private const val SHELL_COMMAND_TRANSACTION = 0x5f434d44 // '_CMD'
     }
 
     enum class WorkingMode {
@@ -185,19 +190,29 @@ class DefaultPrivilegedService(
         Timber.tag(TAG).d("performDexOpt: $packageName, filter=$compilerFilter, force=$force")
 
         return try {
-            val result = iPackageManager.performDexOptMode(
-                packageName,
-                false,          // checkProfiles
-                compilerFilter,
-                force,
-                true,           // bootComplete
-                null            // splitName
+            val args = buildList {
+                add("compile")
+                add("-m")
+                add(compilerFilter)
+
+                if (force) {
+                    add("-f")
+                }
+
+                add(packageName)
+            }.toTypedArray()
+
+            // Important: this must be the wrapped package binder.
+            // Do not call ServiceManager.getService("package") again here.
+            sendPackageShellCommandOneway(
+                binder = iPackageManager.asBinder(),
+                args = args
             )
 
-            Timber.tag(TAG).i("performDexOpt result for $packageName: $result")
-            result
+            Timber.tag(TAG).d("Dexopt command dispatched: ${args.joinToString(" ")}")
+            true
         } catch (e: Exception) {
-            Timber.tag(TAG).e(e, "performDexOpt failed for $packageName")
+            Timber.tag(TAG).e(e, "Failed to dispatch dexopt for $packageName")
             false
         }
     }
@@ -800,6 +815,65 @@ class DefaultPrivilegedService(
             Timber.tag(TAG).e(e, "Failed to set package networking via AIDL Stub")
             throw RemoteException("AIDL Stub invocation failed: ${e.message}")
         }
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun sendPackageShellCommandOneway(
+        binder: IBinder,
+        args: Array<String>
+    ) {
+        val data = Parcel.obtain()
+
+        val stdin = ParcelFileDescriptor.open(
+            File("/dev/null"),
+            ParcelFileDescriptor.MODE_READ_ONLY
+        )
+
+        val stdout = ParcelFileDescriptor.open(
+            File("/dev/null"),
+            ParcelFileDescriptor.MODE_WRITE_ONLY
+        )
+
+        val stderr = ParcelFileDescriptor.open(
+            File("/dev/null"),
+            ParcelFileDescriptor.MODE_WRITE_ONLY
+        )
+
+        try {
+            data.writeFileDescriptor(stdin.fileDescriptor)
+            data.writeFileDescriptor(stdout.fileDescriptor)
+            data.writeFileDescriptor(stderr.fileDescriptor)
+            data.writeStringArray(args)
+
+            writeNullShellCallback(data)
+
+            // Server still expects a ResultReceiver object, but we do not wait for it.
+            ResultReceiver(null).writeToParcel(data, 0)
+
+            binder.transact(
+                SHELL_COMMAND_TRANSACTION,
+                data,
+                null,
+                FLAG_ONEWAY
+            )
+        } finally {
+            data.recycle()
+            runCatching { stdin.close() }
+            runCatching { stdout.close() }
+            runCatching { stderr.close() }
+        }
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun writeNullShellCallback(parcel: Parcel) {
+        val shellCallbackClass = Class.forName("android.os.ShellCallback")
+        val method = shellCallbackClass.getDeclaredMethod(
+            "writeToParcel",
+            shellCallbackClass,
+            Parcel::class.java
+        )
+
+        method.invoke(null, null, parcel)
     }
 
     /**
