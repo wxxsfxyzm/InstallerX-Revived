@@ -55,7 +55,7 @@ fun UpdateLoadingIndicator(
                 is AboutEvent.ShowUpdateLoading -> showUpdateLoading = true
                 is AboutEvent.HideUpdateLoading -> showUpdateLoading = false
                 is AboutEvent.ShowInAppUpdateErrorDetail -> showUpdateLoading = false
-                else -> null
+                else -> Unit
             }
         }
     }
