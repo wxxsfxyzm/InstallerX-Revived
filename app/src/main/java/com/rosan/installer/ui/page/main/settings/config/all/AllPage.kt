@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2025-2026 InstallerX Revived contributors
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.rosan.installer.ui.page.main.settings.config.all
 
 import androidx.compose.animation.AnimatedVisibility
@@ -30,6 +32,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon

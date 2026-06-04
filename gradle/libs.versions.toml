@@ -11,13 +11,13 @@
 agp = "9.2.1"
 biometric = "1.4.0-alpha07"
 focusApi = "1.4"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 ksp = "2.3.9"
 composeBom = "2026.05.01"
 compose = "1.11.2"
 splashScreen = "1.2.0"
-material3 = "1.5.0-alpha20"
-room = "3.0.0-alpha05"
+material3 = "1.5.0-alpha21"
+room = "3.0.0-alpha06"
 ktx-serialization = "1.11.0"
 rikka-shizuku = "13.1.5"
 koin-bom = "4.2.1"
@@ -58,7 +58,7 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
-androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.18.0" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.19.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.13.0" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }

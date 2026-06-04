@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2026 InstallerX Revived contributors
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.rosan.installer.ui.page.main.settings.home
 
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
