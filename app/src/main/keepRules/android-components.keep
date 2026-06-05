@@ -2,10 +2,10 @@
 -keep public interface ** extends android.os.IInterface {*;}
 
 # Keep application entry point
--keep public class com.rosan.installer.App {*;}
+# -keep public class com.rosan.installer.App {*;}
 
 # Keep all UI activities
--keep public class com.rosan.installer.ui.activity.** extends android.app.Activity
+# -keep public class com.rosan.installer.ui.activity.** extends android.app.Activity
 
 # Uncomment and modify below if Services, Receivers, or Providers are missing in release build
 #-keep public class com.rosan.installer.** extends android.app.Service

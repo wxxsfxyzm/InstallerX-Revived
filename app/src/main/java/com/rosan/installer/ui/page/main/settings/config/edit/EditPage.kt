@@ -214,7 +214,7 @@ fun EditPage(
                     dataUserWidget(state, dispatch)
                     dataInstallReasonWidget(state, dispatch)
                     if (isAtLeastTiramisu) dataPackageSourceWidget(state, dispatch)
-                    if (state.isCustomInstallRequesterEnabled) dataInstallRequesterWidget(state, dispatch)
+                    dataInstallRequesterWidget(state, dispatch)
                     dataDeclareInstallerWidget(state, dispatch)
                     dataManualDexoptWidget(state, dispatch)
                     dataAutoDeleteWidget(state, dispatch)

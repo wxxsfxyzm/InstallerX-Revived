@@ -45,6 +45,7 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.miuix.settings.config.all.MiuixAllPage
+import com.rosan.installer.ui.page.miuix.settings.history.MiuixHistoryPage
 import com.rosan.installer.ui.page.miuix.settings.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
@@ -90,7 +91,7 @@ private fun SettingsFloatingBottomBar(
                     bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
                         .calculateBottomPadding()
                 ),
-            selectedIndex = { mainPagerState.pagerState.targetPage },
+            selectedIndex = { mainPagerState.selectedPage },
             onSelected = { index ->
                 mainPagerState.animateToPage(index)
             },
@@ -177,7 +178,7 @@ fun SettingsCompactLayout(
                     ) {
                         navigationItems.forEachIndexed { index, item ->
                             NavigationBarItem(
-                                selected = mainPagerState.pagerState.targetPage == index,
+                                selected = mainPagerState.selectedPage == index,
                                 onClick = {
                                     mainPagerState.animateToPage(index)
                                 },
@@ -192,7 +193,7 @@ fun SettingsCompactLayout(
         snackbarHost = { SnackbarHost(state = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = mainPagerState.pagerState.targetPage == 1,
+                visible = mainPagerState.selectedPage == 1,
                 enter = scaleIn(),
                 exit = scaleOut()
             ) {
@@ -289,7 +290,7 @@ fun SettingsWideScreenLayout(
                 ) {
                     navigationItems.forEachIndexed { index, item ->
                         NavigationRailItem(
-                            selected = mainPagerState.pagerState.targetPage == index,
+                            selected = mainPagerState.selectedPage == index,
                             onClick = {
                                 mainPagerState.animateToPage(index)
                             },
@@ -347,7 +348,7 @@ private fun SettingsWideContent(
         snackbarHost = { SnackbarHost(state = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = mainPagerState.pagerState.targetPage == 1,
+                visible = mainPagerState.selectedPage == 1,
                 enter = scaleIn(),
                 exit = scaleOut()
             ) {
@@ -420,7 +421,13 @@ private fun SettingsPagerContent(
                 snackbarHostState = snackbarHostState
             )
 
-            2 -> MiuixPreferredPage(
+            2 -> MiuixHistoryPage(
+                enableBlur = useBlur,
+                title = navigationItems[page].label,
+                outerPadding = outerPadding
+            )
+
+            3 -> MiuixPreferredPage(
                 enableBlur = useBlur,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,

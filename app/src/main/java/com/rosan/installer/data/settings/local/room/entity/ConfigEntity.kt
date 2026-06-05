@@ -8,6 +8,7 @@ import androidx.room3.Ignore
 import androidx.room3.PrimaryKey
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.DexoptMode
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
@@ -42,6 +43,8 @@ data class ConfigEntity(
     var enableCustomizePackageSource: Boolean = false,
     @ColumnInfo(name = "package_source", defaultValue = "1")
     var packageSource: PackageSource = PackageSource.OTHER,
+    @ColumnInfo(name = "install_requester_mode", defaultValue = "0")
+    var installRequesterMode: InstallRequesterMode = InstallRequesterMode.Disable,
     @ColumnInfo(name = "install_requester")
     var installRequester: String? = null,
     @ColumnInfo(name = "installer_mode", defaultValue = "0")

@@ -8,10 +8,19 @@ import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
+import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
+import com.rosan.installer.domain.history.model.InstallMethod
+import com.rosan.installer.domain.history.model.OperationHistoryModel
+import com.rosan.installer.domain.history.model.OperationStatus
+import com.rosan.installer.domain.history.model.OperationType
+import com.rosan.installer.domain.history.usecase.RecordOperationHistoryUseCase
+import com.rosan.installer.domain.history.usecase.VersionChangeResolver
+import com.rosan.installer.domain.history.usecase.historyErrorSummary
+import com.rosan.installer.domain.history.usecase.historyErrorType
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
@@ -35,7 +44,8 @@ class ProcessInstallationUseCase(
     private val appSettingsRepo: AppSettingsRepository,
     private val appInstaller: AppInstallerRepository,
     private val moduleInstaller: ModuleInstallerRepository,
-    private val capabilityProvider: DeviceCapabilityProvider
+    private val capabilityProvider: DeviceCapabilityProvider,
+    private val recordOperationHistory: RecordOperationHistoryUseCase
 ) {
     companion object {
         private const val MODULE_INSTALL_BANNER = """
@@ -92,7 +102,7 @@ class ProcessInstallationUseCase(
             )
 
             // 4. Now perform the heavy, blocking installation work
-            installApp(config, selected)
+            installApp(config, analysisResults, selected)
 
             // 5. Emit success if it is a single task or the last task in a batch
             if (total <= 1) {
@@ -184,6 +194,7 @@ class ProcessInstallationUseCase(
 
     private suspend fun installApp(
         config: ConfigModel,
+        analysisResults: List<PackageAnalysisResult>,
         selectedEntities: List<SelectInstallEntity>
     ) {
         val blacklist = appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedBlacklistPackages)
@@ -206,13 +217,74 @@ class ProcessInstallationUseCase(
             )
         }
 
-        // Perform the actual installation via repository (This blocks until finished)
-        appInstaller.doInstallWork(
-            config = config,
-            entities = installEntities,
-            blacklist = blacklist,
-            sharedUserIdBlacklist = sharedUidBlacklist,
-            sharedUserIdExemption = sharedUidWhitelist
-        )
+        val result = runCatching {
+            appInstaller.doInstallWork(
+                config = config,
+                entities = installEntities,
+                blacklist = blacklist,
+                sharedUserIdBlacklist = sharedUidBlacklist,
+                sharedUserIdExemption = sharedUidWhitelist
+            )
+        }
+
+        recordInstallHistory(config, analysisResults, selectedEntities, result)
+        result.onFailure { throw it }
+    }
+
+    private suspend fun recordInstallHistory(
+        config: ConfigModel,
+        analysisResults: List<PackageAnalysisResult>,
+        selectedEntities: List<SelectInstallEntity>,
+        result: Result<Unit>
+    ) {
+        val installerPackageName = runCatching {
+            appInstaller.resolveInstallerPackageName(config)
+        }.getOrNull()
+
+        selectedEntities
+            .groupBy { it.app.packageName }
+            .forEach { (packageName, selectedForPackage) ->
+                val analysis = analysisResults.find { it.packageName == packageName }
+                val base = selectedForPackage.map { it.app }
+                    .filterIsInstance<AppEntity.BaseEntity>()
+                    .firstOrNull()
+                    ?: analysis?.appEntities
+                        ?.map { it.app }
+                        ?.filterIsInstance<AppEntity.BaseEntity>()
+                        ?.firstOrNull()
+                val installed = analysis?.installedAppInfo?.takeUnless { it.isUninstalled }
+                val oldVersionCode = installed?.versionCode
+                val newVersionCode = base?.versionCode
+                val sourcePaths = selectedForPackage
+                    .mapNotNull { it.app.data.sourcePath() }
+                    .distinct()
+
+                runCatching {
+                    recordOperationHistory(
+                    OperationHistoryModel(
+                        operationType = OperationType.INSTALL,
+                        status = if (result.isSuccess) OperationStatus.SUCCESS else OperationStatus.FAILED,
+                        packageName = packageName,
+                        appLabel = base?.label ?: installed?.label,
+                        isFreshInstall = oldVersionCode == null,
+                        versionChange = VersionChangeResolver.resolve(oldVersionCode, newVersionCode),
+                        oldVersionName = installed?.versionName,
+                        oldVersionCode = oldVersionCode,
+                        newVersionName = base?.versionName,
+                        newVersionCode = newVersionCode,
+                        sourcePaths = sourcePaths,
+                        initiatorPackageName = config.initiatorPackageName,
+                        installerPackageName = installerPackageName,
+                        installMethod = InstallMethod.PACKAGE_MANAGER,
+                        authorizer = config.authorizer,
+                        installMode = config.installMode,
+                        errorSummary = result.exceptionOrNull()?.historyErrorSummary(),
+                        errorType = result.exceptionOrNull()?.historyErrorType()
+                    )
+                    )
+                }.onFailure { e ->
+                    Timber.e(e, "Failed to record install history for $packageName")
+                }
+            }
     }
 }

@@ -26,6 +26,9 @@ interface AppDao {
     fun all(): List<AppEntity>
 
     @Query("select * from app")
+    suspend fun allSuspend(): List<AppEntity>
+
+    @Query("select * from app")
     fun flowAll(): Flow<List<AppEntity>>
 
     @Query("select * from app where id = :id limit 1")
@@ -52,6 +55,12 @@ interface AppDao {
     @Insert
     suspend fun insert(appEntity: AppEntity)
 
+    @Insert
+    suspend fun insertAll(appEntities: List<AppEntity>)
+
     @Delete
     suspend fun delete(appEntity: AppEntity)
+
+    @Query("delete from app")
+    suspend fun deleteAll()
 }

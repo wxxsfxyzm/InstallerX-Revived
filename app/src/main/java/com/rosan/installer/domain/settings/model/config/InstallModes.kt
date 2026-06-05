@@ -36,6 +36,15 @@ enum class InstallerMode(val value: Int) {
 }
 
 /**
+ * Define Install Requester Modes used by InstallerX
+ */
+enum class InstallRequesterMode(val value: Int) {
+    Disable(0),
+    Initiator(1),
+    Custom(2)
+}
+
+/**
  * Define Dexopt Modes used by InstallerX
  * Sync with Android's Dexopt Mode
  */

@@ -9,6 +9,7 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
+import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerSettingsViewModel
@@ -26,6 +27,7 @@ val viewModelModule = module {
     viewModelOf(::SettingsSharedViewModel)
     viewModelOf(::HomePageViewModel)
     viewModelOf(::AllViewModel)
+    viewModelOf(::HistoryViewModel)
     viewModelOf(::PreferredViewModel)
     viewModelOf(::ThemeSettingsViewModel)
     viewModelOf(::InstallerSettingsViewModel)

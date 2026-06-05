@@ -24,6 +24,11 @@ class AppInstallerRepositoryImpl(
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val postInstallTaskProvider: PostInstallTaskProvider
 ) : AppInstallerRepository {
+    override suspend fun resolveInstallerPackageName(config: ConfigModel): String? =
+        executeWithRepo(config) { repo ->
+            repo.resolveInstallerPackageName(config)
+        }
+
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,

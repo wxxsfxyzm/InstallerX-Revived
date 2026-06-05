@@ -8,7 +8,9 @@
 package com.rosan.installer.ui.navigation
 
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,16 +45,31 @@ class MainPagerState(
         selectedPage = targetIndex
         isNavigating = true
 
-        val distance = abs(targetIndex - pagerState.currentPage).coerceAtLeast(2)
-        val duration = 100 * distance + 100
-
         navJob = coroutineScope.launch {
             val myJob = coroutineContext.job
             try {
-                pagerState.animateScrollToPage(
-                    page = targetIndex,
-                    animationSpec = tween(easing = EaseInOut, durationMillis = duration)
-                )
+                pagerState.scroll(MutatePriority.UserInput) {
+                    val distance = abs(targetIndex - pagerState.currentPage).coerceAtLeast(2)
+                    val duration = 100 * distance + 100
+                    val layoutInfo = pagerState.layoutInfo
+                    val pageSize = layoutInfo.pageSize + layoutInfo.pageSpacing
+                    val currentDistanceInPages =
+                        targetIndex - pagerState.currentPage - pagerState.currentPageOffsetFraction
+                    val scrollPixels = currentDistanceInPages * pageSize
+
+                    var previousValue = 0f
+                    animate(
+                        initialValue = 0f,
+                        targetValue = scrollPixels,
+                        animationSpec = tween(easing = EaseInOut, durationMillis = duration)
+                    ) { currentValue, _ ->
+                        previousValue += scrollBy(currentValue - previousValue)
+                    }
+                }
+
+                if (pagerState.currentPage != targetIndex) {
+                    pagerState.scrollToPage(targetIndex)
+                }
             } finally {
                 if (navJob == myJob) {
                     isNavigating = false

@@ -3,19 +3,29 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred
 
 import android.annotation.SuppressLint
+import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -26,9 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.device.model.Level
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.settings.model.backup.BackupRestorePreview
+import com.rosan.installer.domain.settings.model.backup.BackupValidationIssue
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
@@ -44,10 +56,14 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
+import com.rosan.installer.ui.util.readBackupText
+import com.rosan.installer.ui.util.writeBackupText
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -55,11 +71,14 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SnackbarDuration
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.SnackbarResult
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 
 @Composable
@@ -92,6 +111,46 @@ fun MiuixPreferredPage(
         )
     }
     val showErrorSheetState = remember { mutableStateOf(false) }
+    var pendingExportContent by remember { mutableStateOf<String?>(null) }
+    var pendingRestorePreview by remember { mutableStateOf<BackupRestorePreview?>(null) }
+    val showRestoreConfirmDialog = remember { mutableStateOf(false) }
+    var backupValidationErrorText by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        val content = pendingExportContent ?: return@rememberLauncherForActivityResult
+        if (uri == null) {
+            pendingExportContent = null
+            return@rememberLauncherForActivityResult
+        }
+        coroutineScope.launch {
+            runCatching {
+                context.writeBackupText(uri, content)
+            }.onSuccess {
+                snackbarHostState.showSnackbar(context.getString(R.string.backup_settings_export_success))
+            }.onFailure {
+                snackbarHostState.showSnackbar(context.getString(R.string.backup_settings_file_write_failed))
+            }
+            pendingExportContent = null
+        }
+    }
+
+    val restoreLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        coroutineScope.launch {
+            runCatching {
+                context.readBackupText(uri)
+            }.onSuccess { content ->
+                viewModel.dispatch(PreferredViewAction.PrepareRestoreBackup(content))
+            }.onFailure {
+                snackbarHostState.showSnackbar(context.getString(R.string.backup_settings_file_read_failed))
+            }
+        }
+    }
 
     val defaultInstallerErrorDetailActionLabel = stringResource(R.string.details)
     @SuppressLint("LocalContextGetResourceValueCall") LaunchedEffect(Unit) {
@@ -112,6 +171,28 @@ fun MiuixPreferredPage(
                         errorDialogInfo = event
                         showErrorSheetState.value = true
                     }
+                }
+
+                is PreferredViewEvent.LaunchBackupExport -> {
+                    pendingExportContent = event.content
+                    exportLauncher.launch(event.fileName)
+                }
+
+                is PreferredViewEvent.ShowBackupMessage -> {
+                    snackbarHostState.showSnackbar(context.getString(event.messageResId))
+                }
+
+                is PreferredViewEvent.ShowBackupError -> {
+                    snackbarHostState.showSnackbar(context.getString(event.titleResId))
+                }
+
+                is PreferredViewEvent.ShowBackupRestorePreview -> {
+                    pendingRestorePreview = event.preview
+                    showRestoreConfirmDialog.value = true
+                }
+
+                is PreferredViewEvent.ShowBackupValidationError -> {
+                    backupValidationErrorText = event.issues.formatBackupValidationIssues(context)
                 }
             }
         }
@@ -215,6 +296,27 @@ fun MiuixPreferredPage(
                     ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                 }
             }
+            item { SmallTitle(stringResource(R.string.backup_settings)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    BasicComponent(
+                        title = stringResource(R.string.backup_settings_export),
+                        summary = stringResource(R.string.backup_settings_export_desc),
+                        enabled = !uiState.backupBusy,
+                        onClick = { viewModel.dispatch(PreferredViewAction.RequestExportBackup) }
+                    )
+                    BasicComponent(
+                        title = stringResource(R.string.backup_settings_restore),
+                        summary = stringResource(R.string.backup_settings_restore_desc),
+                        enabled = !uiState.backupBusy,
+                        onClick = { restoreLauncher.launch(arrayOf("application/json", "text/json", "*/*")) }
+                    )
+                }
+            }
             item { SmallTitle(stringResource(R.string.other)) }
             item {
                 Card(
@@ -257,7 +359,127 @@ fun MiuixPreferredPage(
             title = stringResource(dialogInfo.titleResId)
         )
     }
+    MiuixRestoreBackupConfirmDialog(
+        show = showRestoreConfirmDialog.value,
+        preview = pendingRestorePreview,
+        onDismiss = {
+            showRestoreConfirmDialog.value = false
+            pendingRestorePreview = null
+        },
+        onConfirm = {
+            viewModel.dispatch(PreferredViewAction.ConfirmRestoreBackup)
+            pendingRestorePreview = null
+            showRestoreConfirmDialog.value = false
+        }
+    )
+    MiuixBackupValidationErrorDialog(
+        errorText = backupValidationErrorText,
+        onDismiss = { backupValidationErrorText = null }
+    )
 }
+
+@Composable
+private fun MiuixRestoreBackupConfirmDialog(
+    show: Boolean,
+    preview: BackupRestorePreview?,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val context = LocalContext.current
+    WindowDialog(
+        show = show,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.backup_settings_restore_confirm_title),
+        content = {
+            Column {
+                Text(
+                    text = preview?.formatBackupRestorePreview(context)
+                        ?: stringResource(R.string.backup_settings_restore_confirm_desc),
+                    color = MiuixTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onConfirm,
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun MiuixBackupValidationErrorDialog(
+    errorText: String?,
+    onDismiss: () -> Unit
+) {
+    WindowDialog(
+        show = errorText != null,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.backup_settings_validation_failed_title),
+        content = {
+            Column {
+                Text(
+                    text = errorText.orEmpty(),
+                    color = MiuixTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onDismiss,
+                    text = stringResource(R.string.confirm),
+                    colors = ButtonDefaults.textButtonColorsPrimary()
+                )
+            }
+        }
+    )
+}
+
+private fun BackupRestorePreview.formatBackupRestorePreview(context: Context): String =
+    buildString {
+        append(
+            context.getString(
+                R.string.backup_settings_restore_preview_desc,
+                profileCount,
+                scopeCount,
+                settingCount,
+                historyCount
+            )
+        )
+        if (ignoredSettingCount > 0) {
+            append("\n")
+            append(context.getString(R.string.backup_settings_restore_ignored_settings, ignoredSettingCount))
+        }
+        if (warnings.isNotEmpty()) {
+            append("\n\n")
+            append(context.getString(R.string.backup_settings_restore_warnings_title))
+            append("\n")
+            append(warnings.formatBackupValidationIssues(context))
+        }
+    }
+
+private fun List<BackupValidationIssue>.formatBackupValidationIssues(context: Context): String =
+    joinToString(separator = "\n") { issue ->
+        context.getString(issue.messageResId, *issue.args.toTypedArray())
+    }
 
 @Composable
 private fun MiuixDisableAdbVerify(

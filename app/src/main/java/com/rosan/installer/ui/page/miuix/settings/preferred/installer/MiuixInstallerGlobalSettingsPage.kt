@@ -206,12 +206,6 @@ fun MiuixInstallerGlobalSettingsPage(
                                 )
                             }
                         )
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.lab_set_install_requester),
-                            description = stringResource(R.string.lab_set_install_requester_desc),
-                            checked = uiState.setInstallRequester,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeSetInstallRequester(it)) }
-                        )
                     }
                 }
             }

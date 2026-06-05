@@ -62,6 +62,7 @@ import com.rosan.installer.ui.library.FloatingBottomBarItem
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.NavigationTab
 import com.rosan.installer.ui.page.main.settings.config.all.AllPage
+import com.rosan.installer.ui.page.main.settings.history.HistoryPage
 import com.rosan.installer.ui.page.main.settings.home.HomePage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredPage
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
@@ -105,7 +106,7 @@ fun Material3SettingsCompactLayout(
                     modifier = Modifier.installerMaterial3BlurEffect(backdrop),
                     windowInsets = navigationWindowInsets,
                     tabs = tabs,
-                    currentPage = mainPagerState.pagerState.targetPage,
+                    currentPage = mainPagerState.selectedPage,
                     onPageChanged = { mainPagerState.animateToPage(it) },
                     configCount = configCount,
                     containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
@@ -172,7 +173,7 @@ fun Material3SettingsWideScreenLayout(
             ColumnNavigation(
                 windowInsets = navigationWindowInsets,
                 tabs = tabs,
-                currentPage = mainPagerState.pagerState.targetPage,
+                currentPage = mainPagerState.selectedPage,
                 onPageChanged = { mainPagerState.animateToPage(it) }
             )
 
@@ -217,7 +218,7 @@ private fun Material3FloatingBottomBar(
                     bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
                         .calculateBottomPadding()
                 ),
-            selectedIndex = { mainPagerState.pagerState.targetPage },
+            selectedIndex = { mainPagerState.selectedPage },
             onSelected = { index ->
                 mainPagerState.animateToPage(index)
             },
@@ -300,7 +301,14 @@ private fun Material3SettingsPagerContent(
                 windowInsetsSides = windowInsetsSides
             )
 
-            2 -> PreferredPage(
+            2 -> HistoryPage(
+                useBlur = useBlur,
+                title = tabs[page].label,
+                outerPadding = outerPadding,
+                windowInsetsSides = windowInsetsSides
+            )
+
+            3 -> PreferredPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
                 outerPadding = outerPadding,

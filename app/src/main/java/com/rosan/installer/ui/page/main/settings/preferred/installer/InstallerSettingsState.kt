@@ -19,6 +19,5 @@ data class InstallerSettingsState(
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
     val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
-    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
-    val setInstallRequester: Boolean = false
+    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList()
 )

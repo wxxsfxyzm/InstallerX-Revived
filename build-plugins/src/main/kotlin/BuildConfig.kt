@@ -9,7 +9,18 @@ object BuildConfig {
     const val MIN_SDK = 26
     const val JDK_VERSION = 25
 
-    const val VERSION_CODE = 54
+    const val VERSION_CODE = 520
+}
+
+// Get git commit count safely, compatible with configuration cache
+fun Project.getGitCommitCount(): Int {
+    return try {
+        providers.exec {
+            commandLine("git", "rev-list", "--count", "HEAD")
+        }.standardOutput.asText.get().trim().toInt()
+    } catch (_: Exception) {
+        BuildConfig.VERSION_CODE
+    }
 }
 
 // Get git commit hash safely, compatible with configuration cache
