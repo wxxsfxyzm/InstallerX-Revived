@@ -1,11 +1,21 @@
-* text=auto
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+gradlew text eol=lf
+gradlew.bat text eol=crlf
 
 *.kt text eol=lf
 *.kts text eol=lf
+*.java text eol=lf
 *.xml text eol=lf
 *.gradle text eol=lf
 *.properties text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
-*.keep text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
 *.md text eol=lf
+*.keep text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=lf
