@@ -54,6 +54,7 @@
     <string name="history_method_package_manager">包管理器</string>
     <string name="history_method_session">会话确认</string>
     <string name="history_operation_type">操作类型</string>
+    <string name="history_package_name">包名</string>
     <string name="history_time">时间</string>
     <string name="history_version_change">版本变化</string>
     <string name="history_version_name">版本名称</string>

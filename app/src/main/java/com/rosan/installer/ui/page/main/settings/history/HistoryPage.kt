@@ -2,22 +2,30 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.history
 
+import android.content.ClipData
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,12 +49,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,6 +76,8 @@ import com.rosan.installer.ui.theme.middleShape
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import com.rosan.installer.ui.theme.singleShape
 import com.rosan.installer.ui.theme.topShape
+import com.rosan.installer.util.toast
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
@@ -81,7 +96,6 @@ fun HistoryPage(
     val layoutDirection = LocalLayoutDirection.current
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
-    // State to track which record is currently selected for the detail sheet
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
     val sheetState = rememberBottomSheetState(
@@ -225,13 +239,12 @@ fun HistoryPage(
         )
     }
 
-    // Detail BottomSheet
     if (selectedRecord != null) {
         ModalBottomSheet(
             onDismissRequest = { selectedRecord = null },
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentWindowInsets = { ScaffoldDefaults.contentWindowInsets }
+            contentWindowInsets = { WindowInsets.statusBars }
         ) {
             HistoryRecordDetailContent(
                 record = selectedRecord!!,
@@ -276,7 +289,6 @@ private fun HistoryRecordBriefCard(
         MaterialTheme.colorScheme.error
     }
 
-    // Card serves as the interactive container for the brief info
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -337,12 +349,10 @@ fun HistoryRecordDetailContent(
     record: OperationHistoryModel,
     modifier: Modifier = Modifier
 ) {
-    // This is the dedicated slot for expanded details
     Column(
-        modifier = modifier,
+        modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Sheet Header
         Text(
             text = record.appLabel ?: record.packageName,
             style = MaterialTheme.typography.headlineSmall,
@@ -350,6 +360,10 @@ fun HistoryRecordDetailContent(
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            HistoryInfoLine(
+                title = stringResource(R.string.history_package_name),
+                value = record.packageName
+            )
             HistoryInfoLine(
                 title = stringResource(R.string.history_operation_type),
                 value = stringResource(record.operationType.labelRes())
@@ -401,6 +415,7 @@ fun HistoryRecordDetailContent(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
     }
 }
 
@@ -410,7 +425,25 @@ private fun HistoryInfoLine(
     value: String,
     valueColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    val clipboard = LocalClipboard.current
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(value) {
+                detectTapGestures(
+                    onLongPress = {
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipData.newPlainText(title, value).toClipEntry())
+                        }
+                        context.toast(R.string.copied_format, value)
+                    }
+                )
+            },
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelMedium,
