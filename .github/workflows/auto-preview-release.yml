@@ -16,8 +16,8 @@ jobs:
   build_and_prerelease:
     # Skip preview release for version bumps or explicitly skipped commits
     if: |
-      !contains(github.event.head_commit.message, 'chore: bump version') &&
-      !contains(github.event.head_commit.message, 'chore(release)') &&
+      !startsWith(github.event.head_commit.message, 'chore: bump version') &&
+      !startsWith(github.event.head_commit.message, 'chore(release)') &&
       !contains(github.event.head_commit.message, '[skip preview]')
     runs-on: ubuntu-latest
     permissions:
