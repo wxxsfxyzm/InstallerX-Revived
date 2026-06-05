@@ -6,5 +6,6 @@ import com.rosan.installer.domain.history.model.OperationHistoryModel
 
 data class HistoryViewState(
     val records: List<OperationHistoryModel> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val isSystemApp: Boolean = false
 )

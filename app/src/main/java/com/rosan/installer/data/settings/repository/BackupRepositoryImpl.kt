@@ -34,6 +34,7 @@ import com.rosan.installer.domain.settings.model.backup.BackupValidationSeverity
 import com.rosan.installer.domain.settings.model.backup.RestoreResult
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.DexoptMode
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
@@ -340,6 +341,7 @@ class BackupRepositoryImpl(
             installReason = installReason.value,
             enableCustomizePackageSource = enableCustomizePackageSource,
             packageSource = packageSource.value,
+            installRequesterMode = installRequesterMode.value,
             installRequester = installRequester,
             installerMode = installerMode.value,
             installer = installer,
@@ -412,6 +414,8 @@ class BackupRepositoryImpl(
             installReason = InstallReason.fromInt(installReason),
             enableCustomizePackageSource = enableCustomizePackageSource,
             packageSource = PackageSource.fromInt(packageSource),
+            installRequesterMode = InstallRequesterMode.entries.find { it.value == installRequesterMode }
+                ?: InstallRequesterMode.Disable,
             installRequester = installRequester,
             installerMode = InstallerMode.entries.find { it.value == installerMode } ?: InstallerMode.Self,
             installer = installer,
@@ -455,6 +459,9 @@ class BackupRepositoryImpl(
         }
         if (InstallerMode.entries.none { it.value == profile.installerMode }) {
             issues += invalidProfileField("installerMode=${profile.installerMode}")
+        }
+        if (InstallRequesterMode.entries.none { it.value == profile.installRequesterMode }) {
+            issues += invalidProfileField("installRequesterMode=${profile.installRequesterMode}")
         }
         if (InstallReason.entries.none { it.value == profile.installReason }) {
             issues += invalidProfileField("installReason=${profile.installReason}")

@@ -13,7 +13,6 @@ sealed interface InstallerSettingsAction {
     data class ChangeShowOPPOSpecial(val show: Boolean) : InstallerSettingsAction
     data class ChangeDetectXposedModule(val detect: Boolean) : InstallerSettingsAction
     data class ChangeQuickOpenLSPosed(val open: Boolean) : InstallerSettingsAction
-    data class ChangeSetInstallRequester(val enable: Boolean) : InstallerSettingsAction
 
     // --- Collection Management ---
     data class AddManagedInstallerPackage(val pkg: NamedPackage) : InstallerSettingsAction

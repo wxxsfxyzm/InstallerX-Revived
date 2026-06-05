@@ -4,6 +4,7 @@ package com.rosan.installer.ui.page.main.settings.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.history.repository.OperationHistoryRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -12,10 +13,17 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class HistoryViewModel(
-    private val repository: OperationHistoryRepository
+    private val repository: OperationHistoryRepository,
+    private val capabilityProvider: DeviceCapabilityProvider
 ) : ViewModel() {
     val state: StateFlow<HistoryViewState> = repository.flowAll()
-        .map { HistoryViewState(records = it, isLoading = false) }
+        .map {
+            HistoryViewState(
+                records = it,
+                isLoading = false,
+                isSystemApp = capabilityProvider.isSystemApp
+            )
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,

@@ -10,7 +10,6 @@ data class LabSettingsState(
     val labRootEnableModuleFlash: Boolean = false,
     val labRootShowModuleArt: Boolean = true,
     val labRootMode: RootMode = RootMode.Magisk,
-    val labSetInstallRequester: Boolean = false,
     val labHttpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
     val labHttpSaveFile: Boolean = false,
     val labTapIconToShare: Boolean = false,

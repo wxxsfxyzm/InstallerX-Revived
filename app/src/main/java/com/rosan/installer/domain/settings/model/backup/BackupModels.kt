@@ -70,6 +70,7 @@ data class BackupProfile(
     val installReason: Int = 0,
     val enableCustomizePackageSource: Boolean = false,
     val packageSource: Int = 1,
+    val installRequesterMode: Int = 0,
     val installRequester: String? = null,
     val installerMode: Int = 0,
     val installer: String? = null,

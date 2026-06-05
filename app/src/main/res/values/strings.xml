@@ -340,9 +340,10 @@
     <string name="config_package_source_store">Store</string>
     <string name="config_package_source_local_file">Local File</string>
     <string name="config_package_source_downloaded_file">Downloaded File</string>
-    <string name="config_declare_install_requester">Customize install requester</string>
-    <string name="config_declare_install_requester_desc">Defaults to the requesting app when off</string>
+    <string name="config_declare_install_requester">Install requester</string>
+    <string name="config_declare_install_requester_desc">Use a custom installed package as the install requester</string>
     <string name="config_declare_install_requester_error_desc">The entered package name must be installed</string>
+    <string name="config_install_requester_mode_disable">Not set</string>
     <string name="config_install_requester">Install requested by (package name)</string>
     <string name="config_declare_installer">Set install source</string>
     <string name="config_declare_installer_desc">Defaults to this app\'s package name</string>

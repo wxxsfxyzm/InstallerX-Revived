@@ -44,12 +44,14 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.domain.history.model.InstallMethod
 import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewAction
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
 import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
+import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
 import com.rosan.installer.ui.page.main.settings.history.labelRes
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
@@ -196,6 +198,7 @@ fun MiuixHistoryPage(
         ) {
             HistoryRecordDetailContent(
                 record = record,
+                isSystemApp = state.isSystemApp,
                 modifier = Modifier
                     .fillMaxWidth()
             )
@@ -292,6 +295,7 @@ private fun HistoryRecordBriefCard(
 @Composable
 private fun HistoryRecordDetailContent(
     record: OperationHistoryModel,
+    isSystemApp: Boolean,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -316,23 +320,25 @@ private fun HistoryRecordDetailContent(
                 value = record.timestamp.formatHistoryTime()
             )
         }
-        item {
-            HistoryInfoLine(
-                title = stringResource(R.string.history_version_change),
-                value = stringResource(record.versionChange.labelRes())
-            )
-        }
-        item {
-            HistoryInfoLine(
-                title = stringResource(R.string.history_version_name),
-                value = versionNameText(record)
-            )
-        }
-        item {
-            HistoryInfoLine(
-                title = stringResource(R.string.history_version_code),
-                value = versionCodeText(record)
-            )
+        if (record.installMethod != InstallMethod.SESSION) {
+            item {
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_version_change),
+                    value = stringResource(record.versionChange.labelRes())
+                )
+            }
+            item {
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_version_name),
+                    value = versionNameText(record)
+                )
+            }
+            item {
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_version_code),
+                    value = versionCodeText(record)
+                )
+            }
         }
         item {
             HistoryInfoLine(
@@ -346,11 +352,13 @@ private fun HistoryRecordDetailContent(
                 value = record.installerPackageName ?: stringResource(R.string.history_unknown)
             )
         }
-        item {
-            HistoryInfoLine(
-                title = stringResource(R.string.history_apk_path),
-                value = sourcePathText(record)
-            )
+        if (record.installMethod != InstallMethod.SESSION) {
+            item {
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_apk_path),
+                    value = sourcePathText(record)
+                )
+            }
         }
         item {
             HistoryInfoLine(
@@ -361,7 +369,7 @@ private fun HistoryRecordDetailContent(
         item {
             HistoryInfoLine(
                 title = stringResource(R.string.history_authorizer),
-                value = record.authorizer.value
+                value = historyAuthorizerText(record.authorizer, isSystemApp)
             )
         }
         if (record.status == OperationStatus.FAILED) {

@@ -20,6 +20,7 @@ import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.local.room.entity.OperationHistoryEntity
 import com.rosan.installer.data.settings.local.room.entity.converter.AuthorizerConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.DexoptModeConverter
+import com.rosan.installer.data.settings.local.room.entity.converter.InstallRequesterModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallerModeConverter
@@ -53,6 +54,7 @@ const val INSTALLER_ROOM_SCHEMA_VERSION = 16
 @TypeConverters(
     AuthorizerConverter::class,
     InstallModeConverter::class,
+    InstallRequesterModeConverter::class,
     InstallerModeConverter::class,
     DexoptModeConverter::class,
     PackageSourceConverter::class,

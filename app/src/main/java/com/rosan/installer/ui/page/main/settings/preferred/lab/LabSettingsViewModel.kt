@@ -24,7 +24,6 @@ class LabSettingsViewModel(
             labRootEnableModuleFlash = prefs.labRootEnableModuleFlash,
             labRootShowModuleArt = prefs.labRootShowModuleArt,
             labRootMode = prefs.labRootMode,
-            labSetInstallRequester = prefs.labSetInstallRequester,
             labHttpProfile = prefs.labHttpProfile,
             labHttpSaveFile = prefs.labHttpSaveFile,
             labTapIconToShare = prefs.labTapIconToShare,
@@ -58,13 +57,6 @@ class LabSettingsViewModel(
                 updateSetting(
                     StringSetting.LabRootImplementation,
                     action.implementation.name
-                )
-            }
-
-            is LabSettingsAction.LabChangeSetInstallRequester -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.LabSetInstallRequester,
-                    action.enable
                 )
             }
 

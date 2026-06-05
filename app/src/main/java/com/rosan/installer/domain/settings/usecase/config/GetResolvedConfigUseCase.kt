@@ -6,12 +6,13 @@ import android.content.Context
 import com.rosan.installer.domain.settings.model.app.AppModel
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.repository.AppRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
-import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -39,15 +40,16 @@ class GetResolvedConfigUseCase(
         val currentUninstallFlags = appSettingsRepo.getInt(IntSetting.UninstallFlags, 0).first()
         model = model.copy(uninstallFlags = currentUninstallFlags)
 
-        val isRequesterEnabled = appSettingsRepo.getBoolean(BooleanSetting.LabSetInstallRequester).first()
-        if (isRequesterEnabled) {
-            var targetUid: Int? = model.installRequester?.let { requesterPkg ->
+        val targetUid = when (model.installRequesterMode) {
+            InstallRequesterMode.Disable -> null
+            InstallRequesterMode.Initiator -> packageName?.let { initiatorPkg ->
+                runCatching { context.packageManager.getPackageUid(initiatorPkg, 0) }.getOrNull()
+            }
+            InstallRequesterMode.Custom -> model.installRequester?.let { requesterPkg ->
                 runCatching { context.packageManager.getPackageUid(requesterPkg, 0) }.getOrNull()
             }
-
-            if (targetUid == null && packageName != null) {
-                targetUid = runCatching { context.packageManager.getPackageUid(packageName, 0) }.getOrNull()
-            }
+        }
+        if (targetUid != null) {
             model = model.copy(callingFromUid = targetUid)
         }
 

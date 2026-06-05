@@ -47,6 +47,7 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.DexoptMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
@@ -352,7 +353,7 @@ fun SegmentedColumnScope.dataInstallRequesterWidget(
     visible: Boolean = true
 ) {
     val stateData = state.data
-    val enableCustomize = stateData.enableCustomizeInstallRequester
+    val currentMode = stateData.installRequesterMode
     val packageName = stateData.installRequester
     val uid = stateData.installRequesterUid
 
@@ -361,21 +362,31 @@ fun SegmentedColumnScope.dataInstallRequesterWidget(
 
     expandableItem(
         animatedVisibility = visible,
-        expanded = enableCustomize,
+        expanded = currentMode == InstallRequesterMode.Custom,
         topContent = {
-            val description =
+            val data = mapOf(
+                InstallRequesterMode.Disable to stringResource(R.string.config_install_requester_mode_disable),
+                InstallRequesterMode.Initiator to stringResource(R.string.config_installer_mode_initiator),
+                InstallRequesterMode.Custom to stringResource(R.string.config_installer_mode_custom)
+            )
+            val description = if (currentMode == InstallRequesterMode.Custom) {
                 if (isError) stringResource(R.string.config_declare_install_requester_error_desc)
                 else stringResource(R.string.config_declare_install_requester_desc)
-            SwitchWidget(
+            } else {
+                data[currentMode]
+            }
+            DropDownMenuWidget(
                 icon = AppIcons.InstallSource,
                 title = stringResource(id = R.string.config_declare_install_requester),
                 description = description,
-                checked = enableCustomize,
-                onCheckedChange = {
-                    dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
-                },
+                choice = data.keys.toList().indexOf(currentMode),
+                data = data.values.toList(),
                 isError = isError
-            )
+            ) { index ->
+                data.keys.toList().getOrNull(index)?.let { mode ->
+                    dispatch(EditViewAction.ChangeDataInstallRequesterMode(mode))
+                }
+            }
         },
         bottomContent = {
             BaseItemContainer {
@@ -405,7 +416,9 @@ fun SegmentedColumnScope.dataInstallRequesterWidget(
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
-                        } else stringResource(R.string.config_error_package_name_empty)
+                        } else {
+                            Text(text = stringResource(R.string.config_error_package_name_empty))
+                        }
                     }
                 )
             }

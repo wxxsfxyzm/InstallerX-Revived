@@ -66,8 +66,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.domain.history.model.InstallMethod
 import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
@@ -248,6 +250,7 @@ fun HistoryPage(
         ) {
             HistoryRecordDetailContent(
                 record = selectedRecord!!,
+                isSystemApp = state.isSystemApp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 16.dp)
@@ -347,6 +350,7 @@ private fun HistoryRecordBriefCard(
 @Composable
 fun HistoryRecordDetailContent(
     record: OperationHistoryModel,
+    isSystemApp: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -372,18 +376,20 @@ fun HistoryRecordDetailContent(
                 title = stringResource(R.string.history_time),
                 value = record.timestamp.formatHistoryTime()
             )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_version_change),
-                value = stringResource(record.versionChange.labelRes())
-            )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_version_name),
-                value = versionNameText(record)
-            )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_version_code),
-                value = versionCodeText(record)
-            )
+            if (record.installMethod != InstallMethod.SESSION) {
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_version_change),
+                    value = stringResource(record.versionChange.labelRes())
+                )
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_version_name),
+                    value = versionNameText(record)
+                )
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_version_code),
+                    value = versionCodeText(record)
+                )
+            }
             HistoryInfoLine(
                 title = stringResource(R.string.history_initiator),
                 value = record.initiatorPackageName ?: stringResource(R.string.history_unknown)
@@ -392,17 +398,19 @@ fun HistoryRecordDetailContent(
                 title = stringResource(R.string.history_installer_package),
                 value = record.installerPackageName ?: stringResource(R.string.history_unknown)
             )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_apk_path),
-                value = sourcePathText(record)
-            )
+            if (record.installMethod != InstallMethod.SESSION) {
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_apk_path),
+                    value = sourcePathText(record)
+                )
+            }
             HistoryInfoLine(
                 title = stringResource(R.string.history_method),
                 value = stringResource(record.installMethod.labelRes())
             )
             HistoryInfoLine(
                 title = stringResource(R.string.history_authorizer),
-                value = record.authorizer.value
+                value = historyAuthorizerText(record.authorizer, isSystemApp)
             )
             if (record.status == OperationStatus.FAILED) {
                 HistoryInfoLine(
@@ -418,6 +426,14 @@ fun HistoryRecordDetailContent(
         Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
     }
 }
+
+@Composable
+fun historyAuthorizerText(authorizer: Authorizer, isSystemApp: Boolean): String =
+    if (authorizer == Authorizer.None && isSystemApp) {
+        stringResource(R.string.working_status_system_installer)
+    } else {
+        stringResource(authorizer.displayNameRes)
+    }
 
 @Composable
 private fun HistoryInfoLine(

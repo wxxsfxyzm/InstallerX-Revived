@@ -7,6 +7,7 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.DexoptMode
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
@@ -19,7 +20,6 @@ data class EditViewState(
     val originalData: Data? = null,
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val availableUsers: Map<Int, String> = emptyMap(),
-    val isCustomInstallRequesterEnabled: Boolean = false,
 
     // Global states integrated into the view state
     val globalAuthorizer: Authorizer = Authorizer.Global,
@@ -56,7 +56,7 @@ data class EditViewState(
         val packageSource: PackageSource,
         val enableCustomizeInstallReason: Boolean,
         val installReason: InstallReason,
-        val enableCustomizeInstallRequester: Boolean,
+        val installRequesterMode: InstallRequesterMode,
         val installRequester: String,
         val installRequesterUid: Int? = null,
         val installerMode: InstallerMode,
@@ -86,7 +86,8 @@ data class EditViewState(
         val authorizerCustomize = authorizer == Authorizer.Customize
         val errorCustomizeAuthorizer = authorizerCustomize && customizeAuthorizer.isEmpty()
         val errorInstaller = installerMode == InstallerMode.Custom && installer.isEmpty()
-        val errorInstallRequester = enableCustomizeInstallRequester && (installRequester.isEmpty() || installRequesterUid == null)
+        val errorInstallRequester =
+            installRequesterMode == InstallRequesterMode.Custom && (installRequester.isEmpty() || installRequesterUid == null)
 
         fun toConfigModel(): ConfigModel = ConfigModel(
             name = this.name,
@@ -99,7 +100,8 @@ data class EditViewState(
             installReason = this.installReason,
             enableCustomizePackageSource = this.enableCustomizePackageSource,
             packageSource = this.packageSource,
-            installRequester = if (this.enableCustomizeInstallRequester) this.installRequester else null,
+            installRequesterMode = this.installRequesterMode,
+            installRequester = if (this.installRequesterMode == InstallRequesterMode.Custom) this.installRequester else null,
             installerMode = this.installerMode,
             installer = this.installer.takeIf { it.isNotEmpty() },
             enableCustomizeUser = this.enableCustomizeUser,
@@ -136,7 +138,7 @@ data class EditViewState(
                 enableCustomizeInstallReason = config.enableCustomizeInstallReason,
                 installReason = config.installReason,
                 packageSource = config.packageSource,
-                enableCustomizeInstallRequester = config.installRequester != null,
+                installRequesterMode = config.installRequesterMode,
                 installRequester = config.installRequester ?: "",
                 installRequesterUid = null,
                 installerMode = config.installerMode,

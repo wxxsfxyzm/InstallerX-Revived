@@ -40,8 +40,7 @@ class InstallerSettingsViewModel(
             managedInstallerPackages = prefs.managedInstallerPackages,
             managedBlacklistPackages = prefs.managedBlacklistPackages,
             managedSharedUserIdBlacklist = prefs.managedSharedUserIdBlacklist,
-            managedSharedUserIdExemptedPackages = prefs.managedSharedUserIdExemptedPackages,
-            setInstallRequester = prefs.labSetInstallRequester
+            managedSharedUserIdExemptedPackages = prefs.managedSharedUserIdExemptedPackages
         )
     }.stateIn(
         scope = viewModelScope,
@@ -78,13 +77,6 @@ class InstallerSettingsViewModel(
                 updateSetting(
                     BooleanSetting.QuickOpenLSPosed,
                     action.open
-                )
-            }
-
-            is InstallerSettingsAction.ChangeSetInstallRequester -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.LabSetInstallRequester,
-                    action.enable
                 )
             }
 

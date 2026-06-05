@@ -332,9 +332,10 @@
     <string name="config_package_source_store">应用商店</string>
     <string name="config_package_source_local_file">本地文件</string>
     <string name="config_package_source_downloaded_file">已下载的文件</string>
-    <string name="config_declare_install_requester">自定义安装请求方</string>
-    <string name="config_declare_install_requester_desc">关闭时默认填写发起安装的应用</string>
+    <string name="config_declare_install_requester">安装请求方</string>
+    <string name="config_declare_install_requester_desc">使用自定义的已安装应用作为安装请求方</string>
     <string name="config_declare_install_requester_error_desc">输入的应用必须已经安装在设备上</string>
+    <string name="config_install_requester_mode_disable">不设置安装请求方</string>
     <string name="config_install_requester">安装请求方</string>
     <string name="config_declare_installer">安装来源</string>
     <string name="config_declare_installer_desc">默认填写本应用包名</string>

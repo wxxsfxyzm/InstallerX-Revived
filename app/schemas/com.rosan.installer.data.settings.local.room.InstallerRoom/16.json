@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 16,
-    "identityHash": "ad2d098120aa40b1e50d8ae1c04b68ad",
+    "identityHash": "f60addb5ccb89b64cf93ad8d0be93ab1",
     "entities": [
       {
         "tableName": "app",
@@ -80,7 +80,7 @@
       },
       {
         "tableName": "config",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT 'Default', `description` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `customize_authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `show_toast` INTEGER NOT NULL DEFAULT 0, `enable_customize_install_reason` INTEGER NOT NULL DEFAULT 0, `install_reason` INTEGER NOT NULL DEFAULT 0, `enable_customize_package_source` INTEGER NOT NULL DEFAULT 0, `package_source` INTEGER NOT NULL DEFAULT 1, `install_requester` TEXT, `installer_mode` INTEGER NOT NULL DEFAULT 0, `installer` TEXT, `enable_customize_user` INTEGER NOT NULL DEFAULT 0, `target_user_id` INTEGER NOT NULL DEFAULT 0, `enable_manual_dexopt` INTEGER NOT NULL DEFAULT 0, `force_dexopt` INTEGER NOT NULL DEFAULT 0, `dexopt_mode` TEXT NOT NULL DEFAULT 'speed-profile', `auto_delete` INTEGER NOT NULL DEFAULT 0, `auto_delete_zip` INTEGER NOT NULL DEFAULT 0, `display_size` INTEGER NOT NULL DEFAULT 0, `display_sdk` INTEGER NOT NULL DEFAULT 0, `for_all_user` INTEGER NOT NULL DEFAULT 0, `allow_test_only` INTEGER NOT NULL DEFAULT 0, `allow_downgrade` INTEGER NOT NULL DEFAULT 0, `bypass_low_target_sdk` INTEGER NOT NULL DEFAULT 0, `allow_all_requested_permissions` INTEGER NOT NULL DEFAULT 0, `allow_sig_mismatch` INTEGER NOT NULL DEFAULT 0, `allow_sig_unknown` INTEGER NOT NULL DEFAULT 0, `request_update_ownership` INTEGER NOT NULL DEFAULT 0, `split_choose_all` INTEGER NOT NULL DEFAULT 0, `apk_choose_all` INTEGER NOT NULL DEFAULT 0, `require_biometric_auth` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT 'Default', `description` TEXT NOT NULL, `authorizer` TEXT NOT NULL, `customize_authorizer` TEXT NOT NULL, `install_mode` TEXT NOT NULL, `show_toast` INTEGER NOT NULL DEFAULT 0, `enable_customize_install_reason` INTEGER NOT NULL DEFAULT 0, `install_reason` INTEGER NOT NULL DEFAULT 0, `enable_customize_package_source` INTEGER NOT NULL DEFAULT 0, `package_source` INTEGER NOT NULL DEFAULT 1, `install_requester_mode` INTEGER NOT NULL DEFAULT 0, `install_requester` TEXT, `installer_mode` INTEGER NOT NULL DEFAULT 0, `installer` TEXT, `enable_customize_user` INTEGER NOT NULL DEFAULT 0, `target_user_id` INTEGER NOT NULL DEFAULT 0, `enable_manual_dexopt` INTEGER NOT NULL DEFAULT 0, `force_dexopt` INTEGER NOT NULL DEFAULT 0, `dexopt_mode` TEXT NOT NULL DEFAULT 'speed-profile', `auto_delete` INTEGER NOT NULL DEFAULT 0, `auto_delete_zip` INTEGER NOT NULL DEFAULT 0, `display_size` INTEGER NOT NULL DEFAULT 0, `display_sdk` INTEGER NOT NULL DEFAULT 0, `for_all_user` INTEGER NOT NULL DEFAULT 0, `allow_test_only` INTEGER NOT NULL DEFAULT 0, `allow_downgrade` INTEGER NOT NULL DEFAULT 0, `bypass_low_target_sdk` INTEGER NOT NULL DEFAULT 0, `allow_all_requested_permissions` INTEGER NOT NULL DEFAULT 0, `allow_sig_mismatch` INTEGER NOT NULL DEFAULT 0, `allow_sig_unknown` INTEGER NOT NULL DEFAULT 0, `request_update_ownership` INTEGER NOT NULL DEFAULT 0, `split_choose_all` INTEGER NOT NULL DEFAULT 0, `apk_choose_all` INTEGER NOT NULL DEFAULT 0, `require_biometric_auth` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -153,6 +153,13 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1"
+          },
+          {
+            "fieldPath": "installRequesterMode",
+            "columnName": "install_requester_mode",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "installRequester",
@@ -476,7 +483,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ad2d098120aa40b1e50d8ae1c04b68ad')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f60addb5ccb89b64cf93ad8d0be93ab1')"
     ]
   }
 }

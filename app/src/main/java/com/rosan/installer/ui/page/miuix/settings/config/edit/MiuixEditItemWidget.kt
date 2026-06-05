@@ -23,6 +23,7 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.DexoptMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
@@ -350,26 +351,46 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
 @Composable
 fun MiuixDataInstallRequesterWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     val stateData = state.data
-    val enableCustomize = stateData.enableCustomizeInstallRequester
+    val currentMode = stateData.installRequesterMode
     val packageName = stateData.installRequester
     val uid = stateData.installRequesterUid
     val isError = stateData.errorInstallRequester
 
-    val description =
+    val data = mapOf(
+        InstallRequesterMode.Disable to stringResource(R.string.config_install_requester_mode_disable),
+        InstallRequesterMode.Initiator to stringResource(R.string.config_installer_mode_initiator),
+        InstallRequesterMode.Custom to stringResource(R.string.config_installer_mode_custom)
+    )
+
+    val spinnerEntries = remember(data) {
+        data.values.map { modeName -> DropdownItem(title = modeName) }
+    }
+
+    val selectedIndex = remember(currentMode, data) {
+        data.keys.toList().indexOf(currentMode).coerceAtLeast(0)
+    }
+
+    val description = if (currentMode == InstallRequesterMode.Custom) {
         if (isError) stringResource(R.string.config_declare_install_requester_error_desc)
         else stringResource(R.string.config_declare_install_requester_desc)
+    } else {
+        data[currentMode]
+    }
 
-    MiuixSwitchWidget(
+    WindowSpinnerPreference(
         title = stringResource(id = R.string.config_declare_install_requester),
-        description = description,
-        checked = enableCustomize,
-        onCheckedChange = {
-            dispatch(EditViewAction.ChangeDataEnableCustomizeInstallRequester(it))
+        summary = description,
+        items = spinnerEntries,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { newIndex ->
+            data.keys.elementAtOrNull(newIndex)?.let { mode ->
+                dispatch(EditViewAction.ChangeDataInstallRequesterMode(mode))
+            }
         }
     )
 
     AnimatedVisibility(
-        visible = enableCustomize,
+        visible = currentMode == InstallRequesterMode.Custom,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
