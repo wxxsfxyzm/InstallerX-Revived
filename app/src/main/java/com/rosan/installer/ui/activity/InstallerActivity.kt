@@ -2,9 +2,7 @@
 // Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageInstaller
 import android.os.Bundle
 import android.os.PowerManager
@@ -13,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,9 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
+import com.rosan.installer.core.bitmask.hasFlag
+import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.session.manager.InstallerSessionManager
-import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.domain.device.model.PermissionType
 import com.rosan.installer.domain.device.provider.PermissionChecker
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -37,7 +37,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.isPhoneDevice
-import com.rosan.installer.core.bitmask.hasFlag
+import com.rosan.installer.ui.util.requestPortraitOrientationOnPhoneSafely
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +49,7 @@ import timber.log.Timber
 
 class InstallerActivity : ComponentActivity(), KoinComponent {
     companion object {
-        const val KEY_ID = "installer_id"
+        private const val KEY_ID = "installer_id"
         private const val ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL"
         private const val ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS"
     }
@@ -335,9 +335,8 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 return@setContent
 
             // Force portrait on phones only when UI is actually rendered
-            if (isPhoneDevice) {
-                @SuppressLint("SourceLockedOrientationActivity")
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            LaunchedEffect(isPhoneDevice) {
+                requestPortraitOrientationOnPhoneSafely(isPhoneDevice)
             }
 
             InstallerTheme(
