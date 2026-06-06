@@ -20,12 +20,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -243,17 +241,23 @@ fun HistoryPage(
 
     if (selectedRecord != null) {
         ModalBottomSheet(
+            modifier = Modifier.statusBarsPadding(),
             onDismissRequest = { selectedRecord = null },
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentWindowInsets = { WindowInsets.statusBars }
+            contentWindowInsets = {
+                WindowInsets(
+                    left = 0.dp,
+                    top = 0.dp,
+                    right = 0.dp,
+                    bottom = 0.dp
+                )
+            }
         ) {
             HistoryRecordDetailContent(
                 record = selectedRecord!!,
                 isSystemApp = state.isSystemApp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -353,77 +357,95 @@ fun HistoryRecordDetailContent(
     isSystemApp: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(
+            start = 24.dp,
+            top = 16.dp,
+            end = 24.dp,
+            bottom = 16.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = record.appLabel ?: record.packageName,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        item {
+            Text(
+                text = record.appLabel ?: record.packageName,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            HistoryInfoLine(
-                title = stringResource(R.string.history_package_name),
-                value = record.packageName
-            )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_operation_type),
-                value = stringResource(record.operationType.labelRes())
-            )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_time),
-                value = record.timestamp.formatHistoryTime()
-            )
-            if (record.installMethod != InstallMethod.SESSION) {
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 HistoryInfoLine(
-                    title = stringResource(R.string.history_version_change),
-                    value = stringResource(record.versionChange.labelRes())
+                    title = stringResource(R.string.history_package_name),
+                    value = record.packageName
                 )
                 HistoryInfoLine(
-                    title = stringResource(R.string.history_version_name),
-                    value = versionNameText(record)
+                    title = stringResource(R.string.history_operation_type),
+                    value = stringResource(record.operationType.labelRes())
                 )
                 HistoryInfoLine(
-                    title = stringResource(R.string.history_version_code),
-                    value = versionCodeText(record)
+                    title = stringResource(R.string.history_time),
+                    value = record.timestamp.formatHistoryTime()
                 )
-            }
-            HistoryInfoLine(
-                title = stringResource(R.string.history_initiator),
-                value = record.initiatorPackageName ?: stringResource(R.string.history_unknown)
-            )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_installer_package),
-                value = record.installerPackageName ?: stringResource(R.string.history_unknown)
-            )
-            if (record.installMethod != InstallMethod.SESSION) {
+
+                if (record.installMethod != InstallMethod.SESSION) {
+                    HistoryInfoLine(
+                        title = stringResource(R.string.history_version_change),
+                        value = stringResource(record.versionChange.labelRes())
+                    )
+                    HistoryInfoLine(
+                        title = stringResource(R.string.history_version_name),
+                        value = versionNameText(record)
+                    )
+                    HistoryInfoLine(
+                        title = stringResource(R.string.history_version_code),
+                        value = versionCodeText(record)
+                    )
+                }
+
                 HistoryInfoLine(
-                    title = stringResource(R.string.history_apk_path),
-                    value = sourcePathText(record)
+                    title = stringResource(R.string.history_initiator),
+                    value = record.initiatorPackageName ?: stringResource(R.string.history_unknown)
                 )
-            }
-            HistoryInfoLine(
-                title = stringResource(R.string.history_method),
-                value = stringResource(record.installMethod.labelRes())
-            )
-            HistoryInfoLine(
-                title = stringResource(R.string.history_authorizer),
-                value = historyAuthorizerText(record.authorizer, isSystemApp)
-            )
-            if (record.status == OperationStatus.FAILED) {
                 HistoryInfoLine(
-                    title = stringResource(R.string.history_error),
-                    value = listOfNotNull(record.errorType, record.errorSummary).joinToString(": ")
-                        .ifBlank { stringResource(R.string.history_unknown) },
-                    valueColor = MaterialTheme.colorScheme.error
+                    title = stringResource(R.string.history_installer_package),
+                    value = record.installerPackageName ?: stringResource(R.string.history_unknown)
                 )
+
+                if (record.installMethod != InstallMethod.SESSION) {
+                    HistoryInfoLine(
+                        title = stringResource(R.string.history_apk_path),
+                        value = sourcePathText(record)
+                    )
+                }
+
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_method),
+                    value = stringResource(record.installMethod.labelRes())
+                )
+                HistoryInfoLine(
+                    title = stringResource(R.string.history_authorizer),
+                    value = historyAuthorizerText(record.authorizer, isSystemApp)
+                )
+
+                if (record.status == OperationStatus.FAILED) {
+                    HistoryInfoLine(
+                        title = stringResource(R.string.history_error),
+                        value = listOfNotNull(record.errorType, record.errorSummary)
+                            .joinToString(": ")
+                            .ifBlank { stringResource(R.string.history_unknown) },
+                        valueColor = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+        }
     }
 }
 
