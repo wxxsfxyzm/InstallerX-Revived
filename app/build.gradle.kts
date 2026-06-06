@@ -222,7 +222,7 @@ dependencies {
 
     implementation(libs.iamr0s.dhizuku.api)
 
-    implementation(libs.iamr0s.androidAppProcess)
+    implementation(project(":app-process"))
 
     // aboutlibraries
     implementation(libs.aboutlibraries.core)
