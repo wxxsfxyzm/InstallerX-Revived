@@ -40,7 +40,7 @@ fun useDirectPrivileged(
             val shell = special?.invoke() ?: SHELL_ROOT
             val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
             handle.use {
-                action(DefaultPrivilegedService.binderWrapped("Root", isSystemApp) { binder ->
+                action(DefaultPrivilegedService.binderWrapped(name = "Root", useAppCallerPackage = isSystemApp) { binder ->
                     it.entity.binderWrapper(binder)
                 })
             }
@@ -55,7 +55,7 @@ fun useDirectPrivileged(
         Authorizer.Dhizuku -> {
             runBlocking {
                 requireDhizukuPermissionGranted {
-                    action(DefaultPrivilegedService.binderWrapped("Dhizuku", isSystemApp) { binder ->
+                    action(DefaultPrivilegedService.binderWrapped(name = "Dhizuku", useAppCallerPackage = isSystemApp) { binder ->
                         Dhizuku.binderWrapper(binder)
                     })
                 }
@@ -66,7 +66,7 @@ fun useDirectPrivileged(
             val shell = customizeAuthorizer.ifBlank { SHELL_ROOT }
             val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
             handle.use {
-                action(DefaultPrivilegedService.binderWrapped("Customize", isSystemApp) { binder ->
+                action(DefaultPrivilegedService.binderWrapped(name = "Customize", useAppCallerPackage = isSystemApp) { binder ->
                     it.entity.binderWrapper(binder)
                 })
             }
@@ -76,7 +76,7 @@ fun useDirectPrivileged(
             special?.invoke()?.let { shell ->
                 val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
                 handle.use {
-                    action(DefaultPrivilegedService.binderWrapped("Special", isSystemApp) { binder ->
+                    action(DefaultPrivilegedService.binderWrapped(name = "Special", useAppCallerPackage = isSystemApp) { binder ->
                         it.entity.binderWrapper(binder)
                     })
                 }

@@ -20,7 +20,7 @@ private const val TAG = "PrivilegedRuntime"
 
 internal sealed interface PrivilegedRuntime {
     val name: String
-    val hasSystemLevelPermission: Boolean
+    val canCallSystemRestrictedPreferredApis: Boolean
 
     fun settingsResolverContext(context: Context): Context
 
@@ -36,13 +36,13 @@ internal sealed interface PrivilegedRuntime {
 
     fun connectivityManager(): IConnectivityManager
 
-    data object SystemApp : Direct("SystemApp", hasSystemLevelPermission = false)
+    data object SystemApp : Direct("SystemApp", canCallSystemRestrictedPreferredApis = false)
 
-    data object UserService : Direct("UserService", hasSystemLevelPermission = false)
+    data object UserService : Direct("UserService", canCallSystemRestrictedPreferredApis = false)
 
     data object ShizukuHooked : PrivilegedRuntime {
         override val name = "ShizukuHook"
-        override val hasSystemLevelPermission = false
+        override val canCallSystemRestrictedPreferredApis = false
 
         override fun settingsResolverContext(context: Context): Context {
             Timber.tag(TAG).d("Using ShellContextResolver for $name.")
@@ -82,7 +82,7 @@ internal sealed interface PrivilegedRuntime {
         private val useAppCallerPackage: Boolean,
         private val binderWrapper: (IBinder) -> IBinder
     ) : PrivilegedRuntime {
-        override val hasSystemLevelPermission = true
+        override val canCallSystemRestrictedPreferredApis = true
 
         override fun settingsResolverContext(context: Context): Context {
             Timber.tag(TAG).d("Using SystemContextResolver for $name.")
@@ -126,7 +126,7 @@ internal sealed interface PrivilegedRuntime {
 
     sealed class Direct(
         override val name: String,
-        override val hasSystemLevelPermission: Boolean
+        override val canCallSystemRestrictedPreferredApis: Boolean
     ) : PrivilegedRuntime {
         override fun settingsResolverContext(context: Context): Context {
             Timber.tag(TAG).d("Using ShellContextResolver for $name.")

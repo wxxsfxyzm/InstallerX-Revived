@@ -125,19 +125,19 @@ class DefaultPrivilegedService private constructor(
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         val userId = AndroidProcess.myUid() / 100000
-        val hasSystemLevelPermission = runtime.hasSystemLevelPermission
+        val canCallSystemRestrictedPreferredApis = runtime.canCallSystemRestrictedPreferredApis
 
         Timber.tag(TAG).d(
-            "setDefaultInstaller called: component=%s, enable=%b, userId=%d, rootMode=%b",
+            "setDefaultInstaller called: component=%s, enable=%b, userId=%d, canCallSystemRestrictedPreferredApis=%b",
             component.flattenToShortString(),
             enable,
             userId,
-            hasSystemLevelPermission
+            canCallSystemRestrictedPreferredApis
         )
 
         // Reset state for our own package
         Timber.tag(TAG).v("Resetting preferred state for %s", component.packageName)
-        clearPackageActivities(component.packageName, userId, hasSystemLevelPermission)
+        clearPackageActivities(component.packageName, userId, canCallSystemRestrictedPreferredApis)
 
         if (!enable) {
             Timber.tag(TAG).i("Enable flag is false. Exiting after clearing own preferred activities.")
@@ -175,7 +175,7 @@ class DefaultPrivilegedService private constructor(
                 // Dynamically clear preferred activities for other apps
                 if (infoPackageName != component.packageName && infoPackageName != "android") {
                     // Use the extracted helper to clear competing apps
-                    clearPackageActivities(infoPackageName, userId, hasSystemLevelPermission)
+                    clearPackageActivities(infoPackageName, userId, canCallSystemRestrictedPreferredApis)
                 }
 
                 names.add(ComponentName(infoPackageName, infoClassName))
@@ -201,7 +201,7 @@ class DefaultPrivilegedService private constructor(
                 component = component,
                 userId = userId,
                 removeExisting = true,
-                hasSystemLevelPermission = hasSystemLevelPermission
+                canCallSystemRestrictedPreferredApis = canCallSystemRestrictedPreferredApis
             )
         }
 
@@ -775,7 +775,7 @@ class DefaultPrivilegedService private constructor(
     private fun clearPackageActivities(
         packageName: String,
         userId: Int,
-        hasSystemLevelPermission: Boolean
+        canCallSystemRestrictedPreferredApis: Boolean
     ) {
         // 1. Clear standard preferred activities (Always try)
         try {
@@ -785,8 +785,8 @@ class DefaultPrivilegedService private constructor(
             Timber.tag(TAG).w(e, "Failed to clear preferred activities for $packageName")
         }
 
-        // 2. Clear persistent preferred activities (Only if in Root mode)
-        if (hasSystemLevelPermission) {
+        // 2. Clear persistent preferred activities (Only if the runtime can call system-restricted APIs)
+        if (canCallSystemRestrictedPreferredApis) {
             try {
                 Timber.tag(TAG).d("Clearing persistent preferred activities for $packageName")
                 iPackageManager.clearPackagePersistentPreferredActivities(packageName, userId)
@@ -811,7 +811,7 @@ class DefaultPrivilegedService private constructor(
         component: ComponentName,
         userId: Int,
         removeExisting: Boolean,
-        hasSystemLevelPermission: Boolean
+        canCallSystemRestrictedPreferredApis: Boolean
     ) {
         // 1. Add standard preferred activity
         try {
@@ -825,8 +825,8 @@ class DefaultPrivilegedService private constructor(
             Timber.e(e, "Failed to add preferred activity for %s", component.packageName)
         }
 
-        // 2. Add persistent preferred activity (Only if in Root mode)
-        if (hasSystemLevelPermission) {
+        // 2. Add persistent preferred activity (Only if the runtime can call system-restricted APIs)
+        if (canCallSystemRestrictedPreferredApis) {
             Timber.tag(TAG).d("Adding persistent preferred activity for %s", component.packageName)
             try {
                 iPackageManager.addPersistentPreferredActivity(filter, component, userId)

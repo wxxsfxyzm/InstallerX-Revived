@@ -3,18 +3,17 @@
 package com.rosan.installer.framework.privileged.util
 
 import com.rosan.installer.IPrivilegedService
-import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
+import com.rosan.installer.di.RecyclerNames
+import com.rosan.installer.domain.privileged.exception.PrivilegedException
+import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.framework.privileged.lifecycle.Recyclable
 import com.rosan.installer.framework.privileged.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.lifecycle.UserService
 import com.rosan.installer.framework.privileged.recycler.ProcessUserServiceRecycler
 import com.rosan.installer.framework.privileged.recycler.ShizukuUserServiceRecycler
-import com.rosan.installer.di.RecyclerNames
-import com.rosan.installer.domain.privileged.exception.PrivilegedException
-import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
-import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
 import org.koin.core.context.GlobalContext
-import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import java.lang.reflect.InvocationTargetException
 
@@ -33,10 +32,16 @@ fun useUserService(
     special: (() -> String?)? = null,
     action: (UserService) -> Unit
 ) {
+    val fallbackPrivileged = if (isSystemApp) {
+        DefaultPrivilegedService.system()
+    } else {
+        DefaultPrivilegedService.userService()
+    }
+
     if (authorizer == Authorizer.None) {
         if (isSystemApp) {
             Timber.tag(TAG).d("Running as System App with None Authorizer. Executing direct calls.")
-            action.invoke(DefaultUserService(DefaultPrivilegedService.system()))
+            action.invoke(DefaultUserService(fallbackPrivileged))
         } else {
             Timber.tag(TAG).w("Authorizer is None but not running as System App. Privileged action skipped.")
         }
@@ -49,12 +54,13 @@ fun useUserService(
     }
 
     val recycler = getRecyclableInstance(authorizer, customizeAuthorizer, special)
-    processRecycler(authorizer, recycler, action)
+    processRecycler(authorizer, recycler, fallbackPrivileged, action)
 }
 
 private fun processRecycler(
     authorizer: Authorizer,
     recycler: Recyclable<out UserService>?,
+    fallbackPrivileged: IPrivilegedService,
     action: (UserService) -> Unit
 ) {
     try {
@@ -63,7 +69,7 @@ private fun processRecycler(
             recycler.use { action.invoke(it.entity) }
         } else {
             Timber.tag(TAG).e("No recycler found for $authorizer. Falling back to DefaultUserService.")
-            action.invoke(DefaultUserService(DefaultPrivilegedService.userService()))
+            action.invoke(DefaultUserService(fallbackPrivileged))
         }
     } catch (e: Exception) {
         if (e is InvocationTargetException) {
