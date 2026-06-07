@@ -2,12 +2,12 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.device.provider
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.SystemProperties
 import android.provider.Settings
 import android.text.TextUtils
 import androidx.core.net.toUri
@@ -66,11 +66,6 @@ class DeviceCapabilityProviderImpl(
             "ro.vivo.market.name",          // Vivo
             "ro.config.marketing_name"      // Huawei/Honor
         )
-    }
-
-    private val systemPropertiesClass by lazy {
-        @SuppressLint("PrivateApi")
-        Class.forName("android.os.SystemProperties")
     }
 
     override val isSessionInstallSupported: Boolean by lazy {
@@ -378,11 +373,11 @@ class DeviceCapabilityProviderImpl(
     }
 
     private fun getSystemProperty(key: String, defaultValue: String = ""): String? =
-        reflect.invokeStatic<String>(
-            "get",
-            systemPropertiesClass,
-            arrayOf(String::class.java, String::class.java),
-            key,
-            defaultValue
-        )?.takeIf { it.isNotEmpty() }
+        try {
+            SystemProperties.get(key, defaultValue)
+                .takeIf { it.isNotEmpty() }
+        } catch (e: Throwable) {
+            Timber.d(e, "Failed to read system property: $key")
+            defaultValue.takeIf { it.isNotEmpty() }
+        }
 }
