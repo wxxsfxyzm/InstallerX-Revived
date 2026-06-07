@@ -14,12 +14,12 @@ import com.rosan.app_process.AppProcess
 import com.rosan.installer.IAppProcessService
 import com.rosan.installer.IPrivilegedService
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
+import com.rosan.installer.di.init.processModules
 import com.rosan.installer.framework.privileged.lifecycle.Recyclable
 import com.rosan.installer.framework.privileged.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.lifecycle.UserService
-import com.rosan.installer.di.init.processModules
+import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -30,8 +30,7 @@ class ProcessUserServiceRecycler(
     private val shell: String,
     private val context: Context,
     private val appProcessRecyclerManager: RecyclerManager<String, AppProcessRecycler>
-) :
-    Recycler<ProcessUserServiceRecycler.UserServiceProxy>() {
+) : Recycler<ProcessUserServiceRecycler.UserServiceProxy>() {
 
     class UserServiceProxy(
         val service: IAppProcessService,
@@ -66,7 +65,7 @@ class ProcessUserServiceRecycler(
             }
         }
 
-        private val privileged = DefaultPrivilegedService(isHookMode = false)
+        private val privileged = DefaultPrivilegedService.userService()
 
         override fun quit() {
             try {

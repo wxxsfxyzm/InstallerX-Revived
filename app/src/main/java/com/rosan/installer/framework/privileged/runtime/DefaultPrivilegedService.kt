@@ -8,7 +8,6 @@ import android.app.IApplicationThread
 import android.app.ProfilerInfo
 import android.content.ComponentName
 import android.content.ContentResolver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.IPackageManager
@@ -26,7 +25,6 @@ import android.os.Parcel
 import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.os.ResultReceiver
-import android.os.ServiceManager
 import android.provider.Settings
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
@@ -35,10 +33,6 @@ import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.getValue
 import com.rosan.installer.core.reflection.invoke
 import com.rosan.installer.core.reflection.invokeStatic
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
-import com.rosan.installer.framework.privileged.util.ShizukuContext
-import com.rosan.installer.framework.privileged.util.ShizukuHook
-import com.rosan.installer.framework.privileged.util.SystemContext
 import com.rosan.installer.framework.privileged.util.deletePaths
 import com.rosan.installer.framework.privileged.util.resolveSettingsBinder
 import com.rosan.installer.util.pm.REASON_REMIND_OWNERSHIP
@@ -49,135 +43,47 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import android.os.Process as AndroidProcess
 
-class DefaultPrivilegedService(
-    private val isHookMode: Boolean,
-    private val binderWrapper: ((IBinder) -> IBinder)? = null
+class DefaultPrivilegedService private constructor(
+    private val runtime: PrivilegedRuntime
 ) : BasePrivilegedService(), PrivilegedOperations {
     companion object {
         private const val TAG = "PrivilegedService"
 
         private const val SHELL_COMMAND_TRANSACTION = 0x5f434d44 // '_CMD'
-    }
 
-    enum class WorkingMode {
-        ROOT,       // Process Hook Mode (binderWrapper != null)
-        SHIZUKU,    // Hook Mode (isHookMode == true)
-        SYSTEM,     // System App Mode
-        UserService // UserService Mode
+        fun system() = DefaultPrivilegedService(PrivilegedRuntime.SystemApp)
+
+        fun userService() = DefaultPrivilegedService(PrivilegedRuntime.UserService)
+
+        fun shizukuHook() = DefaultPrivilegedService(PrivilegedRuntime.ShizukuHooked)
+
+        fun binderWrapped(
+            name: String,
+            useAppCallerPackage: Boolean,
+            binderWrapper: (IBinder) -> IBinder
+        ) = DefaultPrivilegedService(PrivilegedRuntime.BinderWrapped(name, useAppCallerPackage, binderWrapper))
     }
 
     private val reflect by inject<ReflectionProvider>()
-    private val capabilityProvider by inject<DeviceCapabilityProvider>()
-
-    // Cache the working mode lazily to avoid Koin injection lifecycle issues
-    // with capabilityProvider during class instantiation.
-    private val workingMode: WorkingMode by lazy {
-        when {
-            binderWrapper != null -> WorkingMode.ROOT
-            isHookMode -> WorkingMode.SHIZUKU
-            capabilityProvider.isSystemApp -> WorkingMode.SYSTEM
-            else -> WorkingMode.UserService
-        }
-    }
 
     private val iPackageManager: IPackageManager by lazy {
-        when (workingMode) {
-            WorkingMode.ROOT -> {
-                Timber.tag(TAG).d("Getting IPackageManager in Process Hook Mode.")
-                val original = ServiceManager.getService("package")
-                IPackageManager.Stub.asInterface(binderWrapper!!.invoke(original))
-            }
-
-            WorkingMode.SHIZUKU -> {
-                Timber.tag(TAG).d("Getting IPackageManager in Hook Mode (Directly).")
-                ShizukuHook.hookedPackageManager
-            }
-
-            WorkingMode.SYSTEM, WorkingMode.UserService -> {
-                Timber.tag(TAG).d("Getting IPackageManager in ${workingMode.name} Mode.")
-                IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
-            }
-        }
+        runtime.packageManager()
     }
 
     private val iActivityManager: IActivityManager by lazy {
-        when (workingMode) {
-            WorkingMode.ROOT -> {
-                Timber.tag(TAG).d("Getting IActivityManager in Process Hook Mode.")
-                val original = ServiceManager.getService(Context.ACTIVITY_SERVICE)
-                IActivityManager.Stub.asInterface(binderWrapper!!.invoke(original))
-            }
-
-            WorkingMode.SHIZUKU -> {
-                ShizukuHook.hookedActivityManager
-            }
-
-            WorkingMode.SYSTEM, WorkingMode.UserService -> {
-                Timber.tag(TAG).d("Getting IActivityManager in ${workingMode.name} Mode.")
-                IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE))
-            }
-        }
+        runtime.activityManager()
     }
 
     private val iUserManager: IUserManager by lazy {
-        when (workingMode) {
-            WorkingMode.ROOT -> {
-                Timber.tag(TAG).d("Getting IUserManager in Process Hook Mode.")
-                val original = ServiceManager.getService(Context.USER_SERVICE)
-                IUserManager.Stub.asInterface(binderWrapper!!.invoke(original))
-            }
-
-            WorkingMode.SHIZUKU -> {
-                Timber.tag(TAG).d("Getting IUserManager in Hook Mode (From ShizukuHook Factory).")
-                ShizukuHook.hookedUserManager
-            }
-
-            WorkingMode.SYSTEM, WorkingMode.UserService -> {
-                Timber.tag(TAG).d("Getting IUserManager in ${workingMode.name} Mode.")
-                IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE))
-            }
-        }
+        runtime.userManager()
     }
 
     private val settingsBinder: IBinder? by lazy {
-        val original = reflect.resolveSettingsBinder()?.originalBinder
-
-        when (workingMode) {
-            WorkingMode.ROOT -> {
-                Timber.tag(TAG).d("Getting Settings Binder in Process Hook Mode.")
-                if (original != null) binderWrapper!!.invoke(original) else null
-            }
-
-            WorkingMode.SHIZUKU -> {
-                Timber.tag(TAG).d("Getting Settings Binder in Hook Mode (via ShizukuHook).")
-                ShizukuHook.hookedSettingsBinder
-            }
-
-            WorkingMode.SYSTEM, WorkingMode.UserService -> {
-                Timber.tag(TAG).d("Getting Settings Binder in ${workingMode.name} Mode.")
-                original
-            }
-        }
+        runtime.settingsBinder(reflect)
     }
 
     private val iConnectivityManager: IConnectivityManager by lazy {
-        when (workingMode) {
-            WorkingMode.ROOT -> {
-                Timber.tag(TAG).d("Getting IConnectivityManager in Process Hook Mode.")
-                val original = ServiceManager.getService(Context.CONNECTIVITY_SERVICE)
-                IConnectivityManager.Stub.asInterface(binderWrapper!!.invoke(original))
-            }
-
-            WorkingMode.SHIZUKU -> {
-                Timber.tag(TAG).d("Getting IConnectivityManager in Hook Mode (via ShizukuHook).")
-                ShizukuHook.hookedConnectivityManager
-            }
-
-            WorkingMode.SYSTEM, WorkingMode.UserService -> {
-                Timber.tag(TAG).d("Getting IConnectivityManager in ${workingMode.name} Mode.")
-                IConnectivityManager.Stub.asInterface(ServiceManager.getService(Context.CONNECTIVITY_SERVICE))
-            }
-        }
+        runtime.connectivityManager()
     }
 
     override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
@@ -219,8 +125,7 @@ class DefaultPrivilegedService(
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         val userId = AndroidProcess.myUid() / 100000
-        // Use the cached mode to determine system-level permission (su 1000 in this case)
-        val hasSystemLevelPermission = workingMode == WorkingMode.ROOT
+        val hasSystemLevelPermission = runtime.hasSystemLevelPermission
 
         Timber.tag(TAG).d(
             "setDefaultInstaller called: component=%s, enable=%b, userId=%d, rootMode=%b",
@@ -433,19 +338,7 @@ class DefaultPrivilegedService(
                 if (originalBinder != targetBinder) {
                     remoteField.set(provider, targetBinder)
                 }
-                val targetResolver = if (binderWrapper != null) {
-                    // [Root Mode] UID is 1000.
-                    // Must spoof package name "android" to pass AppOps check.
-                    Timber.tag(TAG).d("Root Mode: Using SystemContextResolver (UID 1000, Pkg: android)")
-                    val systemContext = SystemContext(context)
-                    object : ContentResolver(systemContext) {}
-                } else {
-                    // [Shizuku Mode] UID is 2000.
-                    // Must spoof package name "com.android.shell".
-                    Timber.tag(TAG).d("Shizuku Mode: Using ShellContextResolver (UID 2000, Pkg: com.android.shell)")
-                    val shellContext = ShizukuContext(context)
-                    object : ContentResolver(shellContext) {}
-                }
+                val targetResolver = object : ContentResolver(runtime.settingsResolverContext(context)) {}
 
                 val result = Settings.Global.putInt(targetResolver, key, targetValue)
                 Timber.tag(TAG).i("Set $key to $targetValue. Result: $result")
@@ -505,9 +398,7 @@ class DefaultPrivilegedService(
             val am = iActivityManager
 
             val userId = AndroidProcess.myUid() / 100000
-            val callerPackage = if (capabilityProvider.isSystemApp) {
-                context.packageName
-            } else "com.android.shell"
+            val callerPackage = runtime.activityCallerPackage(context)
             val resolvedType = intent.resolveType(context.contentResolver)
 
             val result = am.startActivityAsUser(

@@ -20,8 +20,9 @@ import java.lang.reflect.InvocationTargetException
 
 private const val TAG = "PrivilegedService"
 
-private object DefaultUserService : UserService {
-    override val privileged: IPrivilegedService = DefaultPrivilegedService(isHookMode = false)
+private class DefaultUserService(
+    override val privileged: IPrivilegedService
+) : UserService {
     override fun close() {}
 }
 
@@ -35,7 +36,7 @@ fun useUserService(
     if (authorizer == Authorizer.None) {
         if (isSystemApp) {
             Timber.tag(TAG).d("Running as System App with None Authorizer. Executing direct calls.")
-            action.invoke(DefaultUserService)
+            action.invoke(DefaultUserService(DefaultPrivilegedService.system()))
         } else {
             Timber.tag(TAG).w("Authorizer is None but not running as System App. Privileged action skipped.")
         }
@@ -62,7 +63,7 @@ private fun processRecycler(
             recycler.use { action.invoke(it.entity) }
         } else {
             Timber.tag(TAG).e("No recycler found for $authorizer. Falling back to DefaultUserService.")
-            action.invoke(DefaultUserService)
+            action.invoke(DefaultUserService(DefaultPrivilegedService.userService()))
         }
     } catch (e: Exception) {
         if (e is InvocationTargetException) {
