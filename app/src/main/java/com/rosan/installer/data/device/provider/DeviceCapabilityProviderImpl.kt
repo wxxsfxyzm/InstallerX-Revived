@@ -66,6 +66,9 @@ class DeviceCapabilityProviderImpl(
             "ro.vivo.market.name",          // Vivo
             "ro.config.marketing_name"      // Huawei/Honor
         )
+
+        private const val ROOT_DETECTION_EXTRA_PATH =
+            "/data/adb/ksu/bin:/data/adb/ap/bin:/data/adb/magisk/bin"
     }
 
     override val isSessionInstallSupported: Boolean by lazy {
@@ -253,17 +256,18 @@ class DeviceCapabilityProviderImpl(
 
     private fun checkBinaryViaSu(command: String) =
         try {
+            val shellCommand = $$"export PATH=$PATH:$$ROOT_DETECTION_EXTRA_PATH && $$command"
             // Execute the specific binary check within the su environment
-            val process = ProcessBuilder("su", "-c", command)
+            val process = ProcessBuilder("su", "-c", shellCommand)
                 .redirectErrorStream(true)
                 .start()
 
             val exitCode = process.waitFor()
             if (exitCode == 0) {
-                Timber.d("RootDetection: Successfully executed -> su -c '$command'")
+                Timber.d("RootDetection: Successfully executed -> su -c '$shellCommand'")
                 true
             } else {
-                Timber.d("RootDetection: Command 'su -c '$command'' failed with exit code: $exitCode")
+                Timber.d("RootDetection: Command 'su -c '$shellCommand'' failed with exit code: $exitCode")
                 false
             }
         } catch (e: CancellationException) {
