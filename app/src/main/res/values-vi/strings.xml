@@ -835,4 +835,13 @@
     <string name="home_learn_more_title">Tìm hiểu Thêm</string>
     <string name="home_learn_more_installerx_title">Tìm hiểu về InstallerX Revived</string>
     <string name="home_learn_more_installerx_desc">Tìm hiểu cách để cấu hình và sử dụng InstallerX Revived</string>
+    <string name="history">Lịch sử</string>
+    <string name="history_empty_title">Chưa có bản ghi nào</string>
+    <string name="history_empty_desc">Bản ghi về quá trình cài đặt và gỡ cài đặt sẽ hiển thị ở đây sau khi một thao tác hoàn tất.</string>
+    <string name="history_clear">Dọn lịch sử</string>
+    <string name="history_clear_confirm_title">Dọn lịch sử?</string>
+    <string name="history_clear_confirm_desc">Tất cả bản ghi quá trình cài đặt và gỡ cài đặt sẽ bị xóa. Thao tác này không thể hoàn tác.</string>
+    <string name="history_operation_install">Cài đặt</string>
+    <string name="history_operation_uninstall">Gỡ cài đặt</string>
+    <string name="history_operation_session_confirm">Phiên</string>
 </resources>

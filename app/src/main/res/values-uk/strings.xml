@@ -459,4 +459,15 @@
     <string name="uninstall_call_uninstaller_manually_desc">Видалити програму за вказаною назвою пакета</string>
     <string name="uninstall_progress_text">Видалення...</string>
     <string name="uninstall_enter_package_name">Введіть назву пакета, щоб видалити</string>
+    <string name="installer_temp_settings_tip">Ці налаштування є тимчасовими для цього сеансу. Щоб зберегти їх, перейдіть у Налаштування</string>
+    <string name="installer_show_oem_special">Показати додаткову інформацію OEM</string>
+    <string name="installer_show_oem_special_desc">Аналізуйте та показує деякі специфічні значення для OEM apk(s) у діалоговому вікні встановлення</string>
+    <string name="lab_show_apk_path">Показати шлях до файлу</string>
+    <string name="lab_show_apk_path_desc">Відображати шлях до файлу в деталях програми</string>
+    <string name="lab_show_install_initiator">Показати ініціатора встановлення</string>
+    <string name="lab_show_apk_path_label">Шлях до файлу</string>
+    <string name="lab_show_install_initiator_label">Ініціатор встановлення</string>
+    <string name="lab_show_install_initiator_desc">Показати, яка програма почала встановлення</string>
+    <string name="permission_list">Список дозволів</string>
+    <string name="permission_list_desc">Список дозволів, які запитує встановлюваний пакет</string>
 </resources>
