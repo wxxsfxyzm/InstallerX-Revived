@@ -1,5 +1,6 @@
 package com.rosan.installer;
 
+import android.content.ComponentName;
 import com.rosan.installer.ICommandOutputListener;
 
 /**
@@ -26,6 +27,11 @@ interface IPrivilegedService {
      * Executes a command and streams its output back via a listener.
      */
     void execArrWithCallback(in String[] command, ICommandOutputListener listener);
+
+    /**
+     * Configures this app as the default package installer.
+     */
+    void setDefaultInstaller(in ComponentName component, boolean enable);
 
     /**
      * Retrieves detailed information about an installation session (app name, icon).

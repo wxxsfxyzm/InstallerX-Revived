@@ -2,12 +2,12 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.device.provider
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.SystemProperties
 import android.provider.Settings
 import android.text.TextUtils
 import androidx.core.net.toUri
@@ -66,11 +66,9 @@ class DeviceCapabilityProviderImpl(
             "ro.vivo.market.name",          // Vivo
             "ro.config.marketing_name"      // Huawei/Honor
         )
-    }
 
-    private val systemPropertiesClass by lazy {
-        @SuppressLint("PrivateApi")
-        Class.forName("android.os.SystemProperties")
+        private const val ROOT_DETECTION_EXTRA_PATH =
+            "/data/adb/ksu/bin:/data/adb/ap/bin:/data/adb/magisk/bin"
     }
 
     override val isSessionInstallSupported: Boolean by lazy {
@@ -258,17 +256,18 @@ class DeviceCapabilityProviderImpl(
 
     private fun checkBinaryViaSu(command: String) =
         try {
+            val shellCommand = $$"export PATH=$PATH:$$ROOT_DETECTION_EXTRA_PATH && $$command"
             // Execute the specific binary check within the su environment
-            val process = ProcessBuilder("su", "-c", command)
+            val process = ProcessBuilder("su", "-c", shellCommand)
                 .redirectErrorStream(true)
                 .start()
 
             val exitCode = process.waitFor()
             if (exitCode == 0) {
-                Timber.d("RootDetection: Successfully executed -> su -c '$command'")
+                Timber.d("RootDetection: Successfully executed -> su -c '$shellCommand'")
                 true
             } else {
-                Timber.d("RootDetection: Command 'su -c '$command'' failed with exit code: $exitCode")
+                Timber.d("RootDetection: Command 'su -c '$shellCommand'' failed with exit code: $exitCode")
                 false
             }
         } catch (e: CancellationException) {
@@ -378,11 +377,11 @@ class DeviceCapabilityProviderImpl(
     }
 
     private fun getSystemProperty(key: String, defaultValue: String = ""): String? =
-        reflect.invokeStatic<String>(
-            "get",
-            systemPropertiesClass,
-            arrayOf(String::class.java, String::class.java),
-            key,
-            defaultValue
-        )?.takeIf { it.isNotEmpty() }
+        try {
+            SystemProperties.get(key, defaultValue)
+                .takeIf { it.isNotEmpty() }
+        } catch (e: Throwable) {
+            Timber.d(e, "Failed to read system property: $key")
+            defaultValue.takeIf { it.isNotEmpty() }
+        }
 }

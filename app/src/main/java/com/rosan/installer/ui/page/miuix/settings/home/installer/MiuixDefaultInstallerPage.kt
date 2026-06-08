@@ -3,6 +3,8 @@
 package com.rosan.installer.ui.page.miuix.settings.home.installer
 
 import android.annotation.SuppressLint
+import android.os.SystemClock
+import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -36,7 +38,9 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewEvent
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
+import com.rosan.installer.ui.page.main.settings.home.delayDefaultInstallerProgressIfNeeded
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import com.rosan.installer.ui.page.miuix.widgets.MiuixBlockingLoadingDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
@@ -50,8 +54,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.SnackbarHost
-import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -74,20 +76,41 @@ fun MiuixDefaultInstallerPage(
 
     val backdrop = rememberMiuixBlurBackdrop(useBlur)
 
-    val snackbarHostState = remember { SnackbarHostState() }
     var errorSheetInfo by remember {
         mutableStateOf<HomePageViewEvent.ShowDefaultInstallerErrorDetail?>(null)
     }
     val showErrorSheet = remember { mutableStateOf(false) }
+    var showDefaultInstallerProgress by remember { mutableStateOf(false) }
+    var defaultInstallerProgressStartedAt by remember { mutableStateOf(0L) }
+    var defaultInstallerProgressTextResId by remember {
+        mutableStateOf(R.string.locking_default_installer)
+    }
+
+    fun dispatchSetDefaultInstaller(lock: Boolean) {
+        defaultInstallerProgressStartedAt = SystemClock.elapsedRealtime()
+        defaultInstallerProgressTextResId =
+            if (lock) R.string.locking_default_installer else R.string.unlocking_default_installer
+        showDefaultInstallerProgress = true
+        viewModel.dispatch(HomePageViewAction.SetDefaultInstaller(lock))
+    }
+
+    suspend fun dismissDefaultInstallerProgress() {
+        if (showDefaultInstallerProgress) {
+            delayDefaultInstallerProgressIfNeeded(defaultInstallerProgressStartedAt)
+            showDefaultInstallerProgress = false
+        }
+    }
 
     @SuppressLint("LocalContextGetResourceValueCall") LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
                 is HomePageViewEvent.ShowDefaultInstallerResult -> {
-                    snackbarHostState.showSnackbar(context.getString(event.messageResId))
+                    dismissDefaultInstallerProgress()
+                    Toast.makeText(context, context.getString(event.messageResId), Toast.LENGTH_SHORT).show()
                 }
 
                 is HomePageViewEvent.ShowDefaultInstallerErrorDetail -> {
+                    dismissDefaultInstallerProgress()
                     errorSheetInfo = event
                     showErrorSheet.value = true
                 }
@@ -108,7 +131,6 @@ fun MiuixDefaultInstallerPage(
                 scrollBehavior = scrollBehavior
             )
         },
-        snackbarHost = { SnackbarHost(state = snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -150,11 +172,11 @@ fun MiuixDefaultInstallerPage(
                     MiuixDefaultInstaller(
                         lock = true,
                         enabled = uiState.globalAuthorizer != Authorizer.None
-                    ) { viewModel.dispatch(HomePageViewAction.SetDefaultInstaller(true)) }
+                    ) { dispatchSetDefaultInstaller(true) }
                     MiuixDefaultInstaller(
                         lock = false,
                         enabled = uiState.globalAuthorizer != Authorizer.None
-                    ) { viewModel.dispatch(HomePageViewAction.SetDefaultInstaller(false)) }
+                    ) { dispatchSetDefaultInstaller(false) }
                 }
             }
 
@@ -205,11 +227,21 @@ fun MiuixDefaultInstallerPage(
             onDismissRequest = { showErrorSheet.value = false },
             onRetry = {
                 showErrorSheet.value = false
-                viewModel.dispatch(info.retryAction)
+                val action = info.retryAction
+                if (action is HomePageViewAction.SetDefaultInstaller) {
+                    dispatchSetDefaultInstaller(action.lock)
+                } else {
+                    viewModel.dispatch(action)
+                }
             },
             title = stringResource(info.titleResId)
         )
     }
+
+    MiuixBlockingLoadingDialog(
+        visible = showDefaultInstallerProgress,
+        text = stringResource(defaultInstallerProgressTextResId)
+    )
 }
 
 @Composable
