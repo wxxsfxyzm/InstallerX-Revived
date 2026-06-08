@@ -34,6 +34,7 @@ import org.koin.dsl.module
 
 object RecyclerNames {
     val APP_PROCESS = named("AppProcessManager")
+    val SYSTEM_UID_APP_PROCESS = named("SystemUidAppProcessManager")
     val USER_SERVICE = named("ProcessUserServiceManager")
     val SYSTEM_UID_USER_SERVICE = named("SystemUidProcessUserServiceManager")
     val SYSTEM_UID_SHIZUKU_USER_SERVICE = named("SystemUidShizukuUserService")
@@ -67,6 +68,12 @@ val privilegedModule = module {
         }
     }
 
+    single(RecyclerNames.SYSTEM_UID_APP_PROCESS) {
+        RecyclerManager<String, AppProcessRecycler> { shell ->
+            AppProcessRecycler(shell)
+        }
+    }
+
     // Add named qualifier to distinguish this manager
     single(RecyclerNames.USER_SERVICE) {
         RecyclerManager<String, ProcessUserServiceRecycler> { shell ->
@@ -83,7 +90,7 @@ val privilegedModule = module {
             ProcessUserServiceRecycler(
                 shell = shell,
                 context = get(),
-                appProcessRecyclerManager = get(RecyclerNames.APP_PROCESS),
+                appProcessRecyclerManager = get(RecyclerNames.SYSTEM_UID_APP_PROCESS),
                 serviceClass = ProcessUserServiceRecycler.SystemUidAppProcessService::class.java
             )
         }
