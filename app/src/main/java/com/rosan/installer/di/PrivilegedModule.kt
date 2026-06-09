@@ -98,7 +98,13 @@ val privilegedModule = module {
 
     // 2. Stateless / Permission-based Recyclers (Singletons)
     // Replaces the old 'object' declarations. Koin now manages their lifecycle.
-    singleOf(::ShizukuUserServiceRecycler)
+    single {
+        ShizukuUserServiceRecycler(
+            context = get(),
+            serviceClass = ShizukuUserServiceRecycler.ShizukuUserService::class.java,
+            processNameSuffix = "shizuku_privileged"
+        )
+    }
     single(RecyclerNames.SYSTEM_UID_SHIZUKU_USER_SERVICE) {
         ShizukuUserServiceRecycler(
             context = get(),
