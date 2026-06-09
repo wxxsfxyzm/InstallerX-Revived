@@ -47,8 +47,7 @@ class AppOpsProviderImpl(
             useDirectPrivileged(
                 isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = authorizer,
-                customizeAuthorizer = customizeAuthorizer,
-                special = getSpecialAuth(authorizer)
+                customizeAuthorizer = customizeAuthorizer
             ) { privileged ->
                 try {
                     privileged.setAdbVerify(enabled)
@@ -62,11 +61,11 @@ class AppOpsProviderImpl(
     }
 
     override suspend fun setPackageNetworkingEnabled(authorizer: Authorizer, uid: Int, enabled: Boolean) {
+        if (authorizer != Authorizer.Shizuku) throw IllegalStateException("Unsupported authorizer: $authorizer")
         withContext(Dispatchers.IO) {
             useDirectPrivileged(
                 isSystemApp = capabilityProvider.isSystemApp,
-                authorizer = authorizer,
-                special = getSpecialAuth(authorizer)
+                authorizer = authorizer
             ) { privileged ->
                 try {
                     privileged.setPackageNetworkingEnabled(uid, enabled)
