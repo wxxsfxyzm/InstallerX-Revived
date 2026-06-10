@@ -7,7 +7,7 @@ package com.rosan.installer.util
  * Logic is from the PackageUtil.kt file in the PackageInstaller project.
  * Under Apache License 2.0.
  *
- * @param this The legacy language code to be converted.
+ * @receiver The legacy language code to be converted.
  * @return The modern language code.
  * @see <a href="https://developer.android.com/reference/java/util/Locale#legacy-language-codes">java.util.Locale#legacy-language-codes</a>
  * @see <a href="https://github.com/vvb2060/PackageInstaller/blob/master/app/src/main/java/io/github/vvb2060/packageinstaller/model/PackageUtil.kt">PackageUtil</a>
