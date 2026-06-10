@@ -1,7 +1,7 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025-2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package top.yukonga.miuix.kmp.basic.patched
+package com.rosan.installer.ui.page.miuix.widgets
 
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.LocalIndication

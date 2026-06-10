@@ -45,4 +45,8 @@ public class ApkAssets {
                                                 int flags) throws IOException {
         return null;
     }
+
+    public native String getAssetPath();
+
+    public native XmlResourceParser openXml(String fileName) throws IOException;
 }

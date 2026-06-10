@@ -6,23 +6,26 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ApkAssets
 import android.content.res.AssetManager
+import android.content.res.`AssetManager$Builder`
 import android.content.res.Resources
+import android.content.res.XmlResourceParser
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.res.ResourcesCompat
+import com.rosan.installer.core.device.model.Architecture
+import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.invoke
 import com.rosan.installer.core.resParser.parser.AxmlTreeParser
-import com.rosan.installer.core.resParser.parser.AxmlTreeParserImpl
-import com.rosan.installer.core.device.model.Architecture
-import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.domain.engine.exception.AnalyseException
-import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
+import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
-import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
+import com.rosan.installer.domain.engine.model.source.DataEntity
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -53,14 +56,27 @@ class ApkParser(
                 val apkResources = loadApkResources(resources, path)
                 Timber.d("ApkParser: Resources loaded successfully for $path")
 
-                val entity = loadAppEntity(
-                    apkResources,
-                    apkResources.newTheme(),
-                    path,
-                    data,
-                    extra,
-                    bestArch ?: Architecture.UNKNOWN
-                )
+                val entity = if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
+                    loadAppEntity(
+                        apkResources.resources,
+                        apkResources.resources.newTheme(),
+                        apkResources.openManifestParser,
+                        path,
+                        data,
+                        extra,
+                        bestArch ?: Architecture.UNKNOWN
+                    )
+                } else {
+                    loadAppEntity(
+                        apkResources.resources,
+                        apkResources.resources.newTheme(),
+                        apkResources.openManifestParser,
+                        path,
+                        data,
+                        extra,
+                        bestArch ?: Architecture.UNKNOWN
+                    )
+                }
                 Timber.d("ApkParser: Entity parsed successfully -> Pkg: ${entity.packageName}")
                 listOf(entity)
             } catch (e: Exception) {
@@ -114,11 +130,25 @@ class ApkParser(
         return Resources(assetManager, resources.displayMetrics, resources.configuration)
     }
 
-    private fun loadApkResources(systemResources: Resources, path: String): Resources {
+    private data class ApkResourceContext(
+        val resources: Resources,
+        val openManifestParser: () -> XmlResourceParser,
+        val closeResourcesAfterUse: Boolean
+    )
+
+    private fun loadApkResources(systemResources: Resources, path: String): ApkResourceContext {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
-                setAssetPath(systemResources.assets, arrayOf(ApkAssets.loadFromPath(path)))
-                return systemResources
+                val apkAssets = ApkAssets.loadFromPath(path)
+                val assetManager = `AssetManager$Builder`()
+                    .addApkAssets(apkAssets)
+                    .build()
+                val apkResources = Resources(assetManager, systemResources.displayMetrics, systemResources.configuration)
+                return ApkResourceContext(
+                    resources = apkResources,
+                    openManifestParser = { apkAssets.openXml("AndroidManifest.xml") },
+                    closeResourcesAfterUse = true
+                )
             } catch (e: IOException) {
                 Timber.e(e, "Failed to load APK assets from path: $path")
                 throw AnalyseException(
@@ -152,7 +182,13 @@ class ApkParser(
                     message = "addAssetPath returned 0 for: $path"
                 )
             }
-            @Suppress("DEPRECATION") return Resources(assets, systemResources.displayMetrics, systemResources.configuration)
+            @Suppress("DEPRECATION")
+            val apkResources = Resources(assets, systemResources.displayMetrics, systemResources.configuration)
+            return ApkResourceContext(
+                resources = apkResources,
+                openManifestParser = { apkResources.assets.openXmlResourceParser("AndroidManifest.xml") },
+                closeResourcesAfterUse = true
+            )
         }
     }
 
@@ -174,6 +210,7 @@ class ApkParser(
     private fun loadAppEntity(
         resources: Resources,
         theme: Resources.Theme?,
+        openManifestParser: () -> XmlResourceParser,
         path: String,
         data: DataEntity,
         extra: AnalyseExtraEntity,
@@ -200,83 +237,136 @@ class ApkParser(
         var appDescription: String? = null
         var isPotentialXposed = false
 
-        AxmlTreeParserImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
-            .register("/manifest") {
-                packageName = getAttributeValue(null, "package")
-                sharedUserId = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "sharedUserId")
-                splitName = getAttributeValue(null, "split")
-                val versionCodeMajor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCodeMajor", 0).toLong()
-                val versionCodeMinor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCode", 0).toLong()
-                versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
+        try {
+            openManifestParser().use { manifestParser ->
+                var insideApplication = false
+                var applicationDepth = -1
+                var eventType = manifestParser.eventType
 
-                versionName = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName")
-                ) ?: versionName
-            }
-            .register("/manifest/uses-sdk") {
-                minSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "minSdkVersion")
-                targetSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "targetSdkVersion")
-            }
-            .register("/manifest/application") {
-                label = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "label")
-                )
-                icon = resolveDrawable(
-                    resources,
-                    theme,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", ResourcesCompat.ID_NULL)
-                )
-                roundIcon = resolveDrawable(
-                    resources,
-                    theme,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", ResourcesCompat.ID_NULL)
-                )
+                while (eventType != XmlPullParser.END_DOCUMENT) {
+                    when (eventType) {
+                        XmlPullParser.START_TAG -> when (manifestParser.name) {
+                            "manifest" -> {
+                                packageName = manifestParser.getAttributeValue(null, "package")
+                                sharedUserId = manifestParser.getAndroidAttributeValue("sharedUserId", android.R.attr.sharedUserId)
+                                splitName = manifestParser.getAttributeValue(null, "split")
+                                val versionCodeMajor = manifestParser.getAndroidAttributeIntValue(
+                                    "versionCodeMajor",
+                                    android.R.attr.versionCodeMajor,
+                                    0
+                                ).toLong()
+                                val versionCodeMinor = manifestParser.getAndroidAttributeIntValue(
+                                    "versionCode",
+                                    android.R.attr.versionCode,
+                                    0
+                                ).toLong()
+                                versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
 
-                // Extract description for Xposed fallback
-                appDescription = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "description", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "description")
-                )
-            }
-            .register("/manifest/application/meta-data") {
-                if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                    if ("minOsdkVersion" == getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")) {
-                        minOsdkVersion = resolveString(
-                            resources,
-                            getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
-                            getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
-                        )
+                                versionName = resolveString(
+                                    resources,
+                                    manifestParser.getAndroidAttributeResourceValue("versionName", android.R.attr.versionName),
+                                    manifestParser.getAndroidAttributeValue("versionName", android.R.attr.versionName)
+                                ) ?: versionName
+                            }
+
+                            "uses-sdk" -> {
+                                minSdk = manifestParser.getAndroidAttributeValue("minSdkVersion", android.R.attr.minSdkVersion)
+                                    ?: manifestParser.getAndroidAttributeIntValue(
+                                        "minSdkVersion",
+                                        android.R.attr.minSdkVersion,
+                                        -1
+                                    ).takeIf { it >= 0 }?.toString()
+                                targetSdk = manifestParser.getAndroidAttributeValue("targetSdkVersion", android.R.attr.targetSdkVersion)
+                                    ?: manifestParser.getAndroidAttributeIntValue(
+                                        "targetSdkVersion",
+                                        android.R.attr.targetSdkVersion,
+                                        -1
+                                    ).takeIf { it >= 0 }?.toString()
+                            }
+
+                            "application" -> {
+                                insideApplication = true
+                                applicationDepth = manifestParser.depth
+
+                                label = resolveString(
+                                    resources,
+                                    manifestParser.getAndroidAttributeResourceValue("label", android.R.attr.label),
+                                    manifestParser.getAndroidAttributeValue("label", android.R.attr.label)
+                                )
+                                icon = resolveDrawable(
+                                    resources,
+                                    theme,
+                                    manifestParser.getAndroidAttributeResourceValue("icon", android.R.attr.icon),
+                                    "icon"
+                                )
+                                roundIcon = resolveDrawable(
+                                    resources,
+                                    theme,
+                                    manifestParser.getAndroidAttributeResourceValue("roundIcon", android.R.attr.roundIcon),
+                                    "roundIcon"
+                                )
+
+                                // Extract description for Xposed fallback
+                                appDescription = resolveString(
+                                    resources,
+                                    manifestParser.getAndroidAttributeResourceValue("description", android.R.attr.description),
+                                    manifestParser.getAndroidAttributeValue("description", android.R.attr.description)
+                                )
+                            }
+
+                            "meta-data" -> {
+                                if (insideApplication) {
+                                    if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                                        if ("minOsdkVersion" == manifestParser.getAndroidAttributeValue("name", android.R.attr.name)) {
+                                            minOsdkVersion = resolveString(
+                                                resources,
+                                                manifestParser.getAndroidAttributeResourceValue("value", android.R.attr.value),
+                                                manifestParser.getAndroidAttributeValue("value", android.R.attr.value)
+                                            )
+                                        }
+                                    }
+
+                                    val metaDataName = manifestParser.getAndroidAttributeValue("name", android.R.attr.name)
+                                    val metaDataValue = resolveString(
+                                        resources,
+                                        manifestParser.getAndroidAttributeResourceValue("value", android.R.attr.value),
+                                        manifestParser.getAndroidAttributeValue("value", android.R.attr.value)
+                                    )
+
+                                    if (metaDataName != null && metaDataValue != null) {
+                                        metaDataMap[metaDataName] = metaDataValue
+                                    }
+
+                                    // Check legacy xposed indicators
+                                    if ("xposedmodule" == metaDataName ||
+                                        "xposedminversion" == metaDataName ||
+                                        "xposeddescription" == metaDataName
+                                    ) {
+                                        isPotentialXposed = true
+                                    }
+                                }
+                            }
+
+                            "uses-permission", "uses-permission-sdk-m" -> {
+                                manifestParser.getAndroidAttributeValue("name", android.R.attr.name)
+                                    ?.let { if (it.isNotBlank()) permissions.add(it) }
+                            }
+                        }
+
+                        XmlPullParser.END_TAG -> {
+                            if (insideApplication && manifestParser.depth == applicationDepth && manifestParser.name == "application") {
+                                insideApplication = false
+                                applicationDepth = -1
+                            }
+                        }
                     }
-                }
-
-                val metaDataName = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")
-                val metaDataValue = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
-                )
-
-                if (metaDataName != null && metaDataValue != null) {
-                    metaDataMap[metaDataName] = metaDataValue
-                }
-
-                // Check legacy xposed indicators
-                if ("xposedmodule" == metaDataName ||
-                    "xposedminversion" == metaDataName ||
-                    "xposeddescription" == metaDataName
-                ) {
-                    isPotentialXposed = true
+                    eventType = manifestParser.next()
                 }
             }
-            .register("/manifest/uses-permission") {
-                getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")?.let { if (it.isNotBlank()) permissions.add(it) }
-            }
-            .map { }
+        } catch (e: Exception) {
+            if (!e.isRecoverableManifestParseException() || packageName.isNullOrEmpty()) throw e
+            Timber.w(e, "ApkParser: Manifest parsing stopped early for $path. Optional manifest data may be incomplete.")
+        }
 
         // Final Xposed verification and data extraction
         var xposedInfo: XposedModuleInfo? = null
@@ -301,7 +391,7 @@ class ApkParser(
             versionCode = versionCode,
             versionName = versionName,
             label = label,
-            icon = roundIcon ?: icon,
+            icon = icon ?: roundIcon,
             targetSdk = targetSdk,
             minSdk = minSdk,
             minOsdkVersion = minOsdkVersion,
@@ -327,6 +417,38 @@ class ApkParser(
         }
     }
 
+    private fun XmlResourceParser.findAndroidAttributeIndex(name: String, resId: Int): Int {
+        for (index in 0 until attributeCount) {
+            if (getAttributeNameResource(index) == resId || getAttributeName(index) == name) return index
+        }
+        return -1
+    }
+
+    private fun XmlResourceParser.getAndroidAttributeValue(name: String, resId: Int): String? {
+        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, name)?.let { return it }
+        getAttributeValue(null, name)?.let { return it }
+        val index = findAndroidAttributeIndex(name, resId)
+        return if (index >= 0) getAttributeValue(index) else null
+    }
+
+    private fun XmlResourceParser.getAndroidAttributeResourceValue(name: String, resId: Int): Int {
+        val namespaced = getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, name, ResourcesCompat.ID_NULL)
+        if (namespaced != ResourcesCompat.ID_NULL) return namespaced
+        val nonNamespaced = getAttributeResourceValue(null, name, ResourcesCompat.ID_NULL)
+        if (nonNamespaced != ResourcesCompat.ID_NULL) return nonNamespaced
+        val index = findAndroidAttributeIndex(name, resId)
+        return if (index >= 0) getAttributeResourceValue(index, ResourcesCompat.ID_NULL) else ResourcesCompat.ID_NULL
+    }
+
+    private fun XmlResourceParser.getAndroidAttributeIntValue(name: String, resId: Int, defaultValue: Int): Int {
+        val namespaced = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, name, defaultValue)
+        if (namespaced != defaultValue) return namespaced
+        val nonNamespaced = getAttributeIntValue(null, name, defaultValue)
+        if (nonNamespaced != defaultValue) return nonNamespaced
+        val index = findAndroidAttributeIndex(name, resId)
+        return if (index >= 0) getAttributeIntValue(index, defaultValue) else defaultValue
+    }
+
     private fun resolveString(res: Resources, resId: Int, rawValue: String?): String? {
         if (resId == ResourcesCompat.ID_NULL) return rawValue
         return try {
@@ -336,13 +458,18 @@ class ApkParser(
         }
     }
 
-    private fun resolveDrawable(res: Resources, theme: Resources.Theme?, resId: Int): Drawable? {
+    private fun resolveDrawable(res: Resources, theme: Resources.Theme?, resId: Int, attrName: String): Drawable? {
         if (resId == ResourcesCompat.ID_NULL) return null
         return try {
             ResourcesCompat.getDrawable(res, resId, theme)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Timber.w(e, "ApkParser: Failed to resolve application $attrName resource: 0x${resId.toString(16)}")
             null
         }
+    }
+
+    private fun Exception.isRecoverableManifestParseException(): Boolean {
+        return this is XmlPullParserException || this is IOException
     }
 
     private fun analyseAndSelectBestArchitecture(path: String, deviceSupportedArchs: List<Architecture>): Architecture? {

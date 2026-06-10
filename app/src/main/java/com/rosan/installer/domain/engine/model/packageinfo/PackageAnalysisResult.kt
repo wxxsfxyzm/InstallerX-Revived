@@ -1,5 +1,6 @@
 package com.rosan.installer.domain.engine.model.packageinfo
 
+import android.graphics.Bitmap
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 
@@ -12,6 +13,7 @@ data class PackageAnalysisResult(
     val packageName: String,
     val sessionMode: SessionMode,
     val appEntities: List<SelectInstallEntity>,
+    val displayIcon: Bitmap? = null,
     val seedColor: Int? = null,
     val installedAppInfo: InstalledAppInfo?,
     val signatureMatchStatus: SignatureMatchStatus,

@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
+import com.rosan.installer.ui.page.main.installer.components.workingIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
@@ -17,9 +18,8 @@ import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 fun analysingDialog() = DialogParams(
     icon = DialogInnerParams(
         DialogParamsType.IconWorking.id,
-
-
-        ), title = DialogInnerParams(
+        workingIcon
+    ), title = DialogInnerParams(
         DialogParamsType.InstallerAnalysing.id,
     ) {
         Text(stringResource(R.string.installer_analysing))

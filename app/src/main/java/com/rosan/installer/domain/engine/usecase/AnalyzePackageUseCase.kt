@@ -18,9 +18,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 
+private const val DISPLAY_ICON_SIZE_PX = 512
+
 /**
  * UseCase for analyzing installation sources (APKs, ZIPs, Modules).
- * It coordinates file parsing and optional dynamic color extraction.
+ * It coordinates file parsing, display icon preparation, and optional dynamic color extraction.
  */
 class AnalyzePackageUseCase(
     private val analyserRepository: AnalyserRepository,
@@ -53,30 +55,36 @@ class AnalyzePackageUseCase(
         val useDynamicColorForLiveActivity = appSettingsRepo.getBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, false).first()
         val preferSystemIcon = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first()
 
-        // 3. If dynamic color is enabled, concurrently extract seed colors from package icons
-        return@coroutineScope if (useDynamicColor || useDynamicColorForLiveActivity) {
-            results.map { res ->
-                async {
-                    if (!isActive) throw CancellationException()
+        // 3. Prepare display icons during analysis so UI stages can consume stable visual data.
+        results.map { res ->
+            async {
+                if (!isActive) throw CancellationException()
 
-                    // Extract the base APK entity to find the icon
-                    val base = res.appEntities
-                        .map { it.app }
-                        .filterIsInstance<AppEntity.BaseEntity>()
-                        .firstOrNull()
+                val entityForIcon = res.appEntities
+                    .map { it.app }
+                    .let { entities ->
+                        entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+                            ?: entities.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+                            ?: entities.firstOrNull()
+                    }
 
-                    // Extract color using the repository (abstracted from IconColorExtractor)
-                    val color = appIconRepository.extractColorFromApp(
-                        sessionId = sessionId,
-                        packageName = res.packageName,
-                        entityToInstall = base,
-                        preferSystemIcon = preferSystemIcon
-                    )
-                    res.copy(seedColor = color)
+                val displayIcon = appIconRepository.getIcon(
+                    sessionId = sessionId,
+                    packageName = res.packageName,
+                    entityToInstall = entityForIcon,
+                    userId = 0,
+                    iconSizePx = DISPLAY_ICON_SIZE_PX,
+                    preferSystemIcon = preferSystemIcon
+                )
+
+                val color = if (useDynamicColor || useDynamicColorForLiveActivity) {
+                    appIconRepository.extractColorFromBitmap(displayIcon)
+                } else {
+                    null
                 }
-            }.awaitAll()
-        } else {
-            results
-        }
+
+                res.copy(displayIcon = displayIcon, seedColor = color)
+            }
+        }.awaitAll()
     }
 }
