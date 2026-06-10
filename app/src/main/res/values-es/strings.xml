@@ -75,7 +75,7 @@
     <!--    <string name="config_authorizer_msg">Para ejecutar análisis y comandos, asegúrate de tener permisos suficientes.</string>-->
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
-    <string name="config_authorizer_none">Ninguno</string>
+    <string name="config_authorizer_none">Sin privilegios</string>
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
@@ -496,7 +496,7 @@
     <string name="dhizuku_cannot_set_dexopt_desc">¡El modo Dhizuku no admite la configuración de dexopt!</string>
     <string name="installer_oppo_related">Relacionado con OPPO</string>
     <string name="installer_show_oem_special">Mostrar información adicional del OEM</string>
-    <string name="installer_show_oem_special_desc">Analizar y mostrar algún valor específico para los APKs de OEM en el diálogo de instalación</string>
+    <string name="installer_show_oem_special_desc">Analizar y mostrar algún valor específico para los APKs OEM en el cuadro de diálogo de instalación</string>
     <string name="config_request_update_ownership">Solicitar actualización de propiedad</string>
     <string name="config_request_update_ownership_desc">Establecer este instalador como fuente para futuras actualizaciones</string>
     <string name="installer_select_multi_apk">Instalación en lotes</string>
@@ -572,7 +572,7 @@
     <string name="config_customize_install_reason">Personalizar motivo de instalación</string>
     <string name="config_customize_install_reason_desc">Especifica el motivo de la instalación. Para nuevas instalaciones. Seleccionar Usuario suele hacer que el lanzador cree un icono de escritorio</string>
     <string name="config_install_reason">Motivo de Instalación</string>
-    <string name="config_install_reason_unknown">Desconocido</string>
+    <string name="config_install_reason_unknown">Motivo desconocido</string>
     <string name="config_install_reason_policy">Política de dispositivos</string>
     <string name="config_install_reason_device_restore">Restauración del dispositivo</string>
     <string name="config_install_reason_device_setup">Configuración del dispositivo</string>
@@ -857,7 +857,7 @@
     <string name="history_status_success">Completado</string>
     <string name="history_status_failed">Fallido</string>
     <string name="history_version_fresh_install">Instalación limpia</string>
-    <string name="history_version_update">Actualizar</string>
+    <string name="history_version_update">Actualización</string>
     <string name="history_version_downgrade">Degradar</string>
     <string name="history_version_same">Misma versión</string>
     <string name="history_method_package_manager">Administrador de paquetes</string>
@@ -888,7 +888,7 @@
     <string name="backup_settings_restore_ignored_settings">Ajustes ignorados: %1$d</string>
     <string name="backup_settings_restore_warnings_title">Advertencias</string>
     <string name="backup_settings_validation_failed_title">Copia de seguridad no válida</string>
-    <string name="backup_settings_validation_invalid_file">El archivo seleccionado no es una copia de seguridad válida de InstallerX.</string>
+    <string name="backup_settings_validation_invalid_file">El archivo seleccionado no es una copia de seguridad válida de InstallerX Revived.</string>
     <string name="backup_settings_validation_unsupported_format">La versión del formato de copia de seguridad %1$s no es compatible. La versión actual admite hasta %2$s.</string>
     <string name="backup_settings_validation_empty">La copia de seguridad no contiene perfiles, ámbitos, ajustes ni registros del historial.</string>
     <string name="backup_settings_validation_invalid_profile_id">ID de perfil no válido: %1$s</string>
@@ -907,4 +907,6 @@
     <string name="backup_settings_file_read_failed">No se pudo leer el archivo de copia de seguridad</string>
     <string name="backup_settings_file_write_failed">No se pudo escribir el archivo de copia de seguridad</string>
     <string name="config_install_requester_mode_disable">No establecido</string>
+    <string name="locking_default_installer">Estableciendo como instalador predeterminado…</string>
+    <string name="unlocking_default_installer">Quitando el instalador predeterminado…</string>
 </resources>

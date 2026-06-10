@@ -878,7 +878,7 @@
     <string name="backup_settings_restore_ignored_settings">Пропущено настроек: %1$d</string>
     <string name="backup_settings_restore_warnings_title">Предупреждения</string>
     <string name="backup_settings_validation_failed_title">Поврежденный файл бэкапа</string>
-    <string name="backup_settings_validation_invalid_file">Выбранный файл не является резервной копией InstallerX.</string>
+    <string name="backup_settings_validation_invalid_file">Выбранный файл не является резервной копией InstallerX Revived.</string>
     <string name="backup_settings_validation_unsupported_format">Формат бэкапа версии %1$s не поддерживается. Текущая сборка работает с версиями не выше %2$s.</string>
     <string name="backup_settings_validation_empty">Файл резервной копии пуст.</string>
     <string name="backup_settings_validation_invalid_profile_id">Неверный ID профиля: %1$s</string>
@@ -897,4 +897,6 @@
     <string name="backup_settings_file_read_failed">Ошибка чтения файла бэкапа</string>
     <string name="backup_settings_file_write_failed">Ошибка записи файла бэкапа</string>
     <string name="config_install_requester_mode_disable">Не задано</string>
+    <string name="locking_default_installer">Назначение установщиком по умолчанию…</string>
+    <string name="unlocking_default_installer">Отмена назначения установщиком по умолчанию…</string>
 </resources>

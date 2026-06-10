@@ -458,7 +458,7 @@
     <string name="disable_notification_on_dismiss">Batalkan Pemasangan pada Abaikan</string>
     <string name="close_notification_immediately_on_dialog_dismiss">Mengabaikan dialog tersebut akan membatalkan proses pemasangan, alih-alih meminimalkannya ke area pemberitahuan</string>
     <string name="close_session_countdown">Atur hitung mundur</string>
-    <string name="close_session_countdown_desc">Hitung mundur untuk menutup otomatis setelah instalasi Dhizuku berhasil</string>
+    <string name="close_session_countdown_desc">Jika tidak ada hak akses khusus, beberapa sistem CN yang dikustomisasi akan menghalangi proses startup yang terkait. Mengubah nilai ini dapat memperlambat waktu respons saat jendela pop-up yang menghalangi sistem tetap muncul.</string>
     <string name="dhizuku_cannot_set_package_source_desc">Mode Shizuku tidak mendukung kustomisasi sumber paket!</string>
     <string name="dhizuku_cannot_set_installer_desc">Mode Dhizuku tidak mendukung pengaturan installer!</string>
     <string name="dhizuku_cannot_set_user_desc">Mode Dhizuku tidak mendukung pengaturan pengguna target!</string>
@@ -783,7 +783,7 @@
     <string name="exception_install_failed_multi_arch_not_match_all_native_abis">Kode native yang dikemas tidak cocok dengan semua ABI native yang didukung oleh sistem</string>
     <string name="exception_uninstall_failed_device_policy">Pencopotan pemasangan diblokir oleh kebijakan perangkat</string>
     <string name="exception_uninstall_failed_owner_blocked">Pencopotan pemasangan diblokir oleh pemilik</string>
-    <string name="reboot_soft_reboot">Soft Reboot</string>
+    <string name="reboot_soft_reboot">Reboot Ringan</string>
     <string name="config_allow_sig_mismatch">Izinkan Ketidakcocokan Tanda Tangan</string>
     <string name="config_allow_sig_mismatch_desc">Izinkan pemasangan aplikasi yang memiliki tanda tangan berbeda dari versi yang terpasang (memerlukan Core Patch)</string>
     <string name="config_allow_sig_unknown">Izinkan Tanda Tangan Tidak Diketahui</string>
@@ -875,11 +875,11 @@
     <string name="backup_settings_restore_ignored_settings">Pengaturan yang diabaikan: %1$d</string>
     <string name="backup_settings_restore_warnings_title">Peringatan</string>
     <string name="backup_settings_validation_failed_title">Cadangan tidak valid</string>
-    <string name="backup_settings_validation_invalid_file">File yang dipilih bukan cadangan InstallerX yang valid.</string>
+    <string name="backup_settings_validation_invalid_file">Berkas yang dipilih bukanlah cadangan InstallerX Revived yang sah.</string>
     <string name="backup_settings_validation_unsupported_format">Versi format cadangan %1$s tidak didukung. Versi saat ini mendukung hingga %2$s.</string>
     <string name="backup_settings_validation_empty">Cadangan ini tidak berisi profil, cakupan, pengaturan, atau catatan riwayat.</string>
-    <string name="backup_settings_validation_invalid_profile_id">ID profil tidak valid: %1$s</string>
-    <string name="backup_settings_validation_duplicate_profile_id">ID profil duplikat: %1$s</string>
+    <string name="backup_settings_validation_invalid_profile_id">ID profil tidak sah: %1$s</string>
+    <string name="backup_settings_validation_duplicate_profile_id">ID profil ganda: %1$s</string>
     <string name="backup_settings_validation_invalid_profile_field">Bidang profil tidak valid: %1$s</string>
     <string name="backup_settings_validation_duplicate_scope_package">Paket cakupan duplikat: %1$s</string>
     <string name="backup_settings_validation_invalid_history_field">Bidang riwayat tidak valid: %1$s</string>
@@ -897,4 +897,6 @@
     <string name="home_learn_more_title">Pelajari lebih lanjut</string>
     <string name="home_learn_more_installerx_title">Pelajari tentang InstallerX Revived</string>
     <string name="home_learn_more_installerx_desc">Pelajari cara mengonfigurasi dan menggunakan InstallerX Revived</string>
+    <string name="locking_default_installer">Tetapkan sebagai pemasang bawaan…</string>
+    <string name="unlocking_default_installer">Menghapus pemasang bawaan…</string>
 </resources>

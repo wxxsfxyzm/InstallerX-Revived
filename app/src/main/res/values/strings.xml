@@ -232,7 +232,7 @@
     <string name="backup_settings_restore_ignored_settings">Ignored settings: %1$d</string>
     <string name="backup_settings_restore_warnings_title">Warnings</string>
     <string name="backup_settings_validation_failed_title">Invalid backup</string>
-    <string name="backup_settings_validation_invalid_file">The selected file is not a valid InstallerX backup.</string>
+    <string name="backup_settings_validation_invalid_file">The selected file is not a valid InstallerX Revived backup.</string>
     <string name="backup_settings_validation_unsupported_format">Unsupported backup format version %1$s. Current version supports up to %2$s.</string>
     <string name="backup_settings_validation_empty">The backup does not contain profiles, scopes, settings, or history records.</string>
     <string name="backup_settings_validation_invalid_profile_id">Invalid profile id: %1$s</string>
