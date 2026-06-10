@@ -23,6 +23,7 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
+import org.xmlpull.v1.XmlPullParserException
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -200,83 +201,88 @@ class ApkParser(
         var appDescription: String? = null
         var isPotentialXposed = false
 
-        AxmlTreeParserImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
-            .register("/manifest") {
-                packageName = getAttributeValue(null, "package")
-                sharedUserId = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "sharedUserId")
-                splitName = getAttributeValue(null, "split")
-                val versionCodeMajor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCodeMajor", 0).toLong()
-                val versionCodeMinor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCode", 0).toLong()
-                versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
+        try {
+            AxmlTreeParserImpl(resources.assets.openXmlResourceParser("AndroidManifest.xml"))
+                .register("/manifest") {
+                    packageName = getAttributeValue(null, "package")
+                    sharedUserId = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "sharedUserId")
+                    splitName = getAttributeValue(null, "split")
+                    val versionCodeMajor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCodeMajor", 0).toLong()
+                    val versionCodeMinor = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCode", 0).toLong()
+                    versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
 
-                versionName = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName")
-                ) ?: versionName
-            }
-            .register("/manifest/uses-sdk") {
-                minSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "minSdkVersion")
-                targetSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "targetSdkVersion")
-            }
-            .register("/manifest/application") {
-                label = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "label")
-                )
-                icon = resolveDrawable(
-                    resources,
-                    theme,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", ResourcesCompat.ID_NULL)
-                )
-                roundIcon = resolveDrawable(
-                    resources,
-                    theme,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", ResourcesCompat.ID_NULL)
-                )
+                    versionName = resolveString(
+                        resources,
+                        getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName", ResourcesCompat.ID_NULL),
+                        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName")
+                    ) ?: versionName
+                }
+                .register("/manifest/uses-sdk") {
+                    minSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "minSdkVersion")
+                    targetSdk = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "targetSdkVersion")
+                }
+                .register("/manifest/application") {
+                    label = resolveString(
+                        resources,
+                        getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", ResourcesCompat.ID_NULL),
+                        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "label")
+                    )
+                    icon = resolveDrawable(
+                        resources,
+                        theme,
+                        getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", ResourcesCompat.ID_NULL)
+                    )
+                    roundIcon = resolveDrawable(
+                        resources,
+                        theme,
+                        getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "roundIcon", ResourcesCompat.ID_NULL)
+                    )
 
-                // Extract description for Xposed fallback
-                appDescription = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "description", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "description")
-                )
-            }
-            .register("/manifest/application/meta-data") {
-                if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                    if ("minOsdkVersion" == getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")) {
-                        minOsdkVersion = resolveString(
-                            resources,
-                            getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
-                            getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
-                        )
+                    // Extract description for Xposed fallback
+                    appDescription = resolveString(
+                        resources,
+                        getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "description", ResourcesCompat.ID_NULL),
+                        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "description")
+                    )
+                }
+                .register("/manifest/application/meta-data") {
+                    if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+                        if ("minOsdkVersion" == getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")) {
+                            minOsdkVersion = resolveString(
+                                resources,
+                                getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
+                                getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
+                            )
+                        }
+                    }
+
+                    val metaDataName = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")
+                    val metaDataValue = resolveString(
+                        resources,
+                        getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
+                        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
+                    )
+
+                    if (metaDataName != null && metaDataValue != null) {
+                        metaDataMap[metaDataName] = metaDataValue
+                    }
+
+                    // Check legacy xposed indicators
+                    if ("xposedmodule" == metaDataName ||
+                        "xposedminversion" == metaDataName ||
+                        "xposeddescription" == metaDataName
+                    ) {
+                        isPotentialXposed = true
                     }
                 }
-
-                val metaDataName = getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")
-                val metaDataValue = resolveString(
-                    resources,
-                    getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "value", ResourcesCompat.ID_NULL),
-                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
-                )
-
-                if (metaDataName != null && metaDataValue != null) {
-                    metaDataMap[metaDataName] = metaDataValue
+                .register("/manifest/uses-permission") {
+                    getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")?.let { if (it.isNotBlank()) permissions.add(it) }
                 }
-
-                // Check legacy xposed indicators
-                if ("xposedmodule" == metaDataName ||
-                    "xposedminversion" == metaDataName ||
-                    "xposeddescription" == metaDataName
-                ) {
-                    isPotentialXposed = true
-                }
-            }
-            .register("/manifest/uses-permission") {
-                getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")?.let { if (it.isNotBlank()) permissions.add(it) }
-            }
-            .map { }
+                .map { }
+        } catch (e: Exception) {
+            if (!e.isRecoverableManifestParseException() || packageName.isNullOrEmpty()) throw e
+            Timber.w(e, "ApkParser: Manifest parsing stopped early for $path. Optional manifest data may be incomplete.")
+        }
 
         // Final Xposed verification and data extraction
         var xposedInfo: XposedModuleInfo? = null
@@ -343,6 +349,10 @@ class ApkParser(
         } catch (_: Exception) {
             null
         }
+    }
+
+    private fun Exception.isRecoverableManifestParseException(): Boolean {
+        return this is XmlPullParserException || this is IOException
     }
 
     private fun analyseAndSelectBestArchitecture(path: String, deviceSupportedArchs: List<Architecture>): Architecture? {
