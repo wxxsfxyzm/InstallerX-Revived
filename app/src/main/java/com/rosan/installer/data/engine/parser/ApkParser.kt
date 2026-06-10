@@ -37,6 +37,21 @@ class ApkParser(
     private val context: Context,
     private val reflect: ReflectionProvider
 ) {
+    private companion object {
+        const val ANDROID_ATTR_DESCRIPTION = 0x01010020
+        const val ANDROID_ATTR_ICON = 0x01010002
+        const val ANDROID_ATTR_LABEL = 0x01010001
+        const val ANDROID_ATTR_MIN_SDK_VERSION = 0x0101020c
+        const val ANDROID_ATTR_NAME = 0x01010003
+        const val ANDROID_ATTR_ROUND_ICON = 0x0101052c
+        const val ANDROID_ATTR_SHARED_USER_ID = 0x0101000b
+        const val ANDROID_ATTR_TARGET_SDK_VERSION = 0x01010270
+        const val ANDROID_ATTR_VALUE = 0x01010024
+        const val ANDROID_ATTR_VERSION_CODE = 0x0101021b
+        const val ANDROID_ATTR_VERSION_CODE_MAJOR = 0x010104b6
+        const val ANDROID_ATTR_VERSION_NAME = 0x0101021c
+    }
+
     @SuppressLint("DiscouragedPrivateApi")
     fun parseFull(
         data: DataEntity,
@@ -248,28 +263,40 @@ class ApkParser(
                         XmlPullParser.START_TAG -> when (manifestParser.name) {
                             "manifest" -> {
                                 packageName = manifestParser.getAttributeValue(null, "package")
-                                sharedUserId = manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "sharedUserId")
+                                sharedUserId = manifestParser.getAndroidAttributeValue("sharedUserId", ANDROID_ATTR_SHARED_USER_ID)
                                 splitName = manifestParser.getAttributeValue(null, "split")
-                                val versionCodeMajor =
-                                    manifestParser.getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCodeMajor", 0).toLong()
-                                val versionCodeMinor =
-                                    manifestParser.getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionCode", 0).toLong()
+                                val versionCodeMajor = manifestParser.getAndroidAttributeIntValue(
+                                    "versionCodeMajor",
+                                    ANDROID_ATTR_VERSION_CODE_MAJOR,
+                                    0
+                                ).toLong()
+                                val versionCodeMinor = manifestParser.getAndroidAttributeIntValue(
+                                    "versionCode",
+                                    ANDROID_ATTR_VERSION_CODE,
+                                    0
+                                ).toLong()
                                 versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
 
                                 versionName = resolveString(
                                     resources,
-                                    manifestParser.getAttributeResourceValue(
-                                        AxmlTreeParser.ANDROID_NAMESPACE,
-                                        "versionName",
-                                        ResourcesCompat.ID_NULL
-                                    ),
-                                    manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "versionName")
+                                    manifestParser.getAndroidAttributeResourceValue("versionName", ANDROID_ATTR_VERSION_NAME),
+                                    manifestParser.getAndroidAttributeValue("versionName", ANDROID_ATTR_VERSION_NAME)
                                 ) ?: versionName
                             }
 
                             "uses-sdk" -> {
-                                minSdk = manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "minSdkVersion")
-                                targetSdk = manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "targetSdkVersion")
+                                minSdk = manifestParser.getAndroidAttributeValue("minSdkVersion", ANDROID_ATTR_MIN_SDK_VERSION)
+                                    ?: manifestParser.getAndroidAttributeIntValue(
+                                        "minSdkVersion",
+                                        ANDROID_ATTR_MIN_SDK_VERSION,
+                                        -1
+                                    ).takeIf { it >= 0 }?.toString()
+                                targetSdk = manifestParser.getAndroidAttributeValue("targetSdkVersion", ANDROID_ATTR_TARGET_SDK_VERSION)
+                                    ?: manifestParser.getAndroidAttributeIntValue(
+                                        "targetSdkVersion",
+                                        ANDROID_ATTR_TARGET_SDK_VERSION,
+                                        -1
+                                    ).takeIf { it >= 0 }?.toString()
                             }
 
                             "application" -> {
@@ -278,63 +305,47 @@ class ApkParser(
 
                                 label = resolveString(
                                     resources,
-                                    manifestParser.getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "label", ResourcesCompat.ID_NULL),
-                                    manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "label")
+                                    manifestParser.getAndroidAttributeResourceValue("label", ANDROID_ATTR_LABEL),
+                                    manifestParser.getAndroidAttributeValue("label", ANDROID_ATTR_LABEL)
                                 )
                                 icon = resolveDrawable(
                                     resources,
                                     theme,
-                                    manifestParser.getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, "icon", ResourcesCompat.ID_NULL),
+                                    manifestParser.getAndroidAttributeResourceValue("icon", ANDROID_ATTR_ICON),
                                     "icon"
                                 )
                                 roundIcon = resolveDrawable(
                                     resources,
                                     theme,
-                                    manifestParser.getAttributeResourceValue(
-                                        AxmlTreeParser.ANDROID_NAMESPACE,
-                                        "roundIcon",
-                                        ResourcesCompat.ID_NULL
-                                    ),
+                                    manifestParser.getAndroidAttributeResourceValue("roundIcon", ANDROID_ATTR_ROUND_ICON),
                                     "roundIcon"
                                 )
 
                                 // Extract description for Xposed fallback
                                 appDescription = resolveString(
                                     resources,
-                                    manifestParser.getAttributeResourceValue(
-                                        AxmlTreeParser.ANDROID_NAMESPACE,
-                                        "description",
-                                        ResourcesCompat.ID_NULL
-                                    ),
-                                    manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "description")
+                                    manifestParser.getAndroidAttributeResourceValue("description", ANDROID_ATTR_DESCRIPTION),
+                                    manifestParser.getAndroidAttributeValue("description", ANDROID_ATTR_DESCRIPTION)
                                 )
                             }
 
                             "meta-data" -> {
                                 if (insideApplication) {
                                     if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                                        if ("minOsdkVersion" == manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")) {
+                                        if ("minOsdkVersion" == manifestParser.getAndroidAttributeValue("name", ANDROID_ATTR_NAME)) {
                                             minOsdkVersion = resolveString(
                                                 resources,
-                                                manifestParser.getAttributeResourceValue(
-                                                    AxmlTreeParser.ANDROID_NAMESPACE,
-                                                    "value",
-                                                    ResourcesCompat.ID_NULL
-                                                ),
-                                                manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
+                                                manifestParser.getAndroidAttributeResourceValue("value", ANDROID_ATTR_VALUE),
+                                                manifestParser.getAndroidAttributeValue("value", ANDROID_ATTR_VALUE)
                                             )
                                         }
                                     }
 
-                                    val metaDataName = manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")
+                                    val metaDataName = manifestParser.getAndroidAttributeValue("name", ANDROID_ATTR_NAME)
                                     val metaDataValue = resolveString(
                                         resources,
-                                        manifestParser.getAttributeResourceValue(
-                                            AxmlTreeParser.ANDROID_NAMESPACE,
-                                            "value",
-                                            ResourcesCompat.ID_NULL
-                                        ),
-                                        manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "value")
+                                        manifestParser.getAndroidAttributeResourceValue("value", ANDROID_ATTR_VALUE),
+                                        manifestParser.getAndroidAttributeValue("value", ANDROID_ATTR_VALUE)
                                     )
 
                                     if (metaDataName != null && metaDataValue != null) {
@@ -352,7 +363,7 @@ class ApkParser(
                             }
 
                             "uses-permission", "uses-permission-sdk-m" -> {
-                                manifestParser.getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, "name")
+                                manifestParser.getAndroidAttributeValue("name", ANDROID_ATTR_NAME)
                                     ?.let { if (it.isNotBlank()) permissions.add(it) }
                             }
                         }
@@ -419,6 +430,38 @@ class ApkParser(
                 configValue = metadata.configValue
             )
         }
+    }
+
+    private fun XmlResourceParser.findAndroidAttributeIndex(name: String, resId: Int): Int {
+        for (index in 0 until attributeCount) {
+            if (getAttributeNameResource(index) == resId || getAttributeName(index) == name) return index
+        }
+        return -1
+    }
+
+    private fun XmlResourceParser.getAndroidAttributeValue(name: String, resId: Int): String? {
+        getAttributeValue(AxmlTreeParser.ANDROID_NAMESPACE, name)?.let { return it }
+        getAttributeValue(null, name)?.let { return it }
+        val index = findAndroidAttributeIndex(name, resId)
+        return if (index >= 0) getAttributeValue(index) else null
+    }
+
+    private fun XmlResourceParser.getAndroidAttributeResourceValue(name: String, resId: Int): Int {
+        val namespaced = getAttributeResourceValue(AxmlTreeParser.ANDROID_NAMESPACE, name, ResourcesCompat.ID_NULL)
+        if (namespaced != ResourcesCompat.ID_NULL) return namespaced
+        val nonNamespaced = getAttributeResourceValue(null, name, ResourcesCompat.ID_NULL)
+        if (nonNamespaced != ResourcesCompat.ID_NULL) return nonNamespaced
+        val index = findAndroidAttributeIndex(name, resId)
+        return if (index >= 0) getAttributeResourceValue(index, ResourcesCompat.ID_NULL) else ResourcesCompat.ID_NULL
+    }
+
+    private fun XmlResourceParser.getAndroidAttributeIntValue(name: String, resId: Int, defaultValue: Int): Int {
+        val namespaced = getAttributeIntValue(AxmlTreeParser.ANDROID_NAMESPACE, name, defaultValue)
+        if (namespaced != defaultValue) return namespaced
+        val nonNamespaced = getAttributeIntValue(null, name, defaultValue)
+        if (nonNamespaced != defaultValue) return nonNamespaced
+        val index = findAndroidAttributeIndex(name, resId)
+        return if (index >= 0) getAttributeIntValue(index, defaultValue) else defaultValue
     }
 
     private fun resolveString(res: Resources, resId: Int, rawValue: String?): String? {
