@@ -87,6 +87,17 @@ class AppInstallerRepositoryImpl(
                         cause = e
                     )
 
+                is ProcessAppInstallerRepoImpl if e.message?.contains("Failed to initialize AppProcess for Hook Mode") == true ->
+                    PrivilegedException(
+                        errorType = if (config.authorizer == Authorizer.Root) {
+                            PrivilegedErrorType.ROOT_NOT_WORK
+                        } else {
+                            PrivilegedErrorType.APP_PROCESS_NOT_WORK
+                        },
+                        message = "AppProcess hook initialization failed during operation.",
+                        cause = e
+                    )
+
                 else -> e
             }
         }

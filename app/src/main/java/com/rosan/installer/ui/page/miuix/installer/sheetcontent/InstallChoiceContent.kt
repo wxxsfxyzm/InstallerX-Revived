@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,13 +45,12 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixMultiApkCheckboxWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.WarningCard
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -129,7 +127,6 @@ fun InstallChoiceContent(
                 MixedModuleZip_InitialChoice(
                     analysisResults = analysisResults,
                     viewModel = viewModel,
-                    isDarkMode = isDarkMode,
                     apkChooseAll = uiState.config.apkChooseAll,
                     onSelectModule = { viewModel.dispatch(InstallerViewAction.InstallPrepare) }
                 ) { selectionMode = MmzSelectionMode.APK_CHOICE }
@@ -149,7 +146,6 @@ fun InstallChoiceContent(
 
             Box(modifier = Modifier.weight(1f, fill = false)) {
                 ChoiceLazyList(
-                    isDarkMode = isDarkMode,
                     analysisResults = resultsForList,
                     viewModel = viewModel,
                     isModuleApk = isModuleApk,
@@ -228,15 +224,11 @@ fun InstallChoiceContent(
 
 @Composable
 private fun ChoiceLazyList(
-    isDarkMode: Boolean,
     analysisResults: List<PackageAnalysisResult>,
     viewModel: InstallerViewModel,
     isModuleApk: Boolean,
     isMultiApk: Boolean
 ) {
-    val cardColor = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-        if (isDarkMode) miuixSheetCardColorDark else Color.White
-
     if (isModuleApk) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }
         val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
@@ -253,10 +245,7 @@ private fun ChoiceLazyList(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardColors(
-                        color = cardColor,
-                        contentColor = MiuixTheme.colorScheme.onSurface
-                    )
+                    colors = miuixSheetCardColors()
                 ) {
                     if (baseSelectableEntity != null) {
                         val baseEntityInfo = baseSelectableEntity.app as AppEntity.BaseEntity
@@ -348,10 +337,7 @@ private fun ChoiceLazyList(
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardColors(
-                        color = cardColor,
-                        contentColor = MiuixTheme.colorScheme.onSurface
-                    )
+                    colors = miuixSheetCardColors()
                 ) {
                     if (isTreatAsSingle) {
                         // --- Single Base (possibly with Splits) - Use MiuixCheckboxWidget inside Card ---
@@ -475,10 +461,7 @@ private fun ChoiceLazyList(
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardColors(
-                            color = cardColor,
-                            contentColor = MiuixTheme.colorScheme.onSurface
-                        ),
+                        colors = miuixSheetCardColors(),
                         pressFeedbackType = PressFeedbackType.Sink
                     ) {
                         MiuixCheckboxWidget(
@@ -513,10 +496,7 @@ private fun ChoiceLazyList(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardColors(
-                            color = cardColor,
-                            contentColor = MiuixTheme.colorScheme.onSurface
-                        )
+                        colors = miuixSheetCardColors()
                     ) {
                         Column {
                             entitiesInGroup.forEach { item ->
@@ -553,16 +533,12 @@ private fun ChoiceLazyList(
 
 @Composable
 private fun MixedModuleZip_InitialChoice(
-    isDarkMode: Boolean,
     analysisResults: List<PackageAnalysisResult>,
     viewModel: InstallerViewModel,
     apkChooseAll: Boolean,
     onSelectModule: () -> Unit,
     onSelectApk: () -> Unit
 ) {
-    val cardColor = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-        if (isDarkMode) miuixSheetCardColorDark else Color.White
-
     val allSelectableEntities = analysisResults.flatMap { it.appEntities }
     val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
     val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
@@ -578,10 +554,7 @@ private fun MixedModuleZip_InitialChoice(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardColors(
-                    color = cardColor,
-                    contentColor = MiuixTheme.colorScheme.onSurface
-                )
+                colors = miuixSheetCardColors()
             ) {
                 if (moduleSelectableEntity != null) {
                     val moduleEntityInfo = moduleSelectableEntity.app as AppEntity.ModuleEntity

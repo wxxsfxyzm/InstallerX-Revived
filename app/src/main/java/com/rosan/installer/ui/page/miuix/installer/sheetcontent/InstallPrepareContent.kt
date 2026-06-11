@@ -64,8 +64,7 @@ import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInfoChipGroup
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.toast
@@ -75,7 +74,6 @@ import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -93,7 +91,6 @@ fun InstallPrepareContent(
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
-    val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val config = uiState.config
     val currentPackageName = uiState.currentPackageName
@@ -245,11 +242,7 @@ fun InstallPrepareContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
-                colors = CardColors(
-                    color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                        if (isDarkMode) miuixSheetCardColorDark else Color.White,
-                    contentColor = MiuixTheme.colorScheme.onSurface
-                )
+                colors = miuixSheetCardColors()
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -378,11 +371,7 @@ fun InstallPrepareContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    colors = CardColors(
-                        color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                            if (isDarkMode) miuixSheetCardColorDark else Color.White,
-                        contentColor = MiuixTheme.colorScheme.onSurface
-                    )
+                    colors = miuixSheetCardColors()
                 ) {
                     // Permissions List
                     if (rawBaseEntity?.permissions?.isNotEmpty() == true)
@@ -465,11 +454,7 @@ fun InstallPrepareContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    colors = CardColors(
-                        color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                            if (isDarkMode) miuixSheetCardColorDark else Color.White,
-                        contentColor = MiuixTheme.colorScheme.onSurface
-                    )
+                    colors = miuixSheetCardColors()
                 ) {
                     if (settings.labShowFilePath) {
                         // Safely extract the source path

@@ -4,6 +4,9 @@
 
 package com.rosan.installer.ui.page.main.settings.preferred.lab
 
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,36 +17,57 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.domain.device.model.ShizukuMode
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
@@ -51,6 +75,7 @@ import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelectionDialog
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
+import com.rosan.installer.ui.page.main.widget.setting.DraggableList
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
@@ -59,6 +84,7 @@ import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -68,12 +94,20 @@ fun LabPage(
     viewModel: LabSettingsViewModel = koinViewModel()
 ) {
     val navigator = LocalNavigator.current
+    val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
+    val rootMode by capabilityProvider.rootModeFlow.collectAsStateWithLifecycle()
+    val shizukuMode by capabilityProvider.shizukuModeFlow.collectAsStateWithLifecycle()
+    val shizukuAuthorized by capabilityProvider.shizukuAuthorizedFlow.collectAsStateWithLifecycle()
+    val dhizukuAvailable by capabilityProvider.dhizukuAvailableFlow.collectAsStateWithLifecycle()
+    val dhizukuAuthorized by capabilityProvider.dhizukuAuthorizedFlow.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val showRootImplementationDialog = remember { mutableStateOf(false) }
     val showChannelDialog = remember { mutableStateOf(false) }
     val showCustomProxyDialog = remember { mutableStateOf(false) }
+    val showSmartAuthorizerSheet = remember { mutableStateOf(false) }
 
     if (showChannelDialog.value)
         GithubUpdateChannelSelectionDialog(
@@ -123,6 +157,11 @@ fun LabPage(
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
+    val smartAuthorizerSummary = uiState.smartAuthorizerCandidates
+        .filter { it.enabled }
+        .joinToString("->") {
+            smartAuthorizerDisplayName(it.authorizer, context::getString)
+        }
 
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
@@ -165,6 +204,39 @@ fun LabPage(
             )
         ) {
             item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.config_authorizer)
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Authorizer,
+                            title = stringResource(R.string.config_try_multiple_authorizers_on_install),
+                            description = stringResource(R.string.config_try_multiple_authorizers_on_install_desc),
+                            checked = uiState.tryMultipleAuthorizersOnInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    LabSettingsAction.LabChangeTryMultipleAuthorizersOnInstall(it)
+                                )
+                            }
+                        )
+                    }
+                    item(animatedVisibility = uiState.tryMultipleAuthorizersOnInstall) {
+                        BaseWidget(
+                            icon = AppIcons.Authorizer,
+                            title = stringResource(R.string.config_smart_authorizer_fallback_list),
+                            description = stringResource(
+                                R.string.config_smart_authorizer_fallback_list_desc,
+                                smartAuthorizerSummary
+                            ),
+                            onClick = {
+                                capabilityProvider.refreshPrivilegeStatus()
+                                showSmartAuthorizerSheet.value = true
+                            }
+                        ) {}
+                    }
+                }
+            }
             item {
                 SegmentedColumn(
                     title = stringResource(R.string.config_authorizer_root)
@@ -278,7 +350,210 @@ fun LabPage(
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
+
+    if (showSmartAuthorizerSheet.value) {
+        ModalBottomSheet(
+            onDismissRequest = { showSmartAuthorizerSheet.value = false }
+        ) {
+            SmartAuthorizerBottomSheet(
+                candidates = uiState.smartAuthorizerCandidates,
+                rootMode = rootMode,
+                shizukuMode = shizukuMode,
+                shizukuAuthorized = shizukuAuthorized,
+                dhizukuAvailable = dhizukuAvailable,
+                dhizukuAuthorized = dhizukuAuthorized,
+                onCandidatesChange = {
+                    viewModel.dispatch(LabSettingsAction.LabChangeSmartAuthorizerCandidates(it))
+                }
+            )
+        }
+    }
 }
+
+@Composable
+private fun SmartAuthorizerBottomSheet(
+    candidates: List<SmartAuthorizerCandidate>,
+    rootMode: RootMode,
+    shizukuMode: ShizukuMode,
+    shizukuAuthorized: Boolean,
+    dhizukuAvailable: Boolean,
+    dhizukuAuthorized: Boolean,
+    onCandidatesChange: (List<SmartAuthorizerCandidate>) -> Unit
+) {
+    val context = LocalContext.current
+    var sheetCandidates by remember { mutableStateOf(candidates) }
+
+    LaunchedEffect(candidates) {
+        if (sheetCandidates != candidates) {
+            sheetCandidates = candidates
+        }
+    }
+
+    fun updateCandidates(next: List<SmartAuthorizerCandidate>) {
+        sheetCandidates = next
+        onCandidatesChange(next)
+    }
+
+    fun toggleCandidate(candidate: SmartAuthorizerCandidate, enabled: Boolean) {
+        if (!enabled && candidate.enabled && sheetCandidates.count { it.enabled } <= 1) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.config_smart_authorizer_must_choose_one),
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        updateCandidates(sheetCandidates.toggle(candidate.authorizer, enabled))
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.config_try_multiple_authorizers_on_install),
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            style = MaterialTheme.typography.headlineSmall
+        )
+        InfoTipCard(
+            text = stringResource(R.string.config_smart_authorizer_fallback_list_tip),
+            noPadding = true
+        )
+        DraggableList(
+            items = sheetCandidates,
+            itemKey = { it.authorizer.value },
+            itemName = { smartAuthorizerDisplayName(it.authorizer, context::getString) },
+            itemDescription = {
+                smartAuthorizerAvailabilityDescription(
+                    authorizer = it.authorizer,
+                    rootMode = rootMode,
+                    shizukuMode = shizukuMode,
+                    shizukuAuthorized = shizukuAuthorized,
+                    dhizukuAvailable = dhizukuAvailable,
+                    dhizukuAuthorized = dhizukuAuthorized,
+                    getString = context::getString
+                )
+            },
+            itemLeadingIcon = { smartAuthorizerIcon(it.authorizer) },
+            onMove = { from, to ->
+                updateCandidates(sheetCandidates.move(from, to))
+            },
+            onItemClick = { candidate ->
+                toggleCandidate(candidate, !candidate.enabled)
+            },
+            noContentTitle = stringResource(R.string.config_authorizer),
+            trailingContent = { candidate ->
+                val checkboxColor = LocalContentColor.current
+                val checkmarkColor = if (checkboxColor.luminance() > 0.5f) {
+                    Color.Black
+                } else {
+                    Color.White
+                }
+                Checkbox(
+                    checked = candidate.enabled,
+                    onCheckedChange = { checked ->
+                        toggleCandidate(candidate, checked)
+                    },
+                    modifier = Modifier.clearAndSetSemantics {},
+                    colors = CheckboxDefaults.colors(
+                        checkedCheckmarkColor = checkmarkColor,
+                        uncheckedCheckmarkColor = Color.Transparent,
+                        disabledCheckmarkColor = checkmarkColor.copy(alpha = 0.38f),
+                        checkedBoxColor = checkboxColor,
+                        uncheckedBoxColor = Color.Transparent,
+                        disabledCheckedBoxColor = checkboxColor.copy(alpha = 0.38f),
+                        disabledUncheckedBoxColor = Color.Transparent,
+                        disabledIndeterminateBoxColor = checkboxColor.copy(alpha = 0.38f),
+                        checkedBorderColor = checkboxColor,
+                        uncheckedBorderColor = checkboxColor.copy(alpha = 0.72f),
+                        disabledBorderColor = checkboxColor.copy(alpha = 0.38f),
+                        disabledUncheckedBorderColor = checkboxColor.copy(alpha = 0.38f),
+                        disabledIndeterminateBorderColor = checkboxColor.copy(alpha = 0.38f)
+                    )
+                )
+            }
+        )
+        Spacer(Modifier.navigationBarsPadding())
+    }
+}
+
+private fun smartAuthorizerDisplayName(
+    authorizer: Authorizer,
+    getString: (Int) -> String
+): String =
+    if (authorizer == Authorizer.None) {
+        getString(R.string.working_status_system_installer)
+    } else {
+        getString(authorizer.displayNameRes)
+    }
+
+@Composable
+private fun smartAuthorizerIcon(authorizer: Authorizer): ImageVector =
+    when (authorizer) {
+        Authorizer.None -> AppIcons.None
+        Authorizer.Root -> AppIcons.Root
+        Authorizer.Shizuku -> ImageVector.vectorResource(R.drawable.ic_shizuku)
+        Authorizer.Dhizuku -> AppIcons.InstallAllowRestrictedPermissions
+        else -> AppIcons.Authorizer
+    }
+
+private fun smartAuthorizerAvailabilityDescription(
+    authorizer: Authorizer,
+    rootMode: RootMode,
+    shizukuMode: ShizukuMode,
+    shizukuAuthorized: Boolean,
+    dhizukuAvailable: Boolean,
+    dhizukuAuthorized: Boolean,
+    getString: (Int) -> String
+): String =
+    when (authorizer) {
+        Authorizer.Root -> if (rootMode != RootMode.None) {
+            "${getString(R.string.available)} (${rootMode.name})"
+        } else {
+            getString(R.string.unavailable)
+        }
+
+        Authorizer.Shizuku -> when {
+            shizukuAuthorized -> "${getString(R.string.activate)} (${shizukuMode.desc})"
+            shizukuMode != ShizukuMode.NONE -> getString(R.string.shizuku_not_authorized)
+            else -> getString(R.string.shizuku_not_available)
+        }
+
+        Authorizer.Dhizuku -> when {
+            dhizukuAuthorized -> getString(R.string.activate)
+            dhizukuAvailable -> getString(R.string.dhizuku_not_authorized)
+            else -> getString(R.string.dhizuku_not_available)
+        }
+
+        Authorizer.None -> getString(R.string.working_status_system_installer_desc)
+        else -> authorizer.value
+    }
+
+private fun List<SmartAuthorizerCandidate>.move(
+    from: Int,
+    to: Int
+): List<SmartAuthorizerCandidate> {
+    if (from !in indices || to !in indices || from == to) return this
+    return toMutableList().apply {
+        val item = removeAt(from)
+        add(to, item)
+    }
+}
+
+private fun List<SmartAuthorizerCandidate>.toggle(
+    authorizer: Authorizer,
+    enabled: Boolean
+): List<SmartAuthorizerCandidate> =
+    map { candidate ->
+        if (candidate.authorizer == authorizer) {
+            candidate.copy(enabled = enabled)
+        } else {
+            candidate
+        }
+    }
 
 /**
  * Widget for selecting the Root Implementation (Magisk/KernelSU/APatch).

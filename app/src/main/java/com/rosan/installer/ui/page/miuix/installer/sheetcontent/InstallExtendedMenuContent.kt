@@ -38,17 +38,13 @@ import com.rosan.installer.ui.page.main.installer.dialog.ExtendedMenuEntity
 import com.rosan.installer.ui.page.main.installer.dialog.ExtendedMenuItemEntity
 import com.rosan.installer.ui.page.main.installer.dialog.inner.InstallExtendedMenuAction
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -56,7 +52,6 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 fun InstallExtendedMenuContent(
     viewModel: InstallerViewModel
 ) {
-    val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Read state from aggregated config model
@@ -137,7 +132,6 @@ fun InstallExtendedMenuContent(
     ) {
         Box(modifier = Modifier.weight(1f, fill = false)) {
             ExtendedMenuLazyList(
-                isDarkMode = isDarkMode,
                 entities = menuEntities,
                 viewModel = viewModel,
                 installFlags = installFlags,
@@ -170,7 +164,6 @@ fun InstallExtendedMenuContent(
 
 @Composable
 private fun ExtendedMenuLazyList(
-    isDarkMode: Boolean,
     entities: SnapshotStateList<ExtendedMenuEntity>,
     viewModel: InstallerViewModel,
     installFlags: Int,
@@ -183,11 +176,7 @@ private fun ExtendedMenuLazyList(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardColors(
-            color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                if (isDarkMode) miuixSheetCardColorDark else Color.White,
-            contentColor = MiuixTheme.colorScheme.onSurface
-        )
+        colors = miuixSheetCardColors()
     ) {
         LazyColumn(
             modifier = Modifier

@@ -5,6 +5,7 @@ package com.rosan.installer.ui.page.main.settings.preferred.lab
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 
 data class LabSettingsState(
     val labRootEnableModuleFlash: Boolean = false,
@@ -14,6 +15,8 @@ data class LabSettingsState(
     val labHttpSaveFile: Boolean = false,
     val labTapIconToShare: Boolean = false,
     val labAllowInstallWithoutUserAction: Boolean = false,
+    val tryMultipleAuthorizersOnInstall: Boolean = false,
+    val smartAuthorizerCandidates: List<SmartAuthorizerCandidate> = emptyList(),
     val githubUpdateChannel: GithubUpdateChannel = GithubUpdateChannel.OFFICIAL,
     val customGithubProxyUrl: String = ""
 )
