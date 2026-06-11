@@ -28,6 +28,9 @@ interface AppDao {
     @Query("select * from app")
     suspend fun allSuspend(): List<AppEntity>
 
+    @Query("select * from app where config_id = :configId")
+    suspend fun findByConfigId(configId: Long): List<AppEntity>
+
     @Query("select * from app")
     fun flowAll(): Flow<List<AppEntity>>
 

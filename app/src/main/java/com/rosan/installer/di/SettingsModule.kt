@@ -33,8 +33,10 @@ import com.rosan.installer.domain.settings.usecase.backup.ParseBackupUseCase
 import com.rosan.installer.domain.settings.usecase.backup.PrepareBackupRestoreUseCase
 import com.rosan.installer.domain.settings.usecase.backup.RestoreBackupUseCase
 import com.rosan.installer.domain.settings.usecase.backup.ValidateBackupUseCase
+import com.rosan.installer.domain.settings.usecase.config.DeleteConfigWithScopesUseCase
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
+import com.rosan.installer.domain.settings.usecase.config.RestoreDeletedConfigSnapshotUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
 import com.rosan.installer.domain.settings.usecase.config.ToggleAppTargetConfigUseCase
 import com.rosan.installer.domain.settings.usecase.settings.GetPackageUidUseCase
@@ -107,6 +109,8 @@ val settingsModule = module {
     factoryOf(::GetResolvedConfigUseCase)
     factoryOf(::GetConfigDraftUseCase)
     factoryOf(::SaveConfigUseCase)
+    factoryOf(::DeleteConfigWithScopesUseCase)
+    factoryOf(::RestoreDeletedConfigSnapshotUseCase)
     factoryOf(::ExportBackupUseCase)
     factoryOf(::ParseBackupUseCase)
     factoryOf(::ValidateBackupUseCase)

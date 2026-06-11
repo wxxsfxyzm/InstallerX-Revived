@@ -75,7 +75,7 @@ fun AllViewEventCollector(
                     val actionPerformed = onShowSnackbar(deleteSuccessString, restoreString)
                     if (actionPerformed) {
                         viewModel.dispatch(
-                            AllViewAction.RestoreDataConfig(configModel = event.configModel)
+                            AllViewAction.RestoreDataConfig(snapshot = event.snapshot)
                         )
                     }
                 }
