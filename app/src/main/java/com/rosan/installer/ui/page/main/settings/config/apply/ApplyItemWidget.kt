@@ -130,6 +130,10 @@ fun ApplyItemWidget(
         Switch(
             checked = isApplied,
             onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedIconColor = MaterialTheme.colorScheme.primary,
+                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest
+            ),
             thumbContent = if (isM3e) {
                 {
                     val iconVector = if (isApplied) Icons.Filled.Check else Icons.Filled.Close
