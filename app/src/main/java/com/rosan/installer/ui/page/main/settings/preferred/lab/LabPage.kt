@@ -29,11 +29,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -48,8 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -446,33 +442,12 @@ private fun SmartAuthorizerBottomSheet(
             },
             noContentTitle = stringResource(R.string.config_authorizer),
             trailingContent = { candidate ->
-                val checkboxColor = LocalContentColor.current
-                val checkmarkColor = if (checkboxColor.luminance() > 0.5f) {
-                    Color.Black
-                } else {
-                    Color.White
-                }
                 Checkbox(
                     checked = candidate.enabled,
                     onCheckedChange = { checked ->
                         toggleCandidate(candidate, checked)
                     },
-                    modifier = Modifier.clearAndSetSemantics {},
-                    colors = CheckboxDefaults.colors(
-                        checkedCheckmarkColor = checkmarkColor,
-                        uncheckedCheckmarkColor = Color.Transparent,
-                        disabledCheckmarkColor = checkmarkColor.copy(alpha = 0.38f),
-                        checkedBoxColor = checkboxColor,
-                        uncheckedBoxColor = Color.Transparent,
-                        disabledCheckedBoxColor = checkboxColor.copy(alpha = 0.38f),
-                        disabledUncheckedBoxColor = Color.Transparent,
-                        disabledIndeterminateBoxColor = checkboxColor.copy(alpha = 0.38f),
-                        checkedBorderColor = checkboxColor,
-                        uncheckedBorderColor = checkboxColor.copy(alpha = 0.72f),
-                        disabledBorderColor = checkboxColor.copy(alpha = 0.38f),
-                        disabledUncheckedBorderColor = checkboxColor.copy(alpha = 0.38f),
-                        disabledIndeterminateBorderColor = checkboxColor.copy(alpha = 0.38f)
-                    )
+                    modifier = Modifier.clearAndSetSemantics {}
                 )
             }
         )
