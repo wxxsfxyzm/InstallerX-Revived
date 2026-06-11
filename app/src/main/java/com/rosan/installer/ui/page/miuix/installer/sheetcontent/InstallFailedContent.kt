@@ -28,13 +28,11 @@ import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixErrorTextBlock
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallConfirmationDialog
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.ui.util.rememberErrorSuggestions
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -46,7 +44,6 @@ fun InstallFailedContent(
     viewModel: InstallerViewModel,
     onClose: () -> Unit
 ) {
-    val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentError = uiState.error
 
@@ -65,7 +62,6 @@ fun InstallFailedContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         MiuixErrorSuggestions(
-            isDarkMode = isDarkMode,
             error = currentError,
             viewModel = viewModel
         )
@@ -90,7 +86,6 @@ fun InstallFailedContent(
 
 @Composable
 private fun MiuixErrorSuggestions(
-    isDarkMode: Boolean,
     error: Throwable,
     viewModel: InstallerViewModel,
 ) {
@@ -118,11 +113,7 @@ private fun MiuixErrorSuggestions(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                colors = CardColors(
-                    color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                        if (isDarkMode) miuixSheetCardColorDark else Color.White,
-                    contentColor = MiuixTheme.colorScheme.onSurface
-                )
+                colors = miuixSheetCardColors()
             ) {
                 visibleSuggestions.forEach { suggestion ->
                     MiuixNavigationItemWidget(

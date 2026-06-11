@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -27,24 +26,19 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.pm.getBestPermissionLabel
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun InstallPreparePermissionContent(
     viewModel: InstallerViewModel,
     onBack: () -> Unit
 ) {
-    val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
     val currentPackage = uiState.analysisResults.find { it.packageName == currentPackageName }
@@ -72,11 +66,7 @@ fun InstallPreparePermissionContent(
                 .fillMaxWidth()
                 .weight(1f, fill = false)
                 .padding(vertical = 6.dp),
-            colors = CardColors(
-                color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                    if (isDarkMode) miuixSheetCardColorDark else Color.White,
-                contentColor = MiuixTheme.colorScheme.onSurface
-            )
+            colors = miuixSheetCardColors()
         ) {
             LazyColumn {
                 items(permissionList) { permission ->

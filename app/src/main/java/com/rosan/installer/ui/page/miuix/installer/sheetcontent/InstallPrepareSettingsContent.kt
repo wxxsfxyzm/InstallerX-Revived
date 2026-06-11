@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,19 +23,14 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.miuixSheetCardColorDark
+import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardColors
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun PrepareSettingsContent(
     viewModel: InstallerViewModel
 ) {
-    val isDarkMode = InstallerTheme.isDark
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val settings = uiState.viewSettings
 
@@ -56,11 +50,7 @@ fun PrepareSettingsContent(
         MiuixInstallerTipCard(stringResource(R.string.installer_temp_settings_tip))
         Card(
             modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-            colors = CardColors(
-                color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                    if (isDarkMode) miuixSheetCardColorDark else Color.White,
-                contentColor = MiuixTheme.colorScheme.onSurface
-            )
+            colors = miuixSheetCardColors()
         ) {
             MiuixSwitchWidget(
                 title = stringResource(R.string.config_display_sdk_version),
@@ -105,11 +95,7 @@ fun PrepareSettingsContent(
         }
         Card(
             modifier = Modifier.padding(bottom = 6.dp),
-            colors = CardColors(
-                color = if (isDynamicColor) MiuixTheme.colorScheme.surfaceContainer else
-                    if (isDarkMode) miuixSheetCardColorDark else Color.White,
-                contentColor = MiuixTheme.colorScheme.onSurface
-            )
+            colors = miuixSheetCardColors()
         ) {
             MiuixSwitchWidget(
                 title = stringResource(R.string.lab_show_apk_path),
