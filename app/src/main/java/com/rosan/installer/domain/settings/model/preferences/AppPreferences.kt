@@ -36,6 +36,8 @@ data class AppPreferences(
     val autoLockInstaller: Boolean,
     val autoSilentInstall: Boolean,
     val longClickBackgroundInstall: Boolean,
+    val tryMultipleAuthorizersOnInstall: Boolean,
+    val smartAuthorizerCandidates: List<SmartAuthorizerCandidate>,
     val showMiuixUI: Boolean,
     val preferSystemIcon: Boolean,
     val showLauncherIcon: Boolean,

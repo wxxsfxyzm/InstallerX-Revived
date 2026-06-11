@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
+import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerPreferences
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,8 @@ class LabSettingsViewModel(
             labHttpSaveFile = prefs.labHttpSaveFile,
             labTapIconToShare = prefs.labTapIconToShare,
             labAllowInstallWithoutUserAction = prefs.labInstallWithoutUserAction,
+            tryMultipleAuthorizersOnInstall = prefs.tryMultipleAuthorizersOnInstall,
+            smartAuthorizerCandidates = prefs.smartAuthorizerCandidates,
             githubUpdateChannel = prefs.githubUpdateChannel,
             customGithubProxyUrl = prefs.customGithubProxyUrl
         )
@@ -85,6 +88,20 @@ class LabSettingsViewModel(
                 updateSetting(
                     BooleanSetting.LabInstallWithoutUserAction,
                     action.enable
+                )
+            }
+
+            is LabSettingsAction.LabChangeTryMultipleAuthorizersOnInstall -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.TryMultipleAuthorizersOnInstall,
+                    action.enable
+                )
+            }
+
+            is LabSettingsAction.LabChangeSmartAuthorizerCandidates -> viewModelScope.launch {
+                updateSetting(
+                    StringSetting.SmartAuthorizerCandidates,
+                    SmartAuthorizerPreferences.encode(action.candidates)
                 )
             }
 

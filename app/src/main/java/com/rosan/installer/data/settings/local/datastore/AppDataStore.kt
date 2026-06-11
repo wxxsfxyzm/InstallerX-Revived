@@ -134,6 +134,10 @@ class AppDataStore(
             register(booleanPreferencesKey("auto_silent_install"), PreferenceValueType.BOOLEAN)
         val DIALOG_LONG_CLICK_BACKGROUND_INSTALL =
             register(booleanPreferencesKey("long_click_background_install"), PreferenceValueType.BOOLEAN)
+        val TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL =
+            register(booleanPreferencesKey("try_multiple_authorizers_on_install"), PreferenceValueType.BOOLEAN)
+        val SMART_AUTHORIZER_CANDIDATES =
+            register(stringPreferencesKey("smart_authorizer_candidates"), PreferenceValueType.STRING)
         val DETECT_XPOSED_MODULE =
             register(booleanPreferencesKey("detect_xposed_module"), PreferenceValueType.BOOLEAN)
         val QUICK_OPEN_LSPOSED =

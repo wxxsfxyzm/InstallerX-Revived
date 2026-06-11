@@ -56,7 +56,9 @@ import com.rosan.installer.R
  * @param itemName A function that returns the display name of an item.
  * @param itemDescription A function that returns the display description of an item.
  * @param leadingIcon The icon displayed at the start of each item.
+ * @param itemLeadingIcon Optional per-item icon. If set, it takes precedence over [leadingIcon].
  * @param onMove Callback invoked when an item is moved to a new position.
+ * @param onItemClick Optional callback invoked when an item row is clicked.
  * @param noContentTitle Title shown when the list is empty.
  * @param noContentDescription Optional description shown when the list is empty.
  * @param trailingContent Optional content displayed at the end of each item.
@@ -70,7 +72,9 @@ fun <T> DraggableList(
     itemName: (T) -> String,
     itemDescription: (T) -> String,
     leadingIcon: ImageVector? = null,
+    itemLeadingIcon: (@Composable (T) -> ImageVector?)? = null,
     onMove: (from: Int, to: Int) -> Unit,
+    onItemClick: ((T) -> Unit)? = null,
     noContentTitle: String,
     noContentDescription: String? = stringResource(R.string.config_add_one_to_get_started),
     trailingContent: (@Composable (item: T) -> Unit)? = null,
@@ -112,13 +116,15 @@ fun <T> DraggableList(
             )
         } else if (localItems.size == 1) {
             val item = localItems.first()
+            val icon = itemLeadingIcon?.invoke(item) ?: leadingIcon
             BaseWidget(
                 modifier = Modifier.clip(MaterialTheme.shapes.large),
                 title = itemName(item),
                 description = itemDescription(item),
-                icon = leadingIcon,
-                iconPlaceholder = leadingIcon != null,
+                icon = icon,
+                iconPlaceholder = icon != null,
                 iconColor = MaterialTheme.colorScheme.primary,
+                onClick = onItemClick?.let { { it(item) } },
                 trailingContent = { trailingContent?.invoke(item) }
             )
         } else {
@@ -162,6 +168,7 @@ fun <T> DraggableList(
             ) {
                 localItems.forEachIndexed { index, item ->
                     key(itemKey(item)) {
+                        val icon = itemLeadingIcon?.invoke(item) ?: leadingIcon
                         val isDragged = index == draggedIndex
                         val interactionSource = remember { MutableInteractionSource() }
 
@@ -192,7 +199,7 @@ fun <T> DraggableList(
                         val finalTranslationY = if (isDragged) dragOffsetY else if (draggedIndex == null) 0f else animatedTranslationY
 
                         SegmentedListItem(
-                            onClick = { },
+                            onClick = { onItemClick?.invoke(item) },
                             shapes = ListItemDefaults.segmentedShapes(index, localItems.size),
                             colors = ListItemDefaults.segmentedColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceBright,
@@ -207,7 +214,7 @@ fun <T> DraggableList(
                                 .graphicsLayer { this.translationY = finalTranslationY },
                             content = { Text(itemName(item)) },
                             supportingContent = { Text(itemDescription(item)) },
-                            leadingContent = leadingIcon?.let { icon -> { Icon(icon, null) } },
+                            leadingContent = icon?.let { imageVector -> { Icon(imageVector, null) } },
                             trailingContent = { trailingContent?.invoke(item) }
                         )
                     }

@@ -150,6 +150,25 @@ fun MiuixLabPage(
         ) {
             item { MiuixSettingsTipCard(stringResource(R.string.lab_tip)) }
             item { Spacer(modifier = Modifier.size(12.dp)) }
+            item { SmallTitle(stringResource(R.string.config_authorizer)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.config_try_multiple_authorizers_on_install),
+                        description = stringResource(R.string.config_try_multiple_authorizers_on_install_desc),
+                        checked = uiState.tryMultipleAuthorizersOnInstall,
+                        onCheckedChange = {
+                            viewModel.dispatch(
+                                LabSettingsAction.LabChangeTryMultipleAuthorizersOnInstall(it)
+                            )
+                        }
+                    )
+                }
+            }
             item { SmallTitle(stringResource(R.string.config_authorizer_root)) }
             item {
                 Card(
