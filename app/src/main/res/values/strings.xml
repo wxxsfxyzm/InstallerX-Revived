@@ -643,6 +643,8 @@
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
     <string name="exception_install_failed_blacklisted_package">You don\'t allow installation of the app!</string>
     <string name="exception_install_failed_blocked_by_profile">Installation blocked by profile policy</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_mismatch">Profile blocks installing apps with a different signature</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_unknown">Profile blocks installing apps whose signature cannot be verified</string>
     <string name="exception_install_failed_invalid_apk">Invalid APK (package corrupted). Please redownload and try again</string>
     <string name="exception_install_failed_invalid_uri">Invalid URI</string>
     <string name="exception_install_failed_insufficient_storage">Storage full, try clearing some space</string>
@@ -795,10 +797,10 @@
     <string name="disable_allowed_apex_update_check_desc">Don\'t check whether the installed APEX can be updated</string>
     <string name="config_bypass_low_target_sdk">Bypass Low Target SDK Block</string>
     <string name="config_bypass_low_target_sdk_desc">Allows apps targeting old SDK versions to be installed</string>
-    <string name="config_allow_sig_mismatch">Allow Signature Mismatch</string>
-    <string name="config_allow_sig_mismatch_desc">Allow installing apps that have a different signature than the installed version (Core Patch required)</string>
-    <string name="config_allow_sig_unknown">Allow Unknown Signature</string>
-    <string name="config_allow_sig_unknown_desc">Allow installing apps whose signature cannot be verified (Core Patch required)</string>
+    <string name="config_allow_sig_mismatch">Block Signature Mismatch</string>
+    <string name="config_allow_sig_mismatch_desc">Block installing apps that have a different signature than the installed version</string>
+    <string name="config_allow_sig_unknown">Block Unknown Signature</string>
+    <string name="config_allow_sig_unknown_desc">Block installing apps whose signature cannot be verified</string>
     <string name="dry_run">Dry Run</string>
     <string name="dry_run_desc">Verify the package, but don\'t install it</string>
     <string name="config_request_update_ownership">Request Update Ownership</string>

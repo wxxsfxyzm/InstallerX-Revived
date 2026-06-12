@@ -401,24 +401,51 @@ Before preparing a commit message:
 * include only files related to the requested task,
 * do not include user-owned unrelated changes, generated artifacts, credentials, local IDE files, or build outputs.
 
-Write commit messages in the natural style of this repository:
+Write commit messages in the repository's Conventional Commits style.
+
+Subject format is mandatory:
+
+```text
+type: short lowercase description
+type(scope): short lowercase description
+```
+
+Use only these top-level types unless the maintainer explicitly asks for another one:
+
+* `fix:` — bug fixes, behavior corrections, compatibility fixes, UI defects, build fixes.
+* `feat:` — new user-facing or maintainer-facing capabilities.
+* `refactor:` — code restructuring without intended behavior changes.
+* `docs:` — documentation-only changes.
+* `i18n:` — translation-only updates, especially Weblate-style changes.
+* `fix(deps):` — dependency update commits.
+
+Subject rules:
 
 * keep the subject at or below 72 characters,
-* use imperative mood,
+* use lowercase after the type prefix unless naming a proper noun, API, class, or UI brand,
+* use imperative mood after the prefix,
+* describe behavior or developer intent rather than listing files,
 * prefer a one-line message for most changes,
 * add a body only when it explains important intent, behavior, risk, or multiple independent changes,
 * use bullets only for genuinely separate changes, risks, or dependency groups,
 * avoid generic wording such as "Refined", "Enhanced", "Improved", or "Updated",
-* describe behavior or developer intent rather than listing files,
 * do not invent issue numbers, user impact, names, emails, or identifiers,
 * do not add AI signatures, `Co-authored-by`, or generated-by trailers unless explicitly requested.
+
+Examples that match repository style:
+
+* `fix: restore config scopes on undo`
+* `fix: fix Miuix sheet dismissal behavior`
+* `feat: add smart authorizer fallback settings`
+* `refactor: define explicit parameters for ShizukuUserServiceRecycler`
+* `docs: document agent submission and repo layout`
 
 For dependency changes:
 
 * explicitly list package, library, plugin, or tool names,
 * include version changes in `from -> to` form when available,
 * mention scope when inferable, such as runtime, build plugin, Gradle, Maven, npm, or pnpm,
-* if the change is primarily dependency updates, start the subject with `chore(deps):`,
+* if the change is primarily dependency updates, start the subject with `fix(deps):`,
 * do not collapse unrelated dependency updates into vague wording like "update dependencies" or "bump deps".
 
 If verification was not run or did not pass, do not write the commit or handoff as though it was verified.

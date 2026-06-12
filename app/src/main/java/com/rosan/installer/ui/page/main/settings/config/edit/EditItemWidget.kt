@@ -772,8 +772,8 @@ fun DataAllowSigMismatchWidget(state: EditViewState, dispatch: (EditViewAction) 
         icon = AppIcons.InstallAllowSigMismatch,
         title = stringResource(id = R.string.config_allow_sig_mismatch),
         description = stringResource(id = R.string.config_allow_sig_mismatch_desc),
-        checked = state.data.allowSigMismatch,
-        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigMismatch(it)) }
+        checked = !state.data.allowSigMismatch,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigMismatch(!it)) }
     )
 }
 
@@ -783,8 +783,8 @@ fun DataAllowSigUnknownWidget(state: EditViewState, dispatch: (EditViewAction) -
         icon = AppIcons.InstallAllowSigUnknown,
         title = stringResource(id = R.string.config_allow_sig_unknown),
         description = stringResource(id = R.string.config_allow_sig_unknown_desc),
-        checked = state.data.allowSigUnknown,
-        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigUnknown(it)) }
+        checked = !state.data.allowSigUnknown,
+        onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigUnknown(!it)) }
     )
 }
 

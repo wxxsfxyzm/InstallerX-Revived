@@ -170,8 +170,8 @@ class ProcessInstallationUseCase(
                 result.signatureMatchStatus == SignatureMatchStatus.MISMATCH
             ) {
                 throw InstallException(
-                    InstallErrorType.BLOCKED_BY_PROFILE,
-                    "Installing with a different signature is not allowed by this profile"
+                    InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_MISMATCH,
+                    "Installing apps with a different signature is blocked by this profile"
                 )
             }
 
@@ -179,8 +179,8 @@ class ProcessInstallationUseCase(
                 result.signatureMatchStatus == SignatureMatchStatus.UNKNOWN_ERROR
             ) {
                 throw InstallException(
-                    InstallErrorType.BLOCKED_BY_PROFILE,
-                    "Installing with an unverifiable signature is not allowed by this profile"
+                    InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_UNKNOWN,
+                    "Installing apps with an unverifiable signature is blocked by this profile"
                 )
             }
         }
