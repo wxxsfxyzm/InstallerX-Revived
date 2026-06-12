@@ -225,6 +225,7 @@ fun MiuixDefaultInstallerPage(
             showState = showErrorSheet,
             exception = info.exception,
             onDismissRequest = { showErrorSheet.value = false },
+            onDismissFinished = { errorSheetInfo = null },
             onRetry = {
                 showErrorSheet.value = false
                 val action = info.retryAction

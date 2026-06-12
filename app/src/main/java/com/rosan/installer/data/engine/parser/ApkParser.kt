@@ -143,6 +143,7 @@ class ApkParser(
                 val assetManager = `AssetManager$Builder`()
                     .addApkAssets(apkAssets)
                     .build()
+                @Suppress("DEPRECATION")
                 val apkResources = Resources(assetManager, systemResources.displayMetrics, systemResources.configuration)
                 return ApkResourceContext(
                     resources = apkResources,
@@ -248,6 +249,7 @@ class ApkParser(
                         XmlPullParser.START_TAG -> when (manifestParser.name) {
                             "manifest" -> {
                                 packageName = manifestParser.getAttributeValue(null, "package")
+                                @Suppress("DEPRECATION")
                                 sharedUserId = manifestParser.getAndroidAttributeValue("sharedUserId", android.R.attr.sharedUserId)
                                 splitName = manifestParser.getAttributeValue(null, "split")
                                 val versionCodeMajor = manifestParser.getAndroidAttributeIntValue(

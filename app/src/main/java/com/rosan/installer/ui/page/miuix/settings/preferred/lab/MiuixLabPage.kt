@@ -49,7 +49,6 @@ import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
-import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabSettingsViewModel
@@ -68,6 +67,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Checkbox
 import top.yukonga.miuix.kmp.basic.CheckboxDefaults
 import top.yukonga.miuix.kmp.basic.DropdownItem
@@ -367,41 +367,23 @@ fun MiuixLabPage(
         }
     }
 
-    if (showSmartAuthorizerSheet.value) {
-        WindowBottomSheet(
-            show = showSmartAuthorizerSheet.value,
-            backgroundColor = MiuixTheme.colorScheme.surfaceContainerHigh,
-            title = stringResource(R.string.config_try_multiple_authorizers_on_install),
-            insideMargin = DpSize(16.dp, 0.dp),
-            startAction = {
-                MiuixBackButton(
-                    icon = AppMiuixIcons.Close,
-                    iconTint = MiuixTheme.colorScheme.onSurface,
-                    onClick = { showSmartAuthorizerSheet.value = false }
-                )
-            },
-            endAction = {
-                MiuixBackButton(
-                    icon = AppMiuixIcons.Ok,
-                    iconTint = MiuixTheme.colorScheme.onSurface,
-                    contentDescription = stringResource(R.string.confirm),
-                    onClick = { showSmartAuthorizerSheet.value = false }
-                )
-            },
-            onDismissRequest = { showSmartAuthorizerSheet.value = false }
-        ) {
-            MiuixSmartAuthorizerBottomSheet(
-                candidates = uiState.smartAuthorizerCandidates,
-                rootMode = rootMode,
-                shizukuMode = shizukuMode,
-                shizukuAuthorized = shizukuAuthorized,
-                dhizukuAvailable = dhizukuAvailable,
-                dhizukuAuthorized = dhizukuAuthorized,
-                onCandidatesChange = {
-                    viewModel.dispatch(LabSettingsAction.LabChangeSmartAuthorizerCandidates(it))
-                }
-            )
-        }
+    WindowBottomSheet(
+        show = showSmartAuthorizerSheet.value,
+        title = stringResource(R.string.config_try_multiple_authorizers_on_install),
+        insideMargin = DpSize(16.dp, 0.dp),
+        onDismissRequest = { showSmartAuthorizerSheet.value = false }
+    ) {
+        MiuixSmartAuthorizerBottomSheet(
+            candidates = uiState.smartAuthorizerCandidates,
+            rootMode = rootMode,
+            shizukuMode = shizukuMode,
+            shizukuAuthorized = shizukuAuthorized,
+            dhizukuAvailable = dhizukuAvailable,
+            dhizukuAuthorized = dhizukuAuthorized,
+            onCandidatesChange = {
+                viewModel.dispatch(LabSettingsAction.LabChangeSmartAuthorizerCandidates(it))
+            }
+        )
     }
 }
 
@@ -469,6 +451,9 @@ private fun MiuixSmartAuthorizerBottomSheet(
             onItemClick = { candidate ->
                 toggleCandidate(candidate, !candidate.enabled)
             },
+            cardColors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.secondaryContainer
+            ),
             trailingContent = { candidate ->
                 Checkbox(
                     state = ToggleableState(value = candidate.enabled),

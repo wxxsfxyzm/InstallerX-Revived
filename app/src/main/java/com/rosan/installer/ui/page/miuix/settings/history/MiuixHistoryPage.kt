@@ -70,6 +70,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -88,6 +89,7 @@ fun MiuixHistoryPage(
     val layoutDirection = LocalLayoutDirection.current
     val topBarBackdrop = rememberMiuixBlurBackdrop(enableBlur)
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
+    var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -164,7 +166,10 @@ fun MiuixHistoryPage(
                     items(state.records, key = { it.id }) { record ->
                         HistoryRecordBriefCard(
                             record = record,
-                            onClick = { selectedRecord = record }
+                            onClick = {
+                                selectedRecord = record
+                                showRecordDetailSheet = true
+                            }
                         )
                     }
                 }
@@ -183,18 +188,20 @@ fun MiuixHistoryPage(
 
     selectedRecord?.let { record ->
         WindowBottomSheet(
-            show = true,
+            show = showRecordDetailSheet,
             backgroundColor = MiuixTheme.colorScheme.surfaceContainerHigh,
             startAction = {
+                val dismissState = LocalDismissState.current
                 MiuixBackButton(
                     icon = AppMiuixIcons.Close,
                     iconTint = MiuixTheme.colorScheme.onSurface,
-                    onClick = { selectedRecord = null }
+                    onClick = { dismissState?.invoke() ?: run { showRecordDetailSheet = false } }
                 )
             },
             title = record.appLabel ?: record.packageName,
             insideMargin = DpSize(24.dp, 0.dp),
-            onDismissRequest = { selectedRecord = null }
+            onDismissRequest = { showRecordDetailSheet = false },
+            onDismissFinished = { selectedRecord = null }
         ) {
             HistoryRecordDetailContent(
                 record = record,
@@ -239,55 +246,53 @@ private fun HistoryRecordBriefCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        insideMargin = PaddingValues(16.dp),
         pressFeedbackType = PressFeedbackType.Sink,
         onClick = onClick
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = record.appLabel ?: record.packageName,
-                    fontSize = MiuixTheme.textStyles.headline1.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = stringResource(record.status.labelRes()),
-                    style = MiuixTheme.textStyles.subtitle,
-                    color = statusColor,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 12.dp)
-                )
-            }
+            Text(
+                text = record.appLabel ?: record.packageName,
+                fontSize = MiuixTheme.textStyles.headline1.fontSize,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = stringResource(record.status.labelRes()),
+                style = MiuixTheme.textStyles.subtitle,
+                color = statusColor,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(start = 12.dp)
+            )
+        }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = record.packageName,
-                    style = MiuixTheme.textStyles.body1,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = record.timestamp.formatHistoryTime(),
-                    style = MiuixTheme.textStyles.body1,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                    modifier = Modifier.padding(start = 12.dp)
-                )
-            }
+        Spacer(modifier = Modifier.size(4.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = record.packageName,
+                style = MiuixTheme.textStyles.body1,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = record.timestamp.formatHistoryTime(),
+                style = MiuixTheme.textStyles.body1,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                modifier = Modifier.padding(start = 12.dp)
+            )
         }
     }
 }
