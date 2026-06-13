@@ -5,11 +5,14 @@ package com.rosan.installer.data.engine.repository
 import com.rosan.installer.data.engine.parser.FileTypeDetector
 import com.rosan.installer.data.engine.parser.PackagePreprocessor
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
+import com.rosan.installer.data.engine.signature.PackageSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.PackageSignatureAnalysis
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
@@ -25,6 +28,7 @@ class AnalyserRepositoryImpl(
     private val fileTypeDetector: FileTypeDetector,
     private val unifiedContainerAnalyser: UnifiedContainerAnalyser,
     private val packagePreprocessor: PackagePreprocessor,
+    private val packageSignatureAnalyzer: PackageSignatureAnalyzer,
     private val selectOptimalSplitsUseCase: SelectOptimalSplitsUseCase
 ) : AnalyserRepository {
     override suspend fun doWork(
@@ -57,7 +61,7 @@ class AnalyserRepositoryImpl(
         }
 
         // Step 2: Group, Deduplicate
-        val processedGroups = packagePreprocessor.process(rawEntities)
+        val processedGroups = packagePreprocessor.process(rawEntities, includeSignature = extra.checkAppSignature)
 
         Timber.d("AnalyserRepo: Step 2 Processed. Groups count: ${processedGroups.size}")
         processedGroups.forEach { group ->
@@ -105,11 +109,23 @@ class AnalyserRepositoryImpl(
 
             val baseEntity = group.entities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
 
-            // Execute the signature check.
-            val signatureStatus = packagePreprocessor.checkSignature(
-                baseEntity,
-                group.installedInfo
-            )
+            val signatureStatus = if (extra.checkAppSignature) {
+                packageSignatureAnalyzer.match(
+                    baseEntity,
+                    group.installedInfo
+                )
+            } else {
+                SignatureMatchStatus.NOT_INSTALLED
+            }
+
+            val signatureAnalysis = if (extra.checkAppSignature) {
+                packageSignatureAnalyzer.analyzeSelection(
+                    selectableEntities,
+                    group.installedInfo
+                )
+            } else {
+                PackageSignatureAnalysis()
+            }
 
             // Execute the identity check.
             val identityStatus = packagePreprocessor.checkPackageIdentity(
@@ -123,6 +139,7 @@ class AnalyserRepositoryImpl(
                 appEntities = selectableEntities,
                 installedAppInfo = group.installedInfo,
                 signatureMatchStatus = signatureStatus,
+                signatureAnalysis = signatureAnalysis,
                 identityStatus = identityStatus,
                 sessionMode = detectedMode
             )

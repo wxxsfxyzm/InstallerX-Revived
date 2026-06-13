@@ -210,6 +210,52 @@ fun MiuixInstallerGlobalSettingsPage(
                 }
             }
 
+            item { SmallTitle(stringResource(R.string.installer_settings_signature_check)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.config_check_app_signature),
+                        description = stringResource(R.string.config_check_app_signature_desc),
+                        checked = uiState.checkAppSignature,
+                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeCheckAppSignature(it)) }
+                    )
+
+                    AnimatedVisibility(
+                        visible = uiState.checkAppSignature,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.config_show_signature_info_on_match),
+                            description = stringResource(R.string.config_show_signature_info_on_match_desc),
+                            checked = uiState.showSignatureInfoOnMatch,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureInfoOnMatch(it))
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = uiState.checkAppSignature,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.config_show_signature_details),
+                            description = stringResource(R.string.config_show_signature_details_desc),
+                            checked = uiState.showSignatureDetails,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureDetails(it))
+                            }
+                        )
+                    }
+                }
+            }
+
             item { SmallTitle(stringResource(R.string.installer_settings_xposed_detection)) }
             item {
                 Card(

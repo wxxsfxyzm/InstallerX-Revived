@@ -247,7 +247,12 @@ fun rememberErrorSuggestions(
                 )
             }
 
-            if (error.hasErrorType(InstallErrorType.BLOCKED_BY_PROFILE)) {
+            if (error.hasErrorType(
+                    InstallErrorType.BLOCKED_BY_PROFILE,
+                    InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_MISMATCH,
+                    InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_UNKNOWN
+                )
+            ) {
                 add(
                     ErrorSuggestion(
                         labelRes = R.string.install_anyway,

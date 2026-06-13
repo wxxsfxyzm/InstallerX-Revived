@@ -67,6 +67,9 @@ class AppSettingsRepositoryImpl(
             versionCompareInSingleLine = prefs[AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE] ?: false,
             sdkCompareInMultiLine = prefs[AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE] ?: false,
             showOPPOSpecial = prefs[AppDataStore.DIALOG_SHOW_OPPO_SPECIAL] ?: false,
+            checkAppSignature = prefs[AppDataStore.CHECK_APP_SIGNATURE] ?: true,
+            showSignatureInfoOnMatch = prefs[AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH] ?: false,
+            showSignatureDetails = prefs[AppDataStore.SHOW_SIGNATURE_DETAILS] ?: false,
             installerRequireBiometricAuth = BiometricAuthMode.fromValueOrDefault(
                 prefs[AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH] ?: BiometricAuthMode.Disable.value
             ),
@@ -255,6 +258,9 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.DialogShowIntelligentSuggestion -> AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION
             BooleanSetting.DialogDisableNotificationOnDismiss -> AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS
             BooleanSetting.DialogShowOppoSpecial -> AppDataStore.DIALOG_SHOW_OPPO_SPECIAL
+            BooleanSetting.CheckAppSignature -> AppDataStore.CHECK_APP_SIGNATURE
+            BooleanSetting.ShowSignatureInfoOnMatch -> AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH
+            BooleanSetting.ShowSignatureDetails -> AppDataStore.SHOW_SIGNATURE_DETAILS
             BooleanSetting.DialogAutoSilentInstall -> AppDataStore.DIALOG_AUTO_SILENT_INSTALL
             BooleanSetting.DialogLongClickBackgroundInstall -> AppDataStore.DIALOG_LONG_CLICK_BACKGROUND_INSTALL
             BooleanSetting.TryMultipleAuthorizersOnInstall -> AppDataStore.TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL

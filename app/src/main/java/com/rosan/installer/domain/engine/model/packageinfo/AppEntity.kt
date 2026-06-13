@@ -39,6 +39,7 @@ sealed class AppEntity {
         // Get from AndroidManifest.xml
         val permissions: List<String>? = null,
         val signatureHash: String? = null,
+        val signatureInfo: AppSignatureInfo? = null,
         val fileHash: String? = null
     ) : AppEntity() {
         val isXposedModule: Boolean
@@ -61,7 +62,8 @@ sealed class AppEntity {
         // and can be installed as long as the user wants it.
         val filterType: FilterType = FilterType.NONE,
         // Extracted config value ("zh", "xhdpi", "arm64-v8a")
-        val configValue: String? = null
+        val configValue: String? = null,
+        val signatureInfo: AppSignatureInfo? = null
     ) : AppEntity() {
         override val name = "$splitName.apk"
     }

@@ -4,6 +4,7 @@ package com.rosan.installer.data.engine.parser.strategy
 
 import com.rosan.installer.data.engine.parser.ApkParser
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
+import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -15,7 +16,8 @@ import java.io.File
 import java.util.zip.ZipFile
 
 class ApksStrategy(
-    private val apkParser: ApkParser
+    private val apkParser: ApkParser,
+    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
 ) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
@@ -94,10 +96,11 @@ class ApksStrategy(
 
         val splits = splitEntities.map { (entry, name) ->
             val metadata = name.parseSplitMetadata()
+            val entryData = DataEntity.ZipFileEntity(entry.name, data as DataEntity.FileEntity)
 
             AppEntity.SplitEntity(
                 packageName = finalBase.packageName,
-                data = DataEntity.ZipFileEntity(entry.name, data as DataEntity.FileEntity),
+                data = entryData,
                 splitName = name,
                 targetSdk = finalBase.targetSdk,
                 minSdk = finalBase.minSdk,
@@ -105,7 +108,12 @@ class ApksStrategy(
                 sourceType = extra.dataType,
                 type = metadata.type,
                 filterType = metadata.filterType,
-                configValue = metadata.configValue
+                configValue = metadata.configValue,
+                signatureInfo = if (extra.checkAppSignature) {
+                    pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                } else {
+                    null
+                }
             )
         }
 

@@ -12,6 +12,7 @@ import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.packageinfo.PackageSignatureAnalysis
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
@@ -158,16 +159,19 @@ class ProcessInstallationUseCase(
      * Checks the profile's policy toggles against the analysis results.
      * Throws [InstallException] if a restriction is violated and not bypassed.
      */
-    private fun checkBlockedByProfile(config: ConfigModel, results: List<PackageAnalysisResult>) {
+    private suspend fun checkBlockedByProfile(config: ConfigModel, results: List<PackageAnalysisResult>) {
         if (config.bypassProfileRestriction) return
+        if (!appSettingsRepo.getBoolean(BooleanSetting.CheckAppSignature, true).first()) return
 
         val selectedResults = results.filter { result -> result.appEntities.any { it.selected } }
 
         for (result in selectedResults) {
             if (!shouldApplySignaturePolicy(result)) continue
 
+            val signatureAnalysis = result.signatureAnalysis
             if (!config.allowSigMismatch &&
-                result.signatureMatchStatus == SignatureMatchStatus.MISMATCH
+                (result.signatureMatchStatus == SignatureMatchStatus.MISMATCH ||
+                        signatureAnalysis.hasSignatureMismatchPolicyViolation())
             ) {
                 throw InstallException(
                     InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_MISMATCH,
@@ -176,7 +180,9 @@ class ProcessInstallationUseCase(
             }
 
             if (!config.allowSigUnknown &&
-                result.signatureMatchStatus == SignatureMatchStatus.UNKNOWN_ERROR
+                (result.signatureMatchStatus == SignatureMatchStatus.UNKNOWN_ERROR ||
+                        result.signatureMatchStatus == SignatureMatchStatus.CANDIDATE_ROTATION_UNCONFIRMED ||
+                        signatureAnalysis.hasSignatureUnknownPolicyViolation())
             ) {
                 throw InstallException(
                     InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_UNKNOWN,
@@ -188,13 +194,34 @@ class ProcessInstallationUseCase(
 
     private fun shouldApplySignaturePolicy(result: PackageAnalysisResult): Boolean {
         val selectedApps = result.appEntities.filter { it.selected }.map { it.app }
-        val containerType = selectedApps.firstOrNull()?.sourceType ?: return false
+        val selectedApks = selectedApps.filter { it is AppEntity.BaseEntity || it is AppEntity.SplitEntity }
+        val containerType = selectedApks.firstOrNull()?.sourceType ?: return false
         val hasInstalledApp = result.installedAppInfo != null
-        val hasSelectedBase = selectedApps.any { it is AppEntity.BaseEntity }
-        val hasSelectedSplit = selectedApps.any { it is AppEntity.SplitEntity }
+        val hasSelectedBase = selectedApks.any { it is AppEntity.BaseEntity }
+        val hasSelectedSplit = selectedApks.any { it is AppEntity.SplitEntity }
         val isSplitUpdateMode = hasInstalledApp && hasSelectedSplit && !hasSelectedBase
 
-        return !isSplitUpdateMode && (containerType == DataType.APK || containerType == DataType.APKS)
+        return !isSplitUpdateMode && containerType.supportsApkSignaturePolicy()
+    }
+
+    private fun DataType.supportsApkSignaturePolicy() = when (this) {
+        DataType.APK,
+        DataType.APKS,
+        DataType.APKM,
+        DataType.XAPK,
+        DataType.MULTI_APK,
+        DataType.MULTI_APK_ZIP -> true
+
+        else -> false
+    }
+
+    private fun PackageSignatureAnalysis.hasSignatureMismatchPolicyViolation(): Boolean {
+        return splitSignatureMismatchFiles.isNotEmpty()
+    }
+
+    private fun PackageSignatureAnalysis.hasSignatureUnknownPolicyViolation(): Boolean {
+        return verificationFailedFiles.isNotEmpty() ||
+                duplicateSplitNames.isNotEmpty()
     }
 
     private suspend fun installApp(

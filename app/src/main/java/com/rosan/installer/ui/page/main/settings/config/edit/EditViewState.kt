@@ -23,7 +23,8 @@ data class EditViewState(
 
     // Global states integrated into the view state
     val globalAuthorizer: Authorizer = Authorizer.Global,
-    val globalInstallerBiometricAuthMode: BiometricAuthMode = BiometricAuthMode.Disable
+    val globalInstallerBiometricAuthMode: BiometricAuthMode = BiometricAuthMode.Disable,
+    val checkAppSignature: Boolean = true
 ) {
     // Computed property for unsaved changes
     val hasUnsavedChanges: Boolean

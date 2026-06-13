@@ -7,7 +7,6 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
-import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.provider.InstalledAppInfoProvider
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +35,7 @@ class PackagePreprocessor(
     /**
      * Process raw data in parallel: Group -> Deduplicate -> Get installed system info.
      */
-    suspend fun process(rawEntities: List<AppEntity>): List<ProcessedGroup> = coroutineScope {
+    suspend fun process(rawEntities: List<AppEntity>, includeSignature: Boolean = true): List<ProcessedGroup> = coroutineScope {
         rawEntities
             .groupBy { it.packageName }
             .map { (packageName, entities) ->
@@ -44,7 +43,7 @@ class PackagePreprocessor(
                     // 1. Parallel Deduplication (IO intensive)
                     val deduplicated = deduplicateEntities(entities)
                     // 2. Parallel fetching of system info (IPC/IO intensive)
-                    val installedInfo = installedAppInfoProvider.getByPackageName(packageName)
+                    val installedInfo = installedAppInfoProvider.getByPackageName(packageName, includeSignature)
 
                     ProcessedGroup(packageName, deduplicated, installedInfo)
                 }
@@ -84,26 +83,6 @@ class PackagePreprocessor(
         }
 
         return SessionTypeInfo(isMultiAppSession, finalContainerType, isFromSingleFile)
-    }
-
-    /**
-     * Helper method for signature verification status.
-     */
-    fun checkSignature(
-        baseEntity: AppEntity.BaseEntity?,
-        installedInfo: InstalledAppInfo?
-    ): SignatureMatchStatus {
-        return when {
-            installedInfo == null -> SignatureMatchStatus.NOT_INSTALLED
-            baseEntity?.signatureHash.isNullOrBlank() || installedInfo.signatureHash.isNullOrBlank() ->
-                SignatureMatchStatus.UNKNOWN_ERROR
-
-            baseEntity.signatureHash == installedInfo.signatureHash ->
-                SignatureMatchStatus.MATCH
-
-            else ->
-                SignatureMatchStatus.MISMATCH
-        }
     }
 
     // Internal: Deduplication logic

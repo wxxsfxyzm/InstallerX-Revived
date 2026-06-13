@@ -3,7 +3,6 @@
 package com.rosan.installer.data.engine.parser
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.ApkAssets
 import android.content.res.AssetManager
 import android.content.res.`AssetManager$Builder`
@@ -18,6 +17,7 @@ import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.invoke
 import com.rosan.installer.core.resParser.parser.AxmlTreeParser
+import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
@@ -34,8 +34,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class ApkParser(
-    private val context: Context,
-    private val reflect: ReflectionProvider
+    private val reflect: ReflectionProvider,
+    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
 ) {
     @SuppressLint("DiscouragedPrivateApi")
     fun parseFull(
@@ -143,6 +143,7 @@ class ApkParser(
                 val assetManager = `AssetManager$Builder`()
                     .addApkAssets(apkAssets)
                     .build()
+
                 @Suppress("DEPRECATION")
                 val apkResources = Resources(assetManager, systemResources.displayMetrics, systemResources.configuration)
                 return ApkResourceContext(
@@ -193,21 +194,6 @@ class ApkParser(
         }
     }
 
-    private fun setAssetPath(assetManager: AssetManager, assets: Array<ApkAssets>) {
-        val setApkAssetsMtd = reflect.getDeclaredMethod(
-            "setApkAssets",
-            AssetManager::class.java,
-            Array<ApkAssets>::class.java,
-            Boolean::class.java
-        ) ?: throw AnalyseException(
-            errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
-            message = "Failed to find setApkAssets method"
-        )
-
-        setApkAssetsMtd.isAccessible = true
-        setApkAssetsMtd.invoke(assetManager, assets, true)
-    }
-
     private fun loadAppEntity(
         resources: Resources,
         theme: Resources.Theme?,
@@ -229,9 +215,10 @@ class ApkParser(
         var minSdk: String? = null
         var targetSdk: String? = null
         val permissions = mutableListOf<String>()
-        val signatureHash = (data as? DataEntity.FileEntity)?.path?.let {
-            SignatureUtils.getApkSignatureHash(context, it)
+        val signatureInfo = (data as? DataEntity.FileEntity)?.path?.takeIf { extra.checkAppSignature }?.let {
+            pendingApkSignatureAnalyzer.analyze(it)
         }
+        val signatureHash = signatureInfo?.primarySha256
 
         // Variables for Xposed extraction
         val metaDataMap = mutableMapOf<String, String>()
@@ -254,7 +241,9 @@ class ApkParser(
                                 splitName = manifestParser.getAttributeValue(null, "split")
                                 val versionCodeMajor = manifestParser.getAndroidAttributeIntValue(
                                     "versionCodeMajor",
-                                    android.R.attr.versionCodeMajor,
+                                    // TODO Increase minSDK to 28 to get rid of this magic number
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) android.R.attr.versionCodeMajor
+                                    else 0x01010576,
                                     0
                                 ).toLong()
                                 val versionCodeMinor = manifestParser.getAndroidAttributeIntValue(
@@ -401,7 +390,8 @@ class ApkParser(
             arch = arch,
             permissions = permissions,
             sourceType = extra.dataType,
-            signatureHash = signatureHash
+            signatureHash = signatureHash,
+            signatureInfo = signatureInfo
         ) else {
             val metadata = splitName.parseSplitMetadata()
             AppEntity.SplitEntity(
@@ -414,7 +404,8 @@ class ApkParser(
                 sourceType = extra.dataType,
                 type = metadata.type,
                 filterType = metadata.filterType,
-                configValue = metadata.configValue
+                configValue = metadata.configValue,
+                signatureInfo = signatureInfo
             )
         }
     }
@@ -470,9 +461,7 @@ class ApkParser(
         }
     }
 
-    private fun Exception.isRecoverableManifestParseException(): Boolean {
-        return this is XmlPullParserException || this is IOException
-    }
+    private fun Exception.isRecoverableManifestParseException() = this is XmlPullParserException || this is IOException
 
     private fun analyseAndSelectBestArchitecture(path: String, deviceSupportedArchs: List<Architecture>): Architecture? {
         val apkArchs = mutableSetOf<Architecture>()

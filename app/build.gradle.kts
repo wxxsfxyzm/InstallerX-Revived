@@ -176,6 +176,7 @@ room3 {
 
 dependencies {
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.android.tools.apksig)
     "baselineProfile"(project(":baselineprofile"))
     compileOnly(project(":hidden-api"))
     implementation(libs.androidx.core)
@@ -183,7 +184,7 @@ dependencies {
     implementation(libs.androidx.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androix.splashscreen)
+    implementation(libs.androidx.splashscreen)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)

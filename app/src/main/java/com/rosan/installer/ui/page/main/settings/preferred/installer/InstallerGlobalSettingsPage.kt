@@ -195,7 +195,48 @@ fun InstallerGlobalSettingsPage(
                 }
             }
 
-            // --- Group 2: Xposed Detection ---
+            // --- Group 2: Signature Check ---
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.installer_settings_signature_check)
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.InstallRequestUpdateOwnership,
+                            title = stringResource(R.string.config_check_app_signature),
+                            description = stringResource(R.string.config_check_app_signature_desc),
+                            checked = uiState.checkAppSignature,
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeCheckAppSignature(it)) }
+                        )
+                    }
+
+                    item(animatedVisibility = uiState.checkAppSignature) {
+                        SwitchWidget(
+                            icon = AppIcons.Info,
+                            title = stringResource(R.string.config_show_signature_info_on_match),
+                            description = stringResource(R.string.config_show_signature_info_on_match_desc),
+                            checked = uiState.showSignatureInfoOnMatch,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureInfoOnMatch(it))
+                            }
+                        )
+                    }
+
+                    item(animatedVisibility = uiState.checkAppSignature) {
+                        SwitchWidget(
+                            icon = AppIcons.InstallAllowSigUnknown,
+                            title = stringResource(R.string.config_show_signature_details),
+                            description = stringResource(R.string.config_show_signature_details_desc),
+                            checked = uiState.showSignatureDetails,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureDetails(it))
+                            }
+                        )
+                    }
+                }
+            }
+
+            // --- Group 3: Xposed Detection ---
             item {
                 SegmentedColumn(
                     title = stringResource(R.string.installer_settings_xposed_detection)
@@ -222,7 +263,7 @@ fun InstallerGlobalSettingsPage(
                 }
             }
 
-            // --- Group 3: OPPO Related ---
+            // --- Group 4: OPPO Related ---
             if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
                 item {
                     SegmentedColumn(
@@ -241,7 +282,7 @@ fun InstallerGlobalSettingsPage(
                 }
             }
 
-            // --- Group 4: Preset Installer Packages ---
+            // --- Group 5: Preset Installer Packages ---
             item {
                 SegmentedColumn(
                     modifier = Modifier.padding(top = 8.dp),

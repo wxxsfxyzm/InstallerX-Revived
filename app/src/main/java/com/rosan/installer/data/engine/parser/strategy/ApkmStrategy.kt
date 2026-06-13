@@ -4,6 +4,7 @@ package com.rosan.installer.data.engine.parser.strategy
 
 import android.graphics.drawable.Drawable
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
+import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -19,7 +20,8 @@ import java.io.File
 import java.util.zip.ZipFile
 
 class ApkmStrategy(
-    private val json: Json
+    private val json: Json,
+    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
 ) : AnalysisStrategy {
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -71,9 +73,19 @@ class ApkmStrategy(
                                 sourceType = extra.dataType,
                                 type = metadata.type,
                                 filterType = metadata.filterType,
-                                configValue = metadata.configValue
+                                configValue = metadata.configValue,
+                                signatureInfo = if (extra.checkAppSignature) {
+                                    pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                                } else {
+                                    null
+                                }
                             )
                         } else {
+                            val signatureInfo = if (extra.checkAppSignature) {
+                                pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                            } else {
+                                null
+                            }
                             AppEntity.BaseEntity(
                                 packageName = manifest.packageName,
                                 sharedUserId = null,
@@ -84,7 +96,9 @@ class ApkmStrategy(
                                 icon = icon,
                                 targetSdk = null,
                                 minSdk = manifest.minApi,
-                                sourceType = extra.dataType
+                                sourceType = extra.dataType,
+                                signatureHash = signatureInfo?.primarySha256,
+                                signatureInfo = signatureInfo
                             )
                         }
                         sequenceOf(entity)

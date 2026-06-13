@@ -230,8 +230,10 @@ fun EditPage(
                     item { DataForAllUserWidget(state, dispatch) }
                     item { DataAllowTestOnlyWidget(state, dispatch) }
                     item { DataAllowDowngradeWidget(state, dispatch) }
-                    item { DataAllowSigMismatchWidget(state, dispatch) }
-                    item { DataAllowSigUnknownWidget(state, dispatch) }
+                    if (state.checkAppSignature) {
+                        item { DataAllowSigMismatchWidget(state, dispatch) }
+                        item { DataAllowSigUnknownWidget(state, dispatch) }
+                    }
                     if (isAtLeastUpsideDownCake) item { DataBypassLowTargetSdkWidget(state, dispatch) }
                     item { DataAllowAllRequestedPermissionsWidget(state, dispatch) }
                     if (isAtLeastUpsideDownCake) item { DataRequestUpdateOwnershipWidget(state, dispatch) }

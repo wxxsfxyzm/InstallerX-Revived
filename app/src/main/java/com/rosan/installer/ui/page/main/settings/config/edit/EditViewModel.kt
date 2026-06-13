@@ -67,7 +67,8 @@ class EditViewModel(
             availableUsers = availableUsers,
             managedInstallerPackages = managedInstallerPackages,
             globalAuthorizer = prefs.authorizer,
-            globalInstallerBiometricAuthMode = prefs.installerRequireBiometricAuth
+            globalInstallerBiometricAuthMode = prefs.installerRequireBiometricAuth,
+            checkAppSignature = prefs.checkAppSignature
         )
     }.stateIn(
         scope = viewModelScope,
