@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.Build
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
+import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import timber.log.Timber
 
 /**
@@ -16,8 +17,8 @@ import timber.log.Timber
 class InstalledPackageSignatureReader(
     private val context: Context,
     private val certificateFormatter: CertificateFormatter
-) {
-    fun hasSigningCertificate(packageName: String, certificateSha256: String): Boolean {
+) : InstalledPackageSignatureProvider {
+    override fun hasSigningCertificate(packageName: String, certificateSha256: String): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return false
         val certificateBytes = certificateSha256.hexToByteArrayOrNull() ?: return false
         return runCatching {

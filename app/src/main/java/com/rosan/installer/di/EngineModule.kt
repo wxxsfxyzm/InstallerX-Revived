@@ -27,6 +27,7 @@ import com.rosan.installer.domain.engine.repository.AppIconRepository
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.engine.provider.InstalledAppInfoProvider
+import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.usecase.AnalyzeInstallStateUseCase
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
 import com.rosan.installer.domain.engine.usecase.ApproveSessionUseCase
@@ -47,7 +48,7 @@ val engineModule = module {
     // Signature analysis
     singleOf(::CertificateFormatter)
     singleOf(::PendingApkSignatureAnalyzer)
-    singleOf(::InstalledPackageSignatureReader)
+    singleOf(::InstalledPackageSignatureReader) { bind<InstalledPackageSignatureProvider>() }
     singleOf(::SignatureMatcher)
     singleOf(::PackageSignatureAnalyzer)
 

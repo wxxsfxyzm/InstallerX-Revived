@@ -65,6 +65,77 @@ fun List<SelectInstallEntity>.analyzePackageSignatureSelection(
     )
 }
 
+fun List<SelectInstallEntity>.analyzePackageSignatureMatch(
+    installedInfo: InstalledAppInfo?,
+    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean
+): SignatureMatchStatus {
+    val selectedBase = filter { it.selected }
+        .map { it.app }
+        .filterIsInstance<AppEntity.BaseEntity>()
+        .firstOrNull()
+
+    return selectedBase.analyzePackageSignatureMatch(installedInfo, hasSigningCertificate)
+}
+
+fun AppEntity.BaseEntity?.analyzePackageSignatureMatch(
+    installedInfo: InstalledAppInfo?,
+    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean
+): SignatureMatchStatus {
+    val pendingSignatureInfo = this?.signatureInfo?.takeIf { it.verified }
+    val pendingSignerSet = pendingSignatureInfo?.signerSha256Set?.takeIf { it.isNotEmpty() }
+    val installedSignatureInfo = installedInfo?.signatureInfo
+    val installedSignerSet = installedSignatureInfo?.signerSha256Set?.takeIf { it.isNotEmpty() }
+
+    return when {
+        installedInfo == null -> SignatureMatchStatus.NOT_INSTALLED
+        pendingSignatureInfo == null || pendingSignerSet == null || installedSignerSet == null ->
+            SignatureMatchStatus.UNKNOWN_ERROR
+
+        pendingSignerSet == installedSignerSet ->
+            SignatureMatchStatus.MATCH
+
+        isRotationCompatible(installedInfo, pendingSignerSet, hasSigningCertificate) ->
+            SignatureMatchStatus.ROTATION_COMPATIBLE
+
+        pendingSignatureInfo.isCandidateRotationUnconfirmed(pendingSignerSet, installedSignerSet) ->
+            SignatureMatchStatus.CANDIDATE_ROTATION_UNCONFIRMED
+
+        else -> SignatureMatchStatus.MISMATCH
+    }
+}
+
+private fun isRotationCompatible(
+    installedInfo: InstalledAppInfo,
+    pendingSignerSet: Set<String>,
+    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean
+): Boolean {
+    val installedSignatureInfo = installedInfo.signatureInfo ?: return false
+    if (installedSignatureInfo.hasMultipleSigners || pendingSignerSet.size != 1) return false
+
+    val hasHistoryMatch = pendingSignerSet.all { sha256 ->
+        sha256 in installedSignatureInfo.signingCertificateHistorySha256Set
+    }
+    val packageManagerConfirms = pendingSignerSet.all { sha256 ->
+        hasSigningCertificate(installedInfo.packageName, sha256)
+    }
+
+    return hasHistoryMatch || packageManagerConfirms
+}
+
+private fun AppSignatureInfo.isCandidateRotationUnconfirmed(
+    pendingSignerSet: Set<String>,
+    installedSignerSet: Set<String>
+): Boolean {
+    if (hasMultipleSigners || pendingSignerSet.size != 1 || installedSignerSet.size != 1) {
+        return false
+    }
+
+    val lineage = signingCertificateHistorySha256Set
+    return lineage.size > 1 &&
+            pendingSignerSet.all { it in lineage } &&
+            installedSignerSet.all { it in lineage }
+}
+
 private fun AppEntity.signatureInfo() = when (this) {
     is AppEntity.BaseEntity -> signatureInfo
     is AppEntity.SplitEntity -> signatureInfo

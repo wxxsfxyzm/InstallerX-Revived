@@ -108,10 +108,14 @@ class AnalyserRepositoryImpl(
             }
 
             val baseEntity = group.entities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
+            val selectedBaseEntity = selectableEntities
+                .firstOrNull { it.selected && it.app is AppEntity.BaseEntity }
+                ?.app as? AppEntity.BaseEntity
+                ?: baseEntity
 
             val signatureStatus = if (extra.checkAppSignature) {
                 packageSignatureAnalyzer.match(
-                    baseEntity,
+                    selectedBaseEntity,
                     group.installedInfo
                 )
             } else {

@@ -14,6 +14,9 @@ import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.PackageSignatureAnalysis
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
+import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureMatch
+import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureSelection
+import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.history.model.InstallMethod
@@ -51,6 +54,7 @@ class ProcessInstallationUseCase(
     private val appInstaller: AppInstallerRepository,
     private val moduleInstaller: ModuleInstallerRepository,
     private val capabilityProvider: DeviceCapabilityProvider,
+    private val installedPackageSignatureProvider: InstalledPackageSignatureProvider,
     private val recordOperationHistory: RecordOperationHistoryUseCase
 ) {
     companion object {
@@ -168,9 +172,16 @@ class ProcessInstallationUseCase(
         for (result in selectedResults) {
             if (!shouldApplySignaturePolicy(result)) continue
 
-            val signatureAnalysis = result.signatureAnalysis
+            val signatureAnalysis = result.appEntities.analyzePackageSignatureSelection(
+                result.installedAppInfo
+            )
+            val signatureMatchStatus = result.appEntities.analyzePackageSignatureMatch(
+                installedInfo = result.installedAppInfo,
+                hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+            )
+
             if (!config.allowSigMismatch &&
-                (result.signatureMatchStatus == SignatureMatchStatus.MISMATCH ||
+                (signatureMatchStatus == SignatureMatchStatus.MISMATCH ||
                         signatureAnalysis.hasSignatureMismatchPolicyViolation())
             ) {
                 throw InstallException(
@@ -180,8 +191,8 @@ class ProcessInstallationUseCase(
             }
 
             if (!config.allowSigUnknown &&
-                (result.signatureMatchStatus == SignatureMatchStatus.UNKNOWN_ERROR ||
-                        result.signatureMatchStatus == SignatureMatchStatus.CANDIDATE_ROTATION_UNCONFIRMED ||
+                (signatureMatchStatus == SignatureMatchStatus.UNKNOWN_ERROR ||
+                        signatureMatchStatus == SignatureMatchStatus.CANDIDATE_ROTATION_UNCONFIRMED ||
                         signatureAnalysis.hasSignatureUnknownPolicyViolation())
             ) {
                 throw InstallException(
