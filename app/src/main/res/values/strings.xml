@@ -521,8 +521,8 @@
     <string name="installer_signature_schemes">Verified signature schemes</string>
     <string name="installer_signature_certificate">Certificate</string>
     <string name="installer_signature_current_certificate">Current certificate</string>
-    <string name="installer_signature_certificate_lineage">Signing certificate history</string>
-    <string name="installer_signature_lineage_certificate">History certificate</string>
+    <string name="installer_signature_certificate_lineage">Signing certificate lineage</string>
+    <string name="installer_signature_lineage_certificate">Signing certificate</string>
     <string name="installer_signature_current_marker">current</string>
     <string name="installer_signature_sha256" translatable="false">SHA-256</string>
     <string name="installer_signature_sha1" translatable="false">SHA-1</string>

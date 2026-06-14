@@ -224,10 +224,11 @@ class InstallStateUiMapper(
             }
         }
 
-        if (info.warnings.isNotEmpty()) {
+        val visibleWarnings = info.userVisibleWarnings()
+        if (visibleWarnings.isNotEmpty()) {
             appendLine()
             appendLine(resources.labelSignatureWarnings)
-            info.warnings.forEach { appendLine("- $it") }
+            visibleWarnings.forEach { appendLine("- $it") }
         }
 
         if (info.errors.isNotEmpty()) {
@@ -290,6 +291,13 @@ class InstallStateUiMapper(
         if (signingCertificateHistory.isEmpty()) return false
         return signingCertificateHistorySha256Set != signerSha256Set ||
                 signingCertificateHistory.size > certificates.size
+    }
+
+    private fun AppSignatureInfo.userVisibleWarnings(): List<String> {
+        return warnings.filterNot { warning ->
+            warning.contains("not protected by signature", ignoreCase = true) &&
+                    warning.contains("META-INF/", ignoreCase = true)
+        }
     }
 
     private fun StringBuilder.trimTrailingWhitespace() {
