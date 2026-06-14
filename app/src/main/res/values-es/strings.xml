@@ -828,10 +828,10 @@
     <string name="config_quick_open_lsposed">Abrir LSPosed rápidamente</string>
     <string name="config_quick_open_lsposed_desc">Mostrar el botón \"Abrir LSPosed\" después de instalar el módulo Xposed</string>
     <string name="exception_install_failed_blocked_by_profile">Instalación bloqueada por la política del perfil</string>
-    <string name="config_allow_sig_mismatch">Permitir discrepancia de firma</string>
-    <string name="config_allow_sig_mismatch_desc">Permitir la instalación de aplicaciones que tengan una firma diferente a la versión instalada (se requiere Core Patch)</string>
-    <string name="config_allow_sig_unknown">Permitir firma desconocida</string>
-    <string name="config_allow_sig_unknown_desc">Permitir la instalación de aplicaciones cuya firma no pueda verificarse (se requiere Core Patch)</string>
+    <string name="config_allow_sig_mismatch">Bloquear discrepancia de firmas</string>
+    <string name="config_allow_sig_mismatch_desc">Bloquear la instalación de aplicaciones que tengan una firma diferente a la versión instalada</string>
+    <string name="config_allow_sig_unknown">Bloquear firmas desconocidas</string>
+    <string name="config_allow_sig_unknown_desc">Bloquear la instalación de aplicaciones cuya firma no pueda verificarse</string>
     <string name="suggestion_install_anyway_desc">Omitir temporalmente la restricción del perfil y volver a intentarlo</string>
     <string name="extras">Extras</string>
     <string name="authorizer_customization">Ajustes del autorizador</string>
@@ -909,4 +909,13 @@
     <string name="config_install_requester_mode_disable">No establecido</string>
     <string name="locking_default_installer">Estableciendo como instalador predeterminado…</string>
     <string name="unlocking_default_installer">Quitando el instalador predeterminado…</string>
+    <string name="config_try_multiple_authorizers_on_install">Autorización inteligente</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Cuando el autorizador seleccionado por el perfil no esté disponible, probar los autorizadores habilitados por orden.</string>
+    <string name="config_smart_authorizer_fallback_list">Lista de autorizadores alternativos</string>
+    <string name="config_smart_authorizer_fallback_list_desc">Selecciona y ordena los autorizadores alternativos.\nOrden de autorización seleccionado: %1$s«</string>
+    <string name="config_smart_authorizer_fallback_list_tip">Selecciona al menos un elemento. Arrastra para ordenar.</string>
+    <string name="config_smart_authorizer_must_choose_one">¡Debes seleccionar uno!</string>
+    <string name="exception_install_failed_all_authorizers_failed">Todos los autorizadores fallaron</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_mismatch">El perfil bloquea la instalación de aplicaciones con una firma diferente</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_unknown">El perfil bloquea la instalación de aplicaciones cuya firma no puede verificarse</string>
 </resources>
