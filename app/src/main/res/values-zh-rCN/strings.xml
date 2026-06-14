@@ -493,7 +493,7 @@
     <string name="installer_prepare_type_unknown_confirm">你确定要安装吗？</string>
     <string name="installer_prepare_signature_new_install">新安装。系统中未发现同包名应用。</string>
     <string name="installer_prepare_signature_match">签名一致。当前安装包与已安装应用使用相同 signer 集合。</string>
-    <string name="installer_prepare_signature_rotation_compatible">签名轮换兼容。当前安装包证书存在于已安装应用的签名历史中，最终能否覆盖安装以系统校验为准。</string>
+    <string name="installer_prepare_signature_rotation_compatible">签名轮换兼容。当前安装包证书存在于已安装应用的签名证书谱系中，最终能否覆盖安装以系统校验为准。</string>
     <string name="installer_prepare_signature_candidate_rotation_unconfirmed">检测到签名轮换证明，但无法确认它与已安装应用兼容，最终结果以系统校验为准。</string>
     <string name="installer_prepare_signature_mismatch">签名不一致！继续安装可能导致数据丢失或带来安全风险。</string>
     <string name="installer_prepare_signature_unknown">无法验证应用签名，请谨慎操作。</string>

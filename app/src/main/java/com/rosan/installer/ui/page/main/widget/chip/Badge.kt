@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -115,13 +116,16 @@ fun InstallInfoChipGroup(
                 )
             },
             text = {
-                Text(
-                    text = notice.fullDescription,
-                    style = MaterialTheme.typography.bodyMedium,
+                SelectionContainer(
                     modifier = Modifier
                         .heightIn(max = 360.dp)
                         .verticalScroll(rememberScrollState())
-                )
+                ) {
+                    Text(
+                        text = notice.fullDescription,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             },
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )

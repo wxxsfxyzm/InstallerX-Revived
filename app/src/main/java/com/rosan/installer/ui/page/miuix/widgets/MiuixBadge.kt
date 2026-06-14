@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
@@ -119,13 +120,16 @@ fun MiuixInfoChipGroup(
             },
             content = {
                 Column {
-                    Text(
-                        text = selectedNotice!!.fullDescription,
-                        color = MiuixTheme.colorScheme.onSurface,
+                    SelectionContainer(
                         modifier = Modifier
                             .heightIn(max = 360.dp)
                             .verticalScroll(rememberScrollState())
-                    )
+                    ) {
+                        Text(
+                            text = selectedNotice!!.fullDescription,
+                            color = MiuixTheme.colorScheme.onSurface
+                        )
+                    }
                     Spacer(modifier = Modifier.height(24.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
