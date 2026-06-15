@@ -899,4 +899,11 @@
     <string name="locking_default_installer">Đang đặt như trình cài đặt mặc định…</string>
     <string name="unlocking_default_installer">Đang hoàn đặt trình cài đặt mặc định…</string>
     <string name="config_install_requester_mode_disable">Chưa đặt</string>
+    <string name="config_try_multiple_authorizers_on_install">Uỷ quyền thông minh</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Khi trình ủy quyền được chọn trong hồ sơ không khả dụng, thử các trình ủy quyền đã được bật theo thứ tự.</string>
+    <string name="config_smart_authorizer_fallback_list">Danh sách trình ủy quyền dự phòng</string>
+    <string name="config_smart_authorizer_fallback_list_desc">Chọn và sắp xếp các trình ủy quyền dự phòng.\nThứ tự trình ủy quyền đã chọn: %1$s</string>
+    <string name="config_smart_authorizer_fallback_list_tip">Chọn ít nhất một mục. Kéo để sắp xếp.</string>
+    <string name="config_smart_authorizer_must_choose_one">Phải chọn một cái!</string>
+    <string name="exception_install_failed_all_authorizers_failed">Tất cả trình ủy quyền đã thất bại</string>
 </resources>

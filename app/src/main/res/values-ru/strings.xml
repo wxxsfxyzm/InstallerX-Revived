@@ -818,10 +818,10 @@
     <string name="config_quick_open_lsposed">Запуск LSPosed</string>
     <string name="config_quick_open_lsposed_desc">После установки модуля Xposed отобразится кнопка \"Запуск LSPosed\"</string>
     <string name="exception_install_failed_blocked_by_profile">Установка заблокирована политикой профиля</string>
-    <string name="config_allow_sig_mismatch">Разрешить несоответствие подписи</string>
-    <string name="config_allow_sig_mismatch_desc">Разрешить установку приложений с подписью, отличающейся от установленной версии (требуется Core Patch)</string>
-    <string name="config_allow_sig_unknown">Разрешить без подписи</string>
-    <string name="config_allow_sig_unknown_desc">Разрешить установку приложений, подпись которых не может быть проверена (требуется Core Patch)</string>
+    <string name="config_allow_sig_mismatch">Блокировать несовпадение подписей</string>
+    <string name="config_allow_sig_mismatch_desc">Блокировать установку приложений с подписью, отличающейся от установленной версии</string>
+    <string name="config_allow_sig_unknown">Блокировать без подписи</string>
+    <string name="config_allow_sig_unknown_desc">Блокировать установку приложений, подпись которых невозможно проверить</string>
     <string name="suggestion_install_anyway_desc">Временно обойти ограничение профиля и повторить попытку</string>
     <string name="extras">Дополнительные функции</string>
     <string name="authorizer_customization">Настройки авторизатора</string>
@@ -899,4 +899,13 @@
     <string name="config_install_requester_mode_disable">Не задано</string>
     <string name="locking_default_installer">Назначение установщиком по умолчанию…</string>
     <string name="unlocking_default_installer">Отмена назначения установщиком по умолчанию…</string>
+    <string name="config_try_multiple_authorizers_on_install">Умный авторизатор</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Если выбранный авторизатор недоступен, пробовать другие включенные методы по порядку.</string>
+    <string name="config_smart_authorizer_fallback_list">Резервные авторизаторы</string>
+    <string name="config_smart_authorizer_fallback_list_desc">Выбор и сортировка.\nПорядок авторизаторов: %1$s</string>
+    <string name="config_smart_authorizer_fallback_list_tip">Выберите хотя бы один элемент. Перетаскивайте для сортировки.</string>
+    <string name="config_smart_authorizer_must_choose_one">Обязательно выберите один элемент!</string>
+    <string name="exception_install_failed_all_authorizers_failed">Ни один авторизатор не сработал</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_mismatch">Профиль блокирует установку приложений с другой подписью</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_unknown">Профиль блокирует установку приложений, подпись которых невозможно проверить</string>
 </resources>

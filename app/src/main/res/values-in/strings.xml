@@ -784,10 +784,10 @@
     <string name="exception_uninstall_failed_device_policy">Pencopotan pemasangan diblokir oleh kebijakan perangkat</string>
     <string name="exception_uninstall_failed_owner_blocked">Pencopotan pemasangan diblokir oleh pemilik</string>
     <string name="reboot_soft_reboot">Reboot Ringan</string>
-    <string name="config_allow_sig_mismatch">Izinkan Ketidakcocokan Tanda Tangan</string>
-    <string name="config_allow_sig_mismatch_desc">Izinkan pemasangan aplikasi yang memiliki tanda tangan berbeda dari versi yang terpasang (memerlukan Core Patch)</string>
-    <string name="config_allow_sig_unknown">Izinkan Tanda Tangan Tidak Diketahui</string>
-    <string name="config_allow_sig_unknown_desc">Izinkan pemasangan aplikasi yang tanda tangannya tidak dapat diverifikasi (memerlukan Core Patch)</string>
+    <string name="config_allow_sig_mismatch">Blokir Signature Mismatch</string>
+    <string name="config_allow_sig_mismatch_desc">Memblokir pemasangan aplikasi yang memiliki signature berbeda dari versi yang terpasang</string>
+    <string name="config_allow_sig_unknown">Blokir Unknown Signature</string>
+    <string name="config_allow_sig_unknown_desc">Memblokir pemasangan aplikasi yang signature-nya tidak dapat diverifikasi</string>
     <string name="suggestion_install_anyway_desc">Lewati pembatasan profil untuk sementara dan coba lagi</string>
     <string name="lab_update_github_proxy">Kanal Pembaruan GitHub</string>
     <string name="lab_update_github_proxy_official">Resmi</string>
@@ -899,4 +899,13 @@
     <string name="home_learn_more_installerx_desc">Pelajari cara mengonfigurasi dan menggunakan InstallerX Revived</string>
     <string name="locking_default_installer">Tetapkan sebagai pemasang bawaan…</string>
     <string name="unlocking_default_installer">Menghapus pemasang bawaan…</string>
+    <string name="config_try_multiple_authorizers_on_install">Otorisasi cerdas</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Jika pemberi otorisasi yang dipilih oleh profil tidak tersedia, coba pemberi otorisasi yang diaktifkan secara berurutan.</string>
+    <string name="config_smart_authorizer_fallback_list">Daftar penyedia otorisasi cadangan</string>
+    <string name="config_smart_authorizer_fallback_list_desc">Pilih dan urutkan pemberi otorisasi cadangan.\nUrutan otorisasi yang dipilih: %1$s</string>
+    <string name="config_smart_authorizer_fallback_list_tip">Pilih setidaknya satu item. Seret untuk mengurutkan.</string>
+    <string name="config_smart_authorizer_must_choose_one">Harus memilih satu!</string>
+    <string name="exception_install_failed_all_authorizers_failed">Semua pemberi otorisasi gagal</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_mismatch">Memblokir pemasangan aplikasi dengan signature yang berbeda</string>
+    <string name="exception_install_failed_blocked_by_profile_signature_unknown">Memblokir pemasangan aplikasi yang signature-nya tidak dapat diverifikasi</string>
 </resources>
