@@ -1,0 +1,9 @@
+# apksig uses runtime annotations and reflection for its internal ASN.1 models.
+# R8 full mode can otherwise strip these annotations from release builds.
+-keep,allowoptimization,allowobfuscation,allowaccessmodification @com.android.apksig.internal.asn1.Asn1Class class com.android.apksig.internal.** {
+    public <init>();
+}
+
+-keepclassmembers,allowoptimization,allowobfuscation,allowaccessmodification class com.android.apksig.internal.** {
+    @com.android.apksig.internal.asn1.Asn1Field <fields>;
+}

@@ -9,6 +9,7 @@
 
 [versions]
 agp = "9.2.1"
+apksig = "9.2.1"
 biometric = "1.4.0-alpha07"
 focusApi = "1.4"
 kotlin = "2.4.0"
@@ -57,6 +58,7 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+android-tools-apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidx-annotation" }
@@ -65,7 +67,7 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.13.0" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-androix-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
+androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 
 focus-api = { module = "com.xzakota.hyper.notification:focus-api", version.ref = "focusApi" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }

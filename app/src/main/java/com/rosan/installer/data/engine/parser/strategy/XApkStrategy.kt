@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import com.rosan.installer.data.engine.parser.ApkParser
 import com.rosan.installer.data.engine.parser.FlexibleXapkVersionCodeSerializer
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
+import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -23,7 +24,8 @@ import java.util.zip.ZipFile
 class XApkStrategy(
     private val json: Json,
     // Inject ApkParser to handle fallback analysis for Base APK
-    private val apkParser: ApkParser
+    private val apkParser: ApkParser,
+    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
 ) : AnalysisStrategy {
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -73,12 +75,22 @@ class XApkStrategy(
                             sourceType = extra.dataType,
                             type = metadata.type,
                             filterType = metadata.filterType,
-                            configValue = metadata.configValue
+                            configValue = metadata.configValue,
+                            signatureInfo = if (extra.checkAppSignature) {
+                                pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                            } else {
+                                null
+                            }
                         )
                     } else {
                         // Handle Base APK
                         var resolvedLabel = manifest.label
                         var resolvedIcon = icon
+                        val signatureInfo = if (extra.checkAppSignature) {
+                            pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                        } else {
+                            null
+                        }
 
                         // Fallback: If label is missing from JSON, parse the Base APK fully to extract it
                         if (resolvedLabel.isNullOrBlank()) {
@@ -107,7 +119,9 @@ class XApkStrategy(
                             icon = resolvedIcon,
                             targetSdk = manifest.targetSdk,
                             minSdk = manifest.minSdk,
-                            sourceType = extra.dataType
+                            sourceType = extra.dataType,
+                            signatureHash = signatureInfo?.primarySha256,
+                            signatureInfo = signatureInfo
                         )
                     }
                     listOf(entity)

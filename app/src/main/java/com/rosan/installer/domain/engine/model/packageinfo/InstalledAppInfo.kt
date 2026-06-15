@@ -13,6 +13,7 @@ data class InstalledAppInfo(
     val minSdk: Int?,
     val targetSdk: Int?,
     val signatureHash: String? = null,
+    val signatureInfo: AppSignatureInfo? = null,
     val isSystemApp: Boolean = false,
     val isUninstalled: Boolean = false,
     val isArchived: Boolean = false,

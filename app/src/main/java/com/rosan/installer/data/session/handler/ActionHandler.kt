@@ -279,7 +279,14 @@ class ActionHandler(
         val isModuleEnabled = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first()
         Timber.d("[id=$sessionId] Module flashing enabled: $isModuleEnabled")
 
-        val extra = AnalyseExtraEntity(cacheDirectory, isModuleFlashEnabled = isModuleEnabled)
+        val checkAppSignature = appSettingsRepo.getBoolean(BooleanSetting.CheckAppSignature, true).first()
+        Timber.d("[id=$sessionId] App signature checks enabled: $checkAppSignature")
+
+        val extra = AnalyseExtraEntity(
+            cacheDirectory = cacheDirectory,
+            isModuleFlashEnabled = isModuleEnabled,
+            checkAppSignature = checkAppSignature
+        )
 
         val results = analyzePackage(
             sessionId = session.id,

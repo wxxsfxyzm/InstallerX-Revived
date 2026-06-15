@@ -11,6 +11,9 @@ sealed interface InstallerSettingsAction {
     data class ChangeGlobalAuthorizer(val authorizer: Authorizer) : InstallerSettingsAction
     data class ChangeBiometricAuth(val mode: BiometricAuthMode) : InstallerSettingsAction
     data class ChangeShowOPPOSpecial(val show: Boolean) : InstallerSettingsAction
+    data class ChangeCheckAppSignature(val check: Boolean) : InstallerSettingsAction
+    data class ChangeShowSignatureInfoOnMatch(val show: Boolean) : InstallerSettingsAction
+    data class ChangeShowSignatureDetails(val show: Boolean) : InstallerSettingsAction
     data class ChangeDetectXposedModule(val detect: Boolean) : InstallerSettingsAction
     data class ChangeQuickOpenLSPosed(val open: Boolean) : InstallerSettingsAction
 

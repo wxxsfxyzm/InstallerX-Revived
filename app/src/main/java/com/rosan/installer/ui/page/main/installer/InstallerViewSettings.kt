@@ -16,6 +16,9 @@ data class InstallerViewSettings(
     val longClickBackgroundInstall: Boolean = true,
     val enableModuleInstall: Boolean = false,
     val useDynColorFollowPkgIcon: Boolean = false,
+    val checkAppSignature: Boolean = true,
+    val showSignatureInfoOnMatch: Boolean = false,
+    val showSignatureDetails: Boolean = false,
     val detectXposedModule: Boolean = true,
     val quickOpenLSPosed: Boolean = true,
     // Lab

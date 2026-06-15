@@ -35,6 +35,9 @@ class InstallerSettingsViewModel(
             closeSessionCountDown = prefs.closeSessionCountDown,
             installerRequireBiometricAuth = prefs.installerRequireBiometricAuth,
             showOPPOSpecial = prefs.showOPPOSpecial,
+            checkAppSignature = prefs.checkAppSignature,
+            showSignatureInfoOnMatch = prefs.showSignatureInfoOnMatch,
+            showSignatureDetails = prefs.showSignatureDetails,
             detectXposedModule = prefs.detectXposedModule,
             quickOpenLSPosed = prefs.quickOpenLSPosed,
             managedInstallerPackages = prefs.managedInstallerPackages,
@@ -62,6 +65,27 @@ class InstallerSettingsViewModel(
             is InstallerSettingsAction.ChangeShowOPPOSpecial -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.DialogShowOppoSpecial,
+                    action.show
+                )
+            }
+
+            is InstallerSettingsAction.ChangeCheckAppSignature -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.CheckAppSignature,
+                    action.check
+                )
+            }
+
+            is InstallerSettingsAction.ChangeShowSignatureInfoOnMatch -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.ShowSignatureInfoOnMatch,
+                    action.show
+                )
+            }
+
+            is InstallerSettingsAction.ChangeShowSignatureDetails -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.ShowSignatureDetails,
                     action.show
                 )
             }

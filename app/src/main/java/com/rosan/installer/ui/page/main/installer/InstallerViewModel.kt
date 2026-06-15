@@ -16,7 +16,10 @@ import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureMatch
+import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureSelection
 import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppLabelUseCase
@@ -54,7 +57,8 @@ class InstallerViewModel(
     private val getAvailableUsers: GetAvailableUsersUseCase,
     private val getAppIcon: GetAppIconUseCase,
     private val getAppIconColor: GetAppIconColorUseCase,
-    private val getAppLabel: GetAppLabelUseCase
+    private val getAppLabel: GetAppLabelUseCase,
+    private val installedPackageSignatureProvider: InstalledPackageSignatureProvider
 ) : ViewModel() {
 
     // Event channel for one-off side effects (e.g. Toasts)
@@ -93,6 +97,9 @@ class InstallerViewModel(
                 versionCompareInSingleLine = prefs.versionCompareInSingleLine,
                 sdkCompareInMultiLine = prefs.sdkCompareInMultiLine,
                 showOPPOSpecial = local.tempShowOPPOSpecial ?: prefs.showOPPOSpecial,
+                checkAppSignature = prefs.checkAppSignature,
+                showSignatureInfoOnMatch = prefs.showSignatureInfoOnMatch,
+                showSignatureDetails = prefs.showSignatureDetails,
                 detectXposedModule = prefs.detectXposedModule,
                 quickOpenLSPosed = prefs.quickOpenLSPosed,
                 autoSilentInstall = prefs.autoSilentInstall,
@@ -580,7 +587,18 @@ class InstallerViewModel(
         if (containerType == DataType.MIXED_MODULE_APK) {
             // Generate a new list with all selections cleared
             currentResults = currentResults.map { result ->
-                result.copy(appEntities = result.appEntities.map { it.copy(selected = false) })
+                val clearedEntities = result.appEntities.map { it.copy(selected = false) }
+
+                result.copy(
+                    appEntities = clearedEntities,
+                    signatureMatchStatus = clearedEntities.analyzePackageSignatureMatch(
+                        installedInfo = result.installedAppInfo,
+                        hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+                    ),
+                    signatureAnalysis = clearedEntities.analyzePackageSignatureSelection(
+                        result.installedAppInfo
+                    )
+                )
             }
             // Sync the updated list back to the underlying session
             session.analysisResults = currentResults.toMutableList()
@@ -658,7 +676,19 @@ class InstallerViewModel(
                 updatedEntities.replaceAll { it.copy(selected = false) }
             }
 
-            val newPackageAnalysisResult = packageToUpdate.copy(appEntities = updatedEntities)
+            val newSignatureAnalysis = updatedEntities.analyzePackageSignatureSelection(
+                packageToUpdate.installedAppInfo
+            )
+            val newSignatureMatchStatus = updatedEntities.analyzePackageSignatureMatch(
+                installedInfo = packageToUpdate.installedAppInfo,
+                hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+            )
+
+            val newPackageAnalysisResult = packageToUpdate.copy(
+                appEntities = updatedEntities,
+                signatureMatchStatus = newSignatureMatchStatus,
+                signatureAnalysis = newSignatureAnalysis
+            )
             currentResults[packageIndex] = newPackageAnalysisResult
 
             // Sync to session

@@ -5,5 +5,5 @@ package com.rosan.installer.domain.engine.provider
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
 
 interface InstalledAppInfoProvider {
-    fun getByPackageName(packageName: String): InstalledAppInfo?
+    fun getByPackageName(packageName: String, includeSignature: Boolean = true): InstalledAppInfo?
 }
