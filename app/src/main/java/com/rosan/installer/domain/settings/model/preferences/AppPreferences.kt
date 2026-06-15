@@ -65,6 +65,7 @@ data class AppPreferences(
     val labShowFilePath: Boolean,
     val labShowInstallInitiator: Boolean,
     val labInstallWithoutUserAction: Boolean,
+    val labRespectPlatformInstallPolicy: Boolean,
     val enableFileLogging: Boolean,
     // Theme Settings
     val themeMode: ThemeMode,

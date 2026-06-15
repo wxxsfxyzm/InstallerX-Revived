@@ -3,9 +3,11 @@
 package com.rosan.installer.data.engine.repository
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.util.LruCache
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -69,21 +71,21 @@ class AppIconRepositoryImpl(
     private val context: Context
 ) : AppIconRepository {
 
-    companion object {
+    private companion object {
         /** Google Blue (#4285F4) — fallback seed color when extraction yields no result. */
-        private const val FALLBACK_SEED_COLOR: Int = 0xFF4285F4.toInt()
+        const val FALLBACK_SEED_COLOR: Int = 0xFF4285F4.toInt()
 
         /** Bitmap size (px) used for color extraction — balances accuracy and memory. */
-        private const val COLOR_EXTRACT_SIZE_PX = 256
+        const val COLOR_EXTRACT_SIZE_PX = 256
 
         /** Max bitmap dimension (px) before pixel quantization — caps the pixel array at ~64 KB. */
-        private const val QUANTIZE_BITMAP_MAX_SIZE = 128
+        const val QUANTIZE_BITMAP_MAX_SIZE = 128
 
         /** Maximum distinct colors extracted during quantization. */
-        private const val DEFAULT_MAX_QUANTIZE_COLORS = 128
+        const val DEFAULT_MAX_QUANTIZE_COLORS = 128
 
         /** Maximum entries in the icon LRU cache. */
-        private const val MAX_CACHE_ENTRIES = 50
+        const val MAX_CACHE_ENTRIES = 50
     }
 
     private val pm: PackageManager by lazy { context.packageManager }
@@ -117,7 +119,10 @@ class AppIconRepositoryImpl(
         val sessionId: String,
         val packageName: String,
         val userId: Int,
-        val iconSizePx: Int
+        val iconSizePx: Int,
+        val preferSystemIcon: Boolean,
+        val systemIconSourceKey: String?,
+        val apkPath: String?
     )
 
     /**
@@ -151,12 +156,34 @@ class AppIconRepositoryImpl(
         iconSizePx: Int,
         preferSystemIcon: Boolean
     ): Bitmap? {
-        val cacheKey = CacheKey(sessionId, packageName, userId, iconSizePx)
+        val rawEntityIconDrawable = entityToInstall.rawIconDrawable()
+        val apkPath = entityToInstall.apkPath()
+        val installedAppInfo = if (preferSystemIcon || rawEntityIconDrawable == null) {
+            getInstalledApplicationInfo(packageName)
+        } else {
+            null
+        }
+        val cacheKey = CacheKey(
+            sessionId = sessionId,
+            packageName = packageName,
+            userId = userId,
+            iconSizePx = iconSizePx,
+            preferSystemIcon = preferSystemIcon,
+            systemIconSourceKey = installedAppInfo?.let(AppIconCache::iconSourceKey),
+            apkPath = apkPath
+        )
 
         // Atomic get-or-create under Mutex; LAZY start avoids redundant I/O.
         val deferred = cacheMutex.withLock {
             iconCache.get(cacheKey) ?: repoScope.async(start = CoroutineStart.LAZY) {
-                loadIconInternal(packageName, entityToInstall, userId, iconSizePx, preferSystemIcon)
+                loadIconInternal(
+                    rawEntityIconDrawable = rawEntityIconDrawable,
+                    apkPath = apkPath,
+                    installedAppInfo = installedAppInfo,
+                    userId = userId,
+                    iconSizePx = iconSizePx,
+                    preferSystemIcon = preferSystemIcon
+                )
             }.also { iconCache.put(cacheKey, it) }
         }
 
@@ -265,28 +292,13 @@ class AppIconRepositoryImpl(
      * 2. Installed app icon via system launcher (fallback).
      */
     private suspend fun loadIconInternal(
-        packageName: String,
-        entityToInstall: AppEntity?,
+        rawEntityIconDrawable: Drawable?,
+        apkPath: String?,
+        installedAppInfo: ApplicationInfo?,
         userId: Int,
         iconSizePx: Int,
         preferSystemIcon: Boolean
     ): Bitmap? {
-        // Extract raw drawable depending on the entity type
-        val rawEntityIconDrawable = when (entityToInstall) {
-            is AppEntity.BaseEntity -> entityToInstall.icon
-            is AppEntity.ModuleEntity -> entityToInstall.icon
-            else -> null
-        }
-
-        // Only BaseEntity (APK) supports system loader fallback
-        val apkPath = ((entityToInstall as? AppEntity.BaseEntity)?.data as? DataEntity.FileEntity)?.path
-
-        val installedAppInfo = try {
-            pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-        } catch (_: PackageManager.NameNotFoundException) {
-            null
-        }
-
         // Modules generally won't have installedAppInfo or apkPath,
         // so they will naturally fall back to rawEntityIconDrawable.
         return if (preferSystemIcon) {
@@ -323,6 +335,36 @@ class AppIconRepositoryImpl(
             throw e
         } catch (e: Exception) {
             Timber.w(e, "Could not load themed icon from APK at path: %s", apkPath)
+            null
+        }
+    }
+
+    private fun AppEntity?.rawIconDrawable(): Drawable? {
+        return when (this) {
+            is AppEntity.BaseEntity -> icon
+            is AppEntity.ModuleEntity -> icon
+            else -> null
+        }
+    }
+
+    private fun AppEntity?.apkPath(): String? {
+        return ((this as? AppEntity.BaseEntity)?.data as? DataEntity.FileEntity)?.path
+    }
+
+    private fun getInstalledApplicationInfo(packageName: String): ApplicationInfo? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                pm.getApplicationInfo(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(
+                        PackageManager.GET_META_DATA.toLong() or PackageManager.MATCH_ARCHIVED_PACKAGES
+                    )
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            }
+        } catch (_: PackageManager.NameNotFoundException) {
             null
         }
     }

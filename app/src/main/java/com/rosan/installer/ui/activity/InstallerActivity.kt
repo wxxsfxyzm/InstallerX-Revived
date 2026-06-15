@@ -2,42 +2,43 @@
 // Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.ui.activity
 
+import android.Manifest
+import android.app.AppOpsManager
 import android.content.Intent
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageInstallerHidden
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.LaunchedEffect
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.rosan.installer.R
 import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.data.session.manager.InstallerSessionManager
 import com.rosan.installer.domain.device.model.PermissionType
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.device.provider.PermissionChecker
+import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionManager
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.preferences.ThemeState
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.framework.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
-import com.rosan.installer.ui.page.main.installer.InstallerPage
-import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.isPhoneDevice
-import com.rosan.installer.ui.util.requestPortraitOrientationOnPhoneSafely
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,8 +51,6 @@ import timber.log.Timber
 class InstallerActivity : ComponentActivity(), KoinComponent {
     companion object {
         private const val KEY_ID = "installer_id"
-        private const val ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL"
-        private const val ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS"
     }
 
     private val appSettingsRepo by inject<AppSettingsRepository>()
@@ -64,14 +63,31 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private var latestProgress: ProgressEntity = ProgressEntity.Ready
 
+    private val deviceCapabilityProvider: DeviceCapabilityProvider by inject()
     private val permissionChecker: PermissionChecker by inject()
     private lateinit var permissionRequester: PermissionRequester
 
     // Flag to track if the activity is stopped due to a permission request
     private var isRequestingPermission = false
+    private var unknownSourceSettingsLaunchedForFailure = false
+    private var pendingUnknownSourcePackageName: String? = null
+
+    private val unknownSourceSettingsLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val packageName = pendingUnknownSourcePackageName
+            pendingUnknownSourcePackageName = null
+            unknownSourceSettingsLaunchedForFailure = false
+
+            if (packageName != null && isUnknownSourceAllowed(packageName)) {
+                Timber.d("Unknown source permission granted for $packageName. Retrying install.")
+                session?.install(false)
+            } else {
+                Timber.d("Unknown source permission was not granted. Keeping installer in waiting state.")
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE) logIntentDetails("onNewIntent", intent)
+        if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE) logIntentDetails("onCreate", intent)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
@@ -119,8 +135,9 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             onGranted = {
                 Timber.d("All essential permissions are granted.")
                 when (intent.action) {
-                    ACTION_CONFIRM_INSTALL,
-                    ACTION_CONFIRM_PERMISSIONS -> resolveConfirm(intent)
+                    PackageInstallerHidden.ACTION_CONFIRM_INSTALL,
+                    PackageInstallerHidden.ACTION_CONFIRM_PERMISSIONS,
+                    PackageInstallerHidden.ACTION_CONFIRM_PRE_APPROVAL -> resolveConfirm(intent)
 
                     else -> {
                         Timber.d("onCreate: Dispatching resolveInstall")
@@ -142,7 +159,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                         this.toast(R.string.enable_storage_permission_hint)
                     }
                 }
-                // Finish the activity if permissions are not granted.
+                session?.close()
                 finish()
             }
         )
@@ -160,41 +177,42 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         if (AppConfig.isDebug && AppConfig.LEVEL == Level.UNSTABLE)
             logIntentDetails("onNewIntent", intent)
 
-        val isSystemConfirmAction = intent.action == ACTION_CONFIRM_INSTALL || intent.action == ACTION_CONFIRM_PERMISSIONS
+        val isSystemConfirmAction = intent.isSystemConfirmAction()
 
-        // Prevent re-initialization on Microsoft Edge, but allow system confirmation intents to pass through.
-        if (!isSystemConfirmAction && this.session != null && intent.flags.hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK)) {
-            Timber.w("onNewIntent was called with NEW_TASK, but an installer instance already exists. Ignoring re-initialization.")
-            super.onNewIntent(intent)
-            return
-        }
-
-        this.intent = intent
         super.onNewIntent(intent)
 
         if (isSystemConfirmAction) {
+            this.intent = intent
             val sysSessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
 
             if (sysSessionId != -1) {
+                val requestType = intent.confirmationRequestType()
                 // Route the system confirmation request to the currently active session if one exists.
                 // This bridges the gap between the suspended commit coroutine and the system UI request.
                 val currentSession = this.session
                 if (currentSession != null) {
                     Timber.d("onNewIntent: Sending confirm request to ACTIVE session [id=${currentSession.id}]")
-                    currentSession.resolveConfirmInstall(this, sysSessionId)
+                    currentSession.resolveConfirmInstall(this, sysSessionId, requestType)
                 } else {
                     // Fallback: Restore or create a new session if this confirmation was triggered
                     // without an active foreground installation process (e.g., silent background trigger).
                     Timber.d("onNewIntent: No active session found. Restoring for system confirm.")
                     restoreInstaller()
-                    session?.resolveConfirmInstall(this, sysSessionId)
+                    session?.resolveConfirmInstall(this, sysSessionId, requestType)
                 }
             } else {
-                Timber.e("onNewIntent: CONFIRM_INSTALL intent missing EXTRA_SESSION_ID")
+                Timber.e("onNewIntent: ${intent.action} intent missing EXTRA_SESSION_ID")
                 finish()
             }
         } else {
+            if (shouldDeferInstallIntent()) {
+                sessionManager.enqueueForegroundInstall(Intent(intent).apply { removeExtra(KEY_ID) })
+                Timber.d("onNewIntent: Deferred foreground install intent.")
+                return
+            }
+
             // Proceed with normal intent resolution for standard APK installations.
+            this.intent = intent
             restoreInstaller()
             Timber.d("onNewIntent: Dispatching resolveInstall")
             session?.resolveInstall(this)
@@ -287,9 +305,12 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 session.progress.collect { progress ->
                     Timber.d("[id=${session.id}] Activity collected progress: ${progress::class.simpleName}")
                     latestProgress = progress
+                    handleUnknownSourceInstallPermission(progress)
                     if (progress is ProgressEntity.Finish) {
                         Timber.d("[id=${session.id}] Finish progress detected, finishing activity.")
-                        if (!this@InstallerActivity.isFinishing) this@InstallerActivity.finish()
+                        if (!launchNextPendingInstall() && !this@InstallerActivity.isFinishing) {
+                            this@InstallerActivity.finish()
+                        }
                     }
                 }
             }
@@ -297,6 +318,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                 session.background.collect { isBackground ->
                     Timber.d("[id=${session.id}] Activity collected background: $isBackground")
                     if (isBackground) {
+                        if (launchSelfUnknownSourceSettingsIfNeeded()) {
+                            Timber.d("[id=${session.id}] Background request ignored while opening install source settings.")
+                            session.background(false)
+                            return@collect
+                        }
+                        if (launchNextPendingInstall()) {
+                            Timber.d("[id=${session.id}] Background mode released foreground slot for deferred install.")
+                            return@collect
+                        }
                         Timber.d("[id=${session.id}] Background mode detected, finishing activity.")
                         this@InstallerActivity.finish()
                     }
@@ -305,6 +335,37 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
     }
 
+    private fun shouldDeferInstallIntent(): Boolean {
+        val hasCurrentSession = session != null
+        return hasCurrentSession && latestProgress.isActiveInstallProgress()
+    }
+
+    private fun launchNextPendingInstall(): Boolean {
+        val nextIntent = sessionManager.takeNextForegroundInstall() ?: return false
+        Timber.d("Launching deferred foreground install intent.")
+        intent = nextIntent
+        restoreInstaller()
+        checkPermissionsAndStartProcess()
+        return true
+    }
+
+    private fun ProgressEntity.isActiveInstallProgress(): Boolean =
+        this is ProgressEntity.InstallResolving ||
+                this is ProgressEntity.InstallResolvedFailed ||
+                this is ProgressEntity.InstallResolveSuccess ||
+                this is ProgressEntity.InstallPreparing ||
+                this is ProgressEntity.InstallAnalysing ||
+                this is ProgressEntity.InstallAnalysedFailed ||
+                this is ProgressEntity.InstallAnalysedUnsupported ||
+                this is ProgressEntity.InstallAnalysedSuccess ||
+                this is ProgressEntity.InstallConfirming ||
+                this is ProgressEntity.InstallWaitingUnknownSource ||
+                this is ProgressEntity.Installing ||
+                this is ProgressEntity.InstallCompleted ||
+                this is ProgressEntity.InstallFailed ||
+                this is ProgressEntity.InstallSuccess ||
+                this is ProgressEntity.InstallingModule
+
     private fun resolveConfirm(intent: Intent) {
         val sessionId = intent.getIntExtra(
             PackageInstaller.EXTRA_SESSION_ID,
@@ -312,21 +373,122 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         )
 
         if (sessionId == -1) {
-            Timber.e("CONFIRM_INSTALL intent missing EXTRA_SESSION_ID")
+            Timber.e("${intent.action} intent missing EXTRA_SESSION_ID")
             finish()
             return
         }
 
-        Timber.d("onCreate: Dispatching resolveConfirmInstall for session $sessionId")
-        session?.resolveConfirmInstall(this, sessionId)
+        val requestType = intent.confirmationRequestType()
+        Timber.d("onCreate: Dispatching resolveConfirmInstall for session $sessionId, type=$requestType")
+        session?.resolveConfirmInstall(this, sessionId, requestType)
     }
+
+    private fun handleUnknownSourceInstallPermission(progress: ProgressEntity) {
+        if (progress !is ProgressEntity.InstallWaitingUnknownSource) {
+            unknownSourceSettingsLaunchedForFailure = false
+            return
+        }
+
+        if (unknownSourceSettingsLaunchedForFailure) return
+
+        val session = session ?: return
+
+        val packageName = if (session.config.authorizer == Authorizer.None &&
+            !deviceCapabilityProvider.isSystemApp &&
+            !packageManager.canRequestPackageInstalls()
+        ) {
+            this.packageName
+        } else {
+            session.config.initiatorPackageName
+        } ?: return
+
+        unknownSourceSettingsLaunchedForFailure = true
+        launchUnknownSourceSettings(packageName)
+    }
+
+    fun launchUnknownSourceSettingsForCurrentSession(): Boolean {
+        val session = session ?: return false
+        val packageName = if (session.config.authorizer == Authorizer.None &&
+            !deviceCapabilityProvider.isSystemApp &&
+            !packageManager.canRequestPackageInstalls()
+        ) {
+            this.packageName
+        } else {
+            session.config.initiatorPackageName
+        } ?: return false
+
+        launchUnknownSourceSettings(packageName)
+        return true
+    }
+
+    private fun launchSelfUnknownSourceSettingsIfNeeded(): Boolean {
+        val session = session ?: return false
+        if (session.config.authorizer != Authorizer.None) return false
+        if (deviceCapabilityProvider.isSystemApp) return false
+        if (packageManager.canRequestPackageInstalls()) return false
+
+        return launchUnknownSourceSettingsForCurrentSession()
+    }
+
+    private fun launchUnknownSourceSettings(packageName: String) {
+        val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+            .setData("package:$packageName".toUri())
+
+        pendingUnknownSourcePackageName = packageName
+        isRequestingPermission = true
+        runCatching {
+            unknownSourceSettingsLauncher.launch(intent)
+        }.onFailure { error ->
+            pendingUnknownSourcePackageName = null
+            isRequestingPermission = false
+            Timber.e(error, "Failed to launch unknown source settings for $packageName")
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun isUnknownSourceAllowed(packageName: String): Boolean {
+        if (packageName == this.packageName) {
+            return packageManager.canRequestPackageInstalls()
+        }
+
+        val uid = runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageUid(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                packageManager.getPackageUid(packageName, 0)
+            }
+        }.getOrNull() ?: return false
+
+        val appOps = getSystemService(AppOpsManager::class.java) ?: return false
+        val op = AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES)
+            ?: return false
+
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            appOps.unsafeCheckOpNoThrow(op, uid, packageName)
+        } else {
+            appOps.checkOpNoThrow(op, uid, packageName)
+        }
+        return mode == AppOpsManager.MODE_ALLOWED
+    }
+
+    private fun Intent.isSystemConfirmAction(): Boolean =
+        action == PackageInstallerHidden.ACTION_CONFIRM_INSTALL ||
+                action == PackageInstallerHidden.ACTION_CONFIRM_PERMISSIONS ||
+                action == PackageInstallerHidden.ACTION_CONFIRM_PRE_APPROVAL
+
+    private fun Intent.confirmationRequestType(): ConfirmationRequestType =
+        when (action) {
+            PackageInstallerHidden.ACTION_CONFIRM_PERMISSIONS -> ConfirmationRequestType.PERMISSIONS
+            PackageInstallerHidden.ACTION_CONFIRM_PRE_APPROVAL -> ConfirmationRequestType.PRE_APPROVAL
+            else -> ConfirmationRequestType.INSTALL
+        }
 
 
     private fun showContent() {
         setContent {
-            val uiState by themeStateProvider.themeStateFlow.collectAsState(initial = ThemeState())
-            if (!uiState.isLoaded) return@setContent
-
             val session = session ?: return@setContent
             val background by session.background.collectAsState(false)
             val progress by session.progress.collectAsState(ProgressEntity.Ready)
@@ -334,28 +496,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
                 return@setContent
 
-            // Force portrait on phones only when UI is actually rendered
-            LaunchedEffect(isPhoneDevice) {
-                requestPortraitOrientationOnPhoneSafely(isPhoneDevice)
-            }
-
-            InstallerTheme(
-                useMiuix = uiState.useMiuix,
-                themeMode = uiState.themeMode,
-                paletteStyle = uiState.paletteStyle,
-                colorSpec = uiState.colorSpec,
-                useDynamicColor = uiState.useDynamicColor,
-                useMiuixMonet = uiState.useMiuixMonet,
-                seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor)
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (uiState.useMiuix) {
-                        MiuixInstallerPage(session)
-                    } else {
-                        InstallerPage(session)
-                    }
-                }
-            }
+            InstallerActivityContent(session = session, themeStateProvider = themeStateProvider)
         }
     }
 

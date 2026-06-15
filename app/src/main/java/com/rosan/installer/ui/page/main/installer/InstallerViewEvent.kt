@@ -24,4 +24,9 @@ sealed interface InstallerViewEvent {
      * Share a file using its original content URI.
      */
     data class ShareFile(val uriString: String, val mimeType: String) : InstallerViewEvent
+
+    /**
+     * Open Android settings for allowing the active install source.
+     */
+    data object RequestUnknownSourcePermission : InstallerViewEvent
 }

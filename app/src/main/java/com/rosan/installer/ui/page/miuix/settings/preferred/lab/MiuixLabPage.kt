@@ -76,8 +76,8 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
@@ -284,7 +284,7 @@ fun MiuixLabPage(
                 }
             }
             // item { SmallTitle(stringResource(R.string.lab_ui_settings)) }
-            /*item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
+            item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
             item {
                 Card(
                     modifier = Modifier
@@ -292,19 +292,17 @@ fun MiuixLabPage(
                         .padding(bottom = 12.dp)
                 ) {
                     MiuixSwitchWidget(
-                        title = stringResource(R.string.lab_tap_icon_to_share),
-                        description = stringResource(R.string.lab_tap_icon_to_share_desc),
-                        checked = uiState.labTapIconToShare,
-                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeTapIconToShare(it)) }
-                    )
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.lab_set_install_requester),
-                        description = stringResource(R.string.lab_set_install_requester_desc),
-                        checked = uiState.labSetInstallRequester,
-                        onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeSetInstallRequester(it)) }
+                        title = stringResource(R.string.lab_respect_platform_install_policy),
+                        description = stringResource(R.string.lab_respect_platform_install_policy_desc),
+                        checked = uiState.labRespectPlatformInstallPolicy,
+                        onCheckedChange = {
+                            viewModel.dispatch(
+                                LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
+                            )
+                        }
                     )
                 }
-            }*/
+            }
             if (AppConfig.isInternetAccessEnabled) {
                 item { SmallTitle(stringResource(R.string.internet_access_enabled)) }
                 item {

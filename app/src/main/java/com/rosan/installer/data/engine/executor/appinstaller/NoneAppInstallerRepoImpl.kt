@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
-package com.rosan.installer.data.engine.executor.appInstaller
+package com.rosan.installer.data.engine.executor.appinstaller
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
+import android.content.pm.VersionedPackage
 import android.os.Build
-import android.provider.Settings
-import androidx.core.net.toUri
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.engine.exception.InstallException
-import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
+import com.rosan.installer.domain.engine.model.install.InstallEntity
+import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.engine.model.install.sourcePath
+import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
@@ -40,6 +40,8 @@ class NoneAppInstallerRepoImpl(
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
+        metadata: InstallMetadata,
+        respectPlatformInstallPolicy: Boolean,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
@@ -47,13 +49,8 @@ class NoneAppInstallerRepoImpl(
         val allowInstallWithoutUserAction = config.allowInstallWithoutUserAction
         val result = runCatching {
             if (!context.packageManager.canRequestPackageInstalls()) {
-                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                    data = "package:${context.packageName}".toUri()
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
                 throw InstallException(
-                    InstallErrorType.BLACKLISTED_PACKAGE,
+                    InstallErrorType.MISSING_INSTALL_PERMISSION,
                     "Please make sure you have granted \"Install unknown apps\" permission!"
                 )
             }
@@ -155,9 +152,16 @@ class NoneAppInstallerRepoImpl(
             // Instantiate the receiver
             val receiver = LocalIntentReceiver(reflect)
 
-            // Request uninstallation using the standard API
-            // This will trigger a system dialog asking the user to confirm uninstallation
-            packageInstaller.uninstall(packageName, receiver.getIntentSender())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && config.uninstallFlags != 0) {
+                packageInstaller.uninstall(
+                    VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    config.uninstallFlags,
+                    receiver.getIntentSender()
+                )
+            } else {
+                // This will trigger a system dialog asking the user to confirm uninstallation.
+                packageInstaller.uninstall(packageName, receiver.getIntentSender())
+            }
 
             // Block and wait for the result verification
             PackageManagerUtil.uninstallResultVerify(context, receiver)

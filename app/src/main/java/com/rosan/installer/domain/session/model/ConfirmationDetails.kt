@@ -12,6 +12,8 @@ data class ConfirmationDetails(
     // A generic label for the related app (either the update owner or the initiator)
     val sourceAppLabel: CharSequence? = null,
     val installerPackageName: String? = null,
+    val requestType: ConfirmationRequestType = ConfirmationRequestType.INSTALL,
+    val isPreApprovalRequested: Boolean = false,
 
     // Flag to determine if this confirmation belongs to our own active installation
     val isSelfSession: Boolean = false,

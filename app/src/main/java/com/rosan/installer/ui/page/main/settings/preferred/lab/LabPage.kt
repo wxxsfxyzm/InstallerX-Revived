@@ -4,7 +4,6 @@
 
 package com.rosan.installer.ui.page.main.settings.preferred.lab
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -79,6 +78,7 @@ import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -273,40 +273,23 @@ fun LabPage(
                 }
             }
             item {
-                /*SegmentedColumn(
+                SegmentedColumn(
                     title = stringResource(R.string.lab_unstable_features)
                 ) {
                     item {
                         SwitchWidget(
-                            icon = AppIcons.Share,
-                            title = stringResource(R.string.lab_tap_icon_to_share),
-                            description = stringResource(R.string.lab_tap_icon_to_share_desc),
-                            checked = uiState.labTapIconToShare,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    LabSettingsAction.LabChangeTapIconToShare(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                    }
-                    item {
-                        SwitchWidget(
                             icon = AppIcons.InstallRequester,
-                            title = stringResource(R.string.lab_set_install_requester),
-                            description = stringResource(R.string.lab_set_install_requester_desc),
-                            checked = uiState.labSetInstallRequester,
+                            title = stringResource(R.string.lab_respect_platform_install_policy),
+                            description = stringResource(R.string.lab_respect_platform_install_policy_desc),
+                            checked = uiState.labRespectPlatformInstallPolicy,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    LabSettingsAction.LabChangeSetInstallRequester(
-                                        it
-                                    )
+                                    LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
                                 )
                             }
                         )
                     }
-                }*/
+                }
             }
 
             if (AppConfig.isInternetAccessEnabled)
@@ -392,11 +375,7 @@ private fun SmartAuthorizerBottomSheet(
 
     fun toggleCandidate(candidate: SmartAuthorizerCandidate, enabled: Boolean) {
         if (!enabled && candidate.enabled && sheetCandidates.count { it.enabled } <= 1) {
-            Toast.makeText(
-                context,
-                context.getString(R.string.config_smart_authorizer_must_choose_one),
-                Toast.LENGTH_SHORT
-            ).show()
+            context.toast(R.string.config_smart_authorizer_must_choose_one)
             return
         }
         updateCandidates(sheetCandidates.toggle(candidate.authorizer, enabled))

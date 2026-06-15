@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
 import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.ui.icons.AppMiuixIcons
@@ -59,6 +60,9 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallFailedC
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallPrepareContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallSuccessContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallingContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UnarchiveErrorContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UnarchivePrepareContent
+import com.rosan.installer.ui.page.miuix.installer.sheetcontent.unarchiveErrorTitle
 import com.rosan.installer.ui.page.miuix.widgets.DropdownItem
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.theme.InstallerMiuixTheme
@@ -134,6 +138,7 @@ fun MiuixInstallerPage(
 
     val sheetTitle = when (stage) {
         is InstallerStage.Preparing -> stringResource(R.string.installer_preparing)
+        is InstallerStage.InstallWaitingUnknownSource -> stringResource(R.string.installer_waiting_unknown_source)
         is InstallerStage.InstallChoice -> sourceType.getSupportTitle()
         is InstallerStage.InstallExtendedMenu -> stringResource(R.string.config_label_install_options)
         is InstallerStage.InstallPrepare -> when {
@@ -151,15 +156,27 @@ fun MiuixInstallerPage(
             stringResource(R.string.installer_installing_module)
         }
 
-        is InstallerStage.InstallConfirm -> stringResource(R.string.installer_install_confirm)
+        is InstallerStage.InstallConfirm -> stringResource(
+            when (stage.requestType) {
+                ConfirmationRequestType.PRE_APPROVAL -> R.string.installer_install_pre_approval
+                ConfirmationRequestType.PERMISSIONS -> R.string.installer_permissions_confirm
+                ConfirmationRequestType.INSTALL -> R.string.installer_install_confirm
+            }
+        )
         is InstallerStage.Installing -> stringResource(R.string.installer_installing)
         is InstallerStage.InstallCompleted -> stringResource(R.string.installer_install_success)
         is InstallerStage.InstallSuccess -> stringResource(R.string.installer_install_success)
         is InstallerStage.InstallFailed -> stringResource(R.string.installer_install_failed)
-        is InstallerStage.UninstallReady -> stringResource(R.string.installer_uninstall_app)
+        is InstallerStage.UninstallReady -> stringResource(
+            if (uiState.uiUninstallInfo?.isArchived == true) R.string.uninstall_archive else R.string.installer_uninstall_app
+        )
         is InstallerStage.Uninstalling -> stringResource(R.string.installer_uninstalling)
         is InstallerStage.UninstallSuccess -> stringResource(R.string.uninstall_success_message)
         is InstallerStage.UninstallFailed -> stringResource(R.string.uninstall_failed_message)
+        is InstallerStage.UnarchiveReady -> stringResource(R.string.unarchive_restore)
+        is InstallerStage.Unarchiving -> stringResource(R.string.unarchive_restoring)
+        is InstallerStage.UnarchiveError -> unarchiveErrorTitle(stage.status, stage.installerLabel)
+        is InstallerStage.UnarchiveFailed -> stringResource(R.string.unarchive_failed)
         is InstallerStage.AnalyseFailed -> stringResource(R.string.installer_analyse_failed)
         is InstallerStage.ResolveFailed -> stringResource(R.string.installer_resolve_failed)
         is InstallerStage.Resolving -> stringResource(R.string.installer_resolving)
@@ -197,7 +214,8 @@ fun MiuixInstallerPage(
                     miuixSheetColorDark else miuixSheetColorLight,
                 startAction = {
                     when (stage) {
-                        is InstallerStage.Preparing -> {
+                        is InstallerStage.Preparing,
+                        is InstallerStage.InstallWaitingUnknownSource -> {
                             MiuixBackButton(
                                 icon = AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
@@ -247,6 +265,9 @@ fun MiuixInstallerPage(
                         is InstallerStage.UninstallReady,
                         is InstallerStage.UninstallSuccess,
                         is InstallerStage.UninstallFailed,
+                        is InstallerStage.UnarchiveReady,
+                        is InstallerStage.UnarchiveError,
+                        is InstallerStage.UnarchiveFailed,
                         is InstallerStage.AnalyseFailed,
                         is InstallerStage.ResolveFailed -> {
                             MiuixBackButton(
@@ -366,10 +387,13 @@ fun MiuixInstallerPage(
                             val isUninstall =
                                 stage is InstallerStage.UninstallReady || stage is InstallerStage.UninstallResolveFailed ||
                                         stage is InstallerStage.UninstallSuccess || stage is InstallerStage.UninstallFailed
+                            val isUnarchive =
+                                stage is InstallerStage.UnarchiveReady || stage is InstallerStage.UnarchiveError ||
+                                        stage is InstallerStage.UnarchiveFailed
 
                             // 1. If it's a module install, OR uninstall OR the "disable notification" setting is on -> Close
                             // 2. Otherwise (including Preparing, Standard APK install) -> Background
-                            val action = if (isModule || disableNotif || isUninstall) {
+                            val action = if (isModule || disableNotif || isUninstall || isUnarchive) {
                                 InstallerViewAction.Close
                             } else {
                                 InstallerViewAction.Background
@@ -460,6 +484,17 @@ fun MiuixInstallerPage(
                                         viewModel.dispatch(InstallerViewAction.Background)
                                     }
                                 }
+                            )
+                        }
+
+                        is InstallerStage.InstallWaitingUnknownSource -> {
+                            InstallPreparingContent(
+                                viewModel = viewModel,
+                                onBackground = {
+                                    viewModel.dispatch(InstallerViewAction.RequestUnknownSourcePermission)
+                                },
+                                descriptionRes = R.string.installer_waiting_unknown_source_desc,
+                                buttonTextRes = R.string.suggestion_allow_unknown_source
                             )
                         }
 
@@ -591,6 +626,36 @@ fun MiuixInstallerPage(
                         is InstallerStage.UninstallFailed -> {
                             UninstallFailedContent(
                                 viewModel = viewModel,
+                                onClose = closeSheet
+                            )
+                        }
+
+                        is InstallerStage.UnarchiveReady -> {
+                            UnarchivePrepareContent(
+                                appLabel = stage.appLabel,
+                                installerLabel = stage.installerLabel,
+                                onCancel = closeSheet,
+                                onRestore = { viewModel.dispatch(InstallerViewAction.StartUnarchive) }
+                            )
+                        }
+
+                        is InstallerStage.Unarchiving -> {
+                            LoadingContent(statusText = stringResource(R.string.unarchive_restoring))
+                        }
+
+                        is InstallerStage.UnarchiveError -> {
+                            UnarchiveErrorContent(
+                                status = stage.status,
+                                requiredBytes = stage.requiredBytes,
+                                installerLabel = stage.installerLabel,
+                                onClose = closeSheet,
+                                onPrimaryAction = { viewModel.dispatch(InstallerViewAction.OpenUnarchiveErrorAction) }
+                            )
+                        }
+
+                        is InstallerStage.UnarchiveFailed -> {
+                            NonInstallFailedContent(
+                                error = error,
                                 onClose = closeSheet
                             )
                         }

@@ -10,5 +10,6 @@ data class InstallEntity(
     val sharedUserId: String? = null,
     val arch: Architecture? = null,
     val data: DataEntity,
-    val sourceType: DataType
+    val sourceType: DataType,
+    val installLocation: Int? = null
 )

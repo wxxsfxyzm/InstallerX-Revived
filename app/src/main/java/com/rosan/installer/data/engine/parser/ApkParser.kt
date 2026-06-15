@@ -209,6 +209,7 @@ class ApkParser(
         var versionCode: Long = -1
         var versionName = ""
         var minOsdkVersion: String? = null
+        var installLocation: Int? = null
         var label: String? = null
         var icon: Drawable? = null
         var roundIcon: Drawable? = null
@@ -258,6 +259,11 @@ class ApkParser(
                                     manifestParser.getAndroidAttributeResourceValue("versionName", android.R.attr.versionName),
                                     manifestParser.getAndroidAttributeValue("versionName", android.R.attr.versionName)
                                 ) ?: versionName
+                                installLocation = manifestParser.getAndroidAttributeIntValue(
+                                    "installLocation",
+                                    android.R.attr.installLocation,
+                                    Int.MIN_VALUE
+                                ).takeIf { it != Int.MIN_VALUE }
                             }
 
                             "uses-sdk" -> {
@@ -391,7 +397,8 @@ class ApkParser(
             permissions = permissions,
             sourceType = extra.dataType,
             signatureHash = signatureHash,
-            signatureInfo = signatureInfo
+            signatureInfo = signatureInfo,
+            installLocation = installLocation
         ) else {
             val metadata = splitName.parseSplitMetadata()
             AppEntity.SplitEntity(

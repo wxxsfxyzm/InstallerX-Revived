@@ -6,11 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.net.Uri
-import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.system.Os
 import android.system.OsConstants
+import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.session.util.copyToWithProgress
@@ -84,12 +84,7 @@ class SourceResolver(
 
                 // 2. Fallback to Stream/ClipData if no URL found (Handles file sharing, including text files like logcat.txt)
                 if (uris.isEmpty()) {
-                    val streamUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                    }
+                    val streamUri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
 
                     if (streamUri != null) uris.add(streamUri)
 
@@ -124,12 +119,7 @@ class SourceResolver(
             }
 
             Intent.ACTION_SEND_MULTIPLE -> {
-                val streams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
-                }
+                val streams = IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
                 streams?.filterNotNull()?.let { uris.addAll(it) }
 
                 if (uris.isEmpty()) {

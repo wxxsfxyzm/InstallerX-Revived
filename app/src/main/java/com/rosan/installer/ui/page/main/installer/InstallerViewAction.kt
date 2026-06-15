@@ -34,11 +34,14 @@ sealed interface InstallerViewAction {
      * @see com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl.Action.Install
      */
     data class Install(val triggerAuth: Boolean) : InstallerViewAction
+    data object RequestUnknownSourcePermission : InstallerViewAction
     data object Background : InstallerViewAction
     data object Cancel : InstallerViewAction
     data class Reboot(val reason: String) : InstallerViewAction
 
     data object Uninstall : InstallerViewAction
+    data object StartUnarchive : InstallerViewAction
+    data object OpenUnarchiveErrorAction : InstallerViewAction
 
     data object ShowMiuixSheetRightActionSettings : InstallerViewAction
     data object HideMiuixSheetRightActionSettings : InstallerViewAction

@@ -593,6 +593,14 @@ class DefaultPrivilegedService private constructor(
 
         var isUpdate = false
         var isOwnershipConflict = false
+        val isPreApprovalRequested = runCatching {
+            reflect.invoke<Boolean>(
+                sessionInfo,
+                "isPreApprovalRequested",
+                sessionInfo::class.java,
+                emptyArray()
+            ) == true
+        }.getOrDefault(false)
         var sourceAppLabel: CharSequence? = null
 
         if (packageName.isNotEmpty()) {
@@ -649,6 +657,7 @@ class DefaultPrivilegedService private constructor(
             putString("installerPackageName", sessionInfo.installerPackageName)
             putBoolean("isUpdate", isUpdate)
             putBoolean("isOwnershipConflict", isOwnershipConflict)
+            putBoolean("isPreApprovalRequested", isPreApprovalRequested)
 
             sourceAppLabel?.let { putCharSequence("sourceAppLabel", it) }
 

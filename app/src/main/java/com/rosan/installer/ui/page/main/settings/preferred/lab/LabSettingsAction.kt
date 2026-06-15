@@ -13,12 +13,13 @@ sealed interface LabSettingsAction {
     data class LabChangeRootImplementation(val implementation: RootMode) : LabSettingsAction
     data class LabChangeHttpProfile(val profile: HttpProfile) : LabSettingsAction
     data class LabChangeHttpSaveFile(val enable: Boolean) : LabSettingsAction
-    data class LabChangeTapIconToShare(val enable: Boolean) : LabSettingsAction
     data class LabChangeAllowInstallWithoutUserAction(val enable: Boolean) : LabSettingsAction
+    data class LabChangeRespectPlatformInstallPolicy(val enable: Boolean) : LabSettingsAction
     data class LabChangeTryMultipleAuthorizersOnInstall(val enable: Boolean) : LabSettingsAction
     data class LabChangeSmartAuthorizerCandidates(
         val candidates: List<SmartAuthorizerCandidate>
     ) : LabSettingsAction
+
     data class LabChangeGithubUpdateChannel(val channel: GithubUpdateChannel) : LabSettingsAction
     data class LabChangeCustomGithubProxyUrl(val url: String) : LabSettingsAction
 }

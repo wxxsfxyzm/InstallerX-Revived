@@ -54,7 +54,8 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 @Composable
 fun uninstallInfoDialog(
     viewModel: InstallerViewModel,
-    onTitleExtraClick: () -> Unit = {}
+    onTitleExtraClick: () -> Unit = {},
+    showTitleExtra: Boolean = true
 ): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val appInfo = uiState.uiUninstallInfo ?: return DialogParams()
@@ -97,7 +98,7 @@ fun uninstallInfoDialog(
                     modifier = Modifier.basicMarquee()
                 )
                 AnimatedVisibility(
-                    visible = stage == InstallerStage.UninstallReady,
+                    visible = showTitleExtra && stage == InstallerStage.UninstallReady,
                     enter = fadeIn() + slideInHorizontally { it },
                     exit = fadeOut() + slideOutHorizontally { it }
                 ) {

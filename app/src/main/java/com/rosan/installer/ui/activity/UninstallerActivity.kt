@@ -8,27 +8,16 @@ import android.os.PowerManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import com.rosan.installer.R
-import com.rosan.installer.data.session.manager.InstallerSessionManager
 import com.rosan.installer.domain.device.model.PermissionType
 import com.rosan.installer.domain.device.provider.PermissionChecker
 import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.repository.InstallerSessionManager
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
-import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.framework.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
-import com.rosan.installer.ui.page.main.installer.InstallerPage
-import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.isPhoneDevice
-import com.rosan.installer.ui.util.requestPortraitOrientationOnPhoneSafely
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +37,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
     private val sessionManager by inject<InstallerSessionManager>()
     private var session: InstallerSessionRepository? = null
     private var job: Job? = null
+    private var latestProgress: ProgressEntity = ProgressEntity.Ready
 
     private val permissionChecker: PermissionChecker by inject()
     private lateinit var permissionRequester: PermissionRequester
@@ -67,39 +57,28 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
             isRequestingPermission = true
         }
 
-        val sessionId = savedInstanceState?.getString(KEY_ID)
-        session = sessionManager.getOrCreate(sessionId)
-
-        // Start the process only if it's a fresh launch, not a configuration change
         if (savedInstanceState == null) {
-            var packageName: String?
-            // First, try to get it from our custom extra (for internal calls)
-            packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME)
-
-            // If not found, try to get it from the intent data (for system calls)
-            if (packageName.isNullOrBlank()) {
-                val action = intent.action
-                if (action == @Suppress("DEPRECATION") Intent.ACTION_UNINSTALL_PACKAGE || action == Intent.ACTION_DELETE) {
-                    intent.data?.schemeSpecificPart?.let {
-                        packageName = it
-                    }
-                }
-            }
-
-            if (packageName.isNullOrBlank()) {
-                Timber.e("UninstallerActivity started without a package name.")
-                session?.close()
-                this.finish()
-                return
-            }
-
-            Timber.d("Target package to uninstall: $packageName")
-            // Trigger the uninstall resolution process
-            requestPermissionsAndProceed(packageName)
+            startUninstallIntent(intent)
+            return
         }
 
+        val sessionId = savedInstanceState.getString(KEY_ID)
+        session = sessionManager.getOrCreate(sessionId)
         startCollectors()
         showContent()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Timber.d("UninstallerActivity onNewIntent.")
+
+        if (shouldDeferUninstallIntent()) {
+            sessionManager.enqueueForegroundUninstall(Intent(intent).apply { removeExtra(KEY_ID) })
+            Timber.d("UninstallerActivity deferred foreground uninstall intent.")
+            return
+        }
+
+        startUninstallIntent(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -165,9 +144,54 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                         this.toast(R.string.enable_storage_permission_hint)
                     }
                 }
+                session?.close()
                 finish()
             }
         )
+    }
+
+    private fun startUninstallIntent(intent: Intent) {
+        this.intent = intent
+        job?.cancel()
+        val newSession = sessionManager.getOrCreate(null)
+        newSession.background(false)
+        session = newSession
+        intent.putExtra(KEY_ID, newSession.id)
+        latestProgress = ProgressEntity.Ready
+
+        val packageName = intent.uninstallPackageName()
+        if (packageName.isNullOrBlank()) {
+            Timber.e("UninstallerActivity started without a package name.")
+            newSession.close()
+            finish()
+            return
+        }
+
+        startCollectors()
+        showContent()
+        Timber.d("Target package to uninstall: $packageName")
+        requestPermissionsAndProceed(packageName)
+    }
+
+    private fun Intent.uninstallPackageName(): String? {
+        getStringExtra(EXTRA_PACKAGE_NAME)?.let { if (it.isNotBlank()) return it }
+
+        val isUninstallAction =
+            action == @Suppress("DEPRECATION") Intent.ACTION_UNINSTALL_PACKAGE ||
+                    action == Intent.ACTION_DELETE
+        if (!isUninstallAction) return null
+
+        return data?.schemeSpecificPart
+    }
+
+    private fun shouldDeferUninstallIntent(): Boolean =
+        session != null && latestProgress.isForegroundUninstallProgress()
+
+    private fun launchNextPendingUninstall(): Boolean {
+        val nextIntent = sessionManager.takeNextForegroundUninstall() ?: return false
+        Timber.d("Launching deferred foreground uninstall intent.")
+        startUninstallIntent(nextIntent)
+        return true
     }
 
     private fun startCollectors() {
@@ -176,50 +200,36 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         job = scope.launch {
             session?.progress?.collect { progress ->
                 Timber.d("[id=${session?.id}] Activity collected progress: ${progress::class.simpleName}")
+                latestProgress = progress
                 // Finish the activity on final states
                 if (progress is ProgressEntity.Finish) {
-                    if (!this@UninstallerActivity.isFinishing) this@UninstallerActivity.finish()
+                    if (!launchNextPendingUninstall() && !this@UninstallerActivity.isFinishing) {
+                        this@UninstallerActivity.finish()
+                    }
                 }
             }
         }
     }
 
+    private fun ProgressEntity.isForegroundUninstallProgress(): Boolean =
+        this is ProgressEntity.UninstallResolving ||
+                this is ProgressEntity.UninstallReady ||
+                this is ProgressEntity.Uninstalling ||
+                this is ProgressEntity.UninstallSuccess ||
+                this is ProgressEntity.UninstallFailed ||
+                this is ProgressEntity.UninstallResolveFailed
+
     private fun showContent() {
         setContent {
-            val uiState by themeStateProvider.themeStateFlow.collectAsState(initial = ThemeState())
-            if (!uiState.isLoaded) return@setContent
-
             val currentSession = session
             if (currentSession == null) {
-                // If session is null, we can't proceed.
                 LaunchedEffect(Unit) {
                     finish()
                 }
                 return@setContent
             }
 
-            // Force portrait on phones only when UI is actually rendered
-            LaunchedEffect(isPhoneDevice) {
-                requestPortraitOrientationOnPhoneSafely(isPhoneDevice)
-            }
-
-            InstallerTheme(
-                useMiuix = uiState.useMiuix,
-                themeMode = uiState.themeMode,
-                paletteStyle = uiState.paletteStyle,
-                colorSpec = uiState.colorSpec,
-                useDynamicColor = uiState.useDynamicColor,
-                useMiuixMonet = uiState.useMiuixMonet,
-                seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor)
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (uiState.useMiuix) {
-                        MiuixInstallerPage(currentSession)
-                    } else {
-                        InstallerPage(currentSession)
-                    }
-                }
-            }
+            InstallerActivityContent(session = currentSession, themeStateProvider = themeStateProvider)
         }
     }
 }

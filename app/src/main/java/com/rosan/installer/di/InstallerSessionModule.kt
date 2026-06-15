@@ -2,10 +2,13 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.di
 
-import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.data.session.manager.InstallerSessionManagerImpl
 import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.data.session.resolver.ConfigResolver
+import com.rosan.installer.data.session.resolver.UnarchiveResolver
+import com.rosan.installer.data.session.resolver.UninstallResolver
 import com.rosan.installer.domain.notification.SessionNotifier
+import com.rosan.installer.domain.session.repository.InstallerSessionManager
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.framework.notification.SessionNotifierImpl
 import org.koin.core.module.dsl.bind
@@ -14,7 +17,9 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val installerModule = module {
-    singleOf(::InstallerSessionManager)
+    singleOf(::InstallerSessionManagerImpl) {
+        bind<InstallerSessionManager>()
+    }
 
     factoryOf(::SessionNotifierImpl) { bind<SessionNotifier>() }
     factory<InstallerSessionRepository> { (id: String, onClose: () -> Unit) ->
@@ -24,4 +29,6 @@ val installerModule = module {
         )
     }
     factoryOf(::ConfigResolver)
+    factoryOf(::UninstallResolver)
+    factoryOf(::UnarchiveResolver)
 }

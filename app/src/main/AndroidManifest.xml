@@ -97,7 +97,9 @@
             <intent-filter android:priority="10">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.INSTALL_PACKAGE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="application/apk" />
                 <data android:mimeType="application/apk.1" />
                 <data android:mimeType="application/apkm" />
@@ -121,7 +123,9 @@
             <intent-filter android:priority="10">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.INSTALL_PACKAGE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:host="*" />
@@ -170,6 +174,7 @@
             <intent-filter android:priority="10">
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
                 <action android:name="android.content.pm.action.CONFIRM_PERMISSIONS" />
+                <action android:name="android.content.pm.action.CONFIRM_PRE_APPROVAL" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -191,6 +196,23 @@
                 <data android:scheme="package" />
             </intent-filter>
 
+        </activity>
+
+        <activity
+            android:name=".ui.activity.UnarchiveActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Installer.Translucent">
+            <intent-filter>
+                <action android:name="com.android.intent.action.UNARCHIVE_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.android.intent.action.UNARCHIVE_ERROR_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity

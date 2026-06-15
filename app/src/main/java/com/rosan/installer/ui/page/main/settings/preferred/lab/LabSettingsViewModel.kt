@@ -4,10 +4,10 @@ package com.rosan.installer.ui.page.main.settings.preferred.lab
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerPreferences
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerPreferences
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,8 +27,8 @@ class LabSettingsViewModel(
             labRootMode = prefs.labRootMode,
             labHttpProfile = prefs.labHttpProfile,
             labHttpSaveFile = prefs.labHttpSaveFile,
-            labTapIconToShare = prefs.labTapIconToShare,
             labAllowInstallWithoutUserAction = prefs.labInstallWithoutUserAction,
+            labRespectPlatformInstallPolicy = prefs.labRespectPlatformInstallPolicy,
             tryMultipleAuthorizersOnInstall = prefs.tryMultipleAuthorizersOnInstall,
             smartAuthorizerCandidates = prefs.smartAuthorizerCandidates,
             githubUpdateChannel = prefs.githubUpdateChannel,
@@ -77,16 +77,16 @@ class LabSettingsViewModel(
                 )
             }
 
-            is LabSettingsAction.LabChangeTapIconToShare -> viewModelScope.launch {
+            is LabSettingsAction.LabChangeAllowInstallWithoutUserAction -> viewModelScope.launch {
                 updateSetting(
-                    BooleanSetting.LabTapIconToShare,
+                    BooleanSetting.LabInstallWithoutUserAction,
                     action.enable
                 )
             }
 
-            is LabSettingsAction.LabChangeAllowInstallWithoutUserAction -> viewModelScope.launch {
+            is LabSettingsAction.LabChangeRespectPlatformInstallPolicy -> viewModelScope.launch {
                 updateSetting(
-                    BooleanSetting.LabInstallWithoutUserAction,
+                    BooleanSetting.LabRespectPlatformInstallPolicy,
                     action.enable
                 )
             }

@@ -5,32 +5,15 @@ package com.rosan.installer.data.engine.executor
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageInstallerHidden
 import androidx.core.content.IntentCompat
-import com.rosan.installer.data.engine.executor.appInstaller.LocalIntentReceiver
+import com.rosan.installer.data.engine.executor.appinstaller.LocalIntentReceiver
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.exception.UninstallException
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.error.UninstallErrorType
-import com.rosan.installer.domain.engine.model.install.UninstallFlags
 
 object PackageManagerUtil {
-    private const val EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS"
-
-    /**
-     * Flag parameter to indicate keeping the package's data directory.
-     */
-    const val DELETE_KEEP_DATA = UninstallFlags.DELETE_KEEP_DATA
-
-    /**
-     * Flag parameter to indicate deleting the package for all users.
-     */
-    const val DELETE_ALL_USERS = UninstallFlags.DELETE_ALL_USERS
-
-    /**
-     * Flag parameter to mark the app as uninstalled for the current user only.
-     */
-    const val DELETE_SYSTEM_APP = UninstallFlags.DELETE_SYSTEM_APP
-
     suspend fun installResultVerify(
         context: Context,
         receiver: LocalIntentReceiver
@@ -49,7 +32,10 @@ object PackageManagerUtil {
 
         if (status == PackageInstaller.STATUS_SUCCESS) return
 
-        val legacyStatus = intent.getIntExtra(EXTRA_LEGACY_STATUS, PackageInstaller.STATUS_FAILURE)
+        val legacyStatus = intent.getIntExtra(
+            PackageInstallerHidden.EXTRA_LEGACY_STATUS,
+            PackageInstaller.STATUS_FAILURE
+        )
         val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
         val ecpMsg = "Install Failure $status#$legacyStatus [$msg]"
 
@@ -76,7 +62,7 @@ object PackageManagerUtil {
 
         if (status == PackageInstaller.STATUS_SUCCESS) return
 
-        val legacyStatus = intent.getIntExtra(EXTRA_LEGACY_STATUS, 0)
+        val legacyStatus = intent.getIntExtra(PackageInstallerHidden.EXTRA_LEGACY_STATUS, 0)
         val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
         val ecpMsg = "Uninstall Failure $status#$legacyStatus [$msg]"
 

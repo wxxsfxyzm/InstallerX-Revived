@@ -40,7 +40,8 @@ sealed class AppEntity {
         val permissions: List<String>? = null,
         val signatureHash: String? = null,
         val signatureInfo: AppSignatureInfo? = null,
-        val fileHash: String? = null
+        val fileHash: String? = null,
+        val installLocation: Int? = null
     ) : AppEntity() {
         val isXposedModule: Boolean
             get() = xposedInfo != null

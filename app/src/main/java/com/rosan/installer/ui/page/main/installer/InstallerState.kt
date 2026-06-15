@@ -57,11 +57,13 @@ data class InstallerState(
             is InstallerStage.Resolving,
             is InstallerStage.InstallExtendedMenu,
             is InstallerStage.InstallChoice,
-            is InstallerStage.Uninstalling -> false
+            is InstallerStage.Uninstalling,
+            is InstallerStage.Unarchiving -> false
 
             is InstallerStage.InstallingModule -> stage.isFinished
             is InstallerStage.InstallPrepare -> !(showMiuixSheetRightActionSettings || showMiuixPermissionList)
             is InstallerStage.Preparing,
+            is InstallerStage.InstallWaitingUnknownSource,
             is InstallerStage.Installing -> !viewSettings.disableNotificationOnDismiss
 
             else -> true

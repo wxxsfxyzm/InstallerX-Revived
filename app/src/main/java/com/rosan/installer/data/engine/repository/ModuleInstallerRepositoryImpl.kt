@@ -2,12 +2,12 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.repository
 
-import com.rosan.installer.data.engine.executor.moduleInstaller.LocalModuleInstallerRepositoryImpl
-import com.rosan.installer.data.engine.executor.moduleInstaller.ShizukuModuleInstallerRepositoryImpl
+import com.rosan.installer.data.engine.executor.moduleinstaller.LocalModuleInstallerRepositoryImpl
+import com.rosan.installer.data.engine.executor.moduleinstaller.ShizukuModuleInstallerRepositoryImpl
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
-import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.privileged.model.PrivilegedErrorType

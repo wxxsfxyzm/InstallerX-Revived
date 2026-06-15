@@ -23,6 +23,7 @@ sealed class ProgressEntity {
     data class Installing(val current: Int = 1, val total: Int = 1, val appLabel: String? = null) : ProgressEntity()
     data class InstallCompleted(val results: List<InstallResult>) : ProgressEntity()
     data object InstallConfirming : ProgressEntity()
+    data object InstallWaitingUnknownSource : ProgressEntity()
     data class InstallingModule(val output: List<String>) : ProgressEntity()
     data object InstallFailed : ProgressEntity()
     data object InstallSuccess : ProgressEntity()
@@ -34,4 +35,10 @@ sealed class ProgressEntity {
     data object Uninstalling : ProgressEntity()
     data object UninstallSuccess : ProgressEntity()
     data object UninstallFailed : ProgressEntity()
+
+    data object UnarchiveResolving : ProgressEntity()
+    data object UnarchiveReady : ProgressEntity()
+    data object Unarchiving : ProgressEntity()
+    data object UnarchiveErrorReady : ProgressEntity()
+    data object UnarchiveFailed : ProgressEntity()
 }

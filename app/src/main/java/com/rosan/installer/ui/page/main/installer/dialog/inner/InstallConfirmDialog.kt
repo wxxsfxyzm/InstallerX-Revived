@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -58,6 +59,16 @@ fun installConfirmDialog(
         },
         text = DialogInnerParams(DialogParamsType.InstallerConfirm.id) {
             val tipMessage = when {
+                sessionInfo.requestType == ConfirmationRequestType.PRE_APPROVAL -> {
+                    val initiator = sessionInfo.sourceAppLabel ?: stringResource(R.string.installer_label_unknown)
+                    stringResource(R.string.install_confirm_pre_approval_tip, initiator)
+                }
+
+                sessionInfo.requestType == ConfirmationRequestType.PERMISSIONS -> {
+                    val initiator = sessionInfo.sourceAppLabel ?: stringResource(R.string.installer_label_unknown)
+                    stringResource(R.string.install_confirm_permissions_tip, initiator)
+                }
+
                 sessionInfo.isOwnershipConflict -> {
                     val owner = sessionInfo.sourceAppLabel ?: stringResource(R.string.installer_label_unknown)
                     stringResource(R.string.install_confirm_question_update_owner_reminder, owner)
@@ -81,6 +92,8 @@ fun installConfirmDialog(
             // Change the confirm button text to "Update Anyway" if it's an ownership conflict
             val confirmText = if (sessionInfo.isOwnershipConflict) {
                 stringResource(R.string.install_anyway)
+            } else if (sessionInfo.requestType == ConfirmationRequestType.PRE_APPROVAL) {
+                stringResource(R.string.pre_approve)
             } else {
                 stringResource(R.string.confirm)
             }

@@ -131,6 +131,7 @@ class AppSettingsRepositoryImpl(
             labShowFilePath = prefs[AppDataStore.LAB_SHOW_FILE_PATH] ?: false,
             labShowInstallInitiator = prefs[AppDataStore.LAB_SHOW_INSTALL_INITIATOR] ?: false,
             labInstallWithoutUserAction = prefs[AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION] ?: false,
+            labRespectPlatformInstallPolicy = prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false,
             enableFileLogging = prefs[AppDataStore.ENABLE_FILE_LOGGING] ?: true,
             // UI State
             themeMode = ThemeMode.fromValueOrDefault(prefs[AppDataStore.THEME_MODE] ?: ThemeMode.SYSTEM.name),
@@ -272,6 +273,7 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.LabShowFilePath -> AppDataStore.LAB_SHOW_FILE_PATH
             BooleanSetting.LabShowInstallInitiator -> AppDataStore.LAB_SHOW_INSTALL_INITIATOR
             BooleanSetting.LabInstallWithoutUserAction -> AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION
+            BooleanSetting.LabRespectPlatformInstallPolicy -> AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY
             BooleanSetting.DetectXposedModule -> AppDataStore.DETECT_XPOSED_MODULE
             BooleanSetting.QuickOpenLSPosed -> AppDataStore.QUICK_OPEN_LSPOSED
             BooleanSetting.EnableFileLogging -> AppDataStore.ENABLE_FILE_LOGGING

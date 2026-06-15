@@ -18,7 +18,7 @@ import com.rosan.installer.data.session.handler.ActionHandler
 import com.rosan.installer.data.session.handler.BroadcastHandler
 import com.rosan.installer.data.session.handler.ForegroundInfoHandler
 import com.rosan.installer.data.session.handler.ProgressHandler
-import com.rosan.installer.data.session.manager.InstallerSessionManager
+import com.rosan.installer.data.session.manager.InstallerSessionManagerImpl
 import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -51,7 +51,7 @@ class InstallerService : Service() {
         }
     }
 
-    private val sessionManager: InstallerSessionManager by inject()
+    private val sessionManager: InstallerSessionManagerImpl by inject()
 
     // Lifecycle scope for the Service itself (not specific installers)
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())

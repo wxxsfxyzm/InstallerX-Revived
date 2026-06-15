@@ -306,6 +306,8 @@
     <string name="authorizer_customization_desc">Fine-tune options for supported authorizers</string>
     <string name="config_try_multiple_authorizers_on_install">Smart authorization</string>
     <string name="config_try_multiple_authorizers_on_install_desc">When the authorizer selected by the profile is unavailable, try enabled authorizers in order.</string>
+    <string name="lab_respect_platform_install_policy">Respect Platform Install Policy</string>
+    <string name="lab_respect_platform_install_policy_desc">Apply Android PackageInstaller source permission and user restriction checks before installing</string>
     <string name="config_smart_authorizer_fallback_list">Fallback authorizer list</string>
     <string name="config_smart_authorizer_fallback_list_desc">Select and sort fallback authorizers.\nSelected authorization order: %1$s</string>
     <string name="config_smart_authorizer_fallback_list_tip">Select at least one item. Drag to sort.</string>
@@ -425,6 +427,7 @@
     <string name="config_error_package_name_empty">Package name can\'t be empty</string>
     <string name="discard">Discard</string>
     <string name="confirm">Confirm</string>
+    <string name="pre_approve">Pre-approve</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
     <string name="install">Install</string>
@@ -470,6 +473,8 @@
     <string name="installer_resolve_success">Resolve passed</string>
     <string name="installer_preparing">Preparing</string>
     <string name="installer_preparing_desc">Preparing files, please wait…</string>
+    <string name="installer_waiting_unknown_source">Allow Unknown Source</string>
+    <string name="installer_waiting_unknown_source_desc">Waiting for Android settings to allow this source to request package installs</string>
     <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
     <string name="installer_analyse_failed_corrupted_archive">Corrupted archive</string>
@@ -545,6 +550,8 @@
     <string name="installer_install_app">Install App</string>
     <string name="installer_install_module">Install Module</string>
     <string name="installer_install_confirm">Install Confirm</string>
+    <string name="installer_install_pre_approval">Install Pre-approval</string>
+    <string name="installer_permissions_confirm">Permissions Confirm</string>
     <string name="installer_installing">Installing…</string>
     <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>
@@ -556,6 +563,8 @@
     <string name="installer_unknown_error">Unknown Error</string>
     <string name="install_confirm_question_update_owner_reminder">This app is usually updated by %1$s. If you update it from another source, your phone may receive future updates from any source. App functionality may change.</string>
     <string name="install_confirm_external_request_tip">Approve installation request from %1$s ?</string>
+    <string name="install_confirm_pre_approval_tip">Allow %1$s to pre-approve installing this app?</string>
+    <string name="install_confirm_permissions_tip">Approve permission confirmation request from %1$s?</string>
     <string name="installer_notification_tap_to_disable">Foreground service notification, tap to disable</string>
     <string name="installer_channel_name">Install Notification</string>
     <string name="installer_channel_name_desc">Shows the installation stage</string>
@@ -586,6 +595,8 @@
     <string name="uninstall_all_users_disabled">Uninstall for all users was disabled</string>
     <string name="uninstall_delete_system_app">Delete SystemApp</string>
     <string name="uninstall_delete_system_app_desc">Allow deleting system apps for current user</string>
+    <string name="uninstall_archive">Uninstall Archive</string>
+    <string name="uninstall_archive_message">Uninstall this archived app entry from this device</string>
     <string name="uninstall_system_app_disabled">System app removal was disabled</string>
     <string name="uninstall_success_message">Uninstall Success</string>
     <string name="uninstall_failed_message">Uninstall Failed</string>
@@ -914,6 +925,8 @@
     <string name="suggestion_bypass_blacklist_set_by_user">Allow install once</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">Temporarily allow install once</string>
     <string name="suggestion_install_anyway_desc">Temporarily bypass profile restriction and retry</string>
+    <string name="suggestion_allow_unknown_source">Allow This Source</string>
+    <string name="suggestion_allow_unknown_source_desc">Open Android settings to allow this app to request package installs</string>
     <string name="suggestion_retry_install_desc">Try install again</string>
     <string name="lab_tip">Experimental features in the lab may be unstable or risky and could change or be removed at any time. Use at your own risk</string>
     <string name="lab_use_hook_mode">Use BinderWrapper mode</string>
@@ -979,4 +992,24 @@
     <string name="home_learn_more_title">Learn More</string>
     <string name="home_learn_more_installerx_title">Learn about InstallerX Revived</string>
     <string name="home_learn_more_installerx_desc">Learn how to configure and use InstallerX Revived</string>
+    <string name="unarchive_restore">Restore</string>
+    <string name="unarchive_title">Restore %1$s?</string>
+    <string name="unarchive_message">%1$s will restore this archived app.</string>
+    <string name="unarchive_restoring">Restoring app</string>
+    <string name="unarchive_failed">Restore failed</string>
+    <string name="unarchive_error_action_required_title">Action required</string>
+    <string name="unarchive_error_action_required_message">Additional action is required before this app can be restored</string>
+    <string name="unarchive_error_storage_title">Not enough storage</string>
+    <string name="unarchive_error_storage_message">Free at least %1$s, then try restoring again</string>
+    <string name="unarchive_error_offline_title">No network connection</string>
+    <string name="unarchive_error_offline_message">Connect to the internet, then try restoring again</string>
+    <string name="unarchive_error_installer_disabled_title">%1$s is disabled</string>
+    <string name="unarchive_error_installer_disabled_message">Enable %1$s to restore this archived app</string>
+    <string name="unarchive_error_installer_uninstalled_title">%1$s is unavailable</string>
+    <string name="unarchive_error_installer_uninstalled_message">%1$s is no longer installed and cannot restore this app</string>
+    <string name="unarchive_error_generic_title">Unable to restore app</string>
+    <string name="unarchive_error_generic_message">The archived app could not be restored</string>
+    <string name="unarchive_action_continue">Continue</string>
+    <string name="unarchive_action_clear_storage">Clear storage</string>
+    <string name="unarchive_action_app_settings">App settings</string>
 </resources>

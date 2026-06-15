@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
@@ -83,6 +84,16 @@ fun InstallConfirmContent(
 
         item {
             val tipMessage = when {
+                sessionInfo.requestType == ConfirmationRequestType.PRE_APPROVAL -> {
+                    val initiator = sessionInfo.sourceAppLabel ?: stringResource(R.string.installer_label_unknown)
+                    stringResource(R.string.install_confirm_pre_approval_tip, initiator)
+                }
+
+                sessionInfo.requestType == ConfirmationRequestType.PERMISSIONS -> {
+                    val initiator = sessionInfo.sourceAppLabel ?: stringResource(R.string.installer_label_unknown)
+                    stringResource(R.string.install_confirm_permissions_tip, initiator)
+                }
+
                 sessionInfo.isOwnershipConflict -> {
                     val owner = sessionInfo.sourceAppLabel ?: stringResource(R.string.installer_label_unknown)
                     stringResource(R.string.install_confirm_question_update_owner_reminder, owner)
@@ -120,6 +131,8 @@ fun InstallConfirmContent(
 
                 val confirmText = if (sessionInfo.isOwnershipConflict) {
                     stringResource(R.string.install_anyway)
+                } else if (sessionInfo.requestType == ConfirmationRequestType.PRE_APPROVAL) {
+                    stringResource(R.string.pre_approve)
                 } else {
                     stringResource(R.string.confirm)
                 }

@@ -23,6 +23,7 @@ sealed class DialogParamsType(val id: String) {
     data object InstallerInfo : DialogParamsType("installer_info")
     data object InstallerPrepareInstall : DialogParamsType("installer_prepare")
     data object InstallerInstalling : DialogParamsType("installer_installing")
+    data object InstallerUnknownSource : DialogParamsType("installer_unknown_source")
     data object InstallerInstallSuccess : DialogParamsType("install_success")
     data object InstallerInstallFailed : DialogParamsType("install_failed")
     data object InstallerInstallCompleted : DialogParamsType("install_completed")
@@ -31,4 +32,7 @@ sealed class DialogParamsType(val id: String) {
     data object InstallerUninstallReady : DialogParamsType("uninstaller_ready")
     data object InstallerUninstallSuccess : DialogParamsType("uninstaller_uninstall_success")
     data object InstallerUninstallFailed : DialogParamsType("uninstaller_uninstall_failed")
+    data object InstallerUnarchiveReady : DialogParamsType("unarchive_ready")
+    data object InstallerUnarchiveError : DialogParamsType("unarchive_error")
+    data object InstallerUnarchiving : DialogParamsType("unarchiving")
 }

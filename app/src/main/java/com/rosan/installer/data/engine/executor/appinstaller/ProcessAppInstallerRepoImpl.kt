@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
-package com.rosan.installer.data.engine.executor.appInstaller
+package com.rosan.installer.data.engine.executor.appinstaller
 
 import android.content.Context
 import android.os.IBinder
 import com.rosan.installer.core.reflection.ReflectionProvider
-import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
-import com.rosan.installer.framework.privileged.util.SHELL_ROOT
-import com.rosan.installer.framework.privileged.util.SHELL_SH
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.install.InstallEntity
+import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
+import com.rosan.installer.framework.privileged.util.SHELL_ROOT
+import com.rosan.installer.framework.privileged.util.SHELL_SH
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
 
@@ -27,11 +28,21 @@ class ProcessAppInstallerRepoImpl(
     override suspend fun doInstallWork(
         config: ConfigModel,
         entities: List<InstallEntity>,
+        metadata: InstallMetadata,
+        respectPlatformInstallPolicy: Boolean,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) = runWithProcess(config) {
-        super.doInstallWork(config, entities, blacklist, sharedUserIdBlacklist, sharedUserIdExemption)
+        super.doInstallWork(
+            config,
+            entities,
+            metadata,
+            respectPlatformInstallPolicy,
+            blacklist,
+            sharedUserIdBlacklist,
+            sharedUserIdExemption
+        )
     }
 
     override suspend fun doUninstallWork(

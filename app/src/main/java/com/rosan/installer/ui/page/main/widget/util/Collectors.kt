@@ -18,6 +18,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rosan.installer.R
+import com.rosan.installer.ui.activity.InstallerActivity
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Navigator
 import com.rosan.installer.ui.navigation.Route
@@ -159,6 +160,10 @@ fun InstallerEventCollector(viewModel: InstallerViewModel) {
                         Timber.e(e, "Failed to share file via URI")
                         context.toast("Failed to share file")
                     }
+                }
+
+                is InstallerViewEvent.RequestUnknownSourcePermission -> {
+                    (context as? InstallerActivity)?.launchUnknownSourceSettingsForCurrentSession()
                 }
             }
         }

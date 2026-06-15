@@ -17,4 +17,9 @@ object UninstallFlags {
      * Mark a system app as uninstalled for the current user only.
      */
     const val DELETE_SYSTEM_APP = 0x00000004
+
+    /**
+     * Delete the archived app entry instead of performing a normal package uninstall.
+     */
+    const val DELETE_ARCHIVE = 0x00000010
 }

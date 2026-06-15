@@ -4,6 +4,7 @@ package com.rosan.installer.ui.util
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.StringRes
@@ -261,6 +262,25 @@ fun rememberErrorSuggestions(
                         onClick = {
                             viewModel.updateConfig { it.copy(bypassProfileRestriction = true) }
                             viewModel.dispatch(InstallerViewAction.Install(false))
+                        }
+                    )
+                )
+            }
+
+            val initiatorPackageName = config.initiatorPackageName
+            if (error.hasErrorType(InstallErrorType.MISSING_INSTALL_PERMISSION) &&
+                !initiatorPackageName.isNullOrBlank()
+            ) {
+                add(
+                    ErrorSuggestion(
+                        labelRes = R.string.suggestion_allow_unknown_source,
+                        descriptionRes = R.string.suggestion_allow_unknown_source_desc,
+                        icon = AppIcons.Settings,
+                        onClick = {
+                            val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                                .setData(Uri.parse("package:$initiatorPackageName"))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            runCatching { context.startActivity(intent) }
                         }
                     )
                 )

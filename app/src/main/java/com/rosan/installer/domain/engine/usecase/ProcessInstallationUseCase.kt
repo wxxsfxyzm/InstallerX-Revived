@@ -8,6 +8,7 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.install.InstallEntity
+import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.engine.model.install.sourcePath
@@ -79,6 +80,7 @@ class ProcessInstallationUseCase(
     operator fun invoke(
         config: ConfigModel,
         analysisResults: List<PackageAnalysisResult>,
+        metadata: InstallMetadata = InstallMetadata.Empty,
         current: Int = 1,
         total: Int = 1
     ): Flow<ProgressEntity> = flow {
@@ -112,7 +114,7 @@ class ProcessInstallationUseCase(
             )
 
             // 4. Now perform the heavy, blocking installation work
-            installApp(config, analysisResults, selected)
+            installApp(config, analysisResults, selected, metadata)
 
             // 5. Emit success if it is a single task or the last task in a batch
             if (total <= 1) {
@@ -238,7 +240,8 @@ class ProcessInstallationUseCase(
     private suspend fun installApp(
         config: ConfigModel,
         analysisResults: List<PackageAnalysisResult>,
-        selectedEntities: List<SelectInstallEntity>
+        selectedEntities: List<SelectInstallEntity>,
+        metadata: InstallMetadata
     ) {
         val blacklist = appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedBlacklistPackages)
             .first().map { it.packageName }
@@ -256,7 +259,8 @@ class ProcessInstallationUseCase(
                 sharedUserId = (it.app as? AppEntity.BaseEntity)?.sharedUserId,
                 arch = it.app.arch,
                 data = it.app.data,
-                sourceType = it.app.sourceType!!
+                sourceType = it.app.sourceType!!,
+                installLocation = (it.app as? AppEntity.BaseEntity)?.installLocation
             )
         }
 
@@ -265,6 +269,7 @@ class ProcessInstallationUseCase(
             historyConfig = installWithResolvedAuthorizer(
                 config = config,
                 installEntities = installEntities,
+                metadata = metadata,
                 blacklist = blacklist,
                 sharedUidBlacklist = sharedUidBlacklist,
                 sharedUidWhitelist = sharedUidWhitelist
@@ -278,6 +283,7 @@ class ProcessInstallationUseCase(
     private suspend fun installWithResolvedAuthorizer(
         config: ConfigModel,
         installEntities: List<InstallEntity>,
+        metadata: InstallMetadata,
         blacklist: List<String>,
         sharedUidBlacklist: List<String>,
         sharedUidWhitelist: List<String>
@@ -287,13 +293,13 @@ class ProcessInstallationUseCase(
             .first()
 
         if (!tryMultipleAuthorizers) {
-            submitInstall(config, installEntities, blacklist, sharedUidBlacklist, sharedUidWhitelist)
+            submitInstall(config, installEntities, metadata, blacklist, sharedUidBlacklist, sharedUidWhitelist)
             return config
         }
 
         val candidates = buildAuthorizerCandidates(config)
         if (candidates.isEmpty()) {
-            submitInstall(config, installEntities, blacklist, sharedUidBlacklist, sharedUidWhitelist)
+            submitInstall(config, installEntities, metadata, blacklist, sharedUidBlacklist, sharedUidWhitelist)
             return config
         }
 
@@ -303,7 +309,7 @@ class ProcessInstallationUseCase(
             Timber.d("Trying install with authorizer: ${attemptConfig.authorizer}")
 
             try {
-                submitInstall(attemptConfig, installEntities, blacklist, sharedUidBlacklist, sharedUidWhitelist)
+                submitInstall(attemptConfig, installEntities, metadata, blacklist, sharedUidBlacklist, sharedUidWhitelist)
                 return attemptConfig
             } catch (e: PrivilegedException) {
                 lastAuthorizerFailure = e
@@ -320,6 +326,7 @@ class ProcessInstallationUseCase(
     private suspend fun submitInstall(
         config: ConfigModel,
         installEntities: List<InstallEntity>,
+        metadata: InstallMetadata,
         blacklist: List<String>,
         sharedUidBlacklist: List<String>,
         sharedUidWhitelist: List<String>
@@ -327,6 +334,7 @@ class ProcessInstallationUseCase(
         appInstaller.doInstallWork(
             config = config,
             entities = installEntities,
+            metadata = metadata,
             blacklist = blacklist,
             sharedUserIdBlacklist = sharedUidBlacklist,
             sharedUserIdExemption = sharedUidWhitelist

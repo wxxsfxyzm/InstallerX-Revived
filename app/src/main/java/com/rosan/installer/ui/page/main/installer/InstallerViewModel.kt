@@ -177,10 +177,13 @@ class InstallerViewModel(
             is InstallerViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
             is InstallerViewAction.InstallMultiple -> installMultiple()
             is InstallerViewAction.Install -> install()
+            is InstallerViewAction.RequestUnknownSourcePermission -> requestUnknownSourcePermission()
             is InstallerViewAction.Background -> background()
             is InstallerViewAction.Reboot -> session.reboot(action.reason)
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData, action.conflictingPackage)
             is InstallerViewAction.Uninstall -> session.uninstallInfo.value?.packageName?.let { session.uninstall(it) }
+            is InstallerViewAction.StartUnarchive -> session.startUnarchive()
+            is InstallerViewAction.OpenUnarchiveErrorAction -> session.openUnarchiveErrorAction()
 
             is InstallerViewAction.ShowMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = true) }
             is InstallerViewAction.HideMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = false) }
@@ -227,6 +230,8 @@ class InstallerViewModel(
 
         is ProgressEntity.InstallCompleted -> InstallerStage.InstallCompleted(progress.results)
 
+        ProgressEntity.InstallWaitingUnknownSource -> InstallerStage.InstallWaitingUnknownSource
+
         ProgressEntity.InstallFailed -> {
             if (isInstallingModule) {
                 val currentOutput = session.moduleLog.toMutableList()
@@ -255,7 +260,8 @@ class InstallerViewModel(
                     sessionId = details.sessionId,
                     isSelfSession = details.isSelfSession,
                     isOwnershipConflict = details.isOwnershipConflict,
-                    sourceAppLabel = details.sourceAppLabel
+                    sourceAppLabel = details.sourceAppLabel,
+                    requestType = details.requestType
                 )
             } else {
                 InstallerStage.ResolveFailed
@@ -266,6 +272,34 @@ class InstallerViewModel(
         ProgressEntity.UninstallFailed -> if (isRetrying) InstallerStage.InstallFailed else InstallerStage.UninstallFailed
         ProgressEntity.UninstallSuccess -> if (isRetrying) InstallerStage.InstallRetryDowngradeUsingUninstall else InstallerStage.UninstallSuccess
         ProgressEntity.UninstallReady -> InstallerStage.UninstallReady
+        ProgressEntity.UnarchiveReady -> {
+            val info = session.unarchiveInfo.value
+            if (info != null) {
+                InstallerStage.UnarchiveReady(
+                    packageName = info.packageName,
+                    appLabel = info.appLabel,
+                    installerLabel = info.installerLabel
+                )
+            } else {
+                InstallerStage.UnarchiveFailed
+            }
+        }
+
+        ProgressEntity.Unarchiving -> InstallerStage.Unarchiving
+        ProgressEntity.UnarchiveErrorReady -> {
+            val info = session.unarchiveErrorInfo.value
+            if (info != null) {
+                InstallerStage.UnarchiveError(
+                    status = info.status,
+                    requiredBytes = info.requiredBytes,
+                    installerLabel = info.installerLabel
+                )
+            } else {
+                InstallerStage.UnarchiveFailed
+            }
+        }
+
+        ProgressEntity.UnarchiveFailed -> InstallerStage.UnarchiveFailed
         ProgressEntity.InstallResolving, ProgressEntity.InstallAnalysing, is ProgressEntity.InstallPreparing -> _localState.value.stage
         else -> InstallerStage.Ready
     }
@@ -368,7 +402,10 @@ class InstallerViewModel(
                         }
                     }
 
-                    is InstallerStage.InstallPrepare, is InstallerStage.InstallFailed, is InstallerStage.InstallSuccess -> {
+                    is InstallerStage.InstallPrepare,
+                    is InstallerStage.InstallWaitingUnknownSource,
+                    is InstallerStage.InstallFailed,
+                    is InstallerStage.InstallSuccess -> {
                         _localState.value.currentPackageName ?: _localState.value.analysisResults.firstOrNull()?.packageName
                     }
 
@@ -381,6 +418,8 @@ class InstallerViewModel(
                     is InstallerStage.Uninstalling,
                     is InstallerStage.UninstallSuccess,
                     is InstallerStage.UninstallFailed -> uninstallInfo?.packageName
+
+                    is InstallerStage.UnarchiveReady -> newStage.packageName
 
                     else -> _localState.value.currentPackageName
                 }
@@ -656,6 +695,10 @@ class InstallerViewModel(
         autoInstallJob?.cancel()
         Timber.d("Standard foreground installation triggered. Contains Module: $isInstallingModule")
         session.install(true)
+    }
+
+    private fun requestUnknownSourcePermission() {
+        _uiEvents.tryEmit(InstallerViewEvent.RequestUnknownSourcePermission)
     }
 
     private fun background() = session.background(true)

@@ -45,7 +45,8 @@ interface AppIconRepository {
      * - **true** (upgrades): system launcher icon → APK system loader → raw APK drawable
      * - **false** (new installs): raw APK drawable → system launcher icon
      *
-     * Results are cached by (sessionId, packageName, userId, iconSizePx).
+     * Results are cached by session, package, user, size, resolution preference,
+     * and the current system icon source state when a system icon can be used.
      * A platform default icon is returned if all resolution strategies fail.
      *
      * @param sessionId   Logical grouping key for cache invalidation (e.g., an install

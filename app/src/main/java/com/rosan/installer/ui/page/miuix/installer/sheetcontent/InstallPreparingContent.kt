@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,7 +32,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @Composable
 fun InstallPreparingContent(
     viewModel: InstallerViewModel,
-    onBackground: () -> Unit
+    onBackground: () -> Unit,
+    @StringRes descriptionRes: Int = R.string.installer_preparing_desc,
+    @StringRes buttonTextRes: Int = R.string.loading
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
@@ -64,7 +67,7 @@ fun InstallPreparingContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = stringResource(R.string.installer_preparing_desc),
+                text = stringResource(descriptionRes),
                 color = MiuixTheme.colorScheme.onSurface,
                 style = MiuixTheme.textStyles.body1
             )
@@ -91,7 +94,7 @@ fun InstallPreparingContent(
         ) {
             Text(
                 color = contentColor,
-                text = stringResource(R.string.loading)
+                text = stringResource(buttonTextRes)
             )
         }
     }

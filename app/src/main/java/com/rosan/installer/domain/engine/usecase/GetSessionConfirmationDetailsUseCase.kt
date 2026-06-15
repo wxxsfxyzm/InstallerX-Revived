@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import com.rosan.installer.domain.engine.provider.SessionDetailsProvider
 import com.rosan.installer.domain.session.model.ConfirmationDetails
+import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import timber.log.Timber
 
@@ -23,6 +24,7 @@ class GetSessionConfirmationDetailsUseCase(
     operator fun invoke(
         sessionId: Int,
         config: ConfigModel,
+        requestType: ConfirmationRequestType,
         isSelfSession: Boolean = false,
         currentProgress: Int = 1,
         totalProgress: Int = 1
@@ -32,6 +34,7 @@ class GetSessionConfirmationDetailsUseCase(
         var packageName = ""
         var isUpdate = false
         var isOwnershipConflict = false
+        var isPreApprovalRequested = false
         var sourceAppLabel: CharSequence? = null
         var installerPackageName: String? = null
 
@@ -49,6 +52,7 @@ class GetSessionConfirmationDetailsUseCase(
             packageName = bundle.getString("packageName", "")
             isUpdate = bundle.getBoolean("isUpdate", false)
             isOwnershipConflict = bundle.getBoolean("isOwnershipConflict", false)
+            isPreApprovalRequested = bundle.getBoolean("isPreApprovalRequested", false)
             sourceAppLabel = bundle.getCharSequence("sourceAppLabel")
             installerPackageName = bundle.getString("installerPackageName")
 
@@ -75,6 +79,8 @@ class GetSessionConfirmationDetailsUseCase(
             isOwnershipConflict = isOwnershipConflict,
             sourceAppLabel = sourceAppLabel,
             installerPackageName = installerPackageName,
+            requestType = requestType,
+            isPreApprovalRequested = isPreApprovalRequested,
             isSelfSession = isSelfSession,
             currentProgress = currentProgress,
             totalProgress = totalProgress

@@ -177,6 +177,8 @@ class AppDataStore(
         val LAB_SHOW_INSTALL_INITIATOR = register(booleanPreferencesKey("lab_show_install_initiator"), PreferenceValueType.BOOLEAN)
         val LAB_INSTALL_WITHOUT_USER_ACTION =
             register(booleanPreferencesKey("lab_install_without_user_action"), PreferenceValueType.BOOLEAN)
+        val LAB_RESPECT_PLATFORM_INSTALL_POLICY =
+            register(booleanPreferencesKey("lab_respect_platform_install_policy"), PreferenceValueType.BOOLEAN)
 
         // Debug
         val ENABLE_FILE_LOGGING = register(booleanPreferencesKey("enable_file_logging"), PreferenceValueType.BOOLEAN)

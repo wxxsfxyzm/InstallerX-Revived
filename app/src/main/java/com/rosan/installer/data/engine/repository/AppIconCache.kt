@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.AdaptiveIconDrawable
+import android.os.Build
 import androidx.collection.LruCache
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -24,15 +25,22 @@ import me.zhanghai.android.appiconloader.AppIconLoader
  * dedicated background dispatcher to ensure the main thread remains responsive during icon decoding.
  */
 object AppIconCache {
+    private data class CacheKey(
+        val packageName: String,
+        val userId: Int,
+        val size: Int,
+        val iconSourceKey: String
+    )
+
     private class AppIconLruCache(maxSize: Int) :
-        LruCache<Triple<String, Int, Int>, Bitmap>(maxSize) {
-        override fun sizeOf(key: Triple<String, Int, Int>, value: Bitmap): Int {
+        LruCache<CacheKey, Bitmap>(maxSize) {
+        override fun sizeOf(key: CacheKey, value: Bitmap): Int {
             // Memory size in KB
             return value.byteCount / 1024
         }
     }
 
-    private val lruCache: LruCache<Triple<String, Int, Int>, Bitmap>
+    private val lruCache: LruCache<CacheKey, Bitmap>
 
     /**
      * Dedicated dispatcher with limited parallelism to handle heavy icon loading tasks
@@ -52,12 +60,25 @@ object AppIconCache {
         dispatcher = Dispatchers.IO.limitedParallelism(threadCount)
     }
 
-    private fun get(packageName: String, userId: Int, size: Int): Bitmap? =
-        lruCache[Triple(packageName, userId, size)]
+    internal fun iconSourceKey(info: ApplicationInfo): String {
+        val isArchived = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            info.isArchived
+        } else {
+            false
+        }
+        return listOf(
+            info.sourceDir.orEmpty(),
+            info.publicSourceDir.orEmpty(),
+            info.icon,
+            isArchived
+        ).joinToString(separator = "|")
+    }
 
-    private fun put(packageName: String, userId: Int, size: Int, bitmap: Bitmap) {
-        if (get(packageName, userId, size) == null) {
-            lruCache.put(Triple(packageName, userId, size), bitmap)
+    private fun get(cacheKey: CacheKey): Bitmap? = lruCache[cacheKey]
+
+    private fun put(cacheKey: CacheKey, bitmap: Bitmap) {
+        if (get(cacheKey) == null) {
+            lruCache.put(cacheKey, bitmap)
         }
     }
 
@@ -67,7 +88,8 @@ object AppIconCache {
         userId: Int,
         size: Int
     ): Bitmap {
-        get(info.packageName, userId, size)?.let { return it }
+        val cacheKey = CacheKey(info.packageName, userId, size, iconSourceKey(info))
+        get(cacheKey)?.let { return it }
 
         val loader = appIconLoaders.getOrPut(size) {
             // Determine if the icon should be shrunk based on AdaptiveIcon compatibility
@@ -76,7 +98,7 @@ object AppIconCache {
         }
 
         val bitmap = loader.loadIcon(info, false)
-        put(info.packageName, userId, size, bitmap)
+        put(cacheKey, bitmap)
         return bitmap
     }
 
