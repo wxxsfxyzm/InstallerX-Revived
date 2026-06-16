@@ -59,6 +59,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.library.FloatingBottomBar
 import com.rosan.installer.ui.library.FloatingBottomBarDefaults
 import com.rosan.installer.ui.library.FloatingBottomBarItem
+import com.rosan.installer.ui.library.FloatingBottomBarMode
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.NavigationTab
 import com.rosan.installer.ui.page.main.settings.config.all.AllPage
@@ -224,7 +225,7 @@ private fun Material3FloatingBottomBar(
             },
             backdrop = floatingBackdrop,
             tabsCount = tabs.size,
-            isBlurEnabled = false,
+            mode = if (backdrop != null) FloatingBottomBarMode.Blur else FloatingBottomBarMode.None,
             colors = FloatingBottomBarDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 indicatorColor = MaterialTheme.colorScheme.primary,

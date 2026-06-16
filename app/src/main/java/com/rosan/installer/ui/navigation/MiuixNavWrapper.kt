@@ -19,6 +19,7 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.library.FloatingBottomBarMode
 import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.miuix.settings.SettingsCompactLayout
 import com.rosan.installer.ui.page.miuix.settings.SettingsWideScreenLayout
@@ -41,8 +42,11 @@ fun MiuixMainPageWrapper(
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
     val useFloatingBottomBar = uiState.useAppleFloatingBar
-    val useFloatingBottomBarBlur =
-        useBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val floatingBottomBarMode = when {
+        useBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> FloatingBottomBarMode.LiquidGlass
+        useBlur -> FloatingBottomBarMode.Blur
+        else -> FloatingBottomBarMode.None
+    }
 
     val configRepo = koinInject<ConfigRepository>()
     val configCountFlow = remember { configRepo.flowAll().map { it.size } }
@@ -108,7 +112,7 @@ fun MiuixMainPageWrapper(
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             useFloatingBottomBar = useFloatingBottomBar,
-            useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+            floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop
         )
@@ -119,7 +123,7 @@ fun MiuixMainPageWrapper(
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             useFloatingBottomBar = useFloatingBottomBar,
-            useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+            floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop
         )

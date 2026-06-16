@@ -41,6 +41,7 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.library.FloatingBottomBar
 import com.rosan.installer.ui.library.FloatingBottomBarItem
+import com.rosan.installer.ui.library.FloatingBottomBarMode
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.Route
@@ -73,7 +74,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop as miuixLayerBackdrop
 private fun SettingsFloatingBottomBar(
     mainPagerState: MainPagerState,
     navigationItems: List<NavigationItem>,
-    useFloatingBottomBarBlur: Boolean,
+    floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop
 ) {
     Box(
@@ -97,7 +98,7 @@ private fun SettingsFloatingBottomBar(
             },
             backdrop = floatingBackdrop,
             tabsCount = navigationItems.size,
-            isBlurEnabled = useFloatingBottomBarBlur
+            mode = floatingBottomBarMode
         ) {
             navigationItems.forEachIndexed { index, item ->
                 FloatingBottomBarItem(
@@ -134,7 +135,7 @@ fun SettingsCompactLayout(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     useFloatingBottomBar: Boolean,
-    useFloatingBottomBarBlur: Boolean,
+    floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop?,
     miuixBackdrop: MiuixLayerBackdrop?
 ) {
@@ -147,7 +148,7 @@ fun SettingsCompactLayout(
                 SettingsFloatingBottomBar(
                     mainPagerState = mainPagerState,
                     navigationItems = navigationItems,
-                    useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+                    floatingBottomBarMode = floatingBottomBarMode,
                     floatingBackdrop = floatingBackdrop
                 )
             } else if (!useFloatingBottomBar) {
@@ -237,7 +238,7 @@ fun SettingsWideScreenLayout(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     useFloatingBottomBar: Boolean,
-    useFloatingBottomBarBlur: Boolean,
+    floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop?,
     miuixBackdrop: MiuixLayerBackdrop?
 ) {
@@ -248,7 +249,7 @@ fun SettingsWideScreenLayout(
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             useFloatingBottomBar = true,
-            useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+            floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop
         )
@@ -312,7 +313,7 @@ fun SettingsWideScreenLayout(
                     navigationItems = navigationItems,
                     snackbarHostState = snackbarHostState,
                     useFloatingBottomBar = false,
-                    useFloatingBottomBarBlur = false,
+                    floatingBottomBarMode = FloatingBottomBarMode.None,
                     floatingBackdrop = floatingBackdrop,
                     miuixBackdrop = miuixBackdrop
                 )
@@ -328,7 +329,7 @@ private fun SettingsWideContent(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     useFloatingBottomBar: Boolean,
-    useFloatingBottomBarBlur: Boolean,
+    floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop?,
     miuixBackdrop: MiuixLayerBackdrop?
 ) {
@@ -340,7 +341,7 @@ private fun SettingsWideContent(
                 SettingsFloatingBottomBar(
                     mainPagerState = mainPagerState,
                     navigationItems = navigationItems,
-                    useFloatingBottomBarBlur = useFloatingBottomBarBlur,
+                    floatingBottomBarMode = floatingBottomBarMode,
                     floatingBackdrop = floatingBackdrop
                 )
             }
