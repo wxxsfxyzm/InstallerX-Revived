@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.device.model.Manufacturer
+import com.rosan.installer.domain.device.model.ShizukuMode
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallOption
@@ -51,13 +52,16 @@ fun rememberErrorSuggestions(
     val config = uiState.config
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
     val hasMiPackageInstaller = capabilityProvider.hasMiPackageInstaller
+    val shizukuMode by capabilityProvider.shizukuModeFlow.collectAsStateWithLifecycle()
     val shizukuIcon = ImageVector.vectorResource(R.drawable.ic_shizuku)
 
-    return remember(error, config) {
+    return remember(error, config, shizukuMode) {
         buildList {
             // Calculate this first so we can use it to suppress unnecessary uninstall suggestions
+            val isRootShizuku = config.authorizer == Authorizer.Shizuku && shizukuMode == ShizukuMode.ROOT
             val canAllowDowngrade = config.authorizer == Authorizer.Root ||
                     (config.authorizer == Authorizer.None && capabilityProvider.isSystemApp) ||
+                    isRootShizuku ||
                     (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE && config.authorizer == Authorizer.Shizuku)
 
             if (error.hasErrorType(InstallErrorType.TEST_ONLY)) {
