@@ -59,12 +59,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.device.model.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
-import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
+import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
@@ -180,7 +180,8 @@ fun installInfoDialog(
                                 onLongPress = {
                                     // Copy the app name to clipboard on long press
                                     scope.launch {
-                                        val clipData = ClipData.newPlainText("App Name", displayLabel)
+                                        val clipData =
+                                            ClipData.newPlainText("App Name", displayLabel)
                                         clipboard.setClipEntry(clipData.toClipEntry())
                                         context.toast(R.string.copied_format, displayLabel)
                                     }
@@ -248,7 +249,8 @@ fun installInfoDialog(
                                 onLongPress = {
                                     // Clipboard operations are suspend functions now
                                     scope.launch {
-                                        val clipData = ClipData.newPlainText("Package Name", rawPackageName)
+                                        val clipData =
+                                            ClipData.newPlainText("Package Name", rawPackageName)
                                         clipboard.setClipEntry(clipData.toClipEntry())
                                         context.toast(R.string.copied_format, rawPackageName)
                                     }
@@ -494,6 +496,7 @@ private fun VersionCompareMultiLine(
 ) {
     // 1. Determine the installation status (downgrade or upgrade/equal)
     val isDowngrade = preInstallAppInfo.versionCode > entityToInstall.versionCode
+    val isOverwrite = preInstallAppInfo.versionCode == entityToInstall.versionCode
 
     // 2. Centralize the color logic based on the status
     val statusColor = if (isDowngrade) {
@@ -525,6 +528,8 @@ private fun VersionCompareMultiLine(
     val oldPrefix = stringResource(R.string.old_version_prefix)
     val newPrefix = if (isDowngrade) {
         stringResource(R.string.downgrade_version_prefix)
+    } else if (isOverwrite) {
+        stringResource(R.string.overwrite_version_prefix)
     } else {
         stringResource(R.string.upgrade_version_prefix)
     }

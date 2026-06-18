@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventHandler
 import androidx.navigationevent.NavigationEventInfo
@@ -87,12 +86,6 @@ fun NavigationEventHandler(
         callBack()
     },
 ) {
-    if (LocalInspectionMode.current) {
-        // TODO(b/462365661): Return early to prevent Preview crashes. Future work should implement
-        //  full support for navigation events in Interactive Previews instead of disabling them.
-        return
-    }
-
     val dispatcher =
         checkNotNull(LocalNavigationEventDispatcherOwner.current) {
             "No NavigationEventDispatcher was provided via LocalNavigationEventDispatcherOwner"
