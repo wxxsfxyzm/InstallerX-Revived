@@ -9,15 +9,15 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.source.FilterType
 import com.rosan.installer.domain.engine.model.source.SplitType
 
-sealed class AppEntity {
-    abstract val packageName: String
-    abstract val name: String
-    abstract val data: DataEntity
-    abstract val targetSdk: String?
-    abstract val minSdk: String?
-    abstract val arch: Architecture?
-    abstract val size: Long
-    abstract val sourceType: DataType?
+sealed interface AppEntity {
+    val packageName: String
+    val name: String
+    val data: DataEntity
+    val targetSdk: String?
+    val minSdk: String?
+    val arch: Architecture?
+    val size: Long
+    val sourceType: DataType?
 
     data class BaseEntity(
         override val packageName: String,
@@ -42,7 +42,7 @@ sealed class AppEntity {
         val signatureInfo: AppSignatureInfo? = null,
         val fileHash: String? = null,
         val installLocation: Int? = null
-    ) : AppEntity() {
+    ) : AppEntity {
         val isXposedModule: Boolean
             get() = xposedInfo != null
     }
@@ -65,7 +65,7 @@ sealed class AppEntity {
         // Extracted config value ("zh", "xhdpi", "arm64-v8a")
         val configValue: String? = null,
         val signatureInfo: AppSignatureInfo? = null
-    ) : AppEntity() {
+    ) : AppEntity {
         override val name = "$splitName.apk"
     }
 
@@ -78,7 +78,7 @@ sealed class AppEntity {
         override val arch: Architecture? = null,
         override val size: Long = data.getSize(),
         override val sourceType: DataType? = null,
-    ) : AppEntity() {
+    ) : AppEntity {
         override val name = "base.dm"
     }
 
@@ -93,7 +93,7 @@ sealed class AppEntity {
         val icon: Drawable? = null,
         override val size: Long = data.getSize(),
         override val sourceType: DataType? = null
-    ) : AppEntity() {
+    ) : AppEntity {
         override val packageName: String
             get() = id
         override val targetSdk: String? = null

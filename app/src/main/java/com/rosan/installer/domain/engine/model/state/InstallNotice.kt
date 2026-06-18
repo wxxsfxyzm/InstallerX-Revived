@@ -17,29 +17,29 @@ data class SignatureNoticeDetails(
  * Represents specific notices (warnings or informational messages)
  * generated during package analysis.
  */
-sealed class InstallNotice {
+sealed interface InstallNotice {
     // --- Warnings (Usually displayed with error/tertiary colors) ---
-    data object Downgrade : InstallNotice()
+    data object Downgrade : InstallNotice
     data class SignatureSummary(
         val status: SignatureMatchStatus,
         val details: SignatureNoticeDetails? = null,
         val hasPackageSignatureIssues: Boolean = false
-    ) : InstallNotice()
+    ) : InstallNotice
 
     data class SignatureMismatch(
         val details: SignatureNoticeDetails? = null,
         val hasPackageSignatureIssues: Boolean = false
-    ) : InstallNotice()
+    ) : InstallNotice
 
     data class SignatureUnknown(
         val details: SignatureNoticeDetails? = null,
         val hasPackageSignatureIssues: Boolean = false
-    ) : InstallNotice()
-    data object SdkIncompatible : InstallNotice()
-    data object Arch32On64 : InstallNotice()
-    data class Emulated(val appArch: Architecture, val sysArch: Architecture) : InstallNotice()
+    ) : InstallNotice
+    data object SdkIncompatible : InstallNotice
+    data object Arch32On64 : InstallNotice
+    data class Emulated(val appArch: Architecture, val sysArch: Architecture) : InstallNotice
 
     // --- Info (Usually displayed with primary/neutral colors) ---
-    data object Identical : InstallNotice()
-    data class Xposed(val minApi: String?, val targetApi: String?, val description: String?) : InstallNotice()
+    data object Identical : InstallNotice
+    data class Xposed(val minApi: String?, val targetApi: String?, val description: String?) : InstallNotice
 }

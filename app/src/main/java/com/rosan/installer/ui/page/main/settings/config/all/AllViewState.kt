@@ -15,9 +15,9 @@ data class AllViewState(
         val configOrder: ConfigOrder = ConfigOrder.Id(OrderType.Ascending),
         val progress: Progress = Progress.Loading
     ) {
-        sealed class Progress {
-            data object Loading : Progress()
-            data object Loaded : Progress()
+        sealed interface Progress {
+            data object Loading : Progress
+            data object Loaded : Progress
         }
     }
 }

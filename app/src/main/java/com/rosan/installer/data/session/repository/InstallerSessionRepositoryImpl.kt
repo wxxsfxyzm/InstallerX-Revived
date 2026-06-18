@@ -160,9 +160,9 @@ class InstallerSessionRepositoryImpl(
         }
     }
 
-    sealed class Action {
-        data class ResolveInstall(val activity: Activity) : Action()
-        data object Analyse : Action()
+    sealed interface Action {
+        data class ResolveInstall(val activity: Activity) : Action
+        data object Analyse : Action
 
         /**
          * Install single module/apk
@@ -173,7 +173,7 @@ class InstallerSessionRepositoryImpl(
          * @see com.rosan.installer.ui.page.main.installer.InstallerViewAction.Install
          * @see com.rosan.installer.data.session.handler.ActionHandler.handleSingleInstall
          */
-        data class Install(val triggerAuth: Boolean) : Action()
+        data class Install(val triggerAuth: Boolean) : Action
 
         /**
          * Install multiple module/apk
@@ -182,32 +182,32 @@ class InstallerSessionRepositoryImpl(
          * @see com.rosan.installer.ui.page.main.installer.InstallerViewAction.InstallMultiple
          * @see com.rosan.installer.data.session.handler.ActionHandler.handleMultiInstall
          */
-        data object InstallMultiple : Action()
-        data class ResolveUninstall(val activity: Activity, val packageName: String) : Action()
-        data class Uninstall(val packageName: String) : Action()
+        data object InstallMultiple : Action
+        data class ResolveUninstall(val activity: Activity, val packageName: String) : Action
+        data class Uninstall(val packageName: String) : Action
         data class ResolveConfirmInstall(
             val activity: Activity,
             val sessionId: Int,
             val requestType: ConfirmationRequestType
-        ) : Action()
-        data class ApproveSession(val sessionId: Int, val granted: Boolean) : Action()
+        ) : Action
+        data class ApproveSession(val sessionId: Int, val granted: Boolean) : Action
         data class ResolveUnarchive(
             val activity: Activity,
             val packageName: String,
             val intentSender: IntentSender
-        ) : Action()
-        data object StartUnarchive : Action()
+        ) : Action
+        data object StartUnarchive : Action
         data class ResolveUnarchiveError(
             val activity: Activity,
             val info: UnarchiveErrorInfo
-        ) : Action()
-        data object OpenUnarchiveErrorAction : Action()
+        ) : Action
+        data object OpenUnarchiveErrorAction : Action
 
         /**
          * Action to trigger device reboot after cleanup.
          */
-        data class Reboot(val reason: String) : Action()
-        data object Cancel : Action()
-        data object Finish : Action()
+        data class Reboot(val reason: String) : Action
+        data object Cancel : Action
+        data object Finish : Action
     }
 }
