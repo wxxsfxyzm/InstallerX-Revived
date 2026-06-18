@@ -2,16 +2,16 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.settings.local.room.entity.converter
 
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import com.rosan.installer.domain.settings.model.config.DexoptMode
 
 object DexoptModeConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     @JvmStatic
     fun revert(value: String): DexoptMode =
         DexoptMode.entries.firstOrNull { it.value == value } ?: DexoptMode.SpeedProfile
 
-    @TypeConverter
+    @ColumnTypeConverter
     @JvmStatic
     fun convert(value: DexoptMode): String = value.value
 }

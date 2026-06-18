@@ -5,6 +5,7 @@ on:
     branches-ignore:
       - 'main'
       - 'weblate-dev'
+      - 'renovate/**'
     paths:
       - 'app/**'
       - 'build.gradle.kts'

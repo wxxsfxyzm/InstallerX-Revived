@@ -2,14 +2,14 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.settings.local.room.entity.converter
 
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 
 object InstallRequesterModeConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromInstallRequesterMode(mode: InstallRequesterMode): Int = mode.value
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toInstallRequesterMode(value: Int): InstallRequesterMode =
         InstallRequesterMode.entries.find { it.value == value } ?: InstallRequesterMode.Disable
 }

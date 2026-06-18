@@ -2,13 +2,13 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.settings.local.room.entity.converter
 
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import com.rosan.installer.domain.settings.model.config.ToastMode
 
 object ToastModeConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromToastMode(mode: ToastMode): Int = mode.value
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toToastMode(value: Int): ToastMode = ToastMode.fromValue(value)
 }
