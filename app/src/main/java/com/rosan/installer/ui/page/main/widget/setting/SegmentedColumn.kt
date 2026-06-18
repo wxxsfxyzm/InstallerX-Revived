@@ -226,13 +226,17 @@ fun SegmentedColumn(
 
                         // 3. Drive the corner transition animations. Provides a fluid shift between
                         // rounded and flat states during expand/collapse interactions.
-                        val currentTopRadius = if (isDynamicDpSupported) {
+                        val currentTopRadius = (if (isDynamicDpSupported) {
                             animateDpAsState(targetTopRadius, dpSpring, label = "TopRadius").value
-                        } else targetTopRadius
+                        } else {
+                            targetTopRadius
+                        }).coerceAtLeast(0.dp)
 
-                        val currentBottomRadius = if (isDynamicDpSupported) {
+                        val currentBottomRadius = (if (isDynamicDpSupported) {
                             animateDpAsState(targetBottomRadius, dpSpring, label = "BottomRadius").value
-                        } else targetBottomRadius
+                        } else {
+                            targetBottomRadius
+                        }).coerceAtLeast(0.dp)
 
                         val shape = RoundedCornerShape(
                             topStart = currentTopRadius,
@@ -242,9 +246,11 @@ fun SegmentedColumn(
                         )
 
                         val targetTopPadding = itemData.customTopPadding ?: (if (isFirst) 0.dp else ListItemDefaults.SegmentedGap)
-                        val currentTopPadding = if (isDynamicDpSupported) {
+                        val currentTopPadding = (if (isDynamicDpSupported) {
                             animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding").value
-                        } else targetTopPadding
+                        } else {
+                            targetTopPadding
+                        }).coerceAtLeast(0.dp)
 
                         var hasFocus by remember { mutableStateOf(false) }
 
