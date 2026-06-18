@@ -4,14 +4,14 @@ package com.rosan.installer.data.settings.local.room.entity.converter
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import com.rosan.installer.domain.settings.model.config.PackageSource
 
 object PackageSourceConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     fun convert(packageSource: PackageSource): Int = packageSource.value
 
-    @TypeConverter
+    @ColumnTypeConverter
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun revert(value: Int): PackageSource = PackageSource.fromInt(value)
 }

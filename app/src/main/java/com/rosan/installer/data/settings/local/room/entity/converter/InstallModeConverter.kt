@@ -2,15 +2,15 @@
 // Copyright (C) 2023-2026 iamr0s InstallerX Revived contributors
 package com.rosan.installer.data.settings.local.room.entity.converter
 
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import com.rosan.installer.domain.settings.model.config.InstallMode
 
 object InstallModeConverter {
-    @TypeConverter
+    @ColumnTypeConverter
     fun revert(value: String?): InstallMode =
         (if (value != null) InstallMode.entries.find { it.value == value }
         else null) ?: InstallMode.Dialog
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun convert(value: InstallMode): String = value.value
 }
