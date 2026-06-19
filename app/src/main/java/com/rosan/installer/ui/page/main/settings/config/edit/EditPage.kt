@@ -230,10 +230,6 @@ fun EditPage(
                     item { DataForAllUserWidget(state, dispatch) }
                     item { DataAllowTestOnlyWidget(state, dispatch) }
                     item { DataAllowDowngradeWidget(state, dispatch) }
-                    if (state.checkAppSignature) {
-                        item { DataAllowSigMismatchWidget(state, dispatch) }
-                        item { DataAllowSigUnknownWidget(state, dispatch) }
-                    }
                     if (isAtLeastUpsideDownCake) item { DataBypassLowTargetSdkWidget(state, dispatch) }
                     item { DataAllowAllRequestedPermissionsWidget(state, dispatch) }
                     if (isAtLeastUpsideDownCake) item { DataRequestUpdateOwnershipWidget(state, dispatch) }
@@ -247,6 +243,10 @@ fun EditPage(
                 ) {
                     item { DataSplitChooseAllWidget(state, dispatch) }
                     item { DataApkChooseAllWidget(state, dispatch) }
+                    if (state.checkAppSignature) {
+                        item { DataAllowSigMismatchWidget(state, dispatch) }
+                        item { DataAllowSigUnknownWidget(state, dispatch) }
+                    }
                 }
             }
 

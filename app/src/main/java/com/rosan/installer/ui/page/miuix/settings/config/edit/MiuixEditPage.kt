@@ -222,10 +222,6 @@ fun MiuixEditPage(
                     MiuixDataForAllUserWidget(state = state, dispatch = dispatch)
                     MiuixDataAllowTestOnlyWidget(state = state, dispatch = dispatch)
                     MiuixDataAllowDowngradeWidget(state = state, dispatch = dispatch)
-                    if (state.checkAppSignature) {
-                        MiuixDataAllowSigMismatchWidget(state = state, dispatch = dispatch)
-                        MiuixDataAllowSigUnknownWidget(state = state, dispatch = dispatch)
-                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                         MiuixDataBypassLowTargetSdkWidget(state = state, dispatch = dispatch)
                     MiuixDataAllowAllRequestedPermissionsWidget(state = state, dispatch = dispatch)
@@ -242,6 +238,10 @@ fun MiuixEditPage(
                 ) {
                     MiuixDataSplitChooseAllWidget(state = state, dispatch = dispatch)
                     MiuixDataApkChooseAllWidget(state = state, dispatch = dispatch)
+                    if (state.checkAppSignature) {
+                        MiuixDataAllowSigMismatchWidget(state = state, dispatch = dispatch)
+                        MiuixDataAllowSigUnknownWidget(state = state, dispatch = dispatch)
+                    }
                 }
             }
             item { Spacer(Modifier.navigationBarsPadding()) }
