@@ -1013,4 +1013,5 @@
     <string name="unarchive_action_continue">Continue</string>
     <string name="unarchive_action_clear_storage">Clear storage</string>
     <string name="unarchive_action_app_settings">App settings</string>
+    <string name="installer_result_pending">Another installation is already in progress. Wait for it to finish, then try again.</string>
 </resources>

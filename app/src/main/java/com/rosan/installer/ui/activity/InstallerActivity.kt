@@ -242,6 +242,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
                 IncomingInstallPolicy.RejectWhileResultPending -> {
                     Timber.w("onNewIntent: Ignoring foreground install intent while result-bound install is active.")
+                    toast(R.string.installer_result_pending)
                     return
                 }
             }
