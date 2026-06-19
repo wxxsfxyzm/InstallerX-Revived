@@ -80,6 +80,14 @@ class InstallerSessionManagerImpl(
             }
         }
 
+    override fun clearForegroundInstallQueue() {
+        synchronized(foregroundInstallQueue) {
+            val count = foregroundInstallQueue.size
+            foregroundInstallQueue.clear()
+            Timber.d("InstallerSessionManager: Foreground install queue cleared. Removed count=$count")
+        }
+    }
+
     override fun enqueueForegroundUninstall(intent: Intent) {
         synchronized(foregroundUninstallQueue) {
             foregroundUninstallQueue.addLast(Intent(intent))

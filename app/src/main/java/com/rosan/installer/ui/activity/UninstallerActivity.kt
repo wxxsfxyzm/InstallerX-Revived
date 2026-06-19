@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import com.rosan.installer.R
+import com.rosan.installer.core.app.ActivityContracts.KEY_UNINSTALLER_ID
 import com.rosan.installer.domain.device.model.PermissionType
 import com.rosan.installer.domain.device.provider.PermissionChecker
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -28,9 +29,8 @@ import org.koin.core.component.inject
 import timber.log.Timber
 
 class UninstallerActivity : ComponentActivity(), KoinComponent {
-    companion object {
-        private const val KEY_ID = "uninstaller_id"
-        private const val EXTRA_PACKAGE_NAME = "package_name"
+    private companion object {
+        const val EXTRA_PACKAGE_NAME = "package_name"
     }
 
     private val themeStateProvider by inject<ThemeStateProvider>()
@@ -62,7 +62,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
             return
         }
 
-        val sessionId = savedInstanceState.getString(KEY_ID)
+        val sessionId = savedInstanceState.getString(KEY_UNINSTALLER_ID)
         session = sessionManager.getOrCreate(sessionId)
         startCollectors()
         showContent()
@@ -73,7 +73,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         Timber.d("UninstallerActivity onNewIntent.")
 
         if (shouldDeferUninstallIntent()) {
-            sessionManager.enqueueForegroundUninstall(Intent(intent).apply { removeExtra(KEY_ID) })
+            sessionManager.enqueueForegroundUninstall(Intent(intent).apply { removeExtra(KEY_UNINSTALLER_ID) })
             Timber.d("UninstallerActivity deferred foreground uninstall intent.")
             return
         }
@@ -83,7 +83,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
 
     override fun onSaveInstanceState(outState: Bundle) {
         val currentId = session?.id
-        outState.putString(KEY_ID, currentId)
+        outState.putString(KEY_UNINSTALLER_ID, currentId)
         Timber.d("UninstallerActivity onSaveInstanceState: Saving id: $currentId")
         super.onSaveInstanceState(outState)
     }
@@ -156,7 +156,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         val newSession = sessionManager.getOrCreate(null)
         newSession.background(false)
         session = newSession
-        intent.putExtra(KEY_ID, newSession.id)
+        intent.putExtra(KEY_UNINSTALLER_ID, newSession.id)
         latestProgress = ProgressEntity.Ready
 
         val packageName = intent.uninstallPackageName()

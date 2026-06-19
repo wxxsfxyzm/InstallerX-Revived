@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import com.rosan.installer.core.app.ActivityContracts
+import com.rosan.installer.core.app.ActivityContracts.KEY_INSTALLER_ID
 import com.rosan.installer.data.session.util.pendingActivity
 import com.rosan.installer.data.session.util.pendingBroadcast
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
@@ -26,7 +27,6 @@ class BroadcastHandler(
 ) : Handler, KoinComponent {
     companion object {
         private const val ACTION = "installer.broadcast.action"
-        const val KEY_ID = "installer_id"
         private const val KEY_NAME = "name"
 
         private fun getRequestCode(installer: InstallerSessionRepository, name: Name) =
@@ -45,13 +45,13 @@ class BroadcastHandler(
 
         fun namedIntent(context: Context, installer: InstallerSessionRepository, name: Name) =
             Intent(ACTION).setPackage(context.packageName)
-                .putExtra(KEY_ID, installer.id)
+                .putExtra(KEY_INSTALLER_ID, installer.id)
                 .putExtra(KEY_NAME, name.value)
                 .pendingBroadcast(context, getRequestCode(installer, name))
 
         fun privilegedLaunchAndFinishIntent(context: Context, installer: InstallerSessionRepository) =
             Intent(ACTION).setPackage(context.packageName)
-                .putExtra(KEY_ID, installer.id)
+                .putExtra(KEY_INSTALLER_ID, installer.id)
                 .putExtra(KEY_NAME, Name.PrivilegedLaunchAndFinish.value)
                 .pendingBroadcast(context, getRequestCode(installer, Name.PrivilegedLaunchAndFinish))
     }
@@ -87,7 +87,7 @@ class BroadcastHandler(
             if (intent.action != ACTION) return
             context ?: return // Ensure context is not null
 
-            val receivedId = intent.getStringExtra(KEY_ID)
+            val receivedId = intent.getStringExtra(KEY_INSTALLER_ID)
             Timber
                 .d("Receiver onReceive: Expected ID=${session.id}, Received ID=$receivedId, Action=${intent.action}")
 

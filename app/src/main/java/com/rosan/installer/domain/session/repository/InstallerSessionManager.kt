@@ -8,6 +8,7 @@ interface InstallerSessionManager {
     fun getOrCreate(id: String?): InstallerSessionRepository
     fun enqueueForegroundInstall(intent: Intent)
     fun takeNextForegroundInstall(): Intent?
+    fun clearForegroundInstallQueue()
     fun enqueueForegroundUninstall(intent: Intent)
     fun takeNextForegroundUninstall(): Intent?
 }
