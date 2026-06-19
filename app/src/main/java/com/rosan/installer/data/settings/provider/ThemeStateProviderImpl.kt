@@ -29,7 +29,11 @@ class ThemeStateProviderImpl(
         val manualSeedColor = prefs.seedColorInt
         val effectiveSeedColor =
             if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                if (!wallpaperColors.isNullOrEmpty()) wallpaperColors[0] else manualSeedColor
+                if (!wallpaperColors.isNullOrEmpty()) {
+                    if (wallpaperColors.contains(manualSeedColor)) {
+                        manualSeedColor
+                    } else wallpaperColors[0]
+                } else manualSeedColor
             } else manualSeedColor
 
         ThemeState(
