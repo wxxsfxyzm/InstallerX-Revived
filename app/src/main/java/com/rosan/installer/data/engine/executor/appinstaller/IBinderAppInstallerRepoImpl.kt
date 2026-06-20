@@ -40,10 +40,8 @@ import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.InstallerMode
-import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.framework.privileged.util.requireDhizukuPermissionGranted
 import com.rosan.installer.util.pm.isFreshInstallCandidate
-import com.rosan.installer.util.pm.isPackageArchivedCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -290,8 +288,8 @@ abstract class IBinderAppInstallerRepoImpl(
         packageName: String
     ): Session {
         val pm = context.packageManager
-        val containerType = entities.first().sourceType
-        val params = if (containerType == DataType.MULTI_APK_ZIP || containerType == DataType.MULTI_APK)
+        val sourceType = entities.first().sourceType
+        val params = if (sourceType == DataType.MULTI_APK_ZIP || sourceType == DataType.MULTI_APK)
             PackageInstaller.SessionParams(
                 // Always use full mode when apk is definite
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL
@@ -306,32 +304,13 @@ abstract class IBinderAppInstallerRepoImpl(
             )
         config.callingFromUid?.let { params.setOriginatingUid(it) }
         params.setAppPackageName(packageName)
-        params.applyMetadata(
+        params.applySessionContext(
+            config = config,
             metadata = metadata,
             entities = entities,
             installerPackageName = resolveInstallerPackageName(config),
             respectPlatformInstallPolicy = respectPlatformInstallPolicy
         )
-        // --- Customize Install Reason ---
-        if (config.enableCustomizeInstallReason) {
-            Timber.d("Setting installReason to ${config.installReason.name} (${config.installReason.value})")
-            params.setInstallReason(config.installReason.value)
-        } else
-            params.setInstallReason(PackageManager.INSTALL_REASON_USER)
-        // --- Install Reason End ---
-
-        // --- Customize PackageSource ---
-        // Only available on Android 13+, Dhizuku need test
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != Authorizer.Dhizuku) {
-            val packageSource = if (config.enableCustomizePackageSource) {
-                config.packageSource
-            } else {
-                metadata.defaultPackageSource()
-            }
-            Timber.d("Setting packageSource to ${packageSource.name} (${packageSource.value})")
-            params.setPackageSource(packageSource.value)
-        }
-        // --- PackageSource End ---
 
         // --- InstallFlags Start ---
         Timber.tag(INSTALL_FLAGS_TAG).d("Initial install flags: ${params.installFlags}")
@@ -341,13 +320,6 @@ abstract class IBinderAppInstallerRepoImpl(
         // Force-enable the 'ReplaceExisting' flag as a baseline
         newFlags = newFlags.addFlag(InstallOption.ReplaceExisting.value)
         Timber.tag(INSTALL_FLAGS_TAG).d("After adding baseline flags: $newFlags")
-        // Conditionally add the 'UnArchive' flag
-        if (context.packageManager.isPackageArchivedCompat(packageName)) {
-            Timber.tag(INSTALL_FLAGS_TAG).d("Package $packageName is archived, adding unarchive option.")
-            newFlags = newFlags.addFlag(InstallOption.UnArchive.value)
-        } else {
-            Timber.tag(INSTALL_FLAGS_TAG).d("Package $packageName is not archived.")
-        }
         params.installFlags = newFlags
         Timber.tag(INSTALL_FLAGS_TAG).d("Install flags after customization: ${params.installFlags}")
         // --- InstallFlags End ---
@@ -374,7 +346,7 @@ abstract class IBinderAppInstallerRepoImpl(
 
         // Only set abiOverride if the APK actually contains native libraries.
         // Pure Java/Kotlin apps (Architecture.NONE) should be left to the system to decide.
-        if ((containerType == DataType.APK || containerType == DataType.MULTI_APK || containerType == DataType.MULTI_APK_ZIP) &&
+        if ((sourceType == DataType.APK || sourceType == DataType.MULTI_APK || sourceType == DataType.MULTI_APK_ZIP) &&
             baseApkArch != null &&
             baseApkArch != Architecture.NONE
         ) {
@@ -398,9 +370,6 @@ abstract class IBinderAppInstallerRepoImpl(
         setSessionIBinder(session)
         return session
     }
-
-    private fun InstallMetadata.defaultPackageSource(): PackageSource =
-        if (referrerUri.isNullOrBlank()) PackageSource.LOCAL_FILE else PackageSource.DOWNLOADED_FILE
 
     private fun installIts(entities: List<InstallEntity>, session: Session) {
         for (entity in entities) installIt(entity, session)

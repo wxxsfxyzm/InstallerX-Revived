@@ -4,14 +4,38 @@ package com.rosan.installer.data.engine.executor.appinstaller
 
 import android.Manifest
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.net.toUri
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.config.PackageSource
 import timber.log.Timber
 
-internal fun PackageInstaller.SessionParams.applyMetadata(
+internal fun PackageInstaller.SessionParams.applySessionContext(
+    config: ConfigModel,
+    metadata: InstallMetadata,
+    entities: List<InstallEntity>,
+    installerPackageName: String?,
+    respectPlatformInstallPolicy: Boolean
+) {
+    applyMetadata(
+        metadata = metadata,
+        entities = entities,
+        installerPackageName = installerPackageName,
+        respectPlatformInstallPolicy = respectPlatformInstallPolicy
+    )
+    applyInstallReasonAndPackageSource(
+        config = config,
+        metadata = metadata,
+        respectPlatformInstallPolicy = respectPlatformInstallPolicy
+    )
+}
+
+private fun PackageInstaller.SessionParams.applyMetadata(
     metadata: InstallMetadata,
     entities: List<InstallEntity>,
     installerPackageName: String?,
@@ -48,6 +72,37 @@ internal fun PackageInstaller.SessionParams.applyMetadata(
     }
 }
 
+private fun PackageInstaller.SessionParams.applyInstallReasonAndPackageSource(
+    config: ConfigModel,
+    metadata: InstallMetadata,
+    respectPlatformInstallPolicy: Boolean
+) {
+    val installReason = if (config.enableCustomizeInstallReason) {
+        config.installReason
+    } else {
+        null
+    }
+
+    if (installReason != null) {
+        Timber.d("Setting installReason to ${installReason.name} (${installReason.value})")
+        setInstallReason(installReason.value)
+    } else {
+        setInstallReason(PackageManager.INSTALL_REASON_USER)
+    }
+
+    // Only available on Android 13+.
+    // TODO Dhizuku needs test.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != Authorizer.Dhizuku) {
+        val packageSource = when {
+            config.enableCustomizePackageSource -> config.packageSource
+            respectPlatformInstallPolicy -> metadata.defaultPackageSource()
+            else -> PackageSource.UNSPECIFIED
+        }
+        Timber.d("Setting packageSource to ${packageSource.name} (${packageSource.value})")
+        setPackageSource(packageSource.value)
+    }
+}
+
 private fun String.toUriOrNull(): Uri? =
     runCatching { toUri() }
         .getOrElse { error ->
@@ -62,3 +117,6 @@ private fun List<InstallEntity>.totalInstallSize(): Long? {
     if (sizes.any { it <= 0L }) return null
     return sizes.sum()
 }
+
+private fun InstallMetadata.defaultPackageSource(): PackageSource =
+    if (referrerUri.isNullOrBlank()) PackageSource.LOCAL_FILE else PackageSource.DOWNLOADED_FILE
