@@ -15,6 +15,8 @@ enum class UninstallErrorType(val legacyCode: Int, val stringResId: Int) {
     USER_RESTRICTED(PackageManagerHidden.DELETE_FAILED_USER_RESTRICTED, R.string.exception_install_failed_user_restricted),
     OWNER_BLOCKED(PackageManagerHidden.DELETE_FAILED_OWNER_BLOCKED, R.string.exception_uninstall_failed_owner_blocked),
     ABORTED(PackageManagerHidden.DELETE_FAILED_ABORTED, R.string.exception_uninstall_failed_aborted),
+    USED_SHARED_LIBRARY(PackageManagerHidden.DELETE_FAILED_USED_SHARED_LIBRARY, R.string.exception_uninstall_failed_used_shared_library),
+    APP_PINNED(PackageManagerHidden.DELETE_FAILED_APP_PINNED, R.string.exception_uninstall_failed_app_pinned),
     HYPEROS_SYSTEM_APP(-1000, R.string.exception_uninstall_failed_hyperos_system_app),
 
     // --- Fallback for unknown status codes ---

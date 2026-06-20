@@ -744,6 +744,8 @@
     <string name="exception_uninstall_failed_aborted">Uninstallation cancelled by user</string>
     <string name="exception_uninstall_failed_device_policy">Uninstallation blocked by device policy</string>
     <string name="exception_uninstall_failed_owner_blocked">Uninstallation blocked by owner</string>
+    <string name="exception_uninstall_failed_used_shared_library">Uninstallation blocked because the app is used as a shared library</string>
+    <string name="exception_uninstall_failed_app_pinned">Uninstallation blocked because the app is pinned</string>
     <string name="exception_package_manager_name_not_found">Package name not found</string>
     <string name="exception_shizuku_not_work">Please activate Sui or Shizuku and grant permission</string>
     <string name="exception_dhizuku_not_work">Please activate Dhizuku and grant permission</string>

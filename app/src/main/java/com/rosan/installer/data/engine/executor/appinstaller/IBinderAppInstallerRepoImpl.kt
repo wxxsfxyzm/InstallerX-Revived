@@ -10,6 +10,7 @@ import android.content.pm.IPackageManager
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.Session
 import android.content.pm.PackageManager
+import android.content.pm.PackageManagerHidden
 import android.content.pm.VersionedPackage
 import android.content.res.AssetFileDescriptor
 import android.os.Build
@@ -318,7 +319,7 @@ abstract class IBinderAppInstallerRepoImpl(
         // Start with the base flags from params and config
         var newFlags = params.installFlags.addFlag(config.installFlags)
         // Force-enable the 'ReplaceExisting' flag as a baseline
-        newFlags = newFlags.addFlag(InstallOption.ReplaceExisting.value)
+        newFlags = newFlags.addFlag(PackageManagerHidden.INSTALL_REPLACE_EXISTING)
         Timber.tag(INSTALL_FLAGS_TAG).d("After adding baseline flags: $newFlags")
         params.installFlags = newFlags
         Timber.tag(INSTALL_FLAGS_TAG).d("Install flags after customization: ${params.installFlags}")

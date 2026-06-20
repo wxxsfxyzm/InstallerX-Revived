@@ -27,6 +27,160 @@ public final class PackageManagerHidden {
     public static final int INSTALL_UNKNOWN = 0;
 
     /**
+     * Flag parameter for package installation to replace an existing package if present.
+     *
+     * @hide
+     */
+    public static final int INSTALL_REPLACE_EXISTING = 0x00000002;
+
+    /**
+     * Flag parameter for package installation to allow test packages.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALLOW_TEST = 0x00000004;
+
+    /**
+     * Flag parameter for package installation to install on internal storage.
+     *
+     * @hide
+     */
+    public static final int INSTALL_INTERNAL = 0x00000010;
+
+    /**
+     * Flag parameter for package installation to install on external storage.
+     *
+     * @hide
+     */
+    public static final int INSTALL_EXTERNAL = 0x00000008;
+
+    /**
+     * Flag parameter for package installation originating from adb.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FROM_ADB = 0x00000020;
+
+    /**
+     * Flag parameter for package installation for all users.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALL_USERS = 0x00000040;
+
+    /**
+     * Flag parameter for package installation to request downgrade handling.
+     *
+     * @hide
+     */
+    public static final int INSTALL_REQUEST_DOWNGRADE = 0x00000080;
+
+    /**
+     * Flag parameter for package installation to grant all requested permissions.
+     *
+     * @hide
+     */
+    public static final int INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS = 0x00000100;
+
+    /**
+     * Flag parameter for package installation as an instant app.
+     *
+     * @hide
+     */
+    public static final int INSTALL_INSTANT_APP = 0x00000800;
+
+    /**
+     * Flag parameter for package installation to avoid killing the app.
+     *
+     * @hide
+     */
+    public static final int INSTALL_DONT_KILL_APP = 0x00001000;
+
+    /**
+     * Flag parameter for package installation as a full app.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FULL_APP = 0x00004000;
+
+    /**
+     * Flag parameter for package installation to allocate storage aggressively.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALLOCATE_AGGRESSIVE = 0x00008000;
+
+    /**
+     * Flag parameter for package installation as a virtual preload.
+     *
+     * @hide
+     */
+    public static final int INSTALL_VIRTUAL_PRELOAD = 0x00010000;
+
+    /**
+     * Flag parameter for package installation of APEX packages.
+     *
+     * @hide
+     */
+    public static final int INSTALL_APEX = 0x00020000;
+
+    /**
+     * Flag parameter for package installation to enable rollback.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ENABLE_ROLLBACK = 0x00040000;
+
+    /**
+     * Flag parameter for package installation to disable verification.
+     *
+     * @hide
+     */
+    public static final int INSTALL_DISABLE_VERIFICATION = 0x00080000;
+
+    /**
+     * Flag parameter for package installation to allow downgrade.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALLOW_DOWNGRADE = 0x00100000;
+
+    /**
+     * Flag parameter for staged package installation.
+     *
+     * @hide
+     */
+    public static final int INSTALL_STAGED = 0x00200000;
+
+    /**
+     * Flag parameter for dry-run package installation.
+     *
+     * @hide
+     */
+    public static final int INSTALL_DRY_RUN = 0x00800000;
+
+    /**
+     * Flag parameter for package installation to disable allowed APEX update checks.
+     *
+     * @hide
+     */
+    public static final int INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK = 0x00800000;
+
+    /**
+     * Flag parameter for package installation to bypass the low target SDK block.
+     *
+     * @hide
+     */
+    public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x01000000;
+
+    /**
+     * Flag parameter for package installation to request update ownership.
+     *
+     * @hide
+     */
+    public static final int INSTALL_REQUEST_UPDATE_OWNERSHIP = 1 << 25;
+
+    /**
      * Installation return code: this is passed in the {@link PackageInstallerHidden#EXTRA_LEGACY_STATUS}
      * on success.
      *
