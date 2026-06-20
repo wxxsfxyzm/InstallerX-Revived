@@ -33,6 +33,8 @@ data class ConfigEntity(
     var customizeAuthorizer: String,
     @ColumnInfo(name = "install_mode")
     var installMode: InstallMode,
+    @ColumnInfo(name = "auto_approve_session", defaultValue = "0")
+    var autoApproveSession: Boolean = false,
     @ColumnInfo(name = "show_toast", defaultValue = "0")
     var toastMode: ToastMode = ToastMode.Disable,
     @ColumnInfo(name = "enable_customize_install_reason", defaultValue = "0")

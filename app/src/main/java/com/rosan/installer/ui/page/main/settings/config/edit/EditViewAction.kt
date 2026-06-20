@@ -17,6 +17,7 @@ sealed interface EditViewAction {
     data class ChangeDataAuthorizer(val authorizer: Authorizer) : EditViewAction
     data class ChangeDataCustomizeAuthorizer(val customizeAuthorizer: String) : EditViewAction
     data class ChangeDataInstallMode(val installMode: InstallMode) : EditViewAction
+    data class ChangeDataAutoApproveSession(val autoApproveSession: Boolean) : EditViewAction
     data class ChangeDataToastMode(val toastMode: ToastMode) : EditViewAction
     data class ChangeDataEnableCustomizePackageSource(val enable: Boolean) : EditViewAction
     data class ChangeDataPackageSource(val packageSource: PackageSource) : EditViewAction

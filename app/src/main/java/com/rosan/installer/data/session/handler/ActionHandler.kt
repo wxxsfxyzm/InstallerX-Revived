@@ -567,6 +567,13 @@ class ActionHandler(
         }
 
         session.confirmationDetails.value = details
+
+        if (session.config.autoApproveSession) {
+            Timber.d("[id=$sessionId] resolveConfirmInstall: Auto approving system session $sysSessionId.")
+            handleConfirm(sysSessionId, true)
+            return
+        }
+
         Timber.d("[id=$sessionId] resolveConfirmInstall: Success. Emitting InstallConfirming.")
         session.progress.emit(ProgressEntity.InstallConfirming)
     }

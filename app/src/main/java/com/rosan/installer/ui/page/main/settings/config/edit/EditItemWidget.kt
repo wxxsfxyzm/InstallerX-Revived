@@ -231,6 +231,27 @@ fun DataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) -> Un
 }
 
 @Composable
+fun DataAutoApproveSessionWidget(
+    state: EditViewState,
+    dispatch: (EditViewAction) -> Unit,
+    onEnableRequest: () -> Unit
+) {
+    SwitchWidget(
+        icon = AppIcons.InstallMode,
+        title = stringResource(id = R.string.config_auto_approve_session),
+        description = stringResource(id = R.string.config_auto_approve_session_desc),
+        checked = state.data.autoApproveSession,
+        onCheckedChange = { checked ->
+            if (checked) {
+                onEnableRequest()
+            } else {
+                dispatch(EditViewAction.ChangeDataAutoApproveSession(false))
+            }
+        }
+    )
+}
+
+@Composable
 fun DataToastModeWidget(
     state: EditViewState,
     dispatch: (EditViewAction) -> Unit

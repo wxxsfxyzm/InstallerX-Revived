@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -85,6 +87,7 @@ fun EditPage(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     var showUnsavedDialog by remember { mutableStateOf(false) }
+    var showAutoApproveSessionDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
@@ -104,6 +107,39 @@ fun EditPage(
         },
         errorMessages = state.activeErrorResIds.map { stringResource(it) }
     )
+
+    if (showAutoApproveSessionDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showAutoApproveSessionDialog = false
+            },
+            title = {
+                Text(text = stringResource(R.string.warning))
+            },
+            text = {
+                Text(text = stringResource(R.string.config_auto_approve_session_warning))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showAutoApproveSessionDialog = false
+                        dispatch(EditViewAction.ChangeDataAutoApproveSession(true))
+                    }
+                ) {
+                    Text(text = stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showAutoApproveSessionDialog = false
+                    }
+                ) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     val shouldInterceptBackPress = state.hasUnsavedChanges || state.hasErrors
 
@@ -196,6 +232,15 @@ fun EditPage(
                     item { DataNameWidget(state, dispatch, { DataDescriptionWidget(state, dispatch) }) }
                     dataAuthorizerWidget(state, dispatch)
                     item { DataInstallModeWidget(state, dispatch) }
+                    item {
+                        DataAutoApproveSessionWidget(
+                            state = state,
+                            dispatch = dispatch,
+                            onEnableRequest = {
+                                showAutoApproveSessionDialog = true
+                            }
+                        )
+                    }
                     if (state.globalInstallerBiometricAuthMode == BiometricAuthMode.FollowConfig)
                         item { DataRequireBiometricAuthWidget(state, dispatch) }
                     item { DataToastModeWidget(state, dispatch) }

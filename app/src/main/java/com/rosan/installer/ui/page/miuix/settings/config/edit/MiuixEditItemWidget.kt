@@ -203,6 +203,27 @@ fun MiuixDataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) 
 }
 
 @Composable
+fun MiuixDataAutoApproveSessionWidget(
+    state: EditViewState,
+    dispatch: (EditViewAction) -> Unit,
+    onEnableRequest: () -> Unit
+) {
+    MiuixSwitchWidget(
+        icon = AppIcons.InstallMode,
+        title = stringResource(id = R.string.config_auto_approve_session),
+        description = stringResource(id = R.string.config_auto_approve_session_desc),
+        checked = state.data.autoApproveSession,
+        onCheckedChange = { checked ->
+            if (checked) {
+                onEnableRequest()
+            } else {
+                dispatch(EditViewAction.ChangeDataAutoApproveSession(false))
+            }
+        }
+    )
+}
+
+@Composable
 fun MiuixToastModeWidget(
     state: EditViewState,
     dispatch: (EditViewAction) -> Unit

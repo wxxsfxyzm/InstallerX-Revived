@@ -65,6 +65,7 @@ data class BackupProfile(
     val authorizer: String = "global",
     val customizeAuthorizer: String = "",
     val installMode: String = "dialog",
+    val autoApproveSession: Boolean = false,
     val toastMode: Int = 0,
     val enableCustomizeInstallReason: Boolean = false,
     val installReason: Int = 0,
