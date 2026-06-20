@@ -35,23 +35,26 @@ class ThemeSettingsViewModel(
         systemEnvProvider.getWallpaperColorsFlow().onStart { emit(emptyList()) }
     ) { prefs, wallpaperColors ->
         val manualSeedColor = Color(prefs.seedColorInt)
-        val effectiveSeedColor: Color = if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            if (!wallpaperColors.isNullOrEmpty()) {
-                if (wallpaperColors.contains(manualSeedColor.toArgb())) {
-                    manualSeedColor
-                } else Color(wallpaperColors[0])
-            } else manualSeedColor
-        } else {
-            if (PresetColors.any { it.color == manualSeedColor }) manualSeedColor else PresetColors[0].color
-        }
 
-        val availableColors: List<RawColor> = if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            if (!wallpaperColors.isNullOrEmpty()) {
-                wallpaperColors.map { colorInt ->
-                    RawColor(key = colorInt.toHexString(), color = Color(colorInt))
-                }
+        val effectiveSeedColor: Color =
+            if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                if (!wallpaperColors.isNullOrEmpty()) {
+                    if (wallpaperColors.contains(manualSeedColor.toArgb())) {
+                        manualSeedColor
+                    } else Color(wallpaperColors[0])
+                } else PresetColors[0].color
+            } else if (PresetColors.any { it.color == manualSeedColor }) {
+                manualSeedColor
+            } else PresetColors[0].color
+
+        val availableColors: List<RawColor> =
+            if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                if (!wallpaperColors.isNullOrEmpty()) {
+                    wallpaperColors.map { colorInt ->
+                        RawColor(key = colorInt.toHexString(), color = Color(colorInt))
+                    }
+                } else PresetColors
             } else PresetColors
-        } else PresetColors
 
         ThemeSettingsState(
             showMiuixUI = prefs.showMiuixUI,
@@ -85,7 +88,12 @@ class ThemeSettingsViewModel(
             is ThemeSettingsAction.SetThemeMode -> viewModelScope.launch { updateSetting(StringSetting.ThemeMode, action.mode.name) }
             is ThemeSettingsAction.SetPaletteStyle -> viewModelScope.launch { updateSetting(StringSetting.ThemePaletteStyle, action.style.name) }
             is ThemeSettingsAction.SetColorSpec -> viewModelScope.launch { updateSetting(StringSetting.ThemeColorSpec, action.spec.name) }
-            is ThemeSettingsAction.SetUseDynamicColor -> viewModelScope.launch { updateSetting(BooleanSetting.ThemeUseDynamicColor, action.use) }
+
+            is ThemeSettingsAction.SetUseDynamicColor -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ThemeUseDynamicColor, action.use)
+                updateSetting(IntSetting.ThemeSeedColor, Int.MIN_VALUE)
+            }
+
             is ThemeSettingsAction.SetUseMiuixMonet -> viewModelScope.launch { updateSetting(BooleanSetting.UiUseMiuixMonet, action.use) }
             is ThemeSettingsAction.SetUseAppleFloatingBar -> viewModelScope.launch {
                 updateSetting(
