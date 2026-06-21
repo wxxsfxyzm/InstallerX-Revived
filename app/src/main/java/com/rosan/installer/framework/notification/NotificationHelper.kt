@@ -4,7 +4,9 @@ package com.rosan.installer.framework.notification
 
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
 import androidx.annotation.DrawableRes
 import com.rosan.installer.R
 import com.rosan.installer.data.session.handler.BroadcastHandler
@@ -37,6 +39,22 @@ class NotificationHelper(
     val unknownSourceIntent: PendingIntent = BroadcastHandler.Companion.openIntent(context, session)
     val cancelIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Cancel)
     val finishIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Finish)
+
+    fun unknownSourceDescription(): String =
+        context.getString(R.string.installer_waiting_unknown_source_desc, sourceAppLabel())
+
+    @Suppress("DEPRECATION")
+    private fun sourceAppLabel(): CharSequence {
+        val packageName = session.config.initiatorPackageName ?: return context.getString(R.string.installer_label_unknown)
+        return runCatching {
+            val appInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0))
+            } else {
+                context.packageManager.getApplicationInfo(packageName, 0)
+            }
+            context.packageManager.getApplicationLabel(appInfo)
+        }.getOrNull() ?: context.getString(R.string.installer_label_unknown)
+    }
 
     // Resolve specific launch intent considering privileged access
     fun getLaunchPendingIntent(packageName: String?): PendingIntent? {

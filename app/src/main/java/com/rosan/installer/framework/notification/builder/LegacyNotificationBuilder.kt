@@ -154,17 +154,19 @@ class LegacyNotificationBuilder(
     private suspend fun onWaitingUnknownSource(
         builder: NotificationCompat.Builder,
         preferSystemIcon: Boolean
-    ): NotificationCompat.Builder =
-        builder.setContentTitle(context.getString(R.string.installer_waiting_unknown_source))
-            .setContentText(context.getString(R.string.installer_waiting_unknown_source_desc))
+    ): NotificationCompat.Builder {
+        val description = helper.unknownSourceDescription()
+        return builder.setContentTitle(context.getString(R.string.installer_waiting_unknown_source))
+            .setContentText(description)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(context.getString(R.string.installer_waiting_unknown_source_desc))
+                    .bigText(description)
             )
             .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
             .setOnlyAlertOnce(false)
             .addAction(0, context.getString(R.string.suggestion_allow_unknown_source), helper.unknownSourceIntent)
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
+    }
 
     private suspend fun onInstallFailed(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
         val info = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context)

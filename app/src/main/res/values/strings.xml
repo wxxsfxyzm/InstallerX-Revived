@@ -474,7 +474,7 @@
     <string name="installer_preparing">Preparing</string>
     <string name="installer_preparing_desc">Preparing files, please wait…</string>
     <string name="installer_waiting_unknown_source">Allow Unknown Source</string>
-    <string name="installer_waiting_unknown_source_desc">Waiting for Android settings to allow this source to request package installs</string>
+    <string name="installer_waiting_unknown_source_desc">Grant %1$s the \"Install unknown apps\" permission</string>
     <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
     <string name="installer_analyse_failed_corrupted_archive">Corrupted archive</string>

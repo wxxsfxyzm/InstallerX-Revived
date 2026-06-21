@@ -310,7 +310,7 @@ class ModernNotificationBuilder(
         builder: NotificationCompat.Builder,
         preferSystemIcon: Boolean
     ): NotificationCompat.Builder =
-        builder.setContentText(context.getString(R.string.installer_waiting_unknown_source_desc))
+        builder.setContentText(helper.unknownSourceDescription())
             .setOnlyAlertOnce(false)
             .setSilent(false)
             .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))

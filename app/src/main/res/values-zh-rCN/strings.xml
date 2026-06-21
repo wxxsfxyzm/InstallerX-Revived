@@ -462,7 +462,7 @@
     <string name="installer_preparing">正在读取文件</string>
     <string name="installer_preparing_desc">正在读取文件，请稍候…</string>
     <string name="installer_waiting_unknown_source">允许未知来源</string>
-    <string name="installer_waiting_unknown_source_desc">正在等待 Android 设置允许此来源请求安装软件包</string>
+    <string name="installer_waiting_unknown_source_desc">请授予 %1$s “安装未知应用”权限</string>
     <string name="installer_analysing">分析中…</string>
     <string name="installer_analyse_failed">分析失败</string>
     <string name="installer_analyse_success">分析成功</string>

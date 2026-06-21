@@ -192,7 +192,7 @@ class MiIslandNotificationBuilder(
             is ProgressEntity.InstallWaitingUnknownSource -> {
                 title = context.getString(R.string.installer_waiting_unknown_source)
                 shortText = context.getString(R.string.installer_waiting_unknown_source)
-                contentText = context.getString(R.string.installer_waiting_unknown_source_desc)
+                contentText = helper.unknownSourceDescription()
                 showAppIcon = false
                 actionsList.add(IslandAction("miui_action_unknown_source", context.getString(R.string.suggestion_allow_unknown_source), helper.unknownSourceIntent, true))
                 actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
