@@ -94,7 +94,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
             if (packageName != null && isUnknownSourceAllowed(packageName)) {
                 Timber.d("Unknown source permission granted for $packageName. Retrying install.")
-                session?.install(false)
+                val currentSession = session
+                if (currentSession != null &&
+                    latestProgress is ProgressEntity.InstallWaitingUnknownSource &&
+                    currentSession.multiInstallQueue.isNotEmpty()
+                ) {
+                    currentSession.installMultiple(currentSession.multiInstallQueue, triggerAuth = false)
+                } else {
+                    currentSession?.install(false)
+                }
             } else {
                 Timber.d("Unknown source permission was not granted. Keeping installer in waiting state.")
             }

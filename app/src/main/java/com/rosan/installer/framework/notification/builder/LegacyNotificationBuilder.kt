@@ -41,6 +41,7 @@ class LegacyNotificationBuilder(
             is ProgressEntity.InstallAnalysedSuccess -> onAnalysedSuccess(builder, preferSystemIcon)
             is ProgressEntity.Installing -> onInstalling(builder, progress, preferSystemIcon)
             is ProgressEntity.InstallingModule -> onInstallingModule(builder, progress, preferSystemIcon)
+            is ProgressEntity.InstallWaitingUnknownSource -> onWaitingUnknownSource(builder, preferSystemIcon).build()
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
             is ProgressEntity.InstallCompleted -> onInstallCompleted(builder, progress).build()
@@ -52,7 +53,7 @@ class LegacyNotificationBuilder(
         val isWorking =
             progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallResolveSuccess || progress is ProgressEntity.InstallAnalysing || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.Installing || progress is ProgressEntity.InstallingModule || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
         val isImportance =
-            progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
+            progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallWaitingUnknownSource || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
 
         val channelEnum =
             if (isImportance && background) NotificationHelper.Channel.InstallerChannel else NotificationHelper.Channel.InstallerProgressChannel
@@ -149,6 +150,21 @@ class LegacyNotificationBuilder(
     ): Notification = builder.setContentTitle(context.getString(R.string.installer_installing))
         .setContentText(progress.output.lastOrNull() ?: context.getString(R.string.installer_installing)).setProgress(100, 50, true)
         .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon)).build()
+
+    private suspend fun onWaitingUnknownSource(
+        builder: NotificationCompat.Builder,
+        preferSystemIcon: Boolean
+    ): NotificationCompat.Builder =
+        builder.setContentTitle(context.getString(R.string.installer_waiting_unknown_source))
+            .setContentText(context.getString(R.string.installer_waiting_unknown_source_desc))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(context.getString(R.string.installer_waiting_unknown_source_desc))
+            )
+            .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
+            .setOnlyAlertOnce(false)
+            .addAction(0, context.getString(R.string.suggestion_allow_unknown_source), helper.unknownSourceIntent)
+            .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
 
     private suspend fun onInstallFailed(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
         val info = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context)

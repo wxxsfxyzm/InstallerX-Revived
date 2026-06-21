@@ -226,7 +226,7 @@ class ActionHandler(
             is InstallerSessionRepositoryImpl.Action.ResolveInstall -> resolve(action.activity)
             is InstallerSessionRepositoryImpl.Action.Analyse -> analyse()
             is InstallerSessionRepositoryImpl.Action.Install -> handleSingleInstall(action.triggerAuth)
-            is InstallerSessionRepositoryImpl.Action.InstallMultiple -> handleMultiInstall()
+            is InstallerSessionRepositoryImpl.Action.InstallMultiple -> handleMultiInstall(action.triggerAuth)
             is InstallerSessionRepositoryImpl.Action.ResolveUninstall -> resolveUninstall(action.activity, action.packageName)
             is InstallerSessionRepositoryImpl.Action.Uninstall -> uninstall(action.packageName)
             is InstallerSessionRepositoryImpl.Action.ResolveConfirmInstall -> resolveConfirm(
@@ -404,8 +404,10 @@ class ActionHandler(
         performInstallLogic()
     }
 
-    private suspend fun handleMultiInstall() {
-        requestUserBiometricAuthentication(true)
+    private suspend fun handleMultiInstall(triggerAuth: Boolean) {
+        if (triggerAuth) {
+            requestUserBiometricAuthentication(true)
+        }
         val queue = session.multiInstallQueue
         if (queue.isEmpty()) return
 
@@ -457,6 +459,14 @@ class ActionHandler(
                     throw IllegalStateException("Original package info not found")
                 }
             } catch (e: Exception) {
+                if ((e as? InstallException)?.errorType == InstallErrorType.MISSING_INSTALL_PERMISSION) {
+                    Timber.w(e, "Batch install is waiting for unknown source permission.")
+                    session.error = e
+                    session.multiInstallResults.clear()
+                    session.currentMultiInstallIndex = 0
+                    session.progress.emit(ProgressEntity.InstallWaitingUnknownSource)
+                    return
+                }
                 Timber.e(e, "Batch install failed for ${firstEntity.app.packageName}")
                 appEntities.forEach { entity ->
                     session.multiInstallResults.add(InstallResult(entity, false, e))

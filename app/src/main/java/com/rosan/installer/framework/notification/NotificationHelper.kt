@@ -34,6 +34,7 @@ class NotificationHelper(
     val openIntent: PendingIntent = BroadcastHandler.Companion.openIntent(context, session)
     val analyseIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Analyse)
     val installIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Install)
+    val unknownSourceIntent: PendingIntent = BroadcastHandler.Companion.openIntent(context, session)
     val cancelIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Cancel)
     val finishIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Finish)
 
