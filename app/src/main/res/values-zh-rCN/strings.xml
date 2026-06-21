@@ -328,7 +328,7 @@
     <string name="config_install_mode_notification">通知栏</string>
     <string name="config_install_mode_auto_notification">通知栏自动</string>
     <string name="config_install_mode_ignore">忽略</string>
-    <string name="config_auto_approve_session">会话安装自动批准</string>
+    <string name="config_auto_approve_session">自动批准安装会话</string>
     <string name="config_auto_approve_session_desc">静默批准目标应用的会话安装请求</string>
     <string name="config_auto_approve_session_warning">启用此开关会使该配置的作用域内 app 拥有未经用户明确授权即可静默安装的能力，请谨慎启用。</string>
     <string name="config_install_show_toast">显示 Toast</string>
