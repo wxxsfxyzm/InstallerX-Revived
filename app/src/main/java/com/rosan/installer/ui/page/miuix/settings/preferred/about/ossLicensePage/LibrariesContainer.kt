@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,13 +37,15 @@ import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.util.author
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.squircle.LocalSquircleEnabled
+import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowDialog
@@ -54,7 +58,7 @@ fun LibrariesContainer(
 ) {
     val uriHandler = LocalUriHandler.current
     var selectedLibrary by remember { mutableStateOf<Library?>(null) }
-    val showState = remember { mutableStateOf(false) }
+    var showLicenseDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier,
@@ -67,67 +71,67 @@ fun LibrariesContainer(
                 library = library,
                 onClick = {
                     selectedLibrary = library
-                    showState.value = true
+                    showLicenseDialog = true
                 }
             )
         }
         item { Spacer(Modifier.navigationBarsPadding()) }
     }
 
-    val onDismiss = {
-        showState.value = false
-    }
-
     selectedLibrary?.let { library ->
+        val licenseSummary = stringResource(
+            R.string.license,
+            library.licenses.joinToString(", ") { it.name }
+        )
+
         WindowDialog(
-            show = showState.value,
-            onDismissRequest = onDismiss,
+            show = showLicenseDialog,
             title = library.name,
+            summary = licenseSummary,
+            onDismissRequest = { showLicenseDialog = false },
+            onDismissFinished = { selectedLibrary = null },
             content = {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                val dismissState = LocalDismissState.current
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 420.dp)
+                ) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f, fill = false)
                             .scrollEndHaptic()
                             .overScrollVertical(),
+                        contentPadding = PaddingValues(bottom = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         overscrollEffect = null
                     ) {
-                        item {
-                            MiuixInstallerTipCard(
-                                text = stringResource(
-                                    R.string.license,
-                                    library.licenses.joinToString(", ") { it.name }
-                                )
-                            )
-                        }
-
                         items(library.licenses.toList()) { license ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.defaultColors(
-                                    color = MiuixTheme.colorScheme.surfaceContainerHighest
-                                )
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(
-                                        text = license.name,
-                                        style = MiuixTheme.textStyles.title4,
-                                        color = MiuixTheme.colorScheme.primary,
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .clickable {
+                            CompositionLocalProvider(LocalSquircleEnabled provides false) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.defaultColors(
+                                        color = MiuixTheme.colorScheme.surfaceContainerHighest
+                                    )
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text(
+                                            text = license.name,
+                                            style = MiuixTheme.textStyles.title4,
+                                            color = MiuixTheme.colorScheme.primary,
+                                            modifier = Modifier.clickable {
                                                 license.url?.let { uriHandler.openUri(it) }
                                             }
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = license.licenseContent
-                                            ?: stringResource(R.string.no_license_text),
-                                        style = MiuixTheme.textStyles.body2,
-                                        color = MiuixTheme.colorScheme.onSurfaceContainer
-                                    )
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = license.licenseContent
+                                                ?: stringResource(R.string.no_license_text),
+                                            style = MiuixTheme.textStyles.body2,
+                                            color = MiuixTheme.colorScheme.onSurfaceContainer
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -149,7 +153,7 @@ fun LibrariesContainer(
 
                         TextButton(
                             modifier = Modifier.weight(1f),
-                            onClick = onDismiss,
+                            onClick = { dismissState?.invoke() },
                             text = stringResource(R.string.close),
                             colors = ButtonDefaults.textButtonColorsPrimary()
                         )
@@ -170,8 +174,9 @@ fun LibraryCard(
         modifier = modifier
             .padding(horizontal = 12.dp)
             .padding(bottom = 12.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            .clip(RoundedCornerShape(16.dp)),
+        onClick = onClick,
+        pressFeedbackType = PressFeedbackType.Sink
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

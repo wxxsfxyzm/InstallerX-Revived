@@ -35,7 +35,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,13 +53,16 @@ import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
-import com.mikepenz.aboutlibraries.ui.compose.m3.chipColors
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
+import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantColors
+import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryDetailMode
+import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryRow
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
+import com.rosan.installer.ui.theme.CornerRadius
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
@@ -113,9 +115,6 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
         val cornerRadius = 16.dp
         LibrariesContainer(
             libraries = libraries,
-            libraryModifier = Modifier
-                .padding(vertical = 4.dp)
-                .clip(RoundedCornerShape(cornerRadius)),
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
@@ -126,17 +125,30 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                 bottom = paddingValues.calculateBottomPadding()
             ),
             colors = LibraryDefaults.libraryColors(
-                libraryBackgroundColor = MaterialTheme.colorScheme.surfaceBright,
-                libraryContentColor = MaterialTheme.colorScheme.onSurface,
-                // To maintain the original appearance, explicitly set the license chip colors
-                // to match the old function's default badge colors.
-                licenseChipColors = LibraryDefaults.chipColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = contentColorFor(MaterialTheme.colorScheme.primary)
-                )
+                libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+                libraryContentColor = MaterialTheme.colorScheme.onSurface
             ),
-            onLibraryClick = { library ->
+            variantColors = LibraryDefaults.m3VariantColors(
+                rowBackground = MaterialTheme.colorScheme.surfaceBright,
+                rowExpandedBackground = MaterialTheme.colorScheme.surfaceBright,
+                rowOnBackground = MaterialTheme.colorScheme.onSurface,
+                rowSubtleContent = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            detailMode = LibraryDetailMode.None,
+            libraryRow = { _, library, expanded, toggle, style ->
+                LibraryRow(
+                    library = library,
+                    expanded = expanded,
+                    onToggle = toggle,
+                    style = style,
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .clip(RoundedCornerShape(CornerRadius))
+                )
+            },
+            onLibraryClick = { library: Library ->
                 selectedLibrary = library
+                true
             }
         )
 
