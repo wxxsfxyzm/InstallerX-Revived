@@ -116,7 +116,6 @@ class ActionHandler(
         job = scope.launch {
             session.action.collect { action ->
                 Timber.d("[id=$sessionId] Received action: ${action::class.simpleName}")
-                clearActionReplayCache(action)
 
                 when (action) {
                     is InstallerSessionRepositoryImpl.Action.Cancel -> {
@@ -146,7 +145,7 @@ class ActionHandler(
                                 val message = error.getErrorMessage(context)
                                 val emitted = session.toastEvents.tryEmit(message)
                                 Timber.d("[id=$sessionId] ApproveSession failure toast emitted=$emitted, message=$message")
-                                session.progress.emit(ProgressEntity.Finish)
+                                session.close()
                             }
                         }
                     }
@@ -157,12 +156,6 @@ class ActionHandler(
                 }
             }
         }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun clearActionReplayCache(action: InstallerSessionRepositoryImpl.Action) {
-        session.action.resetReplayCache()
-        Timber.d("[id=$sessionId] Cleared action replay cache after ${action::class.simpleName}")
     }
 
     private suspend fun handleCancel() {
@@ -229,9 +222,16 @@ class ActionHandler(
 
     override suspend fun onFinish() {
         Timber.d("[id=$sessionId] onFinish: Cleaning up resources and cancelling job.")
+        clearActionReplayCache()
         clearCache()
         processingJob?.cancel()
         job?.cancel()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun clearActionReplayCache() {
+        session.action.resetReplayCache()
+        Timber.d("[id=$sessionId] Cleared action replay cache on finish")
     }
 
     private suspend fun handleAction(action: InstallerSessionRepositoryImpl.Action) {
@@ -570,6 +570,11 @@ class ActionHandler(
             totalProgress = totalProgress
         )
 
+        val externalInstallerPackageName = details.installerPackageName.takeIf { !isSelfSession }
+        if (externalInstallerPackageName != null) {
+            session.config = configResolver.resolveForPackage(externalInstallerPackageName)
+        }
+
         if (requestType == ConfirmationRequestType.PRE_APPROVAL && !details.isPreApprovalRequested) {
             Timber.w("[id=$sessionId] resolveConfirmInstall: Session $sysSessionId is not requesting pre-approval. Rejecting.")
             approveSession(
@@ -578,13 +583,13 @@ class ActionHandler(
                 config = session.config,
                 details = details
             )
-            session.progress.emit(ProgressEntity.Finish)
+            session.close()
             return
         }
 
         session.confirmationDetails.value = details
 
-        if (session.config.autoApproveSession) {
+        if (session.config.autoApproveSession && (isSelfSession || externalInstallerPackageName != null)) {
             Timber.d("[id=$sessionId] resolveConfirmInstall: Auto approving system session $sysSessionId.")
             val error = runCatching { handleConfirm(sysSessionId, true) }.exceptionOrNull()
             if (error != null) {
@@ -592,7 +597,7 @@ class ActionHandler(
                 val message = error.getErrorMessage(context)
                 val emitted = session.toastEvents.tryEmit(message)
                 Timber.d("[id=$sessionId] Auto approve failure toast emitted=$emitted, message=$message")
-                session.progress.emit(ProgressEntity.Finish)
+                session.close()
             }
             return
         }
@@ -701,7 +706,7 @@ class ActionHandler(
 
         if (!isSelfSession) {
             // For external apps, approving/denying the session is the end of our job.
-            session.progress.emit(ProgressEntity.Finish)
+            session.close()
         } else {
             // For our own installations, we need to wait for the system callback.
             if (granted) {
