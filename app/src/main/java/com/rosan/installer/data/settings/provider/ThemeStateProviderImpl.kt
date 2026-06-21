@@ -3,10 +3,12 @@
 package com.rosan.installer.data.settings.provider
 
 import android.os.Build
+import androidx.compose.ui.graphics.toArgb
 import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
+import com.rosan.installer.ui.theme.material.PresetColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,10 +29,17 @@ class ThemeStateProviderImpl(
         getWallpaperColorsFlow()
     ) { prefs, wallpaperColors ->
         val manualSeedColor = prefs.seedColorInt
-        val effectiveSeedColor =
+
+        val effectiveSeedColor: Int =
             if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                if (!wallpaperColors.isNullOrEmpty()) wallpaperColors[0] else manualSeedColor
-            } else manualSeedColor
+                if (!wallpaperColors.isNullOrEmpty()) {
+                    if (wallpaperColors.contains(manualSeedColor)) {
+                        manualSeedColor
+                    } else wallpaperColors[0]
+                } else manualSeedColor
+            } else if (PresetColors.any { it.color.toArgb() == manualSeedColor }) {
+                manualSeedColor
+            } else PresetColors[0].color.toArgb()
 
         ThemeState(
             isLoaded = true,

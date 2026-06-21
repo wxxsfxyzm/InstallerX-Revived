@@ -296,8 +296,9 @@ fun MiuixThemeSettingsPage(
                                                         colorSpec = uiState.colorSpec,
                                                         textStyle = MiuixTheme.textStyles.footnote1,
                                                         textColor = MiuixTheme.colorScheme.onSurface,
-                                                        isSelected = uiState.seedColor == rawColor.color &&
-                                                                !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                        isSelected =
+                                                            uiState.seedColor == rawColor.color
+                                                            && !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                     ) {
                                                         viewModel.dispatch(
                                                             ThemeSettingsAction.SetSeedColor(

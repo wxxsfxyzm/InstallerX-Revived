@@ -381,8 +381,9 @@ fun ThemeSettingsPage(
                                                             colorSpec = uiState.colorSpec,
                                                             textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
                                                             textColor = MaterialTheme.colorScheme.onSurface,
-                                                            isSelected = uiState.seedColor == rawColor.color &&
-                                                                    !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                            isSelected =
+                                                                uiState.seedColor == rawColor.color
+                                                                && !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                         ) {
                                                             viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
                                                         }
