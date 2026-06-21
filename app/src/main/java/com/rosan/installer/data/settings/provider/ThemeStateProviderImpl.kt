@@ -36,7 +36,7 @@ class ThemeStateProviderImpl(
                     if (wallpaperColors.contains(manualSeedColor)) {
                         manualSeedColor
                     } else wallpaperColors[0]
-                } else PresetColors[0].color.toArgb()
+                } else manualSeedColor
             } else if (PresetColors.any { it.color.toArgb() == manualSeedColor }) {
                 manualSeedColor
             } else PresetColors[0].color.toArgb()

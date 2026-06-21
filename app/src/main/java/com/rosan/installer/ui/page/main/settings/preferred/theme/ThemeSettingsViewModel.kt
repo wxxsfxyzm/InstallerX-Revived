@@ -42,7 +42,7 @@ class ThemeSettingsViewModel(
                     if (wallpaperColors.contains(manualSeedColor.toArgb())) {
                         manualSeedColor
                     } else Color(wallpaperColors[0])
-                } else PresetColors[0].color
+                } else manualSeedColor
             } else if (PresetColors.any { it.color == manualSeedColor }) {
                 manualSeedColor
             } else PresetColors[0].color
