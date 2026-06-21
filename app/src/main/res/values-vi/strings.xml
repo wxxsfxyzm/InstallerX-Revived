@@ -906,4 +906,14 @@
     <string name="config_smart_authorizer_fallback_list_tip">Chọn ít nhất một mục. Kéo để sắp xếp.</string>
     <string name="config_smart_authorizer_must_choose_one">Phải chọn một cái!</string>
     <string name="exception_install_failed_all_authorizers_failed">Tất cả trình ủy quyền đã thất bại</string>
+    <string name="installer_settings_signature_check">Kiểm tra chữ ký</string>
+    <string name="config_check_app_signature">Kiểm tra chữ ký ứng dụng</string>
+    <string name="config_check_app_signature_desc">Phân tích chữ ký APK trước khi cài đặt và so sánh chúng với các ứng dụng đã cài đặt</string>
+    <string name="config_show_signature_info_on_match">Hiện thông tin về trạng thái chữ ký thông thường</string>
+    <string name="config_show_signature_info_on_match_desc">Hiện thông báo chữ ký cho các chữ ký trùng khớp và các cài đặt mới</string>
+    <string name="config_show_signature_details">Hiện chi tiết chữ ký</string>
+    <string name="config_show_signature_details_desc">Hiện tóm tắt chứng chỉ, các chương trình đã được xác minh, cảnh báo, và lỗi trong thông báo chữ ký</string>
+    <string name="tag_signature_match">Chữ ký khớp</string>
+    <string name="tag_signature_rotation">Xoay chữ ký</string>
+    <string name="tag_signature_rotation_unconfirmed">Xoay đã được yêu cầu</string>
 </resources>

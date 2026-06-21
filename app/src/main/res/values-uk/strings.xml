@@ -470,4 +470,16 @@
     <string name="lab_show_install_initiator_desc">Показати, яка програма почала встановлення</string>
     <string name="permission_list">Список дозволів</string>
     <string name="permission_list_desc">Список дозволів, які запитує встановлюваний пакет</string>
+    <string name="inactivate">Вимкнути</string>
+    <string name="activate">Увімкнути</string>
+    <string name="available">Доступно</string>
+    <string name="unavailable">Недоступно</string>
+    <string name="running">Запущено</string>
+    <string name="working_status_default_installer">Використовується як типовий встановлювач</string>
+    <string name="working_status_not_default_installer">Не вибрано типовим встановлювачем</string>
+    <string name="working_status_default_installer_desc">Зараз цей застосунок є типовим встановлювачем пакетів</string>
+    <string name="working_status_system_installer">Працює як системний встановлювач пакетів</string>
+    <string name="working_status_system_installer_desc">Застосунок запущено як системний встановлювач пакетів</string>
+    <string name="working_status_none_authorizer_desc">Не надано дозволу. Щоб установити застосунки, надайте дозвіл на встановлення з невідомих джерел</string>
+    <string name="working_status_not_default_installer_click_details">Натисніть, щоб переглянути подробиці</string>
 </resources>

@@ -899,4 +899,6 @@
     <string name="locking_default_installer">Varsayılan yükleyici olarak ayarlanıyor…</string>
     <string name="config_install_requester_mode_disable">Ayarlanmadı</string>
     <string name="unlocking_default_installer">Varsayılan yükleyici ayarı kaldırılıyor…</string>
+    <string name="installer_settings_signature_check">İmza kontrolü</string>
+    <string name="config_check_app_signature">Uygulama imzalarını kontrol et</string>
 </resources>
