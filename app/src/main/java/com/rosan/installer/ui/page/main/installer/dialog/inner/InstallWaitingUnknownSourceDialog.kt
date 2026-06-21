@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -30,49 +31,55 @@ import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 @Composable
 fun installWaitingUnknownSourceDialog(
     viewModel: InstallerViewModel
-): DialogParams = DialogParams(
-    icon = DialogInnerParams(
-        DialogParamsType.IconWorking.id,
-        workingIcon
-    ),
-    title = DialogInnerParams(
-        DialogParamsType.InstallerUnknownSource.id
-    ) {
-        Text(stringResource(R.string.installer_waiting_unknown_source))
-    },
-    text = DialogInnerParams(
-        DialogParamsType.InstallerUnknownSource.id
-    ) {
-        Column(
-            modifier = Modifier.padding(bottom = 4.dp)
+): DialogParams {
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val sourceAppLabel = uiState.initiatorAppLabel ?: stringResource(R.string.installer_label_unknown)
+    val description = stringResource(R.string.installer_waiting_unknown_source_desc, sourceAppLabel)
+
+    return DialogParams(
+        icon = DialogInnerParams(
+            DialogParamsType.IconWorking.id,
+            workingIcon
+        ),
+        title = DialogInnerParams(
+            DialogParamsType.InstallerUnknownSource.id
         ) {
-            Text(
-                text = stringResource(R.string.installer_waiting_unknown_source_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            )
+            Text(stringResource(R.string.installer_waiting_unknown_source))
+        },
+        text = DialogInnerParams(
+            DialogParamsType.InstallerUnknownSource.id
+        ) {
+            Column(
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            LinearWavyProgressIndicator(
-                modifier = Modifier.fillMaxWidth(),
-                amplitude = 0f
+                LinearWavyProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    amplitude = 0f
+                )
+            }
+        },
+        buttons = dialogButtons(
+            DialogParamsType.ButtonsCancel.id
+        ) {
+            listOf(
+                DialogButton(stringResource(R.string.suggestion_allow_unknown_source)) {
+                    viewModel.dispatch(InstallerViewAction.RequestUnknownSourcePermission)
+                },
+                DialogButton(stringResource(R.string.cancel)) {
+                    viewModel.dispatch(InstallerViewAction.Cancel)
+                }
             )
         }
-    },
-    buttons = dialogButtons(
-        DialogParamsType.ButtonsCancel.id
-    ) {
-        listOf(
-            DialogButton(stringResource(R.string.suggestion_allow_unknown_source)) {
-                viewModel.dispatch(InstallerViewAction.RequestUnknownSourcePermission)
-            },
-            DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(InstallerViewAction.Cancel)
-            }
-        )
-    }
-)
+    )
+}

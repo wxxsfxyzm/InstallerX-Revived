@@ -68,13 +68,13 @@ class InstallerSessionRepositoryImpl(
         action.tryEmit(Action.Install(triggerAuth))
     }
 
-    override fun installMultiple(entities: List<SelectInstallEntity>) {
+    override fun installMultiple(entities: List<SelectInstallEntity>, triggerAuth: Boolean) {
         Timber.d("[id=$id] installMultiple() called. Queue size: ${entities.size}")
         multiInstallQueue = entities
         multiInstallResults.clear()
         currentMultiInstallIndex = 0
 
-        action.tryEmit(Action.InstallMultiple)
+        action.tryEmit(Action.InstallMultiple(triggerAuth))
     }
 
     override fun resolveUninstall(activity: Activity, packageName: String) {
@@ -182,7 +182,7 @@ class InstallerSessionRepositoryImpl(
          * @see com.rosan.installer.ui.page.main.installer.InstallerViewAction.InstallMultiple
          * @see com.rosan.installer.data.session.handler.ActionHandler.handleMultiInstall
          */
-        data object InstallMultiple : Action
+        data class InstallMultiple(val triggerAuth: Boolean) : Action
         data class ResolveUninstall(val activity: Activity, val packageName: String) : Action
         data class Uninstall(val packageName: String) : Action
         data class ResolveConfirmInstall(

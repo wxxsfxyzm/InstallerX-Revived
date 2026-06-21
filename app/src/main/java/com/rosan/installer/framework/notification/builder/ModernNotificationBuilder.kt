@@ -86,6 +86,7 @@ class ModernNotificationBuilder(
             is ProgressEntity.InstallAnalysedFailed -> onAnalysedFailed(builder).build()
             is ProgressEntity.Installing -> onInstalling(builder, progress, preferSystemIcon).build()
             is ProgressEntity.InstallingModule -> onInstallingModule(builder, progress, preferSystemIcon).build()
+            is ProgressEntity.InstallWaitingUnknownSource -> onWaitingUnknownSource(builder, preferSystemIcon).build()
             is ProgressEntity.InstallSuccess -> onInstallSuccess(builder, preferSystemIcon).build()
             is ProgressEntity.InstallCompleted -> onInstallCompleted(builder).build()
             is ProgressEntity.InstallFailed -> onInstallFailed(builder, preferSystemIcon).build()
@@ -133,6 +134,7 @@ class ModernNotificationBuilder(
         val failedStageIndex = when (progress) {
             is ProgressEntity.InstallResolvedFailed -> 0
             is ProgressEntity.InstallAnalysedFailed -> 2
+            is ProgressEntity.InstallWaitingUnknownSource -> 3
             is ProgressEntity.InstallFailed -> 3
             else -> null
         }
@@ -235,6 +237,12 @@ class ModernNotificationBuilder(
                 progressStyle.setProgress(totalProgressWeight.toInt())
             }
 
+            is ProgressEntity.InstallWaitingUnknownSource -> {
+                contentTitle = context.getString(R.string.installer_waiting_unknown_source)
+                shortText = context.getString(R.string.installer_waiting_unknown_source)
+                progressStyle.setProgress(totalProgressWeight.toInt())
+            }
+
             else -> {
                 contentTitle = context.getString(R.string.installer_ready)
                 progressStyle.setProgress(0)
@@ -297,6 +305,17 @@ class ModernNotificationBuilder(
     ): NotificationCompat.Builder =
         builder.setContentText(progress.output.lastOrNull() ?: context.getString(R.string.installer_installing))
             .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
+
+    private suspend fun onWaitingUnknownSource(
+        builder: NotificationCompat.Builder,
+        preferSystemIcon: Boolean
+    ): NotificationCompat.Builder =
+        builder.setContentText(helper.unknownSourceDescription())
+            .setOnlyAlertOnce(false)
+            .setSilent(false)
+            .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
+            .addAction(0, context.getString(R.string.suggestion_allow_unknown_source), helper.unknownSourceIntent)
+            .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
 
     private suspend fun onInstallSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
         builder.setContentText(context.getString(R.string.installer_install_success))

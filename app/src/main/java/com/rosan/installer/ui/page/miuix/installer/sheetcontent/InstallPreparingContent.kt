@@ -34,6 +34,7 @@ fun InstallPreparingContent(
     viewModel: InstallerViewModel,
     onBackground: () -> Unit,
     @StringRes descriptionRes: Int = R.string.installer_preparing_desc,
+    descriptionText: String? = null,
     @StringRes buttonTextRes: Int = R.string.loading
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -67,7 +68,7 @@ fun InstallPreparingContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = stringResource(descriptionRes),
+                text = descriptionText ?: stringResource(descriptionRes),
                 color = MiuixTheme.colorScheme.onSurface,
                 style = MiuixTheme.textStyles.body1
             )

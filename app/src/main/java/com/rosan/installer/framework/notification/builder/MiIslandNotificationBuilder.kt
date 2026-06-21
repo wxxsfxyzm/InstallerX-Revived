@@ -189,6 +189,15 @@ class MiIslandNotificationBuilder(
                 actionsList.add(IslandAction("miui_action_retry", context.getString(R.string.retry), helper.installIntent))
             }
 
+            is ProgressEntity.InstallWaitingUnknownSource -> {
+                title = context.getString(R.string.installer_waiting_unknown_source)
+                shortText = context.getString(R.string.installer_waiting_unknown_source)
+                contentText = helper.unknownSourceDescription()
+                showAppIcon = false
+                actionsList.add(IslandAction("miui_action_unknown_source", context.getString(R.string.suggestion_allow_unknown_source), helper.unknownSourceIntent, true))
+                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
+            }
+
             else -> {}
         }
 
@@ -346,7 +355,7 @@ class MiIslandNotificationBuilder(
         val isWorking =
             progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallResolveSuccess || progress is ProgressEntity.InstallAnalysing || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.Installing || progress is ProgressEntity.InstallingModule || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
         val isImportance =
-            progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
+            progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallWaitingUnknownSource || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
 
         val channelEnum =
             if (isImportance && background) NotificationHelper.Channel.InstallerChannel else NotificationHelper.Channel.InstallerProgressChannel

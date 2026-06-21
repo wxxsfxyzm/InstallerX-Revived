@@ -488,12 +488,13 @@ fun MiuixInstallerPage(
                         }
 
                         is InstallerStage.InstallWaitingUnknownSource -> {
+                            val sourceAppLabel = uiState.initiatorAppLabel ?: stringResource(R.string.installer_label_unknown)
                             InstallPreparingContent(
                                 viewModel = viewModel,
                                 onBackground = {
                                     viewModel.dispatch(InstallerViewAction.RequestUnknownSourcePermission)
                                 },
-                                descriptionRes = R.string.installer_waiting_unknown_source_desc,
+                                descriptionText = stringResource(R.string.installer_waiting_unknown_source_desc, sourceAppLabel),
                                 buttonTextRes = R.string.suggestion_allow_unknown_source
                             )
                         }

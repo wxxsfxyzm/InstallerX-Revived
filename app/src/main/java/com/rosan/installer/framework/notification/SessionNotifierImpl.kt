@@ -273,7 +273,7 @@ class SessionNotifierImpl(
         val currentTime = System.currentTimeMillis()
         val timeSinceLastUpdate = currentTime - lastNotificationUpdateTime
         val isCriticalState =
-            progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallCompleted || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed
+            progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallCompleted || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallWaitingUnknownSource
         val isEnteringInstalling = progress is ProgressEntity.Installing && lastProgressClass != ProgressEntity.Installing::class
         val isDataChanged = progress != lastNotifiedEntity
 
