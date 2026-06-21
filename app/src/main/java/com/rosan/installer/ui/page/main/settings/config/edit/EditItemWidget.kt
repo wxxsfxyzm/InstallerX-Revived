@@ -237,7 +237,7 @@ fun DataAutoApproveSessionWidget(
     onEnableRequest: () -> Unit
 ) {
     SwitchWidget(
-        icon = AppIcons.InstallMode,
+        icon = AppIcons.Active,
         title = stringResource(id = R.string.config_auto_approve_session),
         description = stringResource(id = R.string.config_auto_approve_session_desc),
         checked = state.data.autoApproveSession,

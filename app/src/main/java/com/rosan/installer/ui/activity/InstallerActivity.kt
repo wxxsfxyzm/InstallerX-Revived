@@ -290,11 +290,25 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
                 val currentProgress = latestProgress
 
+                if (currentProgress is ProgressEntity.InstallConfirming) {
+                    val details = session.confirmationDetails.value
+                    if (details != null) {
+                        Timber.d(
+                            "onStop: User left install confirmation. Denying system session ${details.sessionId}, " +
+                                    "requestType=${details.requestType}, source=${details.sourceAppLabel}"
+                        )
+                        session.approveConfirmation(details.sessionId, false)
+                    } else {
+                        Timber.w("onStop: User left install confirmation without details. Closing repository.")
+                        session.close()
+                    }
+                    return
+                }
+
                 val isRunning = currentProgress is ProgressEntity.InstallResolving ||
                         currentProgress is ProgressEntity.InstallAnalysing ||
                         currentProgress is ProgressEntity.InstallPreparing ||
                         currentProgress is ProgressEntity.Installing ||
-                        currentProgress is ProgressEntity.InstallConfirming ||
                         currentProgress is ProgressEntity.InstallingModule
 
                 // If the task is still running and hasn't finished or errored

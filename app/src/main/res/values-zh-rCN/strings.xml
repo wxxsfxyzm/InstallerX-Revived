@@ -551,6 +551,7 @@
     <string name="install_confirm_external_request_tip">是否要批准来自 %1$s 的安装请求？</string>
     <string name="install_confirm_pre_approval_tip">是否允许 %1$s 预批准安装此应用？</string>
     <string name="install_confirm_permissions_tip">是否批准来自 %1$s 的权限确认请求？</string>
+    <string name="install_confirm_approved_toast">已批准 %1$s 的安装请求</string>
     <string name="installer_channel_name">安装通知</string>
     <string name="installer_channel_name_desc">显示安装的阶段</string>
     <string name="installer_notification_tap_to_disable">前台服务通知，点击以禁用</string>

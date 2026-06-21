@@ -42,14 +42,17 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.domain.settings.model.config.ConfigModel.Companion.default
 import com.rosan.installer.domain.settings.model.config.InstallMode
+import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.framework.auth.safeBiometricAuthOrThrow
 import com.rosan.installer.framework.service.AutoLockService
+import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
@@ -113,6 +116,7 @@ class ActionHandler(
         job = scope.launch {
             session.action.collect { action ->
                 Timber.d("[id=$sessionId] Received action: ${action::class.simpleName}")
+                clearActionReplayCache(action)
 
                 when (action) {
                     is InstallerSessionRepositoryImpl.Action.Cancel -> {
@@ -136,8 +140,14 @@ class ActionHandler(
                     is InstallerSessionRepositoryImpl.Action.ApproveSession -> {
                         // Launch concurrently
                         scope.launch {
-                            runCatching { handleAction(action) }
-                                .onFailure { Timber.e(it, "ApproveSession failed") }
+                            val error = runCatching { handleAction(action) }.exceptionOrNull()
+                            if (error != null) {
+                                Timber.e(error, "ApproveSession failed")
+                                val message = error.getErrorMessage(context)
+                                val emitted = session.toastEvents.tryEmit(message)
+                                Timber.d("[id=$sessionId] ApproveSession failure toast emitted=$emitted, message=$message")
+                                session.progress.emit(ProgressEntity.Finish)
+                            }
                         }
                     }
 
@@ -147,6 +157,12 @@ class ActionHandler(
                 }
             }
         }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun clearActionReplayCache(action: InstallerSessionRepositoryImpl.Action) {
+        session.action.resetReplayCache()
+        Timber.d("[id=$sessionId] Cleared action replay cache after ${action::class.simpleName}")
     }
 
     private suspend fun handleCancel() {
@@ -570,7 +586,14 @@ class ActionHandler(
 
         if (session.config.autoApproveSession) {
             Timber.d("[id=$sessionId] resolveConfirmInstall: Auto approving system session $sysSessionId.")
-            handleConfirm(sysSessionId, true)
+            val error = runCatching { handleConfirm(sysSessionId, true) }.exceptionOrNull()
+            if (error != null) {
+                Timber.e(error, "[id=$sessionId] Auto approve session failed")
+                val message = error.getErrorMessage(context)
+                val emitted = session.toastEvents.tryEmit(message)
+                Timber.d("[id=$sessionId] Auto approve failure toast emitted=$emitted, message=$message")
+                session.progress.emit(ProgressEntity.Finish)
+            }
             return
         }
 
@@ -655,15 +678,25 @@ class ActionHandler(
     }
 
     private suspend fun handleConfirm(sessionId: Int, granted: Boolean) {
-        Timber.d("[id=$sessionId] ApproveSession: $granted for session $sessionId")
+        val detailsBeforeApprove = session.confirmationDetails.value
+        Timber.d("[id=${this.sessionId}] ApproveSession: $granted for session $sessionId")
         approveSession(
             sessionId = sessionId,
             granted = granted,
             config = session.config,
-            details = session.confirmationDetails.value
+            details = detailsBeforeApprove
         )
 
         val details = session.confirmationDetails.value
+        if (granted && session.config.toastMode != ToastMode.Disable) {
+            val sourceLabel = details?.sourceAppLabel
+                ?: session.config.initiatorPackageName
+                ?: context.getString(R.string.installer_label_unknown)
+            val message = context.getString(R.string.install_confirm_approved_toast, sourceLabel)
+            val emitted = session.toastEvents.tryEmit(message)
+            Timber.d("[id=${this.sessionId}] Approve success toast emitted=$emitted")
+        }
+
         val isSelfSession = details?.isSelfSession == true
 
         if (!isSelfSession) {

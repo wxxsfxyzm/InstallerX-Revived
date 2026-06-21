@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +43,7 @@ import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
@@ -275,7 +275,7 @@ private fun MiuixStatusGrid(
                 ) {
                     Icon(
                         modifier = Modifier.size(170.dp),
-                        imageVector = if (isActive) Icons.Rounded.CheckCircleOutline else Icons.Rounded.ErrorOutline,
+                        imageVector = if (isActive) AppIcons.Active else Icons.Rounded.ErrorOutline,
                         tint = if (isActive) {
                             if (isDynamicColor) MiuixTheme.colorScheme.primary.copy(alpha = 0.8f) else miuixHomeStatusCardColorActivated
                         } else {

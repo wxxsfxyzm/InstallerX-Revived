@@ -158,7 +158,7 @@ class InstallerService : Service() {
             )
 
             // Start observing UI effects (Toasts) on the main thread
-            observeUiEffectsForSession(session)
+            observeUiEffectsForSession(scope, session)
 
             scope.launch {
                 Timber.d("[id=$id] Starting handlers.")
@@ -279,10 +279,21 @@ class InstallerService : Service() {
 
     /**
      * Observes session progress to trigger UI effects like Toasts.
-     * Executed within serviceScope which runs on Dispatchers.Main.
+     * Executed within the session scope so collectors are cancelled when the session detaches.
      */
-    private fun observeUiEffectsForSession(session: InstallerSessionRepository) {
-        serviceScope.launch {
+    private fun observeUiEffectsForSession(
+        scope: CoroutineScope,
+        session: InstallerSessionRepository
+    ) {
+        scope.launch(Dispatchers.Main) {
+            session.toastEvents.collect { message ->
+                if (session.shouldShowToast()) {
+                    toast(message)
+                }
+            }
+        }
+
+        scope.launch(Dispatchers.Main) {
             session.progress.collect { progress ->
                 // Disable toast according to user preference
                 if (!session.shouldShowToast()) return@collect

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.AdminPanelSettings
@@ -101,6 +102,7 @@ object AppIcons {
     // You need to add the 'androidx.compose.material:material-icons-extended' dependency to use all icons
     // Or replace them with your own icon resources
     val Android = Icons.TwoTone.Android
+    val Active = Icons.Rounded.CheckCircleOutline
     val Info = Icons.TwoTone.Info
     val Add = Icons.TwoTone.Add
     val Edit = Icons.TwoTone.Edit
