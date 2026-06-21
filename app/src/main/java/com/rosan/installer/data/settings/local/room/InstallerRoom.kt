@@ -30,7 +30,7 @@ import com.rosan.installer.data.settings.local.room.entity.converter.ToastModeCo
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-const val INSTALLER_ROOM_SCHEMA_VERSION = 16
+const val INSTALLER_ROOM_SCHEMA_VERSION = 17
 
 @Database(
     entities = [AppEntity::class, ConfigEntity::class, OperationHistoryEntity::class],
@@ -49,6 +49,7 @@ const val INSTALLER_ROOM_SCHEMA_VERSION = 16
         AutoMigration(from = 13, to = 14),
         AutoMigration(from = 14, to = 15),
         AutoMigration(from = 15, to = 16),
+        AutoMigration(from = 16, to = 17),
     ]
 )
 @ColumnTypeConverters(

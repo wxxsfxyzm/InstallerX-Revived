@@ -6,8 +6,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.session.model.UninstallInfo
-import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.app.NamedPackage
+import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 
 /**
@@ -58,6 +58,7 @@ data class InstallerState(
             is InstallerStage.InstallExtendedMenu,
             is InstallerStage.InstallChoice,
             is InstallerStage.Uninstalling,
+            is InstallerStage.InstallConfirm,
             is InstallerStage.Unarchiving -> false
 
             is InstallerStage.InstallingModule -> stage.isFinished

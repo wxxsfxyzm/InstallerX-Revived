@@ -39,6 +39,7 @@ class InstallerSessionRepositoryImpl(
     override var referrerUri: String? by mutableStateOf(null)
     override var analysisResults: List<PackageAnalysisResult> by mutableStateOf(emptyList())
     override val progress: MutableSharedFlow<ProgressEntity> = MutableStateFlow(ProgressEntity.Ready)
+    override val toastEvents: MutableSharedFlow<String> = MutableSharedFlow(extraBufferCapacity = 16)
 
     // Action flow for communication with Handlers
     val action: MutableSharedFlow<Action> = MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
@@ -148,13 +149,7 @@ class InstallerSessionRepositoryImpl(
             action.tryEmit(Action.Finish)
 
             // 2. Trigger the callback to remove from SessionManager
-            // We run this slightly later or immediately depending on requirements.
-            // Here we run it immediately to ensure Manager is clean.
             onClose()
-
-            // 3. Mark progress as finished (if not already) to satisfy Service collection loop
-            // This acts as a fallback if the Action.Finish handler didn't set Progress.
-            // (Optional, depends on your ProgressHandler logic)
         } else {
             Timber.w("[id=$id] close() called on an already closed instance.")
         }

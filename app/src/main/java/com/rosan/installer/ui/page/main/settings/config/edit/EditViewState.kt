@@ -24,7 +24,8 @@ data class EditViewState(
     // Global states integrated into the view state
     val globalAuthorizer: Authorizer = Authorizer.Global,
     val globalInstallerBiometricAuthMode: BiometricAuthMode = BiometricAuthMode.Disable,
-    val checkAppSignature: Boolean = true
+    val checkAppSignature: Boolean = true,
+    val labRespectPlatformInstallPolicy: Boolean = false
 ) {
     // Computed property for unsaved changes
     val hasUnsavedChanges: Boolean
@@ -52,6 +53,7 @@ data class EditViewState(
         val authorizer: Authorizer,
         val customizeAuthorizer: String,
         val installMode: InstallMode,
+        val autoApproveSession: Boolean,
         val toastMode: ToastMode,
         val enableCustomizePackageSource: Boolean,
         val packageSource: PackageSource,
@@ -96,6 +98,7 @@ data class EditViewState(
             authorizer = this.authorizer,
             customizeAuthorizer = if (this.authorizerCustomize) this.customizeAuthorizer else "",
             installMode = this.installMode,
+            autoApproveSession = this.autoApproveSession,
             toastMode = this.toastMode,
             enableCustomizeInstallReason = this.enableCustomizeInstallReason,
             installReason = this.installReason,
@@ -135,6 +138,7 @@ data class EditViewState(
                 customizeAuthorizer = config.customizeAuthorizer,
                 toastMode = config.toastMode,
                 installMode = config.installMode,
+                autoApproveSession = config.autoApproveSession,
                 enableCustomizePackageSource = config.enableCustomizePackageSource,
                 enableCustomizeInstallReason = config.enableCustomizeInstallReason,
                 installReason = config.installReason,

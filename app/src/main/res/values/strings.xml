@@ -336,6 +336,10 @@
     <string name="config_install_mode_notification">Notification</string>
     <string name="config_install_mode_auto_notification">Auto notification</string>
     <string name="config_install_mode_ignore">Ignore</string>
+    <string name="config_auto_approve_session">Auto-approve session installs</string>
+    <string name="config_auto_approve_session_desc">Silently approve session install requests from target apps</string>
+    <string name="config_auto_approve_session_disabled_desc">Unavailable when Respect platform policy is enabled</string>
+    <string name="config_auto_approve_session_warning">Enabling this switch allows apps within this profile\'s scope to silently install apps without explicit user authorization. Enable it with caution.</string>
     <string name="config_install_show_toast">Show Toast</string>
     <string name="config_install_show_toast_desc">Controls whether to show toast after install</string>
     <string name="config_toast_mode_disable">Never show toast</string>
@@ -565,6 +569,7 @@
     <string name="install_confirm_external_request_tip">Approve installation request from %1$s ?</string>
     <string name="install_confirm_pre_approval_tip">Allow %1$s to pre-approve installing this app?</string>
     <string name="install_confirm_permissions_tip">Approve permission confirmation request from %1$s?</string>
+    <string name="install_confirm_approved_toast">Approved %1$s\'s install request</string>
     <string name="installer_notification_tap_to_disable">Foreground service notification, tap to disable</string>
     <string name="installer_channel_name">Install Notification</string>
     <string name="installer_channel_name_desc">Shows the installation stage</string>

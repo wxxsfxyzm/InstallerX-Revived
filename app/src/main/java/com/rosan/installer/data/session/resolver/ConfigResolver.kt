@@ -75,6 +75,8 @@ class ConfigResolver(
         return getConfigForPackage(null)
     }
 
+    suspend fun resolveForPackage(packageName: String?): ConfigModel = getConfigForPackage(packageName)
+
     /**
      * Checks if the authority belongs to a generic system provider.
      * Matches explicit list or any authority starting with "com.android.providers".

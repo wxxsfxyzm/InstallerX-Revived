@@ -28,6 +28,7 @@ interface InstallerSessionRepository : Closeable {
     var referrerUri: String?
     var analysisResults: List<PackageAnalysisResult>
     val progress: Flow<ProgressEntity>
+    val toastEvents: Flow<String>
     val background: Flow<Boolean>
     var multiInstallQueue: List<SelectInstallEntity>
     var multiInstallResults: MutableList<InstallResult>

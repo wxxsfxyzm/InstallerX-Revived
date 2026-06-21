@@ -328,6 +328,10 @@
     <string name="config_install_mode_notification">通知栏</string>
     <string name="config_install_mode_auto_notification">通知栏自动</string>
     <string name="config_install_mode_ignore">忽略</string>
+    <string name="config_auto_approve_session">自动批准安装会话</string>
+    <string name="config_auto_approve_session_desc">静默批准目标应用的会话安装请求</string>
+    <string name="config_auto_approve_session_disabled_desc">遵守平台政策启用时不可用</string>
+    <string name="config_auto_approve_session_warning">启用此开关会使该配置的作用域内 app 拥有未经用户明确授权即可静默安装的能力，请谨慎启用。</string>
     <string name="config_install_show_toast">显示 Toast</string>
     <string name="config_install_show_toast_desc">控制安装完成后是否显示 Toast</string>
     <string name="config_toast_mode_disable">从不显示 Toast</string>
@@ -548,6 +552,7 @@
     <string name="install_confirm_external_request_tip">是否要批准来自 %1$s 的安装请求？</string>
     <string name="install_confirm_pre_approval_tip">是否允许 %1$s 预批准安装此应用？</string>
     <string name="install_confirm_permissions_tip">是否批准来自 %1$s 的权限确认请求？</string>
+    <string name="install_confirm_approved_toast">已批准 %1$s 的安装请求</string>
     <string name="installer_channel_name">安装通知</string>
     <string name="installer_channel_name_desc">显示安装的阶段</string>
     <string name="installer_notification_tap_to_disable">前台服务通知，点击以禁用</string>

@@ -68,7 +68,8 @@ class EditViewModel(
             managedInstallerPackages = managedInstallerPackages,
             globalAuthorizer = prefs.authorizer,
             globalInstallerBiometricAuthMode = prefs.installerRequireBiometricAuth,
-            checkAppSignature = prefs.checkAppSignature
+            checkAppSignature = prefs.checkAppSignature,
+            labRespectPlatformInstallPolicy = prefs.labRespectPlatformInstallPolicy
         )
     }.stateIn(
         scope = viewModelScope,
@@ -93,6 +94,7 @@ class EditViewModel(
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
                     is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(action.customizeAuthorizer)
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
+                    is EditViewAction.ChangeDataAutoApproveSession -> changeDataAutoApproveSession(action.autoApproveSession)
                     is EditViewAction.ChangeDataToastMode -> changeDataToastMode(action.toastMode)
                     is EditViewAction.ChangeDataEnableCustomizePackageSource -> changeDataEnableCustomPackageSource(action.enable)
                     is EditViewAction.ChangeDataPackageSource -> changeDataPackageSource(action.packageSource)
@@ -176,6 +178,10 @@ class EditViewModel(
 
     private fun changeDataInstallMode(installMode: InstallMode) {
         _data.update { it.copy(installMode = installMode) }
+    }
+
+    private fun changeDataAutoApproveSession(autoApproveSession: Boolean) {
+        _data.update { it.copy(autoApproveSession = autoApproveSession) }
     }
 
     private fun changeDataToastMode(toastMode: ToastMode) {
