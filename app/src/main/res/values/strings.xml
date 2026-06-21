@@ -338,6 +338,7 @@
     <string name="config_install_mode_ignore">Ignore</string>
     <string name="config_auto_approve_session">Auto-approve session installs</string>
     <string name="config_auto_approve_session_desc">Silently approve session install requests from target apps</string>
+    <string name="config_auto_approve_session_disabled_desc">Unavailable when Respect platform policy is enabled</string>
     <string name="config_auto_approve_session_warning">Enabling this switch allows apps within this profile\'s scope to silently install apps without explicit user authorization. Enable it with caution.</string>
     <string name="config_install_show_toast">Show Toast</string>
     <string name="config_install_show_toast_desc">Controls whether to show toast after install</string>

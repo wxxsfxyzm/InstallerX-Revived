@@ -143,10 +143,10 @@ class InstallerSessionRepositoryImpl(
     override fun close() {
         // Ensure close is only executed once
         if (isClosed.compareAndSet(false, true)) {
-            Timber.d("[id=$id] close() called. Emitting ProgressEntity.Finish and triggering cleanup.")
+            Timber.d("[id=$id] close() called. Emitting Action.Finish and triggering cleanup.")
 
             // 1. Notify UI and Service that we are done
-            progress.tryEmit(ProgressEntity.Finish)
+            action.tryEmit(Action.Finish)
 
             // 2. Trigger the callback to remove from SessionManager
             onClose()

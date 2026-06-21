@@ -574,8 +574,9 @@ class ActionHandler(
         if (externalInstallerPackageName != null) {
             session.config = configResolver.resolveForPackage(externalInstallerPackageName)
         }
+        val hasResolvedSessionDetails = details.packageName.isNotBlank() || details.installerPackageName != null
 
-        if (requestType == ConfirmationRequestType.PRE_APPROVAL && !details.isPreApprovalRequested) {
+        if (requestType == ConfirmationRequestType.PRE_APPROVAL && hasResolvedSessionDetails && !details.isPreApprovalRequested) {
             Timber.w("[id=$sessionId] resolveConfirmInstall: Session $sysSessionId is not requesting pre-approval. Rejecting.")
             approveSession(
                 sessionId = sysSessionId,
@@ -589,7 +590,11 @@ class ActionHandler(
 
         session.confirmationDetails.value = details
 
-        if (session.config.autoApproveSession && (isSelfSession || externalInstallerPackageName != null)) {
+        val canAutoApproveSession =
+            session.config.autoApproveSession &&
+                    !appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy, false).first()
+
+        if (canAutoApproveSession) {
             Timber.d("[id=$sessionId] resolveConfirmInstall: Auto approving system session $sysSessionId.")
             val error = runCatching { handleConfirm(sysSessionId, true) }.exceptionOrNull()
             if (error != null) {

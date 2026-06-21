@@ -251,9 +251,12 @@ fun MiuixInstallerPage(
                                 icon = AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
-                                    dismissSheet {
+                                    if (stage.isSelfSession) {
                                         viewModel.dispatch(InstallerViewAction.ApproveSession(stage.sessionId, false))
-                                        viewModel.dispatch(InstallerViewAction.Close)
+                                    } else {
+                                        dismissSheet {
+                                            viewModel.dispatch(InstallerViewAction.ApproveSession(stage.sessionId, false))
+                                        }
                                     }
                                 }
                             )
@@ -376,7 +379,6 @@ fun MiuixInstallerPage(
                         if (stage is InstallerStage.InstallConfirm) {
                             dismissSheet {
                                 viewModel.dispatch(InstallerViewAction.ApproveSession(stage.sessionId, false))
-                                viewModel.dispatch(InstallerViewAction.Close)
                             }
                             return@WindowBottomSheet
                         }

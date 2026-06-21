@@ -208,10 +208,18 @@ fun MiuixDataAutoApproveSessionWidget(
     dispatch: (EditViewAction) -> Unit,
     onEnableRequest: () -> Unit
 ) {
+    val enabled = !state.labRespectPlatformInstallPolicy
     MiuixSwitchWidget(
         icon = AppIcons.InstallMode,
         title = stringResource(id = R.string.config_auto_approve_session),
-        description = stringResource(id = R.string.config_auto_approve_session_desc),
+        description = stringResource(
+            id = if (enabled) {
+                R.string.config_auto_approve_session_desc
+            } else {
+                R.string.config_auto_approve_session_disabled_desc
+            }
+        ),
+        enabled = enabled,
         checked = state.data.autoApproveSession,
         onCheckedChange = { checked ->
             if (checked) {
