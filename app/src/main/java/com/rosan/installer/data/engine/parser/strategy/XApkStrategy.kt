@@ -4,7 +4,6 @@ package com.rosan.installer.data.engine.parser.strategy
 
 import android.graphics.drawable.Drawable
 import com.rosan.installer.data.engine.parser.ApkParser
-import com.rosan.installer.data.engine.parser.FlexibleXapkVersionCodeSerializer
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
@@ -14,8 +13,15 @@ import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.io.File
@@ -151,7 +157,7 @@ class XApkStrategy(
     @Serializable
     private data class Manifest(
         @SerialName("package_name") val packageName: String,
-        @SerialName("version_code") @Serializable(with = FlexibleXapkVersionCodeSerializer::class) val versionCodeStr: String,
+        @SerialName("version_code") @Serializable(with = FlexibleXapkVersionCodeSerializer::class) val versionCode: Long,
         // Assign default value null to prevent MissingFieldException when the key is missing in JSON
         @SerialName("version_name") val versionNameStr: String? = null,
         // Assign default value null to fix the crash
@@ -160,7 +166,6 @@ class XApkStrategy(
         @SerialName("min_sdk_version") val minSdk: String? = null,
         @SerialName("target_sdk_version") val targetSdk: String? = null,
     ) {
-        val versionCode: Long = versionCodeStr.toLong()
         val versionName: String = versionNameStr ?: ""
 
         @Serializable
@@ -168,5 +173,25 @@ class XApkStrategy(
             @SerialName("file") val name: String,
             @SerialName("id") val splitName: String
         )
+    }
+}
+
+private object FlexibleXapkVersionCodeSerializer : KSerializer<Long> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("FlexibleXapkVersionCode", PrimitiveKind.LONG)
+
+    override fun serialize(encoder: Encoder, value: Long) =
+        encoder.encodeLong(value)
+
+    override fun deserialize(decoder: Decoder): Long {
+        return try {
+            decoder.decodeLong()
+        } catch (_: Exception) {
+            try {
+                decoder.decodeString().toLong()
+            } catch (e: Exception) {
+                throw SerializationException("Expected string or number for XAPK version_code", e)
+            }
+        }
     }
 }

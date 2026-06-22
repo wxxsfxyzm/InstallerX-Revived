@@ -63,6 +63,7 @@ import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
+import com.rosan.installer.domain.engine.model.packageinfo.InstalledModuleInfo
 import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.ui.icons.AppIcons
@@ -328,16 +329,57 @@ fun installInfoDialog(
                     }
 
                     is AppEntity.ModuleEntity -> {
-                        // For modules, just show the current info without comparison.
-                        Text(
-                            text = stringResource(
-                                R.string.installer_version,
-                                entityToInstall.version,
-                                entityToInstall.versionCode
-                            ),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.basicMarquee()
-                        )
+                        val installedModuleInfo = currentPackage.installedModuleInfo
+                        if (installedModuleInfo == null) {
+                            Text(
+                                text = stringResource(
+                                    R.string.installer_version,
+                                    entityToInstall.version,
+                                    entityToInstall.versionCode
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
+                        } else {
+                            val defaultIsSingleLine = settings.versionCompareInSingleLine
+                            var contentState by remember {
+                                mutableStateOf(Pair(defaultIsSingleLine, false))
+                            }
+
+                            LaunchedEffect(defaultIsSingleLine) {
+                                if (contentState.first != defaultIsSingleLine) {
+                                    contentState = Pair(defaultIsSingleLine, false)
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier.clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    contentState = Pair(!contentState.first, true)
+                                }
+                            ) {
+                                AnimatedContent(
+                                    targetState = contentState,
+                                    transitionSpec = {
+                                        if (targetState.second) {
+                                            fadeIn(tween(200)) togetherWith fadeOut(tween(200)) using
+                                                    SizeTransform { _, _ -> tween(250) }
+                                        } else {
+                                            fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                                        }
+                                    },
+                                    label = "ModuleVersionViewAnimation"
+                                ) { state ->
+                                    if (state.first) {
+                                        ModuleVersionCompareSingleLine(installedModuleInfo, entityToInstall)
+                                    } else {
+                                        ModuleVersionCompareMultiLine(installedModuleInfo, entityToInstall)
+                                    }
+                                }
+                            }
+                        }
                         Spacer(modifier = Modifier.size(4.dp))
                         Text(
                             text = stringResource(
@@ -485,6 +527,108 @@ fun installInfoDialog(
     )
 }
 
+
+@Composable
+private fun ModuleVersionCompareMultiLine(
+    installedModuleInfo: InstalledModuleInfo,
+    entityToInstall: AppEntity.ModuleEntity
+) {
+    val isDowngrade = installedModuleInfo.versionCode?.let { it > entityToInstall.versionCode } == true
+    val isOverwrite = installedModuleInfo.versionCode == entityToInstall.versionCode
+    val statusColor = if (isDowngrade) {
+        MaterialTheme.colorScheme.error
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
+    val oldVersionFormatted = stringResource(
+        R.string.installer_version_short,
+        installedModuleInfo.version.orEmpty(),
+        installedModuleInfo.versionCode?.toString().orEmpty()
+    )
+    val newVersionFormatted = stringResource(
+        R.string.installer_version_short,
+        entityToInstall.version,
+        entityToInstall.versionCode
+    )
+
+    val oldPrefix = stringResource(R.string.old_version_prefix)
+    val newPrefix = if (isDowngrade) {
+        stringResource(R.string.downgrade_version_prefix)
+    } else if (isOverwrite) {
+        stringResource(R.string.overwrite_version_prefix)
+    } else {
+        stringResource(R.string.upgrade_version_prefix)
+    }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = stringResource(
+                R.string.version_with_prefix_format,
+                oldPrefix,
+                oldVersionFormatted
+            ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.basicMarquee()
+        )
+
+        Icon(
+            imageVector = AppIcons.ArrowDropDownFilled,
+            contentDescription = "to",
+            tint = statusColor,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Text(
+            text = stringResource(
+                R.string.version_with_prefix_format,
+                newPrefix,
+                newVersionFormatted
+            ),
+            color = statusColor,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.basicMarquee()
+        )
+    }
+}
+
+@Composable
+private fun ModuleVersionCompareSingleLine(
+    installedModuleInfo: InstalledModuleInfo,
+    entityToInstall: AppEntity.ModuleEntity
+) {
+    val isDowngrade = installedModuleInfo.versionCode?.let { it > entityToInstall.versionCode } == true
+    val color = if (isDowngrade) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val oldVersionText = stringResource(
+        R.string.installer_version_short,
+        installedModuleInfo.version.orEmpty(),
+        installedModuleInfo.versionCode?.toString().orEmpty()
+    )
+    val newVersionText = stringResource(
+        R.string.installer_version2,
+        entityToInstall.version,
+        entityToInstall.versionCode
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+    ) {
+        Text(text = oldVersionText, textAlign = TextAlign.Center)
+        Icon(
+            imageVector = AppIcons.ArrowRight,
+            contentDescription = "to",
+            tint = color,
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = newVersionText,
+            color = color,
+            textAlign = TextAlign.Center
+        )
+    }
+}
 
 /**
  * Composable for displaying version comparison in multiple lines (the original style).

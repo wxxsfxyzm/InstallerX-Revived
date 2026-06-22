@@ -26,24 +26,20 @@ fun String.parseSplitMetadata(): SplitMetadata {
     val rawName = this.removeSuffix(".apk")
 
     // 2. Extract qualifier
-    var qualifier = rawName
-    var isLikelyFeature = true
-
-    if (qualifier.startsWith(SPLIT_CONFIG_PREFIX)) {
-        qualifier = qualifier.removePrefix(SPLIT_CONFIG_PREFIX)
-        isLikelyFeature = false
-    } else if (qualifier.startsWith(CONFIG_PREFIX)) {
-        qualifier = qualifier.removePrefix(CONFIG_PREFIX)
-        isLikelyFeature = false
+    val (qualifier, isLikelyFeature) = if (rawName.startsWith(SPLIT_CONFIG_PREFIX)) {
+        rawName.removePrefix(SPLIT_CONFIG_PREFIX) to false
+    } else if (rawName.startsWith(CONFIG_PREFIX)) {
+        rawName.removePrefix(CONFIG_PREFIX) to false
     } else {
-        qualifier = qualifier
+        rawName
             .removePrefix(BASE_PREFIX)
-            .removePrefix(SPLIT_PREFIX)
+            .removePrefix(SPLIT_PREFIX) to true
     }
+    val hasEmbeddedConfig = qualifier.contains(CONFIG_INFIX)
 
     // 3. Extract potential config
     // If ".config." exists (e.g., split_feature_map.config.arm64_v8a), take the suffix.
-    val potentialConfig = if (qualifier.contains(CONFIG_INFIX)) {
+    val potentialConfig = if (hasEmbeddedConfig) {
         qualifier.substringAfterLast(CONFIG_INFIX)
     } else {
         qualifier
@@ -57,21 +53,21 @@ fun String.parseSplitMetadata(): SplitMetadata {
         ?: Architecture.fromArchString(normalizedArch).takeIf { it != Architecture.UNKNOWN }
 
     if (arch != null) {
-        val type = if (isLikelyFeature && qualifier.contains(CONFIG_INFIX)) SplitType.FEATURE else SplitType.ARCHITECTURE
+        val type = if (isLikelyFeature && hasEmbeddedConfig) SplitType.FEATURE else SplitType.ARCHITECTURE
         return SplitMetadata(type, FilterType.ABI, arch.arch)
     }
 
     // 4.2 Check Density
     val dpiResId = getDpiStringResourceId(potentialConfig)
     if (dpiResId != null || (potentialConfig.endsWith("dpi") && potentialConfig.removeSuffix("dpi").all { it.isDigit() })) {
-        val type = if (isLikelyFeature && qualifier.contains(CONFIG_INFIX)) SplitType.FEATURE else SplitType.DENSITY
+        val type = if (isLikelyFeature && hasEmbeddedConfig) SplitType.FEATURE else SplitType.DENSITY
         return SplitMetadata(type, FilterType.DENSITY, potentialConfig)
     }
 
     // 4.3 Check Language
     val languageDisplayName = getLanguageDisplayName(potentialConfig)
     if (languageDisplayName != null) {
-        val type = if (isLikelyFeature && qualifier.contains(CONFIG_INFIX)) SplitType.FEATURE else SplitType.LANGUAGE
+        val type = if (isLikelyFeature && hasEmbeddedConfig) SplitType.FEATURE else SplitType.LANGUAGE
         return SplitMetadata(type, FilterType.LANGUAGE, potentialConfig)
     }
 
@@ -124,8 +120,8 @@ private fun getLanguageDisplayName(code: String): String? {
 }
 
 @StringRes
-private fun getDpiStringResourceId(name: String): Int? {
-    return when (name) {
+private fun getDpiStringResourceId(name: String) =
+    when (name) {
         "ldpi" -> R.string.split_dpi_ldpi
         "mdpi" -> R.string.split_dpi_mdpi
         "hdpi" -> R.string.split_dpi_hdpi
@@ -137,7 +133,6 @@ private fun getDpiStringResourceId(name: String): Int? {
         "anydpi" -> R.string.split_dpi_anydpi
         else -> null
     }
-}
 
 @Composable
 fun SplitType.getDisplayName(): String {

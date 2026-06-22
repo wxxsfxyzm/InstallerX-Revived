@@ -371,15 +371,16 @@ fun InstallPrepareContent(
                         }
 
                         is AppEntity.ModuleEntity -> {
+                            val installedModuleInfo = currentPackage.installedModuleInfo
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_name_label,
                                 newValue = primaryEntity.version,
-                                oldValue = null
+                                oldValue = installedModuleInfo?.version
                             )
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_code_label,
                                 newValue = primaryEntity.versionCode.toString(),
-                                oldValue = null
+                                oldValue = installedModuleInfo?.versionCode?.toString()
                             )
                             AnimatedVisibility(visible = config.displaySdk) {
                                 AdaptiveInfoRow(
