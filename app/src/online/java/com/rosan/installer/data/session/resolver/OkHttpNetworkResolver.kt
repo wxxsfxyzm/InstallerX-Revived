@@ -31,6 +31,7 @@ import okhttp3.Request
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.io.RandomAccessFile
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
@@ -46,18 +47,26 @@ class OkHttpNetworkResolver(
     // Mutex to ensure thread-safe progress emission
     private val progressMutex = Mutex()
 
-    companion object {
-        private const val SIZE_THRESHOLD_SMALL = 5 * 1024 * 1024L        // 5MB
-        private const val SIZE_THRESHOLD_MEDIUM = 20 * 1024 * 1024L      // 20MB
-        private const val SIZE_THRESHOLD_LARGE = 50 * 1024 * 1024L       // 50MB
-        private const val SIZE_THRESHOLD_XLARGE = 100 * 1024 * 1024L     // 100MB
+    private companion object {
+        const val SIZE_THRESHOLD_SMALL = 5 * 1024 * 1024L        // 5MB
+        const val SIZE_THRESHOLD_MEDIUM = 20 * 1024 * 1024L      // 20MB
+        const val SIZE_THRESHOLD_LARGE = 50 * 1024 * 1024L       // 50MB
+        const val SIZE_THRESHOLD_XLARGE = 100 * 1024 * 1024L     // 100MB
 
-        private const val MIN_CHUNK_SIZE = 2 * 1024 * 1024L              // 2MB
+        const val MIN_CHUNK_SIZE = 2 * 1024 * 1024L              // 2MB
+        const val DOWNLOAD_BUFFER_SIZE = 1024 * 1024             // 1MB
     }
 
     private enum class NetworkType { WIFI, MOBILE, ETHERNET, UNKNOWN }
 
     private data class ChunkRange(val start: Long, val end: Long)
+    private data class PreFlightResult(
+        val contentLength: Long,
+        val supportsRange: Boolean,
+        val isArchive: Boolean
+    )
+
+    private class RangeNotSupportedException(message: String) : IOException(message)
 
     override suspend fun resolve(
         uri: Uri,
@@ -73,12 +82,12 @@ class OkHttpNetworkResolver(
 
         val client = buildClientForScheme(uri, HttpProfile.fromString(httpProfileName))
 
-        // 2. Pre-flight Check (HEAD Request)
+        // 2. Pre-flight Check
         val preFlight = performPreFlightCheck(client, uri.toString())
-        val contentLength = preFlight.first
-        val supportsRange = preFlight.second
+        val contentLength = preFlight.contentLength
+        val supportsRange = preFlight.supportsRange
 
-        if (!verifyArchiveMagicNumber(client, uri.toString())) {
+        if (!preFlight.isArchive) {
             throw ResolveException(
                 errorType = ResolveErrorType.LINK_NOT_VALID,
                 message = "The target file is not a valid ZIP/APK archive."
@@ -98,7 +107,13 @@ class OkHttpNetworkResolver(
         try {
             if (threadCount > 1) {
                 Timber.i("Strategy: Multi-threaded ($threadCount threads). Size: $contentLength")
-                downloadMultiThreaded(client, uri.toString(), tempFile, contentLength, threadCount, progressFlow)
+                try {
+                    downloadMultiThreaded(client, uri.toString(), tempFile, contentLength, threadCount, progressFlow)
+                } catch (e: RangeNotSupportedException) {
+                    Timber.w(e, "Range download failed. Falling back to single-threaded download.")
+                    if (tempFile.exists()) tempFile.delete()
+                    downloadSingleThreaded(client, uri.toString(), tempFile, progressFlow)
+                }
             } else {
                 Timber.i("Strategy: Single-threaded. Range Support: $supportsRange, Size: $contentLength")
                 downloadSingleThreaded(client, uri.toString(), tempFile, progressFlow)
@@ -192,11 +207,11 @@ class OkHttpNetworkResolver(
             .build()
 
         client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful && response.code != 206) {
+            if (response.code != 206) {
                 // If we get a 200 OK here, it means server ignored Range.
                 // We shouldn't write to the file as it would be the full file content
                 // multiplied by thread count, corrupting the download.
-                throw IOException("Chunk download failed or Range ignored: ${response.code}")
+                throw RangeNotSupportedException("Chunk download failed or Range ignored: ${response.code}")
             }
 
             val body = response.body
@@ -204,7 +219,7 @@ class OkHttpNetworkResolver(
             RandomAccessFile(destFile, "rw").use { raf ->
                 raf.seek(range.start)
 
-                val buffer = ByteArray(8192)
+                val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
                 var bytesRead: Int
                 val input = body.byteStream()
 
@@ -275,28 +290,85 @@ class OkHttpNetworkResolver(
         ).header(
             "Accept",
             "application/vnd.android.package-archive, application/octet-stream, */*"
+        ).header(
+            "Accept-Encoding",
+            "identity"
         )
     }
 
-    private fun performPreFlightCheck(client: OkHttpClient, url: String): Pair<Long, Boolean> {
+    private fun performPreFlightCheck(client: OkHttpClient, url: String): PreFlightResult {
+        val rangeProbe = Request.Builder()
+            .url(url)
+            .addDefaultHeaders()
+            .header("Range", "bytes=0-3")
+            .build()
+
+        try {
+            client.newCall(rangeProbe).execute().use { response ->
+                if (!response.isSuccessful) return performHeadFallback(client, url)
+
+                val buffer = ByteArray(4)
+                val bytesRead = response.body.byteStream().readUpTo(buffer)
+                val isArchive = bytesRead >= 4 && buffer.isZipMagicNumber()
+
+                val contentRange = response.header("Content-Range")
+                val rangeTotal = parseContentRangeTotal(contentRange)
+                val responseLength = response.header("Content-Length")?.toLongOrNull() ?: response.body.contentLength()
+                val supportsRange = response.code == 206 && rangeTotal > 0
+                val length = when {
+                    rangeTotal > 0 -> rangeTotal
+                    response.code == 200 -> responseLength
+                    else -> -1L
+                }
+
+                return PreFlightResult(
+                    contentLength = length,
+                    supportsRange = supportsRange,
+                    isArchive = isArchive
+                )
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Range pre-flight request failed. Falling back to HEAD.")
+            return performHeadFallback(client, url)
+        }
+    }
+
+    private fun performHeadFallback(client: OkHttpClient, url: String): PreFlightResult {
         val request = Request.Builder()
             .url(url)
             .head()
             .addDefaultHeaders()
             .build()
 
-        try {
+        return try {
             client.newCall(request).execute().use { response ->
                 val length = response.header("Content-Length")?.toLongOrNull() ?: -1L
-                val acceptRanges = response.header("Accept-Ranges")
-                val contentRange = response.header("Content-Range")
-                val supports = (acceptRanges == "bytes" || contentRange != null)
-                return Pair(length, supports)
+                val supports = response.header("Accept-Ranges").equals("bytes", ignoreCase = true)
+
+                // Preserve the previous behavior: if the lightweight archive probe cannot
+                // complete, do not reject otherwise valid download sources.
+                PreFlightResult(length, supports, isArchive = true)
             }
         } catch (e: Exception) {
             Timber.w(e, "Pre-flight HEAD request failed. Assuming single thread.")
-            return Pair(-1L, false)
+            PreFlightResult(-1L, supportsRange = false, isArchive = true)
         }
+    }
+
+    private fun parseContentRangeTotal(contentRange: String?): Long {
+        if (contentRange.isNullOrBlank()) return -1L
+        val total = contentRange.substringAfter('/', missingDelimiterValue = "")
+        return total.toLongOrNull() ?: -1L
+    }
+
+    private fun InputStream.readUpTo(buffer: ByteArray): Int {
+        var bytesRead = 0
+        while (bytesRead < buffer.size) {
+            val read = read(buffer, bytesRead, buffer.size - bytesRead)
+            if (read == -1) break
+            bytesRead += read
+        }
+        return bytesRead
     }
 
     private fun getNetworkType(): NetworkType {
@@ -352,51 +424,6 @@ class OkHttpNetworkResolver(
                     /* Allowed */
                 }
             }
-        }
-    }
-
-    /**
-     * Verify if the remote file is a valid archive by checking common ZIP signatures.
-     * Requesting only the first 4 bytes is highly efficient for rejecting HTML/JSON error pages.
-     *
-     * @param client The OkHttpClient instance.
-     * @param url The target download URL.
-     * @return true if the header matches known ZIP signatures, false otherwise.
-     */
-    private fun verifyArchiveMagicNumber(client: OkHttpClient, url: String): Boolean {
-        val request = Request.Builder()
-            .url(url)
-            .addDefaultHeaders()
-            // Request the first 4 bytes
-            .header("Range", "bytes=0-3")
-            .build()
-
-        return try {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return false
-
-                val body = response.body
-                val stream = body.byteStream()
-                val buffer = ByteArray(4)
-                var bytesRead = 0
-
-                while (bytesRead < 4) {
-                    val read = stream.read(buffer, bytesRead, 4 - bytesRead)
-                    if (read == -1) break
-                    bytesRead += read
-                }
-
-                if (bytesRead >= 4) {
-                    buffer.isZipMagicNumber()
-                } else {
-                    false
-                }
-            }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to verify archive magic number.")
-            // Assume true on network failure to avoid blocking valid downloads
-            // if the server simply mishandled the Range request.
-            true
         }
     }
 }
