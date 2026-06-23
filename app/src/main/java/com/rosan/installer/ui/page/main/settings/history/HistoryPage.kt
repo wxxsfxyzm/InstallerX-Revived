@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
@@ -36,7 +34,6 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -87,8 +84,7 @@ fun HistoryPage(
     useBlur: Boolean,
     viewModel: HistoryViewModel = koinViewModel(),
     title: String,
-    outerPadding: PaddingValues = PaddingValues(0.dp),
-    windowInsetsSides: WindowInsetsSides? = null
+    outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
@@ -108,13 +104,9 @@ fun HistoryPage(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentWindowInsets = windowInsetsSides?.let { ScaffoldDefaults.contentWindowInsets.only(it) }
-            ?: ScaffoldDefaults.contentWindowInsets,
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                windowInsets = windowInsetsSides?.let { TopAppBarDefaults.windowInsets.only(it) }
-                    ?: TopAppBarDefaults.windowInsets,
                 title = {
                     Text(
                         text = title,
@@ -474,7 +466,9 @@ private fun HistoryInfoLine(
                 detectTapGestures(
                     onLongPress = {
                         coroutineScope.launch {
-                            clipboard.setClipEntry(ClipData.newPlainText(title, value).toClipEntry())
+                            clipboard.setClipEntry(
+                                ClipData.newPlainText(title, value).toClipEntry()
+                            )
                         }
                         context.toast(R.string.copied_format, value)
                     }

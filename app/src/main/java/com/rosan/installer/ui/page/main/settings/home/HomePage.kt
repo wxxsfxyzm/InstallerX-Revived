@@ -10,13 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -71,8 +68,7 @@ fun HomePage(
     title: String,
     outerPadding: PaddingValues,
     configCount: Int = 0,
-    onNavigateToProfiles: () -> Unit = {},
-    windowInsetsSides: WindowInsetsSides? = null
+    onNavigateToProfiles: () -> Unit = {}
 ) {
     val navigator = LocalNavigator.current
     val uriHandler = LocalUriHandler.current
@@ -90,13 +86,9 @@ fun HomePage(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentWindowInsets = windowInsetsSides?.let { ScaffoldDefaults.contentWindowInsets.only(it) }
-            ?: ScaffoldDefaults.contentWindowInsets,
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                windowInsets = windowInsetsSides?.let { TopAppBarDefaults.windowInsets.only(it) }
-                    ?: TopAppBarDefaults.windowInsets,
                 title = {
                     Text(
                         text = title,

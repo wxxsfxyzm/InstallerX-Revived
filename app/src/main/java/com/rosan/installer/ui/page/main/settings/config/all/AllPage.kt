@@ -40,7 +40,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -85,8 +84,7 @@ fun AllPage(
     useBlur: Boolean,
     viewModel: AllViewModel = koinViewModel(),
     title: String,
-    outerPadding: PaddingValues = PaddingValues(0.dp),
-    windowInsetsSides: WindowInsetsSides? = null
+    outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -141,13 +139,9 @@ fun AllPage(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentWindowInsets = windowInsetsSides?.let { ScaffoldDefaults.contentWindowInsets.only(it) }
-            ?: ScaffoldDefaults.contentWindowInsets,
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                windowInsets = windowInsetsSides?.let { TopAppBarDefaults.windowInsets.only(it) }
-                    ?: TopAppBarDefaults.windowInsets,
                 title = {
                     Text(
                         text = title,

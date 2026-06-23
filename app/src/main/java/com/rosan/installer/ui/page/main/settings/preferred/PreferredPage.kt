@@ -10,12 +10,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
@@ -24,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -79,8 +76,7 @@ fun PreferredPage(
     useBlur: Boolean,
     viewModel: PreferredViewModel = koinViewModel(),
     title: String,
-    outerPadding: PaddingValues = PaddingValues(0.dp),
-    windowInsetsSides: WindowInsetsSides? = null
+    outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
@@ -198,13 +194,9 @@ fun PreferredPage(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentWindowInsets = windowInsetsSides?.let { ScaffoldDefaults.contentWindowInsets.only(it) }
-            ?: ScaffoldDefaults.contentWindowInsets,
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                windowInsets = windowInsetsSides?.let { TopAppBarDefaults.windowInsets.only(it) }
-                    ?: TopAppBarDefaults.windowInsets,
                 title = {
                     Text(
                         text = title,
@@ -329,7 +321,15 @@ fun PreferredPage(
                             title = stringResource(R.string.backup_settings_restore),
                             description = stringResource(R.string.backup_settings_restore_desc),
                             enabled = !uiState.backupBusy,
-                            onClick = { restoreLauncher.launch(arrayOf("application/json", "text/json", "*/*")) }
+                            onClick = {
+                                restoreLauncher.launch(
+                                    arrayOf(
+                                        "application/json",
+                                        "text/json",
+                                        "*/*"
+                                    )
+                                )
+                            }
                         )
                     }
                 }
@@ -442,7 +442,12 @@ private fun BackupRestorePreview.formatBackupRestorePreview(context: Context): S
         )
         if (ignoredSettingCount > 0) {
             append("\n")
-            append(context.getString(R.string.backup_settings_restore_ignored_settings, ignoredSettingCount))
+            append(
+                context.getString(
+                    R.string.backup_settings_restore_ignored_settings,
+                    ignoredSettingCount
+                )
+            )
         }
         if (warnings.isNotEmpty()) {
             append("\n\n")
