@@ -368,6 +368,7 @@
     <string name="config_install_requester">Install requested by (package name)</string>
     <string name="config_declare_installer">Set install source</string>
     <string name="config_declare_installer_desc">Defaults to this app\'s package name</string>
+    <string name="config_declare_installer_system_default_desc">Defaults to the install initiator</string>
     <string name="config_installer_mode_self">Default</string>
     <string name="config_installer_mode_initiator">Initiating app</string>
     <string name="config_installer_mode_custom">Custom</string>

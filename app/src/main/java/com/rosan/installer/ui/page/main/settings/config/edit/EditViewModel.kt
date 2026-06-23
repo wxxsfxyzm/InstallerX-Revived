@@ -20,6 +20,7 @@ import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.usecase.config.GetConfigDraftUseCase
 import com.rosan.installer.domain.settings.usecase.config.SaveConfigUseCase
 import com.rosan.installer.domain.settings.usecase.settings.GetPackageUidUseCase
+import com.rosan.installer.ui.util.isDhizukuActive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -148,27 +149,13 @@ class EditViewModel(
     }
 
     private fun changeDataAuthorizer(authorizer: Authorizer) {
-        _data.update { currentData ->
-            var updatedData = currentData.copy(authorizer = authorizer)
-            val effectiveAuthorizer = if (authorizer == Authorizer.Global) state.value.globalAuthorizer else authorizer
-
-            if (effectiveAuthorizer == Authorizer.Dhizuku) {
-                updatedData = updatedData.copy(
-                    enableCustomizePackageSource = false,
-                    installerMode = InstallerMode.Self,
-                    enableCustomizeUser = false,
-                    enableManualDexopt = false
-                )
-            }
-            updatedData
-        }
+        _data.update { currentData -> currentData.copy(authorizer = authorizer) }
 
         // Handle side-effects after state is safely updated
-        if (_data.value.enableCustomizeUser) {
+        if (_data.value.enableCustomizeUser && !isDhizukuActive(authorizer, state.value.globalAuthorizer)) {
             loadAvailableUsers()
         } else {
             _availableUsers.value = emptyMap()
-            _data.update { it.copy(targetUserId = 0) }
         }
     }
 
@@ -382,8 +369,9 @@ class EditViewModel(
             var model = currentData.toConfigModel()
             if (id != null) model = model.copy(id = id)
             val hasRequesterUid = currentData.installRequesterUid != null
+            val installerRequired = !isDhizukuActive(currentData.authorizer, state.value.globalAuthorizer)
 
-            val result = saveConfig(model, hasRequesterUid)
+            val result = saveConfig(model, hasRequesterUid, installerRequired)
 
             result.onSuccess {
                 _originalData.value = currentData

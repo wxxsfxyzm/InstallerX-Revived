@@ -40,6 +40,7 @@ import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.rememberUnknownSourcePermissionActionVisible
 import com.rosan.installer.ui.page.main.widget.util.InstallerEventCollector
 import com.rosan.installer.ui.page.miuix.installer.components.rememberAppInfoState
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallChoiceContent
@@ -491,13 +492,17 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.InstallWaitingUnknownSource -> {
                             val sourceAppLabel = uiState.initiatorAppLabel ?: stringResource(R.string.installer_label_unknown)
+                            val showPermissionAction = rememberUnknownSourcePermissionActionVisible(
+                                isWaitingUnknownSource = true
+                            )
                             InstallPreparingContent(
                                 viewModel = viewModel,
                                 onBackground = {
                                     viewModel.dispatch(InstallerViewAction.RequestUnknownSourcePermission)
                                 },
                                 descriptionText = stringResource(R.string.installer_waiting_unknown_source_desc, sourceAppLabel),
-                                buttonTextRes = R.string.suggestion_allow_unknown_source
+                                buttonTextRes = R.string.suggestion_allow_unknown_source,
+                                showButton = showPermissionAction
                             )
                         }
 

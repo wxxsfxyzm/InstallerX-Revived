@@ -23,22 +23,24 @@
         android:name="android.permission.DELETE_PACKAGES"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-
     <uses-permission
         android:name="android.permission.REQUEST_INSTALL_PACKAGES"
         tools:ignore="RequestInstallPackagesPolicy" />
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-
     <uses-permission
         android:name="android.permission.MANAGE_USERS"
         tools:ignore="ProtectedPermissions" />
-
     <uses-permission android:name="android.permission.READ_INSTALL_SESSIONS" />
     <uses-permission
         android:name="android.permission.READ_INSTALLED_SESSION_PATHS"
         tools:ignore="ProtectedPermissions" />
-
+    <uses-permission
+        android:name="android.permission.UPDATE_APP_OPS_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.MANAGE_APP_OPS_MODES"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="com.rosan.dhizuku.permission.API" />
 
     <uses-sdk tools:overrideLibrary="

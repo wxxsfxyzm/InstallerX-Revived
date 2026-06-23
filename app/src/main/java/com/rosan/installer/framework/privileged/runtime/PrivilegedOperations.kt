@@ -27,4 +27,5 @@ interface PrivilegedOperations {
     fun getUsers(): Map<Int, String>
     fun getSessionDetails(sessionId: Int): Bundle?
     fun setPackageNetworkingEnabled(uid: Int, enabled: Boolean)
+    fun prepareUnknownSourceAppOp(uid: Int, packageName: String): Int
 }

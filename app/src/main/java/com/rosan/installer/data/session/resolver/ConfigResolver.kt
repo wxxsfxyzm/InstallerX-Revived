@@ -4,18 +4,20 @@ package com.rosan.installer.data.session.resolver
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.PackageManagerHidden
 import com.rosan.installer.core.app.ActivityContracts
+import com.rosan.installer.core.bitmask.addFlag
 import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
-import com.rosan.installer.core.bitmask.addFlag
 import timber.log.Timber
 
 class ConfigResolver(
     private val getResolvedConfigUseCase: GetResolvedConfigUseCase
 ) {
-    companion object {
-        private const val TAG = "InstallSource"
+    private companion object {
+        const val TAG = "InstallSource"
     }
 
     // Authorities that definitely belong to the system but don't follow the "com.android.providers" naming convention.
@@ -26,6 +28,8 @@ class ConfigResolver(
 
     suspend fun resolve(activity: Activity): ConfigModel {
         Timber.tag(TAG).d("resolveConfig: Starting.")
+        val notUnknownSource = activity.intent.getBooleanExtra(PackageManagerHidden.EXTRA_NOT_UNKNOWN_SOURCE, false)
+
         // 0. Special Check: Is this UninstallerActivity?
         if (activity::class.java.name == ActivityContracts.UNINSTALLER_ACTIVITY) {
             Timber.tag(TAG).d("Activity is UninstallerActivity. Returning default config immediately.")
@@ -36,7 +40,8 @@ class ConfigResolver(
         val callingPackage = activity.callingPackage
         Timber.tag(TAG).d("activity.callingPackage: $callingPackage")
         if (callingPackage != null) {
-            return getConfigForPackage(callingPackage)
+            val callingUid = activity.packageUid(callingPackage)
+            return getConfigForPackage(callingPackage, notUnknownSource, callingUid)
         }
 
         // 2. Check Referrer
@@ -50,7 +55,7 @@ class ConfigResolver(
         if (referrer?.scheme == "android-app" && referrer.host != null) {
             val referrerPackage = referrer.host
             Timber.tag(TAG).d("Valid app referrer found: $referrerPackage")
-            return getConfigForPackage(referrerPackage)
+            return getConfigForPackage(referrerPackage, notUnknownSource)
         } else if (referrer != null) {
             Timber.tag(TAG).w("Ignoring referrer with non-app scheme: ${referrer.scheme}")
         }
@@ -63,16 +68,16 @@ class ConfigResolver(
             if (isSystemAuthority(authority)) {
                 Timber.tag(TAG).w("Authority '$authority' is identified as a system provider. Using default config.")
                 // Load default config from database (passing null to getByPackageName)
-                return getConfigForPackage(null)
+                return getConfigForPackage(null, notUnknownSource)
             } else {
                 val authorityPackage = extractPackageFromAuthority(authority)
                 Timber.tag(TAG).d("Package extracted from app-specific authority: $authorityPackage")
-                return getConfigForPackage(authorityPackage)
+                return getConfigForPackage(authorityPackage, notUnknownSource)
             }
         }
 
         Timber.tag(TAG).w("Could not determine calling package. Using default config.")
-        return getConfigForPackage(null)
+        return getConfigForPackage(null, notUnknownSource)
     }
 
     suspend fun resolveForPackage(packageName: String?): ConfigModel = getConfigForPackage(packageName)
@@ -86,7 +91,11 @@ class ConfigResolver(
                 authority.startsWith("com.android.providers")
     }
 
-    private suspend fun getConfigForPackage(packageName: String?): ConfigModel {
+    private suspend fun getConfigForPackage(
+        packageName: String?,
+        notUnknownSource: Boolean = false,
+        installSourceUid: Int? = null
+    ): ConfigModel {
         var config = getResolvedConfigUseCase(packageName)
 
         val initialInstallFlags = listOfNotNull(
@@ -99,15 +108,26 @@ class ConfigResolver(
         ).fold(0) { acc, flag -> acc or flag }
 
         config = config.copy(
-            installFlags = config.installFlags.addFlag(initialInstallFlags)
+            installFlags = config.installFlags.addFlag(initialInstallFlags),
+            installSourceUid = installSourceUid,
+            notUnknownSource = notUnknownSource
         )
 
         Timber.tag(TAG).d("Resolved config for '${packageName ?: "default"}': $config")
         return config
     }
 
-    private fun extractPackageFromAuthority(authority: String): String {
-        return authority.removeSuffix(".FileProvider")
+    @Suppress("DEPRECATION")
+    private fun Activity.packageUid(packageName: String): Int? =
+        runCatching {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageUid(packageName, PackageManager.PackageInfoFlags.of(0))
+            } else {
+                packageManager.getPackageUid(packageName, 0)
+            }
+        }.getOrNull()
+
+    private fun extractPackageFromAuthority(authority: String) =
+        authority.removeSuffix(".FileProvider")
             .removeSuffix(".provider")
-    }
 }

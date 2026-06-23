@@ -160,6 +160,15 @@ object ShizukuHook : KoinComponent {
             throw e
         }
     }
+
+    val hookedAppOpsBinder: IBinder? by lazy {
+        Timber.tag("ShizukuHook").d("Creating on-demand hooked AppOps Binder...")
+        runCatching {
+            ShizukuBinderWrapper(SystemServiceHelper.getSystemService(Context.APP_OPS_SERVICE))
+        }.onFailure { error ->
+            Timber.tag("ShizukuHook").e(error, "Failed to create hooked AppOps Binder")
+        }.getOrNull()
+    }
 }
 
 data class SettingsReflectionInfo(

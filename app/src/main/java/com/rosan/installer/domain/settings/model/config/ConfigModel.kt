@@ -59,6 +59,8 @@ data class ConfigModel(
     val uninstallFlags: Int = 0,
     val callingFromUid: Int? = null,
     val initiatorPackageName: String? = null,
+    val installSourceUid: Int? = null,
+    val notUnknownSource: Boolean = false,
     val allowInstallWithoutUserAction: Boolean = false
 ) {
     companion object {

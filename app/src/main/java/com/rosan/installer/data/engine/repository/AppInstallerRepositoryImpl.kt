@@ -44,21 +44,26 @@ class AppInstallerRepositoryImpl(
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) = executeWithRepo(config) { repo ->
-        val effectiveRespectPlatformInstallPolicy = respectPlatformInstallPolicy ||
+        val requestedRespectPlatformInstallPolicy = respectPlatformInstallPolicy ||
                 appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy).first()
-        if (effectiveRespectPlatformInstallPolicy) {
-            PlatformInstallPolicyChecker(context).check(config)
+        if (requestedRespectPlatformInstallPolicy) {
+            if (canCheckPlatformInstallPolicy(config)) {
+                PlatformInstallPolicyChecker(context, reflect).check(config)
+            }
         }
         repo.doInstallWork(
             config,
             entities,
             metadata,
-            effectiveRespectPlatformInstallPolicy,
+            requestedRespectPlatformInstallPolicy,
             blacklist,
             sharedUserIdBlacklist,
             sharedUserIdExemption
         )
     }
+
+    private fun canCheckPlatformInstallPolicy(config: ConfigModel): Boolean =
+        config.authorizer != Authorizer.None || deviceCapabilityProvider.isSystemApp
 
     override suspend fun doUninstallWork(
         config: ConfigModel,

@@ -33,6 +33,7 @@ import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixHintTextField
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.util.isDhizukuActive
+import com.rosan.installer.ui.util.isSystemPackageInstallerActive
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Text
@@ -326,9 +327,10 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
     val globalAuthorizer = state.globalAuthorizer
     val enableCustomizePackageSource = state.data.enableCustomizePackageSource
     val currentSource = state.data.packageSource
+    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
 
     val description =
-        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
         else stringResource(id = R.string.config_customize_package_source_desc)
 
     Column {
@@ -336,14 +338,14 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
             title = stringResource(id = R.string.config_customize_package_source),
             description = description,
             checked = enableCustomizePackageSource,
-            enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
+            enabled = !isDhizuku,
             onCheckedChange = {
                 dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
             }
         )
 
         AnimatedVisibility(
-            visible = enableCustomizePackageSource,
+            visible = enableCustomizePackageSource && !isDhizuku,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
@@ -471,13 +473,31 @@ fun MiuixDataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAct
     val stateAuthorizer = state.data.authorizer
     val globalAuthorizer = state.globalAuthorizer
     val currentMode = state.data.installerMode
+    val capabilityProvider = koinInject<DeviceCapabilityProvider>()
 
     val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
 
     val description = if (isDhizuku) {
         stringResource(R.string.dhizuku_cannot_set_installer_desc)
     } else {
-        stringResource(id = R.string.config_declare_installer_desc)
+        when (currentMode) {
+            InstallerMode.Self -> {
+                val descRes = if (
+                    isSystemPackageInstallerActive(
+                        stateAuthorizer = stateAuthorizer,
+                        globalAuthorizer = globalAuthorizer,
+                        isSystemApp = capabilityProvider.isSystemApp
+                    )
+                ) {
+                    R.string.config_declare_installer_system_default_desc
+                } else {
+                    R.string.config_declare_installer_desc
+                }
+                stringResource(descRes)
+            }
+            InstallerMode.Initiator -> stringResource(R.string.config_installer_mode_initiator)
+            InstallerMode.Custom -> stringResource(R.string.config_installer_mode_custom)
+        }
     }
 
     Column {
@@ -564,9 +584,10 @@ fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
     val enableCustomizeUser = state.data.enableCustomizeUser
     val targetUserId = state.data.targetUserId
     val availableUsers = state.availableUsers
+    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
 
     val description =
-        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_user_desc)
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_user_desc)
         else stringResource(id = R.string.config_customize_user_desc)
 
     Column {
@@ -574,14 +595,14 @@ fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
             title = stringResource(id = R.string.config_customize_user),
             description = description,
             checked = enableCustomizeUser,
-            enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
+            enabled = !isDhizuku,
             onCheckedChange = {
                 dispatch(EditViewAction.ChangeDataCustomizeUser(it))
             }
         )
 
         AnimatedVisibility(
-            visible = enableCustomizeUser,
+            visible = enableCustomizeUser && !isDhizuku,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
@@ -611,23 +632,25 @@ fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
 fun MiuixDataManualDexoptWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     val stateAuthorizer = state.data.authorizer
     val globalAuthorizer = state.globalAuthorizer
+    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
+    val showDexoptOptions = state.data.enableManualDexopt && !isDhizuku
 
     val description =
-        if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
+        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
         else stringResource(R.string.config_manual_dexopt_desc)
 
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_manual_dexopt),
         description = description,
         checked = state.data.enableManualDexopt,
-        enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
+        enabled = !isDhizuku,
         onCheckedChange = {
             dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
         }
     )
 
     AnimatedVisibility(
-        visible = state.data.enableManualDexopt,
+        visible = showDexoptOptions,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {

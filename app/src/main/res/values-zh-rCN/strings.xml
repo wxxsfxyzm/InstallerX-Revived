@@ -360,6 +360,7 @@
     <string name="config_install_requester">安装请求方</string>
     <string name="config_declare_installer">安装来源</string>
     <string name="config_declare_installer_desc">默认填写本应用包名</string>
+    <string name="config_declare_installer_system_default_desc">默认填写安装发起者</string>
     <string name="config_installer_mode_self">默认</string>
     <string name="config_installer_mode_initiator">发起安装的应用</string>
     <string name="config_installer_mode_custom">自定义</string>

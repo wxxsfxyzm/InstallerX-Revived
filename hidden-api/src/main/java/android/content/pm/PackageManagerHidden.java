@@ -24,6 +24,12 @@ public final class PackageManagerHidden {
     /**
      * @hide
      */
+    public static final String EXTRA_NOT_UNKNOWN_SOURCE =
+            "android.intent.extra.NOT_UNKNOWN_SOURCE";
+
+    /**
+     * @hide
+     */
     public static final int INSTALL_UNKNOWN = 0;
 
     /**

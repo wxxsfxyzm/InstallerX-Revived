@@ -2,7 +2,9 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.framework.privileged.runtime
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AppOpsManager
 import android.app.IActivityManager
 import android.app.IApplicationThread
 import android.app.ProfilerInfo
@@ -44,6 +46,7 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import android.os.Process as AndroidProcess
 
+@SuppressLint("PrivateApi")
 class DefaultPrivilegedService private constructor(
     private val runtime: PrivilegedRuntime
 ) : BasePrivilegedService(), PrivilegedOperations {
@@ -86,6 +89,17 @@ class DefaultPrivilegedService private constructor(
 
     private val iConnectivityManager: IConnectivityManager by lazy {
         runtime.connectivityManager()
+    }
+
+    private val appOpsManager: AppOpsManager by lazy {
+        val appOps = context.getSystemService(AppOpsManager::class.java)
+        val binder = runtime.appOpsBinder() ?: return@lazy appOps
+        val service = Class.forName("com.android.internal.app.IAppOpsService\$Stub")
+            .getMethod("asInterface", IBinder::class.java)
+            .invoke(null, binder)
+
+        reflect.setFieldValue(appOps, "mService", appOps.javaClass, service)
+        appOps
     }
 
     override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
@@ -729,6 +743,37 @@ class DefaultPrivilegedService private constructor(
             Timber.tag(TAG).e(e, "Failed to set package networking via AIDL Stub")
             throw RemoteException("AIDL Stub invocation failed: ${e.message}")
         }
+    }
+
+    @Suppress("DEPRECATION")
+    override fun prepareUnknownSourceAppOp(uid: Int, packageName: String): Int {
+        val op = AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES)
+            ?: return AppOpsManager.MODE_ERRORED
+
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            appOpsManager.noteOpNoThrow(
+                op,
+                uid,
+                packageName,
+                null,
+                "Started package installation activity"
+            )
+        } else {
+            appOpsManager.noteOpNoThrow(op, uid, packageName)
+        }
+
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            reflect.getMethod(
+                "setMode",
+                appOpsManager.javaClass,
+                String::class.java,
+                Int::class.javaPrimitiveType!!,
+                String::class.java,
+                Int::class.javaPrimitiveType!!
+            )?.invoke(appOpsManager, op, uid, packageName, AppOpsManager.MODE_ERRORED)
+        }
+
+        return mode
     }
 
     @SuppressLint("PrivateApi")

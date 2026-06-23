@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.rememberUnknownSourcePermissionActionVisible
 import com.rosan.installer.ui.page.main.installer.components.workingIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
@@ -35,6 +36,9 @@ fun installWaitingUnknownSourceDialog(
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val sourceAppLabel = uiState.initiatorAppLabel ?: stringResource(R.string.installer_label_unknown)
     val description = stringResource(R.string.installer_waiting_unknown_source_desc, sourceAppLabel)
+    val showPermissionAction = rememberUnknownSourcePermissionActionVisible(
+        isWaitingUnknownSource = true
+    )
 
     return DialogParams(
         icon = DialogInnerParams(
@@ -72,14 +76,20 @@ fun installWaitingUnknownSourceDialog(
         buttons = dialogButtons(
             DialogParamsType.ButtonsCancel.id
         ) {
-            listOf(
-                DialogButton(stringResource(R.string.suggestion_allow_unknown_source)) {
-                    viewModel.dispatch(InstallerViewAction.RequestUnknownSourcePermission)
-                },
-                DialogButton(stringResource(R.string.cancel)) {
-                    viewModel.dispatch(InstallerViewAction.Cancel)
+            buildList {
+                if (showPermissionAction) {
+                    add(
+                        DialogButton(stringResource(R.string.suggestion_allow_unknown_source)) {
+                            viewModel.dispatch(InstallerViewAction.RequestUnknownSourcePermission)
+                        }
+                    )
                 }
-            )
+                add(
+                    DialogButton(stringResource(R.string.cancel)) {
+                        viewModel.dispatch(InstallerViewAction.Cancel)
+                    }
+                )
+            }
         }
     )
 }

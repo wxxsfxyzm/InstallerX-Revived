@@ -78,6 +78,24 @@ class AppOpsProviderImpl(
         }
     }
 
+    override suspend fun prepareUnknownSourceAppOp(
+        authorizer: Authorizer,
+        customizeAuthorizer: String,
+        uid: Int,
+        packageName: String
+    ): Int? = withContext(Dispatchers.IO) {
+        var mode: Int? = null
+        useDirectPrivileged(
+            isSystemApp = capabilityProvider.isSystemApp,
+            authorizer = authorizer,
+            customizeAuthorizer = customizeAuthorizer,
+            special = getSpecialAuth(authorizer)
+        ) { privileged ->
+            mode = privileged.prepareUnknownSourceAppOp(uid, packageName)
+        }
+        mode
+    }
+
     private fun shouldUseUserServiceForDefaultInstaller(authorizer: Authorizer) =
         authorizer == Authorizer.Root ||
                 (authorizer == Authorizer.Shizuku &&

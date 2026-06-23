@@ -14,6 +14,7 @@ import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
+import com.rosan.installer.ui.util.isDhizukuActive
 
 data class EditViewState(
     val data: Data = Data.build(ConfigModel.default),
@@ -38,7 +39,9 @@ data class EditViewState(
             with(data) {
                 if (errorName) errors.add(R.string.config_error_name)
                 if (errorCustomizeAuthorizer) errors.add(R.string.config_error_customize_authorizer)
-                if (errorInstaller) errors.add(R.string.config_error_installer)
+                if (errorInstaller && !isDhizukuActive(authorizer, globalAuthorizer)) {
+                    errors.add(R.string.config_error_installer)
+                }
                 if (errorInstallRequester) errors.add(R.string.config_error_package_not_found)
             }
             return errors

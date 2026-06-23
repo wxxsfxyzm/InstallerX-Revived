@@ -57,6 +57,7 @@ import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumnScope
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.util.isDhizukuActive
+import com.rosan.installer.ui.util.isSystemPackageInstallerActive
 import org.koin.compose.koinInject
 
 @Composable
@@ -334,21 +335,21 @@ fun SegmentedColumnScope.dataPackageSourceWidget(
     val globalAuthorizer = state.globalAuthorizer
     val enableCustomizePackageSource = state.data.enableCustomizePackageSource
     val currentSource = state.data.packageSource
+    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
 
     expandableItem(
         animatedVisibility = visible,
-        expanded = enableCustomizePackageSource,
+        expanded = enableCustomizePackageSource && !isDhizuku,
         topContent = {
             val description =
-                if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+                if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
                 else stringResource(id = R.string.config_customize_package_source_desc)
             SwitchWidget(
                 icon = AppIcons.InstallPackageSource,
                 title = stringResource(id = R.string.config_customize_package_source),
                 description = description,
                 checked = enableCustomizePackageSource,
-                enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
-                isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
+                enabled = !isDhizuku,
                 onCheckedChange = {
                     dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
                 }
@@ -466,6 +467,7 @@ fun SegmentedColumnScope.dataDeclareInstallerWidget(state: EditViewState, dispat
     expandableItem(
         expanded = isExpanded,
         topContent = {
+            val capabilityProvider = koinInject<DeviceCapabilityProvider>()
             val data = mapOf(
                 InstallerMode.Self to stringResource(R.string.config_installer_mode_self),
                 InstallerMode.Initiator to stringResource(R.string.config_installer_mode_initiator),
@@ -476,7 +478,20 @@ fun SegmentedColumnScope.dataDeclareInstallerWidget(state: EditViewState, dispat
                 stringResource(R.string.dhizuku_cannot_set_installer_desc)
             } else {
                 when (currentMode) {
-                    InstallerMode.Self -> stringResource(R.string.config_declare_installer_desc)
+                    InstallerMode.Self -> {
+                        val descRes = if (
+                            isSystemPackageInstallerActive(
+                                stateAuthorizer = stateAuthorizer,
+                                globalAuthorizer = globalAuthorizer,
+                                isSystemApp = capabilityProvider.isSystemApp
+                            )
+                        ) {
+                            R.string.config_declare_installer_system_default_desc
+                        } else {
+                            R.string.config_declare_installer_desc
+                        }
+                        stringResource(descRes)
+                    }
                     InstallerMode.Initiator -> stringResource(R.string.config_installer_mode_initiator)
                     InstallerMode.Custom -> stringResource(R.string.config_installer_mode_custom)
                 }
@@ -489,7 +504,6 @@ fun SegmentedColumnScope.dataDeclareInstallerWidget(state: EditViewState, dispat
                 choice = data.keys.toList().indexOf(currentMode),
                 data = data.values.toList(),
                 enabled = !isDhizuku,
-                isError = isDhizuku
             ) { index ->
                 if (!isDhizuku) {
                     data.keys.toList().getOrNull(index)?.let { mode ->
@@ -601,20 +615,20 @@ fun SegmentedColumnScope.dataUserWidget(state: EditViewState, dispatch: (EditVie
     val enableCustomizeUser = state.data.enableCustomizeUser
     val targetUserId = state.data.targetUserId
     val availableUsers = state.availableUsers
+    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
 
     expandableItem(
-        expanded = enableCustomizeUser,
+        expanded = enableCustomizeUser && !isDhizuku,
         topContent = {
             val description =
-                if (isDhizukuActive(stateAuthorizer, globalAuthorizer)) stringResource(R.string.dhizuku_cannot_set_user_desc)
+                if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_user_desc)
                 else stringResource(id = R.string.config_customize_user_desc)
             SwitchWidget(
                 icon = AppIcons.InstallUser,
                 title = stringResource(id = R.string.config_customize_user),
                 description = description,
                 checked = enableCustomizeUser,
-                enabled = !isDhizukuActive(stateAuthorizer, globalAuthorizer),
-                isError = isDhizukuActive(stateAuthorizer, globalAuthorizer),
+                enabled = !isDhizuku,
                 onCheckedChange = {
                     dispatch(EditViewAction.ChangeDataCustomizeUser(it))
                 }
@@ -641,9 +655,10 @@ fun SegmentedColumnScope.dataManualDexoptWidget(state: EditViewState, dispatch: 
     val globalAuthorizer = state.globalAuthorizer
     val expanded = state.data.enableManualDexopt
     val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
+    val showDexoptOptions = expanded && !isDhizuku
 
     // Multi-item integration completely eliminates the need for AnimatedVisibility and manual shape adjustments
-    item(forceFlatBottom = expanded) {
+    item(forceFlatBottom = showDexoptOptions) {
         val description =
             if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
             else stringResource(R.string.config_manual_dexopt_desc)
@@ -653,7 +668,6 @@ fun SegmentedColumnScope.dataManualDexoptWidget(state: EditViewState, dispatch: 
             description = description,
             checked = expanded,
             enabled = !isDhizuku,
-            isError = isDhizuku,
             onCheckedChange = {
                 dispatch(EditViewAction.ChangeDataEnableManualDexopt(it))
             }
@@ -661,7 +675,7 @@ fun SegmentedColumnScope.dataManualDexoptWidget(state: EditViewState, dispatch: 
     }
 
     item(
-        animatedVisibility = expanded,
+        animatedVisibility = showDexoptOptions,
         topPadding = 1.dp,
         forceFlatTop = true,
         forceFlatBottom = true
@@ -679,7 +693,7 @@ fun SegmentedColumnScope.dataManualDexoptWidget(state: EditViewState, dispatch: 
     val currentMode = state.data.dexoptMode
 
     item(
-        animatedVisibility = expanded,
+        animatedVisibility = showDexoptOptions,
         topPadding = 1.dp,
         forceFlatTop = true
     ) {

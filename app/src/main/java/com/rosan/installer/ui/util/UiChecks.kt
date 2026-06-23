@@ -27,3 +27,12 @@ fun isNoneActive(
     Authorizer.Global -> globalAuthorizer == Authorizer.None
     else -> false
 }
+
+/**
+ * Returns true if the effective None authorizer is backed by system package installer privileges.
+ */
+fun isSystemPackageInstallerActive(
+    stateAuthorizer: Authorizer,
+    globalAuthorizer: Authorizer,
+    isSystemApp: Boolean
+) = isSystemApp && isNoneActive(stateAuthorizer, globalAuthorizer)
