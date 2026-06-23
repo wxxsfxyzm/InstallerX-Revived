@@ -2,14 +2,14 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.ui.navigation
 
-import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
+import top.yukonga.miuix.kmp.nav.core.NavKey
 
 /**
  * Type-safe navigation keys for Navigation3.
  * Each destination is a NavKey (data object/data class) and can be saved/restored in the back stack.
  */
-sealed interface Route : NavKey {
+interface Route : NavKey {
     @Serializable
     data object About : Route
 
