@@ -4,9 +4,12 @@ package com.rosan.installer.ui.animation.predictiveback
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
@@ -107,20 +110,33 @@ private val ScaleMotion = NavMotion(
     programmatic = NavSettleSpec.Tween(durationMillis = 200, easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)),
 )
 
-private val ClassicScalePop: NavTransition = navGraphicsTransition(
-    opaqueDepth = 1f,
-    motion = ScaleMotion,
-    scrim = { scope -> coverProgress(scope.relativeDepth) },
-) { scope ->
-    val depth = scope.relativeDepth
-    val widthPx = scope.layoutSize.width.toFloat()
-    if (depth <= 0f) {
-        val progress = topProgress(depth)
-        scaleX = 0.9f + 0.1f * progress
-        scaleY = scaleX
-        alpha = progress
-    } else {
-        translationX = -coverProgress(depth) * widthPx
+private val ScaleAospExitMotion = NavMotion(
+    commit = NavSettleSpec.Tween(durationMillis = 450, easing = FastOutExtraSlowIn),
+    cancel = NavSettleSpec.Spring(stiffness = 1500f),
+    programmatic = NavSettleSpec.Tween(durationMillis = 200, easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)),
+)
+
+private val ClassicScalePop: NavTransition = object : NavTransition {
+    override val opaqueDepth: Float = 1f
+
+    override val motion: NavMotion = ScaleMotion
+
+    override fun scrimFraction(scope: NavTransitionScope): Float = coverProgress(scope.relativeDepth)
+
+    override fun Modifier.transformEntry(scope: NavTransitionScope): Modifier {
+        val zIndex = if (scope.relativeDepth > 0f) 1f else 0f
+        return graphicsLayer {
+            val depth = scope.relativeDepth
+            val widthPx = scope.layoutSize.width.toFloat()
+            if (depth <= 0f) {
+                val progress = topProgress(depth)
+                scaleX = 0.9f + 0.1f * progress
+                scaleY = scaleX
+                alpha = progress
+            } else {
+                translationX = -coverProgress(depth) * widthPx
+            }
+        }.zIndex(zIndex)
     }
 }
 
@@ -132,40 +148,55 @@ private val ClassicScaleTransition: NavTransition = navDirectionalTransition(
 
 private fun scaleTransition(exitDirection: PredictiveBackExitDirection): NavTransition {
     val pop = navGraphicsTransition(
-    opaqueDepth = 1f,
-    motion = ScaleMotion,
-    scrim = { scope ->
-        when {
-            scope.gesture != null -> 1f
-            scope.settle?.phase == NavSettlePhase.Commit -> (1f - (scope.settle?.elapsedMillis ?: 0f) / 200f).coerceIn(0f, 1f)
-            else -> coverProgress(scope.relativeDepth)
+        opaqueDepth = 1f,
+        motion = ScaleAospExitMotion,
+        scrim = { scope ->
+            when {
+                scope.settle?.phase == NavSettlePhase.Commit -> (1f - (scope.settle?.elapsedMillis ?: 0f) / 450f).coerceIn(0f, 1f)
+                scope.gesture != null -> 1f
+                else -> coverProgress(scope.relativeDepth)
+            }
+        },
+    ) { scope ->
+        val depth = scope.relativeDepth
+        val widthPx = scope.layoutSize.width.toFloat()
+        val driftPx = with(scope.density) { CrossActivityDrift.toPx() }
+        val gesture = scope.gesture
+        val sign = exitDirectionSign(exitDirection, scope)
+        val committing = scope.settle?.phase == NavSettlePhase.Commit
+        val outgoingCommit = scope.role == NavRole.Outgoing && committing && gesture != null
+        if (depth <= 0f) {
+            val progress = topProgress(depth)
+            val pageScale = if (outgoingCommit) {
+                val releaseProgress = (1f - gesture.progress).coerceAtLeast(0.01f)
+                val post = (1f - progress / releaseProgress).coerceIn(0f, 1f)
+                val releaseEasedProgress = shapedTopProgress(releaseProgress, gesture)
+                val committedScale = SCALE_MIN + (1f - SCALE_MIN) * releaseEasedProgress
+                committedScale + (SCALE_MIN - committedScale) * post
+            } else {
+                val easedProgress = shapedTopProgress(progress, gesture)
+                SCALE_MIN + (1f - SCALE_MIN) * easedProgress
+            }
+            scaleX = pageScale
+            scaleY = pageScale
+            transformOrigin = TransformOrigin(
+                pivotFractionX = if (gesture?.swipeEdge == NavSwipeEdge.Left) 0.8f else 0.2f,
+                pivotFractionY = gesturePivotY(gesture, scope.layoutSize.height.toFloat()),
+            )
+            translationX = if (gesture != null && scope.settle == null) {
+                0f
+            } else if (outgoingCommit) {
+                val releaseProgress = (1f - gesture.progress).coerceAtLeast(0.01f)
+                val post = (1f - progress / releaseProgress).coerceIn(0f, 1f)
+                sign * post * driftPx
+            } else {
+                sign * (1f - progress) * widthPx
+            }
+            if (outgoingCommit) {
+                val elapsedMillis = scope.settle?.elapsedMillis ?: 0f
+                alpha = (1f - 5f * (elapsedMillis / 450f)).coerceAtLeast(0f)
+            }
         }
-    },
-) { scope ->
-    val depth = scope.relativeDepth
-    val widthPx = scope.layoutSize.width.toFloat()
-    val gesture = scope.gesture
-    val sign = exitDirectionSign(exitDirection, scope)
-    if (depth <= 0f) {
-        val progress = topProgress(depth)
-        scaleX = 0.85f + 0.15f * progress
-        scaleY = scaleX
-        transformOrigin = TransformOrigin(
-            pivotFractionX = if (gesture?.swipeEdge == NavSwipeEdge.Left) 0.8f else 0.2f,
-            pivotFractionY = gesturePivotY(gesture, scope.layoutSize.height.toFloat()),
-        )
-        translationX = if (gesture != null && scope.settle == null) {
-            0f
-        } else {
-            sign * (1f - progress) * widthPx
-        }
-        alpha = progress
-    } else {
-        val cover = coverProgress(depth)
-        translationX = -sign * cover * widthPx * 0.25f
-        scaleX = 0.85f + 0.15f * (1f - cover)
-        scaleY = scaleX
-    }
     }
     return navDirectionalTransition(
         push = NavTransitions.MiuixDefault,
@@ -344,6 +375,7 @@ private fun topProgress(depth: Float): Float = (1f + depth).coerceIn(0f, 1f)
 
 private fun coverProgress(depth: Float): Float = depth.coerceIn(0f, 1f)
 
+private const val SCALE_MIN = 0.85f
 private const val CROSS_ACTIVITY_MIN_SCALE = 0.9f
 private val CrossActivityDrift = 96.dp
 private val CrossActivityEdgeMargin = 8.dp
