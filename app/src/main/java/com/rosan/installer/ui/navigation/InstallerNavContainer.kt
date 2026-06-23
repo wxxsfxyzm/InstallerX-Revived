@@ -9,6 +9,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.ui.animation.predictiveback.installerNavTransition
 import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
@@ -38,12 +40,12 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.installer.notificati
 import com.rosan.installer.ui.page.miuix.settings.preferred.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.uninstaller.MiuixUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.util.rememberDeviceCornerRadius
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.nav.core.NavCornerClipMode
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
-import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 
 @Composable
@@ -59,12 +61,15 @@ fun InstallerNavContainer(uiState: ThemeState) {
     CompositionLocalProvider(
         LocalNavigator provides navigator,
     ) {
-        val navCornerRadius = rememberNavSystemCornerRadius()
-        val effects = remember(navCornerRadius) {
+        val navCornerRadius = rememberDeviceCornerRadius(defaultRadius = 0.dp)
+        val roundAllCorners = uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP ||
+                uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
+                uiState.predictiveBackAnimation == PredictiveBackAnimation.Classic
+        val effects = remember(navCornerRadius, roundAllCorners) {
             NavDisplayEffects(
                 enableCornerClip = true,
-                cornerClipRadius = navCornerRadius,
-                cornerClipMode = NavCornerClipMode.Leading,
+                cornerClipRadius = if (roundAllCorners && navCornerRadius <= 0.dp) 32.dp else navCornerRadius,
+                cornerClipMode = if (roundAllCorners) NavCornerClipMode.All else NavCornerClipMode.Leading,
                 dimAmount = 0.5f,
                 blockInputDuringTransition = true,
             )
