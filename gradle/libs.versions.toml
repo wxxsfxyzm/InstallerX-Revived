@@ -112,7 +112,7 @@ appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", ve
 
 # Dhizuku-API
 # https://github.com/iamr0s/Dhizuku-API
-iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version = "2.5.4" }
+iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version = "2.6.0" }
 
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
