@@ -3,6 +3,7 @@
 package com.rosan.installer.framework.privileged.util
 
 import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.installer.framework.privileged.runtime.DhizukuPrivilegedService
 import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
 import com.rosan.installer.framework.privileged.runtime.PrivilegedOperations
 import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
@@ -55,7 +56,7 @@ fun useDirectPrivileged(
         Authorizer.Dhizuku -> {
             runBlocking {
                 requireDhizukuPermissionGranted {
-                    action(DefaultPrivilegedService.binderWrapped(name = "Dhizuku", useAppCallerPackage = isSystemApp) { binder ->
+                    action(DhizukuPrivilegedService { binder ->
                         Dhizuku.binderWrapper(binder)
                     })
                 }

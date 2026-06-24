@@ -10,6 +10,7 @@ import org.koin.core.component.KoinComponent
 import rikka.shizuku.Shizuku
 import timber.log.Timber
 import java.io.Closeable
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Validates Shizuku hook readiness without exposing a fake UserService.
@@ -32,7 +33,7 @@ class ShizukuHookRecycler : Recycler<ShizukuHookRecycler.HookedUserService>(), K
     private suspend fun ensureBinderReady() {
         repeat(5) {
             if (Shizuku.pingBinder()) return
-            delay(100)
+            delay(100.milliseconds)
         }
     }
 }

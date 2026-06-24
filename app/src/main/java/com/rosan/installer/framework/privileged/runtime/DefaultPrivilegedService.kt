@@ -92,14 +92,7 @@ class DefaultPrivilegedService private constructor(
     }
 
     private val appOpsManager: AppOpsManager by lazy {
-        val appOps = context.getSystemService(AppOpsManager::class.java)
-        val binder = runtime.appOpsBinder() ?: return@lazy appOps
-        val service = Class.forName("com.android.internal.app.IAppOpsService\$Stub")
-            .getMethod("asInterface", IBinder::class.java)
-            .invoke(null, binder)
-
-        reflect.setFieldValue(appOps, "mService", appOps.javaClass, service)
-        appOps
+        runtime.appOpsManager(context, reflect)
     }
 
     override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
@@ -682,7 +675,6 @@ class DefaultPrivilegedService private constructor(
         }
     }
 
-    @SuppressLint("PrivateApi")
     override fun getUsers(): Map<Int, String> {
         val userMap = mutableMapOf<Int, String>()
         try {
@@ -745,7 +737,6 @@ class DefaultPrivilegedService private constructor(
         }
     }
 
-    @Suppress("DEPRECATION")
     override fun prepareUnknownSourceAppOp(uid: Int, packageName: String): Int {
         val op = AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES)
             ?: return AppOpsManager.MODE_ERRORED
@@ -759,6 +750,7 @@ class DefaultPrivilegedService private constructor(
                 "Started package installation activity"
             )
         } else {
+            @Suppress("Deprecation")
             appOpsManager.noteOpNoThrow(op, uid, packageName)
         }
 
@@ -776,7 +768,6 @@ class DefaultPrivilegedService private constructor(
         return mode
     }
 
-    @SuppressLint("PrivateApi")
     private fun sendPackageShellCommandOneway(
         binder: IBinder,
         args: Array<String>
