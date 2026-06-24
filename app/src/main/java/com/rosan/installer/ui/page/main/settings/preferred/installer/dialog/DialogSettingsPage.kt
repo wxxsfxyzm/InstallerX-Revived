@@ -4,19 +4,11 @@
 
 package com.rosan.installer.ui.page.main.settings.preferred.installer.dialog
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,9 +54,6 @@ fun DialogSettingsPage(
     LaunchedEffect(Unit) {
         topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
     }
-
-    val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
@@ -100,12 +88,7 @@ fun DialogSettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-                bottom = paddingValues.calculateBottomPadding()
-            )
+            contentPadding = paddingValues
         ) {
             item {
                 SegmentedColumn(
@@ -119,7 +102,11 @@ fun DialogSettingsPage(
                             description = stringResource(id = R.string.version_compare_in_single_line_desc),
                             checked = uiState.versionCompareInSingleLine,
                             onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeVersionCompareInSingleLine(it))
+                                viewModel.dispatch(
+                                    DialogSettingsAction.ChangeVersionCompareInSingleLine(
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -132,7 +119,11 @@ fun DialogSettingsPage(
                             description = stringResource(id = R.string.sdk_compare_in_multi_line_desc),
                             checked = uiState.sdkCompareInMultiLine,
                             onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeSdkCompareInMultiLine(it))
+                                viewModel.dispatch(
+                                    DialogSettingsAction.ChangeSdkCompareInMultiLine(
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -145,7 +136,11 @@ fun DialogSettingsPage(
                             description = stringResource(id = R.string.show_dialog_install_extended_menu_desc),
                             checked = uiState.showDialogInstallExtendedMenu,
                             onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeShowDialogInstallExtendedMenu(it))
+                                viewModel.dispatch(
+                                    DialogSettingsAction.ChangeShowDialogInstallExtendedMenu(
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -171,7 +166,11 @@ fun DialogSettingsPage(
                             description = stringResource(id = R.string.close_notification_immediately_on_dialog_dismiss),
                             checked = uiState.disableNotificationForDialogInstall,
                             onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeShowDisableNotification(it))
+                                viewModel.dispatch(
+                                    DialogSettingsAction.ChangeShowDisableNotification(
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -203,7 +202,11 @@ fun DialogSettingsPage(
                             description = stringResource(id = R.string.long_click_background_install_desc),
                             checked = uiState.longClickBackgroundInstall,
                             onCheckedChange = {
-                                viewModel.dispatch(DialogSettingsAction.ChangeLongClickBackgroundInstall(it))
+                                viewModel.dispatch(
+                                    DialogSettingsAction.ChangeLongClickBackgroundInstall(
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -228,7 +231,6 @@ fun DialogSettingsPage(
                 }
             }
 
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

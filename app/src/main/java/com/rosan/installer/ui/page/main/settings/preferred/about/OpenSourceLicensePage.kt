@@ -5,20 +5,13 @@ package com.rosan.installer.ui.page.main.settings.preferred.about
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -44,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -82,9 +74,6 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
 
     var selectedLibrary by remember { mutableStateOf<Library?>(null) }
 
-    val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
-
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     Scaffold(
@@ -118,12 +107,7 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection) + 16.dp,
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection) + 16.dp,
-                bottom = paddingValues.calculateBottomPadding()
-            ),
+            contentPadding = paddingValues,
             colors = LibraryDefaults.libraryColors(
                 libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                 libraryContentColor = MaterialTheme.colorScheme.onSurface
@@ -191,7 +175,9 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                         item {
                             InfoTipCard(
                                 icon = AppIcons.License,
-                                text = stringResource(R.string.license, library.licenses.joinToString(separator = ", ") { it.name }),
+                                text = stringResource(
+                                    R.string.license,
+                                    library.licenses.joinToString(separator = ", ") { it.name }),
                                 modifier = Modifier.fillMaxWidth(),
                                 noPadding = true
                             )
@@ -226,7 +212,8 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                                     Spacer(modifier = Modifier.size(8.dp))
 
                                     Text(
-                                        text = license.licenseContent ?: stringResource(R.string.no_license_text),
+                                        text = license.licenseContent
+                                            ?: stringResource(R.string.no_license_text),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

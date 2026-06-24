@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material3.Badge
@@ -119,6 +120,7 @@ fun Material3SettingsCompactLayout(
         Material3SettingsPagerContent(
             modifier = Modifier
                 .fillMaxSize()
+                .consumeWindowInsets(paddingValues)
                 .then(backdrop?.let { Modifier.layerBackdrop(backdrop) } ?: Modifier),
             configCount = configCount,
             mainPagerState = mainPagerState,
@@ -161,6 +163,7 @@ fun Material3SettingsWideScreenLayout(
             Material3SettingsPagerContent(
                 modifier = Modifier
                     .fillMaxSize()
+                    .consumeWindowInsets(paddingValues)
                     .then(backdrop?.let { Modifier.layerBackdrop(backdrop) } ?: Modifier),
                 configCount = configCount,
                 mainPagerState = mainPagerState,
@@ -182,13 +185,13 @@ fun Material3SettingsWideScreenLayout(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxSize()
+                    .consumeWindowInsets(navigationWindowInsets.only(WindowInsetsSides.Start))
                     .then(backdrop?.let { Modifier.layerBackdrop(backdrop) } ?: Modifier),
                 configCount = configCount,
                 mainPagerState = mainPagerState,
                 tabs = tabs,
                 useBlur = useBlur,
-                outerPadding = PaddingValues(0.dp), // Rail navigation doesn't overlay bottom content
-                windowInsetsSides = WindowInsetsSides.Vertical + WindowInsetsSides.End
+                outerPadding = PaddingValues(0.dp) // Rail navigation doesn't overlay bottom content
             )
         }
     }
@@ -215,10 +218,8 @@ private fun Material3FloatingBottomBar(
                     indication = null,
                     onClick = {},
                 )
-                .padding(
-                    bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding()
-                ),
+                .padding(bottom = 12.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
             selectedIndex = { mainPagerState.selectedPage },
             onSelected = { index ->
                 mainPagerState.animateToPage(index)
@@ -276,8 +277,7 @@ private fun Material3SettingsPagerContent(
     mainPagerState: MainPagerState,
     tabs: List<NavigationTab>,
     useBlur: Boolean,
-    outerPadding: PaddingValues,
-    windowInsetsSides: WindowInsetsSides? = null
+    outerPadding: PaddingValues
 ) {
     HorizontalPager(
         state = mainPagerState.pagerState,
@@ -291,29 +291,25 @@ private fun Material3SettingsPagerContent(
                 title = tabs[page].label,
                 outerPadding = outerPadding,
                 configCount = configCount,
-                onNavigateToProfiles = { mainPagerState.animateToPage(1) },
-                windowInsetsSides = windowInsetsSides
+                onNavigateToProfiles = { mainPagerState.animateToPage(1) }
             )
 
             1 -> AllPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding,
-                windowInsetsSides = windowInsetsSides
+                outerPadding = outerPadding
             )
 
             2 -> HistoryPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding,
-                windowInsetsSides = windowInsetsSides
+                outerPadding = outerPadding
             )
 
             3 -> PreferredPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding,
-                windowInsetsSides = windowInsetsSides
+                outerPadding = outerPadding
             )
         }
     }

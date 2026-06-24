@@ -13,17 +13,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -40,7 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -57,7 +50,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -85,8 +77,7 @@ fun AllPage(
     useBlur: Boolean,
     viewModel: AllViewModel = koinViewModel(),
     title: String,
-    outerPadding: PaddingValues = PaddingValues(0.dp),
-    windowInsetsSides: WindowInsetsSides? = null
+    outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -132,8 +123,6 @@ fun AllPage(
         }
     )
 
-    val layoutDirection = LocalLayoutDirection.current
-
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     Scaffold(
@@ -141,13 +130,9 @@ fun AllPage(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentWindowInsets = windowInsetsSides?.let { ScaffoldDefaults.contentWindowInsets.only(it) }
-            ?: ScaffoldDefaults.contentWindowInsets,
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                windowInsets = windowInsetsSides?.let { TopAppBarDefaults.windowInsets.only(it) }
-                    ?: TopAppBarDefaults.windowInsets,
                 title = {
                     Text(
                         text = title,
@@ -165,10 +150,7 @@ fun AllPage(
         floatingActionButton = {
             AnimatedVisibility(
                 modifier = Modifier
-                    .padding(
-                        bottom = outerPadding.calculateBottomPadding()
-                    )
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.End)),
+                    .padding(outerPadding),
                 visible = showFloating,
                 enter = scaleIn(),
                 exit = scaleOut()
@@ -202,10 +184,7 @@ fun AllPage(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(
-                                top = innerPadding.calculateTopPadding(),
-                                bottom = outerPadding.calculateBottomPadding()
-                            ),
+                            .padding(innerPadding + outerPadding),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
@@ -234,16 +213,7 @@ fun AllPage(
                         viewModel = viewModel,
                         listState = listState,
                         backdrop = backdrop,
-                        contentPadding = PaddingValues(
-                            top = innerPadding.calculateTopPadding() + 16.dp,
-                            bottom = outerPadding.calculateBottomPadding() + 16.dp,
-                            start = 16.dp + innerPadding.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
-                                layoutDirection
-                            ),
-                            end = 16.dp + innerPadding.calculateEndPadding(layoutDirection) + outerPadding.calculateEndPadding(
-                                layoutDirection
-                            )
-                        )
+                        contentPadding = PaddingValues(16.dp) + outerPadding + innerPadding
                     )
                 }
             }

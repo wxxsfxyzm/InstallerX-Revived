@@ -4,19 +4,11 @@
 
 package com.rosan.installer.ui.page.main.settings.home.priv
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -66,9 +57,6 @@ fun PrivPage(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
-
-    val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
     OnLifecycleEvent(event = Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(HomePageViewAction.RefreshActivateStatus)
@@ -107,12 +95,7 @@ fun PrivPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-                bottom = paddingValues.calculateBottomPadding()
-            )
+            contentPadding = paddingValues
         ) {
             item {
                 SegmentedColumn {
@@ -120,11 +103,19 @@ fun PrivPage(
                         val selected = uiState.globalAuthorizer == Authorizer.None
                         RadioButtonWidget(
                             icon = AppIcons.None,
-                            title = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer) else stringResource(R.string.config_authorizer_none),
+                            title = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer) else stringResource(
+                                R.string.config_authorizer_none
+                            ),
                             description = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer_desc)
                             else stringResource(R.string.working_status_none_authorizer_desc),
                             selected = selected,
-                            onClick = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.None)) }
+                            onClick = {
+                                viewModel.dispatch(
+                                    HomePageViewAction.ChangeAuthorizer(
+                                        Authorizer.None
+                                    )
+                                )
+                            }
                         )
                     }
                     item {
@@ -136,7 +127,13 @@ fun PrivPage(
                             description = if (isAvailable) stringResource(R.string.available) + " (${uiState.rootMode.name})"
                             else stringResource(R.string.unavailable),
                             selected = selected,
-                            onClick = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Root)) }
+                            onClick = {
+                                viewModel.dispatch(
+                                    HomePageViewAction.ChangeAuthorizer(
+                                        Authorizer.Root
+                                    )
+                                )
+                            }
                         )
                     }
                     item {
@@ -150,7 +147,13 @@ fun PrivPage(
                                 else -> stringResource(R.string.shizuku_not_available)
                             },
                             selected = selected,
-                            onClick = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Shizuku)) }
+                            onClick = {
+                                viewModel.dispatch(
+                                    HomePageViewAction.ChangeAuthorizer(
+                                        Authorizer.Shizuku
+                                    )
+                                )
+                            }
                         )
                     }
                     item {
@@ -164,7 +167,13 @@ fun PrivPage(
                                 else -> stringResource(R.string.dhizuku_not_available)
                             },
                             selected = selected,
-                            onClick = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Dhizuku)) }
+                            onClick = {
+                                viewModel.dispatch(
+                                    HomePageViewAction.ChangeAuthorizer(
+                                        Authorizer.Dhizuku
+                                    )
+                                )
+                            }
                         )
                     }
                 }
@@ -181,7 +190,6 @@ fun PrivPage(
                     text = stringResource(R.string.priv_page_notice_desc)
                 )
             }
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }
