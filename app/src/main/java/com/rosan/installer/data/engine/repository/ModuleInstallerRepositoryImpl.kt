@@ -2,8 +2,8 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.repository
 
-import com.rosan.installer.data.engine.executor.moduleinstaller.LocalModuleInstallerRepositoryImpl
-import com.rosan.installer.data.engine.executor.moduleinstaller.ShizukuModuleInstallerRepositoryImpl
+import com.rosan.installer.data.engine.executor.moduleinstaller.LocalModuleInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.moduleinstaller.ShizukuModuleInstallerRepoImpl
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
 import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
@@ -29,14 +29,14 @@ class ModuleInstallerRepositoryImpl(
         // 1. Select the appropriate repository implementation
         val repo = when (config.authorizer) {
             Authorizer.Root,
-            Authorizer.Customize -> LocalModuleInstallerRepositoryImpl()
+            Authorizer.Customize -> LocalModuleInstallerRepoImpl()
 
             // Shizuku MUST use the Remote implementation
-            Authorizer.Shizuku -> ShizukuModuleInstallerRepositoryImpl(deviceCapabilityProvider)
+            Authorizer.Shizuku -> ShizukuModuleInstallerRepoImpl(deviceCapabilityProvider)
 
             Authorizer.None -> {
                 if (deviceCapabilityProvider.isSystemApp && useRoot)
-                    LocalModuleInstallerRepositoryImpl()
+                    LocalModuleInstallerRepoImpl()
                 else null // Signal that no session is available
             }
 
@@ -58,7 +58,7 @@ class ModuleInstallerRepositoryImpl(
             repo.doInstallWork(config, module, useRoot, rootMode)
         } catch (e: IllegalStateException) {
             // Catch immediate configuration errors
-            if (repo is ShizukuModuleInstallerRepositoryImpl && e.message?.contains("binder") == true
+            if (repo is ShizukuModuleInstallerRepoImpl && e.message?.contains("binder") == true
             ) {
                 flow {
                     throw PrivilegedException(

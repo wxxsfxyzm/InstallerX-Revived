@@ -347,6 +347,7 @@
     <string name="config_toast_mode_always">Always show Toast</string>
     <string name="config_customize_install_reason">Customize Install Reason</string>
     <string name="config_customize_install_reason_desc">Specify the install reason. For new installations, selecting "User" usually triggers the launcher to create a desktop icon</string>
+    <string name="config_customize_install_reason_disabled_desc">When Respect platform policy is enabled, defaults to User</string>
     <string name="config_install_reason">Install Reason</string>
     <string name="config_install_reason_unknown">Unknown Reason</string>
     <string name="config_install_reason_policy">Device Policy</string>
@@ -355,6 +356,7 @@
     <string name="config_install_reason_user">User</string>
     <string name="config_customize_package_source">Customize Package Source</string>
     <string name="config_customize_package_source_desc">Specify the source of the package, Local File or Download File will face more restrictions</string>
+    <string name="config_customize_package_source_disabled_desc">When Respect platform policy is enabled, filled automatically from the source</string>
     <string name="config_package_source">Package Source</string>
     <string name="config_package_source_unspecified">Unspecified</string>
     <string name="config_package_source_other">Other</string>

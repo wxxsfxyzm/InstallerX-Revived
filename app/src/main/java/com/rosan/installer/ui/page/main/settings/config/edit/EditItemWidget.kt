@@ -288,16 +288,29 @@ fun DataToastModeWidget(
 // Extension to integrate directly with the physics layout engine
 fun SegmentedColumnScope.dataInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     val enableCustomizeInstallReason = state.data.enableCustomizeInstallReason
-    val currentInstallReason = state.data.installReason
+    val enabled = !state.labRespectPlatformInstallPolicy
+    val expanded = enabled && enableCustomizeInstallReason
+    val currentInstallReason = if (state.labRespectPlatformInstallPolicy) {
+        InstallReason.USER
+    } else {
+        state.data.installReason
+    }
 
     expandableItem(
-        expanded = enableCustomizeInstallReason,
+        expanded = expanded,
         topContent = {
             SwitchWidget(
                 icon = AppIcons.InstallReason,
                 title = stringResource(id = R.string.config_customize_install_reason),
-                description = stringResource(id = R.string.config_customize_install_reason_desc),
-                checked = enableCustomizeInstallReason,
+                description = stringResource(
+                    id = if (enabled) {
+                        R.string.config_customize_install_reason_desc
+                    } else {
+                        R.string.config_customize_install_reason_disabled_desc
+                    }
+                ),
+                enabled = enabled,
+                checked = expanded,
                 onCheckedChange = {
                     dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
                 }
@@ -315,6 +328,7 @@ fun SegmentedColumnScope.dataInstallReasonWidget(state: EditViewState, dispatch:
             DropDownMenuWidget(
                 title = stringResource(R.string.config_install_reason),
                 description = data[currentInstallReason],
+                enabled = enabled,
                 choice = data.keys.toList().indexOf(currentInstallReason),
                 data = data.values.toList(),
             ) { index ->
@@ -336,20 +350,24 @@ fun SegmentedColumnScope.dataPackageSourceWidget(
     val enableCustomizePackageSource = state.data.enableCustomizePackageSource
     val currentSource = state.data.packageSource
     val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
+    val enabled = !isDhizuku && !state.labRespectPlatformInstallPolicy
 
     expandableItem(
         animatedVisibility = visible,
-        expanded = enableCustomizePackageSource && !isDhizuku,
+        expanded = enabled && enableCustomizePackageSource,
         topContent = {
-            val description =
-                if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
-                else stringResource(id = R.string.config_customize_package_source_desc)
+            val description = when {
+                isDhizuku -> stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+                state.labRespectPlatformInstallPolicy ->
+                    stringResource(R.string.config_customize_package_source_disabled_desc)
+                else -> stringResource(id = R.string.config_customize_package_source_desc)
+            }
             SwitchWidget(
                 icon = AppIcons.InstallPackageSource,
                 title = stringResource(id = R.string.config_customize_package_source),
                 description = description,
                 checked = enableCustomizePackageSource,
-                enabled = !isDhizuku,
+                enabled = enabled,
                 onCheckedChange = {
                     dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
                 }
@@ -366,6 +384,7 @@ fun SegmentedColumnScope.dataPackageSourceWidget(
             DropDownMenuWidget(
                 title = stringResource(R.string.config_package_source),
                 description = data[currentSource],
+                enabled = enabled,
                 choice = data.keys.toList().indexOf(currentSource),
                 data = data.values.toList(),
             ) { index ->

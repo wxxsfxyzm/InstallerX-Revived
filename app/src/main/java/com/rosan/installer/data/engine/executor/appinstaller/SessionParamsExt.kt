@@ -77,25 +77,20 @@ private fun PackageInstaller.SessionParams.applyInstallReasonAndPackageSource(
     metadata: InstallMetadata,
     respectPlatformInstallPolicy: Boolean
 ) {
-    val installReason = if (config.enableCustomizeInstallReason) {
-        config.installReason
-    } else {
-        null
+    val installReason = when {
+        respectPlatformInstallPolicy -> PackageManager.INSTALL_REASON_USER
+        config.enableCustomizeInstallReason -> config.installReason.value
+        else -> PackageManager.INSTALL_REASON_UNKNOWN
     }
-
-    if (installReason != null) {
-        Timber.d("Setting installReason to ${installReason.name} (${installReason.value})")
-        setInstallReason(installReason.value)
-    } else {
-        setInstallReason(PackageManager.INSTALL_REASON_USER)
-    }
+    Timber.d("Setting installReason to $installReason")
+    setInstallReason(installReason)
 
     // Only available on Android 13+.
     // TODO Dhizuku needs test.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && config.authorizer != Authorizer.Dhizuku) {
         val packageSource = when {
-            config.enableCustomizePackageSource -> config.packageSource
             respectPlatformInstallPolicy -> metadata.defaultPackageSource()
+            config.enableCustomizePackageSource -> config.packageSource
             else -> PackageSource.UNSPECIFIED
         }
         Timber.d("Setting packageSource to ${packageSource.name} (${packageSource.value})")

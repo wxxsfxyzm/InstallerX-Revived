@@ -18,7 +18,7 @@ import timber.log.Timber
 /**
  * A module installer that works by executing shell commands via a REMOTE privileged process (Binder).
  */
-class ShizukuModuleInstallerRepositoryImpl(
+class ShizukuModuleInstallerRepoImpl(
     private val capabilityProvider: DeviceCapabilityProvider
 ) : ModuleInstallerRepository {
 

@@ -271,23 +271,36 @@ fun MiuixToastModeWidget(
 @Composable
 fun MiuixInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
     val enableCustomizeInstallReason = state.data.enableCustomizeInstallReason
-    val currentInstallReason = state.data.installReason
+    val enabled = !state.labRespectPlatformInstallPolicy
+    val expanded = enabled && enableCustomizeInstallReason
+    val currentInstallReason = if (state.labRespectPlatformInstallPolicy) {
+        InstallReason.USER
+    } else {
+        state.data.installReason
+    }
 
-    val description = stringResource(id = R.string.config_customize_install_reason_desc)
+    val description = stringResource(
+        id = if (enabled) {
+            R.string.config_customize_install_reason_desc
+        } else {
+            R.string.config_customize_install_reason_disabled_desc
+        }
+    )
 
     Column {
         MiuixSwitchWidget(
             icon = AppIcons.InstallReason,
             title = stringResource(id = R.string.config_customize_install_reason),
             description = description,
-            checked = enableCustomizeInstallReason,
+            enabled = enabled,
+            checked = expanded,
             onCheckedChange = {
                 dispatch(EditViewAction.ChangeDataEnableCustomizeInstallReason(it))
             }
         )
 
         AnimatedVisibility(
-            visible = enableCustomizeInstallReason,
+            visible = expanded,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
@@ -310,6 +323,7 @@ fun MiuixInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) ->
             WindowSpinnerPreference(
                 title = stringResource(R.string.config_install_reason),
                 items = spinnerEntries,
+                enabled = enabled,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->
                     data.keys.elementAtOrNull(newIndex)?.let { reason ->
@@ -328,24 +342,28 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
     val enableCustomizePackageSource = state.data.enableCustomizePackageSource
     val currentSource = state.data.packageSource
     val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
+    val enabled = !isDhizuku && !state.labRespectPlatformInstallPolicy
 
-    val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_package_source_desc)
-        else stringResource(id = R.string.config_customize_package_source_desc)
+    val description = when {
+        isDhizuku -> stringResource(R.string.dhizuku_cannot_set_package_source_desc)
+        state.labRespectPlatformInstallPolicy ->
+            stringResource(R.string.config_customize_package_source_disabled_desc)
+        else -> stringResource(id = R.string.config_customize_package_source_desc)
+    }
 
     Column {
         MiuixSwitchWidget(
             title = stringResource(id = R.string.config_customize_package_source),
             description = description,
             checked = enableCustomizePackageSource,
-            enabled = !isDhizuku,
+            enabled = enabled,
             onCheckedChange = {
                 dispatch(EditViewAction.ChangeDataEnableCustomizePackageSource(it))
             }
         )
 
         AnimatedVisibility(
-            visible = enableCustomizePackageSource && !isDhizuku,
+            visible = enabled && enableCustomizePackageSource,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
@@ -368,6 +386,7 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
             WindowSpinnerPreference(
                 title = stringResource(R.string.config_package_source),
                 items = spinnerEntries,
+                enabled = enabled,
                 selectedIndex = selectedIndex,
                 onSelectedIndexChange = { newIndex ->
                     data.keys.elementAtOrNull(newIndex)?.let { source ->
