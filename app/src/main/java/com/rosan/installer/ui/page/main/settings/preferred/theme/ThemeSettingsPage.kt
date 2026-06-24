@@ -18,21 +18,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -169,9 +160,6 @@ fun ThemeSettingsPage(
         }
     )
 
-    val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
-
     val backdrop = rememberMaterial3BlurBackdrop(uiState.useBlur)
 
     Scaffold(
@@ -205,12 +193,7 @@ fun ThemeSettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-                bottom = paddingValues.calculateBottomPadding()
-            )
+            contentPadding = paddingValues
         ) {
             // --- Group 1: UI Style Selection ---
             item {
@@ -276,7 +259,13 @@ fun ThemeSettingsPage(
                                 title = stringResource(R.string.theme_settings_use_blur),
                                 description = stringResource(R.string.theme_settings_use_blur_desc),
                                 checked = uiState.useBlur,
-                                onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseBlur(it)) }
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        ThemeSettingsAction.SetUseBlur(
+                                            it
+                                        )
+                                    )
+                                }
                             )
                         }
                     }
@@ -307,7 +296,13 @@ fun ThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_dynamic_color),
                             description = stringResource(R.string.theme_settings_dynamic_color_desc),
                             checked = uiState.useDynamicColor,
-                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it)) }
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    ThemeSettingsAction.SetUseDynamicColor(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
                     item {
@@ -316,7 +311,13 @@ fun ThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
                             description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
                             checked = uiState.useDynColorFollowPkgIcon,
-                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it)) }
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    ThemeSettingsAction.SetDynColorFollowPkgIcon(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
                     // Conditional item for Live Activity
@@ -342,10 +343,30 @@ fun ThemeSettingsPage(
             item {
                 AnimatedVisibility(
                     visible = !uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S,
-                    enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
-                            expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
-                            shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
+                    enter = fadeIn(
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) +
+                            expandVertically(
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ),
+                    exit = fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 250,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) +
+                            shrinkVertically(
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
                 ) {
                     SegmentedColumn(
                         title = stringResource(R.string.theme_settings_theme_color)
@@ -358,7 +379,8 @@ fun ThemeSettingsPage(
                                         .padding(horizontal = 12.dp, vertical = 16.dp)
                                 ) {
                                     val itemMinWidth = 88.dp
-                                    val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                    val columns =
+                                        (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
                                     val chunkedColors = uiState.availableColors.chunked(columns)
 
                                     Column(
@@ -379,13 +401,19 @@ fun ThemeSettingsPage(
                                                             rawColor = rawColor,
                                                             currentStyle = uiState.paletteStyle,
                                                             colorSpec = uiState.colorSpec,
-                                                            textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                                                            textStyle = MaterialTheme.typography.labelMedium.copy(
+                                                                fontSize = 13.sp
+                                                            ),
                                                             textColor = MaterialTheme.colorScheme.onSurface,
                                                             isSelected =
                                                                 uiState.seedColor == rawColor.color
-                                                                && !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                                        && !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                         ) {
-                                                            viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
+                                                            viewModel.dispatch(
+                                                                ThemeSettingsAction.SetSeedColor(
+                                                                    rawColor.color
+                                                                )
+                                                            )
                                                         }
                                                     }
                                                 }
@@ -412,12 +440,18 @@ fun ThemeSettingsPage(
                     SegmentedColumn(
                         title = stringResource(R.string.theme_settings_predictive_back)
                     ) {
-                        item { PredictiveBackAnimationWidget(uiState) { showPredictiveBackAnimationDialog = true } }
+                        item {
+                            PredictiveBackAnimationWidget(uiState) {
+                                showPredictiveBackAnimationDialog = true
+                            }
+                        }
                         item(
                             animatedVisibility = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
                                     uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
                         ) {
-                            PredictiveBackAnimationDirectionWidget(uiState) { showPredictiveBackExitDirectionDialog = true }
+                            PredictiveBackAnimationDirectionWidget(uiState) {
+                                showPredictiveBackExitDirectionDialog = true
+                            }
                         }
                     }
                 }
@@ -434,7 +468,13 @@ fun ThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_prefer_system_icon),
                             description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
                             checked = uiState.preferSystemIcon,
-                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangePreferSystemIcon(it)) }
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    ThemeSettingsAction.ChangePreferSystemIcon(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
                 }
@@ -455,7 +495,11 @@ fun ThemeSettingsPage(
                                 if (newCheckedState) {
                                     showHideLauncherIconDialog = true
                                 } else {
-                                    viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(true))
+                                    viewModel.dispatch(
+                                        ThemeSettingsAction.ChangeShowLauncherIcon(
+                                            true
+                                        )
+                                    )
                                 }
                             }
                         )
@@ -463,7 +507,6 @@ fun ThemeSettingsPage(
                 }
             }
 
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

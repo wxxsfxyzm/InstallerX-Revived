@@ -7,19 +7,11 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,11 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.ui.activity.UninstallerActivity
 import com.rosan.installer.ui.icons.AppIcons
@@ -57,7 +49,6 @@ import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
-import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -100,9 +91,6 @@ fun UninstallerGlobalSettingsPage(
             }
         )
 
-    val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
-
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     Scaffold(
@@ -136,12 +124,7 @@ fun UninstallerGlobalSettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-                bottom = paddingValues.calculateBottomPadding()
-            )
+            contentPadding = paddingValues
         ) {
             item { InfoTipCard(text = stringResource(R.string.uninstall_authorizer_tip)) }
             // --- Group 1: Global Settings ---
@@ -156,7 +139,12 @@ fun UninstallerGlobalSettingsPage(
                             description = stringResource(id = R.string.uninstall_keep_data_desc),
                             checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_KEEP_DATA),
                             onCheckedChange = {
-                                viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_KEEP_DATA, it))
+                                viewModel.dispatch(
+                                    UninstallerSettingsAction.ToggleGlobalUninstallFlag(
+                                        UninstallFlags.DELETE_KEEP_DATA,
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -167,7 +155,12 @@ fun UninstallerGlobalSettingsPage(
                             description = stringResource(id = R.string.uninstall_all_users_desc),
                             checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_ALL_USERS),
                             onCheckedChange = {
-                                viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_ALL_USERS, it))
+                                viewModel.dispatch(
+                                    UninstallerSettingsAction.ToggleGlobalUninstallFlag(
+                                        UninstallFlags.DELETE_ALL_USERS,
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -221,7 +214,6 @@ fun UninstallerGlobalSettingsPage(
                 }
             }
 
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

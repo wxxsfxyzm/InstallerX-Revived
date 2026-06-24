@@ -10,12 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -37,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,7 +71,6 @@ fun HomePage(
     val uriHandler = LocalUriHandler.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val layoutDirection = LocalLayoutDirection.current
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     OnLifecycleEvent(event = Lifecycle.Event.ON_RESUME) {
@@ -108,16 +104,7 @@ fun HomePage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = PaddingValues(
-                start = 16.dp + paddingValues.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
-                    layoutDirection
-                ),
-                top = paddingValues.calculateTopPadding() + 16.dp,
-                end = 16.dp + paddingValues.calculateEndPadding(layoutDirection) + outerPadding.calculateEndPadding(
-                    layoutDirection
-                ),
-                bottom = outerPadding.calculateBottomPadding()
-            )
+            contentPadding = PaddingValues(16.dp) + paddingValues + outerPadding
         ) {
             item {
                 InstallerStatusCard(
@@ -216,7 +203,7 @@ fun HomePage(
             item {
                 SegmentedColumn(
                     title = stringResource(R.string.home_learn_more_title),
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 8.dp)
+                    contentPadding = PaddingValues(top = 16.dp)
                 ) {
                     item {
                         BaseWidget(
@@ -228,7 +215,6 @@ fun HomePage(
                     }
                 }
             }
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

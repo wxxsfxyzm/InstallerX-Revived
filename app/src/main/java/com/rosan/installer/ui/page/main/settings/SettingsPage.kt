@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material3.Badge
@@ -120,6 +120,7 @@ fun Material3SettingsCompactLayout(
         Material3SettingsPagerContent(
             modifier = Modifier
                 .fillMaxSize()
+                .consumeWindowInsets(paddingValues)
                 .then(backdrop?.let { Modifier.layerBackdrop(backdrop) } ?: Modifier),
             configCount = configCount,
             mainPagerState = mainPagerState,
@@ -162,6 +163,7 @@ fun Material3SettingsWideScreenLayout(
             Material3SettingsPagerContent(
                 modifier = Modifier
                     .fillMaxSize()
+                    .consumeWindowInsets(paddingValues)
                     .then(backdrop?.let { Modifier.layerBackdrop(backdrop) } ?: Modifier),
                 configCount = configCount,
                 mainPagerState = mainPagerState,
@@ -216,10 +218,8 @@ private fun Material3FloatingBottomBar(
                     indication = null,
                     onClick = {},
                 )
-                .padding(
-                    bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding()
-                ),
+                .padding(bottom = 12.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
             selectedIndex = { mainPagerState.selectedPage },
             onSelected = { index ->
                 mainPagerState.animateToPage(index)

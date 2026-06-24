@@ -13,17 +13,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -56,7 +50,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -130,8 +123,6 @@ fun AllPage(
         }
     )
 
-    val layoutDirection = LocalLayoutDirection.current
-
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     Scaffold(
@@ -159,10 +150,7 @@ fun AllPage(
         floatingActionButton = {
             AnimatedVisibility(
                 modifier = Modifier
-                    .padding(
-                        bottom = outerPadding.calculateBottomPadding()
-                    )
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.End)),
+                    .padding(outerPadding),
                 visible = showFloating,
                 enter = scaleIn(),
                 exit = scaleOut()
@@ -196,10 +184,7 @@ fun AllPage(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(
-                                top = innerPadding.calculateTopPadding(),
-                                bottom = outerPadding.calculateBottomPadding()
-                            ),
+                            .padding(innerPadding + outerPadding),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
@@ -228,16 +213,7 @@ fun AllPage(
                         viewModel = viewModel,
                         listState = listState,
                         backdrop = backdrop,
-                        contentPadding = PaddingValues(
-                            top = innerPadding.calculateTopPadding() + 16.dp,
-                            bottom = outerPadding.calculateBottomPadding() + 16.dp,
-                            start = 16.dp + innerPadding.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
-                                layoutDirection
-                            ),
-                            end = 16.dp + innerPadding.calculateEndPadding(layoutDirection) + outerPadding.calculateEndPadding(
-                                layoutDirection
-                            )
-                        )
+                        contentPadding = PaddingValues(16.dp) + outerPadding + innerPadding
                     )
                 }
             }

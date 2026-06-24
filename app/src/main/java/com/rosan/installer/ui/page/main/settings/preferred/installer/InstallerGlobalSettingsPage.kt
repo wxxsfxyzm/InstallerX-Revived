@@ -17,17 +17,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,7 +54,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -103,9 +95,6 @@ fun InstallerGlobalSettingsPage(
         topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
     }
 
-    val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
-
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
     Scaffold(
@@ -139,12 +128,7 @@ fun InstallerGlobalSettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-                bottom = paddingValues.calculateBottomPadding()
-            )
+            contentPadding = paddingValues
         ) {
             // --- Group 1: Global Installer Settings ---
             item {
@@ -206,7 +190,13 @@ fun InstallerGlobalSettingsPage(
                             title = stringResource(R.string.config_check_app_signature),
                             description = stringResource(R.string.config_check_app_signature_desc),
                             checked = uiState.checkAppSignature,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeCheckAppSignature(it)) }
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.ChangeCheckAppSignature(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
 
@@ -217,7 +207,11 @@ fun InstallerGlobalSettingsPage(
                             description = stringResource(R.string.config_show_signature_info_on_match_desc),
                             checked = uiState.showSignatureInfoOnMatch,
                             onCheckedChange = {
-                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureInfoOnMatch(it))
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.ChangeShowSignatureInfoOnMatch(
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -229,7 +223,11 @@ fun InstallerGlobalSettingsPage(
                             description = stringResource(R.string.config_show_signature_details_desc),
                             checked = uiState.showSignatureDetails,
                             onCheckedChange = {
-                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureDetails(it))
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.ChangeShowSignatureDetails(
+                                        it
+                                    )
+                                )
                             }
                         )
                     }
@@ -247,7 +245,13 @@ fun InstallerGlobalSettingsPage(
                             title = stringResource(R.string.config_detect_xposed_module),
                             description = stringResource(R.string.config_detect_xposed_module_desc),
                             checked = uiState.detectXposedModule,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeDetectXposedModule(it)) }
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.ChangeDetectXposedModule(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
 
@@ -257,7 +261,13 @@ fun InstallerGlobalSettingsPage(
                             title = stringResource(R.string.config_quick_open_lsposed),
                             description = stringResource(R.string.config_quick_open_lsposed_desc),
                             checked = uiState.quickOpenLSPosed,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeQuickOpenLSPosed(it)) }
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.ChangeQuickOpenLSPosed(
+                                        it
+                                    )
+                                )
+                            }
                         )
                     }
                 }
@@ -275,7 +285,13 @@ fun InstallerGlobalSettingsPage(
                                 title = stringResource(id = R.string.installer_show_oem_special),
                                 description = stringResource(id = R.string.installer_show_oem_special_desc),
                                 checked = uiState.showOPPOSpecial,
-                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) }
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        InstallerSettingsAction.ChangeShowOPPOSpecial(
+                                            it
+                                        )
+                                    )
+                                }
                             )
                         }
                     }
@@ -293,10 +309,27 @@ fun InstallerGlobalSettingsPage(
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_preset_install_sources),
                             packages = uiState.managedInstallerPackages,
-                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
-                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedInstallerPackage(it)) },
+                            onAddPackage = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.AddManagedInstallerPackage(
+                                        it
+                                    )
+                                )
+                            },
+                            onRemovePackage = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.RemoveManagedInstallerPackage(
+                                        it
+                                    )
+                                )
+                            },
                             onMovePackage = { fromIndex, toIndex ->
-                                viewModel.dispatch(InstallerSettingsAction.MoveManagedInstallerPackage(fromIndex, toIndex))
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.MoveManagedInstallerPackage(
+                                        fromIndex,
+                                        toIndex
+                                    )
+                                )
                             }
                         )
                     }
@@ -313,10 +346,27 @@ fun InstallerGlobalSettingsPage(
                         ManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_blacklist),
                             packages = uiState.managedBlacklistPackages,
-                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
-                            onRemovePackage = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedBlacklistPackage(it)) },
+                            onAddPackage = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.AddManagedBlacklistPackage(
+                                        it
+                                    )
+                                )
+                            },
+                            onRemovePackage = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.RemoveManagedBlacklistPackage(
+                                        it
+                                    )
+                                )
+                            },
                             onMovePackage = { fromIndex, toIndex ->
-                                viewModel.dispatch(InstallerSettingsAction.MoveManagedBlacklistPackage(fromIndex, toIndex))
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.MoveManagedBlacklistPackage(
+                                        fromIndex,
+                                        toIndex
+                                    )
+                                )
                             }
                         )
                     }
@@ -333,10 +383,27 @@ fun InstallerGlobalSettingsPage(
                         ManagedUidsWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
                             uids = uiState.managedSharedUserIdBlacklist,
-                            onAddUid = { viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdBlacklist(it)) },
-                            onRemoveUid = { viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it)) },
+                            onAddUid = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.AddManagedSharedUserIdBlacklist(
+                                        it
+                                    )
+                                )
+                            },
+                            onRemoveUid = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(
+                                        it
+                                    )
+                                )
+                            },
                             onMoveUid = { from, to ->
-                                viewModel.dispatch(InstallerSettingsAction.MoveManagedSharedUserIdBlacklist(from, to))
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.MoveManagedSharedUserIdBlacklist(
+                                        from,
+                                        to
+                                    )
+                                )
                             }
                         )
                     }
@@ -348,7 +415,13 @@ fun InstallerGlobalSettingsPage(
                             packages = uiState.managedSharedUserIdExemptedPackages,
                             infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
                             isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
-                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(it)) },
+                            onAddPackage = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(
+                                        it
+                                    )
+                                )
+                            },
                             onRemovePackage = {
                                 viewModel.dispatch(
                                     InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(
@@ -357,14 +430,18 @@ fun InstallerGlobalSettingsPage(
                                 )
                             },
                             onMovePackage = { fromIndex, toIndex ->
-                                viewModel.dispatch(InstallerSettingsAction.MoveManagedSharedUserIdExemptedPackages(fromIndex, toIndex))
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.MoveManagedSharedUserIdExemptedPackages(
+                                        fromIndex,
+                                        toIndex
+                                    )
+                                )
                             }
                         )
                     }
                 }
             }
 
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }
@@ -459,7 +536,11 @@ private fun ManagedPackagesWidget(
                             .background(infoColor.copy(alpha = 0.1f))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text(text = infoText ?: "", color = infoColor, style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            text = infoText ?: "",
+                            color = infoColor,
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))

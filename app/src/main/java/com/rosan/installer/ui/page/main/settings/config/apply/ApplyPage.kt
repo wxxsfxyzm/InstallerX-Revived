@@ -20,17 +20,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -131,7 +126,6 @@ fun ApplyPage(
     }
 
     val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
@@ -223,7 +217,6 @@ fun ApplyPage(
                 enter = scaleIn(),
                 exit = scaleOut(),
                 modifier = Modifier.padding(
-                    end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
                     bottom = 16.dp
                 )
             ) {
@@ -289,8 +282,8 @@ fun ApplyPage(
                             lazyListState = lazyListState,
                             topPadding = paddingValues.calculateTopPadding(),
                             bottomPadding = paddingValues.calculateBottomPadding(),
-                            startPadding = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                            endPadding = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                            startPadding = paddingValues.calculateStartPadding(layoutDirection),
+                            endPadding = paddingValues.calculateEndPadding(layoutDirection)
                         )
                     }
                 }
@@ -328,7 +321,7 @@ private fun ItemsWidget(
             start = startPadding + 16.dp,
             top = topPadding + 8.dp,
             end = endPadding + 16.dp,
-            bottom = bottomPadding + 88.dp
+            bottom = bottomPadding + 96.dp
         )
     ) {
         val apps = uiState.checkedApps
@@ -371,11 +364,15 @@ private fun ItemsWidget(
                     viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, isChecked))
                 },
                 onClick = {
-                    viewModel.dispatch(ApplyViewAction.ApplyPackageName(app.packageName, !isApplied))
+                    viewModel.dispatch(
+                        ApplyViewAction.ApplyPackageName(
+                            app.packageName,
+                            !isApplied
+                        )
+                    )
                 }
             )
         }
-        item { Spacer(modifier = Modifier.navigationBarsPadding()) }
     }
 }
 
