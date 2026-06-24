@@ -66,7 +66,6 @@ import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
-import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
@@ -150,15 +149,6 @@ fun ThemeSettingsPage(
             }
         )
     }
-
-    HideLauncherIconWarningDialog(
-        show = showHideLauncherIconDialog,
-        onDismiss = { showHideLauncherIconDialog = false },
-        onConfirm = {
-            showHideLauncherIconDialog = false
-            viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(false))
-        }
-    )
 
     val backdrop = rememberMaterial3BlurBackdrop(uiState.useBlur)
 
@@ -259,13 +249,7 @@ fun ThemeSettingsPage(
                                 title = stringResource(R.string.theme_settings_use_blur),
                                 description = stringResource(R.string.theme_settings_use_blur_desc),
                                 checked = uiState.useBlur,
-                                onCheckedChange = {
-                                    viewModel.dispatch(
-                                        ThemeSettingsAction.SetUseBlur(
-                                            it
-                                        )
-                                    )
-                                }
+                                onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseBlur(it)) }
                             )
                         }
                     }
@@ -296,13 +280,7 @@ fun ThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_dynamic_color),
                             description = stringResource(R.string.theme_settings_dynamic_color_desc),
                             checked = uiState.useDynamicColor,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    ThemeSettingsAction.SetUseDynamicColor(
-                                        it
-                                    )
-                                )
-                            }
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it)) }
                         )
                     }
                     item {
@@ -311,13 +289,7 @@ fun ThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
                             description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
                             checked = uiState.useDynColorFollowPkgIcon,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    ThemeSettingsAction.SetDynColorFollowPkgIcon(
-                                        it
-                                    )
-                                )
-                            }
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it)) }
                         )
                     }
                     // Conditional item for Live Activity
@@ -343,30 +315,10 @@ fun ThemeSettingsPage(
             item {
                 AnimatedVisibility(
                     visible = !uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S,
-                    enter = fadeIn(
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) +
-                            expandVertically(
-                                animationSpec = tween(
-                                    durationMillis = 400,
-                                    easing = FastOutSlowInEasing
-                                )
-                            ),
-                    exit = fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 250,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) +
-                            shrinkVertically(
-                                animationSpec = tween(
-                                    durationMillis = 350,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
+                    enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
+                            expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
+                            shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing))
                 ) {
                     SegmentedColumn(
                         title = stringResource(R.string.theme_settings_theme_color)
@@ -379,8 +331,7 @@ fun ThemeSettingsPage(
                                         .padding(horizontal = 12.dp, vertical = 16.dp)
                                 ) {
                                     val itemMinWidth = 88.dp
-                                    val columns =
-                                        (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                    val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
                                     val chunkedColors = uiState.availableColors.chunked(columns)
 
                                     Column(
@@ -401,19 +352,13 @@ fun ThemeSettingsPage(
                                                             rawColor = rawColor,
                                                             currentStyle = uiState.paletteStyle,
                                                             colorSpec = uiState.colorSpec,
-                                                            textStyle = MaterialTheme.typography.labelMedium.copy(
-                                                                fontSize = 13.sp
-                                                            ),
+                                                            textStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
                                                             textColor = MaterialTheme.colorScheme.onSurface,
                                                             isSelected =
                                                                 uiState.seedColor == rawColor.color
-                                                                        && !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                                && !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
                                                         ) {
-                                                            viewModel.dispatch(
-                                                                ThemeSettingsAction.SetSeedColor(
-                                                                    rawColor.color
-                                                                )
-                                                            )
+                                                            viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
                                                         }
                                                     }
                                                 }
@@ -440,18 +385,12 @@ fun ThemeSettingsPage(
                     SegmentedColumn(
                         title = stringResource(R.string.theme_settings_predictive_back)
                     ) {
-                        item {
-                            PredictiveBackAnimationWidget(uiState) {
-                                showPredictiveBackAnimationDialog = true
-                            }
-                        }
+                        item { PredictiveBackAnimationWidget(uiState) { showPredictiveBackAnimationDialog = true } }
                         item(
                             animatedVisibility = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
                                     uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
                         ) {
-                            PredictiveBackAnimationDirectionWidget(uiState) {
-                                showPredictiveBackExitDirectionDialog = true
-                            }
+                            PredictiveBackAnimationDirectionWidget(uiState) { showPredictiveBackExitDirectionDialog = true }
                         }
                     }
                 }
@@ -468,45 +407,11 @@ fun ThemeSettingsPage(
                             title = stringResource(R.string.theme_settings_prefer_system_icon),
                             description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
                             checked = uiState.preferSystemIcon,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    ThemeSettingsAction.ChangePreferSystemIcon(
-                                        it
-                                    )
-                                )
-                            }
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.ChangePreferSystemIcon(it)) }
                         )
                     }
                 }
             }
-
-            // --- Group 6: Launcher Icons ---
-            item {
-                SegmentedColumn(
-                    title = stringResource(R.string.theme_settings_launcher_icons)
-                ) {
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.Launcher,
-                            title = stringResource(R.string.theme_settings_hide_launcher_icon),
-                            description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
-                            checked = !uiState.showLauncherIcon,
-                            onCheckedChange = { newCheckedState ->
-                                if (newCheckedState) {
-                                    showHideLauncherIconDialog = true
-                                } else {
-                                    viewModel.dispatch(
-                                        ThemeSettingsAction.ChangeShowLauncherIcon(
-                                            true
-                                        )
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
         }
     }
 }

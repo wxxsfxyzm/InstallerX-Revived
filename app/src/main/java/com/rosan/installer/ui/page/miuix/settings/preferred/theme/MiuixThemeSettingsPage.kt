@@ -25,18 +25,14 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,8 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.rosan.installer.R
-import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.ui.navigation.LocalNavigator
@@ -65,21 +59,17 @@ import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpe
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 @SuppressLint("RestrictedApi")
 @Composable
@@ -90,17 +80,6 @@ fun MiuixThemeSettingsPage(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
     val transition = LocalNavAnimatedContentScope.current.transition
-
-    val showHideLauncherIconDialog = remember { mutableStateOf(false) }
-
-    MiuixHideLauncherIconWarningDialog(
-        showState = showHideLauncherIconDialog,
-        onDismiss = { showHideLauncherIconDialog.value = false },
-        onConfirm = {
-            showHideLauncherIconDialog.value = false
-            viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(false))
-        }
-    )
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -390,27 +369,6 @@ fun MiuixThemeSettingsPage(
                     )
                 }
             }
-            item { SmallTitle(stringResource(R.string.theme_settings_launcher_icons)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_hide_launcher_icon),
-                        description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
-                        checked = !uiState.showLauncherIcon,
-                        onCheckedChange = { newCheckedState ->
-                            if (newCheckedState) {
-                                showHideLauncherIconDialog.value = true
-                            } else {
-                                viewModel.dispatch(ThemeSettingsAction.ChangeShowLauncherIcon(true))
-                            }
-                        }
-                    )
-                }
-            }
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
@@ -491,58 +449,6 @@ private fun MiuixPredictiveBackExitDirectionWidget(
             val newDir = options[newIndex]
             if (currentDirection != newDir) {
                 onDirectionChange(newDir)
-            }
-        }
-    )
-}
-
-@Composable
-private fun MiuixHideLauncherIconWarningDialog(
-    showState: MutableState<Boolean>,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    WindowDialog(
-        show = showState.value,
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.warning),
-        content = {
-            // Custom content layout with body text and action buttons
-            Column {
-                // Warning message
-                Text(
-                    text = stringResource(R.string.theme_settings_hide_launcher_icon_warning),
-                    color = MiuixTheme.colorScheme.onSurface
-                )
-                if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI)
-                    Text(
-                        text = stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi),
-                        color = MiuixTheme.colorScheme.onSurface
-                    )
-                Spacer(modifier = Modifier.height(24.dp)) // Spacing before buttons
-
-                // Action buttons row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Dismiss button
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Confirm button with primary color styling
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onConfirm,
-                        text = stringResource(R.string.confirm),
-                        colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
-                    )
-                }
             }
         }
     )

@@ -26,7 +26,6 @@ data class ThemeSettingsState(
     val useDynColorFollowPkgIcon: Boolean = false,
     val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
     val preferSystemIcon: Boolean = false,
-    val showLauncherIcon: Boolean = true,
     val showLiveActivity: Boolean = false,
     val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.None,
     val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FOLLOW_GESTURE

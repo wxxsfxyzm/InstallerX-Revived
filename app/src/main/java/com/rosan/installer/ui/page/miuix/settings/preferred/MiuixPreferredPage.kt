@@ -37,7 +37,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.device.model.Level
+import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.backup.BackupRestorePreview
 import com.rosan.installer.domain.settings.model.backup.BackupValidationIssue
@@ -114,6 +116,7 @@ fun MiuixPreferredPage(
     var pendingExportContent by remember { mutableStateOf<String?>(null) }
     var pendingRestorePreview by remember { mutableStateOf<BackupRestorePreview?>(null) }
     val showRestoreConfirmDialog = remember { mutableStateOf(false) }
+    val showHideLauncherIconDialog = remember { mutableStateOf(false) }
     var backupValidationErrorText by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -294,6 +297,18 @@ fun MiuixPreferredPage(
                         checked = uiState.isIgnoringBatteryOptimizations,
                         enabled = !uiState.isIgnoringBatteryOptimizations,
                     ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.theme_settings_hide_launcher_icon),
+                        description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                        checked = !uiState.showLauncherIcon,
+                        onCheckedChange = { newCheckedState ->
+                            if (newCheckedState) {
+                                showHideLauncherIconDialog.value = true
+                            } else {
+                                viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                            }
+                        }
+                    )
                 }
             }
             item { SmallTitle(stringResource(R.string.backup_settings)) }
@@ -376,6 +391,14 @@ fun MiuixPreferredPage(
         errorText = backupValidationErrorText,
         onDismiss = { backupValidationErrorText = null }
     )
+    MiuixHideLauncherIconWarningDialog(
+        show = showHideLauncherIconDialog.value,
+        onDismiss = { showHideLauncherIconDialog.value = false },
+        onConfirm = {
+            showHideLauncherIconDialog.value = false
+            viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+        }
+    )
 }
 
 @Composable
@@ -448,6 +471,54 @@ private fun MiuixBackupValidationErrorDialog(
                     text = stringResource(R.string.confirm),
                     colors = ButtonDefaults.textButtonColorsPrimary()
                 )
+            }
+        }
+    )
+}
+
+@Composable
+private fun MiuixHideLauncherIconWarningDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    WindowDialog(
+        show = show,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.warning),
+        content = {
+            Column {
+                Text(
+                    text = stringResource(R.string.theme_settings_hide_launcher_icon_warning),
+                    color = MiuixTheme.colorScheme.onSurface
+                )
+                if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI) {
+                    Text(
+                        text = stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi),
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onConfirm,
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
             }
         }
     )

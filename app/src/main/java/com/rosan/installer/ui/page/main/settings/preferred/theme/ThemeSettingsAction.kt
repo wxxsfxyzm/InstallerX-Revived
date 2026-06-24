@@ -22,7 +22,6 @@ sealed interface ThemeSettingsAction {
     data class SetDynColorFollowPkgIconForLiveActivity(val follow: Boolean) : ThemeSettingsAction
     data class SetSeedColor(val color: Color) : ThemeSettingsAction
     data class ChangePreferSystemIcon(val preferSystemIcon: Boolean) : ThemeSettingsAction
-    data class ChangeShowLauncherIcon(val showLauncherIcon: Boolean) : ThemeSettingsAction
     data class SetPredictiveBackAnimation(val animation: PredictiveBackAnimation) : ThemeSettingsAction
     data class SetPredictiveBackExitDirection(val direction: PredictiveBackExitDirection) : ThemeSettingsAction
 }

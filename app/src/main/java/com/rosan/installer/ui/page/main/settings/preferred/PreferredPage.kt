@@ -50,6 +50,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
+import com.rosan.installer.ui.page.main.widget.dialog.HideLauncherIconWarningDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
@@ -97,6 +98,7 @@ fun PreferredPage(
     var pendingExportContent by remember { mutableStateOf<String?>(null) }
     var pendingRestorePreview by remember { mutableStateOf<BackupRestorePreview?>(null) }
     var showRestoreConfirmDialog by remember { mutableStateOf(false) }
+    var showHideLauncherIconDialog by remember { mutableStateOf(false) }
     var backupValidationErrorText by remember { mutableStateOf<String?>(null) }
 
     val detailLabel = stringResource(id = R.string.details)
@@ -285,6 +287,21 @@ fun PreferredPage(
                             enabled = enabled,
                         ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
                     }
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Launcher,
+                            title = stringResource(R.string.theme_settings_hide_launcher_icon),
+                            description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                            checked = !uiState.showLauncherIcon,
+                            onCheckedChange = { newCheckedState ->
+                                if (newCheckedState) {
+                                    showHideLauncherIconDialog = true
+                                } else {
+                                    viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                                }
+                            }
+                        )
+                    }
                 }
             }
             item {
@@ -411,6 +428,15 @@ fun PreferredPage(
             }
         )
     }
+
+    HideLauncherIconWarningDialog(
+        show = showHideLauncherIconDialog,
+        onDismiss = { showHideLauncherIconDialog = false },
+        onConfirm = {
+            showHideLauncherIconDialog = false
+            viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
+        }
+    )
 }
 
 private fun BackupRestorePreview.formatBackupRestorePreview(context: Context): String =

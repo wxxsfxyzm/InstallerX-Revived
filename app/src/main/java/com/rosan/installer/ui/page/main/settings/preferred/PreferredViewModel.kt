@@ -15,6 +15,7 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.backup.ExportBackupUseCase
 import com.rosan.installer.domain.settings.usecase.backup.PrepareBackupRestoreUseCase
 import com.rosan.installer.domain.settings.usecase.backup.RestoreBackupUseCase
+import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import com.rosan.installer.domain.updater.repository.UpdateRepository
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +39,7 @@ class PreferredViewModel(
     private val systemEnvProvider: SystemEnvProvider,
     private val privilegedProvider: PrivilegedProvider,
     private val updateSetting: UpdateSettingUseCase,
+    private val setLauncherIcon: SetLauncherIconUseCase,
     private val exportBackup: ExportBackupUseCase,
     private val prepareBackupRestore: PrepareBackupRestoreUseCase,
     private val restoreBackup: RestoreBackupUseCase
@@ -68,6 +70,7 @@ class PreferredViewModel(
             authorizer = prefs.authorizer,
             customizeAuthorizer = customizeAuthorizer,
             autoLockInstaller = prefs.autoLockInstaller,
+            showLauncherIcon = prefs.showLauncherIcon,
             adbVerifyEnabled = adbVerify,
             isIgnoringBatteryOptimizations = batteryOpt,
             hasUpdate = updateInfo?.hasUpdate ?: false,
@@ -98,6 +101,9 @@ class PreferredViewModel(
             is PreferredViewAction.SetAdbVerifyEnabledState -> setAdbVerifyEnabled(action.enabled, action)
             is PreferredViewAction.RequestIgnoreBatteryOptimization -> requestIgnoreBatteryOptimization()
             is PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus -> refreshIgnoreBatteryOptStatus()
+            is PreferredViewAction.ChangeShowLauncherIcon -> viewModelScope.launch {
+                setLauncherIcon(action.showLauncherIcon)
+            }
             is PreferredViewAction.SetDefaultInstaller -> setDefaultInstaller(action.lock, action)
             is PreferredViewAction.RequestExportBackup -> requestExportBackup()
             is PreferredViewAction.PrepareRestoreBackup -> prepareRestoreBackup(action.rawJson)

@@ -12,7 +12,6 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.RawColor
@@ -26,8 +25,7 @@ import kotlinx.coroutines.launch
 class ThemeSettingsViewModel(
     appSettingsRepo: AppSettingsRepository,
     systemEnvProvider: SystemEnvProvider,
-    private val updateSetting: UpdateSettingUseCase,
-    private val setLauncherIconUseCase: SetLauncherIconUseCase
+    private val updateSetting: UpdateSettingUseCase
 ) : ViewModel() {
 
     val state: StateFlow<ThemeSettingsState> = combine(
@@ -70,7 +68,6 @@ class ThemeSettingsViewModel(
             useDynColorFollowPkgIcon = prefs.useDynColorFollowPkgIcon,
             useDynColorFollowPkgIconForLiveActivity = prefs.useDynColorFollowPkgIconForLiveActivity,
             preferSystemIcon = prefs.preferSystemIcon,
-            showLauncherIcon = prefs.showLauncherIcon,
             showLiveActivity = prefs.showLiveActivity,
             predictiveBackAnimation = prefs.predictiveBackAnimation,
             predictiveBackExitDirection = prefs.predictiveBackExitDirection
@@ -124,7 +121,6 @@ class ThemeSettingsViewModel(
                 )
             }
 
-            is ThemeSettingsAction.ChangeShowLauncherIcon -> viewModelScope.launch { setLauncherIconUseCase(action.showLauncherIcon) }
             is ThemeSettingsAction.SetPredictiveBackAnimation -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.PredictiveBackAnimation,

@@ -8,6 +8,7 @@ data class PreferredViewState(
     val adbVerifyEnabled: Boolean = true,
     val isIgnoringBatteryOptimizations: Boolean = false,
     val autoLockInstaller: Boolean = false,
+    val showLauncherIcon: Boolean = true,
     val hasUpdate: Boolean = false,
     val remoteVersion: String = "",
     val backupBusy: Boolean = false
