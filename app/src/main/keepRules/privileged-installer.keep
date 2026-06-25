@@ -1,0 +1,14 @@
+# Kotlin 2.3.21+ release bytecode can let R8 optimize this hidden binder call in a
+# way that changes privileged uninstall behavior. Keep the Kotlin call site intact.
+-keep,allowobfuscation class com.rosan.installer.data.engine.executor.appinstaller.IBinderAppInstallerRepoImpl {
+    public java.lang.Object doUninstallWork(...);
+}
+
+# Keep the hidden framework method signatures used by the privileged uninstall path.
+-keep,allowobfuscation class android.content.pm.IPackageInstaller {
+    public void uninstall(android.content.pm.VersionedPackage, java.lang.String, int, android.content.IntentSender, int);
+}
+
+-keep,allowobfuscation class android.content.pm.IPackageManager {
+    public android.content.pm.IPackageInstaller getPackageInstaller();
+}
