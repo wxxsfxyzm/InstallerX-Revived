@@ -33,35 +33,43 @@ class UninstallResolver(
     ): Result {
         val resolvedConfig = configResolver.resolve(activity)
         val pm = context.packageManager
-        val appInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        var isArchived = false
+        val appInfo = runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getApplicationInfo(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getApplicationInfo(packageName, 0)
+            }
+        }.getOrElse {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) throw it
+
             pm.getApplicationInfo(
                 packageName,
                 PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES)
-            )
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getApplicationInfo(
-                packageName,
-                PackageManager.ApplicationInfoFlags.of(0)
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            pm.getApplicationInfo(packageName, 0)
+            ).also { archivedInfo ->
+                if (!archivedInfo.isArchived) throw it
+                isArchived = true
+            }
         }
-        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.getPackageInfo(
                 packageName,
-                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES)
-            )
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getPackageInfo(
-                packageName,
-                PackageManager.PackageInfoFlags.of(0)
+                PackageManager.PackageInfoFlags.of(
+                    if (isArchived && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
+                        PackageManager.MATCH_ARCHIVED_PACKAGES
+                    else
+                        0
+                )
             )
         } else {
             @Suppress("DEPRECATION")
             pm.getPackageInfo(packageName, 0)
         }
-        val isArchived = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && appInfo.isArchived
+
         val requestedUninstallFlags = resolveRequestedUninstallFlags(activity)
         val config = if (requestedUninstallFlags != 0) {
             resolvedConfig.copy(
