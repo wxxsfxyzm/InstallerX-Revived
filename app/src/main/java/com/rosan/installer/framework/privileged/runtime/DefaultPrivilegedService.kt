@@ -739,7 +739,12 @@ class DefaultPrivilegedService private constructor(
 
     override fun prepareUnknownSourceAppOp(uid: Int, packageName: String): Int {
         val op = AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES)
-            ?: return AppOpsManager.MODE_ERRORED
+            ?: run {
+                Timber.tag(TAG).w("REQUEST_INSTALL_PACKAGES has no AppOps mapping for $packageName/$uid")
+                return AppOpsManager.MODE_ERRORED
+            }
+
+        Timber.tag(TAG).d("noteOp for request-install AppOps: package=$packageName, uid=$uid, op=$op")
 
         val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             appOpsManager.noteOpNoThrow(
@@ -754,7 +759,9 @@ class DefaultPrivilegedService private constructor(
             appOpsManager.noteOpNoThrow(op, uid, packageName)
         }
 
+        Timber.tag(TAG).d("request-install AppOps noteOp result for $packageName/$uid: mode=$mode")
         if (mode == AppOpsManager.MODE_DEFAULT) {
+            Timber.tag(TAG).d("Setting request-install AppOps default mode to errored for $packageName/$uid")
             reflect.getMethod(
                 "setMode",
                 appOpsManager.javaClass,

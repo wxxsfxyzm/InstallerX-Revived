@@ -12,41 +12,85 @@ import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.getValue
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
+import com.rosan.installer.domain.session.model.InstallSourceConfidence
 import com.rosan.installer.domain.settings.model.config.ConfigModel
-import com.rosan.installer.util.pm.UnknownSourcePermissionUtil
+import timber.log.Timber
 
 class PlatformInstallPolicyChecker(
     private val context: Context,
-    private val reflect: ReflectionProvider
+    private val reflect: ReflectionProvider,
+    private val unknownSourcePermissionChecker: UnknownSourcePermissionChecker
 ) {
     private companion object {
+        const val TAG = "PlatformInstallPolicy"
         const val DOWNLOADS_AUTHORITY = "downloads"
         const val PRIVATE_FLAG_PRIVILEGED = 1 shl 3
     }
 
     suspend fun check(config: ConfigModel) {
-        val callerPackage = config.initiatorPackageName
-        val callerUid = config.installSourceUid ?: callerPackage?.let { packageUid(it) }
+        // A system content provider can own the APK URI without being the app that requested
+        // installation. Do not write REQUEST_INSTALL_PACKAGES AppOps to Downloads/Media itself.
+        val sourceIsSystemProviderOwner = config.installSourceConfidence == InstallSourceConfidence.PROVIDER_OWNER &&
+                config.initiatorPackageName?.let(::isSystemOrUpdatedSystemPackage) == true
+        val callerPackage = config.initiatorPackageName.takeUnless { sourceIsSystemProviderOwner }
+        val callerUid = if (sourceIsSystemProviderOwner) {
+            null
+        } else {
+            config.installSourceUid ?: callerPackage?.let { packageUid(it) }
+        }
         val appOpPackage = callerPackage ?: callerUid?.let { packageNameForUid(it) }
-        val trustedSource = (
+        val trustedSource = config.installSourceConfidence.isTrustedForPlatformPolicy() && (
                 callerUid != null && hasPermission(Manifest.permission.INSTALL_PACKAGES, callerUid)
-                ) || (
-                callerPackage != null && config.notUnknownSource && isPrivilegedPackage(callerPackage)
-                )
+                        || (
+                        callerPackage != null && config.notUnknownSource && isPrivilegedPackage(callerPackage)
+                        ))
         val exemptFromRequestPermission = callerUid != null && (
                 hasPermission(Manifest.permission.MANAGE_DOCUMENTS, callerUid) ||
                         isSystemDownloadsProvider(callerUid)
                 )
+
+        Timber.tag(TAG).d(
+            "Checking platform install policy: package=%s, uid=%s, appOpPackage=%s, candidates=%s, confidence=%s, notUnknown=%s, trustedSource=%s, exemptRequestPermission=%s, sourceIsSystemProviderOwner=%s",
+            callerPackage,
+            callerUid,
+            appOpPackage,
+            config.installSourcePackageCandidates,
+            config.installSourceConfidence,
+            config.notUnknownSource,
+            trustedSource,
+            exemptFromRequestPermission,
+            sourceIsSystemProviderOwner
+        )
+        if (sourceIsSystemProviderOwner) {
+            Timber.tag(TAG).d(
+                "System provider owner ${config.initiatorPackageName} is not an install requester; " +
+                        "skipping source AppOps target for this install."
+            )
+        }
 
         if (callerUid != null &&
             appOpPackage != context.packageName &&
             !trustedSource &&
             !exemptFromRequestPermission
         ) {
+            Timber.tag(TAG).d("Checking REQUEST_INSTALL_PACKAGES declaration for uid=$callerUid")
             checkInstallPermissionRequested(callerUid)
+        } else {
+            Timber.tag(TAG).d(
+                "Skipping request-permission declaration check: uid=%s, appOpPackage=%s, trustedSource=%s, exempt=%s",
+                callerUid,
+                appOpPackage,
+                trustedSource,
+                exemptFromRequestPermission
+            )
         }
         if (callerUid != null && appOpPackage != null && appOpPackage != context.packageName && !trustedSource) {
+            Timber.tag(TAG).d("Checking unknown-source AppOps for package=$appOpPackage, uid=$callerUid")
             checkUnknownSourceAllowed(config, callerUid, appOpPackage)
+        } else {
+            Timber.tag(TAG).d(
+                "Skipping unknown-source AppOps check: uid=$callerUid, appOpPackage=$appOpPackage, trustedSource=$trustedSource"
+            )
         }
 
         checkUserRestrictions(trustedSource)
@@ -70,18 +114,24 @@ class PlatformInstallPolicyChecker(
                 Manifest.permission.REQUEST_INSTALL_PACKAGES
             )
         ) {
+            Timber.tag(TAG).w("Uid $uid does not declare ${Manifest.permission.REQUEST_INSTALL_PACKAGES}")
             throw missingPermission(
                 "Uid $uid does not declare ${Manifest.permission.REQUEST_INSTALL_PACKAGES}"
             )
         }
+        Timber.tag(TAG).d(
+            "Uid $uid declares ${Manifest.permission.REQUEST_INSTALL_PACKAGES} or targetSdk<${Build.VERSION_CODES.O}"
+        )
     }
 
     private suspend fun checkUnknownSourceAllowed(config: ConfigModel, uid: Int, packageName: String) {
-        if (!UnknownSourcePermissionUtil.checkAndPrepare(context, config, uid, packageName)) {
+        if (!unknownSourcePermissionChecker.checkAndPrepare(config, uid, packageName)) {
+            Timber.tag(TAG).w("$packageName is not allowed for ${Manifest.permission.REQUEST_INSTALL_PACKAGES}")
             throw missingPermission(
                 "$packageName is not allowed for ${Manifest.permission.REQUEST_INSTALL_PACKAGES}"
             )
         }
+        Timber.tag(TAG).d("$packageName is allowed for ${Manifest.permission.REQUEST_INSTALL_PACKAGES}")
     }
 
     private fun checkUserRestrictions(trustedSource: Boolean) {
@@ -99,6 +149,7 @@ class PlatformInstallPolicyChecker(
         }
 
         val restriction = restrictions.firstOrNull { userManager.hasUserRestriction(it) } ?: return
+        Timber.tag(TAG).w("Install blocked by user restriction: $restriction")
         throw InstallException(
             InstallErrorType.USER_RESTRICTED,
             "Install blocked by user restriction: $restriction"
@@ -161,6 +212,12 @@ class PlatformInstallPolicyChecker(
 
         val appInfo = providerInfo.applicationInfo ?: return false
         return appInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0 && uid == appInfo.uid
+    }
+
+    private fun isSystemOrUpdatedSystemPackage(packageName: String): Boolean {
+        val appInfo = applicationInfo(packageName) ?: return false
+        return appInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0 ||
+                appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0
     }
 
     private fun applicationInfo(packageName: String): ApplicationInfo? =

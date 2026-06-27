@@ -13,6 +13,8 @@ import com.rosan.installer.data.engine.parser.strategy.ModuleStrategy
 import com.rosan.installer.data.engine.parser.strategy.MultiApkZipStrategy
 import com.rosan.installer.data.engine.parser.strategy.SingleApkStrategy
 import com.rosan.installer.data.engine.parser.strategy.XApkStrategy
+import com.rosan.installer.data.engine.policy.PlatformInstallPolicyChecker
+import com.rosan.installer.data.engine.policy.UnknownSourcePermissionChecker
 import com.rosan.installer.data.engine.repository.AnalyserRepositoryImpl
 import com.rosan.installer.data.engine.repository.AppIconRepositoryImpl
 import com.rosan.installer.data.engine.repository.AppInstallerRepositoryImpl
@@ -70,6 +72,8 @@ val engineModule = module {
     singleOf(::PackagePreprocessor)
     singleOf(::InstalledAppInfoProviderImpl) { bind<InstalledAppInfoProvider>() }
     singleOf(::InstalledModuleInfoProviderImpl) { bind<InstalledModuleInfoProvider>() }
+    singleOf(::UnknownSourcePermissionChecker)
+    singleOf(::PlatformInstallPolicyChecker)
 
     // Repositories
     singleOf(::AppIconRepositoryImpl) { bind<AppIconRepository>() }

@@ -2,8 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.model.config
 
-import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.device.model.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.session.model.InstallSourceConfidence
 
 /**
  * Represents the complete business object for a configuration
@@ -60,6 +61,8 @@ data class ConfigModel(
     val callingFromUid: Int? = null,
     val initiatorPackageName: String? = null,
     val installSourceUid: Int? = null,
+    val installSourcePackageCandidates: List<String> = emptyList(),
+    val installSourceConfidence: InstallSourceConfidence = InstallSourceConfidence.UNKNOWN,
     val notUnknownSource: Boolean = false,
     val allowInstallWithoutUserAction: Boolean = false
 ) {

@@ -25,6 +25,7 @@ import com.rosan.installer.core.app.ActivityContracts.KEY_INSTALLER_ID
 import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.data.engine.policy.UnknownSourcePermissionChecker
 import com.rosan.installer.domain.device.model.PermissionType
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.device.provider.PermissionChecker
@@ -40,7 +41,6 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.framework.auth.BiometricAuthBridge
 import com.rosan.installer.ui.common.permission.PermissionRequester
-import com.rosan.installer.util.pm.UnknownSourcePermissionUtil
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -77,6 +77,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
 
     private val deviceCapabilityProvider: DeviceCapabilityProvider by inject()
     private val permissionChecker: PermissionChecker by inject()
+    private val unknownSourcePermissionChecker: UnknownSourcePermissionChecker by inject()
     private lateinit var permissionRequester: PermissionRequester
 
     // Flag to track if the activity is stopped due to a permission request
@@ -516,7 +517,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private fun launchUnknownSourceSettings(packageName: String, config: ConfigModel) {
         lifecycleScope.launch {
             runCatching {
-                UnknownSourcePermissionUtil.prepareSettingsToggle(this@InstallerActivity, packageName, config)
+                unknownSourcePermissionChecker.prepareSettingsToggle(packageName, config)
             }.onFailure { error ->
                 Timber.w(error, "Failed to prepare unknown source settings for $packageName")
             }
@@ -536,7 +537,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
     }
 
-    private fun isUnknownSourceAllowed(packageName: String) = UnknownSourcePermissionUtil.isAllowed(this, packageName)
+    private fun isUnknownSourceAllowed(packageName: String) = unknownSourcePermissionChecker.isAllowed(packageName)
 
     private fun Intent.isSystemConfirmAction(): Boolean =
         action == PackageInstallerHidden.ACTION_CONFIRM_INSTALL ||
@@ -644,6 +645,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
         Timber.d("$tag: Action: ${intent.action}")
         Timber.d("$tag: Data: ${intent.dataString}")
+        Timber.d("$tag: Type: ${intent.type}")
         Timber.d("$tag: Flags: ${Integer.toHexString(intent.flags)}")
         intent.extras?.let { extras ->
             for (key in extras.keySet()) {
