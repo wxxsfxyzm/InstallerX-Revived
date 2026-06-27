@@ -948,7 +948,7 @@
     <string name="lab_respect_platform_install_policy">Соблюдать правила установки платформы</string>
     <string name="pre_approve">Предварительное одобрение</string>
     <string name="installer_waiting_unknown_source">Разрешить неизвестные источники</string>
-    <string name="installer_waiting_unknown_source_desc">Ожидание разрешения на установку пакетов для этого источника</string>
+    <string name="installer_waiting_unknown_source_desc">Предоставьте %1$s разрешение на установку неизвестных приложений</string>
     <string name="installer_install_pre_approval">Предодобрение установки</string>
     <string name="installer_permissions_confirm">Подтверждение разрешений</string>
     <string name="install_confirm_pre_approval_tip">Разрешить %1$s предварительно одобрять установку этого приложения?</string>
@@ -978,4 +978,15 @@
     <string name="unarchive_action_continue">Продолжить</string>
     <string name="unarchive_action_clear_storage">Очистить хранилище</string>
     <string name="unarchive_action_app_settings">Настройки приложения</string>
+    <string name="config_auto_approve_session">Автоодобрение сеансовых установок</string>
+    <string name="config_auto_approve_session_desc">Автоматически одобрять запросы на сеансовую установку от целевых приложений без вывода уведомлений</string>
+    <string name="config_auto_approve_session_disabled_desc">Недоступно при включенной политике платформы</string>
+    <string name="config_auto_approve_session_warning">Включение этой функции разрешает приложениям в области действия профиля фоновую установку без запроса пользователя. Действуйте с осторожностью.</string>
+    <string name="install_confirm_approved_toast">Установка для %1$s разрешена</string>
+    <string name="exception_uninstall_failed_used_shared_library">Удаление невозможно, приложение является общей библиотекой</string>
+    <string name="exception_uninstall_failed_app_pinned">Удаление невозможно, так как приложение закреплено</string>
+    <string name="installer_result_pending">Идет другая установка. Повторите попытку позже.</string>
+    <string name="config_declare_installer_system_default_desc">По умолчанию используется инициатор установки</string>
+    <string name="config_customize_install_reason_disabled_desc">Если включено соблюдение политики платформы, по умолчанию используется режим Пользователь</string>
+    <string name="config_customize_package_source_disabled_desc">При включении политики платформы заполняется автоматически из источника</string>
 </resources>

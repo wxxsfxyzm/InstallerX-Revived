@@ -948,7 +948,7 @@
     <string name="lab_respect_platform_install_policy_desc">Aplicar checagens de permissões e restrições de usuário originárias do Android PackageInstaller antes de instalar</string>
     <string name="pre_approve">Pré-aprovar</string>
     <string name="installer_waiting_unknown_source">Permitir Fontes Desconhecidas</string>
-    <string name="installer_waiting_unknown_source_desc">Aguardando que as configurações do Android permitam que esta fonte solicite a instalação de pacotes</string>
+    <string name="installer_waiting_unknown_source_desc">Conceda a %1$s a permissão “Instalar aplicativos desconhecidos”</string>
     <string name="installer_install_pre_approval">Instalar a Pré-aprovação</string>
     <string name="installer_permissions_confirm">Confirmar Permissões</string>
     <string name="install_confirm_pre_approval_tip">Permitir que %1$s pré-aprove a instalação deste app?</string>
@@ -978,4 +978,15 @@
     <string name="unarchive_action_continue">Continuar</string>
     <string name="unarchive_action_clear_storage">Limpar armazenamento</string>
     <string name="unarchive_action_app_settings">Configurações do app</string>
+    <string name="config_auto_approve_session">Aprovar automaticamente as sessões de instalações</string>
+    <string name="config_auto_approve_session_desc">Aprovar silenciosamente solicitações de sessão de instalação provenientes de apps alvo</string>
+    <string name="config_auto_approve_session_disabled_desc">Indisponível quando a opção de Respeitar a política da plataforma estiver ativada</string>
+    <string name="config_auto_approve_session_warning">Ativar essa opção permite que os apps dentro do escopo deste perfil sejam instalados silenciosamente, sem a autorização explícita do usuário. Ative-a com cautela.</string>
+    <string name="config_declare_installer_system_default_desc">Retorna para o iniciador da instalação</string>
+    <string name="install_confirm_approved_toast">Aprovado o pedido de instalação de %1$s</string>
+    <string name="exception_uninstall_failed_used_shared_library">A desinstalação foi bloqueada porque o app é usado como uma biblioteca compartilhada</string>
+    <string name="exception_uninstall_failed_app_pinned">A desinstalação foi bloqueada porque o app está fixado</string>
+    <string name="installer_result_pending">Outra instalação já está em andamento. Aguarde até que ela termine e tente novamente.</string>
+    <string name="config_customize_install_reason_disabled_desc">Quando a \"Respeitar a política da plataforma\" estiver ativada, usar o padrão “Usuário”</string>
+    <string name="config_customize_package_source_disabled_desc">Quando a \"Respeitar a política da plataforma\" preencher automaticamente a partir da origem</string>
 </resources>

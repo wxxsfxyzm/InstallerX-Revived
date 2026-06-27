@@ -919,7 +919,7 @@
     <string name="lab_respect_platform_install_policy_desc">Terapkan pemeriksaan izin sumber dan pembatasan pengguna Android PackageInstaller sebelum pemasangan</string>
     <string name="pre_approve">Pra-persetujuan</string>
     <string name="installer_waiting_unknown_source">Izinkan Sumber Tidak Dikenal</string>
-    <string name="installer_waiting_unknown_source_desc">Menunggu pengaturan Android mengizinkan sumber ini meminta pemasangan paket</string>
+    <string name="installer_waiting_unknown_source_desc">Berikan izin %1$s untuk \"Memasang aplikasi yang tidak dikenal\"</string>
     <string name="tag_signature_match">Tanda tangan cocok</string>
     <string name="tag_signature_rotation">Rotasi tanda tangan</string>
     <string name="tag_signature_rotation_unconfirmed">Rotasi diklaim</string>
@@ -978,4 +978,15 @@
     <string name="unarchive_action_continue">Lanjutkan</string>
     <string name="unarchive_action_clear_storage">Hapus penyimpanan</string>
     <string name="unarchive_action_app_settings">Pengaturan aplikasi</string>
+    <string name="config_auto_approve_session">Menyetujui secara otomatis pemasangan sesi</string>
+    <string name="config_auto_approve_session_desc">Menyetujui permintaan pemasangan sesi dari aplikasi target tanpa pemberitahuan</string>
+    <string name="config_auto_approve_session_disabled_desc">Tidak tersedia jika kebijakan platform Respect diaktifkan</string>
+    <string name="config_auto_approve_session_warning">Mengaktifkan tombol ini memungkinkan aplikasi yang termasuk dalam cakupan profil ini untuk memasang aplikasi secara diam-diam tanpa izin eksplisit dari pengguna. Aktifkan dengan hati-hati.</string>
+    <string name="install_confirm_approved_toast">Permohonan pemasangan %1$s telah disetujui</string>
+    <string name="exception_uninstall_failed_used_shared_library">Penghapusan aplikasi diblokir karena aplikasi tersebut digunakan sebagai pustaka bersama</string>
+    <string name="exception_uninstall_failed_app_pinned">Penghapusan aplikasi diblokir karena aplikasi tersebut telah disematkan</string>
+    <string name="installer_result_pending">Proses pemasangan lainnya sedang berlangsung. Tunggu hingga selesai, lalu coba lagi.</string>
+    <string name="config_customize_install_reason_disabled_desc">Saat kebijakan platform Respect diaktifkan, pengaturan awalnya adalah Pengguna</string>
+    <string name="config_customize_package_source_disabled_desc">Saat kebijakan platform Respect diaktifkan, data diisi secara otomatis dari sumbernya</string>
+    <string name="config_declare_installer_system_default_desc">Default ke pihak yang memulai pemasangan</string>
 </resources>
