@@ -916,4 +916,21 @@
     <string name="tag_signature_match">Chữ ký khớp</string>
     <string name="tag_signature_rotation">Xoay chữ ký</string>
     <string name="tag_signature_rotation_unconfirmed">Xoay đã được yêu cầu</string>
+    <string name="lab_respect_platform_install_policy">Tôn trọng Chính sách Cài đặt Nền tảng</string>
+    <string name="lab_respect_platform_install_policy_desc">Áp dụng kiểm tra quyền truy cập nguồn và hạn chế người dùng của Trình cài đặt Gói Android trước khi cài đặt</string>
+    <string name="config_auto_approve_session">Tự động phê duyệt các phiên cài đặt</string>
+    <string name="config_auto_approve_session_desc">Tự động phê duyệt các phiên yêu cầu cài đặt từ các ứng dụng đích</string>
+    <string name="config_auto_approve_session_disabled_desc">Không khả dụng khi Tôn trọng Chính sách Nền tảng được bật</string>
+    <string name="config_auto_approve_session_warning">Bật công tắc này cho phép các ứng dụng nằm trong phạm vi của hồ sơ này cài đặt ứng dụng trong im lặng mà không cần sự cho phép rõ ràng của người dùng. Bật nó một cách thận trọng.</string>
+    <string name="config_customize_install_reason_disabled_desc">Khi Tôn trọng Chính sách Nền tảng được bật, mặc định về Người dùng</string>
+    <string name="config_customize_package_source_disabled_desc">Khi Tôn trọng Chính sách Nền tảng được bật, điền tự động từ nguồn</string>
+    <string name="config_declare_installer_system_default_desc">Mặc định về trình khởi tạo cài đặt</string>
+    <string name="pre_approve">Phê duyệt trước</string>
+    <string name="installer_waiting_unknown_source">Cho phép Nguồn Không xác định</string>
+    <string name="installer_waiting_unknown_source_desc">Cấp cho %1$s quyền \"Cài đặt ứng dụng không xác định\"</string>
+    <string name="installer_prepare_signature_new_install">Cài đặt mới. Không có ứng dụng đã cài đặt nào có cùng tên gói được tìm thấy.</string>
+    <string name="installer_prepare_signature_match">Chữ ký trùng khớp. Gói hiện tại sử dụng cùng một bộ ký được đặt như ứng dụng đã cài đặt.</string>
+    <string name="installer_prepare_signature_rotation_compatible">Tương thích xoay chữ ký. Chứng chỉ gói hiện tại tồn tại trong dòng chứng chỉ ký ứng dụng đã cài đặt. Tính tương thích của bản cập nhật cuối cùng được quyết định bởi hệ thống.</string>
+    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">Bằng chứng xoay vòng ký được phát hiện, nhưng tính tương thích với ứng dụng đã cài đặt không thể xác nhận. Kết quả cuối cùng phụ thuộc vào xác minh hệ thống.</string>
+    <string name="installer_prepare_signature_analysis_issue">Phân tích chữ ký APK đã tìm thấy vấn đề. Cài đặt có thể thất bại; kết quả cuối cùng phụ thuộc vào xác minh hệ thống.</string>
 </resources>

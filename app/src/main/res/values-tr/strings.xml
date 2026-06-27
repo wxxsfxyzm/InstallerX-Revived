@@ -818,10 +818,10 @@
     <string name="config_quick_open_lsposed">Hızlıca LSPosed\'u aç</string>
     <string name="config_quick_open_lsposed_desc">Xposed modülünü yükledikten sonra \"LSPosed\'ı aç\" düğmesini gösterir</string>
     <string name="exception_install_failed_blocked_by_profile">Profil politikası nedeniyle yükleme engellendi</string>
-    <string name="config_allow_sig_mismatch">İmza Uyuşmazlığına İzin ver</string>
-    <string name="config_allow_sig_mismatch_desc">Yüklenen sürümden farklı imzaya sahip uygulamaların yüklenmesine izin verin (Core Patch gereklidir)</string>
-    <string name="config_allow_sig_unknown">Bilinmeyen İmzaya İzin ver</string>
-    <string name="config_allow_sig_unknown_desc">İmzası doğrulanamayan uygulamaların yüklenmesine izin ver (Çekirdek Yama gereklidir)</string>
+    <string name="config_allow_sig_mismatch">İmza Uyuşmazlığını Engelle</string>
+    <string name="config_allow_sig_mismatch_desc">Yüklenen sürümden farklı bir imzaya sahip uygulamaların yüklenmesini engelleyin</string>
+    <string name="config_allow_sig_unknown">Bilinmeyen İmzayı Engelle</string>
+    <string name="config_allow_sig_unknown_desc">İmzası doğrulanamayan uygulamaların yüklenmesini engelleyin</string>
     <string name="suggestion_install_anyway_desc">Profil kısıtlamasını geçici olarak atla ve yeniden dene</string>
     <string name="extras">Ekstralar</string>
     <string name="authorizer_customization">Yetkilendirici Ayarları</string>
