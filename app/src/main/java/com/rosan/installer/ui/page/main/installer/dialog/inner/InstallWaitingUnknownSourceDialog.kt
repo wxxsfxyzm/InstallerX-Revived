@@ -34,7 +34,9 @@ fun installWaitingUnknownSourceDialog(
     viewModel: InstallerViewModel
 ): DialogParams {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
-    val sourceAppLabel = uiState.initiatorAppLabel ?: stringResource(R.string.installer_label_unknown)
+    val sourceAppLabel = uiState.unknownSourcePermissionAppLabel
+        ?: uiState.initiatorAppLabel
+        ?: stringResource(R.string.installer_label_unknown)
     val description = stringResource(R.string.installer_waiting_unknown_source_desc, sourceAppLabel)
     val showPermissionAction = rememberUnknownSourcePermissionActionVisible(
         isWaitingUnknownSource = true

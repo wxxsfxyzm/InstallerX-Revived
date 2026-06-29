@@ -89,6 +89,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val packageName = pendingUnknownSourcePackageName
             pendingUnknownSourcePackageName = null
+            isRequestingPermission = false
             unknownSourceSettingsLaunchedForFailure = false
 
             if (packageName != null && isUnknownSourceAllowed(packageName)) {
@@ -515,6 +516,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     }
 
     private fun launchUnknownSourceSettings(packageName: String, config: ConfigModel) {
+        val pendingPackageName = pendingUnknownSourcePackageName
+        if (pendingPackageName != null || isRequestingPermission) {
+            Timber.d(
+                "Unknown source settings request already active. " +
+                        "Ignoring duplicate launch for $packageName, pending=$pendingPackageName"
+            )
+            return
+        }
+
         lifecycleScope.launch {
             runCatching {
                 unknownSourcePermissionChecker.prepareSettingsToggle(packageName, config)
@@ -532,6 +542,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             }.onFailure { error ->
                 pendingUnknownSourcePackageName = null
                 isRequestingPermission = false
+                unknownSourceSettingsLaunchedForFailure = false
                 Timber.e(error, "Failed to launch unknown source settings for $packageName")
             }
         }

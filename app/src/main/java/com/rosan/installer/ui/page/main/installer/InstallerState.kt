@@ -30,6 +30,7 @@ data class InstallerState(
     // Visual data
     val currentPackageName: String? = null,
     val initiatorAppLabel: String? = null,
+    val unknownSourcePermissionAppLabel: String? = null,
     val displayIcons: Map<String, ImageBitmap?> = emptyMap(),
     val seedColor: Color? = null,
 
