@@ -27,8 +27,6 @@ public final class PackageInstallerHidden {
     public static final String EXTRA_DELETE_FLAGS =
             "android.content.pm.extra.DELETE_FLAGS";
 
-    public static final long MATCH_ARCHIVED_PACKAGES = 0x00004000L;
-
     private PackageInstallerHidden() {
         throw new UnsupportedOperationException();
     }

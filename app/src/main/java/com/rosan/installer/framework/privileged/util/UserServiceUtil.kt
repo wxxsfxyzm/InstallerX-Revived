@@ -30,7 +30,6 @@ fun useUserService(
     authorizer: Authorizer,
     customizeAuthorizer: String = "",
     special: (() -> String?)? = null,
-    uidMode: UserServiceUidMode = UserServiceUidMode.Default,
     action: (UserService) -> Unit
 ) {
     val fallbackPrivileged = if (isSystemApp) {
@@ -54,7 +53,7 @@ fun useUserService(
         return
     }
 
-    val recycler = getRecyclableInstance(authorizer, customizeAuthorizer, special, uidMode)
+    val recycler = getRecyclableInstance(authorizer, customizeAuthorizer, special)
     processRecycler(authorizer, recycler, fallbackPrivileged, action)
 }
 
@@ -105,8 +104,7 @@ private fun processRecycler(
 private fun getRecyclableInstance(
     authorizer: Authorizer,
     customizeAuthorizer: String,
-    special: (() -> String?)?,
-    uidMode: UserServiceUidMode
+    special: (() -> String?)?
 ): Recyclable<out UserService>? {
     val specialShell = special?.invoke()
 
@@ -120,21 +118,12 @@ private fun getRecyclableInstance(
             val targetShell = specialShell ?: SHELL_ROOT
 
             Timber.tag(TAG).d("Using ProcessUserServiceRecycler with shell: $targetShell")
-            val managerName = if (uidMode == UserServiceUidMode.SystemIfRoot) {
-                RecyclerNames.SYSTEM_UID_USER_SERVICE
-            } else {
-                RecyclerNames.USER_SERVICE
-            }
-            koin.get<RecyclerManager<String, ProcessUserServiceRecycler>>(managerName).get(targetShell).make()
+            koin.get<RecyclerManager<String, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetShell).make()
         }
 
         Authorizer.Shizuku -> {
             Timber.tag(TAG).i("Using Shizuku UserService Mode.")
-            if (uidMode == UserServiceUidMode.SystemIfRoot) {
-                koin.get<ShizukuUserServiceRecycler>(RecyclerNames.SYSTEM_UID_SHIZUKU_USER_SERVICE).make()
-            } else {
-                koin.get<ShizukuUserServiceRecycler>().make()
-            }
+            koin.get<ShizukuUserServiceRecycler>().make()
         }
 
         Authorizer.Dhizuku -> null

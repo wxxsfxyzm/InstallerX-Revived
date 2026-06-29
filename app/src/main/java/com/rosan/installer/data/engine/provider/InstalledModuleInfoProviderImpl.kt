@@ -11,7 +11,6 @@ import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.framework.privileged.util.SHELL_ROOT
 import com.rosan.installer.framework.privileged.util.SU_ARGS
-import com.rosan.installer.framework.privileged.util.UserServiceUidMode
 import com.rosan.installer.framework.privileged.util.useUserService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -95,8 +94,7 @@ class InstalledModuleInfoProviderImpl(
         var result: String? = null
         useUserService(
             isSystemApp = capabilityProvider.isSystemApp,
-            authorizer = config.authorizer,
-            uidMode = UserServiceUidMode.SystemIfRoot
+            authorizer = config.authorizer
         ) { userService ->
             result = userService.privileged.execArr(command)
         }

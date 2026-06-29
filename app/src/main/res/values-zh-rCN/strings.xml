@@ -297,9 +297,9 @@
     <string name="authorizer_customization">授权器参数微调</string>
     <string name="authorizer_customization_desc">微调部分授权器的相关参数和偏好</string>
     <string name="config_try_multiple_authorizers_on_install">智能授权</string>
-    <string name="config_try_multiple_authorizers_on_install_desc">在配置文件选择的授权器不可用时，依次尝试已启用的授权器。</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">在配置文件选择的授权器不可用时，依次尝试已启用的授权器</string>
     <string name="lab_respect_platform_install_policy">遵守平台安装策略</string>
-    <string name="lab_respect_platform_install_policy_desc">安装前执行 Android 包安装器的来源权限和用户限制检查</string>
+    <string name="lab_respect_platform_install_policy_desc">安装前执行 Android 包安装器的来源权限和用户限制检查。Dhizuku 和无特权安装不可用</string>
     <string name="config_smart_authorizer_fallback_list">回退授权器列表</string>
     <string name="config_smart_authorizer_fallback_list_desc">对回退的授权器进行选择和排序。\n选中的授权顺序：%1$s</string>
     <string name="config_smart_authorizer_fallback_list_tip">至少选择一项，拖动可以排序</string>

@@ -19,8 +19,6 @@ import com.rosan.installer.di.init.processModules
 import com.rosan.installer.framework.privileged.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.lifecycle.UserService
 import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
-import com.rosan.installer.framework.privileged.util.SystemUidEnvironment
-import com.rosan.installer.framework.privileged.util.UserServiceUidMode
 import com.rosan.installer.framework.privileged.util.requireShizukuPermissionGranted
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -44,8 +42,7 @@ class ShizukuUserServiceRecycler(
     }
 
     abstract class BaseShizukuUserService(
-        context: Context,
-        private val uidMode: UserServiceUidMode
+        context: Context
     ) : IShizukuUserService.Stub() {
         init {
             if (AppConfig.isDebug && Timber.treeCount == 0) Timber.plant(Timber.DebugTree())
@@ -67,7 +64,7 @@ class ShizukuUserServiceRecycler(
             fallbackContext: Context,
             reflection: ReflectionProvider = ReflectionProviderImpl()
         ): Context = try {
-            val packageName = SystemUidEnvironment.shizukuPackageNameFor(uidMode, TAG)
+            val packageName = "com.android.shell"
 
             val activityThreadClass = Class.forName("android.app.ActivityThread")
             val userHandleClass = Class.forName("android.os.UserHandle")
@@ -121,13 +118,7 @@ class ShizukuUserServiceRecycler(
     }
 
     class ShizukuUserService @Keep constructor(context: Context) : BaseShizukuUserService(
-        context = context,
-        uidMode = UserServiceUidMode.Default
-    )
-
-    class SystemUidShizukuUserService @Keep constructor(context: Context) : BaseShizukuUserService(
-        context = context,
-        uidMode = UserServiceUidMode.SystemIfRoot
+        context = context
     )
 
     override fun onMake(): UserServiceProxy = runBlocking {

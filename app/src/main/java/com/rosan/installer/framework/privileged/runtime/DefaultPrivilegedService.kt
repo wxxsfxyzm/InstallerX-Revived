@@ -28,7 +28,6 @@ import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.os.ResultReceiver
 import android.provider.Settings
-import android.system.Os
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.ICommandOutputListener
@@ -54,7 +53,6 @@ class DefaultPrivilegedService private constructor(
         private const val TAG = "PrivilegedService"
 
         private const val SHELL_COMMAND_TRANSACTION = 0x5f434d44 // '_CMD'
-        private const val SYSTEM_UID = 1000
 
         fun system() = DefaultPrivilegedService(PrivilegedRuntime.SystemApp)
 
@@ -134,16 +132,13 @@ class DefaultPrivilegedService private constructor(
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         val userId = AndroidProcess.myUid() / 100000
-        val effectiveUid = Os.geteuid()
-        val canCallSystemRestrictedPreferredApis =
-            runtime.canCallSystemRestrictedPreferredApis || effectiveUid == SYSTEM_UID
+        val canCallSystemRestrictedPreferredApis = runtime.canCallSystemRestrictedPreferredApis
 
         Timber.tag(TAG).d(
-            "setDefaultInstaller called: component=%s, enable=%b, userId=%d, effectiveUid=%d, canCallSystemRestrictedPreferredApis=%b",
+            "setDefaultInstaller called: component=%s, enable=%b, userId=%d, canCallSystemRestrictedPreferredApis=%b",
             component.flattenToShortString(),
             enable,
             userId,
-            effectiveUid,
             canCallSystemRestrictedPreferredApis
         )
 

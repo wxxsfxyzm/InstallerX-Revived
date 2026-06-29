@@ -27,8 +27,8 @@ import timber.log.Timber
 class AppInstallerRepositoryImpl(
     private val context: Context,
     private val reflect: ReflectionProvider,
-    private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val appSettingsRepo: AppSettingsRepository,
+    private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val postInstallTaskProvider: PostInstallTaskProvider,
     private val platformInstallPolicyChecker: PlatformInstallPolicyChecker
 ) : AppInstallerRepository {
@@ -62,7 +62,11 @@ class AppInstallerRepositoryImpl(
                 Timber.tag(TAG).d("Running platform install policy checker.")
                 platformInstallPolicyChecker.check(config)
             } else {
-                Timber.tag(TAG).d("Skipping platform policy checker for non-privileged install path.")
+                Timber.tag(TAG).d(
+                    "Skipping platform policy checker: authorizer=%s, isSystemApp=%s",
+                    config.authorizer,
+                    deviceCapabilityProvider.isSystemApp
+                )
             }
         }
         repo.doInstallWork(
@@ -77,7 +81,16 @@ class AppInstallerRepositoryImpl(
     }
 
     private fun canCheckPlatformInstallPolicy(config: ConfigModel): Boolean =
-        config.authorizer != Authorizer.None || deviceCapabilityProvider.isSystemApp
+        when (config.authorizer) {
+            Authorizer.Root,
+            Authorizer.Shizuku,
+            Authorizer.Customize -> true
+
+            Authorizer.None -> deviceCapabilityProvider.isSystemApp
+
+            Authorizer.Dhizuku,
+            Authorizer.Global -> false
+        }
 
     private companion object {
         const val TAG = "AppInstallerRepository"
@@ -144,8 +157,8 @@ class AppInstallerRepositoryImpl(
     /**
      * Resolve the InstallerRepo based on the provided 
      */
-    private fun resolveRepo(config: ConfigModel): AppInstallerRepository {
-        return when (config.authorizer) {
+    private fun resolveRepo(config: ConfigModel) =
+        when (config.authorizer) {
             Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
             Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
             Authorizer.None -> {
@@ -158,5 +171,4 @@ class AppInstallerRepositoryImpl(
 
             else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
         }
-    }
 }

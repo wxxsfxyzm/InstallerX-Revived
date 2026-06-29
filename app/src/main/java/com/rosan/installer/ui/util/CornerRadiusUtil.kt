@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
  * @return The calculated corner radius in Dp.
  */
 @Composable
-fun rememberDeviceCornerRadius(defaultRadius: Dp = 16.dp): Dp {
+fun rememberDeviceCornerRadius(defaultRadius: Dp = 0.dp): Dp {
     val context = LocalContext.current
     val view = LocalView.current
     val density = LocalDensity.current

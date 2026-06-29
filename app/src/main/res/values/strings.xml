@@ -305,9 +305,9 @@
     <string name="authorizer_customization">Authorizer Tweaks</string>
     <string name="authorizer_customization_desc">Fine-tune options for supported authorizers</string>
     <string name="config_try_multiple_authorizers_on_install">Smart authorization</string>
-    <string name="config_try_multiple_authorizers_on_install_desc">When the authorizer selected by the profile is unavailable, try enabled authorizers in order.</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">When the authorizer selected by the profile is unavailable, try enabled authorizers in order</string>
     <string name="lab_respect_platform_install_policy">Respect Platform Install Policy</string>
-    <string name="lab_respect_platform_install_policy_desc">Apply Android PackageInstaller source permission and user restriction checks before installing</string>
+    <string name="lab_respect_platform_install_policy_desc">Apply Android PackageInstaller source permission and user restriction checks before installing. Not available for Dhizuku or no-privilege installs</string>
     <string name="config_smart_authorizer_fallback_list">Fallback authorizer list</string>
     <string name="config_smart_authorizer_fallback_list_desc">Select and sort fallback authorizers.\nSelected authorization order: %1$s</string>
     <string name="config_smart_authorizer_fallback_list_tip">Select at least one item. Drag to sort.</string>

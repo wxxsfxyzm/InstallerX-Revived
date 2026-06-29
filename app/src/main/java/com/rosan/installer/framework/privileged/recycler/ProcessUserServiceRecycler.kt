@@ -20,8 +20,6 @@ import com.rosan.installer.framework.privileged.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.lifecycle.UserService
 import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
-import com.rosan.installer.framework.privileged.util.SystemUidEnvironment
-import com.rosan.installer.framework.privileged.util.UserServiceUidMode
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -58,13 +56,9 @@ class ProcessUserServiceRecycler(
     }
 
     abstract class BaseAppProcessService(
-        context: Context,
-        uidMode: UserServiceUidMode
+        context: Context
     ) : IAppProcessService.Stub() {
         init {
-            if (uidMode == UserServiceUidMode.SystemIfRoot) {
-                SystemUidEnvironment.switchRootToSystemIfNeeded(TAG)
-            }
             if (AppConfig.isDebug && Timber.treeCount == 0) Timber.plant(Timber.DebugTree())
             if (GlobalContext.getOrNull() == null) {
                 startKoin {
@@ -110,13 +104,7 @@ class ProcessUserServiceRecycler(
     }
 
     class AppProcessService @Keep constructor(context: Context) : BaseAppProcessService(
-        context = context,
-        uidMode = UserServiceUidMode.Default
-    )
-
-    class SystemUidAppProcessService @Keep constructor(context: Context) : BaseAppProcessService(
-        context = context,
-        uidMode = UserServiceUidMode.SystemIfRoot
+        context = context
     )
 
     override fun onMake(): UserServiceProxy {

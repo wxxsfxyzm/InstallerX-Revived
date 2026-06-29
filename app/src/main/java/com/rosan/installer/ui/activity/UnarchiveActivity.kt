@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstallerHidden
+import android.content.pm.PackageInstallerHidden.ACTION_UNARCHIVE_DIALOG
+import android.content.pm.PackageInstallerHidden.ACTION_UNARCHIVE_ERROR_DIALOG
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
@@ -142,10 +144,5 @@ class UnarchiveActivity : ComponentActivity() {
         if (sessionClosed) return
         sessionClosed = true
         session?.close()
-    }
-
-    companion object {
-        private const val ACTION_UNARCHIVE_DIALOG = "com.android.intent.action.UNARCHIVE_DIALOG"
-        private const val ACTION_UNARCHIVE_ERROR_DIALOG = "com.android.intent.action.UNARCHIVE_ERROR_DIALOG"
     }
 }
