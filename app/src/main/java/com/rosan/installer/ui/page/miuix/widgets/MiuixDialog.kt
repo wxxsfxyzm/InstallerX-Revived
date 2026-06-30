@@ -606,3 +606,53 @@ fun MiuixCustomGithubProxyUrlDialog(
         }
     )
 }
+
+@Composable
+fun MiuixCustomAuthorizerDialog(
+    showState: MutableState<Boolean>,
+    initialAuthorizer: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var authorizer by remember(initialAuthorizer) { mutableStateOf(initialAuthorizer) }
+
+    WindowDialog(
+        show = showState.value,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.config_authorizer_customize),
+        content = {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = authorizer,
+                    onValueChange = { authorizer = it },
+                    label = stringResource(R.string.config_customize_authorizer),
+                    useLabelAsPlaceholder = true,
+                    singleLine = false,
+                    maxLines = 4
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.confirm),
+                        onClick = {
+                            onConfirm(authorizer)
+                            onDismiss()
+                        },
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
+}

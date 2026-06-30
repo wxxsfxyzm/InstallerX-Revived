@@ -162,20 +162,22 @@ fun MiuixDefaultInstallerPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp)
                 ) {
+                    val defaultInstallerActionsEnabled =
+                        uiState.globalAuthorizer != Authorizer.None && !uiState.userSetLSPosedActive
                     MiuixAutoLockInstaller(
                         checked = uiState.autoLockInstaller,
-                        enabled = uiState.globalAuthorizer != Authorizer.None,
+                        enabled = defaultInstallerActionsEnabled,
                         onCheckedChange = {
                             viewModel.dispatch(HomePageViewAction.ChangeAutoLockInstaller(it))
                         }
                     )
                     MiuixDefaultInstaller(
                         lock = true,
-                        enabled = uiState.globalAuthorizer != Authorizer.None
+                        enabled = defaultInstallerActionsEnabled
                     ) { dispatchSetDefaultInstaller(true) }
                     MiuixDefaultInstaller(
                         lock = false,
-                        enabled = uiState.globalAuthorizer != Authorizer.None
+                        enabled = defaultInstallerActionsEnabled
                     ) { dispatchSetDefaultInstaller(false) }
                 }
             }

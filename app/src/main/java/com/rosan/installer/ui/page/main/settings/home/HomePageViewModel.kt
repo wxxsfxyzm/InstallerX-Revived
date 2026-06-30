@@ -91,11 +91,9 @@ class HomePageViewModel(
         if (caps.rootMode != RootMode.None) availableCount++
         if (capabilityProvider.isSystemApp) availableCount++
 
-        val customizeAuthorizer = if (prefs.authorizer == Authorizer.Customize) prefs.customizeAuthorizer else ""
-
         HomePageViewState(
             globalAuthorizer = prefs.authorizer,
-            customizeAuthorizer = customizeAuthorizer,
+            customizeAuthorizer = prefs.customizeAuthorizer,
             isDefaultInstaller = isDefault,
 
             shizukuAvailable = shizukuAvailable,
@@ -141,6 +139,13 @@ class HomePageViewModel(
                 updateSetting(
                     StringSetting.Authorizer,
                     action.authorizer.value
+                )
+            }
+
+            is HomePageViewAction.ChangeCustomizeAuthorizer -> viewModelScope.launch {
+                updateSetting(
+                    StringSetting.CustomizeAuthorizer,
+                    action.customizeAuthorizer
                 )
             }
 

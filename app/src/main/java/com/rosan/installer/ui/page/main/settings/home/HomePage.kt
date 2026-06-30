@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -159,7 +160,12 @@ fun HomePage(
                         )
                     }
                     item {
+                        val isCustomizeAuthorizer = uiState.globalAuthorizer == Authorizer.Customize
                         val authorizerText = when {
+                            isCustomizeAuthorizer -> uiState.customizeAuthorizer.ifBlank {
+                                stringResource(R.string.config_customize_authorizer)
+                            }
+
                             uiState.isSystemApp -> stringResource(R.string.working_status_system_installer)
                             uiState.globalAuthorizer == Authorizer.Shizuku -> {
                                 stringResource(R.string.config_authorizer_shizuku) + " " + when {
@@ -188,6 +194,13 @@ fun HomePage(
                         BaseWidget(
                             title = stringResource(R.string.home_device_info_active_authorizer),
                             description = authorizerText,
+                            descriptionStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontFamily = if (isCustomizeAuthorizer && uiState.customizeAuthorizer.isNotBlank()) {
+                                    FontFamily.Monospace
+                                } else {
+                                    null
+                                }
+                            ),
                             iconPlaceholder = false
                         )
                     }

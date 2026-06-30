@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
@@ -424,6 +426,46 @@ fun CustomGithubProxyUrlDialog(
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(url) }
+            ) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun CustomAuthorizerDialog(
+    initialAuthorizer: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var authorizer by remember(initialAuthorizer) { mutableStateOf(initialAuthorizer) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.config_authorizer_customize)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = authorizer,
+                    onValueChange = { authorizer = it },
+                    label = { Text(stringResource(R.string.config_customize_authorizer)) },
+                    textStyle = LocalTextStyle.current.copy(
+                        fontFamily = if (authorizer.isBlank()) null else FontFamily.Monospace
+                    ),
+                    singleLine = false,
+                    maxLines = 4
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(authorizer) }
             ) {
                 Text(stringResource(R.string.confirm))
             }
