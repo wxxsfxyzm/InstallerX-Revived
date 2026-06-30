@@ -71,7 +71,12 @@ class AutoLockService(
         try {
             Timber.d("Locking via $authorizer (Source: $source)")
             val component = ComponentName(context.packageName, ActivityContracts.INSTALLER_ACTIVITY)
-            appOpsProvider.setDefaultInstaller(authorizer = authorizer, component = component, lock = true)
+            appOpsProvider.setDefaultInstaller(
+                authorizer = authorizer,
+                customizeAuthorizer = "",
+                component = component,
+                lock = true
+            )
         } catch (e: Exception) {
             Timber.e(e, "AutoLock execution failed")
         }

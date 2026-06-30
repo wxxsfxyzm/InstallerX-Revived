@@ -10,6 +10,7 @@ import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.framework.privileged.util.SHELL_ROOT
 import com.rosan.installer.framework.privileged.util.SU_ARGS
+import com.rosan.installer.framework.privileged.util.requireCustomizeAuthorizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +34,8 @@ class LocalModuleInstallerRepoImpl : ModuleInstallerRepository {
         // 2. Determine Shell Binary Parts
         // If customizing, we still need to split user input (e.g. "su -c") to ensure ProcessBuilder works correctly.
         // If default, we directly concatenate the constants (SHELL_ROOT + SU_ARGS).
-        val shellParts = if (config.authorizer == Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
-            config.customizeAuthorizer.trim().split("\\s+".toRegex())
+        val shellParts = if (config.authorizer == Authorizer.Customize) {
+            requireCustomizeAuthorizer(config.customizeAuthorizer).trim().split("\\s+".toRegex())
         } else {
             listOf(SHELL_ROOT, SU_ARGS)
         }

@@ -3,12 +3,12 @@
 package com.rosan.installer.framework.privileged.util
 
 import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.framework.privileged.runtime.DhizukuPrivilegedService
 import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
 import com.rosan.installer.framework.privileged.runtime.PrivilegedOperations
 import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
 import com.rosan.installer.framework.privileged.recycler.ShizukuHookRecycler
-import com.rosan.installer.domain.settings.model.config.Authorizer
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
@@ -64,11 +64,9 @@ fun useDirectPrivileged(
         }
 
         Authorizer.Customize -> {
-            val terminal = customizeAuthorizer
-                .takeIf { it.isNotBlank() }
-                ?.let(ShellCommand::parse)
-                ?.let(AppProcessTerminal::Customize)
-                ?: AppProcessTerminal.Root
+            val terminal = AppProcessTerminal.Customize(
+                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer))
+            )
             val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
             handle.use {
                 action(DefaultPrivilegedService.binderWrapped(name = "Customize", useAppCallerPackage = isSystemApp) { binder ->

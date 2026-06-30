@@ -15,11 +15,17 @@ import timber.log.Timber
 class AppOpsProviderImpl(
     private val capabilityProvider: DeviceCapabilityProvider
 ) : AppOpsProvider {
-    override suspend fun setDefaultInstaller(authorizer: Authorizer, component: ComponentName, lock: Boolean) {
+    override suspend fun setDefaultInstaller(
+        authorizer: Authorizer,
+        customizeAuthorizer: String,
+        component: ComponentName,
+        lock: Boolean
+    ) {
         withContext(Dispatchers.IO) {
             useDirectPrivileged(
                 isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = authorizer,
+                customizeAuthorizer = customizeAuthorizer,
                 special = getSpecialAuth(authorizer)
             ) { privileged ->
                 privileged.setDefaultInstaller(component, lock)

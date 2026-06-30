@@ -15,6 +15,7 @@ import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
 import com.rosan.installer.framework.privileged.util.AppProcessTerminal
 import com.rosan.installer.framework.privileged.util.SHELL_SH
 import com.rosan.installer.framework.privileged.util.ShellCommand
+import com.rosan.installer.framework.privileged.util.requireCustomizeAuthorizer
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
 
@@ -86,11 +87,9 @@ class ProcessAppInstallerRepoImpl(
     ): T {
         val terminal = when (config.authorizer) {
             Authorizer.Root -> rootTerminal
-            Authorizer.Customize -> config.customizeAuthorizer
-                .takeIf { it.isNotBlank() }
-                ?.let(ShellCommand::parse)
-                ?.let(AppProcessTerminal::Customize)
-                ?: AppProcessTerminal.Root
+            Authorizer.Customize -> AppProcessTerminal.Customize(
+                ShellCommand.parse(requireCustomizeAuthorizer(config.customizeAuthorizer))
+            )
 
             else -> AppProcessTerminal.Customize(ShellCommand.of(SHELL_SH))
         }

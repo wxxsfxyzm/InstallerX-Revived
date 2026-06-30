@@ -21,10 +21,10 @@ class PrivilegedProviderImpl(
         }
     }
 
-    override suspend fun setDefaultInstaller(authorizer: Authorizer, lock: Boolean) {
+    override suspend fun setDefaultInstaller(authorizer: Authorizer, customizeAuthorizer: String, lock: Boolean) {
         withContext(Dispatchers.IO) {
             val component = ComponentName(context.packageName, ActivityContracts.INSTALLER_ACTIVITY)
-            appOpsProvider.setDefaultInstaller(authorizer, component, lock)
+            appOpsProvider.setDefaultInstaller(authorizer, customizeAuthorizer, component, lock)
         }
     }
 }

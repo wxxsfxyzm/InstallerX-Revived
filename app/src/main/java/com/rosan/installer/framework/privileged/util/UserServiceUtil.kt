@@ -129,11 +129,9 @@ private fun getRecyclableInstance(
         Authorizer.Dhizuku -> null
 
         Authorizer.Customize -> {
-            val targetTerminal = customizeAuthorizer
-                .takeIf { it.isNotBlank() }
-                ?.let(ShellCommand::parse)
-                ?.let(AppProcessTerminal::Customize)
-                ?: AppProcessTerminal.Root
+            val targetTerminal = AppProcessTerminal.Customize(
+                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer))
+            )
             Timber.tag(TAG).d("Using ProcessUserServiceRecycler with terminal: $targetTerminal")
             koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetTerminal).make()
         }

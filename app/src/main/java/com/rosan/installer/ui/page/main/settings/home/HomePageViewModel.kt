@@ -161,7 +161,11 @@ class HomePageViewModel(
     // Attempt to lock or unlock the default installer setting and emit corresponding UI events
     private fun setDefaultInstaller(lock: Boolean, action: HomePageViewAction) = viewModelScope.launch {
         runCatching {
-            privilegedProvider.setDefaultInstaller(state.value.globalAuthorizer, lock)
+            privilegedProvider.setDefaultInstaller(
+                state.value.globalAuthorizer,
+                state.value.customizeAuthorizer,
+                lock
+            )
         }.onSuccess {
             val successResId = if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success
             _uiEvents.emit(HomePageViewEvent.ShowDefaultInstallerResult(successResId))

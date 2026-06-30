@@ -2,6 +2,8 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.framework.privileged.util
 
+import com.rosan.installer.domain.privileged.exception.PrivilegedException
+import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import timber.log.Timber
 import java.io.File
@@ -72,6 +74,16 @@ sealed interface AppProcessTerminal {
     data object Root : AppProcessTerminal
     data object RootSystem : AppProcessTerminal
     data class Customize(val command: ShellCommand) : AppProcessTerminal
+}
+
+fun requireCustomizeAuthorizer(customizeAuthorizer: String): String {
+    if (customizeAuthorizer.isBlank()) {
+        throw PrivilegedException(
+            errorType = PrivilegedErrorType.CUSTOM_AUTHORIZER_EMPTY,
+            message = "Custom authorizer is empty."
+        )
+    }
+    return customizeAuthorizer
 }
 
 private const val DELETE_TAG = "DELETE_PATH"
