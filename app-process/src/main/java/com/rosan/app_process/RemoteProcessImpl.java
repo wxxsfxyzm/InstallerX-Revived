@@ -2,6 +2,7 @@ package com.rosan.app_process;
 
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -10,6 +11,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class RemoteProcessImpl extends IRemoteProcess.Stub {
+    private static final String TAG = "RemoteProcessImpl";
+
     private final @NonNull Process mProcess;
 
     private ParcelFileDescriptor mInputStream;
@@ -70,6 +73,7 @@ public class RemoteProcessImpl extends IRemoteProcess.Stub {
         try {
             return mProcess.waitFor();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
     }
@@ -87,28 +91,32 @@ public class RemoteProcessImpl extends IRemoteProcess.Stub {
     }
 
     public static void transferThread(InputStream inputStream, OutputStream outputStream) {
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             byte[] bytes = new byte[8192];
-            int len = 0;
+            int len;
             try {
-                while ((len = inputStream.read(bytes)) > 0) {
-                    outputStream.write(bytes, 0, len);
-                    outputStream.flush();
+                while ((len = inputStream.read(bytes)) != -1) {
+                    if (len > 0) {
+                        outputStream.write(bytes, 0, len);
+                        outputStream.flush();
+                    }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.w(TAG, "Process stream transfer failed", e);
             } finally {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.w(TAG, "Failed to close process input stream", e);
                 }
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.w(TAG, "Failed to close process output stream", e);
                 }
             }
-        }).start();
+        }, "RemoteProcessStreamTransfer");
+        thread.setDaemon(true);
+        thread.start();
     }
 }

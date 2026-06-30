@@ -55,6 +55,11 @@ public class RemoteProcess extends Process {
     public int exitValue() {
         try {
             return mProcess.exitValue();
+        } catch (IllegalArgumentException e) {
+            if ("process hasn't exited".equals(e.getMessage())) {
+                throw new IllegalThreadStateException(e.getMessage());
+            }
+            throw e;
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

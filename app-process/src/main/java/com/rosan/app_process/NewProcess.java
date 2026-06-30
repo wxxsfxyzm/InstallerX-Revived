@@ -32,14 +32,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NewProcess {
     private static final String TAG = "NewProcess";
 
+    private static final AtomicBoolean ORPHAN_WATCHDOG_STARTED = new AtomicBoolean(false);
+
     private static ActivityThread mActivityThread = null;
 
     @Keep
-    public static void main(String[] args) throws Throwable {
+    static void main(String[] args) throws Throwable {
         // Start the orphan watchdog immediately.
         // This ensures that if the parent process (Main App) dies during the
         // initialization phase (before Binder is ready), this process
@@ -49,7 +52,6 @@ public class NewProcess {
         try {
             innerMain(args);
         } catch (Throwable e) {
-            e.printStackTrace();
             Log.e(TAG, "main", e);
             throw e;
         }
@@ -61,35 +63,41 @@ public class NewProcess {
      * STDIN is a pipe connected to the parent. If the parent dies, the pipe is closed.
      */
     private static void startOrphanWatchdog() {
-        Thread watchdog = new Thread(() -> {
-            try {
-                // Blocking read. This will wait indefinitely as long as the parent is alive.
-                // If the parent dies, the pipe closes, and read() returns -1 (EOF).
-                int result;
-                while ((result = System.in.read()) != -1) {
-                }
-                Log.w(TAG, "Watchdog: Stdin EOF detected (" + result + "). Parent died. Exiting...");
-            } catch (Exception e) {
-                // Any IO exception usually means the pipe is broken.
-                Log.w(TAG, "Watchdog: Stdin broken. Parent likely died.", e);
-            } finally {
-                // Force kill the current process to clean up.
-                Process.killProcess(Process.myPid());
-                System.exit(0);
-            }
-        });
+        if (!ORPHAN_WATCHDOG_STARTED.compareAndSet(false, true)) return;
 
-        // Set as daemon so it doesn't prevent normal JVM shutdown (though typically we loop forever).
+        Thread watchdog = new Thread(NewProcess::watchParentStdin, "OrphanWatchdog");
         watchdog.setDaemon(true);
-        watchdog.setName("OrphanWatchdog");
         watchdog.start();
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    private static void watchParentStdin() {
+        byte[] buffer = new byte[256];
+        try {
+            while (System.in.read(buffer) != -1) {
+                // Intentionally empty: wait until condition becomes false.
+            }
+            Log.w(TAG, "Watchdog: stdin EOF detected. Parent likely died.");
+        } catch (Exception e) {
+            Log.w(TAG, "Watchdog: stdin broken. Parent likely died.", e);
+        } finally {
+            exitFromOrphanWatchdog();
+        }
+    }
+
+    private static void exitFromOrphanWatchdog() {
+        Process.killProcess(Process.myPid());
+        System.exit(0);
     }
 
     private static void innerMain(String[] args) throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.addHiddenApiExemptions("");
         }
-        Options options = new Options().addOption(Option.builder().longOpt("package").hasArg().required().type(String.class).build()).addOption(Option.builder().longOpt("token").hasArg().required().type(String.class).build()).addOption(Option.builder().longOpt("component").hasArg().required().type(String.class).build());
+        Options options = new Options()
+                .addOption(requiredStringOption("package"))
+                .addOption(requiredStringOption("token"))
+                .addOption(requiredStringOption("component"));
         CommandLine cmdLine = new DefaultParser().parse(options, args);
         String packageName = cmdLine.getOptionValue("package");
         String token = cmdLine.getOptionValue("token");
@@ -107,6 +115,15 @@ public class NewProcess {
         Looper.loop();
     }
 
+    private static Option requiredStringOption(String longOption) {
+        return Option.builder()
+                .longOpt(longOption)
+                .hasArg()
+                .required()
+                .type(String.class)
+                .get();
+    }
+
     public static IBinder createBinder(ComponentName componentName) throws PackageManager.NameNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, ClassNotFoundException {
         return createBinder(getUIDContext(), componentName);
     }
@@ -121,9 +138,11 @@ public class NewProcess {
         }
         Object result;
         try {
-            result = constructor != null ? constructor.newInstance(context) : clazz.newInstance();
+            result = constructor != null ? constructor.newInstance(context) : clazz.getDeclaredConstructor().newInstance();
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
             throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("Service must provide either a Context constructor or a no-arg constructor.", e);
         }
         return ((IInterface) result).asBinder();
     }
@@ -134,6 +153,7 @@ public class NewProcess {
         return Arrays.asList(packageNames);
     }
 
+    @SuppressWarnings("deprecation")
     private static @NonNull ActivityThread getActivityThread() {
         if (mActivityThread != null) return mActivityThread;
         if (Looper.getMainLooper() == null) Looper.prepareMainLooper();
@@ -157,7 +177,7 @@ public class NewProcess {
         if (packageNames.contains(context.getPackageName()) && (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || packageNames.contains(context.getOpPackageName())))
             return context;
 
-        return createAppContext(context, packageNames.get(0));
+        return createAppContext(context, packageNames.getFirst());
     }
 
     @SuppressLint("PrivateApi")
