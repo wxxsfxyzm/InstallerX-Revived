@@ -34,6 +34,13 @@ abstract class NewProcessReceiver extends BroadcastReceiver {
         }
     }
 
+    private static String processName(@NonNull Context context, @NonNull ComponentName componentName) {
+        String className = componentName.getClassName();
+        int index = className.lastIndexOf('.');
+        String shortName = index >= 0 ? className.substring(index + 1) : className;
+        return context.getPackageName() + ":app_process:" + shortName;
+    }
+
     private static NewProcessResult waitForResult(
             @NonNull Process process,
             @NonNull LinkedBlockingQueue<NewProcessResult> queue
@@ -73,7 +80,7 @@ abstract class NewProcessReceiver extends BroadcastReceiver {
                     String.format("--package=%s", context.getPackageName()),
                     String.format("--token=%s", token),
                     String.format("--component=%s", componentName.flattenToString())
-            });
+            }, processName(context, componentName));
             NewProcessResult result = waitForResult(process, queue);
             IBinder binder = result != null ? result.getBinder() : null;
             long elapsed = SystemClock.elapsedRealtime() - startedAt;

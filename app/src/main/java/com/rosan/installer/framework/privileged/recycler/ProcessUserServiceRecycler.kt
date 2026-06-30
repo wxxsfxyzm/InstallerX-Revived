@@ -34,6 +34,8 @@ class ProcessUserServiceRecycler(
     private val serviceClass: Class<out IAppProcessService> = AppProcessService::class.java
 ) : Recycler<ProcessUserServiceRecycler.UserServiceProxy>() {
 
+    override val delayDuration: Long = 5_000L
+
     class UserServiceProxy(
         val service: IAppProcessService,
         private val appProcessHandle: Recyclable<AppProcess>,

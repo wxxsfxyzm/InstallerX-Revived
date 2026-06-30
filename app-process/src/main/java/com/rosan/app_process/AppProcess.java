@@ -38,10 +38,20 @@ public abstract class AppProcess implements Closeable {
     protected final ConcurrentMap<String, IBinder> mChildProcess = new ConcurrentHashMap<>();
 
     public static ProcessParams generateProcessParams(@NonNull String classPath, @NonNull String entryClassName, @NonNull List<String> args) {
+        return generateProcessParams(classPath, entryClassName, args, null);
+    }
+
+    public static ProcessParams generateProcessParams(
+            @NonNull String classPath,
+            @NonNull String entryClassName,
+            @NonNull List<String> args,
+            @Nullable String niceName
+    ) {
         List<String> cmdList = new ArrayList<>();
         cmdList.add("/system/bin/app_process");
         cmdList.add("-Djava.class.path=" + classPath);
         cmdList.add("/system/bin");
+        if (niceName != null) cmdList.add("--nice-name=" + niceName);
         cmdList.add(entryClassName);
         cmdList.addAll(args);
         return new ProcessParams(cmdList, null, null);
@@ -91,6 +101,10 @@ public abstract class AppProcess implements Closeable {
 
     public <T> @NonNull Process start(@NonNull String classPath, @NonNull Class<T> entryClass, @NonNull String[] args) throws IOException {
         return start(classPath, entryClass, Arrays.asList(args));
+    }
+
+    public <T> @NonNull Process start(@NonNull String classPath, @NonNull Class<T> entryClass, @NonNull String[] args, @Nullable String niceName) throws IOException {
+        return startProcess(generateProcessParams(classPath, entryClass.getName(), Arrays.asList(args), niceName));
     }
 
     public boolean init() {

@@ -22,12 +22,12 @@ class ProcessHookRecycler(
     private val appProcessRecyclerManager: RecyclerManager<AppProcessTerminal, AppProcessRecycler>
 ) : Recycler<ProcessHookRecycler.HookedUserService>(), KoinComponent {
 
+    override val delayDuration: Long = 5_000L
+
     class HookedUserService(
         private val appProcessHandle: Recyclable<AppProcess>
     ) : Closeable {
-        fun binderWrapper(binder: IBinder): IBinder {
-            return appProcessHandle.entity.binderWrapper(binder)
-        }
+        fun binderWrapper(binder: IBinder): IBinder = appProcessHandle.entity.binderWrapper(binder)
 
         override fun close() {
             appProcessHandle.recycle()
