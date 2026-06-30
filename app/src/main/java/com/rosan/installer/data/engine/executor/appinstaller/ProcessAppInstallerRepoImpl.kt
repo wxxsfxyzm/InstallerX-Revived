@@ -12,8 +12,9 @@ import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
-import com.rosan.installer.framework.privileged.util.SHELL_ROOT
+import com.rosan.installer.framework.privileged.util.AppProcessTerminal
 import com.rosan.installer.framework.privileged.util.SHELL_SH
+import com.rosan.installer.framework.privileged.util.ShellCommand
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
 
@@ -80,16 +81,21 @@ class ProcessAppInstallerRepoImpl(
 
     private suspend fun <T> runWithProcess(
         config: ConfigModel,
-        rootShell: String = SHELL_ROOT,
+        rootTerminal: AppProcessTerminal = AppProcessTerminal.Root,
         block: suspend () -> T
     ): T {
-        val shell = when (config.authorizer) {
-            Authorizer.Root -> rootShell
+        val terminal = when (config.authorizer) {
+            Authorizer.Root -> rootTerminal
             Authorizer.Customize -> config.customizeAuthorizer
-            else -> SHELL_SH
+                .takeIf { it.isNotBlank() }
+                ?.let(ShellCommand::parse)
+                ?.let(AppProcessTerminal::Customize)
+                ?: AppProcessTerminal.Root
+
+            else -> AppProcessTerminal.Customize(ShellCommand.of(SHELL_SH))
         }
 
-        val handle = GlobalContext.get().get<ProcessHookRecycler> { parametersOf(shell) }.make()
+        val handle = GlobalContext.get().get<ProcessHookRecycler> { parametersOf(terminal) }.make()
 
         return try {
             localService = handle.entity

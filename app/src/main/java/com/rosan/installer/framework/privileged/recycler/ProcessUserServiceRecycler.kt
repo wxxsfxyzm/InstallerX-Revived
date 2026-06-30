@@ -20,6 +20,7 @@ import com.rosan.installer.framework.privileged.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.lifecycle.UserService
 import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
+import com.rosan.installer.framework.privileged.util.AppProcessTerminal
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -27,9 +28,9 @@ import timber.log.Timber
 import kotlin.system.exitProcess
 
 class ProcessUserServiceRecycler(
-    private val shell: String,
+    private val terminal: AppProcessTerminal,
     private val context: Context,
-    private val appProcessRecyclerManager: RecyclerManager<String, AppProcessRecycler>,
+    private val appProcessRecyclerManager: RecyclerManager<AppProcessTerminal, AppProcessRecycler>,
     private val serviceClass: Class<out IAppProcessService> = AppProcessService::class.java
 ) : Recycler<ProcessUserServiceRecycler.UserServiceProxy>() {
 
@@ -70,10 +71,6 @@ class ProcessUserServiceRecycler(
 
         private val privileged = DefaultPrivilegedService.userService()
 
-        private companion object {
-            private const val TAG = "ProcessUserService"
-        }
-
         override fun quit() {
             try {
                 // Kill parent shell to ensure clean exit (su/sh process)
@@ -108,7 +105,7 @@ class ProcessUserServiceRecycler(
     )
 
     override fun onMake(): UserServiceProxy {
-        val appProcessRecycler = appProcessRecyclerManager.get(shell)
+        val appProcessRecycler = appProcessRecyclerManager.get(terminal)
         val appProcessHandle = appProcessRecycler.make()
 
         val binder = try {

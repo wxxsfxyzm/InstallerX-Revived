@@ -27,7 +27,7 @@ fun useDirectPrivileged(
     isSystemApp: Boolean,
     authorizer: Authorizer,
     customizeAuthorizer: String = "",
-    special: (() -> String?)? = null,
+    special: (() -> AppProcessTerminal?)? = null,
     action: (PrivilegedOperations) -> Unit
 ) {
     val koin = GlobalContext.get()
@@ -38,8 +38,8 @@ fun useDirectPrivileged(
         }
 
         Authorizer.Root -> {
-            val shell = special?.invoke() ?: SHELL_ROOT
-            val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
+            val terminal = special?.invoke() ?: AppProcessTerminal.Root
+            val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
             handle.use {
                 action(DefaultPrivilegedService.binderWrapped(name = "Root", useAppCallerPackage = isSystemApp) { binder ->
                     it.entity.binderWrapper(binder)
@@ -64,8 +64,12 @@ fun useDirectPrivileged(
         }
 
         Authorizer.Customize -> {
-            val shell = customizeAuthorizer.ifBlank { SHELL_ROOT }
-            val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
+            val terminal = customizeAuthorizer
+                .takeIf { it.isNotBlank() }
+                ?.let(ShellCommand::parse)
+                ?.let(AppProcessTerminal::Customize)
+                ?: AppProcessTerminal.Root
+            val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
             handle.use {
                 action(DefaultPrivilegedService.binderWrapped(name = "Customize", useAppCallerPackage = isSystemApp) { binder ->
                     it.entity.binderWrapper(binder)
@@ -74,8 +78,8 @@ fun useDirectPrivileged(
         }
 
         else -> {
-            special?.invoke()?.let { shell ->
-                val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
+            special?.invoke()?.let { terminal ->
+                val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
                 handle.use {
                     action(DefaultPrivilegedService.binderWrapped(name = "Special", useAppCallerPackage = isSystemApp) { binder ->
                         it.entity.binderWrapper(binder)

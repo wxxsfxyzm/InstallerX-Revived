@@ -177,7 +177,8 @@ public class NewProcess {
         if (packageNames.contains(context.getPackageName()) && (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || packageNames.contains(context.getOpPackageName())))
             return context;
 
-        return createAppContext(context, packageNames.getFirst());
+        // app_process runs against the device platform libraries, so avoid Java 21 List.getFirst().
+        return createAppContext(context, packageNames.get(0));
     }
 
     @SuppressLint("PrivateApi")

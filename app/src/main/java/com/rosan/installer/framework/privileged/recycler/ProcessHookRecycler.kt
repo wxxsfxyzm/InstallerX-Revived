@@ -8,6 +8,7 @@ import com.rosan.app_process.AppProcess
 import com.rosan.installer.framework.privileged.lifecycle.Recyclable
 import com.rosan.installer.framework.privileged.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.lifecycle.RecyclerManager
+import com.rosan.installer.framework.privileged.util.AppProcessTerminal
 import org.koin.core.component.KoinComponent
 import java.io.Closeable
 
@@ -16,9 +17,9 @@ import java.io.Closeable
  * It deliberately does not expose IPrivilegedService; hook callers use the wrapper directly.
  */
 class ProcessHookRecycler(
-    private val shell: String,
+    private val terminal: AppProcessTerminal,
     private val context: Context,
-    private val appProcessRecyclerManager: RecyclerManager<String, AppProcessRecycler>
+    private val appProcessRecyclerManager: RecyclerManager<AppProcessTerminal, AppProcessRecycler>
 ) : Recycler<ProcessHookRecycler.HookedUserService>(), KoinComponent {
 
     class HookedUserService(
@@ -35,7 +36,7 @@ class ProcessHookRecycler(
 
     override fun onMake(): HookedUserService {
         // Obtain a raw AppProcess shell from the injected manager
-        val appProcessHandle = appProcessRecyclerManager.get(shell).make()
+        val appProcessHandle = appProcessRecyclerManager.get(terminal).make()
 
         // Critical Fix: Ensure the reused AppProcess is initialized.
         // If the process was previously closed/recycled, its context/manager might be null.
