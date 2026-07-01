@@ -5,6 +5,7 @@ package com.rosan.installer.ui.page.main.settings.preferred.about
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,9 +52,7 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantColors
 import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryDetailMode
 import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryRow
 import com.rosan.installer.R
-import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.theme.CornerRadius
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
@@ -101,13 +101,12 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
             )
         },
     ) { paddingValues ->
-        val cornerRadius = 16.dp
         LibrariesContainer(
             libraries = libraries,
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues,
+            contentPadding = paddingValues + PaddingValues(horizontal = 16.dp),
             colors = LibraryDefaults.libraryColors(
                 libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                 libraryContentColor = MaterialTheme.colorScheme.onSurface
@@ -172,17 +171,6 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        item {
-                            InfoTipCard(
-                                icon = AppIcons.License,
-                                text = stringResource(
-                                    R.string.license,
-                                    library.licenses.joinToString(separator = ", ") { it.name }),
-                                modifier = Modifier.fillMaxWidth(),
-                                noPadding = true
-                            )
-                        }
-
                         items(library.licenses.toList()) { license ->
                             OutlinedCard(
                                 modifier = Modifier.fillMaxWidth(),
