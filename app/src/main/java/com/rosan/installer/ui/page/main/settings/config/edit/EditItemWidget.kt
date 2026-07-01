@@ -4,9 +4,6 @@ package com.rosan.installer.ui.page.main.settings.config.edit
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -36,9 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.rosan.installer.R
@@ -549,11 +544,6 @@ fun DataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
         managedPackages.find { it.packageName == currentInstaller }
     }
 
-    val layoutDirection = LocalLayoutDirection.current
-    val leftCutoutOffset = WindowInsets.displayCutout
-        .asPaddingValues()
-        .calculateLeftPadding(layoutDirection)
-
     BaseItemContainer {
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -591,7 +581,6 @@ fun DataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.exposedDropdownSize(),
-                offset = DpOffset(x = leftCutoutOffset, y = 0.dp),
                 properties = PopupProperties(
                     focusable = true,
                     clippingEnabled = false
