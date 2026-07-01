@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -60,6 +61,7 @@ fun MiuixPrivPage(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
     val showCustomizeAuthorizerDialog = remember { mutableStateOf(false) }
+    var selectCustomizeOnConfirm by remember { mutableStateOf(false) }
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -71,9 +73,20 @@ fun MiuixPrivPage(
     MiuixCustomAuthorizerDialog(
         showState = showCustomizeAuthorizerDialog,
         initialAuthorizer = uiState.customizeAuthorizer,
-        onDismiss = { showCustomizeAuthorizerDialog.value = false },
+        onDismiss = {
+            showCustomizeAuthorizerDialog.value = false
+            selectCustomizeOnConfirm = false
+        },
         onConfirm = { authorizer ->
-            viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(authorizer))
+            val customizeAuthorizer = authorizer.trim()
+            if (customizeAuthorizer.isBlank()) return@MiuixCustomAuthorizerDialog
+
+            if (selectCustomizeOnConfirm) {
+                viewModel.dispatch(HomePageViewAction.EnableCustomizeAuthorizer(customizeAuthorizer))
+            } else {
+                viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(customizeAuthorizer))
+            }
+            selectCustomizeOnConfirm = false
         }
     )
 
@@ -180,6 +193,10 @@ fun MiuixPrivPage(
                         checked = isCustomizeSelected,
                         onCheckedChange = {
                             if (isCustomizeSelected) {
+                                selectCustomizeOnConfirm = false
+                                showCustomizeAuthorizerDialog.value = true
+                            } else if (uiState.customizeAuthorizer.isBlank()) {
+                                selectCustomizeOnConfirm = true
                                 showCustomizeAuthorizerDialog.value = true
                             } else {
                                 viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Customize))

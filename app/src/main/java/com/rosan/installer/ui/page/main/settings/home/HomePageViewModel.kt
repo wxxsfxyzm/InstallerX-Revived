@@ -149,6 +149,17 @@ class HomePageViewModel(
                 )
             }
 
+            is HomePageViewAction.EnableCustomizeAuthorizer -> viewModelScope.launch {
+                updateSetting(
+                    StringSetting.CustomizeAuthorizer,
+                    action.customizeAuthorizer
+                )
+                updateSetting(
+                    StringSetting.Authorizer,
+                    Authorizer.Customize.value
+                )
+            }
+
             is HomePageViewAction.ChangeUserSetLSPosedActive -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.UserSetLSPosedActive,

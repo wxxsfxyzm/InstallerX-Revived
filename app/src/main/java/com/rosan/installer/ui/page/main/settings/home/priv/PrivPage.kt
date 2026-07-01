@@ -63,6 +63,7 @@ fun PrivPage(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     var showCustomizeAuthorizerDialog by remember { mutableStateOf(false) }
+    var selectCustomizeOnConfirm by remember { mutableStateOf(false) }
 
     OnLifecycleEvent(event = Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(HomePageViewAction.RefreshActivateStatus)
@@ -71,10 +72,21 @@ fun PrivPage(
     if (showCustomizeAuthorizerDialog) {
         CustomAuthorizerDialog(
             initialAuthorizer = uiState.customizeAuthorizer,
-            onDismiss = { showCustomizeAuthorizerDialog = false },
-            onConfirm = { authorizer ->
+            onDismiss = {
                 showCustomizeAuthorizerDialog = false
-                viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(authorizer))
+                selectCustomizeOnConfirm = false
+            },
+            onConfirm = { authorizer ->
+                val customizeAuthorizer = authorizer.trim()
+                if (customizeAuthorizer.isBlank()) return@CustomAuthorizerDialog
+
+                showCustomizeAuthorizerDialog = false
+                if (selectCustomizeOnConfirm) {
+                    viewModel.dispatch(HomePageViewAction.EnableCustomizeAuthorizer(customizeAuthorizer))
+                } else {
+                    viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(customizeAuthorizer))
+                }
+                selectCustomizeOnConfirm = false
             }
         )
     }
@@ -212,6 +224,10 @@ fun PrivPage(
                             selected = selected,
                             onClick = {
                                 if (selected) {
+                                    selectCustomizeOnConfirm = false
+                                    showCustomizeAuthorizerDialog = true
+                                } else if (customizeAuthorizer.isBlank()) {
+                                    selectCustomizeOnConfirm = true
                                     showCustomizeAuthorizerDialog = true
                                 } else {
                                     viewModel.dispatch(

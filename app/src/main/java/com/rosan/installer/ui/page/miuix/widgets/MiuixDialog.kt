@@ -649,6 +649,7 @@ fun MiuixCustomAuthorizerDialog(
                             onConfirm(authorizer)
                             onDismiss()
                         },
+                        enabled = authorizer.isNotBlank(),
                         colors = ButtonDefaults.textButtonColorsPrimary()
                     )
                 }

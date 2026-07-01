@@ -42,7 +42,7 @@ public class NewProcess {
     private static ActivityThread mActivityThread = null;
 
     @Keep
-    static void main(String[] args) throws Throwable {
+    public static void main(String[] args) throws Throwable {
         // Start the orphan watchdog immediately.
         // This ensures that if the parent process (Main App) dies during the
         // initialization phase (before Binder is ready), this process

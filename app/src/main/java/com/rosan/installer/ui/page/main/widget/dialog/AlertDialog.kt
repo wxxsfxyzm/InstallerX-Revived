@@ -465,7 +465,8 @@ fun CustomAuthorizerDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(authorizer) }
+                onClick = { onConfirm(authorizer) },
+                enabled = authorizer.isNotBlank()
             ) {
                 Text(stringResource(R.string.confirm))
             }
