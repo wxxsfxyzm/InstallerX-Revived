@@ -251,7 +251,6 @@ fun BaseWidget(
          * which incorrectly exposes the item as disabled and changes its visual state.
          */
         ListItem(
-            headlineContent = headline,
             modifier = itemModifier
                 .clip(baseShape)
                 .then(
@@ -264,7 +263,8 @@ fun BaseWidget(
             colors = colors,
             leadingContent = leadingContent,
             supportingContent = supportingContent,
-            trailingContent = trailing
+            trailingContent = trailing,
+            content = headline
         )
     }
 }
