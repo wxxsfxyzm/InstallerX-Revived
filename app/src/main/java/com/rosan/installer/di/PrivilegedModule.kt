@@ -15,6 +15,7 @@ import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
 import com.rosan.installer.framework.privileged.recycler.ProcessUserServiceRecycler
 import com.rosan.installer.framework.privileged.recycler.ShizukuHookRecycler
 import com.rosan.installer.framework.privileged.recycler.ShizukuUserServiceRecycler
+import com.rosan.installer.framework.privileged.util.AppProcessTerminal
 import com.rosan.installer.framework.service.AutoLockService
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
@@ -60,16 +61,16 @@ val privilegedModule = module {
     // 1. Recycler Managers (Singletons)
     // Add named qualifier to distinguish this manager
     single(RecyclerNames.APP_PROCESS) {
-        RecyclerManager<String, AppProcessRecycler> { shell ->
-            AppProcessRecycler(shell)
+        RecyclerManager<AppProcessTerminal, AppProcessRecycler> { terminal ->
+            AppProcessRecycler(terminal)
         }
     }
 
     // Add named qualifier to distinguish this manager
     single(RecyclerNames.USER_SERVICE) {
-        RecyclerManager<String, ProcessUserServiceRecycler> { shell ->
+        RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler> { terminal ->
             ProcessUserServiceRecycler(
-                shell = shell,
+                terminal = terminal,
                 context = get(),
                 appProcessRecyclerManager = get(RecyclerNames.APP_PROCESS)
             )
@@ -89,9 +90,9 @@ val privilegedModule = module {
 
     // 3. Shell-dependent Recyclers (Factories)
     // Created dynamically on demand based on the requested shell.
-    factory { (shell: String) ->
+    factory { (terminal: AppProcessTerminal) ->
         ProcessHookRecycler(
-            shell = shell,
+            terminal = terminal,
             context = get(),
             appProcessRecyclerManager = get(RecyclerNames.APP_PROCESS)
         )

@@ -3,12 +3,12 @@
 package com.rosan.installer.framework.privileged.util
 
 import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.framework.privileged.runtime.DhizukuPrivilegedService
 import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
 import com.rosan.installer.framework.privileged.runtime.PrivilegedOperations
 import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
 import com.rosan.installer.framework.privileged.recycler.ShizukuHookRecycler
-import com.rosan.installer.domain.settings.model.config.Authorizer
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
@@ -27,7 +27,7 @@ fun useDirectPrivileged(
     isSystemApp: Boolean,
     authorizer: Authorizer,
     customizeAuthorizer: String = "",
-    special: (() -> String?)? = null,
+    special: (() -> AppProcessTerminal?)? = null,
     action: (PrivilegedOperations) -> Unit
 ) {
     val koin = GlobalContext.get()
@@ -38,8 +38,8 @@ fun useDirectPrivileged(
         }
 
         Authorizer.Root -> {
-            val shell = special?.invoke() ?: SHELL_ROOT
-            val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
+            val terminal = special?.invoke() ?: AppProcessTerminal.Root
+            val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
             handle.use {
                 action(DefaultPrivilegedService.binderWrapped(name = "Root", useAppCallerPackage = isSystemApp) { binder ->
                     it.entity.binderWrapper(binder)
@@ -64,8 +64,10 @@ fun useDirectPrivileged(
         }
 
         Authorizer.Customize -> {
-            val shell = customizeAuthorizer.ifBlank { SHELL_ROOT }
-            val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
+            val terminal = AppProcessTerminal.Customize(
+                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer))
+            )
+            val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
             handle.use {
                 action(DefaultPrivilegedService.binderWrapped(name = "Customize", useAppCallerPackage = isSystemApp) { binder ->
                     it.entity.binderWrapper(binder)
@@ -74,8 +76,8 @@ fun useDirectPrivileged(
         }
 
         else -> {
-            special?.invoke()?.let { shell ->
-                val handle = koin.get<ProcessHookRecycler> { parametersOf(shell) }.make()
+            special?.invoke()?.let { terminal ->
+                val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
                 handle.use {
                     action(DefaultPrivilegedService.binderWrapped(name = "Special", useAppCallerPackage = isSystemApp) { binder ->
                         it.entity.binderWrapper(binder)

@@ -20,6 +20,7 @@ import com.rosan.installer.framework.privileged.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.lifecycle.UserService
 import com.rosan.installer.framework.privileged.runtime.DefaultPrivilegedService
+import com.rosan.installer.framework.privileged.util.AppProcessTerminal
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -27,11 +28,13 @@ import timber.log.Timber
 import kotlin.system.exitProcess
 
 class ProcessUserServiceRecycler(
-    private val shell: String,
+    private val terminal: AppProcessTerminal,
     private val context: Context,
-    private val appProcessRecyclerManager: RecyclerManager<String, AppProcessRecycler>,
+    private val appProcessRecyclerManager: RecyclerManager<AppProcessTerminal, AppProcessRecycler>,
     private val serviceClass: Class<out IAppProcessService> = AppProcessService::class.java
 ) : Recycler<ProcessUserServiceRecycler.UserServiceProxy>() {
+
+    override val delayDuration: Long = 5_000L
 
     class UserServiceProxy(
         val service: IAppProcessService,
@@ -70,10 +73,6 @@ class ProcessUserServiceRecycler(
 
         private val privileged = DefaultPrivilegedService.userService()
 
-        private companion object {
-            private const val TAG = "ProcessUserService"
-        }
-
         override fun quit() {
             try {
                 // Kill parent shell to ensure clean exit (su/sh process)
@@ -108,45 +107,21 @@ class ProcessUserServiceRecycler(
     )
 
     override fun onMake(): UserServiceProxy {
-        val appProcessRecycler = appProcessRecyclerManager.get(shell)
+        val appProcessRecycler = appProcessRecyclerManager.get(terminal)
         val appProcessHandle = appProcessRecycler.make()
 
-        val maxRetries = 5
-        val initialDelay = 100L
-        var currentBinder: IBinder? = null
-
-        // Retry logic for obtaining the binder
-        var attempt = 0
-        while (attempt < maxRetries) {
-            try {
-                currentBinder = appProcessHandle.entity.isolatedServiceBinder(
-                    ComponentName(context, serviceClass)
-                )
-
-                if (currentBinder != null) {
-                    if (currentBinder.isBinderAlive) {
-                        break
-                    } else {
-                        Timber.w("Attempt ${attempt + 1}: Binder retrieved but dead.")
-                    }
-                } else {
-                    Timber.w("Attempt ${attempt + 1}: isolatedServiceBinder returned null.")
-                }
-            } catch (e: Exception) {
-                Timber.w(e, "Attempt ${attempt + 1}: Exception during bind.")
-            }
-
-            attempt++
-            if (attempt < maxRetries) {
-                Thread.sleep(initialDelay * (1 shl (attempt - 1)))
-            }
+        val binder = try {
+            appProcessHandle.entity.isolatedServiceBinder(
+                ComponentName(context, serviceClass)
+            )
+        } catch (e: Exception) {
+            appProcessHandle.recycle()
+            throw IllegalStateException("Failed to bind AppProcessService.", e)
         }
 
-        val binder = currentBinder
-
-        if (binder == null) {
+        if (binder == null || !binder.isBinderAlive) {
             appProcessHandle.recycle()
-            throw IllegalStateException("Failed to bind AppProcessService after $maxRetries attempts. Child process may have crashed or timed out.")
+            throw IllegalStateException("Failed to bind AppProcessService. Child process may have crashed or timed out.")
         }
 
         val deathRecipient = IBinder.DeathRecipient {
@@ -167,10 +142,17 @@ class ProcessUserServiceRecycler(
         try {
             serviceInterface.registerDeathToken(Binder())
         } catch (e: RemoteException) {
+            runCatching { binder.unlinkToDeath(deathRecipient, 0) }
             appProcessHandle.recycle()
             throw e
         }
 
-        return UserServiceProxy(serviceInterface, appProcessHandle, binder, deathRecipient)
+        try {
+            return UserServiceProxy(serviceInterface, appProcessHandle, binder, deathRecipient)
+        } catch (e: Exception) {
+            runCatching { binder.unlinkToDeath(deathRecipient, 0) }
+            appProcessHandle.recycle()
+            throw e
+        }
     }
 }

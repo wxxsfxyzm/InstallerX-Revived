@@ -4,6 +4,7 @@ package com.rosan.installer.framework.privileged.provider
 
 import com.rosan.installer.framework.privileged.util.SHELL_ROOT
 import com.rosan.installer.framework.privileged.util.SU_ARGS
+import com.rosan.installer.framework.privileged.util.requireCustomizeAuthorizer
 import com.rosan.installer.framework.privileged.util.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
@@ -19,13 +20,13 @@ class ShellExecutionProviderImpl(
     override suspend fun executeCommandArray(config: ConfigModel, command: Array<String>): String {
         return withContext(Dispatchers.IO) {
             if (config.authorizer == Authorizer.Root || config.authorizer == Authorizer.Customize) {
-                return@withContext try {
-                    val shellParts = if (config.authorizer == Authorizer.Customize && config.customizeAuthorizer.isNotBlank()) {
-                        config.customizeAuthorizer.trim().split("\\s+".toRegex())
-                    } else {
-                        listOf(SHELL_ROOT, SU_ARGS)
-                    }
+                val shellParts = if (config.authorizer == Authorizer.Customize) {
+                    requireCustomizeAuthorizer(config.customizeAuthorizer).trim().split("\\s+".toRegex())
+                } else {
+                    listOf(SHELL_ROOT, SU_ARGS)
+                }
 
+                return@withContext try {
                     val escapedCommand = command.joinToString(" ") { "'" + it.replace("'", "'\\''") + "'" }
                     val processCommand = shellParts + listOf("-c", escapedCommand)
 

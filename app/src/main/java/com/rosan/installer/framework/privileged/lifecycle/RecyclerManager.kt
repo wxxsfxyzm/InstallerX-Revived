@@ -19,8 +19,14 @@ class RecyclerManager<K, V : Closeable>(
     private val map = ConcurrentHashMap<K, V>()
     private val lock = ReentrantReadWriteLock()
 
-    fun get(key: K): V = lock.read {
-        map.getOrPut(key) { factory(key) }
+    fun get(key: K): V {
+        lock.read {
+            map[key]?.let { return it }
+        }
+
+        return lock.write {
+            map.getOrPut(key) { factory(key) }
+        }
     }
 
     fun remove(key: K): V? = lock.write {

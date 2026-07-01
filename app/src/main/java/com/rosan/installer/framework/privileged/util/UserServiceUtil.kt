@@ -29,7 +29,7 @@ fun useUserService(
     isSystemApp: Boolean,
     authorizer: Authorizer,
     customizeAuthorizer: String = "",
-    special: (() -> String?)? = null,
+    special: (() -> AppProcessTerminal?)? = null,
     action: (UserService) -> Unit
 ) {
     val fallbackPrivileged = if (isSystemApp) {
@@ -104,9 +104,9 @@ private fun processRecycler(
 private fun getRecyclableInstance(
     authorizer: Authorizer,
     customizeAuthorizer: String,
-    special: (() -> String?)?
+    special: (() -> AppProcessTerminal?)?
 ): Recyclable<out UserService>? {
-    val specialShell = special?.invoke()
+    val specialTerminal = special?.invoke()
 
     // Retrieve the active Koin instance
     val koin = GlobalContext.get()
@@ -115,10 +115,10 @@ private fun getRecyclableInstance(
         Authorizer.None -> null
 
         Authorizer.Root -> {
-            val targetShell = specialShell ?: SHELL_ROOT
+            val targetTerminal = specialTerminal ?: AppProcessTerminal.Root
 
-            Timber.tag(TAG).d("Using ProcessUserServiceRecycler with shell: $targetShell")
-            koin.get<RecyclerManager<String, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetShell).make()
+            Timber.tag(TAG).d("Using ProcessUserServiceRecycler with terminal: $targetTerminal")
+            koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetTerminal).make()
         }
 
         Authorizer.Shizuku -> {
@@ -129,14 +129,16 @@ private fun getRecyclableInstance(
         Authorizer.Dhizuku -> null
 
         Authorizer.Customize -> {
-            val targetShell = customizeAuthorizer.ifBlank { SHELL_ROOT }
-            Timber.tag(TAG).d("Using ProcessUserServiceRecycler with shell: $targetShell")
-            koin.get<RecyclerManager<String, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetShell).make()
+            val targetTerminal = AppProcessTerminal.Customize(
+                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer))
+            )
+            Timber.tag(TAG).d("Using ProcessUserServiceRecycler with terminal: $targetTerminal")
+            koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetTerminal).make()
         }
 
-        else -> specialShell?.let {
-            Timber.tag(TAG).d("Using ProcessUserServiceRecycler with shell: $it")
-            koin.get<RecyclerManager<String, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(it).make()
+        else -> specialTerminal?.let {
+            Timber.tag(TAG).d("Using ProcessUserServiceRecycler with terminal: $it")
+            koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(it).make()
         }
     }
 }

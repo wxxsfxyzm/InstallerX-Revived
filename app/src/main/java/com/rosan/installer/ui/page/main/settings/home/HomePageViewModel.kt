@@ -91,11 +91,9 @@ class HomePageViewModel(
         if (caps.rootMode != RootMode.None) availableCount++
         if (capabilityProvider.isSystemApp) availableCount++
 
-        val customizeAuthorizer = if (prefs.authorizer == Authorizer.Customize) prefs.customizeAuthorizer else ""
-
         HomePageViewState(
             globalAuthorizer = prefs.authorizer,
-            customizeAuthorizer = customizeAuthorizer,
+            customizeAuthorizer = prefs.customizeAuthorizer,
             isDefaultInstaller = isDefault,
 
             shizukuAvailable = shizukuAvailable,
@@ -144,6 +142,24 @@ class HomePageViewModel(
                 )
             }
 
+            is HomePageViewAction.ChangeCustomizeAuthorizer -> viewModelScope.launch {
+                updateSetting(
+                    StringSetting.CustomizeAuthorizer,
+                    action.customizeAuthorizer
+                )
+            }
+
+            is HomePageViewAction.EnableCustomizeAuthorizer -> viewModelScope.launch {
+                updateSetting(
+                    StringSetting.CustomizeAuthorizer,
+                    action.customizeAuthorizer
+                )
+                updateSetting(
+                    StringSetting.Authorizer,
+                    Authorizer.Customize.value
+                )
+            }
+
             is HomePageViewAction.ChangeUserSetLSPosedActive -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.UserSetLSPosedActive,
@@ -156,7 +172,11 @@ class HomePageViewModel(
     // Attempt to lock or unlock the default installer setting and emit corresponding UI events
     private fun setDefaultInstaller(lock: Boolean, action: HomePageViewAction) = viewModelScope.launch {
         runCatching {
-            privilegedProvider.setDefaultInstaller(state.value.globalAuthorizer, lock)
+            privilegedProvider.setDefaultInstaller(
+                state.value.globalAuthorizer,
+                state.value.customizeAuthorizer,
+                lock
+            )
         }.onSuccess {
             val successResId = if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success
             _uiEvents.emit(HomePageViewEvent.ShowDefaultInstallerResult(successResId))

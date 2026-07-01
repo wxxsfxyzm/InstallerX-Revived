@@ -2,6 +2,8 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.framework.privileged.util
 
+import com.rosan.installer.domain.privileged.exception.PrivilegedException
+import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import timber.log.Timber
 import java.io.File
@@ -11,6 +13,78 @@ const val SHELL_SYSTEM = "su 1000"
 const val SHELL_SH = "sh"
 
 const val SU_ARGS = "-M"
+
+const val SHELL_COMMAND_PLACEHOLDER = "{command}"
+
+data class ShellCommand(val parts: List<String>) {
+    init {
+        require(parts.isNotEmpty()) { "Shell command must not be empty." }
+        require(parts.none { it.isBlank() }) { "Shell command parts must not be blank." }
+    }
+
+    override fun toString(): String = parts.joinToString(" ") { part ->
+        if (part.any(Char::isWhitespace)) "'${part.replace("'", "'\\''")}'" else part
+    }
+
+    companion object {
+        fun of(vararg parts: String): ShellCommand = ShellCommand(parts.toList())
+
+        fun parse(command: String): ShellCommand {
+            val parts = mutableListOf<String>()
+            val current = StringBuilder()
+            var quote: Char? = null
+            var escaping = false
+
+            fun push() {
+                if (current.isEmpty()) return
+                parts += current.toString()
+                current.clear()
+            }
+
+            for (char in command.trim()) {
+                when {
+                    escaping -> {
+                        current.append(char)
+                        escaping = false
+                    }
+
+                    char == '\\' -> escaping = true
+
+                    quote != null -> {
+                        if (char == quote) quote = null else current.append(char)
+                    }
+
+                    char == '\'' || char == '"' -> quote = char
+
+                    char.isWhitespace() -> push()
+
+                    else -> current.append(char)
+                }
+            }
+
+            if (escaping) current.append('\\')
+            push()
+
+            return ShellCommand(parts)
+        }
+    }
+}
+
+sealed interface AppProcessTerminal {
+    data object Root : AppProcessTerminal
+    data object RootSystem : AppProcessTerminal
+    data class Customize(val command: ShellCommand) : AppProcessTerminal
+}
+
+fun requireCustomizeAuthorizer(customizeAuthorizer: String): String {
+    if (customizeAuthorizer.isBlank()) {
+        throw PrivilegedException(
+            errorType = PrivilegedErrorType.CUSTOM_AUTHORIZER_EMPTY,
+            message = "Custom authorizer is empty."
+        )
+    }
+    return customizeAuthorizer
+}
 
 private const val DELETE_TAG = "DELETE_PATH"
 
@@ -44,8 +118,8 @@ fun deletePaths(paths: List<String>) {
  */
 fun getSpecialAuth(
     authorizer: Authorizer,
-    specialAuth: String = SHELL_SYSTEM
-): (() -> String?)? =
+    specialAuth: AppProcessTerminal = AppProcessTerminal.RootSystem
+): (() -> AppProcessTerminal?)? =
     if (authorizer == Authorizer.Root) {
         { specialAuth }
     } else null

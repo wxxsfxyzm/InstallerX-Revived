@@ -1,5 +1,6 @@
 package com.rosan.app_process;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,88 +9,108 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 abstract class NewProcessReceiver extends BroadcastReceiver {
-    private static boolean waitFor(Process process, long timeout, TimeUnit unit) throws InterruptedException {
-        long startTime = System.nanoTime();
-        long rem = unit.toNanos(timeout);
+    private static final String TAG = "NewProcessReceiver";
 
-        do {
-            try {
-                process.exitValue();
-                return true;
-            } catch (IllegalArgumentException ex) {
-                if (rem > 0)
-                    Thread.sleep(
-                            Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
-            }
-            rem = unit.toNanos(timeout) - (System.nanoTime() - startTime);
-        } while (rem > 0);
-        return false;
+    private static final long START_TIMEOUT_SECONDS = 15L;
+
+    private static boolean hasExited(Process process) {
+        try {
+            process.exitValue();
+            return true;
+        } catch (IllegalThreadStateException ignored) {
+            return false;
+        }
     }
 
+    private static String processName(@NonNull Context context, @NonNull ComponentName componentName) {
+        String className = componentName.getClassName();
+        int index = className.lastIndexOf('.');
+        String shortName = index >= 0 ? className.substring(index + 1) : className;
+        return context.getPackageName() + ":app_process:" + shortName;
+    }
+
+    private static NewProcessResult waitForResult(
+            @NonNull Process process,
+            @NonNull LinkedBlockingQueue<NewProcessResult> queue
+    ) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(START_TIMEOUT_SECONDS);
+        while (true) {
+            long remaining = deadline - System.nanoTime();
+            if (remaining <= 0L) return null;
+
+            long waitMs = Math.min(TimeUnit.NANOSECONDS.toMillis(remaining) + 1L, 100L);
+            NewProcessResult result = queue.poll(waitMs, TimeUnit.MILLISECONDS);
+            if (result != null) return result;
+            if (hasExited(process)) return null;
+        }
+    }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public static IBinder start(Context context, AppProcess appProcess, ComponentName componentName) {
         String token = UUID.randomUUID().toString();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SEND_NEW_PROCESS);
-        LinkedBlockingQueue<AtomicReference<NewProcessResult>> queue = new LinkedBlockingQueue<>();
+        LinkedBlockingQueue<NewProcessResult> queue = new LinkedBlockingQueue<>();
         BroadcastReceiver receiver = new NewProcessReceiver() {
             @Override
             void onReceive(NewProcessResult result) {
                 if (!result.getToken().equals(token)) return;
-                queue.offer(new AtomicReference<>(result));
+                queue.offer(result);
             }
         };
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
         else context.registerReceiver(receiver, filter);
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        Future<AtomicReference<NewProcessResult>> future = executorService.submit(queue::take);
+        Process process = null;
+        long startedAt = SystemClock.elapsedRealtime();
         try {
-            Process process = appProcess.start(context.getPackageCodePath(), NewProcess.class, new String[]{
+            process = appProcess.start(context.getPackageCodePath(), NewProcess.class, new String[]{
                     String.format("--package=%s", context.getPackageName()),
                     String.format("--token=%s", token),
                     String.format("--component=%s", componentName.flattenToString())
-            });
-            executorService.execute(() -> {
-                try {
-                    waitFor(process, 15, TimeUnit.SECONDS);
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                queue.offer(new AtomicReference<>());
-            });
-            NewProcessResult result = future.get().get();
+            }, processName(context, componentName));
+            NewProcessResult result = waitForResult(process, queue);
             IBinder binder = result != null ? result.getBinder() : null;
-            if (binder == null) process.destroy();
+            long elapsed = SystemClock.elapsedRealtime() - startedAt;
+            if (binder == null) {
+                Log.w(TAG, "Failed to receive app_process binder for " + componentName.flattenToShortString() + " after " + elapsed + "ms");
+                process.destroy();
+            } else {
+                Log.d(TAG, "Received app_process binder for " + componentName.flattenToShortString() + " in " + elapsed + "ms");
+            }
             return binder;
-        } catch (IOException | ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            long elapsed = SystemClock.elapsedRealtime() - startedAt;
+            Log.w(TAG, "Failed to start app_process for " + componentName.flattenToShortString() + " after " + elapsed + "ms", e);
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            long elapsed = SystemClock.elapsedRealtime() - startedAt;
+            Log.w(TAG, "Interrupted while waiting for app_process binder after " + elapsed + "ms", e);
+            process.destroy();
             return null;
         } finally {
             context.unregisterReceiver(receiver);
-            executorService.shutdown();
         }
     }
 
-    public static String ACTION_SEND_NEW_PROCESS = "com.rosan.app_process.send.new_process";
+    static final String ACTION_SEND_NEW_PROCESS = "com.rosan.app_process.send.new_process";
 
-    public static String EXTRA_NEW_PROCESS = "new_process";
+    static final String EXTRA_NEW_PROCESS = "new_process";
 
-    public static String EXTRA_TOKEN = "token";
+    static final String EXTRA_TOKEN = "token";
 
     @Override
     public void onReceive(Context context, Intent intent) {

@@ -173,13 +173,15 @@ fun DefaultInstallerPage(
                 SegmentedColumn(
                     title = stringResource(R.string.basic)
                 ) {
+                    val defaultInstallerActionsEnabled =
+                        uiState.globalAuthorizer != Authorizer.None && !uiState.userSetLSPosedActive
                     item {
                         SwitchWidget(
                             icon = AppIcons.AutoLockDefault,
                             title = stringResource(R.string.auto_lock_default_installer),
                             description = stringResource(R.string.auto_lock_default_installer_desc),
                             checked = uiState.autoLockInstaller,
-                            enabled = uiState.globalAuthorizer != Authorizer.None
+                            enabled = defaultInstallerActionsEnabled
                         ) { viewModel.dispatch(HomePageViewAction.ChangeAutoLockInstaller(it)) }
                     }
                     item {
@@ -187,7 +189,7 @@ fun DefaultInstallerPage(
                             icon = AppIcons.LockDefault,
                             title = stringResource(R.string.lock_default_installer),
                             description = stringResource(R.string.lock_default_installer_desc),
-                            enabled = uiState.globalAuthorizer != Authorizer.None,
+                            enabled = defaultInstallerActionsEnabled,
                             onClick = { dispatchSetDefaultInstaller(true) }
                         )
                     }
@@ -198,7 +200,7 @@ fun DefaultInstallerPage(
                                 stringResource(R.string.unlock_default_installer),
                             description =
                                 stringResource(R.string.unlock_default_installer_desc),
-                            enabled = uiState.globalAuthorizer != Authorizer.None,
+                            enabled = defaultInstallerActionsEnabled,
                             onClick = { dispatchSetDefaultInstaller(false) }
                         )
                     }

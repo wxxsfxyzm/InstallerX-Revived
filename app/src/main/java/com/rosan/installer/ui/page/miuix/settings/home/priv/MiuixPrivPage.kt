@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -32,6 +35,7 @@ import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.MiuixCustomAuthorizerDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
@@ -56,6 +60,8 @@ fun MiuixPrivPage(
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
+    val showCustomizeAuthorizerDialog = remember { mutableStateOf(false) }
+    var selectCustomizeOnConfirm by remember { mutableStateOf(false) }
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -63,6 +69,26 @@ fun MiuixPrivPage(
     OnLifecycleEvent(event = Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(HomePageViewAction.RefreshActivateStatus)
     }
+
+    MiuixCustomAuthorizerDialog(
+        showState = showCustomizeAuthorizerDialog,
+        initialAuthorizer = uiState.customizeAuthorizer,
+        onDismiss = {
+            showCustomizeAuthorizerDialog.value = false
+            selectCustomizeOnConfirm = false
+        },
+        onConfirm = { authorizer ->
+            val customizeAuthorizer = authorizer.trim()
+            if (customizeAuthorizer.isBlank()) return@MiuixCustomAuthorizerDialog
+
+            if (selectCustomizeOnConfirm) {
+                viewModel.dispatch(HomePageViewAction.EnableCustomizeAuthorizer(customizeAuthorizer))
+            } else {
+                viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(customizeAuthorizer))
+            }
+            selectCustomizeOnConfirm = false
+        }
+    )
 
     val backdrop = rememberMiuixBlurBackdrop(useBlur)
 
@@ -154,6 +180,28 @@ fun MiuixPrivPage(
                         },
                         checked = uiState.globalAuthorizer == Authorizer.Dhizuku,
                         onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Dhizuku)) }
+                    )
+
+                    // Custom
+                    val isCustomizeSelected = uiState.globalAuthorizer == Authorizer.Customize
+                    CheckboxPreference(
+                        checkboxLocation = CheckboxLocation.End,
+                        title = stringResource(R.string.config_authorizer_customize),
+                        summary = uiState.customizeAuthorizer.ifBlank {
+                            stringResource(R.string.config_customize_authorizer)
+                        },
+                        checked = isCustomizeSelected,
+                        onCheckedChange = {
+                            if (isCustomizeSelected) {
+                                selectCustomizeOnConfirm = false
+                                showCustomizeAuthorizerDialog.value = true
+                            } else if (uiState.customizeAuthorizer.isBlank()) {
+                                selectCustomizeOnConfirm = true
+                                showCustomizeAuthorizerDialog.value = true
+                            } else {
+                                viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Customize))
+                            }
+                        }
                     )
                 }
             }

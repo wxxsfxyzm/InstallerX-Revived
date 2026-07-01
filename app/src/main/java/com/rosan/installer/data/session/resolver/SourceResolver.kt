@@ -187,11 +187,14 @@ class SourceResolver(
             context.contentResolver?.openAssetFileDescriptor(uri, "r")
                 ?: throw IOException("Cannot open file descriptor: $uri")
         } catch (e: SecurityException) {
-            // Directly check if the exception message matches the pattern of a cross-process URI grant failure
-            val isUriPermissionDenial = e.message?.contains("grantUriPermission", ignoreCase = true) == true
+            val message = e.message.orEmpty()
+            val isUriPermissionDenial =
+                message.contains("grantUriPermission", ignoreCase = true) ||
+                        message.contains("Permission Denial", ignoreCase = true) ||
+                        message.contains("not exported", ignoreCase = true)
 
             if (isUriPermissionDenial) {
-                Timber.w(e, "SecurityException caught. Installer is likely hidden from initiator. Throwing Exception.")
+                Timber.w(e, "Content URI permission denied. Installer is likely hidden from initiator.")
                 throw ResolveException(
                     errorType = ResolveErrorType.INITIATOR_NOT_VISIBLE,
                     cause = e

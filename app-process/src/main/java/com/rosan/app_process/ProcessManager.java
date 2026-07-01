@@ -2,7 +2,6 @@ package com.rosan.app_process;
 
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -41,7 +40,6 @@ public class ProcessManager extends IProcessManager.Stub {
         ProcessBuilder builder = new ProcessBuilder().command(cmdList);
         if (directory != null) builder = builder.directory(new File(directory));
         if (env != null) builder.environment().putAll(env);
-        File file = null;
         try {
             return new RemoteProcessImpl(builder.start());
         } catch (IOException e) {
@@ -62,7 +60,7 @@ public class ProcessManager extends IProcessManager.Stub {
 
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-        if (code != Binder.FIRST_CALL_TRANSACTION + 2)
+        if (code != AppProcess.TRANSACTION_REMOTE_TRANSACT)
             return super.onTransact(code, data, reply, flags);
         Parcel targetData = Parcel.obtain();
         try {

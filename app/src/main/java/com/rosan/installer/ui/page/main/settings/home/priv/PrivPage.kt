@@ -21,11 +21,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +40,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
+import com.rosan.installer.ui.page.main.widget.dialog.CustomAuthorizerDialog
 import com.rosan.installer.ui.page.main.widget.card.TitleTipCard
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.RadioButtonWidget
@@ -57,9 +62,33 @@ fun PrivPage(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    var showCustomizeAuthorizerDialog by remember { mutableStateOf(false) }
+    var selectCustomizeOnConfirm by remember { mutableStateOf(false) }
 
     OnLifecycleEvent(event = Lifecycle.Event.ON_RESUME) {
         viewModel.dispatch(HomePageViewAction.RefreshActivateStatus)
+    }
+
+    if (showCustomizeAuthorizerDialog) {
+        CustomAuthorizerDialog(
+            initialAuthorizer = uiState.customizeAuthorizer,
+            onDismiss = {
+                showCustomizeAuthorizerDialog = false
+                selectCustomizeOnConfirm = false
+            },
+            onConfirm = { authorizer ->
+                val customizeAuthorizer = authorizer.trim()
+                if (customizeAuthorizer.isBlank()) return@CustomAuthorizerDialog
+
+                showCustomizeAuthorizerDialog = false
+                if (selectCustomizeOnConfirm) {
+                    viewModel.dispatch(HomePageViewAction.EnableCustomizeAuthorizer(customizeAuthorizer))
+                } else {
+                    viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(customizeAuthorizer))
+                }
+                selectCustomizeOnConfirm = false
+            }
+        )
     }
 
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
@@ -173,6 +202,40 @@ fun PrivPage(
                                         Authorizer.Dhizuku
                                     )
                                 )
+                            }
+                        )
+                    }
+                    item {
+                        val selected = uiState.globalAuthorizer == Authorizer.Customize
+                        val customizeAuthorizer = uiState.customizeAuthorizer
+                        RadioButtonWidget(
+                            icon = AppIcons.Terminal,
+                            title = stringResource(R.string.config_authorizer_customize),
+                            description = customizeAuthorizer.ifBlank {
+                                stringResource(R.string.config_customize_authorizer)
+                            },
+                            descriptionStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontFamily = if (customizeAuthorizer.isBlank()) {
+                                    null
+                                } else {
+                                    FontFamily.Monospace
+                                }
+                            ),
+                            selected = selected,
+                            onClick = {
+                                if (selected) {
+                                    selectCustomizeOnConfirm = false
+                                    showCustomizeAuthorizerDialog = true
+                                } else if (customizeAuthorizer.isBlank()) {
+                                    selectCustomizeOnConfirm = true
+                                    showCustomizeAuthorizerDialog = true
+                                } else {
+                                    viewModel.dispatch(
+                                        HomePageViewAction.ChangeAuthorizer(
+                                            Authorizer.Customize
+                                        )
+                                    )
+                                }
                             }
                         )
                     }

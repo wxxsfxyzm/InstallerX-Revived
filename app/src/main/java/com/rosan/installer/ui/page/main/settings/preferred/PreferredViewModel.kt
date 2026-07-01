@@ -147,7 +147,11 @@ class PreferredViewModel(
 
     private fun setDefaultInstaller(lock: Boolean, action: PreferredViewAction) = viewModelScope.launch {
         runCatching {
-            privilegedProvider.setDefaultInstaller(state.value.authorizer, lock)
+            privilegedProvider.setDefaultInstaller(
+                state.value.authorizer,
+                state.value.customizeAuthorizer,
+                lock
+            )
         }.onSuccess {
             val successResId = if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success
             _uiEvents.emit(PreferredViewEvent.ShowDefaultInstallerResult(successResId))

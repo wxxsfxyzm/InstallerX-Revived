@@ -12,6 +12,7 @@ import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import timber.log.Timber
 
@@ -78,12 +79,12 @@ private fun PackageInstaller.SessionParams.applyInstallReasonAndPackageSource(
     respectPlatformInstallPolicy: Boolean
 ) {
     val installReason = when {
-        respectPlatformInstallPolicy -> PackageManager.INSTALL_REASON_USER
-        config.enableCustomizeInstallReason -> config.installReason.value
-        else -> PackageManager.INSTALL_REASON_UNKNOWN
+        respectPlatformInstallPolicy -> InstallReason.fromInt(PackageManager.INSTALL_REASON_USER)
+        config.enableCustomizeInstallReason -> config.installReason
+        else -> InstallReason.fromInt(PackageManager.INSTALL_REASON_UNKNOWN)
     }
-    Timber.d("Setting installReason to $installReason")
-    setInstallReason(installReason)
+    Timber.d("Setting installReason to ${installReason.name} (${installReason.value})")
+    setInstallReason(installReason.value)
 
     // Only available on Android 13+.
     // TODO Dhizuku needs test.
