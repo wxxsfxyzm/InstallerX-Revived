@@ -58,11 +58,11 @@ class SessionNotifierImpl(
     getAppIcon: GetAppIconUseCase
 ) : SessionNotifier {
 
-    companion object {
-        private const val MINIMUM_VISIBILITY_DURATION_MS = 400L
-        private const val NOTIFICATION_UPDATE_INTERVAL_MS = 500L
-        private const val PROGRESS_UPDATE_THRESHOLD = 0.03f
-        private const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
+    private companion object {
+        const val MINIMUM_VISIBILITY_DURATION_MS = 400L
+        const val NOTIFICATION_UPDATE_INTERVAL_MS = 500L
+        const val PROGRESS_UPDATE_THRESHOLD = 0.03f
+        const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
     }
 
     private data class NotificationSettings(

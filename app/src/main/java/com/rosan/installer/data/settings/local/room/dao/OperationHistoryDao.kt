@@ -22,6 +22,9 @@ interface OperationHistoryDao {
     @Insert
     suspend fun insert(entity: OperationHistoryEntity): Long
 
+    @Query("delete from operation_history where id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query(
         """
         delete from operation_history

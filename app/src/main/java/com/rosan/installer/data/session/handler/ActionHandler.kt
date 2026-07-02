@@ -817,7 +817,8 @@ class ActionHandler(
     private fun installMetadata(): InstallMetadata =
         InstallMetadata(
             sourceUris = session.sourceUris,
-            referrerUri = session.referrerUri
+            referrerUri = session.referrerUri,
+            operationSessionKey = session.id
         )
 
     private val InstallMode.isNotification get() = this == InstallMode.Notification || this == InstallMode.AutoNotification

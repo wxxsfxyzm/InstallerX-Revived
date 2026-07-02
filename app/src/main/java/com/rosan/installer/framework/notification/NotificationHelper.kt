@@ -33,12 +33,12 @@ class NotificationHelper(
         Pausing(R.drawable.round_hourglass_disabled_24)
     }
 
-    val openIntent: PendingIntent = BroadcastHandler.Companion.openIntent(context, session)
-    val analyseIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Analyse)
-    val installIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Install)
-    val unknownSourceIntent: PendingIntent = BroadcastHandler.Companion.openIntent(context, session)
-    val cancelIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Cancel)
-    val finishIntent: PendingIntent = BroadcastHandler.Companion.namedIntent(context, session, BroadcastHandler.Name.Finish)
+    val openIntent: PendingIntent = BroadcastHandler.openIntent(context, session)
+    val analyseIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Analyse)
+    val installIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Install)
+    val unknownSourceIntent: PendingIntent = BroadcastHandler.openIntent(context, session)
+    val cancelIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Cancel)
+    val finishIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Finish)
 
     fun unknownSourceDescription(): String =
         context.getString(R.string.installer_waiting_unknown_source_desc, sourceAppLabel())
@@ -69,9 +69,9 @@ class NotificationHelper(
         )
 
         return if (supportsPrivileged) {
-            BroadcastHandler.Companion.privilegedLaunchAndFinishIntent(context, session)
+            BroadcastHandler.privilegedLaunchAndFinishIntent(context, session)
         } else {
-            BroadcastHandler.Companion.launchIntent(context, session, launchIntent)
+            BroadcastHandler.launchIntent(context, session, launchIntent)
         }
     }
 

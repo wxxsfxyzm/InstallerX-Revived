@@ -25,7 +25,8 @@ data class OperationHistoryModel(
     val authorizer: Authorizer,
     val installMode: InstallMode,
     val errorSummary: String? = null,
-    val errorType: String? = null
+    val errorType: String? = null,
+    val operationSessionKey: String? = null
 )
 
 enum class OperationType {

@@ -276,7 +276,7 @@ class ProcessInstallationUseCase(
             )
         }
 
-        recordInstallHistory(historyConfig, analysisResults, selectedEntities, result)
+        recordInstallHistory(historyConfig, analysisResults, selectedEntities, metadata, result)
         result.onFailure { throw it }
     }
 
@@ -378,6 +378,7 @@ class ProcessInstallationUseCase(
         config: ConfigModel,
         analysisResults: List<PackageAnalysisResult>,
         selectedEntities: List<SelectInstallEntity>,
+        metadata: InstallMetadata,
         result: Result<Unit>
     ) {
         val installerPackageName = runCatching {
@@ -404,26 +405,27 @@ class ProcessInstallationUseCase(
 
                 runCatching {
                     recordOperationHistory(
-                    OperationHistoryModel(
-                        operationType = OperationType.INSTALL,
-                        status = if (result.isSuccess) OperationStatus.SUCCESS else OperationStatus.FAILED,
-                        packageName = packageName,
-                        appLabel = base?.label ?: installed?.label,
-                        isFreshInstall = oldVersionCode == null,
-                        versionChange = VersionChangeResolver.resolve(oldVersionCode, newVersionCode),
-                        oldVersionName = installed?.versionName,
-                        oldVersionCode = oldVersionCode,
-                        newVersionName = base?.versionName,
-                        newVersionCode = newVersionCode,
-                        sourcePaths = sourcePaths,
-                        initiatorPackageName = config.initiatorPackageName,
-                        installerPackageName = installerPackageName,
-                        installMethod = InstallMethod.PACKAGE_MANAGER,
-                        authorizer = config.authorizer,
-                        installMode = config.installMode,
-                        errorSummary = result.exceptionOrNull()?.historyErrorSummary(),
-                        errorType = result.exceptionOrNull()?.historyErrorType()
-                    )
+                        OperationHistoryModel(
+                            operationType = OperationType.INSTALL,
+                            status = if (result.isSuccess) OperationStatus.SUCCESS else OperationStatus.FAILED,
+                            packageName = packageName,
+                            appLabel = base?.label ?: installed?.label,
+                            isFreshInstall = oldVersionCode == null,
+                            versionChange = VersionChangeResolver.resolve(oldVersionCode, newVersionCode),
+                            oldVersionName = installed?.versionName,
+                            oldVersionCode = oldVersionCode,
+                            newVersionName = base?.versionName,
+                            newVersionCode = newVersionCode,
+                            sourcePaths = sourcePaths,
+                            initiatorPackageName = config.initiatorPackageName,
+                            installerPackageName = installerPackageName,
+                            installMethod = InstallMethod.PACKAGE_MANAGER,
+                            authorizer = config.authorizer,
+                            installMode = config.installMode,
+                            errorSummary = result.exceptionOrNull()?.historyErrorSummary(),
+                            errorType = result.exceptionOrNull()?.historyErrorType(),
+                            operationSessionKey = metadata.operationSessionKey
+                        )
                     )
                 }.onFailure { e ->
                     Timber.e(e, "Failed to record install history for $packageName")
