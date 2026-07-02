@@ -26,6 +26,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorPosition
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -591,7 +592,10 @@ fun DataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.exposedDropdownSize(),
-                offset = DpOffset(x = leftCutoutOffset, y = 0.dp),
+                popupPositionProvider = MenuDefaults.rememberDropdownMenuPopupPositionProvider(
+                    dropdownMenuAnchorPosition = MenuAnchorPosition.Below,
+                    offset = DpOffset(x = leftCutoutOffset, y = 0.dp)
+                ),
                 properties = PopupProperties(
                     focusable = true,
                     clippingEnabled = false
