@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -28,11 +28,14 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,10 +59,12 @@ import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
+import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -254,51 +259,43 @@ fun SettingsWideScreenLayout(
             miuixBackdrop = miuixBackdrop
         )
     } else {
+        val expandRail = shouldExpandNavigationRail()
+        val railState = rememberNavigationRailState(
+            initialValue = if (expandRail) NavigationRailValue.Expanded else NavigationRailValue.Collapsed
+        )
+        val contentWindowInsets = WindowInsets.systemBars.union(
+            WindowInsets.displayCutout.exclude(
+                WindowInsets.displayCutout.only(WindowInsetsSides.Start)
+            )
+        )
         val startInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout)
             .only(WindowInsetsSides.Start)
+
+        LaunchedEffect(expandRail) {
+            if (expandRail) {
+                railState.expand()
+            } else {
+                railState.collapse()
+            }
+        }
 
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MiuixTheme.colorScheme.surface)
         ) {
-            val blurActive = miuixBackdrop != null
-            val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .then(
-                        if (blurActive) {
-                            Modifier.textureBlur(
-                                backdrop = miuixBackdrop,
-                                shape = RectangleShape,
-                                blurRadius = 25f,
-                                colors = BlurColors(
-                                    blendColors = listOf(
-                                        BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f)),
-                                    ),
-                                ),
-                            )
-                        } else {
-                            Modifier
-                        }
-                    )
-                    .background(barColor)
+            NavigationRail(
+                state = railState
             ) {
-                NavigationRail(
-                    modifier = Modifier.fillMaxHeight(),
-                    color = barColor
-                ) {
-                    navigationItems.forEachIndexed { index, item ->
-                        NavigationRailItem(
-                            selected = mainPagerState.selectedPage == index,
-                            onClick = {
-                                mainPagerState.animateToPage(index)
-                            },
-                            icon = item.icon,
-                            label = item.label
-                        )
-                    }
+                navigationItems.forEachIndexed { index, item ->
+                    NavigationRailItem(
+                        selected = mainPagerState.selectedPage == index,
+                        onClick = {
+                            mainPagerState.animateToPage(index)
+                        },
+                        icon = item.icon,
+                        label = item.label
+                    )
                 }
             }
 
@@ -315,7 +312,8 @@ fun SettingsWideScreenLayout(
                     useFloatingBottomBar = false,
                     floatingBottomBarMode = FloatingBottomBarMode.None,
                     floatingBackdrop = floatingBackdrop,
-                    miuixBackdrop = miuixBackdrop
+                    miuixBackdrop = miuixBackdrop,
+                    contentWindowInsets = contentWindowInsets
                 )
             }
         }
@@ -331,11 +329,13 @@ private fun SettingsWideContent(
     useFloatingBottomBar: Boolean,
     floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop?,
-    miuixBackdrop: MiuixLayerBackdrop?
+    miuixBackdrop: MiuixLayerBackdrop?,
+    contentWindowInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout)
 ) {
     val navigator = LocalNavigator.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = contentWindowInsets,
         bottomBar = {
             if (useFloatingBottomBar && floatingBackdrop != null) {
                 SettingsFloatingBottomBar(
@@ -380,6 +380,15 @@ private fun SettingsWideContent(
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop
         )
+    }
+}
+
+@Composable
+private fun shouldExpandNavigationRail(): Boolean {
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    return with(density) {
+        windowInfo.containerSize.width.toDp() >= 1200.dp
     }
 }
 
