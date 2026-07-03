@@ -910,7 +910,7 @@
     <string name="locking_default_installer">Estableciendo como instalador predeterminado…</string>
     <string name="unlocking_default_installer">Quitando el instalador predeterminado…</string>
     <string name="config_try_multiple_authorizers_on_install">Autorización inteligente</string>
-    <string name="config_try_multiple_authorizers_on_install_desc">Cuando el autorizador seleccionado por el perfil no esté disponible, probar los autorizadores habilitados por orden.</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Cuando el autorizador seleccionado por el perfil no esté disponible, probar los autorizadores habilitados por orden</string>
     <string name="config_smart_authorizer_fallback_list">Lista de autorizadores alternativos</string>
     <string name="config_smart_authorizer_fallback_list_desc">Selecciona y ordena los autorizadores alternativos.\nOrden de autorización seleccionado: %1$s«</string>
     <string name="config_smart_authorizer_fallback_list_tip">Selecciona al menos un elemento. Arrastra para ordenar.</string>
@@ -954,7 +954,7 @@
     <string name="installer_signature_valid_until">Válido hasta</string>
     <string name="installer_signature_public_key_algorithm">Algoritmo de clave pública</string>
     <string name="installer_signature_subject">Sujeto</string>
-    <string name="lab_respect_platform_install_policy_desc">Aplicar las comprobaciones de permisos de origen de Android PackageInstaller y las restricciones de usuario antes de instalar</string>
+    <string name="lab_respect_platform_install_policy_desc">Aplicar los controles de permisos de origen y de restricción de usuario del Instalador de paquetes de Android antes de la instalación. No disponible para Dhizuku o instalaciones sin privilegios</string>
     <string name="installer_waiting_unknown_source_desc">Conceder a %1$s el permiso de \"Instalar aplicaciones desconocidas\"</string>
     <string name="installer_install_pre_approval">Preaprobación de instalación</string>
     <string name="pre_approve">Preaprobar</string>

@@ -900,7 +900,7 @@
     <string name="locking_default_installer">Definindo como instalador padrão…</string>
     <string name="unlocking_default_installer">Desativando o instalador padrão…</string>
     <string name="config_try_multiple_authorizers_on_install">Autorização inteligente</string>
-    <string name="config_try_multiple_authorizers_on_install_desc">Quando o autorizador selecionado pelo perfil não estiver disponível, tente os autorizadores habilitados nessa ordem.</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Quando o autorizador selecionado pelo perfil não estiver disponível, tente os autorizadores habilitados nessa ordem</string>
     <string name="config_smart_authorizer_fallback_list">Lista de autorizadores alternativos</string>
     <string name="config_smart_authorizer_fallback_list_desc">Selecionar e ordenar autorizadores alternativos.\nOrdem atual: %1$s</string>
     <string name="config_smart_authorizer_fallback_list_tip">Selecione pelo menos um item. Arraste para ordenar.</string>
@@ -945,7 +945,7 @@
     <string name="installer_signature_errors">Erros de verificação</string>
     <string name="installer_signature_no_certificates">Não havia nenhum certificado de signatário disponível.</string>
     <string name="lab_respect_platform_install_policy">Respeitar a Política de Instalação da Plataforma</string>
-    <string name="lab_respect_platform_install_policy_desc">Aplicar checagens de permissões e restrições de usuário originárias do Android PackageInstaller antes de instalar</string>
+    <string name="lab_respect_platform_install_policy_desc">Aplicar checagens de permissões e restrições de usuário originárias do Android PackageInstaller antes de instalar. Não disponível no Dhizuku ou instalações não privilegiadas</string>
     <string name="pre_approve">Pré-aprovar</string>
     <string name="installer_waiting_unknown_source">Permitir Fontes Desconhecidas</string>
     <string name="installer_waiting_unknown_source_desc">Conceda a %1$s a permissão “Instalar aplicativos desconhecidos”</string>

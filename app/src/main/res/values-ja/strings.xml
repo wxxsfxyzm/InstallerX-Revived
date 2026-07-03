@@ -268,8 +268,8 @@
     <string name="config_package_source_store">ストア</string>
     <string name="config_package_source_local_file">ローカルファイル</string>
     <string name="config_package_source_downloaded_file">ダウンロードしたファイル</string>
-    <string name="config_declare_install_requester">インストールリクエスターをカスタマイズ</string>
-    <string name="config_declare_install_requester_desc">オフ時はリクエスト元アプリがデフォルトになります</string>
+    <string name="config_declare_install_requester">インストールリクエスター</string>
+    <string name="config_declare_install_requester_desc">カスタムインストールパッケージをインストールリクエスターとして使用します</string>
     <string name="config_declare_install_requester_error_desc">入力されたパッケージ名はインストール済みでなければなりません</string>
     <string name="config_install_requester">(パッケージ名) によるインストールリクエスト</string>
     <string name="config_customize_user_desc">アプリをインストールするユーザーを手動で設定する</string>
@@ -813,10 +813,10 @@
     <string name="lab_install_without_user_action">ユーザー操作なしでインストール</string>
     <string name="lab_install_without_user_action_desc">ユーザーの確認なしにアプリの更新を試みます。このオプションを有効にすると、OEM が PackageInstaller API を改変しているシステムでは、インストールが完全に阻止される可能性があります</string>
     <string name="working_status_none_authorizer_desc">特別な権限を使用せずにアプリをインストールするには、「不明なアプリのインストール」権限を許可する必要があります</string>
-    <string name="config_allow_sig_mismatch">署名の不一致を許可</string>
-    <string name="config_allow_sig_mismatch_desc">インストール済みのバージョンとは異なる署名を持つアプリのインストールを許可します（Core Patch が必要です）</string>
-    <string name="config_allow_sig_unknown">不明な署名を許可</string>
-    <string name="config_allow_sig_unknown_desc">署名検証ができないアプリのインストールを許可します（Core Patch が必要です）</string>
+    <string name="config_allow_sig_mismatch">署名が一致しないアプリのインストールをブロック</string>
+    <string name="config_allow_sig_mismatch_desc">インストール済みのバージョンとは異なる署名を持つアプリのインストールをブロックします</string>
+    <string name="config_allow_sig_unknown">署名が不明なアプリのインストールをブロック</string>
+    <string name="config_allow_sig_unknown_desc">署名検証ができないアプリのインストールをブロックします</string>
     <string name="home_device_info_active_authorizer">使用中の権限</string>
     <string name="authorizer_customization_desc">サポートされている承認者のオプションを微調整します</string>
     <string name="authorizer_customization">承認者の調整</string>
@@ -862,4 +862,5 @@
     <string name="backup_settings_restore_confirm_desc">現在のプロファイルとアプリ設定は、選択したバックアップファイルに置き換えられます。</string>
     <string name="backup_settings_restore_preview_desc">このバックアップには、%1$d 個のプロファイル、%2$d 個のスコープ、%3$d 個の設定、および %4$d 個の履歴が含まれています。現在のプロファイルとアプリ設定は置き換えられます。</string>
     <string name="backup_settings_restore_ignored_settings">無視された設定: %1$d</string>
+    <string name="config_install_requester_mode_disable">未設定</string>
 </resources>

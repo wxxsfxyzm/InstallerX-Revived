@@ -90,4 +90,17 @@
     <string name="theme_settings_use_live_activity_desc">Użyj Aktywności na żywo zamiast powiadomień. Może nie być obsługiwane na niestandardowych ROM-ach</string>
     <string name="theme_settings_package_icons">Źródło ikony pakietu</string>
     <string name="theme_settings_prefer_system_icon">Użyj ikony systemowej dla instalacji aplikacji</string>
+    <string name="inactivate">Dezaktywuj</string>
+    <string name="dhizuku_not_authorized">Proszę o udzielenie zgody dostępu do Dhizuku</string>
+    <string name="unavailable">Niedostępne</string>
+    <string name="working_status_default_installer_desc">Aplikacja ta jest obecnie domyślnym instalatorem pakietów</string>
+    <string name="shizuku_not_available">Proszę aktywować Sui lub Shizuku</string>
+    <string name="working_status_default_installer">Działa jako domyślny instalator</string>
+    <string name="dhizuku_not_available">Proszę aktywować Dhizuku</string>
+    <string name="shizuku_not_authorized">Proszę o udzielenie zgody dostępu do Sui lub Shizuku</string>
+    <string name="available">Dostępne</string>
+    <string name="working_status_not_default_installer">Nie ustawiony jako domyślny instalator</string>
+    <string name="running">Uruchomiony</string>
+    <string name="activate">Aktywuj</string>
+    <string name="working_status_system_installer">Działa jako Instalator Pakietów Systemowych</string>
 </resources>
