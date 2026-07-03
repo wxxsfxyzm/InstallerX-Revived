@@ -1002,4 +1002,5 @@
     <string name="unarchive_action_clear_storage">清理空间</string>
     <string name="unarchive_action_app_settings">应用设置</string>
     <string name="installer_result_pending">已有安装任务正在进行，请等待结果后重试。</string>
+    <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
 </resources>

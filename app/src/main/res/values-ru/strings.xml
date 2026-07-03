@@ -217,7 +217,7 @@
     <string name="internal_desc">Принудительно установить пакет во внутреннее хранилище</string>
     <string name="loading">Загрузка…</string>
     <string name="lock_default_installer">Назначить установщиком по умолчанию</string>
-    <string name="lock_default_installer_desc">Совмещение нескольких авторизаторов дает лучший результат, а для некоторых систем может потребоваться модуль Xposed</string>
+    <string name="lock_default_installer_desc">Установите InstallerX в качестве приложения по умолчанию для установки apks</string>
     <string name="lock_default_installer_failed">Не удалось назначить установщиком по умолчанию</string>
     <string name="lock_default_installer_success">Успешно назначен установщиком по умолчанию</string>
     <string name="menu">Меню</string>
@@ -337,17 +337,17 @@
     <string name="theme_settings_desc">Изменить тему приложения</string>
     <string name="theme_settings_ui_style">Стиль пользовательского интерфейса</string>
     <string name="theme_settings_use_expressive_ui">Использовать Material 3 Expressive</string>
-    <string name="theme_settings_use_expressive_ui_desc">Использовать новый стиль Material 3 Expressive</string>
+    <string name="theme_settings_use_expressive_ui_desc">Использовать новый M3 Выразительный стиль</string>
     <string name="unarchive">Разархивировать</string>
     <string name="unarchive_desc">Разархивируйте существующий пакет</string>
     <string name="unlock_default_installer">Отменить назначение установщиком по умолчанию</string>
-    <string name="unlock_default_installer_desc">При отмене авторизатор должен быть тот, с которым выполнялось назначение, иначе может не сработать</string>
+    <string name="unlock_default_installer_desc">Отключить InstallerX как установщик по умолчанию для установки apks</string>
     <string name="unlock_default_installer_failed">Не удалось отменить назначение</string>
     <string name="unlock_default_installer_success">Назначение успешно отменено</string>
     <string name="unstable">Альфа</string>
     <string name="update">Опции профиля</string>
     <string name="upgrade_version_prefix">Будет установлена</string>
-    <string name="user_terms">Пользовательское соглашение</string>
+    <string name="user_terms">Политика пользователя</string>
     <string name="version_compare_in_single_line">Сравнение версий в одной строке</string>
     <string name="version_compare_in_single_line_desc">Отображать сравнение версий пакетов в одной строке при установке</string>
     <string name="virtual_preload">Виртуальный предустановщик</string>
@@ -355,7 +355,7 @@
     <string name="privacy_policy">Политика конфиденциальности</string>
     <string name="agree">Согласен</string>
     <string name="warning">Предупреждение</string>
-    <string name="home">Домой</string>
+    <string name="home">Главная</string>
     <string name="lab">Лаборатория</string>
     <string name="lab_desc">Доступ к экспериментальным функциям, которые еще находятся в стадии разработки</string>
     <string name="get_source_code">Исходный код</string>
@@ -407,8 +407,8 @@
     <string name="color_blue_grey">Сине-серый</string>
     <string name="color_brown">Коричневый</string>
     <string name="color_grey">Серый</string>
-    <string name="theme_settings_use_live_activity">Активность</string>
-    <string name="theme_settings_use_live_activity_desc">Использовать интерактивные уведомления. Может не поддерживаться на кастомных прошивках</string>
+    <string name="theme_settings_use_live_activity">Живая активность</string>
+    <string name="theme_settings_use_live_activity_desc">Використовуйте \"Живу Активність\" замість сповіщень, може не підтримуватися на користувацьких ROMs</string>
     <string name="theme_settings_package_icons">Иконка приложения</string>
     <string name="theme_settings_prefer_system_icon">Иконки из системы</string>
     <string name="theme_settings_prefer_system_icon_desc">Пробовать получить иконки из системы при обновлении. При отключении иконки будут загружены из установочного пакета</string>
@@ -500,7 +500,7 @@
     <string name="uninstall_keep_data">Сохранять данные</string>
     <string name="uninstall_keep_data_desc">Данные и кэш будут сохранены при удалении приложений</string>
     <string name="uninstall_all_users">Для всех пользователей</string>
-    <string name="uninstall_all_users_desc">Удалять приложения для всех пользователей устройства</string>
+    <string name="uninstall_all_users_desc">Удалите это приложение для всех пользователей на этом устройстве</string>
     <string name="uninstall_delete_system_app">Удалять системные приложения</string>
     <string name="uninstall_delete_system_app_desc">Разрешить удаление системных приложений для текущего пользователя</string>
     <string name="uninstall_success_message">Удалено успешно</string>
@@ -534,7 +534,7 @@
     <string name="dhizuku_cannot_set_dexopt_desc">Режим Dhizuku не поддерживает dexopt!</string>
     <string name="installer_oppo_related">Относится к OPPO</string>
     <string name="installer_show_oem_special">Показывать дополнительную информацию OEM</string>
-    <string name="installer_show_oem_special_desc">Анализировать и показывать специфические параметры OEM-приложений в окне установки</string>
+    <string name="installer_show_oem_special_desc">Проанализируйте и укажите определенное значение для oem apk(s) в диалоговом окне установки</string>
     <string name="config_request_update_ownership">Запрос прав на обновление</string>
     <string name="config_request_update_ownership_desc">Назначить этот установщик в качестве источника для будущих обновлений</string>
     <string name="installer_select_multi_apk">Пакетная установка</string>
@@ -575,7 +575,7 @@
     <string name="installer_settings_require_biometric_auth_desc">Запрашивать биометрическую аутентификацию при установке пакетов</string>
     <string name="uninstaller_settings_require_biometric_auth">Биометрия для удаления</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Запрашивать биометрическую аутентификацию при удалении</string>
-    <string name="use_biometric_confirm_change_auth_settings">Применить изменения?</string>
+    <string name="use_biometric_confirm_change_auth_settings">Вы уверены, что хотите изменить эту настройку</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">Чтобы продолжить, пожалуйста, аутентифицируйтесь для подтверждения этого действия</string>
     <string name="installer_settings_auto_clear_time_never_desc">Всегда отображать уведомление об успешной установке</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Скрывать уведомления об успешной установке через %d сек.</string>
@@ -602,7 +602,7 @@
     <string name="auth_summary_install">Вы выполняете операцию установки. Для продолжения подтвердите это действие, используя аутентификацию вашего устройства</string>
     <string name="auth_summary_uninstall">Вы выполняете операцию удаления. Для продолжения подтвердите это действие, используя аутентификацию вашего устройства</string>
     <string name="installer_splits_invalid_tip">Невозможно добавить выбранный разделённый пакет к удалённому приложению</string>
-    <string name="installer_splits_only_tip">Выбраны только разделённые APK. Они будут добавлены к существующему приложению</string>
+    <string name="installer_splits_only_tip">Выбран только split APK. Они будут добавлены в существующее приложение</string>
     <string name="installer_install_confirm">Подтверждение установки</string>
     <string name="installer_notification_tap_to_disable">Нажмите на сервисных уведомлениях для их отключения</string>
     <string name="uninstall_authorizer_tip">Деинсталлятор всегда использует авторизатор, заданный в профиле по умолчанию</string>
@@ -726,7 +726,7 @@
     <string name="notification_style">Стиль уведомлений</string>
     <string name="notification_style_desc">Выберите стиль отображения уведомлений о ходе выполнения</string>
     <string name="notification_style_standard">Стандартное</string>
-    <string name="notification_style_live_activity">Интерактивное</string>
+    <string name="notification_style_live_activity">Живая Активность</string>
     <string name="notification_style_mi_island">Hyper Island</string>
     <string name="notification_style_unsupported_desc">Поддерживается только стандартный стиль уведомлений</string>
     <string name="lab_mi_island_bypass_restriction">Обход ограничений Hyper Island (только для Shizuku)</string>
@@ -775,9 +775,9 @@
     <string name="install_confirm_external_request_tip">Подтвердить запрос на установку из %1$s?</string>
     <string name="lab_install_without_user_action">Установка без подтверждения</string>
     <string name="lab_install_without_user_action_desc">Автоматическое обновление приложений без подтверждения. Включение этой функции может сделать установку невозможной, если производитель устройства (OEM) повредил компоненты PackageInstaller API</string>
-    <string name="inactivate">Не активировано</string>
-    <string name="activate">Активировано</string>
-    <string name="available">Доступно</string>
+    <string name="inactivate">Деактивировать</string>
+    <string name="activate">Активировать</string>
+    <string name="available">Доступный</string>
     <string name="unavailable">Недоступно</string>
     <string name="running">Запущено</string>
     <string name="working_status_default_installer">Работает как установщик по умолчанию</string>
@@ -787,7 +787,7 @@
     <string name="working_status_system_installer_desc">Приложение является установщиком системных пакетов</string>
     <string name="working_status_none_authorizer_desc">Для установки приложений необходимо предоставить разрешение на установку из неизвестных источников</string>
     <string name="working_status_not_default_installer_click_details">Нажмите для просмотра подробностей</string>
-    <string name="working_status_default_installer_tip">Назначьте это приложение установщиком по умолчанию для обработки большинства запросов. Перехват невозможен, если:\n- OEM-производитель запрещает замену установщика\n- Инициатор определяет целевой компонент\n- Инициатор использует установку через сессию</string>
+    <string name="working_status_default_installer_tip">Установите это приложение как установщик пакетов по умолчанию для выполнения большинства запросов на установку. Обратите внимание, что перехват невозможен в следующих случаях:\n- OEM ограничивает изменение установщика по умолчанию\n- Инициатор указывает целевой компонент\n- Инициатор использует сессию установки</string>
     <string name="setting_lsposed_module_title">Модуль LSPosed включен</string>
     <string name="setting_lsposed_module_desc">Включите эту опцию, если вы принудительно активировали установщик по умолчанию с помощью стороннего модуля LSPosed. Это отключит внутреннюю проверку статуса и на главной странице будет постоянно отображаться статус Активировано</string>
     <string name="home_stat_authorizers">Доступные привилегии</string>
@@ -796,8 +796,8 @@
     <string name="home_label_lsp_link">Ищете модуль?</string>
     <string name="home_system_app">Системное приложение</string>
     <string name="activate_mode">Активирован режим: %s</string>
-    <string name="shizuku_working_mode">Рабочий режим Shizuku: %s</string>
-    <string name="shizuku_not_authorized">Предоставьте разрешение на доступ к Sui или Shizuku</string>
+    <string name="shizuku_working_mode">Режим работы Shizuku: %s</string>
+    <string name="shizuku_not_authorized">Пожалуйста, предоставьте разрешение на доступ к Ssi или Shizuku</string>
     <string name="shizuku_not_available">Активируйте Sui или Shizuku</string>
     <string name="dhizuku_not_authorized">Предоставьте разрешение на доступ к Dhizuku</string>
     <string name="dhizuku_not_available">Активируйте Dhizuku</string>
@@ -842,7 +842,7 @@
     <string name="history_authorizer">Авторизатор</string>
     <string name="history_clear_confirm_title">Очистить историю?</string>
     <string name="history_empty_desc">История установок и удалений появится здесь после завершения операций.</string>
-    <string name="history_empty_title">История пуста</string>
+    <string name="history_empty_title">Пока нет записей</string>
     <string name="history_error">Ошибка</string>
     <string name="history_initiator">Инициатор</string>
     <string name="history_installer_package">Установщик пакета</string>
@@ -900,7 +900,7 @@
     <string name="locking_default_installer">Назначение установщиком по умолчанию…</string>
     <string name="unlocking_default_installer">Отмена назначения установщиком по умолчанию…</string>
     <string name="config_try_multiple_authorizers_on_install">Умный авторизатор</string>
-    <string name="config_try_multiple_authorizers_on_install_desc">Если выбранный авторизатор недоступен, пробовать другие включенные методы по порядку.</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Если выбранный авторизатор недоступен, пробовать другие включенные методы по порядку</string>
     <string name="config_smart_authorizer_fallback_list">Резервные авторизаторы</string>
     <string name="config_smart_authorizer_fallback_list_desc">Выбор и сортировка.\nПорядок авторизаторов: %1$s</string>
     <string name="config_smart_authorizer_fallback_list_tip">Выберите хотя бы один элемент. Перетаскивайте для сортировки.</string>
@@ -944,7 +944,7 @@
     <string name="config_show_signature_info_on_match_desc">Показывать уведомления при совпадении подписей и новых установках</string>
     <string name="tag_signature_rotation">Ротация подписей</string>
     <string name="tag_signature_rotation_unconfirmed">Заявлена ротация подписи</string>
-    <string name="lab_respect_platform_install_policy_desc">Проверять разрешения источника PackageInstaller и ограничения пользователя перед установкой</string>
+    <string name="lab_respect_platform_install_policy_desc">Проверять разрешения источника PackageInstaller и ограничения пользователя перед установкой. Недоступно для Dhizuku или установок без привилегий</string>
     <string name="lab_respect_platform_install_policy">Соблюдать правила установки платформы</string>
     <string name="pre_approve">Предварительное одобрение</string>
     <string name="installer_waiting_unknown_source">Разрешить неизвестные источники</string>

@@ -2,7 +2,7 @@
 <resources>
     <string name="agreement_title">Політика</string>
     <string name="user_terms">Політика користувача</string>
-    <string name="privacy_policy">Політика приватності</string>
+    <string name="privacy_policy">Політика конфіденційності</string>
     <string name="agree">Погодитися</string>
     <string name="open_source_license">Ліцензія з відкритим вихідним кодом</string>
     <string name="back">Назад</string>
@@ -45,11 +45,11 @@
     <string name="ignore_battery_optimizations_desc">Корисно на ПЗУ із суворою фоновою політикою. Якщо сповіщення зависає, спробуйте проігнорувати оптимізацію акумулятора</string>
     <string name="ignore_battery_optimizations_desc_disabled">Уже проігноровано</string>
     <string name="lock_default_installer">Встановити як типовий встановлювач</string>
-    <string name="lock_default_installer_desc">Встановити InstallerX як типовий застосунок для встановлення файлів APK</string>
+    <string name="lock_default_installer_desc">Встановіть InstallerX як додаток за замовчуванням для встановлення apks</string>
     <string name="lock_default_installer_success">Успішно встановлено як типовий встановлювач</string>
     <string name="lock_default_installer_failed">Не вдалося встановити як типовий встановлювач</string>
     <string name="unlock_default_installer">Скасувати встановлення як типовий встановлювач</string>
-    <string name="unlock_default_installer_desc">Не використовувати InstallerX як типовий встановлювач для встановлення файлів APK</string>
+    <string name="unlock_default_installer_desc">Вимкнути InstallerX як інсталятор за замовчуванням для встановлення apks</string>
     <string name="unlock_default_installer_success">Типовий встановлювач успішно скинуто</string>
     <string name="unlock_default_installer_failed">Не вдалося встановити як типовий встановлювач</string>
     <string name="clear_cache">Очистити кеш</string>
@@ -189,7 +189,7 @@
     <string name="uninstall_keep_data">Зберегти дані</string>
     <string name="uninstall_all_users">Для всіх користувачів</string>
     <string name="uninstall_delete_system_app">Видалити системний застосунок</string>
-    <string name="uninstall_success_message">Успішно видалено</string>
+    <string name="uninstall_success_message">Видалення успішне</string>
     <string name="permission_read_external_storage">Читати дані із зовнішнього сховища</string>
     <string name="permission_write_external_storage">Записувати дані на зовнішнє сховище</string>
     <string name="permission_access_fine_location">Доступ до точного розташування</string>
@@ -267,7 +267,7 @@
     <string name="theme_settings_google_ui_desc">Стандартний дизайн Material UI</string>
     <string name="theme_settings_ui_engine">Двигун UI</string>
     <string name="theme_settings_use_expressive_ui">Використовуйте експресивний UI</string>
-    <string name="theme_settings_use_expressive_ui_desc">Використовуйте новий експресивний UI</string>
+    <string name="theme_settings_use_expressive_ui_desc">Використати новий M3 Виразний стиль</string>
     <string name="theme_settings_use_blur">Увімкнути розмиття</string>
     <string name="theme_settings_use_blur_desc">Увімкніть розмиття для програми</string>
     <string name="theme_settings_google_ui_style">Стиль Google UI</string>
@@ -304,7 +304,7 @@
     <string name="color_blue_grey">Сіро-Синій</string>
     <string name="color_grey">Сірий</string>
     <string name="theme_settings_use_live_activity_desc">Використовуйте Live Activity замість сповіщень, може не підтримуватися на користувацьких ПЗУ</string>
-    <string name="theme_settings_use_live_activity">Live Activity</string>
+    <string name="theme_settings_use_live_activity">Жива Активність</string>
     <string name="theme_settings_package_icons">Джерело іконки пакета</string>
     <string name="theme_settings_prefer_system_icon">Надавати перевагу системній іконці для встановлюваної програми</string>
     <string name="theme_settings_prefer_system_icon_desc">Спроба отримати іконку із системи. Корисно під час використання пакетів значків. Вимикається відображення значка з інсталяційного пакета</string>
@@ -318,7 +318,7 @@
     <string name="installer_settings_require_biometric_auth_desc">Вимагати біометричну авторизацію під час встановлення</string>
     <string name="uninstaller_settings_require_biometric_auth">Для видалення потрібна біометрична авторизація</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Вимагати біометричну авторизацію під час видалення</string>
-    <string name="use_biometric_confirm_change_auth_settings">Ви впевнені, що бажаєте змінити це налаштування?</string>
+    <string name="use_biometric_confirm_change_auth_settings">Ви впевнені, що хочете змінити це налаштування</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">Щоб продовжити, підтвердьте цю дію за допомогою автентифікації пристрою</string>
     <string name="installer_settings_auto_clear_success_notification">Автоматичне очищення сповіщень</string>
     <string name="installer_settings_auto_clear_success_notification_desc">Автоматичне очищення сповіщення про успішне встановлення</string>
@@ -407,7 +407,7 @@
     <string name="pull_to_refresh_hint3">Оновлення…</string>
     <string name="pull_to_refresh_hint4">Оновлено успішно</string>
     <string name="installer_splits_invalid_tip">Не вдається додати вибраний розділений пакет до видаленої програми</string>
-    <string name="installer_splits_only_tip">Вибрано лише розділені файли APK. Вони будуть додані до існуючої програми.</string>
+    <string name="installer_splits_only_tip">Вибрано лише split APK. Вони будуть додані до існуючого додатка</string>
     <string name="installer_install_app">Встановити додаток</string>
     <string name="installer_install_module">Встановити модуль</string>
     <string name="installer_installing_module">Встановлення модуля</string>
@@ -449,7 +449,7 @@
     <string name="exception_install_failed_unknown">Невідома помилка</string>
     <string name="installer_install_confirm">Підтвердження встановлення</string>
     <string name="uninstall_keep_data_desc">Дані застосунку та кеш будуть збережені</string>
-    <string name="uninstall_all_users_desc">Виберіть правило для виявлення серійної зйомки. Жорсткі критерії надійніші, але можуть пропускати деякі серії. М\'які критерії дозволяють виявити більше серій, проте можуть групувати непов\'язані фотографії.</string>
+    <string name="uninstall_all_users_desc">Видаліть цей додаток для всіх користувачів на цьому пристрої</string>
     <string name="uninstall_all_users_disabled">Видалення для всіх користувачів вимкнено</string>
     <string name="uninstall_delete_system_app_desc">Дозволити видалення системних програм для поточного користувача</string>
     <string name="uninstall_system_app_disabled">Видалення системної програми вимкнено</string>
@@ -457,11 +457,11 @@
     <string name="uninstall_call_uninstaller">Виклик деінсталятора</string>
     <string name="uninstall_call_uninstaller_manually">Викликати деінсталятор вручну</string>
     <string name="uninstall_call_uninstaller_manually_desc">Видалити програму за вказаною назвою пакета</string>
-    <string name="uninstall_progress_text">Видалення...</string>
+    <string name="uninstall_progress_text">Видалення…</string>
     <string name="uninstall_enter_package_name">Введіть назву пакета, щоб видалити</string>
     <string name="installer_temp_settings_tip">Ці налаштування є тимчасовими для цього сеансу. Щоб зберегти їх, перейдіть у Налаштування</string>
     <string name="installer_show_oem_special">Показати додаткову інформацію OEM</string>
-    <string name="installer_show_oem_special_desc">Аналізуйте та показує деякі специфічні значення для OEM apk(s) у діалоговому вікні встановлення</string>
+    <string name="installer_show_oem_special_desc">Проаналізуйте та покажіть певне значення для oem apk(s) у діалоговому вікні встановлення</string>
     <string name="lab_show_apk_path">Показати шлях до файлу</string>
     <string name="lab_show_apk_path_desc">Відображати шлях до файлу в деталях програми</string>
     <string name="lab_show_install_initiator">Показати ініціатора встановлення</string>
@@ -470,8 +470,8 @@
     <string name="lab_show_install_initiator_desc">Показати, яка програма почала встановлення</string>
     <string name="permission_list">Список дозволів</string>
     <string name="permission_list_desc">Список дозволів, які запитує встановлюваний пакет</string>
-    <string name="inactivate">Вимкнути</string>
-    <string name="activate">Увімкнути</string>
+    <string name="inactivate">Деактивувати</string>
+    <string name="activate">Активувати</string>
     <string name="available">Доступно</string>
     <string name="unavailable">Недоступно</string>
     <string name="running">Запущено</string>
@@ -482,4 +482,20 @@
     <string name="working_status_system_installer_desc">Застосунок запущено як системний встановлювач пакетів</string>
     <string name="working_status_none_authorizer_desc">Не надано дозволу. Щоб установити застосунки, надайте дозвіл на встановлення з невідомих джерел</string>
     <string name="working_status_not_default_installer_click_details">Натисніть, щоб переглянути подробиці</string>
+    <string name="home_stat_authorizers">Доступні привілеї</string>
+    <string name="dhizuku_not_authorized">Будь ласка, надайте дозвіл на доступ до Dhizuku</string>
+    <string name="shizuku_not_available">Будь ласка, активуйте Sui або Shizuku</string>
+    <string name="home_label_lsp_link">Шукаєте модуль?</string>
+    <string name="activate_mode">Активувати режим: %s</string>
+    <string name="dhizuku_not_available">Будь ласка, активуйте Dhizuku</string>
+    <string name="shizuku_not_authorized">Будь ласка, надайте дозвіл на доступ до Ssi або Shizuku</string>
+    <string name="home_stat_profiles">Профілі</string>
+    <string name="home_system_app">Системний застосунок</string>
+    <string name="setting_lsposed_module_title">Модуль LSPosed включений</string>
+    <string name="home_root_mode">Root: %s</string>
+    <string name="history">Історія</string>
+    <string name="setting_lsposed_module_desc">Увімкніть цю опцію, якщо ви примусово встановили інсталятор за замовчуванням через сторонній модуль LSPosed. Це вимикає внутрішню перевірку статусу, і головна сторінка постійно відображатиметься як Активовано</string>
+    <string name="working_status_default_installer_tip">Встановіть цей застосунок як інсталятор пакетів за замовчуванням, щоб виконувати більшість запитів на встановлення. Зверніть увагу, що перехоплення неможливе у таких випадках:\n- OEM обмежує зміну інсталятора за замовчуванням\n- Ініціатор вказує цільовий компонент\n- Ініціатор використовує сесію встановлення</string>
+    <string name="shizuku_working_mode">Режим роботи Shizuku: %s</string>
+    <string name="history_empty_title">Поки що немає записів</string>
 </resources>
