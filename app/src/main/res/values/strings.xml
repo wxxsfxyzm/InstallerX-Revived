@@ -324,7 +324,7 @@
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Custom</string>
-    <string name="config_customize_authorizer">Custom authorizer</string>
+    <string name="config_authorizer_command_desc">Command: %1$s</string>
     <string name="config_always_use_root_in_system">Use root for privileged operations</string>
     <string name="config_always_use_root_in_system_desc">When working as system package installer, always use root for some privileged operations, such as flashing modules and deleting files</string>
     <string name="config_install_mode">Install mode</string>
@@ -346,7 +346,7 @@
     <string name="config_toast_mode_background_only">Only when dialog is hidden</string>
     <string name="config_toast_mode_always">Always show Toast</string>
     <string name="config_customize_install_reason">Customize Install Reason</string>
-    <string name="config_customize_install_reason_desc">Specify the install reason. For new installations, selecting "User" usually triggers the launcher to create a desktop icon</string>
+    <string name="config_customize_install_reason_desc">Specify the install reason for newly installed apps. Selecting "User" usually lets the launcher create a desktop icon.</string>
     <string name="config_customize_install_reason_disabled_desc">When Respect platform policy is enabled, defaults to User</string>
     <string name="config_install_reason">Install Reason</string>
     <string name="config_install_reason_unknown">Unknown Reason</string>
@@ -791,10 +791,7 @@
     <string name="close_notification_immediately_on_dialog_dismiss">Dismissing the dialog will cancel the installation instead of minimizing it to the notifications</string>
     <string name="close_session_countdown">Close session countdown</string>
     <string name="close_session_countdown_desc">In the absence of privileges, some CN customized systems will intercept the associated startup. Modifying this value can increase the reaction time when the system intercept pop-up remains.</string>
-    <string name="dhizuku_cannot_set_package_source_desc">Dhizuku mode does not support customizing the package source!</string>
-    <string name="dhizuku_cannot_set_installer_desc">Dhizuku mode does not support setting installer!</string>
-    <string name="dhizuku_cannot_set_user_desc">Dhizuku mode does not support setting target user!</string>
-    <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku mode does not support setting dexopt!</string>
+    <string name="dhizuku_unsupported_desc">Dhizuku is not supported</string>
     <string name="grant_permission_after_install">Click to grant permission after installation</string>
     <string name="show_intelligent_suggestion">Show Smart Suggestions</string>
     <string name="show_intelligent_suggestion_desc">Show smart suggestions on install failure</string>

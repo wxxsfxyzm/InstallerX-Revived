@@ -159,7 +159,6 @@
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Khusus</string>
-    <string name="config_customize_authorizer">Otorisasi khusus</string>
     <string name="config_install_mode">Mode pemasangan</string>
     <string name="config_install_mode_desc">Mode Pemasangan Bawaan dan pengaturan terkait</string>
     <string name="config_install_mode_global">Global</string>
@@ -459,10 +458,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">Mengabaikan dialog tersebut akan membatalkan proses pemasangan, alih-alih meminimalkannya ke area pemberitahuan</string>
     <string name="close_session_countdown">Atur hitung mundur</string>
     <string name="close_session_countdown_desc">Jika tidak ada hak akses khusus, beberapa sistem CN yang dikustomisasi akan menghalangi proses startup yang terkait. Mengubah nilai ini dapat memperlambat waktu respons saat jendela pop-up yang menghalangi sistem tetap muncul.</string>
-    <string name="dhizuku_cannot_set_package_source_desc">Mode Shizuku tidak mendukung kustomisasi sumber paket!</string>
-    <string name="dhizuku_cannot_set_installer_desc">Mode Dhizuku tidak mendukung pengaturan installer!</string>
-    <string name="dhizuku_cannot_set_user_desc">Mode Dhizuku tidak mendukung pengaturan pengguna target!</string>
-    <string name="dhizuku_cannot_set_dexopt_desc">Mode Shizuku tidak mendukung pengaturan dexopt!</string>
     <string name="grant_permission_after_install">Klik untuk memberikan izin setelah instalasi</string>
     <string name="show_intelligent_suggestion">Tampilkan Saran Cerdas</string>
     <string name="show_intelligent_suggestion_desc">Tampilkan saran cerdas jika instalasi gagal</string>

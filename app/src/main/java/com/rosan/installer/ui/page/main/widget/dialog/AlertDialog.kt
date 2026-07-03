@@ -454,7 +454,7 @@ fun CustomAuthorizerDialog(
                 OutlinedTextField(
                     value = authorizer,
                     onValueChange = { authorizer = it },
-                    label = { Text(stringResource(R.string.config_customize_authorizer)) },
+                    label = { Text(stringResource(R.string.config_authorizer_customize)) },
                     textStyle = LocalTextStyle.current.copy(
                         fontFamily = if (authorizer.isBlank()) null else FontFamily.Monospace
                     ),

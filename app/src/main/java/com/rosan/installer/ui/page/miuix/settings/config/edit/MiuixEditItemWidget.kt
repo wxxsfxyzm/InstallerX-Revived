@@ -30,9 +30,9 @@ import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
+import com.rosan.installer.ui.page.main.settings.config.edit.dhizukuAwareDescription
 import com.rosan.installer.ui.page.miuix.widgets.MiuixHintTextField
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.util.isDhizukuActive
 import com.rosan.installer.ui.util.isSystemPackageInstallerActive
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.DropdownItem
@@ -163,7 +163,7 @@ fun MiuixDataCustomizeAuthorizerWidget(state: EditViewState, dispatch: (EditView
             .focusable(),
         value = customizeAuthorizer,
         onValueChange = { dispatch(EditViewAction.ChangeDataCustomizeAuthorizer(it)) },
-        label = stringResource(id = R.string.config_customize_authorizer),
+        label = stringResource(id = R.string.config_authorizer_customize),
         useLabelAsPlaceholder = true,
         singleLine = false,
         maxLines = 8
@@ -209,16 +209,19 @@ fun MiuixDataAutoApproveSessionWidget(
     dispatch: (EditViewAction) -> Unit,
     onEnableRequest: () -> Unit
 ) {
-    val enabled = !state.labRespectPlatformInstallPolicy
+    val isDhizuku = state.isDhizukuAuthorizerActive
+    val enabled = !isDhizuku && !state.labRespectPlatformInstallPolicy
     MiuixSwitchWidget(
         icon = AppIcons.InstallMode,
         title = stringResource(id = R.string.config_auto_approve_session),
         description = stringResource(
-            id = if (enabled) {
-                R.string.config_auto_approve_session_desc
-            } else {
-                R.string.config_auto_approve_session_disabled_desc
-            }
+            id = state.dhizukuAwareDescriptionRes(
+                if (state.labRespectPlatformInstallPolicy) {
+                    R.string.config_auto_approve_session_disabled_desc
+                } else {
+                    R.string.config_auto_approve_session_desc
+                }
+            )
         ),
         enabled = enabled,
         checked = state.data.autoApproveSession,
@@ -337,15 +340,11 @@ fun MiuixInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) ->
 
 @Composable
 fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
-    val stateAuthorizer = state.data.authorizer
-    val globalAuthorizer = state.globalAuthorizer
     val enableCustomizePackageSource = state.data.enableCustomizePackageSource
     val currentSource = state.data.packageSource
-    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
-    val enabled = !isDhizuku && !state.labRespectPlatformInstallPolicy
+    val enabled = !state.labRespectPlatformInstallPolicy
 
     val description = when {
-        isDhizuku -> stringResource(R.string.dhizuku_cannot_set_package_source_desc)
         state.labRespectPlatformInstallPolicy ->
             stringResource(R.string.config_customize_package_source_disabled_desc)
         else -> stringResource(id = R.string.config_customize_package_source_desc)
@@ -494,11 +493,9 @@ fun MiuixDataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAct
     val currentMode = state.data.installerMode
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
 
-    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
+    val isDhizuku = state.isDhizukuAuthorizerActive
 
-    val description = if (isDhizuku) {
-        stringResource(R.string.dhizuku_cannot_set_installer_desc)
-    } else {
+    val description = state.dhizukuAwareDescription(
         when (currentMode) {
             InstallerMode.Self -> {
                 val descRes = if (
@@ -517,7 +514,7 @@ fun MiuixDataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAct
             InstallerMode.Initiator -> stringResource(R.string.config_installer_mode_initiator)
             InstallerMode.Custom -> stringResource(R.string.config_installer_mode_custom)
         }
-    }
+    )
 
     Column {
         val data = mapOf(
@@ -538,12 +535,11 @@ fun MiuixDataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAct
             title = stringResource(id = R.string.config_declare_installer),
             summary = description,
             items = spinnerEntries,
+            enabled = !isDhizuku,
             selectedIndex = selectedIndex,
             onSelectedIndexChange = { newIndex ->
-                if (!isDhizuku) {
-                    data.keys.elementAtOrNull(newIndex)?.let { mode ->
-                        dispatch(EditViewAction.ChangeDataInstallerMode(mode))
-                    }
+                data.keys.elementAtOrNull(newIndex)?.let { mode ->
+                    dispatch(EditViewAction.ChangeDataInstallerMode(mode))
                 }
             }
         )
@@ -598,21 +594,17 @@ fun MiuixDataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) ->
 
 @Composable
 fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
-    val stateAuthorizer = state.data.authorizer
-    val globalAuthorizer = state.globalAuthorizer
     val enableCustomizeUser = state.data.enableCustomizeUser
     val targetUserId = state.data.targetUserId
     val availableUsers = state.availableUsers
-    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
-
-    val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_user_desc)
-        else stringResource(id = R.string.config_customize_user_desc)
+    val isDhizuku = state.isDhizukuAuthorizerActive
 
     Column {
         MiuixSwitchWidget(
             title = stringResource(id = R.string.config_customize_user),
-            description = description,
+            description = stringResource(
+                id = state.dhizukuAwareDescriptionRes(R.string.config_customize_user_desc)
+            ),
             checked = enableCustomizeUser,
             enabled = !isDhizuku,
             onCheckedChange = {
@@ -649,18 +641,14 @@ fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
 
 @Composable
 fun MiuixDataManualDexoptWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
-    val stateAuthorizer = state.data.authorizer
-    val globalAuthorizer = state.globalAuthorizer
-    val isDhizuku = isDhizukuActive(stateAuthorizer, globalAuthorizer)
+    val isDhizuku = state.isDhizukuAuthorizerActive
     val showDexoptOptions = state.data.enableManualDexopt && !isDhizuku
-
-    val description =
-        if (isDhizuku) stringResource(R.string.dhizuku_cannot_set_dexopt_desc)
-        else stringResource(R.string.config_manual_dexopt_desc)
 
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_manual_dexopt),
-        description = description,
+        description = stringResource(
+            id = state.dhizukuAwareDescriptionRes(R.string.config_manual_dexopt_desc)
+        ),
         checked = state.data.enableManualDexopt,
         enabled = !isDhizuku,
         onCheckedChange = {
@@ -781,9 +769,13 @@ fun MiuixDataForAllUserWidget(state: EditViewState, dispatch: (EditViewAction) -
 
 @Composable
 fun MiuixDataAllowTestOnlyWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val isDhizuku = state.isDhizukuAuthorizerActive
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_allow_test),
-        description = stringResource(id = R.string.config_allow_test_desc),
+        description = stringResource(
+            id = state.dhizukuAwareDescriptionRes(R.string.config_allow_test_desc)
+        ),
+        enabled = !isDhizuku,
         checked = state.data.allowTestOnly,
         onCheckedChange = {
             dispatch(EditViewAction.ChangeDataAllowTestOnly(it))
@@ -793,9 +785,13 @@ fun MiuixDataAllowTestOnlyWidget(state: EditViewState, dispatch: (EditViewAction
 
 @Composable
 fun MiuixDataAllowDowngradeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val isDhizuku = state.isDhizukuAuthorizerActive
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_allow_downgrade),
-        description = stringResource(id = R.string.config_allow_downgrade_desc),
+        description = stringResource(
+            id = state.dhizukuAwareDescriptionRes(R.string.config_allow_downgrade_desc)
+        ),
+        enabled = !isDhizuku,
         checked = state.data.allowDowngrade,
         onCheckedChange = {
             dispatch(EditViewAction.ChangeDataAllowDowngrade(it))
@@ -805,10 +801,14 @@ fun MiuixDataAllowDowngradeWidget(state: EditViewState, dispatch: (EditViewActio
 
 @Composable
 fun MiuixDataBypassLowTargetSdkWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val isDhizuku = state.isDhizukuAuthorizerActive
     MiuixSwitchWidget(
         icon = AppIcons.InstallBypassLowTargetSdk,
         title = stringResource(id = R.string.config_bypass_low_target_sdk),
-        description = stringResource(id = R.string.config_bypass_low_target_sdk_desc),
+        description = stringResource(
+            id = state.dhizukuAwareDescriptionRes(R.string.config_bypass_low_target_sdk_desc)
+        ),
+        enabled = !isDhizuku,
         checked = state.data.bypassLowTargetSdk,
         onCheckedChange = { dispatch(EditViewAction.ChangeDataBypassLowTargetSdk(it)) }
     )
@@ -838,9 +838,13 @@ fun MiuixDataAllowSigUnknownWidget(state: EditViewState, dispatch: (EditViewActi
 
 @Composable
 fun MiuixDataAllowAllRequestedPermissionsWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val isDhizuku = state.isDhizukuAuthorizerActive
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_grant_all_permissions),
-        description = stringResource(id = R.string.config_grant_all_permissions_desc),
+        description = stringResource(
+            id = state.dhizukuAwareDescriptionRes(R.string.config_grant_all_permissions_desc)
+        ),
+        enabled = !isDhizuku,
         checked = state.data.allowAllRequestedPermissions,
         onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowAllRequestedPermissions(it)) }
     )
@@ -848,9 +852,13 @@ fun MiuixDataAllowAllRequestedPermissionsWidget(state: EditViewState, dispatch: 
 
 @Composable
 fun MiuixRequestUpdateOwnershipWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val isDhizuku = state.isDhizukuAuthorizerActive
     MiuixSwitchWidget(
         title = stringResource(id = R.string.config_request_update_ownership),
-        description = stringResource(id = R.string.config_request_update_ownership_desc),
+        description = stringResource(
+            id = state.dhizukuAwareDescriptionRes(R.string.config_request_update_ownership_desc)
+        ),
+        enabled = !isDhizuku,
         checked = state.data.requestUpdateOwnership,
         onCheckedChange = { dispatch(EditViewAction.ChangeDataRequestUpdateOwnership(it)) }
     )

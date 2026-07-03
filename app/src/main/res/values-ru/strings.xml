@@ -41,7 +41,6 @@
     <string name="config_bypass_low_target_sdk_desc">Разрешить установку приложений для более старых версий SDK</string>
     <string name="config_confirm_deletion">Подтвердите удаление</string>
     <string name="config_confirm_deletion_desc">Вы хотите удалить \'%1$s\'? Это необратимо.</string>
-    <string name="config_customize_authorizer">Пользовательский авторизатор</string>
     <string name="config_declare_installer">Задать источник установки</string>
     <string name="config_description">Описание профиля</string>
     <string name="config_dialog_message_unsaved_changes">Выйти без сохранения?</string>
@@ -82,7 +81,6 @@
     <string name="delete_success">Успешно удалено</string>
     <string name="details">Подробности</string>
     <string name="close_session_countdown_desc">Без необходимых привилегий некоторые китайские кастомные прошивки могут перехватывать связанный запуск приложений. Изменение этого значения позволяет увеличить время ожидания, пока на экране отображается системное всплывающее окно перехвата.</string>
-    <string name="dhizuku_cannot_set_installer_desc">Режим Dhizuku не поддерживает настройку установщика!</string>
     <string name="disable_adb_install_verify">Отключить проверку ADB</string>
     <string name="disable_adb_install_verify_desc">Отключить проверку установки через ADB, что полезно для систем, где установка запускает сканирование (Play Защита)</string>
     <string name="disable_adb_install_verify_failed">Не удалось отключить проверку установки ADB</string>
@@ -529,9 +527,6 @@
     <string name="sdk_compare_in_multi_line_desc">Отображать требуемые версии SDK в две строки при установке</string>
     <string name="auto_background_install">Установка в фоне</string>
     <string name="auto_background_install_desc">Автоматическая установка в фоне при нажатии кнопки \'Установить\'</string>
-    <string name="dhizuku_cannot_set_package_source_desc">Режим Dhizuku не поддерживает настройку источника пакета!</string>
-    <string name="dhizuku_cannot_set_user_desc">Режим Dhizuku не поддерживает настройку для данного пользователя!</string>
-    <string name="dhizuku_cannot_set_dexopt_desc">Режим Dhizuku не поддерживает dexopt!</string>
     <string name="installer_oppo_related">Относится к OPPO</string>
     <string name="installer_show_oem_special">Показывать дополнительную информацию OEM</string>
     <string name="installer_show_oem_special_desc">Проанализируйте и укажите определенное значение для oem apk(s) в диалоговом окне установки</string>

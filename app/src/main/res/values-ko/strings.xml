@@ -248,7 +248,6 @@
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">사용자 지정</string>
-    <string name="config_customize_authorizer">사용자 지정 권한 방식</string>
     <string name="config_always_use_root_in_system">권한 상승 작업에 Root 사용</string>
     <string name="config_always_use_root_in_system_desc">시스템 패키지 설치 프로그램으로 동작할 때 모듈 플래싱, 파일 삭제 같은 일부 권한 상승 작업에 항상 Root를 사용합니다</string>
     <string name="config_install_mode">설치 모드</string>
@@ -646,10 +645,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">대화상자를 닫으면 알림으로 최소화하지 않고 설치를 취소합니다</string>
     <string name="close_session_countdown">세션 종료 카운트다운</string>
     <string name="close_session_countdown_desc">권한이 없을 때 일부 중국 커스텀 ROM은 관련 시작 동작을 가로챌 수 있습니다. 이 값을 늘리면 시스템 가로채기 팝업이 남아 있을 때 더 오래 기다립니다.</string>
-    <string name="dhizuku_cannot_set_package_source_desc">Dhizuku 모드는 패키지 출처 사용자 지정을 지원하지 않습니다!</string>
-    <string name="dhizuku_cannot_set_installer_desc">Dhizuku 모드는 설치 출처 설정을 지원하지 않습니다!</string>
-    <string name="dhizuku_cannot_set_user_desc">Dhizuku 모드는 대상 사용자 설정을 지원하지 않습니다!</string>
-    <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku 모드는 DexOpt 설정을 지원하지 않습니다!</string>
     <string name="grant_permission_after_install">설치 후 권한을 부여하려면 누르세요</string>
     <string name="show_intelligent_suggestion">스마트 제안 표시</string>
     <string name="show_intelligent_suggestion_desc">설치 실패 시 스마트 제안을 표시합니다</string>

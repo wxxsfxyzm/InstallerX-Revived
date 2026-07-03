@@ -173,7 +173,6 @@
     <string name="config_authorizer_global_desc">グローバル (%1$s)</string>
     <string name="config_authorizer_none">権限なし</string>
     <string name="config_authorizer_customize">カスタム</string>
-    <string name="config_customize_authorizer">カスタム承認者</string>
     <string name="config_install_reason">インストール理由</string>
     <string name="config_customize_package_source">パッケージソースのカスタマイズ</string>
     <string name="config_package_source">パッケージソース</string>
@@ -554,10 +553,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">ダイアログを閉じると、通知に最小化されるのではなく、インストールがキャンセルされます</string>
     <string name="close_session_countdown">カウントダウンを設定</string>
     <string name="close_session_countdown_desc">Dhizuku 経由でのインストールが成功した後、自動的に閉じるまでのカウントダウン</string>
-    <string name="dhizuku_cannot_set_package_source_desc">Dhizuku モードではパッケージ ソースのカスタマイズはサポートされていません!</string>
-    <string name="dhizuku_cannot_set_installer_desc">Dhizuku モードではインストーラーの設定をサポートしていません!</string>
-    <string name="dhizuku_cannot_set_user_desc">Dhizuku モードでターゲットユーザーの設定をサポートしていません!</string>
-    <string name="dhizuku_cannot_set_dexopt_desc">Dhizuku モードでは dexopt の設定をサポートしていません!</string>
     <string name="grant_permission_after_install">インストール後にクリックして許可を与える</string>
     <string name="show_intelligent_suggestion">スマートサジェストを表示</string>
     <string name="show_intelligent_suggestion_desc">インストール失敗時にスマートサジェストを表示する</string>

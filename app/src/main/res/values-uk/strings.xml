@@ -79,7 +79,6 @@
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Власний</string>
-    <string name="config_customize_authorizer">Власний затверджувач</string>
     <string name="config_install_mode">Режим установлення</string>
     <string name="config_install_mode_global">Глобальний</string>
     <string name="config_install_mode_global_desc">Глобальний (%1$s)</string>

@@ -188,7 +188,7 @@ fun MiuixPrivPage(
                         checkboxLocation = CheckboxLocation.End,
                         title = stringResource(R.string.config_authorizer_customize),
                         summary = uiState.customizeAuthorizer.ifBlank {
-                            stringResource(R.string.config_customize_authorizer)
+                            stringResource(R.string.config_authorizer_customize)
                         },
                         checked = isCustomizeSelected,
                         onCheckedChange = {

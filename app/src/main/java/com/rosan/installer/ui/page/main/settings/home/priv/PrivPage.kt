@@ -212,7 +212,7 @@ fun PrivPage(
                             icon = AppIcons.Terminal,
                             title = stringResource(R.string.config_authorizer_customize),
                             description = customizeAuthorizer.ifBlank {
-                                stringResource(R.string.config_customize_authorizer)
+                                stringResource(R.string.config_authorizer_customize)
                             },
                             descriptionStyle = MaterialTheme.typography.bodyMedium.copy(
                                 fontFamily = if (customizeAuthorizer.isBlank()) {

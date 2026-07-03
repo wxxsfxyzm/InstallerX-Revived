@@ -169,7 +169,6 @@
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Egyéni</string>
-    <string name="config_customize_authorizer">Egyéni engedélyező</string>
     <string name="config_install_mode">Telepítési mód</string>
     <string name="config_install_mode_desc">Alapértelmezett telepítési mód és a kapcsolódó beállítások</string>
     <string name="config_install_mode_global">Globális</string>
@@ -507,10 +506,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">A párbeszédpanel bezárása csendben kilép</string>
     <string name="close_session_countdown">Visszaszámlálás beállítása</string>
     <string name="close_session_countdown_desc">Visszaszámlálás az automatikus bezárásig a Dhizuku sikeres telepítése után</string>
-    <string name="dhizuku_cannot_set_package_source_desc">A Dhizuku mód nem támogatja a csomag forrásának testreszabását!</string>
-    <string name="dhizuku_cannot_set_installer_desc">A Dhizuku mód nem támogatja a telepítő beállítását!</string>
-    <string name="dhizuku_cannot_set_user_desc">A Dhizuku mód nem támogatja a célfelhasználó beállítását!</string>
-    <string name="dhizuku_cannot_set_dexopt_desc">A Dhizuku mód nem támogatja a dexopt beállítását!</string>
     <string name="grant_permission_after_install">Kattints az engedély megadásához a telepítés után</string>
     <string name="show_intelligent_suggestion">Intelligens javaslatok megjelenítése</string>
     <string name="show_intelligent_suggestion_desc">Intelligens javaslatok megjelenítése telepítési hiba esetén</string>

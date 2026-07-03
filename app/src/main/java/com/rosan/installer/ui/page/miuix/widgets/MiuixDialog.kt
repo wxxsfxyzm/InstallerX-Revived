@@ -626,7 +626,7 @@ fun MiuixCustomAuthorizerDialog(
                 TextField(
                     value = authorizer,
                     onValueChange = { authorizer = it },
-                    label = stringResource(R.string.config_customize_authorizer),
+                    label = stringResource(R.string.config_authorizer_customize),
                     useLabelAsPlaceholder = true,
                     singleLine = false,
                     maxLines = 4

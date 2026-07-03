@@ -48,17 +48,21 @@ class AppInstallerRepositoryImpl(
     ) = executeWithRepo(config) { repo ->
         val requestedRespectPlatformInstallPolicy = respectPlatformInstallPolicy ||
                 appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy).first()
+        val canCheckPlatformInstallPolicy = canCheckPlatformInstallPolicy(config)
+        val effectiveRespectPlatformInstallPolicy =
+            requestedRespectPlatformInstallPolicy && canCheckPlatformInstallPolicy
         Timber.tag(TAG).d(
-            "doInstallWork: respectPlatformPolicy=%s, requestedByCaller=%s, authorizer=%s, source=%s, sourceUid=%s, confidence=%s",
-            requestedRespectPlatformInstallPolicy,
+            "doInstallWork: respectPlatformPolicy=%s, requestedByCaller=%s, requestedEffective=%s, authorizer=%s, source=%s, sourceUid=%s, confidence=%s",
+            effectiveRespectPlatformInstallPolicy,
             respectPlatformInstallPolicy,
+            requestedRespectPlatformInstallPolicy,
             config.authorizer,
             config.initiatorPackageName,
             config.installSourceUid,
             config.installSourceConfidence
         )
         if (requestedRespectPlatformInstallPolicy) {
-            if (canCheckPlatformInstallPolicy(config)) {
+            if (canCheckPlatformInstallPolicy) {
                 Timber.tag(TAG).d("Running platform install policy checker.")
                 platformInstallPolicyChecker.check(config)
             } else {
@@ -73,7 +77,7 @@ class AppInstallerRepositoryImpl(
             config,
             entities,
             metadata,
-            requestedRespectPlatformInstallPolicy,
+            effectiveRespectPlatformInstallPolicy,
             blacklist,
             sharedUserIdBlacklist,
             sharedUserIdExemption

@@ -159,9 +159,10 @@ fun MiuixHomePage(
                     )
                     val isCustomizeAuthorizer = uiState.globalAuthorizer == Authorizer.Customize
                     val authorizerText = when {
-                        isCustomizeAuthorizer -> uiState.customizeAuthorizer.ifBlank {
-                            stringResource(R.string.config_customize_authorizer)
-                        }
+                        isCustomizeAuthorizer -> uiState.customizeAuthorizer
+                            .takeIf { it.isNotBlank() }
+                            ?.let { stringResource(R.string.config_authorizer_command_desc, it) }
+                            ?: stringResource(R.string.config_authorizer_customize)
 
                         uiState.isSystemApp -> stringResource(R.string.working_status_system_installer)
                         uiState.globalAuthorizer == Authorizer.Shizuku -> {
