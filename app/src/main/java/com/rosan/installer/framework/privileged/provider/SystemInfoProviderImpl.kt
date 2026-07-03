@@ -3,8 +3,8 @@
 package com.rosan.installer.framework.privileged.provider
 
 import android.os.Bundle
-import com.rosan.installer.framework.privileged.util.useDirectPrivileged
-import com.rosan.installer.framework.privileged.util.useUserService
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useDirectPrivileged
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
@@ -15,12 +15,13 @@ import timber.log.Timber
 class SystemInfoProviderImpl(
     private val capabilityProvider: DeviceCapabilityProvider
 ) : SystemInfoProvider {
-    override suspend fun getUsers(authorizer: Authorizer): Map<Int, String> =
+    override suspend fun getUsers(authorizer: Authorizer, customizeAuthorizer: String): Map<Int, String> =
         withContext(Dispatchers.IO) {
             var users: Map<Int, String> = emptyMap()
             useDirectPrivileged(
                 isSystemApp = capabilityProvider.isSystemApp,
-                authorizer = authorizer
+                authorizer = authorizer,
+                customizeAuthorizer = customizeAuthorizer
             ) {
                 try {
                     @Suppress("UNCHECKED_CAST")

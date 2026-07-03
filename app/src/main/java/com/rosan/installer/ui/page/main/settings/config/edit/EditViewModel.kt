@@ -68,6 +68,7 @@ class EditViewModel(
             availableUsers = availableUsers,
             managedInstallerPackages = managedInstallerPackages,
             globalAuthorizer = prefs.authorizer,
+            globalCustomizeAuthorizer = prefs.customizeAuthorizer,
             globalInstallerBiometricAuthMode = prefs.installerRequireBiometricAuth,
             checkAppSignature = prefs.checkAppSignature,
             labRespectPlatformInstallPolicy = prefs.labRespectPlatformInstallPolicy
@@ -161,6 +162,9 @@ class EditViewModel(
 
     private fun changeDataCustomizeAuthorizer(customizeAuthorizer: String) {
         _data.update { it.copy(customizeAuthorizer = customizeAuthorizer) }
+        if (_data.value.enableCustomizeUser && effectiveAuthorizer() == Authorizer.Customize) {
+            loadAvailableUsers()
+        }
     }
 
     private fun changeDataInstallMode(installMode: InstallMode) {
@@ -323,10 +327,10 @@ class EditViewModel(
     private fun loadAvailableUsers() {
         viewModelScope.launch {
             val currentData = _data.value
-            val authorizer =
-                if (currentData.authorizer == Authorizer.Global) state.value.globalAuthorizer else currentData.authorizer
+            val authorizer = effectiveAuthorizer()
+            val customizeAuthorizer = effectiveCustomizeAuthorizer(currentData)
 
-            val newAvailableUsers = getAvailableUsers(authorizer).getOrElse { emptyMap() }
+            val newAvailableUsers = getAvailableUsers(authorizer, customizeAuthorizer).getOrElse { emptyMap() }
 
             _availableUsers.value = newAvailableUsers
 
@@ -337,6 +341,18 @@ class EditViewModel(
             }
         }
     }
+
+    private fun effectiveAuthorizer(): Authorizer {
+        val currentData = _data.value
+        return if (currentData.authorizer == Authorizer.Global) state.value.globalAuthorizer else currentData.authorizer
+    }
+
+    private fun effectiveCustomizeAuthorizer(data: EditViewState.Data = _data.value): String =
+        if (data.authorizer == Authorizer.Global && state.value.globalAuthorizer == Authorizer.Customize) {
+            state.value.globalCustomizeAuthorizer
+        } else {
+            data.customizeAuthorizer
+        }
 
     private var loadDataJob: Job? = null
 

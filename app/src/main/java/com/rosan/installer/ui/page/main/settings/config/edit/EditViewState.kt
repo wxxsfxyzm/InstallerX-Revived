@@ -24,6 +24,7 @@ data class EditViewState(
 
     // Global states integrated into the view state
     val globalAuthorizer: Authorizer = Authorizer.Global,
+    val globalCustomizeAuthorizer: String = "",
     val globalInstallerBiometricAuthMode: BiometricAuthMode = BiometricAuthMode.Disable,
     val checkAppSignature: Boolean = true,
     val labRespectPlatformInstallPolicy: Boolean = false
@@ -32,6 +33,12 @@ data class EditViewState(
     val hasUnsavedChanges: Boolean
         get() = originalData != null && data != originalData
 
+    val isDhizukuAuthorizerActive: Boolean
+        get() = isDhizukuActive(data.authorizer, globalAuthorizer)
+
+    fun dhizukuAwareDescriptionRes(defaultRes: Int): Int =
+        if (isDhizukuAuthorizerActive) R.string.dhizuku_unsupported_desc else defaultRes
+
     // Return string resource IDs instead of resolved strings to keep State pure
     val activeErrorResIds: List<Int>
         get() {
@@ -39,7 +46,7 @@ data class EditViewState(
             with(data) {
                 if (errorName) errors.add(R.string.config_error_name)
                 if (errorCustomizeAuthorizer) errors.add(R.string.config_error_customize_authorizer)
-                if (errorInstaller && !isDhizukuActive(authorizer, globalAuthorizer)) {
+                if (errorInstaller && !isDhizukuAuthorizerActive) {
                     errors.add(R.string.config_error_installer)
                 }
                 if (errorInstallRequester) errors.add(R.string.config_error_package_not_found)

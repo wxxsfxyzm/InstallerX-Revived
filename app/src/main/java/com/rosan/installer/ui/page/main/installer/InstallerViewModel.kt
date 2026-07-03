@@ -311,7 +311,9 @@ class InstallerViewModel(
 
     private fun collectRepo(session: InstallerSessionRepository) {
         this.session = session
-        if (session.config.enableCustomizeUser) loadAvailableUsers(session.config.authorizer)
+        if (session.config.enableCustomizeUser) {
+            loadAvailableUsers(session.config.authorizer, session.config.customizeAuthorizer)
+        }
 
         _localState.update {
             val validPackages = session.analysisResults.map { res -> res.packageName }.toSet()
@@ -544,9 +546,9 @@ class InstallerViewModel(
         updateConfig { it.copy(targetUserId = userId) }
     }
 
-    private fun loadAvailableUsers(authorizer: Authorizer) {
+    private fun loadAvailableUsers(authorizer: Authorizer, customizeAuthorizer: String = "") {
         viewModelScope.launch {
-            getAvailableUsers(authorizer)
+            getAvailableUsers(authorizer, customizeAuthorizer)
                 .onSuccess { users ->
                     _localState.update { it.copy(availableUsers = users) }
                     // If the currently selected user is not in the available list, reset it to 0 (Owner).

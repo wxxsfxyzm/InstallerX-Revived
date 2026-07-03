@@ -6,6 +6,6 @@ import android.os.Bundle
 import com.rosan.installer.domain.settings.model.config.Authorizer
 
 interface SystemInfoProvider {
-    suspend fun getUsers(authorizer: Authorizer): Map<Int, String>
+    suspend fun getUsers(authorizer: Authorizer, customizeAuthorizer: String = ""): Map<Int, String>
     suspend fun getSessionDetails(authorizer: Authorizer, sessionId: Int): Bundle?
 }
