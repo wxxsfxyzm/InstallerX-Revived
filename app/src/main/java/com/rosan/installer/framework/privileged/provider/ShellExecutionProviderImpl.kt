@@ -2,10 +2,10 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.framework.privileged.provider
 
-import com.rosan.installer.framework.privileged.util.SHELL_ROOT
-import com.rosan.installer.framework.privileged.util.SU_ARGS
-import com.rosan.installer.framework.privileged.util.requireCustomizeAuthorizer
-import com.rosan.installer.framework.privileged.util.useUserService
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_ROOT
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SU_ARGS
+import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer

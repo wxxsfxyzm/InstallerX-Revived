@@ -5,17 +5,17 @@ package com.rosan.installer.domain.privileged.usecase
 import android.content.Intent
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
-import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
+import kotlin.time.Duration.Companion.milliseconds
 
 class OpenAppUseCase(
     private val componentOpsProvider: ComponentOpsProvider,
     private val capabilityProvider: DeviceCapabilityProvider
 ) {
     companion object {
-        const val PRIVILEGED_START_TIMEOUT_MS = 2500L
+        const val PRIVILEGED_START_TIMEOUT_MS = DEFAULT_PRIVILEGED_START_TIMEOUT_MS
         private const val TAG = "OpenAppUseCase"
     }
 
@@ -33,18 +33,14 @@ class OpenAppUseCase(
      * @return The result of the operation, instructing the UI layer on what to do next.
      */
     suspend operator fun invoke(config: ConfigModel, launchIntent: Intent): Result {
-        val shouldAttemptPrivileged = config.authorizer == Authorizer.Root ||
-                config.authorizer == Authorizer.Shizuku ||
-                (config.authorizer == Authorizer.None && capabilityProvider.isSystemApp)
-
-        if (!shouldAttemptPrivileged) {
+        if (!config.shouldAttemptPrivilegedStart(capabilityProvider.isSystemApp)) {
             Timber.tag(TAG).i("Privileged start skipped based on authorizer rules.")
             return Result.FallbackRequired("Skipped")
         }
 
         Timber.tag(TAG).i("Attempting privileged API start...")
 
-        val timeoutResult = withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS) {
+        val timeoutResult = withTimeoutOrNull(PRIVILEGED_START_TIMEOUT_MS.milliseconds) {
             componentOpsProvider.startActivityPrivileged(config, launchIntent)
         }
 

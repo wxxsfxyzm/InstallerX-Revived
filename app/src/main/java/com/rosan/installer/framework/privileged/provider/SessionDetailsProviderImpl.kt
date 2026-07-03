@@ -3,7 +3,7 @@
 package com.rosan.installer.framework.privileged.provider
 
 import android.os.Bundle
-import com.rosan.installer.framework.privileged.util.useUserService
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.provider.SessionDetailsProvider
 import com.rosan.installer.domain.settings.model.config.ConfigModel

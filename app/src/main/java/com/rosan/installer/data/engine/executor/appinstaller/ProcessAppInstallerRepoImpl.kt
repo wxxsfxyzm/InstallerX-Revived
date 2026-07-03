@@ -11,11 +11,11 @@ import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
-import com.rosan.installer.framework.privileged.recycler.ProcessHookRecycler
-import com.rosan.installer.framework.privileged.util.AppProcessTerminal
-import com.rosan.installer.framework.privileged.util.SHELL_SH
-import com.rosan.installer.framework.privileged.util.ShellCommand
-import com.rosan.installer.framework.privileged.util.requireCustomizeAuthorizer
+import com.rosan.installer.framework.privileged.core.infrastructure.recycler.ProcessHookRecycler
+import com.rosan.installer.framework.privileged.core.infrastructure.process.AppProcessTerminal
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_SH
+import com.rosan.installer.framework.privileged.core.infrastructure.process.ShellCommand
+import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
 

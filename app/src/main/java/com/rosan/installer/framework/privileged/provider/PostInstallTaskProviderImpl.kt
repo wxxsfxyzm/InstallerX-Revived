@@ -2,9 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.framework.privileged.provider
 
-import com.rosan.installer.framework.privileged.util.deletePaths
-import com.rosan.installer.framework.privileged.util.useDirectPrivileged
-import com.rosan.installer.framework.privileged.util.useUserService
+import com.rosan.installer.util.deletePaths
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useDirectPrivileged
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider

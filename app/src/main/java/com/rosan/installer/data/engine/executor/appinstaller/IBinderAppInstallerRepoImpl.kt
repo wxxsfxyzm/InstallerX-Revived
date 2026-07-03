@@ -41,7 +41,7 @@ import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.InstallerMode
-import com.rosan.installer.framework.privileged.util.requireDhizukuPermissionGranted
+import com.rosan.installer.framework.privileged.core.execution.authorization.requireDhizukuPermissionGranted
 import com.rosan.installer.util.pm.isFreshInstallCandidate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

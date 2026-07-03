@@ -6,8 +6,8 @@ import android.content.ComponentName
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
-import com.rosan.installer.framework.privileged.util.getSpecialAuth
-import com.rosan.installer.framework.privileged.util.useDirectPrivileged
+import com.rosan.installer.framework.privileged.core.execution.authorization.getSpecialAuth
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useDirectPrivileged
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber

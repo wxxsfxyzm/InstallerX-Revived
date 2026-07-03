@@ -3,7 +3,7 @@
 package com.rosan.installer.framework.privileged.provider
 
 import android.content.Intent
-import com.rosan.installer.framework.privileged.util.useDirectPrivileged
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useDirectPrivileged
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.settings.model.config.ConfigModel

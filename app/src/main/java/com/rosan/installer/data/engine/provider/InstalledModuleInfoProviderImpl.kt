@@ -10,10 +10,10 @@ import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
-import com.rosan.installer.framework.privileged.util.SHELL_ROOT
-import com.rosan.installer.framework.privileged.util.SU_ARGS
-import com.rosan.installer.framework.privileged.util.requireCustomizeAuthorizer
-import com.rosan.installer.framework.privileged.util.useUserService
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_ROOT
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SU_ARGS
+import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
