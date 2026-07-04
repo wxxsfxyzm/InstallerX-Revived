@@ -169,7 +169,7 @@
     <string name="config_install_mode_auto_notification">Pemberitahuan otomatis</string>
     <string name="config_install_mode_ignore">Abaikan</string>
     <string name="config_customize_install_reason">Sesuaikan Alasan Pemasangan</string>
-    <string name="config_customize_install_reason_desc">Tentukan alasan pemasangan. Untuk pemasangan baru, memilih Pengguna biasanya akan membuat peluncur membuat ikon desktop</string>
+    <string name="config_customize_install_reason_desc">Tentukan alasan pemasangan untuk aplikasi yang baru diinstal. Memilih User biasanya memungkinkan peluncur membuat ikon desktop.</string>
     <string name="config_install_reason">Alasan Pemasangan</string>
     <string name="config_install_reason_unknown">Alasan Tidak Diketahui</string>
     <string name="config_install_reason_policy">Kebijakan Perangkat</string>
@@ -895,7 +895,7 @@
     <string name="locking_default_installer">Tetapkan sebagai pemasang bawaan…</string>
     <string name="unlocking_default_installer">Menghapus pemasang bawaan…</string>
     <string name="config_try_multiple_authorizers_on_install">Otorisasi cerdas</string>
-    <string name="config_try_multiple_authorizers_on_install_desc">Jika pemberi otorisasi yang dipilih oleh profil tidak tersedia, coba pemberi otorisasi yang diaktifkan secara berurutan.</string>
+    <string name="config_try_multiple_authorizers_on_install_desc">Jika pemberi otorisasi yang dipilih oleh profil tidak tersedia, coba pemberi otorisasi yang diaktifkan secara berurutan</string>
     <string name="config_smart_authorizer_fallback_list">Daftar penyedia otorisasi cadangan</string>
     <string name="config_smart_authorizer_fallback_list_desc">Pilih dan urutkan pemberi otorisasi cadangan.\nUrutan otorisasi yang dipilih: %1$s</string>
     <string name="config_smart_authorizer_fallback_list_tip">Pilih setidaknya satu item. Seret untuk mengurutkan.</string>
@@ -911,7 +911,7 @@
     <string name="config_show_signature_details">Tampilkan detail tanda tangan</string>
     <string name="config_show_signature_details_desc">Tampilkan ringkasan sertifikat, skema terverifikasi, peringatan, dan kesalahan pada pemberitahuan tanda tangan</string>
     <string name="lab_respect_platform_install_policy">Patuhi Kebijakan Pemasangan Platform</string>
-    <string name="lab_respect_platform_install_policy_desc">Terapkan pemeriksaan izin sumber dan pembatasan pengguna Android PackageInstaller sebelum pemasangan</string>
+    <string name="lab_respect_platform_install_policy_desc">Terapkan pemeriksaan izin sumber dan pembatasan pengguna Android PackageInstaller sebelum pemasangan. Tidak tersedia untuk instalasi Dhizuku atau instalasi tanpa hak istimewa</string>
     <string name="pre_approve">Pra-persetujuan</string>
     <string name="installer_waiting_unknown_source">Izinkan Sumber Tidak Dikenal</string>
     <string name="installer_waiting_unknown_source_desc">Berikan izin %1$s untuk \"Memasang aplikasi yang tidak dikenal\"</string>
@@ -984,4 +984,6 @@
     <string name="config_customize_install_reason_disabled_desc">Saat kebijakan platform Respect diaktifkan, pengaturan awalnya adalah Pengguna</string>
     <string name="config_customize_package_source_disabled_desc">Saat kebijakan platform Respect diaktifkan, data diisi secara otomatis dari sumbernya</string>
     <string name="config_declare_installer_system_default_desc">Default ke pihak yang memulai pemasangan</string>
+    <string name="config_authorizer_command_desc">Perintah: %1$s</string>
+    <string name="dhizuku_unsupported_desc">Dhizuku tidak didukung</string>
 </resources>

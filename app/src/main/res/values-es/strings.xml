@@ -565,7 +565,7 @@
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Borrar notificación de instalación exitosa después de %d segundos</string>
     <string name="config_install_mode_desc">Modo de instalación predeterminado y ajustes relacionados</string>
     <string name="config_customize_install_reason">Personalizar motivo de instalación</string>
-    <string name="config_customize_install_reason_desc">Especifica el motivo de la instalación. Para nuevas instalaciones. Seleccionar Usuario suele hacer que el lanzador cree un icono de escritorio</string>
+    <string name="config_customize_install_reason_desc">Especifica el motivo de instalación para las aplicaciones recién instaladas. Seleccionar Usuario normalmente permite que el lanzador cree un icono en el escritorio.</string>
     <string name="config_install_reason">Motivo de Instalación</string>
     <string name="config_install_reason_unknown">Motivo desconocido</string>
     <string name="config_install_reason_policy">Política de dispositivos</string>
@@ -994,4 +994,6 @@
     <string name="config_declare_installer_system_default_desc">Se utiliza por defecto el iniciador de la instalación</string>
     <string name="config_customize_install_reason_disabled_desc">Cuando la opción Respetar la política de la plataforma está activada, el valor predeterminado es Usuario</string>
     <string name="config_customize_package_source_disabled_desc">Cuando la opción Respetar la política de la plataforma está habilitada, se rellena automáticamente desde la fuente</string>
+    <string name="config_authorizer_command_desc">Comando: %1$s</string>
+    <string name="dhizuku_unsupported_desc">Dhizuku no es compatible</string>
 </resources>
