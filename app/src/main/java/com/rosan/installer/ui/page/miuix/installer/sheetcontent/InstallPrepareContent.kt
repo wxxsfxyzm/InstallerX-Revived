@@ -292,10 +292,13 @@ fun InstallPrepareContent(
         item {
             AppInfoSlot(
                 appInfo = appInfo,
-                onIconClick = {
-                    // Trigger the share action using the already resolved primaryEntity
-                    if (settings.labTapIconToShare)
+                onIconClick = if (settings.labTapIconToShare) {
+                    {
+                        // Trigger the share action using the already resolved primaryEntity
                         viewModel.dispatch(InstallerViewAction.ShareApp(primaryEntity))
+                    }
+                } else {
+                    null
                 }
             )
         }
