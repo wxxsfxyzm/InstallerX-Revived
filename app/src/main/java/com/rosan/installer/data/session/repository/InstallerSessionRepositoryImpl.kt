@@ -45,6 +45,7 @@ class InstallerSessionRepositoryImpl(
     val action: MutableSharedFlow<Action> = MutableSharedFlow(replay = 1, extraBufferCapacity = 1)
 
     override val background: MutableSharedFlow<Boolean> = MutableStateFlow(false)
+    override val closeRequested: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override var multiInstallQueue: List<SelectInstallEntity> = emptyList()
     override var multiInstallResults: MutableList<InstallResult> = mutableListOf()
     override var currentMultiInstallIndex: Int = 0
@@ -135,6 +136,11 @@ class InstallerSessionRepositoryImpl(
         background.tryEmit(value)
     }
 
+    override fun prepareClose() {
+        Timber.d("[id=$id] prepareClose() called.")
+        closeRequested.value = true
+    }
+
     override fun cancel() {
         Timber.d("[id=$id] cancel() called. Emitting Action.Cancel.")
         action.tryEmit(Action.Cancel)
@@ -144,6 +150,7 @@ class InstallerSessionRepositoryImpl(
         // Ensure close is only executed once
         if (isClosed.compareAndSet(false, true)) {
             Timber.d("[id=$id] close() called. Emitting Action.Finish and triggering cleanup.")
+            closeRequested.value = true
 
             // 1. Notify UI and Service that we are done
             action.tryEmit(Action.Finish)

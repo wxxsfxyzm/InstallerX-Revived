@@ -87,6 +87,7 @@ fun installSuccessDialog(
                 if (launchIntent != null) {
                     add(
                         DialogButton(stringResource(R.string.open)) {
+                            viewModel.dispatch(InstallerViewAction.PrepareClose)
                             coroutineScope.launch(Dispatchers.IO) {
                                 val result = openAppUseCase(
                                     config = config,
@@ -120,6 +121,7 @@ fun installSuccessDialog(
                 if (isXposedModule && settings.quickOpenLSPosed && hasPrivilege) {
                     add(
                         DialogButton(stringResource(R.string.open_lsposed)) {
+                            viewModel.dispatch(InstallerViewAction.PrepareClose)
                             coroutineScope.launch(Dispatchers.IO) {
                                 val success = openLSPosedUseCase(config)
                                 if (success) {

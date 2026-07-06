@@ -10,6 +10,7 @@ import com.rosan.installer.domain.settings.model.config.InstallerMode
 
 sealed interface InstallerViewAction {
     data class CollectSession(val session: InstallerSessionRepository) : InstallerViewAction
+    data object PrepareClose : InstallerViewAction
     data object Close : InstallerViewAction
     data object Analyse : InstallerViewAction
     data object InstallChoice : InstallerViewAction

@@ -28,6 +28,7 @@ import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase.Companion.PRIVILEGED_START_TIMEOUT_MS
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
 import com.rosan.installer.domain.settings.model.config.isPrivileged
+import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoSlot
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
@@ -35,6 +36,7 @@ import com.rosan.installer.ui.util.isGestureNavigation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
@@ -92,10 +94,13 @@ fun InstallSuccessContent(
                         textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
                     ),
                     onClick = {
+                        viewModel.dispatch(InstallerViewAction.PrepareClose)
                         coroutineScope.launch(Dispatchers.IO) {
                             val success = openLSPosedUseCase(config)
                             if (success) {
-                                launch(Dispatchers.Main) { onClose() }
+                                withContext(Dispatchers.Main) {
+                                    viewModel.dispatch(InstallerViewAction.Close)
+                                }
                             }
                         }
                     }
@@ -130,6 +135,7 @@ fun InstallSuccessContent(
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     onClick = {
+                        viewModel.dispatch(InstallerViewAction.PrepareClose)
                         coroutineScope.launch(Dispatchers.IO) {
                             val result = openAppUseCase(
                                 config = config,
@@ -138,11 +144,13 @@ fun InstallSuccessContent(
 
                             when (result) {
                                 is OpenAppUseCase.Result.SuccessPrivileged -> {
-                                    launch(Dispatchers.Main) { onClose() }
+                                    withContext(Dispatchers.Main) {
+                                        viewModel.dispatch(InstallerViewAction.Close)
+                                    }
                                 }
 
                                 is OpenAppUseCase.Result.FallbackRequired -> {
-                                    launch(Dispatchers.Main) {
+                                    withContext(Dispatchers.Main) {
                                         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
                                         if (!hasPrivilege) {
@@ -150,7 +158,7 @@ fun InstallSuccessContent(
                                         } else {
                                             delay(PRIVILEGED_START_TIMEOUT_MS)
                                         }
-                                        onClose()
+                                        viewModel.dispatch(InstallerViewAction.Close)
                                     }
                                 }
                             }

@@ -169,6 +169,7 @@ class InstallerViewModel(
     fun dispatch(action: InstallerViewAction) {
         when (action) {
             is InstallerViewAction.CollectSession -> collectRepo(action.session)
+            is InstallerViewAction.PrepareClose -> session.prepareClose()
             is InstallerViewAction.Close -> close()
             is InstallerViewAction.Cancel -> cancel()
             is InstallerViewAction.Analyse -> analyse()

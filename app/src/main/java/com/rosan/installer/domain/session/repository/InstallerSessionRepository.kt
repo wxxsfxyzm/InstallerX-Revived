@@ -30,6 +30,7 @@ interface InstallerSessionRepository : Closeable {
     val progress: Flow<ProgressEntity>
     val toastEvents: Flow<String>
     val background: Flow<Boolean>
+    val closeRequested: StateFlow<Boolean>
     var multiInstallQueue: List<SelectInstallEntity>
     var multiInstallResults: MutableList<InstallResult>
     var currentMultiInstallIndex: Int
@@ -76,6 +77,7 @@ interface InstallerSessionRepository : Closeable {
     fun reboot(reason: String)
 
     fun background(value: Boolean)
+    fun prepareClose()
     fun cancel()
     override fun close()
 }

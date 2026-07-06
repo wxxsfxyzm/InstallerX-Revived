@@ -285,6 +285,11 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         // Only strictly interpret as user leaving when not finishing and not changing configurations (e.g., rotation)
         if (!isFinishing && !isChangingConfigurations && !isRequestingPermission) {
             session?.let { session ->
+                if (session.closeRequested.value) {
+                    Timber.d("onStop: Close already requested. Ignoring background trigger.")
+                    return
+                }
+
                 // If using session install, we don't hide UI since oems have different package installer impls
                 // if (session.config.authorizer == ConfigEntity.Authorizer.None) return
 
