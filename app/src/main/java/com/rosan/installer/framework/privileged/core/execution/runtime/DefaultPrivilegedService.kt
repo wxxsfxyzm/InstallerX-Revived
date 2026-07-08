@@ -849,7 +849,7 @@ class DefaultPrivilegedService private constructor(
         if (canCallSystemRestrictedPreferredApis) {
             try {
                 Timber.tag(TAG).d("Clearing persistent preferred activities for $packageName")
-                packageManagerFromContext().clearPackagePersistentPreferredActivities(packageName, userId)
+                iPackageManager.clearPackagePersistentPreferredActivities(packageName, userId)
                 Timber.tag(TAG).d("Successfully cleared persistent preferred activities for $packageName")
             } catch (e: SecurityException) {
                 // Specific log for the "only be run by the system" issue
@@ -890,7 +890,7 @@ class DefaultPrivilegedService private constructor(
         if (canCallSystemRestrictedPreferredApis) {
             try {
                 Timber.tag(TAG).d("Adding persistent preferred activity for %s", component.packageName)
-                packageManagerFromContext().addPersistentPreferredActivity(filter, component, userId)
+                iPackageManager.addPersistentPreferredActivity(filter, component, userId)
                 Timber.tag(TAG).d("Successfully added persistent preferred activity for %s", component.packageName)
             } catch (e: SecurityException) {
                 Timber.e(e, "SecurityException: System restricted adding persistent preferred for %s", component.packageName)
@@ -899,10 +899,6 @@ class DefaultPrivilegedService private constructor(
             }
         }
     }
-
-    private fun packageManagerFromContext(): IPackageManager =
-        reflect.getValue<IPackageManager>(context.packageManager, "mPM")
-            ?: iPackageManager
 
     private fun queryIntentActivities(
         iPackageManager: IPackageManager,
