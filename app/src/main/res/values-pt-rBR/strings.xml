@@ -604,7 +604,7 @@
     <string name="lab_set_install_requester">Definir Solicitante de Instalação</string>
     <string name="lab_set_install_requester_desc">Mostrar a personalização do campo OriginatingUid nos perfis quando ativada</string>
     <string name="config_error_package_not_found">Pacote não encontrado</string>
-    <string name="config_customize_install_reason_desc">Especifique o motivo da instalação. Para novas instalações, selecionar Usuário geralmente faz com que o launcher crie um ícone na área de trabalho</string>
+    <string name="config_customize_install_reason_desc">Especificar o motivo da instalação dos apps recém-instalados. Ao selecionar “Usuário”, geralmente o iniciador cria um ícone na área de trabalho.</string>
     <string name="config_install_reason_unknown">Motivo Desconhecido</string>
     <string name="config_install_reason_policy">Política do Dispositivo</string>
     <string name="config_install_reason">Motivo da Instalação</string>
@@ -984,4 +984,6 @@
     <string name="installer_result_pending">Outra instalação já está em andamento. Aguarde até que ela termine e tente novamente.</string>
     <string name="config_customize_install_reason_disabled_desc">Quando a \"Respeitar a política da plataforma\" estiver ativada, usar o padrão “Usuário”</string>
     <string name="config_customize_package_source_disabled_desc">Quando a \"Respeitar a política da plataforma\" preencher automaticamente a partir da origem</string>
+    <string name="config_authorizer_command_desc">Comando: %1$s</string>
+    <string name="dhizuku_unsupported_desc">O Dhizuku não é compatível</string>
 </resources>

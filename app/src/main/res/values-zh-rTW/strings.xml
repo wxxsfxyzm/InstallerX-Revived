@@ -8,7 +8,7 @@
     <string name="open_source_license">開放原始碼許可</string>
     <string name="back">返回</string>
     <string name="home">主頁</string>
-    <string name="config">設定檔數量</string>
+    <string name="config">設定檔</string>
     <string name="app">應用程式</string>
     <string name="preferred">設定</string>
     <string name="personalization">個人化</string>
@@ -21,7 +21,7 @@
     <string name="get_update_detail">檢查軟體更新和新功能</string>
     <string name="get_source_code">查看原始碼</string>
     <string name="get_source_code_detail">在 GitHub 上查看原始碼</string>
-    <string name="internet_access_enabled">連網</string>
+    <string name="internet_access_enabled">在線</string>
     <string name="internet_access_disabled">離線</string>
     <string name="stable">正式版</string>
     <string name="preview">預覽版</string>
@@ -101,7 +101,7 @@
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Dhizuku 不受支援</string>
     <string name="disable_adb_install_verify_failed">無法停用安裝驗證</string>
     <string name="ignore_battery_optimizations">忽略電池最佳化</string>
-    <string name="ignore_battery_optimizations_desc">適用於背景限制較嚴格的 ROM。若通知無法正常更新，請嘗試忽略電池最佳化。</string>
+    <string name="ignore_battery_optimizations_desc">適用於背景限制較嚴格的 ROM。若通知卡住，請嘗試忽略電池最佳化</string>
     <string name="ignore_battery_optimizations_desc_disabled">已被忽略</string>
     <string name="lock_default_installer">鎖定為預設安裝程式</string>
     <string name="lock_default_installer_desc">多個授權器配合效果更佳，少數系統需要配合 Xposed 模組</string>
@@ -140,7 +140,7 @@
     <string name="config_authorizer_global_desc">跟隨全域 (%1$s)</string>
     <string name="config_authorizer_none">無</string>
     <string name="config_authorizer_none_tips">不使用特權時，此處的大多數選項將無效。</string>
-    <string name="config_authorizer_root">ROOT 超級使用者</string>
+    <string name="config_authorizer_root">Root 超級使用者</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">自訂</string>
@@ -350,7 +350,7 @@
     <string name="exception_install_failed_duplicate_package">已存在具有相同包名的應用程式</string>
     <string name="exception_install_failed_no_shared_user">共享 UID 的程式不存在，請先下載主 UID 應用程式</string>
     <string name="exception_install_failed_update_incompatible">更新失敗 (簽名或其他原因)，請解除安裝後安裝</string>
-    <string name="exception_install_failed_shared_user_incompatible">與共享 UID 的程式簽名衝突</string>
+    <string name="exception_install_failed_shared_user_incompatible">套件簽名不符</string>
     <string name="exception_install_failed_missing_shared_library">缺少共享函式庫</string>
     <string name="exception_install_failed_missing_install_permission">請授予未知安裝來源權限然後重試</string>
     <string name="exception_install_failed_replace_couldnt_delete">無效的共享函式庫</string>
@@ -379,7 +379,7 @@
     <string name="exception_shizuku_not_work">請啟用 Sui 或 Shizuku，並授予權限</string>
     <string name="exception_dhizuku_not_work">請啟用 Dhizuku，並授予權限</string>
     <string name="exception_dhizuku_dead_service">Dhizuku遠端服務已經死亡</string>
-    <string name="exception_root_not_work">請授予 ROOT 權限</string>
+    <string name="exception_root_not_work">無法存取 Root</string>
     <string name="exception_app_process_not_work">授權器啟動失敗</string>
     <string name="exception_module_cmd_init_failed">模組安裝命令執行失敗</string>
     <string name="exception_module_install_failed">模組安裝失敗</string>
@@ -405,7 +405,7 @@
     <string name="disable_notification_on_dismiss">對話框隱藏時退出安裝</string>
     <string name="close_notification_immediately_on_dialog_dismiss">主動隱藏對話框將取消本次安裝，而非掛起到通知欄</string>
     <string name="close_session_countdown">設定倒數計時</string>
-    <string name="close_session_countdown_desc">Dhizuku 安裝成功後自動關閉的倒數計時</string>
+    <string name="close_session_countdown_desc">在沒有權限的情況下，部分中國大陸版客製化系統會攔截關聯啟動。修改此數值可以延長系統攔截彈出式視窗顯示時的反應時間。</string>
     <string name="grant_permission_after_install">點擊以在安裝完成後授予權限</string>
     <string name="show_intelligent_suggestion">顯示智慧建議</string>
     <string name="show_intelligent_suggestion_desc">安裝失敗時顯示智慧建議</string>
@@ -413,7 +413,7 @@
     <string name="permission_list_desc">正在安裝的套件請求的權限列表</string>
     <string name="installer_oppo_related">OPPO 相關</string>
     <string name="installer_show_oem_special">展示 OEM 附加資訊</string>
-    <string name="installer_show_oem_special_desc">分析並在安裝對話框展示 OEM 的 apk 附加資訊</string>
+    <string name="installer_show_oem_special_desc">在安裝對話框中分析並顯示原廠應用程式的特定數值</string>
     <!--  InstallOptions Start  -->
     <string name="config_allow_test">允許測試套件</string>
     <string name="config_allow_test_desc">允許安裝帶 TestOnly 標籤的安裝包</string>
@@ -501,14 +501,14 @@
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message">將保留資料解除安裝應用程式，然後嘗試安裝。請勿用於系統應用程式！</string>
     <string name="suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message">將會解除安裝您的應用程式然後安裝新版，所有資料都會遺失。請勿用於系統應用程式！</string>
     <string name="suggestion_allow_downgrade">僅此次允許降級</string>
-    <string name="suggestion_allow_downgrade_desc">暫時允許降級並重試（Android 15以上需要ROOT權限）</string>
+    <string name="suggestion_allow_downgrade_desc">暫時允許降級並重試</string>
     <string name="suggestion_allow_test_app">允許測試套件</string>
     <string name="suggestion_allow_test_app_desc">暫時允許測試套件並重試</string>
     <string name="suggestion_mi_isolation">暫時使用有效的安裝者並重試</string>
     <string name="suggestion_mi_isolation_desc">暫時以有效安裝者身分重試</string>
     <string name="suggestion_user_restricted">允許USB安裝</string>
     <string name="suggestion_user_restricted_desc">前往開發人員選項啟用USB安裝</string>
-    <string name="suggestion_bypass_low_target_sdk">允許繞過低目標SDK限制</string>
+    <string name="suggestion_bypass_low_target_sdk">允許繞過限制</string>
     <string name="suggestion_bypass_low_target_sdk_desc">暫時允許繞過限制並重試</string>
     <string name="suggestion_bypass_blacklist_set_by_user">本次允許安裝</string>
     <string name="suggestion_bypass_blacklist_set_by_user_desc">本次允許黑名單內應用程式安裝</string>
@@ -584,7 +584,7 @@
     <string name="uninstaller_settings">卸載器設定</string>
     <string name="uninstaller_settings_desc">變更解除安裝器的全域設定</string>
     <string name="config_customize_install_reason">自訂安裝原因</string>
-    <string name="config_customize_install_reason_desc">指定安裝原因。對於新安裝的應用程式，選擇「使用者」通常會觸發啟動器自動建立桌面圖示</string>
+    <string name="config_customize_install_reason_desc">爲新安裝的應用程式指定安裝原因，選擇「使用者」通常會觸發啟動器自動建立桌面圖示。</string>
     <string name="config_install_reason">安裝原因</string>
     <string name="config_install_reason_unknown">未知原因</string>
     <string name="config_install_reason_policy">裝置原則</string>
@@ -628,7 +628,7 @@
     <string name="lab_set_install_requester_desc">啟用後在設定檔中顯示 OriginatingUid 欄位自訂</string>
     <string name="installer_splits_only_tip">僅選取拆分 APK，將會加入至現有應用程式中</string>
     <string name="installer_install_confirm">安裝確認</string>
-    <string name="installer_notification_tap_to_disable">前景服務通知，點擊以停用。</string>
+    <string name="installer_notification_tap_to_disable">前景服務通知，點擊以停用</string>
     <string name="uninstall_authorizer_tip">解除安裝時始終使用預設設定檔中的授權方式</string>
     <string name="uninstall_all_users_disabled">已停用「為所有使用者解除安裝」功能</string>
     <string name="uninstall_system_app_disabled">已停用卸載系統應用程式</string>
@@ -688,7 +688,7 @@
     <string name="installer_live_channel_short_text_pending_install">待處理</string>
     <string name="installer_author">作者：%1$s</string>
     <string name="exception_authentication_failed">使用者身分驗證失敗</string>
-    <string name="exception_zip_exception">開啟 ZIP 檔案失敗</string>
+    <string name="exception_zip_exception">開啟 zip 檔案失敗</string>
     <string name="old_version_uninstalled">解除安裝</string>
     <string name="theme_settings_color_spec">顏色規格</string>
     <string name="theme_settings_color_spec_only_2021">當前調色板樣式僅支持 Spec 2021</string>
@@ -994,4 +994,6 @@
     <string name="authorizer_customization">授權者調校</string>
     <string name="exception_install_failed_blocked_by_profile_signature_mismatch">設定檔會阻止安裝簽名不同的應用程式</string>
     <string name="unarchive_error_action_required_message">在此應用程式能被還原之前需要額外操作</string>
+    <string name="config_authorizer_command_desc">命令： %1$s</string>
+    <string name="dhizuku_unsupported_desc">不支援 Dhizuku</string>
 </resources>
