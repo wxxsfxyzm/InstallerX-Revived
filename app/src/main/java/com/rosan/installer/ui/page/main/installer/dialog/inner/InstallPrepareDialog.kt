@@ -155,7 +155,9 @@ fun installPrepareDialog(
 
     val isSplitUpdateMode = (isBundleSplitUpdate || isPureSplit) && preInstallAppInfo != null
 
-    var showChips by remember { mutableStateOf(false) }
+    var showChips by remember(settings.expandTemporarySettingsByDefault) {
+        mutableStateOf(settings.expandTemporarySettingsByDefault)
+    }
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
         viewModel = viewModel,

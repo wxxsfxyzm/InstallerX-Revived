@@ -94,7 +94,9 @@ class InstallerViewModel(
             viewSettings = local.viewSettings.copy(
                 useBlur = prefs.useBlur,
                 closeSessionCountDown = prefs.closeSessionCountDown,
+                hideIdenticalComparisons = prefs.hideIdenticalInstallComparisons,
                 showExtendedMenu = prefs.showDialogInstallExtendedMenu,
+                expandTemporarySettingsByDefault = prefs.expandDialogTemporarySettingsByDefault,
                 showSmartSuggestion = prefs.showSmartSuggestion,
                 disableNotificationOnDismiss = prefs.disableNotificationForDialogInstall,
                 versionCompareInSingleLine = prefs.versionCompareInSingleLine,

@@ -58,7 +58,9 @@ class AppSettingsRepositoryImpl(
             ),
             alwaysUseRootInSystem = prefs[AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM] ?: false,
             customizeAuthorizer = prefs[AppDataStore.CUSTOMIZE_AUTHORIZER] ?: "",
+            hideIdenticalInstallComparisons = prefs[AppDataStore.DIALOG_HIDE_IDENTICAL_COMPARISONS] ?: false,
             showDialogInstallExtendedMenu = prefs[AppDataStore.DIALOG_SHOW_EXTENDED_MENU] ?: false,
+            expandDialogTemporarySettingsByDefault = prefs[AppDataStore.DIALOG_EXPAND_TEMPORARY_SETTINGS_BY_DEFAULT] ?: false,
             showSmartSuggestion = prefs[AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION] ?: true,
             disableNotificationForDialogInstall = prefs[AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS] ?: false,
             showDialogWhenPressingNotification = prefs[AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION] ?: true,
@@ -254,9 +256,11 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.ApplySelectedFirst -> AppDataStore.APPLY_SELECTED_FIRST
             BooleanSetting.ApplyShowSystemApp -> AppDataStore.APPLY_SHOW_SYSTEM_APP
             BooleanSetting.ApplyShowPackageName -> AppDataStore.APPLY_SHOW_PACKAGE_NAME
+            BooleanSetting.DialogHideIdenticalComparisons -> AppDataStore.DIALOG_HIDE_IDENTICAL_COMPARISONS
             BooleanSetting.DialogVersionCompareSingleLine -> AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE
             BooleanSetting.DialogSdkCompareMultiLine -> AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE
             BooleanSetting.DialogShowExtendedMenu -> AppDataStore.DIALOG_SHOW_EXTENDED_MENU
+            BooleanSetting.DialogExpandTemporarySettingsByDefault -> AppDataStore.DIALOG_EXPAND_TEMPORARY_SETTINGS_BY_DEFAULT
             BooleanSetting.DialogShowIntelligentSuggestion -> AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION
             BooleanSetting.DialogDisableNotificationOnDismiss -> AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS
             BooleanSetting.DialogShowOppoSpecial -> AppDataStore.DIALOG_SHOW_OPPO_SPECIAL

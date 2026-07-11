@@ -783,7 +783,14 @@
     <string name="sdk_compare_in_multi_line">Show SDK compare in multi lines</string>
     <string name="sdk_compare_in_multi_line_desc">Show SDK compare in multi lines in install dialog</string>
     <string name="show_dialog_install_extended_menu">Show extended menu</string>
+    <string name="install_comparison_display_behavior">Data comparison display behavior</string>
+    <string name="install_comparison_show_all">Show all</string>
+    <string name="install_comparison_show_all_desc">Always show both old and new values</string>
+    <string name="install_comparison_show_differences_only">Show differences only</string>
+    <string name="install_comparison_show_differences_only_desc">Show identical data as a single value</string>
     <string name="show_dialog_install_extended_menu_desc">Show more options in the install dialog</string>
+    <string name="expand_temporary_settings_by_default">Expand panel by default</string>
+    <string name="expand_temporary_settings_by_default_desc">Expand temporary settings when opening the install dialog</string>
     <string name="extended_menu">Extended Menu</string>
     <string name="auto_background_install">Trigger Background Install</string>
     <string name="auto_background_install_desc">Start install in background when pressing install button</string>

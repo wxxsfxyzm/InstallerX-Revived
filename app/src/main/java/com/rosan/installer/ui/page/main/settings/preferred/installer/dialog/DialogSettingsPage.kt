@@ -31,6 +31,7 @@ import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
+import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
@@ -94,7 +95,32 @@ fun DialogSettingsPage(
                 SegmentedColumn(
                     title = stringResource(R.string.installer_settings_dialog_mode_options)
                 ) {
-                    // 1. Version Compare
+                    // 1. Comparison Display Behavior
+                    item {
+                        DropDownMenuWidget(
+                            icon = AppIcons.SingleLineSettingIcon,
+                            title = stringResource(id = R.string.install_comparison_display_behavior),
+                            description = stringResource(
+                                id = if (uiState.hideIdenticalComparisons) {
+                                    R.string.install_comparison_show_differences_only_desc
+                                } else {
+                                    R.string.install_comparison_show_all_desc
+                                }
+                            ),
+                            choice = if (uiState.hideIdenticalComparisons) 1 else 0,
+                            data = listOf(
+                                stringResource(R.string.install_comparison_show_all),
+                                stringResource(R.string.install_comparison_show_differences_only)
+                            ),
+                            onChoiceChange = { choice ->
+                                viewModel.dispatch(
+                                    DialogSettingsAction.ChangeHideIdenticalComparisons(choice == 1)
+                                )
+                            }
+                        )
+                    }
+
+                    // 2. Version Compare
                     item {
                         SwitchWidget(
                             icon = AppIcons.SingleLineSettingIcon,
@@ -158,7 +184,22 @@ fun DialogSettingsPage(
                         )
                     }
 
-                    // 5. Disable Notification
+                    // 5. Expand Temporary Settings
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.MultiLineSettingIcon,
+                            title = stringResource(id = R.string.expand_temporary_settings_by_default),
+                            description = stringResource(id = R.string.expand_temporary_settings_by_default_desc),
+                            checked = uiState.expandTemporarySettingsByDefault,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    DialogSettingsAction.ChangeExpandTemporarySettingsByDefault(it)
+                                )
+                            }
+                        )
+                    }
+
+                    // 6. Disable Notification
                     item {
                         SwitchWidget(
                             icon = AppIcons.NotificationDisabled,

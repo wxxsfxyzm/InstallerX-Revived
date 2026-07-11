@@ -40,6 +40,8 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -92,6 +94,28 @@ fun MiuixDialogSettingsPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp)
                 ) {
+                    val comparisonOptions = listOf(
+                        stringResource(R.string.install_comparison_show_all),
+                        stringResource(R.string.install_comparison_show_differences_only)
+                    )
+                    WindowSpinnerPreference(
+                        title = stringResource(id = R.string.install_comparison_display_behavior),
+                        summary = stringResource(
+                            id = if (uiState.hideIdenticalComparisons) {
+                                R.string.install_comparison_show_differences_only_desc
+                            } else {
+                                R.string.install_comparison_show_all_desc
+                            }
+                        ),
+                        items = comparisonOptions.map { DropdownItem(title = it) },
+                        selectedIndex = if (uiState.hideIdenticalComparisons) 1 else 0,
+                        onSelectedIndexChange = { index ->
+                            viewModel.dispatch(
+                                DialogSettingsAction.ChangeHideIdenticalComparisons(index == 1)
+                            )
+                        }
+                    )
+
                     /* MiuixSwitchWidget(
                          title = stringResource(id = R.string.version_compare_in_single_line),
                          description = stringResource(id = R.string.version_compare_in_single_line_desc),

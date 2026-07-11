@@ -762,7 +762,14 @@
     <string name="sdk_compare_in_multi_line">多行展示 SDK 对比</string>
     <string name="sdk_compare_in_multi_line_desc">在对话框安装时将 SDK 对比展示为多行</string>
     <string name="show_dialog_install_extended_menu">显示扩展菜单</string>
+    <string name="install_comparison_display_behavior">数据对比的展示行为</string>
+    <string name="install_comparison_show_all">全部展示</string>
+    <string name="install_comparison_show_all_desc">始终展示新旧数据</string>
+    <string name="install_comparison_show_differences_only">仅显示差异项</string>
+    <string name="install_comparison_show_differences_only_desc">相同数据仅显示一个值</string>
     <string name="show_dialog_install_extended_menu_desc">在安装对话框中显示更多操作选项</string>
+    <string name="expand_temporary_settings_by_default">默认展开面板</string>
+    <string name="expand_temporary_settings_by_default_desc">打开安装对话框时默认展开临时设置</string>
     <string name="extended_menu">扩展菜单</string>
     <string name="auto_background_install">触发后台安装</string>
     <string name="auto_background_install_desc">点击安装按钮后自动切换到后台安装</string>

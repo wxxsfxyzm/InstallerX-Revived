@@ -327,19 +327,22 @@ fun InstallPrepareContent(
                                 newValue = primaryEntity.versionName,
                                 oldValue = currentPackage.installedAppInfo?.versionName,
                                 isUninstalled = currentPackage.installedAppInfo?.isUninstalled ?: false,
-                                isArchived = currentPackage.installedAppInfo?.isArchived ?: false
+                                isArchived = currentPackage.installedAppInfo?.isArchived ?: false,
+                                hideIdenticalComparison = settings.hideIdenticalComparisons
                             )
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_code_label,
                                 newValue = primaryEntity.versionCode.toString(),
                                 oldValue = currentPackage.installedAppInfo?.versionCode?.toString(),
                                 isUninstalled = currentPackage.installedAppInfo?.isUninstalled ?: false,
-                                isArchived = currentPackage.installedAppInfo?.isArchived ?: false
+                                isArchived = currentPackage.installedAppInfo?.isArchived ?: false,
+                                hideIdenticalComparison = settings.hideIdenticalComparisons
                             )
                             SDKComparison(
                                 entityToInstall = primaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
-                                displaySDK = config.displaySdk
+                                displaySDK = config.displaySdk,
+                                hideIdenticalComparison = settings.hideIdenticalComparisons
                             )
 
                             AnimatedVisibility(visible = config.displaySize && primaryEntity.size > 0) {
@@ -350,7 +353,8 @@ fun InstallPrepareContent(
                                 AdaptiveInfoRow(
                                     labelResId = R.string.installer_package_size_label,
                                     newValue = newSizeStr,
-                                    oldValue = oldSizeStr
+                                    oldValue = oldSizeStr,
+                                    hideIdenticalComparison = settings.hideIdenticalComparisons
                                 )
                             }
 
@@ -378,12 +382,14 @@ fun InstallPrepareContent(
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_name_label,
                                 newValue = primaryEntity.version,
-                                oldValue = installedModuleInfo?.version
+                                oldValue = installedModuleInfo?.version,
+                                hideIdenticalComparison = settings.hideIdenticalComparisons
                             )
                             AdaptiveInfoRow(
                                 labelResId = R.string.installer_version_code_label,
                                 newValue = primaryEntity.versionCode.toString(),
-                                oldValue = installedModuleInfo?.versionCode?.toString()
+                                oldValue = installedModuleInfo?.versionCode?.toString(),
+                                hideIdenticalComparison = settings.hideIdenticalComparisons
                             )
                             AnimatedVisibility(visible = config.displaySdk) {
                                 AdaptiveInfoRow(
@@ -414,7 +420,8 @@ fun InstallPrepareContent(
                             SDKComparison(
                                 entityToInstall = primaryEntity,
                                 preInstallAppInfo = currentPackage.installedAppInfo,
-                                displaySDK = config.displaySdk
+                                displaySDK = config.displaySdk,
+                                hideIdenticalComparison = settings.hideIdenticalComparisons
                             )
 
                             // Size
@@ -667,7 +674,8 @@ fun InstallPrepareContent(
 private fun SDKComparison(
     entityToInstall: AppEntity,
     preInstallAppInfo: InstalledAppInfo?,
-    displaySDK: Boolean
+    displaySDK: Boolean,
+    hideIdenticalComparison: Boolean
 ) {
     AnimatedVisibility(visible = displaySDK) {
         Column(
@@ -681,6 +689,7 @@ private fun SDKComparison(
                     newSdk = newTargetSdk,
                     oldSdk = preInstallAppInfo?.targetSdk?.toString(),
                     isArchived = preInstallAppInfo?.isArchived ?: false,
+                    hideIdenticalComparison = hideIdenticalComparison,
                     type = "target"
                 )
             }
@@ -692,6 +701,7 @@ private fun SDKComparison(
                     oldSdk = preInstallAppInfo?.minSdk?.toString(),
                     isUninstalled = preInstallAppInfo?.isUninstalled ?: false,
                     isArchived = preInstallAppInfo?.isArchived ?: false,
+                    hideIdenticalComparison = hideIdenticalComparison,
                     type = "min"
                 )
             }
@@ -706,11 +716,13 @@ private fun SdkInfoRow(
     oldSdk: String?,
     isUninstalled: Boolean = false,
     isArchived: Boolean = false,
+    hideIdenticalComparison: Boolean,
     type: String // "min" or "target"
 ) {
     val newSdkInt = newSdk.toIntOrNull()
     val oldSdkInt = oldSdk?.toIntOrNull()
-    val showComparison = oldSdkInt != null && newSdkInt != null && newSdkInt != oldSdkInt
+    val showComparison = oldSdkInt != null && newSdkInt != null &&
+            (!hideIdenticalComparison || newSdkInt != oldSdkInt)
 
     Row(
         modifier = Modifier.fillMaxWidth(),

@@ -20,9 +20,11 @@ class DialogSettingsViewModel(
 
     val state: StateFlow<DialogSettingsState> = appSettingsRepo.preferencesFlow.map { prefs ->
         DialogSettingsState(
+            hideIdenticalComparisons = prefs.hideIdenticalInstallComparisons,
             versionCompareInSingleLine = prefs.versionCompareInSingleLine,
             sdkCompareInMultiLine = prefs.sdkCompareInMultiLine,
             showDialogInstallExtendedMenu = prefs.showDialogInstallExtendedMenu,
+            expandTemporarySettingsByDefault = prefs.expandDialogTemporarySettingsByDefault,
             showSmartSuggestion = prefs.showSmartSuggestion,
             autoSilentInstall = prefs.autoSilentInstall,
             longClickBackgroundInstall = prefs.longClickBackgroundInstall,
@@ -39,6 +41,10 @@ class DialogSettingsViewModel(
 
     fun dispatch(action: DialogSettingsAction) {
         when (action) {
+            is DialogSettingsAction.ChangeHideIdenticalComparisons -> viewModelScope.launch {
+                updateSetting(BooleanSetting.DialogHideIdenticalComparisons, action.hide)
+            }
+
             is DialogSettingsAction.ChangeVersionCompareInSingleLine -> viewModelScope.launch {
                 updateSetting(BooleanSetting.DialogVersionCompareSingleLine, action.compareInSingleLine)
             }
@@ -49,6 +55,10 @@ class DialogSettingsViewModel(
 
             is DialogSettingsAction.ChangeShowDialogInstallExtendedMenu -> viewModelScope.launch {
                 updateSetting(BooleanSetting.DialogShowExtendedMenu, action.showMenu)
+            }
+
+            is DialogSettingsAction.ChangeExpandTemporarySettingsByDefault -> viewModelScope.launch {
+                updateSetting(BooleanSetting.DialogExpandTemporarySettingsByDefault, action.expand)
             }
 
             is DialogSettingsAction.ChangeShowSuggestion -> viewModelScope.launch {

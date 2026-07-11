@@ -135,11 +135,10 @@ private fun getDpiStringResourceId(name: String) =
     }
 
 @Composable
-fun SplitType.getDisplayName(): String {
-    return when (this) {
+fun SplitType.getDisplayName() =
+    when (this) {
         SplitType.ARCHITECTURE -> stringResource(R.string.split_name_architecture_group_title)
         SplitType.LANGUAGE -> stringResource(R.string.split_name_language_group_title)
         SplitType.DENSITY -> stringResource(R.string.split_name_density_group_title)
         SplitType.FEATURE -> stringResource(R.string.split_name_feature_group_title)
     }
-}

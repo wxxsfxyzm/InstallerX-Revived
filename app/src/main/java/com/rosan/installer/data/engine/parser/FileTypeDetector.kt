@@ -4,8 +4,8 @@ package com.rosan.installer.data.engine.parser
 
 import android.os.Build
 import com.rosan.installer.domain.engine.exception.AnalyseException
-import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
+import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.util.isZipArchive
@@ -86,9 +86,7 @@ class FileTypeDetector(
         if (!hasModuleProp) return null
 
         val hasAndroidManifest = zipFile.getEntry("AndroidManifest.xml") != null
-        val hasApksInside = entries.any {
-            !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true)
-        }
+        val hasApksInside = entries.any { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }
 
         return when {
             // Module and APK mixed

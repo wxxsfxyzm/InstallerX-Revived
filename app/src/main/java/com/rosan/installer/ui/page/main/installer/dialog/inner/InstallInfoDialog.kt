@@ -260,11 +260,11 @@ fun installInfoDialog(
                         }
                 )
 
-                Spacer(modifier = Modifier.size(8.dp))
                 // --- Version Info Display ---
                 when (entityToInstall) {
                     is AppEntity.BaseEntity -> {
                         if (preInstallAppInfo == null) {
+                            Spacer(modifier = Modifier.size(8.dp))
                             // 首次安装或无法获取旧信息: 只显示新版本，不带前缀
                             Text(
                                 text = stringResource(
@@ -275,7 +275,25 @@ fun installInfoDialog(
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.basicMarquee()
                             )
+                        } else if (
+                            settings.hideIdenticalComparisons &&
+                            !preInstallAppInfo.isArchived &&
+                            !preInstallAppInfo.isUninstalled &&
+                            preInstallAppInfo.versionName == entityToInstall.versionName &&
+                            preInstallAppInfo.versionCode == entityToInstall.versionCode
+                        ) {
+                            Spacer(modifier = Modifier.size(8.dp))
+                            Text(
+                                text = stringResource(
+                                    R.string.installer_version,
+                                    entityToInstall.versionName,
+                                    entityToInstall.versionCode
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
                         } else {
+                            Spacer(modifier = Modifier.size(8.dp))
                             //
                             // true = singleLine, false = multiLine
                             val defaultIsSingleLine = settings.versionCompareInSingleLine
@@ -331,6 +349,22 @@ fun installInfoDialog(
                     is AppEntity.ModuleEntity -> {
                         val installedModuleInfo = currentPackage.installedModuleInfo
                         if (installedModuleInfo == null) {
+                            Spacer(modifier = Modifier.size(8.dp))
+                            Text(
+                                text = stringResource(
+                                    R.string.installer_version,
+                                    entityToInstall.version,
+                                    entityToInstall.versionCode
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.basicMarquee()
+                            )
+                        } else if (
+                            settings.hideIdenticalComparisons &&
+                            installedModuleInfo.version == entityToInstall.version &&
+                            installedModuleInfo.versionCode == entityToInstall.versionCode
+                        ) {
+                            Spacer(modifier = Modifier.size(8.dp))
                             Text(
                                 text = stringResource(
                                     R.string.installer_version,
@@ -341,6 +375,7 @@ fun installInfoDialog(
                                 modifier = Modifier.basicMarquee()
                             )
                         } else {
+                            Spacer(modifier = Modifier.size(8.dp))
                             val defaultIsSingleLine = settings.versionCompareInSingleLine
                             var contentState by remember {
                                 mutableStateOf(Pair(defaultIsSingleLine, false))
@@ -431,7 +466,10 @@ fun installInfoDialog(
                                         // compact single-line: 使用已有的短标签资源
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.Center,
+                                            horizontalArrangement = Arrangement.spacedBy(
+                                                16.dp,
+                                                Alignment.CenterHorizontally
+                                            ),
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
                                             entityToInstall.minSdk?.let { newMinSdk ->
@@ -441,10 +479,10 @@ fun installInfoDialog(
                                                     oldSdk = preInstallAppInfo?.minSdk?.toString(),
                                                     isUninstalled = preInstallAppInfo?.isUninstalled ?: false,
                                                     isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    hideIdenticalComparison = settings.hideIdenticalComparisons,
                                                     type = "min"
                                                 )
                                             }
-                                            Spacer(modifier = Modifier.size(16.dp))
                                             entityToInstall.targetSdk?.let { newTargetSdk ->
                                                 SdkInfoCompact(
                                                     shortLabelResId = R.string.installer_package_target_sdk_label_short,
@@ -452,6 +490,7 @@ fun installInfoDialog(
                                                     oldSdk = preInstallAppInfo?.targetSdk?.toString(),
                                                     isUninstalled = preInstallAppInfo?.isUninstalled ?: false,
                                                     isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    hideIdenticalComparison = settings.hideIdenticalComparisons,
                                                     type = "target"
                                                 )
                                             }
@@ -470,6 +509,7 @@ fun installInfoDialog(
                                                     oldSdk = preInstallAppInfo?.minSdk?.toString(),
                                                     isUninstalled = preInstallAppInfo?.isUninstalled ?: false,
                                                     isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    hideIdenticalComparison = settings.hideIdenticalComparisons,
                                                     type = "min"
                                                 )
                                             }
@@ -480,6 +520,7 @@ fun installInfoDialog(
                                                     oldSdk = preInstallAppInfo?.targetSdk?.toString(),
                                                     isUninstalled = preInstallAppInfo?.isUninstalled ?: false,
                                                     isArchived = preInstallAppInfo?.isArchived ?: false,
+                                                    hideIdenticalComparison = settings.hideIdenticalComparisons,
                                                     type = "target"
                                                 )
                                             }
@@ -491,12 +532,14 @@ fun installInfoDialog(
                     }
                 }
                 // --- Size Display ---
+                val installedSize = preInstallAppInfo?.packageSize ?: 0L
                 AnimatedVisibility(visible = config.displaySize && totalSize > 0L) {
                     Column {
                         Spacer(modifier = Modifier.size(8.dp))
                         SizeInfoDisplay(
-                            oldSize = preInstallAppInfo?.packageSize ?: 0L,
-                            newSize = totalSize
+                            oldSize = installedSize,
+                            newSize = totalSize,
+                            hideIdenticalComparison = settings.hideIdenticalComparisons
                         )
                     }
                 }
@@ -763,12 +806,14 @@ private fun SdkInfoCompact(
     oldSdk: String?,
     isUninstalled: Boolean = false,
     isArchived: Boolean = false,
+    hideIdenticalComparison: Boolean,
     type: String
 ) {
     val newSdkInt = newSdk.toIntOrNull()
     val oldSdkInt = oldSdk?.toIntOrNull()
 
-    val showComparison = oldSdkInt != null && newSdkInt != null && newSdkInt != oldSdkInt
+    val showComparison = oldSdkInt != null && newSdkInt != null &&
+            (!hideIdenticalComparison || newSdkInt != oldSdkInt)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -828,11 +873,13 @@ private fun SdkInfoExpanded(
     oldSdk: String?,
     isUninstalled: Boolean = false,
     isArchived: Boolean = false,
+    hideIdenticalComparison: Boolean,
     type: String
 ) {
     val newSdkInt = newSdk.toIntOrNull()
     val oldSdkInt = oldSdk?.toIntOrNull()
-    val showComparison = oldSdkInt != null && newSdkInt != null && newSdkInt != oldSdkInt
+    val showComparison = oldSdkInt != null && newSdkInt != null &&
+            (!hideIdenticalComparison || newSdkInt != oldSdkInt)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -932,9 +979,10 @@ private fun SdkValueWithIcon(
 @Composable
 private fun SizeInfoDisplay(
     oldSize: Long,
-    newSize: Long
+    newSize: Long,
+    hideIdenticalComparison: Boolean
 ) {
-    val showComparison = oldSize > 0L && oldSize != newSize
+    val showComparison = oldSize > 0L && (!hideIdenticalComparison || oldSize != newSize)
     var showDiffOnly by remember { mutableStateOf(false) }
 
     Box(

@@ -27,9 +27,10 @@ internal fun AdaptiveInfoRow(
     newValue: String,
     oldValue: String?,
     isUninstalled: Boolean = false,
-    isArchived: Boolean = false
+    isArchived: Boolean = false,
+    hideIdenticalComparison: Boolean = false
 ) {
-    val showComparison = oldValue != null && newValue != oldValue
+    val showComparison = oldValue != null && (!hideIdenticalComparison || newValue != oldValue)
     val oldTextContent = when {
         isArchived -> stringResource(R.string.old_version_archived)
         isUninstalled -> if (oldValue.isNullOrEmpty()) stringResource(R.string.old_version_uninstalled) else oldValue

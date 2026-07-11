@@ -3,9 +3,11 @@
 package com.rosan.installer.ui.page.main.settings.preferred.installer.dialog
 
 sealed interface DialogSettingsAction {
+    data class ChangeHideIdenticalComparisons(val hide: Boolean) : DialogSettingsAction
     data class ChangeVersionCompareInSingleLine(val compareInSingleLine: Boolean) : DialogSettingsAction
     data class ChangeSdkCompareInMultiLine(val compareInMultiLine: Boolean) : DialogSettingsAction
     data class ChangeShowDialogInstallExtendedMenu(val showMenu: Boolean) : DialogSettingsAction
+    data class ChangeExpandTemporarySettingsByDefault(val expand: Boolean) : DialogSettingsAction
     data class ChangeShowSuggestion(val showSuggestion: Boolean) : DialogSettingsAction
     data class ChangeAutoSilentInstall(val autoSilentInstall: Boolean) : DialogSettingsAction
     data class ChangeLongClickBackgroundInstall(val enable: Boolean) : DialogSettingsAction
