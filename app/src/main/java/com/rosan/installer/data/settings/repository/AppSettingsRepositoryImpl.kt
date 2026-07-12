@@ -58,7 +58,7 @@ class AppSettingsRepositoryImpl(
             ),
             alwaysUseRootInSystem = prefs[AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM] ?: false,
             customizeAuthorizer = prefs[AppDataStore.CUSTOMIZE_AUTHORIZER] ?: "",
-            hideIdenticalInstallComparisons = prefs[AppDataStore.DIALOG_HIDE_IDENTICAL_COMPARISONS] ?: false,
+            hideIdenticalInstallComparisons = prefs[AppDataStore.DIALOG_HIDE_IDENTICAL_COMPARISONS] ?: true,
             showDialogInstallExtendedMenu = prefs[AppDataStore.DIALOG_SHOW_EXTENDED_MENU] ?: false,
             expandDialogTemporarySettingsByDefault = prefs[AppDataStore.DIALOG_EXPAND_TEMPORARY_SETTINGS_BY_DEFAULT] ?: false,
             showSmartSuggestion = prefs[AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION] ?: true,

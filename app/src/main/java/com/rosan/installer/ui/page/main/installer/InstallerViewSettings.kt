@@ -6,7 +6,7 @@ data class InstallerViewSettings(
     val useBlur: Boolean = true,
     val preferSystemIconForUpdates: Boolean = false,
     val closeSessionCountDown: Int = 3,
-    val hideIdenticalComparisons: Boolean = false,
+    val hideIdenticalComparisons: Boolean = true,
     val showExtendedMenu: Boolean = false,
     val expandTemporarySettingsByDefault: Boolean = false,
     val showSmartSuggestion: Boolean = true,
