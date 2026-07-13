@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">Politique</string>
-    <string name="user_terms">Politique d\'utilisation</string>
-    <string name="privacy_policy">Politique de confidentialité</string>
-    <string name="agree">Accepter</string>
     <string name="warning">Avertissement</string>
     <string name="open_source_license">Licence Open Source</string>
     <string name="back">Retour</string>
     <string name="home">Accueil</string>
     <string name="config">Profils</string>
-    <string name="app">Appli</string>
     <string name="preferred">Préférences</string>
     <string name="personalization">Personnalisation</string>
     <string name="search">Rechercher</string>
@@ -28,11 +23,6 @@
     <string name="unstable">Instable</string>
     <string name="enable_notification_hint">Merci d\'autoriser les notifications pour installer !</string>
     <string name="enable_storage_permission_hint">Merci d\'autoriser l\'accès à tous les fichiers pour installer !</string>
-    <string name="discuss">Chat, commentaires et mises à jour</string>
-    <string name="telegram_group">Groupe Telegram</string>
-    <string name="telegram_group_desc">Rejoignez le groupe !</string>
-    <string name="telegram_channel">Canal Telegram</string>
-    <string name="telegram_channel_desc">Rejoignez le canal pour recevoir les nouvelles et mises à jour !</string>
     <string name="theme_settings">Paramètres du thème</string>
     <string name="theme_settings_ui_style">Style d\'interface</string>
     <string name="theme_settings_desc">Changez l\'apparence de l\'appli</string>
@@ -41,10 +31,6 @@
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Interface Material Design standard</string>
     <string name="theme_settings_ui_engine">Moteur d\'interface</string>
-    <string name="theme_settings_use_expressive_ui">Utiliser l\'interface Expressive</string>
-    <string name="theme_settings_use_expressive_ui_desc">Utiliser le nouveau style M3 Expressive</string>
-    <string name="theme_settings_google_ui_style">Style d\'interface Google</string>
-    <string name="theme_settings_launcher_icons">Icône du lanceur</string>
     <string name="theme_settings_hide_launcher_icon">Cacher l\'icône de l\'appli dans le lanceur</string>
     <string name="theme_settings_hide_launcher_icon_desc">Composez *#*#46789#*#* pour ouvrir les paramètres</string>
     <string name="theme_settings_hide_launcher_icon_warning">Assurez-vous de pouvoir accéder à cette page avant de masquer l\'icône du lanceur !</string>
@@ -53,7 +39,6 @@
     <string name="installer_settings_desc">Modifiez les paramètres globaux du programme d\'installation</string>
     <string name="installer_settings_global_installer">Général</string>
     <string name="installer_settings_dialog_mode_options">Options du dialogue</string>
-    <string name="installer_settings_notification_mode_options">Options des notifications</string>
     <string name="basic">Basique</string>
     <string name="disable_adb_install_verify">Désactiver la vérification ADB</string>
     <string name="disable_adb_install_verify_desc">Désactiver la vérification de l\'installation ADB, utile sur certains systèmes où une installation déclenchera une analyse (Play Protect)</string>
@@ -70,8 +55,6 @@
     <string name="unlock_default_installer_desc">Retirez InstallerX comme installateur par défaut pour installer des APKs</string>
     <string name="unlock_default_installer_success">Installateur par défaut réinitialiser avec succès</string>
     <string name="unlock_default_installer_failed">Échec de la réinitialisation de l\'installateur par défaut</string>
-    <string name="clear_cache">Vider le cache</string>
-    <string name="success">Succès</string>
     <string name="details">Détails</string>
     <string name="add">Ajouter</string>
     <string name="update">Mettre à jour</string>
@@ -83,11 +66,7 @@
     <string name="restore">Annuler</string>
     <string name="delete_success">Supprimé avec succès</string>
     <string name="loading">Chargement…</string>
-    <string name="empty_configs">Aucun profil, ajoutez-en un ci-dessous</string>
-    <string name="filter">Filtrer</string>
-    <string name="order">Trier</string>
     <string name="config_name">Nom du profil</string>
-    <string name="config_info">Info</string>
     <string name="config_scope">Portée</string>
     <string name="config_description">Description du profil</string>
     <string name="config_authorizer">Autorisateur</string>
@@ -99,8 +78,6 @@
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Personnalisé</string>
     <string name="config_install_mode">Mode d\'installation</string>
-    <string name="config_install_mode_global">Global</string>
-    <string name="config_install_mode_global_desc">Global (%1$s)</string>
     <string name="config_install_mode_dialog">Dialogue</string>
     <string name="config_install_mode_auto_dialog">Dialogue auto</string>
     <string name="config_install_mode_notification">Notification</string>
@@ -147,8 +124,6 @@
     <string name="config_shared_uid_name">Nom du SharedUID</string>
     <string name="config_shared_uid_value">Valeur du SharedUID</string>
     <string name="config_no_managed_shared_user_id_exempted_packages">Liste des applis exemptées</string>
-    <string name="config_no_managed_shared_user_id_no_exempted_packages">Aucune appli exemptée</string>
-    <string name="config_managed_packages_desc">Ajouter ou supprimer des packages gérés</string>
     <string name="config_add_one_to_get_started">Cliquez sur \'Ajouter\' ci-dessous pour commencer</string>
     <string name="config_add_new_package">Ajouter un nouveau package</string>
     <string name="config_package_name">Nom du package</string>
@@ -173,7 +148,6 @@
     <string name="close">Fermer</string>
     <string name="finish">Fini</string>
     <string name="open">Ouvrir</string>
-    <string name="select">Sélectionner</string>
     <string name="clear">Vider</string>
     <string name="global">Global</string>
     <string name="pull_to_refresh_hint1">Tirez pour actualiser</string>
@@ -202,12 +176,7 @@
     <string name="installer_prepare_install_empty">Veuillez sélectionner au moins une appli</string>
     <string name="installer_prepare_install_too_many">Veuillez sélectionner qu\'une seule base.apk</string>
     <string name="installer_prepare_sdk_incompatible">SDK système inférieur à celui requis par l\'appli</string>
-    <string name="installer_prepare_type_new_install">Préparation de l\'installation de la nouvelle appli</string>
-    <string name="installer_prepare_type_upgrade">Préparation de la mise à jour de l\'appli</string>
     <string name="installer_prepare_type_downgrade">Il s’agit d’une rétrogradation, ce qui peut entraîner une perte de données ou une instabilité de l’appli</string>
-    <string name="installer_prepare_type_reinstall">Réinstallera la version actuelle de l\'appli</string>
-    <string name="installer_prepare_type_sidegrade">Modifiera la version actuelle de l\'appli</string>
-    <string name="installer_prepare_type_unarchive">Désarchivera l\'appli actuelle</string>
     <string name="installer_prepare_type_unknown_confirm">Êtes-vous sûr de vouloir installer ?</string>
     <string name="installer_prepare_signature_mismatch">Signature incompatible ! La poursuite de l\'installation peut entraîner une perte de données ou des risques de sécurité.</string>
     <string name="installer_prepare_signature_unknown">Impossible de vérifier la signature de l\'appli, veuillez procéder avec prudence.</string>
@@ -215,7 +184,6 @@
     <string name="installer_install_failed">Échec de l\'installation</string>
     <string name="installer_install_success">Installation réussie</string>
     <string name="installer_move_to_background">Installation silencieuse</string>
-    <string name="installer_error_reason">Raison de l\'erreur</string>
     <string name="installer_unknown_error">Erreur inconnue</string>
     <string name="installer_channel_name">Notification d\'installation</string>
     <string name="installer_progress_channel_name">Notification de progrès d\'installation</string>
@@ -233,7 +201,6 @@
     <string name="installer_version">Version: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Package : %1$s</string>
-    <string name="installer_file_path">Chemin : %1$s</string>
     <string name="exception_install_failed_unknown">Erreur inconnue</string>
     <string name="exception_resolve_failed">Résolution de l\'URI échouée</string>
     <string name="exception_resolve_failed_no_internet_access">Cette version ne peut pas accéder à Internet, pour utiliser cette fonctionnalité, réinstallez l\'autre version</string>
@@ -252,8 +219,6 @@
     <string name="exception_install_failed_dexopt">Échec de l\'optimisation DEX</string>
     <string name="exception_install_failed_older_sdk">La version du système est trop vielle, veuillez mettre à jour le système</string>
     <string name="exception_install_failed_conflicting_provider">Un ContentProvider avec le même nom existe</string>
-    <string name="theme_settings_use_live_activity">Notification de mise à jour en direct</string>
-    <string name="theme_settings_use_live_activity_desc">Utiliser les notifications de mises à jour en direct (Live Activity), peut ne pas être pris en charge sur certaines ROMs</string>
     <string name="installer_live_channel_name">Progression de l\'installation en notification en direct</string>
     <string name="exception_install_failed_newer_sdk">Le package est trop vieux pour la version du système</string>
     <string name="exception_install_failed_test_only">L\'installation d\'applis débogables est désactivée, activez-la et réessayez</string>
@@ -295,7 +260,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">Ignorer le dialogue quittera silencieusement</string>
     <string name="close_session_countdown">Définir le compte à rebours</string>
     <string name="close_session_countdown_desc">Compte à rebours jusqu\'à la fermeture automatique après une installation réussie de Dhizuku</string>
-    <string name="grant_permission_after_install">Cliquez pour accorder l\'autorisation après l\'installation</string>
     <string name="show_intelligent_suggestion">Afficher les suggestions intelligentes</string>
     <string name="show_intelligent_suggestion_desc">Afficher les suggestions intelligentes lors de l\'échec de l\'installation</string>
     <string name="permission_list">Liste des autorisations</string>
@@ -314,9 +278,6 @@
     <string name="theme_settings_package_icons">Icône du package</string>
     <string name="theme_settings_prefer_system_icon">Utiliser l\'icône du système</string>
     <string name="theme_settings_prefer_system_icon_desc">Essaiera d\'obtenir l\'icône du système, utile quand vous utilisez des packs d\'icônes. Désactivez pour afficher l\'icône du package</string>
-    <string name="no_cache">Pas de cache</string>
-    <string name="clearing_cache">Suppression du cache…</string>
-    <string name="cache_size">Taille du cache : %1$s</string>
     <string name="permission_access_fine_location">Accéder à la localisation précise</string>
     <string name="permission_access_coarse_location">Accéder à la localisation approximative</string>
     <string name="permission_camera">Caméra</string>
@@ -369,10 +330,6 @@
     <string name="config_allow_downgrade_desc">Tente de rétrograder la version actuellement installée du package vers celle en cours d\'installation (Android 15+ nécessite les droits ROOT)</string>
     <string name="config_grant_all_permissions">Accorder toutes les autorisations demandées</string>
     <string name="config_grant_all_permissions_desc">Accorder automatiquement toutes les autorisations demandées par le package. Notez que cela ne s\'applique qu\'aux autorisations d\'exécution. Les autorisations spéciales comme l\'accès à tous les fichiers ou l\'accessibilité ne seront pas accordées automatiquement</string>
-    <string name="force_volume_uuid">Forcer l\'UUID du volume</string>
-    <string name="force_volume_uuid_desc">Permet de spécifier l’UUID du volume sur lequel installer le package</string>
-    <string name="force_permission_prompt_desc">Force même les installateurs système à afficher la confirmation d\'installation</string>
-    <string name="force_permission_prompt">Forcer la confirmation d\'installation</string>
     <string name="instant_app">Appli instantanée</string>
     <string name="instant_app_desc">Installer le package comme appli instantanée</string>
     <string name="dont_kill_app">Ne pas tuer l\'appli</string>
@@ -390,8 +347,6 @@
     <string name="disable_verification_desc">Désactive la vérification du package lors de l\'installation. Il ne s\'agit pas de la vérification de signature</string>
     <string name="staged">Installation différée</string>
     <string name="staged_desc">Indique que le package est installé dans le carde d\'une installation différée</string>
-    <string name="config_all_whitelist_restricted_permissions">Autoriser les autorisations restreintes</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">Autoriser l\'octroi d\'autorisations restreintes pour le package en cours d\'installation</string>
     <string name="disable_allowed_apex_update_check">Désactiver la vérification des mises à jour APEX</string>
     <string name="disable_allowed_apex_update_check_desc">Ne vérifie pas si l\'APEX installé peut être mis à jour</string>
     <string name="installer_file_name">Fichier : %1$s</string>
@@ -403,15 +358,10 @@
     <string name="config_request_update_ownership">Demander la propriété des mise à jour</string>
     <string name="config_request_update_ownership_desc">Définir cet installateur comme source des mises à jour futures</string>
     <string name="unarchive">Désarchiver</string>
-    <string name="unarchive_desc">Désarchiver un package existant</string>
-    <string name="replace_existing">Remplacer existant</string>
-    <string name="replace_existing_desc">Si le package en cours d\'installation existe déjà, le remplacer ou le mettre à jour</string>
     <string name="installer_multi_apk_zip_description">Ce fichier contient plusieurs applications distinctes, veuillez sélectionner les applications que vous souhaitez installer</string>
     <string name="installer_multi_apk_description">Veuillez sélectionner les applications que vous souhaitez installer</string>
     <string name="installing_progress_text">Installation %1$s (%2$d/%3$d)</string>
-    <string name="installer_completed">Installation finie</string>
     <string name="installer_completed_subtitle">Réussi %1$s, échoué %2$s</string>
-    <string name="installer_current_install_mode_not_supported">Le mode actuel ne prend pas en charge l\'installation de ce type de fichier</string>
     <string name="split_name_language">Lange partagée : %1$s</string>
     <string name="split_name_architecture">Architecture partagée : %1$s</string>
     <string name="split_name_density">Densité de l\'écran : %1$s</string>
@@ -456,10 +406,8 @@
     <string name="uninstall_content">Après avoir désinstallé l\'appli, vous ne pourrez plus utiliser InstallerX Revived pour installer des applis.</string>
     <string name="auto_lock_default_installer">Définir automatiquement comme installateur par défaut</string>
     <string name="auto_lock_default_installer_desc">Définir automatiquement cette appli comme installateur lors du démarrage d\'une nouvelle installation</string>
-    <string name="config_app_authorizer_desc">Autorisateur pour effectuer des opérations privilégiées</string>
     <string name="config_install_authorizer_desc">Autorisateur pour installer des applis</string>
     <string name="config_label_install_options_desc">Configurez les paramètres d\'installation tels que la source et l\'utilisateur</string>
-    <string name="expand">Développer</string>
     <string name="collapse">Réduire</string>
     <string name="installer_select_split">Sélectionner les APK partagés</string>
     <string name="installer_select_split_desc">Sélectionnez à nouveau les fichiers APK partagés à installer</string>
@@ -519,7 +467,6 @@
     <string name="theme_settings_theme_mode_system">Suivre le thème système</string>
     <string name="theme_settings_palette_style">Palette de couleurs</string>
     <string name="open_source_license_settings_description">Consultez les bibliothèques Open Source tierces et leurs licences</string>
-    <string name="performance">Performance</string>
     <string name="debug">Débodage</string>
     <string name="save_logs">Enregistrer les journaux</string>
     <string name="save_logs_desc">Enregistrer le journal dans un fichier local à des fins de débogage</string>
@@ -569,7 +516,6 @@
     <string name="installer_settings_auto_clear_time_seconds_format">%d secondes</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Effacer la notification de réussite de l\'installation après %d secondes</string>
     <string name="config_authorizer_none_system_app_tips">En tant qu\'installateur système, la plupart des options ici ne sont pas nécessaires.</string>
-    <string name="config_install_mode_desc">Mode d\'installation par défaut et paramètres associés</string>
     <string name="config_install_reason">Raison de l\'installation</string>
     <string name="config_install_reason_unknown">Inconnu</string>
 </resources>

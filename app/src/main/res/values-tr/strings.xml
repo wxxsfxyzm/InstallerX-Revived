@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">Sözleşme</string>
-    <string name="user_terms">Kullanıcı sözleşmesi</string>
-    <string name="privacy_policy">Gizlilik sözleşmesi</string>
-    <string name="agree">Kabul et</string>
     <string name="warning">Uyarı</string>
     <string name="open_source_license">Açık Kaynak Lisansı</string>
     <string name="back">Geri</string>
     <string name="home">Ana Sayfa</string>
     <string name="config">Profiller</string>
-    <string name="app">Uygulama</string>
     <string name="preferred">Tercihler</string>
     <string name="personalization">Kişiselleştirme</string>
     <string name="search">Ara</string>
@@ -28,11 +23,6 @@
     <string name="unstable">Stabil olmayan sürüm</string>
     <string name="enable_notification_hint">Lütfen kurulum için bildirim iznini etkinleştirin!</string>
     <string name="enable_storage_permission_hint">Lütfen kurulum için Tüm Dosyalara Erişim\'i etkinleştirin!</string>
-    <string name="discuss">Sohbet &amp; Geri bildirim &amp; Güncelleme</string>
-    <string name="telegram_group">Telegram grubu</string>
-    <string name="telegram_group_desc">Gruba katılın!</string>
-    <string name="telegram_channel">Telegram Kanalı</string>
-    <string name="telegram_channel_desc">Haberler ve güncellemeler için kanala katılın!</string>
     <string name="theme_settings">Tema Ayarları</string>
     <string name="theme_settings_ui_style">Arayüz Stili</string>
     <string name="theme_settings_desc">Uygulamanın temasını değiştirin</string>
@@ -41,12 +31,6 @@
     <string name="theme_settings_google_ui_desc">Standart Materyal Tasarım Kullanıcı Arayüzü</string>
     <string name="theme_settings_google_ui">Google Materyal 3</string>
     <string name="theme_settings_ui_engine">Arayüz Motoru</string>
-    <string name="theme_settings_use_expressive_ui">Etkileyici Arayüzü kullan</string>
-    <string name="theme_settings_use_expressive_ui_desc">Yeni M3 Etkileyici stilini kullanın</string>
-    <string name="theme_settings_google_ui_style">Google Kullanıcı Arayüzü stili</string>
-    <string name="theme_settings_use_live_activity">Canlı Aktivite</string>
-    <string name="theme_settings_use_live_activity_desc">Bildirimler yerine Canlı Aktivite kullanın, özel ROM\'larda desteklenmeyebilir</string>
-    <string name="theme_settings_launcher_icons">Başlatıcı simgesi</string>
     <string name="theme_settings_hide_launcher_icon">Başlatıcı simgesini gizle</string>
     <string name="theme_settings_hide_launcher_icon_desc">Ayarları açmak için *#*#46789#*#* tuşlayın</string>
     <string name="theme_settings_hide_launcher_icon_warning">Lütfen başlatıcı simgesini gizlemeden önce bu sayfaya erişebildiğinizden emin olun!</string>
@@ -54,7 +38,6 @@
     <string name="installer_settings">Yükleyici Ayarları</string>
     <string name="installer_settings_desc">Yükleyicinin global ayarlarını değiştirin</string>
     <string name="installer_settings_dialog_mode_options">Diyalog Seçenekleri</string>
-    <string name="installer_settings_notification_mode_options">Bildirim Seçenekleri</string>
     <string name="basic">Temel</string>
     <string name="disable_adb_install_verify">ADB Doğrulamasını Devre Dışı Bırak</string>
     <string name="disable_adb_install_verify_desc">ADB kurulum doğrulamasını devre dışı bırakın, kurulumun taramayı tetikleyeceği bazı sistemlerde yararlıdır (Play Protect)</string>
@@ -71,8 +54,6 @@
     <string name="unlock_default_installer_desc">APK\'ları yüklemek için InstallerX\'in varsayılan yükleyici ayarını kaldırır</string>
     <string name="unlock_default_installer_success">Başarıyla varsayılan yükleyici ayarı kaldırıldı</string>
     <string name="unlock_default_installer_failed">Varsayılan yükleyici ayarı kaldırılamadı</string>
-    <string name="clear_cache">Önbelleği temizle</string>
-    <string name="success">Başarılı</string>
     <string name="details">Detaylar</string>
     <string name="add">Ekle</string>
     <string name="update">Güncelle</string>
@@ -84,11 +65,7 @@
     <string name="restore">Geri al</string>
     <string name="delete_success">Başarıyla silindi</string>
     <string name="loading">Yükleniyor…</string>
-    <string name="empty_configs">Profil yok, aşağıdan bir tane ekleyin</string>
-    <string name="filter">Filtrele</string>
-    <string name="order">Sırala</string>
     <string name="config_name">Profil ismi</string>
-    <string name="config_info">Bilgi</string>
     <string name="config_scope">Kapsam</string>
     <string name="config_description">Profil açıklaması</string>
     <string name="config_authorizer">Yetkilendirici</string>
@@ -141,8 +118,6 @@
     <string name="config_shared_uid_name">Paylaşılan Kullanıcı Kimliği adı</string>
     <string name="config_shared_uid_value">Paylaşılan Kullanıcı Kimliği değeri</string>
     <string name="config_no_managed_shared_user_id_exempted_packages">Muaf Uygulamalar Listesi</string>
-    <string name="config_no_managed_shared_user_id_no_exempted_packages">Muaf Uygulama Yok</string>
-    <string name="config_managed_packages_desc">Yönetilen paketleri ekleyin veya kaldırın</string>
     <string name="config_add_one_to_get_started">Başlamak için aşağıdaki \'Ekle\'ye tıklayın</string>
     <string name="config_add_new_package">Yeni paket ekle</string>
     <string name="config_package_name">Paket Adı</string>
@@ -167,7 +142,6 @@
     <string name="close">Kapat</string>
     <string name="finish">Tamamlandı</string>
     <string name="open">Aç</string>
-    <string name="select">Seç</string>
     <string name="clear">Temizle</string>
     <string name="pull_to_refresh_hint1">Yenilemek için aşağı çekin</string>
     <string name="pull_to_refresh_hint2">Yenilemek için bırakın</string>
@@ -196,12 +170,7 @@
     <string name="installer_prepare_install_empty">Lütfen en az bir paket seçin</string>
     <string name="installer_prepare_install_too_many">Lütfen yalnızca bir base.apk seçin</string>
     <string name="installer_prepare_sdk_incompatible">Sistem SDK\'sı uygulamanın gerektirdiğinden daha düşük</string>
-    <string name="installer_prepare_type_new_install">Yeni uygulamayı yüklemeye hazırlanıyor</string>
-    <string name="installer_prepare_type_upgrade">Uygulamayı güncellemeye hazırlanıyor</string>
     <string name="installer_prepare_type_downgrade">Bu bir sürüm düşürme, veri kaybına veya uygulama dengesizliğine neden olabilir</string>
-    <string name="installer_prepare_type_reinstall">Uygulamanın mevcut sürümü yeniden yüklenecek</string>
-    <string name="installer_prepare_type_sidegrade">Uygulamanın mevcut sürümü değiştirilecek</string>
-    <string name="installer_prepare_type_unarchive">Mevcut uygulama arşivden çıkarılacak</string>
     <string name="installer_prepare_type_unknown_confirm">Yüklemek istediğinize emin misiniz?</string>
     <string name="installer_prepare_signature_mismatch">İmza uyumsuzluğu! Kuruluma devam edilmesi veri kaybına veya güvenlik risklerine yol açabilir.</string>
     <string name="installer_prepare_signature_unknown">Uygulama imzası doğrulanamadı, lütfen dikkatli ilerleyin.</string>
@@ -209,7 +178,6 @@
     <string name="installer_install_failed">Yükleme başarısız oldu</string>
     <string name="installer_install_success">Yükleme başarılı</string>
     <string name="installer_move_to_background">Sessiz Yükleme</string>
-    <string name="installer_error_reason">Hata Nedeni</string>
     <string name="installer_unknown_error">Bilinmeyen Hata</string>
     <string name="installer_channel_name">Yükleme Bildirimi</string>
     <string name="installer_progress_channel_name">Yükleme İşlemi Bildirimi</string>
@@ -264,8 +232,6 @@
     <string name="config_authorizer_root">Root</string>
     <string name="config_authorizer_shizuku">Shizuku</string>
     <string name="config_authorizer_dhizuku">Dhizuku</string>
-    <string name="config_install_mode_global">Global</string>
-    <string name="config_install_mode_global_desc">Global (%1$s)</string>
     <string name="global">Global</string>
     <string name="permission_bluetooth">Bluetooth</string>
     <string name="permission_nfc">NFC</string>
@@ -283,7 +249,6 @@
     <string name="installer_version">Sürüm: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Paket: %1$s</string>
-    <string name="installer_file_path">Yol: %1$s</string>
     <string name="exception_install_failed_unknown">Bilinmeyen hata</string>
     <string name="exception_resolve_failed">URI\'yi çözme başarısız oldu</string>
     <string name="exception_resolve_failed_no_internet_access">Bu sürüm İnternet\'e erişemiyor, bu özelliği kullanmak için başka bir sürümü yeniden yükleyin</string>
@@ -342,7 +307,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">Diyaloğu kapatmak bildirim görünümüne geçmek yerine yüklemeyi iptal edecektir</string>
     <string name="close_session_countdown">Geri sayım ayarla</string>
     <string name="close_session_countdown_desc">Ayrıcalıkların bulunmaması durumunda, bazı CN tarafından özelleştirilmiş sistemler ilgili başlangıç işlemini durdurur. Bu değerin değiştirilmesi, sistem müdahale penceresi ekranda kaldığı sürece yanıt süresini uzatabilir.</string>
-    <string name="grant_permission_after_install">Yüklemeden sonra izin vermek için tıklayın</string>
     <string name="show_intelligent_suggestion">Akıllı Önerileri Göster</string>
     <string name="show_intelligent_suggestion_desc">Yükleme başarısız olduğunda akıllı öneriler gösterir</string>
     <string name="permission_list">İzin Listesi</string>
@@ -350,9 +314,6 @@
     <string name="theme_settings_package_icons">Paket simgesi kaynağı</string>
     <string name="theme_settings_prefer_system_icon">Yüklenecek uygulama için sistem simgesini tercih et</string>
     <string name="theme_settings_prefer_system_icon_desc">Sistemden uygulama simgesini almaya çalış. Simge paketleri için kullanışlıdır. Kurulum paketindeki simgeler için bunu kapatın</string>
-    <string name="no_cache">Önbellek yok</string>
-    <string name="clearing_cache">Önbellek temizleniyor…</string>
-    <string name="cache_size">Önbellek boyutu: %1$s</string>
     <string name="config_authorizer_none_tips">Ayrıcalıklar kullanılmadığında, seçeneklerin çoğu geçersizdir.</string>
     <string name="scope_tips">İlk profil varsayılandır, manuel seçim gerektirmez. Yeni profil, başlattıkları yüklemeler için belirli uygulamalara ayarlanabilir.</string>
     <string name="got_it">Anladım</string>
@@ -381,10 +342,6 @@
     <string name="config_allow_downgrade_desc">Paketin şu anda yüklü olan sürümünü, yüklenmek istenen sürüme düşürme girişimi (Android 15+ için ROOT izni gerekir)</string>
     <string name="config_grant_all_permissions">İstenen Tüm İzinleri Verin</string>
     <string name="config_grant_all_permissions_desc">Paketin talep ettiği tüm izinleri otomatik olarak verir. Bunun yalnızca çalışma zamanı izinleri için geçerli olduğunu unutmayın. Tüm Dosyalara Erişim veya Erişilebilirlik gibi özel izinler otomatik olarak verilmeyecektir</string>
-    <string name="force_volume_uuid">Ses UUID\'sini Zorla</string>
-    <string name="force_volume_uuid_desc">Paketin kurulacağı ses UUID\'sinin belirtilmesine olanak tanır</string>
-    <string name="force_permission_prompt">İzin İstemini Zorla</string>
-    <string name="force_permission_prompt_desc">Sistem yükleyicilerinin bile kurulum onay istemini göstermesini zorunlu kılar</string>
     <string name="instant_app">Anında Uygulama</string>
     <string name="instant_app_desc">Paketi anında uygulama olarak yükleyin</string>
     <string name="dont_kill_app">Uygulamayı Durdurma</string>
@@ -402,8 +359,6 @@
     <string name="disable_verification_desc">Yükleme sırasında paket doğrulamasını devre dışı bırakır. Bu, imza doğrulaması değildir</string>
     <string name="staged">Parçalı</string>
     <string name="staged_desc">Bu paketin aşamalı kurulum parçası olarak yüklendiğini gösterir</string>
-    <string name="config_all_whitelist_restricted_permissions">Kısıtlı İzinleri Ver</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">Yüklenecek pakete kısıtlanmış izinleri verir</string>
     <string name="disable_allowed_apex_update_check">İzin Verilen APEX Güncelleme Kontrolünü Devre Dışı Bırak</string>
     <string name="disable_allowed_apex_update_check_desc">Yüklü APEX\'in güncellenebilir olup olmadığını kontrol etmeyin</string>
     <string name="config_bypass_low_target_sdk">Düşük Hedef SDK Bloğunu Atla</string>
@@ -413,17 +368,12 @@
     <string name="config_request_update_ownership">Sahipliği Güncelleme Talebi</string>
     <string name="config_request_update_ownership_desc">Bu yükleyiciyi gelecekteki güncellemeler için kaynak olarak ayarlayın</string>
     <string name="unarchive">Arşivden çıkar</string>
-    <string name="unarchive_desc">Mevcut bir paketi arşivden çıkarır</string>
-    <string name="replace_existing">Varolanı Değiştir</string>
-    <string name="replace_existing_desc">Eğer kurulacak paket zaten mevcutsa, onu değiştirin/yükseltin</string>
     <string name="installer_file_name">Dosya: %1$s</string>
     <string name="installer_select_from_zip">Zip dosyasından seçin</string>
     <string name="installer_multi_apk_zip_description">Bu dosya birden fazla ayrı uygulama içeriyor, lütfen yüklemek istediğiniz uygulamaları seçin</string>
     <string name="installer_multi_apk_description">Lütfen yüklemek istediğiniz uygulamaları seçin</string>
     <string name="installing_progress_text">Yükleniyor %1$s (%2$d/%3$d)</string>
-    <string name="installer_completed">Yükleme tamamlandı</string>
     <string name="installer_completed_subtitle">%1$s başarılı , %2$s başarısız</string>
-    <string name="installer_current_install_mode_not_supported">Mevcut mod bu tür dosyaların yüklenmesini desteklemiyor</string>
     <string name="split_name_language">Dil bölümü: %1$s</string>
     <string name="split_name_architecture">Mimari bölümü: %1$s</string>
     <string name="split_name_density">Ekran yoğunluğu: %1$s</string>
@@ -462,7 +412,6 @@
     <string name="auto_lock_default_installer">Varsayılan yükleyici olarak otomatik ayarla</string>
     <string name="auto_lock_default_installer_desc">Yeni bir yükleme başlatıldığında bu uygulamayı otomatikmen yükleyici olarak ayarlar</string>
     <string name="config_label_install_options_desc">Kaynak, kullanıcı gibi yükleme parametrelerini yapılandırın</string>
-    <string name="expand">Genişlet</string>
     <string name="collapse">Daralt</string>
     <string name="installer_select_split">APK bölümlerini seçin</string>
     <string name="installer_select_split_desc">Yüklemek için APK bölümlerini yeniden seçin</string>
@@ -477,7 +426,6 @@
     <string name="split_name_language_group_title">Dil Bölümleri</string>
     <string name="split_name_density_group_title">Ekran Yoğunluğu Bölümleri</string>
     <string name="split_name_feature_group_title">Özellik Bölümleri</string>
-    <string name="config_app_authorizer_desc">Ayrıcalıklı işlemleri gerçekleştirme yetkisi verir</string>
     <string name="config_install_authorizer_desc">Uygulamaları yüklemek için yetkilendirici</string>
     <string name="installer_choice_install_as_module">Modül olarak yükle</string>
     <string name="installer_module_id">Modül Kimliği: %1$s</string>
@@ -514,8 +462,6 @@
     <string name="exception_module_install_failed_incompatible_authorizer">Uyumsuz yetkilendirici</string>
     <string name="installer_mixed_module_apk_description_notification">Lütfen yükleme türünü seçmek için bildirime tıklayın</string>
     <string name="lab_tip">Laboratuvardaki deneysel özellikler dengesiz veya riskli olabilir ve herhangi bir zamanda değişebilir veya kaldırılabilir. Kullanım kendi sorumluluğunuzdadır</string>
-    <string name="lab_use_hook_mode">BinderWrapper modunu kullan</string>
-    <string name="lab_use_hook_mode_desc">Daha iyi performans için UserService yerine BinderWrapper kullanın, hem Shizuku hem de Root ile çalışır</string>
     <string name="lab_module_flashing">Modül flaşlamayı etkinleştir</string>
     <string name="lab_module_flashing_desc">Herhangi bir modülü flaş etmeden önce mutlaka iki kez kontrol edin!</string>
     <string name="lab_module_select_root_impl">Kök uygulamasını seçin</string>
@@ -559,7 +505,6 @@
     <string name="theme_settings_miuix_custom_colors_desc">Miuix tema tarzında tema renklerini özelleştir</string>
     <string name="theme_settings_live_activity_dynamic_color_follow_icon">Renkli Anlık Etkinlik İlerlemesi</string>
     <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">Anlık etkinliğin ilerleme bölümü, paketin simgesinden çıkarılan renkleri kullanacaktır</string>
-    <string name="config_install_mode_desc">Varsayılan Yükleme Modu ve ilgili ayarlar</string>
     <string name="installer_install_complete">Yükleme tamamlandı</string>
     <string name="updating">Güncelleniyor…</string>
     <string name="update_available">Güncelleme Mevcut: %1$s</string>
@@ -571,16 +516,12 @@
     <string name="permission_manage_external_storage">Harici depolama alanını yönet</string>
     <string name="config_display_size">Paket boyutunu göster</string>
     <string name="config_display_size_desc">Yükleme arayüzünde paket boyutunu gösterir</string>
-    <string name="config_label_app_bundle_settings">Bölünmüş APK Paketleri</string>
     <string name="installer_package_size_label">Boyut:</string>
     <string name="exception_http_not_allowed">Açık metin HTTP\'ye izin verilmiyor</string>
     <string name="exception_http_restricted_for_localhost">Açık metin HTTP, yerel ana sistem ile sınırlandırılmıştır</string>
     <string name="config_split_choose_all">Varsayılan olarak tüm bölümleri seç</string>
     <string name="config_split_choose_all_desc">En uygun olanı seçmek yerine varsayılan olarak tüm bölümleri seçer</string>
-    <string name="lab_http_save_file">İndirilen dosyaları kaydet</string>
-    <string name="lab_http_save_file_desc">İndirme tamamlandıktan sonra dosyaları İndirilenler klasörüne kaydeder</string>
     <string name="lab_http_profile">HTTP Güvenlik Politikası</string>
-    <string name="lab_http_profile_desc">Güvenlik için açık metin HTTP erişimini kısıtlayın</string>
     <string name="lab_http_profile_secure">Yalnızca güvenli bağlantılar (HTTPS)</string>
     <string name="lab_http_profile_local">Yerel açık metine izin ver (Localhost)</string>
     <string name="lab_http_profile_all">Tümüne izin ver (Güvenli değil)</string>
@@ -599,7 +540,6 @@
     <string name="installer_splits_only_tip">Yalnızca bölünmüş APK\'lar seçilmiş. Bunlar mevcut uygulamaya eklenecektir</string>
     <string name="installer_split_name_label">Bölünmüş İsim:</string>
     <string name="open_source_license_settings_description">Üçüncü taraf açık kaynak kütüphaneleri ve lisanslarını görüntüleyin</string>
-    <string name="performance">Performans</string>
     <string name="debug">Hata Ayıklama</string>
     <string name="save_logs">Günlüğü Kaydet</string>
     <string name="save_logs_desc">Hata ayıklama amacıyla günlük kaydını yerel bir dosyaya kaydedin</string>
@@ -671,14 +611,10 @@
     <string name="lab_module_flashing_show_art">ASCII sanatını görüntüle</string>
     <string name="lab_module_flashing_show_art_desc">Yükleme başladığında InstallerX ASCII sanatını göster</string>
     <string name="lab_unstable_features">Kararsız özellikler</string>
-    <string name="lab_set_install_requester">Yükleme İsteği Oluşturucusunu Ayarla</string>
-    <string name="lab_set_install_requester_desc">Etkinleştirildiğinde profillerde OriginatingUid alanı özelleştirmesini göster</string>
     <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
-    <string name="installer_analyse_success">Analiz başarılı</string>
     <string name="installer_live_channel_short_text_analyse_failed">Başarısız</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="exception_resolve_failed_link_not_valid">Bu link geçerli bir dosya içermiyor</string>
-    <string name="lab_mi_island">Mi Süper Ada</string>
     <string name="theme_settings_color_spec">Renk Özelliği</string>
     <string name="theme_settings_color_spec_only_2021">Mevcut palet stili yalnızca Özellik 2021\'i destekler</string>
     <string name="config_label_preferences">Tercihler</string>
@@ -726,7 +662,6 @@
     <string name="notification_settings">Bildirim Ayarları</string>
     <string name="notification_settings_desc">Yükleme ilerleme bildirimlerinin görünümünü özelleştirin</string>
     <string name="notification_style">Bildirim Stili</string>
-    <string name="notification_style_desc">İlerleme bildirimleri için görüntüleme stilini seçin</string>
     <string name="notification_style_standard">Standart Bildirim</string>
     <string name="notification_style_live_activity">Canlı Etkinlik</string>
     <string name="notification_style_unsupported_desc">Yalnızca standart bildirim stili destekleniyor</string>
@@ -740,7 +675,6 @@
     <string name="lab_update_github_proxy_7ed">7ED Proxy</string>
     <string name="lab_update_github_proxy_custom">Özel GHProxy</string>
     <string name="lab_update_github_proxy_url">Özel URL</string>
-    <string name="lab_update_github_proxy_url_desc">Proxy URL</string>
     <string name="installer_biometric_auth_mode_disable">Biyometrik Kimlik Doğrulamasını Devre Dışı Bırak</string>
     <string name="installer_biometric_auth_mode_enable">Biyometrik Kimlik Doğrulamasını Etkinleştir</string>
     <string name="installer_biometric_auth_mode_follow_config">Profili İzle</string>
@@ -763,7 +697,6 @@
     <string name="lab_show_install_initiator_label">Yükleme başlatıcısı</string>
     <string name="lab_show_install_initiator_desc">Yüklemeyi hangi uygulamanın başlattığını gösterir</string>
     <string name="installer_temp_settings_tip">Bu ayarlar bu oturum için geçicidir. Bunları kalıcı hale getirmek için Ayarlar\'a gidin</string>
-    <string name="lab_ui_settings">Deneysel kullanıcı arayüzü özelliği</string>
     <string name="lab_show_apk_path_desc">Uygulama detaylarında dosya yolunu göster</string>
     <string name="lab_show_install_initiator">Yükleme başlatıcısını göster</string>
     <string name="install_confirm_question_update_owner_reminder">Bu uygulama genellikle %1$s tarafından güncellenir. Başka bir kaynaktan güncellerseniz, telefonunuz gelecekte herhangi bir kaynaktan güncelleme alabilir. Uygulama işlevselliği değişebilir.</string>
@@ -786,11 +719,7 @@
     <string name="setting_lsposed_module_title">LSPosed Modülü Etkinleştirildi</string>
     <string name="home_stat_authorizers">Mevcut Ayrıcalıklar</string>
     <string name="home_stat_profiles">Profiller</string>
-    <string name="home_root_mode">Root: %s</string>
     <string name="home_label_lsp_link">Modül mü arıyorsunuz?</string>
-    <string name="home_system_app">Sistem Uygulaması</string>
-    <string name="activate_mode">Etkinleştirme modu: %s</string>
-    <string name="shizuku_working_mode">Shizuku çalışma modu: %s</string>
     <string name="shizuku_not_authorized">Lütfen Sui veya Shizuku\'ya erişim izni verin</string>
     <string name="shizuku_not_available">Lütfen Sui veya Shizuku\'yu etkinleştirin</string>
     <string name="dhizuku_not_authorized">Lütfen Dhizuku\'ya erişim izni verin</string>

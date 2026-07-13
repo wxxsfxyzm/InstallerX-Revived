@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">政策</string>
-    <string name="user_terms">用户条款</string>
-    <string name="privacy_policy">隐私政策</string>
-    <string name="agree">同意</string>
     <string name="warning">警告</string>
     <string name="open_source_license">开放源代码许可</string>
     <string name="open_source_license_settings_description">查看本应用所使用的第三方开源库及其许可证信息</string>
@@ -26,11 +22,7 @@
     <string name="setting_lsposed_module_desc">若已通过第三方 LSPosed 模块强制接管了默认安装器，请开启此项以停用应用内的状态检测。启用后，首页将始终显示为“已激活”</string>
     <string name="home_stat_authorizers">可用特权</string>
     <string name="home_stat_profiles">配置数量</string>
-    <string name="home_root_mode">ROOT: %s</string>
     <string name="home_label_lsp_link">在寻找模块吗？</string>
-    <string name="home_system_app">系统应用模式</string>
-    <string name="activate_mode">激活方式: %s</string>
-    <string name="shizuku_working_mode">Shizuku 工作模式: %s</string>
     <string name="shizuku_not_authorized">请授予本应用访问 Sui 或 Shizuku 的权限</string>
     <string name="shizuku_not_available">请激活 Sui 或 Shizuku</string>
     <string name="dhizuku_not_authorized">请授予本应用访问 Dhizuku 的权限</string>
@@ -68,7 +60,6 @@
     <string name="history_error">错误</string>
     <string name="history_unknown">未知</string>
     <string name="history_none">无</string>
-    <string name="app">应用</string>
     <string name="preferred">设置</string>
     <string name="personalization">个性化</string>
     <string name="search">搜索</string>
@@ -76,7 +67,6 @@
     <string name="about">关于</string>
     <string name="other">其它</string>
     <string name="extras">附加功能</string>
-    <string name="performance">性能</string>
     <string name="debug">调试</string>
     <string name="lab">实验室</string>
     <string name="lab_desc">访问实验性或开发中的新功能</string>
@@ -102,11 +92,6 @@
     <string name="unstable">测试版</string>
     <string name="enable_notification_hint">请启用通知以进行安装！</string>
     <string name="enable_storage_permission_hint">请授予“所有文件访问”权限！</string>
-    <string name="discuss">讨论 &amp; 反馈 &amp; 更新</string>
-    <string name="telegram_group">Telegram 群组</string>
-    <string name="telegram_group_desc">来一起划水！</string>
-    <string name="telegram_channel">Telegram 频道</string>
-    <string name="telegram_channel_desc">加入频道以获取最新更新与动态！</string>
     <string name="theme_settings">主题设置</string>
     <string name="theme_settings_ui_style">主题风格</string>
     <string name="theme_settings_desc">更改应用主题</string>
@@ -117,13 +102,10 @@
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">标准 Material Design 界面</string>
     <string name="theme_settings_ui_engine">UI 引擎</string>
-    <string name="theme_settings_use_expressive_ui">使用 M3 Expressive 外观</string>
-    <string name="theme_settings_use_expressive_ui_desc">使用全新 Material 3 Expressive 设计风格</string>
     <string name="theme_settings_use_apple_floating_bar">启用悬浮底栏</string>
     <string name="theme_settings_use_apple_floating_bar_desc">在屏幕底部使用悬浮样式的导航栏</string>
     <string name="theme_settings_use_blur">启用模糊</string>
     <string name="theme_settings_use_blur_desc">为应用启用模糊效果</string>
-    <string name="theme_settings_google_ui_style">Google UI 风格</string>
     <string name="theme_settings_theme_mode">主题模式</string>
     <string name="theme_settings_theme_mode_desc">选择主题模式</string>
     <string name="theme_settings_theme_mode_light">浅色主题</string>
@@ -158,12 +140,9 @@
     <string name="color_blue_grey">蓝灰色</string>
     <string name="color_brown">棕色</string>
     <string name="color_grey">灰色</string>
-    <string name="theme_settings_use_live_activity">创建实时更新通知</string>
-    <string name="theme_settings_use_live_activity_desc">使用原生实时通知 API，在定制 ROM 上可能无法正常工作</string>
     <string name="theme_settings_package_icons">安装包图标来源</string>
     <string name="theme_settings_prefer_system_icon">为安装应用获取系统图标</string>
     <string name="theme_settings_prefer_system_icon_desc">尝试从系统获取图标包，取消选中可以获取安装包内的最新图标</string>
-    <string name="theme_settings_launcher_icons">桌面图标</string>
     <string name="theme_settings_predictive_back">预测性返回</string>
     <string name="theme_settings_predictive_back_animation">预测性返回动画</string>
     <string name="theme_settings_predictive_back_animation_desc">选择预测性返回的动画效果</string>
@@ -212,7 +191,6 @@
     <string name="use_biometric_confirm_change_auth_settings">确实要修改此设置吗</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">若要继续，请使用你的设备认证进行确认此操作</string>
     <string name="installer_settings_dialog_mode_options">对话框安装自定义选项</string>
-    <string name="installer_settings_notification_mode_options">通知安装自定义选项</string>
     <string name="installer_settings_auto_clear_success_notification">自动清除通知</string>
     <string name="installer_settings_auto_clear_success_notification_desc">安装成功后自动清理通知</string>
     <string name="installer_settings_auto_clear_time_never">从不</string>
@@ -269,11 +247,6 @@
     <string name="unlock_default_installer_failed">清除失败</string>
     <string name="locking_default_installer">正在锁定默认安装器…</string>
     <string name="unlocking_default_installer">正在清除默认安装器…</string>
-    <string name="clear_cache">清理缓存</string>
-    <string name="no_cache">无缓存</string>
-    <string name="clearing_cache">正在清理缓存…</string>
-    <string name="cache_size">缓存大小：%1$s</string>
-    <string name="success">成功</string>
     <string name="details">详情</string>
     <string name="add">新增</string>
     <string name="update">更新</string>
@@ -285,13 +258,9 @@
     <string name="restore">恢复</string>
     <string name="delete_success">删除成功</string>
     <string name="loading">加载中…</string>
-    <string name="empty_configs">没有配置</string>
-    <string name="filter">过滤</string>
-    <string name="order">排序</string>
     <string name="config_global_default">全局默认</string>
     <string name="config_status_inactive">未生效</string>
     <string name="config_name">名称</string>
-    <string name="config_info">信息</string>
     <string name="config_scope">作用域</string>
     <string name="config_description">描述</string>
     <string name="authorizer_customization">特权参数微调</string>
@@ -305,7 +274,6 @@
     <string name="config_smart_authorizer_fallback_list_tip">至少选择一项，拖动可以排序</string>
     <string name="config_smart_authorizer_must_choose_one">必须选择一个！</string>
     <string name="config_authorizer">授权方式</string>
-    <string name="config_app_authorizer_desc">用于执行特权操作的授权方式</string>
     <string name="config_install_authorizer_desc">用于安装应用的授权方式</string>
     <string name="config_authorizer_global">跟随全局</string>
     <string name="config_authorizer_global_desc">跟随全局（%1$s）</string>
@@ -320,9 +288,6 @@
     <string name="config_always_use_root_in_system">使用 root 执行特权操作</string>
     <string name="config_always_use_root_in_system_desc">作为系统安装器发起安装时，始终使用 root 执行需要特权的操作，例如刷写模块、删除文件等</string>
     <string name="config_install_mode">安装方式</string>
-    <string name="config_install_mode_desc">默认的安装模式以及相关个性化设置</string>
-    <string name="config_install_mode_global">跟随全局</string>
-    <string name="config_install_mode_global_desc">跟随全局（%1$s）</string>
     <string name="config_install_mode_dialog">对话框</string>
     <string name="config_install_mode_auto_dialog">对话框自动</string>
     <string name="config_install_mode_notification">通知栏</string>
@@ -389,7 +354,6 @@
     <string name="config_label_installer_settings">安装器设置</string>
     <string name="config_label_install_options">安装选项</string>
     <string name="config_label_install_options_desc">配置安装参数，如安装来源，安装用户等</string>
-    <string name="config_label_app_bundle_settings">拆分安装包</string>
     <string name="config_label_preferences">偏好设置</string>
     <string name="config_dialog_title_invalid">有错误输入项</string>
     <string name="config_dialog_title_unsaved_changes">有未保存的修改</string>
@@ -406,8 +370,6 @@
     <string name="config_shared_uid_name">SharedUID 名称</string>
     <string name="config_shared_uid_value">SharedUID 值</string>
     <string name="config_no_managed_shared_user_id_exempted_packages">被排除的应用列表</string>
-    <string name="config_no_managed_shared_user_id_no_exempted_packages">没有被排除的应用</string>
-    <string name="config_managed_packages_desc">添加或移除需要特殊处理的应用</string>
     <string name="config_add_one_to_get_started">点击下方的“添加”按钮开始</string>
     <string name="config_add_new_package">添加新应用</string>
     <string name="config_package_name">包名</string>
@@ -439,10 +401,8 @@
     <string name="finish">完成</string>
     <string name="open">打开</string>
     <string name="open_lsposed">打开 LSPosed</string>
-    <string name="select">选择</string>
     <string name="clear">清除</string>
     <string name="global">全局</string>
-    <string name="expand">展开</string>
     <string name="collapse">收起</string>
     <string name="scope_tips">第一个配置是默认配置，无需手动选择。新配置可以关联特定应用，以便在该应用发起安装时自动生效。</string>
     <string name="got_it">已读</string>
@@ -472,7 +432,6 @@
     <string name="installer_waiting_unknown_source_desc">请授予 %1$s “安装未知应用”权限</string>
     <string name="installer_analysing">分析中…</string>
     <string name="installer_analyse_failed">分析失败</string>
-    <string name="installer_analyse_success">分析成功</string>
     <string name="installer_select_install">选择要安装的应用</string>
     <string name="installer_select_split">选择分包</string>
     <string name="installer_select_split_desc">重新选择要安装的分包</string>
@@ -496,12 +455,7 @@
     <string name="tag_identical">相同</string>
     <string name="installer_prepare_identical_notice">当前安装包与已安装的应用文件完全一致，可以考虑跳过本次安装</string>
     <string name="installer_prepare_sdk_incompatible">系统 SDK 不满足应用要求</string>
-    <string name="installer_prepare_type_new_install">准备安装新应用</string>
-    <string name="installer_prepare_type_upgrade">准备升级应用</string>
     <string name="installer_prepare_type_downgrade">这是一个降级操作，可能会导致数据丢失或应用不稳定</string>
-    <string name="installer_prepare_type_reinstall">将重新安装当前版本的应用</string>
-    <string name="installer_prepare_type_sidegrade">将变更当前版本的应用</string>
-    <string name="installer_prepare_type_unarchive">将取消归档当前应用</string>
     <string name="installer_prepare_type_unknown_confirm">你确定要安装吗？</string>
     <string name="installer_prepare_signature_new_install">新安装。系统中未发现同包名应用。</string>
     <string name="installer_prepare_signature_match">签名一致。当前安装包与已安装应用使用相同 signer 集合。</string>
@@ -664,7 +618,6 @@
     <string name="installer_package_target_sdk_label">目标 SDK：</string>
     <string name="installer_package_size_label">大小：</string>
     <string name="installer_module_author_label">作者：</string>
-    <string name="installer_file_path">路径：%1$s</string>
     <string name="exception_install_failed_unknown">未知错误</string>
     <string name="exception_install_failed_all_authorizers_failed">所有授权方式尝试均失败</string>
     <string name="exception_resolve_failed">URI 解析失败</string>
@@ -751,7 +704,6 @@
     <string name="upgrade_version_prefix">升级</string>
     <string name="downgrade_version_prefix">降级</string>
     <string name="install_choice">安装包选择</string>
-    <string name="installer_error_reason">错误原因</string>
     <string name="exception_install_failed_origin_os_blacklist">vivo 安装系统 app 需要声明有效安装者</string>
     <string name="exception_install_failed_hyperos_isolation_violation">HyperOS 安装系统 app 需要声明有效安装者</string>
     <string name="get_update">获取更新</string>
@@ -778,7 +730,6 @@
     <string name="close_session_countdown">设定倒计时</string>
     <string name="close_session_countdown_desc">在无特权情况下，部分 CN 定制系统会拦截关联启动，修改该值可以增加系统拦截弹窗驻留时的反应时间。</string>
     <string name="dhizuku_unsupported_desc">Dhizuku 不支持</string>
-    <string name="grant_permission_after_install">点击以在安装完成后授予权限</string>
     <string name="show_intelligent_suggestion">显示智能建议</string>
     <string name="show_intelligent_suggestion_desc">安装失败时显示智能建议</string>
     <string name="permission_list">权限列表</string>
@@ -812,10 +763,6 @@
     <string name="config_split_choose_all_desc">安装时默认选中所有分包而不是选中最合适的</string>
     <string name="config_apk_choose_all">默认选择所有 APK</string>
     <string name="config_apk_choose_all_desc">单次安装会话含有多个 APK 文件时默认勾选所有 APK 文件</string>
-    <string name="force_volume_uuid">指定卷 UUID</string>
-    <string name="force_volume_uuid_desc">允许指定卷 UUID 并将软件包安装到该卷</string>
-    <string name="force_permission_prompt">强制权限提示</string>
-    <string name="force_permission_prompt_desc">强制系统安装程序显示安装权限提示</string>
     <string name="instant_app">免安装应用</string>
     <string name="instant_app_desc">安装软件包作为即时应用</string>
     <string name="dont_kill_app">不要杀死安装进程</string>
@@ -833,8 +780,6 @@
     <string name="disable_verification_desc">在安装过程中禁用软件包验证。这并不是签名验证</string>
     <string name="staged">阶段安装</string>
     <string name="staged_desc">指示正在安装此软件包作为分阶段安装的一部分进行安装</string>
-    <string name="config_all_whitelist_restricted_permissions">允许受限制的权限</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">允许为正在安装的软件包授予受限制的权限</string>
     <string name="disable_allowed_apex_update_check">禁用允许的 APEX 更新检查</string>
     <string name="disable_allowed_apex_update_check_desc">不要检查是否可以更新已安装的 APEX</string>
     <string name="config_bypass_low_target_sdk">绕过低目标 SDK 限制</string>
@@ -848,9 +793,6 @@
     <string name="config_request_update_ownership">请求更新所有权</string>
     <string name="config_request_update_ownership_desc">将此安装程序设为未来更新的来源</string>
     <string name="unarchive">取消归档</string>
-    <string name="unarchive_desc">取消一个现有安装的归档</string>
-    <string name="replace_existing">替换已有</string>
-    <string name="replace_existing_desc">如果该软件包已被安装，则替换或升级</string>
     <!--  InstallOptions End  -->
 
     <!-- MixedModuleApk Installer -->
@@ -869,9 +811,7 @@
     <string name="installer_multi_apk_description">请选择要安装的应用</string>
     <string name="installer_multi_apk_description_notification">请点击通知选择要安装的项目</string>
     <string name="installing_progress_text">正在安装 %1$s (%2$d/%3$d)</string>
-    <string name="installer_completed">安装完成</string>
     <string name="installer_completed_subtitle">成功 %1$s 个，失败 %2$s 个</string>
-    <string name="installer_current_install_mode_not_supported">当前模式不支持安装该类型的文件</string>
     <string name="installer_mixed_module_zip_description">这个文件同时包含了模块和应用包，请选择安装模式</string>
     <!-- MultiApkZip End -->
 
@@ -922,17 +862,12 @@
     <string name="suggestion_allow_unknown_source_desc">打开 Android 设置，允许此应用请求安装软件包</string>
     <string name="suggestion_retry_install_desc">重新尝试安装</string>
     <string name="lab_tip">实验室中的功能可能不稳定或存在风险，随时可能被修改或移除，请自行承担使用风险</string>
-    <string name="lab_use_hook_mode">使用 BinderWrapper 模式</string>
-    <string name="lab_use_hook_mode_desc">以 BinderWrapper 取代 UserService，以获得更好的性能。同时支持 Shizuku 和 Root</string>
     <string name="lab_module_flashing">启用模块刷写</string>
     <string name="lab_module_flashing_desc">在刷写任何模块前务必再次确认！</string>
     <string name="lab_module_flashing_show_art">显示字符画</string>
     <string name="lab_module_flashing_show_art_desc">安装开始时显示 InstallerX 字符画</string>
     <string name="lab_module_select_root_impl">选择 Root 实现方式</string>
-    <string name="lab_http_save_file">保存下载文件</string>
-    <string name="lab_http_save_file_desc">下载完成后将文件保存到系统下载目录</string>
     <string name="lab_http_profile">HTTP 安全策略</string>
-    <string name="lab_http_profile_desc">出于安全性限制 HTTP 明文连接</string>
     <string name="lab_http_profile_secure">仅允许安全连接 (HTTPS)</string>
     <string name="lab_http_profile_local">允许本地明文 (Localhost)</string>
     <string name="lab_http_profile_all">允许所有 (不安全)</string>
@@ -941,20 +876,15 @@
     <string name="lab_update_github_proxy_7ed">7ED 代理</string>
     <string name="lab_update_github_proxy_custom">自定义 GHProxy</string>
     <string name="lab_update_github_proxy_url">自定义 URL</string>
-    <string name="lab_update_github_proxy_url_desc">代理链接</string>
     <string name="lab_unstable_features">不稳定功能</string>
-    <string name="lab_ui_settings">实验性 UI 功能</string>
     <string name="lab_show_apk_path">显示文件路径</string>
     <string name="lab_show_apk_path_label">文件路径</string>
     <string name="lab_show_apk_path_desc">在应用详情中显示文件路径</string>
     <string name="lab_show_install_initiator">显示安装发起方</string>
     <string name="lab_show_install_initiator_label">安装发起方</string>
     <string name="lab_show_install_initiator_desc">显示由哪个应用发起安装</string>
-    <string name="lab_set_install_requester">设置安装请求方</string>
-    <string name="lab_set_install_requester_desc">配置文件将在启用该选项后显示 OriginatingUid 字段自定义设置</string>
     <string name="lab_install_without_user_action">无需确认即可安装</string>
     <string name="lab_install_without_user_action_desc">尝试在无需用户操作的情况下安装应用。在 OEM 破坏包管理 API 的系统上，启用该选项可能会导致完全无法安装应用</string>
-    <string name="lab_mi_island">小米超级岛</string>
     <string name="lab_mi_island_countdown">XMSF 断网时长</string>
     <string name="lab_mi_island_countdown_desc">设置 XMSF 断网时长。仅对 Shizuku 生效。请仅在明确影响时修改！</string>
     <string name="lab_tap_icon_to_share">点击图标分享安装包</string>
@@ -962,7 +892,6 @@
     <string name="notification_settings">通知设置</string>
     <string name="notification_settings_desc">自定义安装进度通知的展示效果</string>
     <string name="notification_style">通知样式</string>
-    <string name="notification_style_desc">选择安装进度通知的展示样式</string>
     <string name="notification_style_standard">标准通知</string>
     <string name="notification_style_live_activity">实时活动通知</string>
     <string name="notification_style_mi_island">小米超级岛</string>

@@ -6,14 +6,12 @@
     <string name="allocate_aggressive">จัดสรรอย่างเข้มข้น</string>
     <string name="allocate_aggressive_desc">ระบุว่าแพ็คเกจเป็น ส่วนสำคัญต่อสุขภาพหรือความปลอดภัยของระบบ และจะลบไฟล์ที่ล้างได้มากขึ้นเพื่อเพิ่มพื้นที่หากจำเป็น</string>
     <string name="apex_desc">ระบุว่าแพ็คเกจที่กำลังติดตั้งคือแพ็คเกจ APEX</string>
-    <string name="app">แอป</string>
     <string name="apply">ใช้</string>
     <string name="back">ย้อนกลับ</string>
     <string name="basic">พื้นฐาน</string>
     <string name="cancel">ยกเลิก</string>
     <string name="change_notification_touch_behavior">เปลี่ยนพฤติกรรมการแตะการแจ้งเตือน</string>
     <string name="clear">ล้าง</string>
-    <string name="clear_cache">ล้างแคช</string>
     <string name="close">ปิด</string>
     <string name="close_notification_immediately_on_dialog_dismiss">ปิดไดอะล็อกจะออกจากโปรแกรมอย่างเงียบ ๆ</string>
     <string name="config">โปรไฟล์</string>
@@ -21,8 +19,6 @@
     <string name="config_add_one_to_get_started">คลิก \'เพิ่ม\' ด้านล่างเพื่อเริ่มต้น</string>
     <string name="config_all_users">ติดตั้งสำหรับผู้ใช้ทั้งหมด</string>
     <string name="config_all_users_desc">ติดตั้งแพ็คเกจสำหรับผู้ใช้ทั้งหมดในระบบ แทนที่จะเป็นแค่ผู้ใช้ที่ระบุหรือผู้ใช้เริ่มต้น</string>
-    <string name="config_all_whitelist_restricted_permissions">อนุญาตสิทธิ์ที่จำกัด</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">อนุญาตให้สิทธิ์ที่จำกัดสำหรับแพ็คเกจที่กำลังติดตั้ง</string>
     <string name="config_allow_downgrade">อนุญาตให้ดาวน์เกรด</string>
     <string name="config_allow_downgrade_desc">พยายามดาวน์เกรดเวอร์ชันที่ติดตั้งปัจจุบันของแพ็คเกจไปเป็นเวอร์ชันที่กำลังติดตั้ง (อาจใช้ไม่ได้กับ ROMs ทั้งหมด)</string>
     <string name="config_allow_test">อนุญาตการทดสอบ</string>
@@ -57,13 +53,10 @@
     <string name="config_force_dexopt_desc">บังคับการคอมไพล์ใหม่แม้ว่าระบบจะเห็นว่าไม่จำเป็น</string>
     <string name="config_grant_all_permissions">ให้สิทธิ์ที่ร้องขอทั้งหมด</string>
     <string name="config_grant_all_permissions_desc">ให้สิทธิ์ทั้งหมดที่แพ็คเกจร้องขอโดยอัตโนมัติ โปรดทราบว่าการกระทำนี้ใช้ได้กับสิทธิ์รันไทม์เท่านั้น สิทธิ์พิเศษเช่น การเข้าถึงไฟล์ทั้งหมดหรือการช่วยเข้าถึงจะไม่ได้รับโดยอัตโนมัติ</string>
-    <string name="config_info">ข้อมูล</string>
     <string name="config_install_mode">โหมดการติดตั้ง</string>
     <string name="config_install_mode_auto_dialog">ไดอะล็อกอัตโนมัติ</string>
     <string name="config_install_mode_auto_notification">การแจ้งเตือนอัตโนมัติ</string>
     <string name="config_install_mode_dialog">ไดอะล็อก</string>
-    <string name="config_install_mode_global">ทั่วโลก</string>
-    <string name="config_install_mode_global_desc">ทั่วโลก (%1$s)</string>
     <string name="config_install_mode_ignore">ละเว้น</string>
     <string name="config_install_mode_notification">การแจ้งเตือน</string>
     <string name="config_installer">ติดตั้งโดย (ชื่อแพ็คเกจ)</string>
@@ -72,7 +65,6 @@
     <string name="config_label_installer_settings">การตั้งค่าตัวติดตั้ง</string>
     <string name="config_label_main_settings">การตั้งค่าหลัก</string>
     <string name="config_managed_installer_packages_title">ค่าที่ตั้งไว้ล่วงหน้าสำหรับแหล่งที่มาของตัวติดตั้ง</string>
-    <string name="config_managed_packages_desc">เพิ่มหรือลบแพ็คเกจที่จัดการ</string>
     <string name="config_manual_dexopt">การเพิ่มประสิทธิภาพ Dex ด้วยตนเอง</string>
     <string name="config_manual_dexopt_desc">เรียกใช้กระบวนการ dex2oat ด้วยตนเองหลังจากการติดตั้ง</string>
     <string name="config_name">ชื่อโปรไฟล์</string>
@@ -103,7 +95,6 @@
     <string name="dry_run">ทดลองรัน</string>
     <string name="dry_run_desc">ยืนยันแพ็คเกจ แต่ไม่ต้องติดตั้ง</string>
     <string name="edit">แก้ไข</string>
-    <string name="empty_configs">ไม่มีโปรไฟล์ เพิ่มหนึ่งโปรไฟล์ด้านล่าง</string>
     <string name="enable_notification_hint">โปรดเปิดใช้งานสิทธิ์การแจ้งเตือนเพื่อติดตั้ง!</string>
     <string name="enable_rollback">เปิดใช้งานการย้อนกลับ</string>
     <string name="enable_rollback_desc">อนุญาตให้มีการย้อนกลับแพ็คเกจนี้ในอนาคต</string>
@@ -152,10 +143,6 @@
     <string name="external">พื้นที่เก็บข้อมูลภายนอก</string>
     <string name="external_desc">บังคับให้แพ็คเกจติดตั้งในพื้นที่เก็บข้อมูลภายนอก</string>
     <string name="finish">เสร็จสิ้น</string>
-    <string name="force_permission_prompt">บังคับพร้อมต์ขอสิทธิ์</string>
-    <string name="force_permission_prompt_desc">บังคับให้แม้กระทั่งตัวติดตั้งของระบบต้องแสดงพร้อมต์ยืนยันการติดตั้ง</string>
-    <string name="force_volume_uuid">บังคับ UUID ของโวลุ่ม</string>
-    <string name="force_volume_uuid_desc">อนุญาตให้ระบุ UUID ของโวลุ่มเพื่อติดตั้งแพ็คเกจ</string>
     <string name="from_adb">คำขอติดตั้งจาก ADB</string>
     <string name="from_adb_desc">บอกระบบว่าคำขอติดตั้งมาจาก ADB</string>
     <string name="full_app">แอปฉบับเต็ม</string>
@@ -163,7 +150,6 @@
     <string name="get_update">รับการอัปเดต</string>
     <string name="get_update_detail">ตรวจสอบการอัปเดตซอฟต์แวร์และฟีเจอร์ใหม่</string>
     <string name="global">ทั่วโลก</string>
-    <string name="grant_permission_after_install">คลิกเพื่อให้สิทธิ์หลังการติดตั้ง</string>
     <string name="ignore_battery_optimizations">ละเว้นการเพิ่มประสิทธิภาพแบตเตอรี่</string>
     <string name="ignore_battery_optimizations_desc">มีประโยชน์ในบาง ROMs ที่กำหนดเองซึ่งมีนโยบายพื้นหลังที่เข้มงวด</string>
     <string name="ignore_battery_optimizations_desc_disabled">ละเว้นอยู่แล้ว</string>
@@ -173,12 +159,8 @@
     <string name="installer_analysing">กำลังวิเคราะห์…</string>
     <string name="installer_background_channel_name">การแจ้งเตือนเบื้องหลัง</string>
     <string name="installer_channel_name">การแจ้งเตือนการติดตั้ง</string>
-    <string name="installer_completed">การติดตั้งเสร็จสมบูรณ์</string>
     <string name="installer_completed_subtitle">สำเร็จ %1$s, ล้มเหลว %2$s</string>
-    <string name="installer_current_install_mode_not_supported">โหมดปัจจุบันไม่รองรับการติดตั้งไฟล์ประเภทนี้</string>
-    <string name="installer_error_reason">สาเหตุของข้อผิดพลาด</string>
     <string name="installer_file_name">ไฟล์: %1$s</string>
-    <string name="installer_file_path">เส้นทาง: %1$s</string>
     <string name="installer_install_failed">การติดตั้งล้มเหลว</string>
     <string name="installer_install_success">การติดตั้งสำเร็จ</string>
     <string name="installer_installing">กำลังติดตั้ง…</string>
@@ -190,12 +172,7 @@
     <string name="installer_prepare_install_too_many">โปรดเลือก base.apk เพียงหนึ่งไฟล์เท่านั้น</string>
     <string name="installer_prepare_sdk_incompatible">SDK ของระบบต่ำกว่าที่แอปต้องการ</string>
     <string name="installer_prepare_type_downgrade">นี่คือการดาวน์เกรด ซึ่งอาจทำให้ข้อมูลสูญหายหรือไม่เสถียร</string>
-    <string name="installer_prepare_type_new_install">กำลังเตรียมติดตั้งแอปใหม่</string>
-    <string name="installer_prepare_type_reinstall">จะติดตั้งแอปเวอร์ชันปัจจุบันใหม่</string>
-    <string name="installer_prepare_type_sidegrade">จะเปลี่ยนเวอร์ชันปัจจุบันของแอป</string>
-    <string name="installer_prepare_type_unarchive">จะยกเลิกการเก็บถาวรแอปปัจจุบัน</string>
     <string name="installer_prepare_type_unknown_confirm">คุณแน่ใจหรือไม่ว่าต้องการติดตั้ง?</string>
-    <string name="installer_prepare_type_upgrade">กำลังเตรียมอัปเกรดแอป</string>
     <string name="installer_preparing">กำลังเตรียมการ</string>
     <string name="installer_preparing_desc">กำลังเตรียมไฟล์ โปรดรอ…</string>
     <string name="installer_progress_channel_name">การแจ้งเตือนกระบวนการติดตั้ง</string>
@@ -210,7 +187,6 @@
     <string name="installer_settings_desc">เปลี่ยนการตั้งค่าทั่วโลกของตัวติดตั้ง</string>
     <string name="installer_settings_dialog_mode_options">ตัวเลือกสำหรับไดอะล็อก</string>
     <string name="installer_settings_global_installer">ทั่วโลก</string>
-    <string name="installer_settings_notification_mode_options">ตัวเลือกสำหรับการแจ้งเตือน</string>
     <string name="installer_move_to_background">ติดตั้งแบบเงียบ</string>
     <string name="installer_unknown_error">ข้อผิดพลาดที่ไม่รู้จัก</string>
     <string name="installer_version">เวอร์ชัน: %1$s (%2$s)</string>
@@ -236,7 +212,6 @@
     <string name="open">เปิด</string>
     <string name="open_source_license">ใบอนุญาตโอเพนซอร์ส</string>
     <string name="options">ตัวเลือก</string>
-    <string name="order">เรียงลำดับ</string>
     <string name="other">อื่นๆ</string>
     <string name="permission_access_background_location">การเข้าถึงตำแหน่งเบื้องหลัง</string>
     <string name="permission_access_coarse_location">การเข้าถึงตำแหน่งคร่าวๆ</string>
@@ -295,8 +270,6 @@
     <string name="preferred">ค่ากำหนด</string>
     <string name="preview">แสดงตัวอย่าง</string>
     <string name="previous">ย้อนกลับ</string>
-    <string name="replace_existing">แทนที่ที่มีอยู่</string>
-    <string name="replace_existing_desc">หากแพ็คเกจที่กำลังติดตั้งมีอยู่แล้ว ให้แทนที่/อัปเกรด</string>
     <string name="restore">เลิกทำ</string>
     <string name="retry">ลองอีกครั้ง</string>
     <string name="save">บันทึก</string>
@@ -330,7 +303,6 @@
     <string name="stable">เสถียร</string>
     <string name="staged">Staged</string>
     <string name="staged_desc">ระบุว่าแพ็คเกจนี้กำลังติดตั้งเป็นส่วนหนึ่งของการติดตั้งแบบ Staged</string>
-    <string name="success">สำเร็จ</string>
     <string name="suggestion_allow_downgrade">อนุญาตให้ดาวน์เกรดชั่วคราวแล้วลองใหม่</string>
     <string name="suggestion_allow_test_app">อนุญาตให้ทดสอบแอปชั่วคราวแล้วลองใหม่</string>
     <string name="suggestion_bypass_low_target_sdk">อนุญาตให้ข้ามข้อจำกัดชั่วคราวแล้วลองใหม่</string>
@@ -344,10 +316,7 @@
     <string name="theme_settings">การตั้งค่าธีม</string>
     <string name="theme_settings_desc">เปลี่ยนธีมของแอป</string>
     <string name="theme_settings_ui_style">สไตล์ UI</string>
-    <string name="theme_settings_use_expressive_ui">ใช้ UI ที่รีเฟรชแล้ว</string>
-    <string name="theme_settings_use_expressive_ui_desc">ใช้ UI ใหม่ของ Google สำหรับแอป</string>
     <string name="unarchive">ยกเลิกการเก็บถาวร</string>
-    <string name="unarchive_desc">ยกเลิกการเก็บถาวรแพ็คเกจที่มีอยู่</string>
     <string name="uninstall">ถอนการติดตั้ง</string>
     <string name="uninstall_all_users">สำหรับผู้ใช้ทั้งหมด</string>
     <string name="uninstall_delete_system_app">ลบแอปของระบบ</string>
@@ -360,7 +329,6 @@
     <string name="unstable">ไม่เสถียร</string>
     <string name="update">อัปเดต</string>
     <string name="upgrade_version_prefix">อัปเกรด</string>
-    <string name="user_terms">นโยบายผู้ใช้</string>
     <string name="version_compare_in_single_line">แสดงการเปรียบเทียบเวอร์ชันในบรรทัดเดียว</string>
     <string name="version_compare_in_single_line_desc">แสดงการเปรียบเทียบเวอร์ชันในบรรทัดเดียวในไดอะล็อกการติดตั้ง</string>
     <string name="virtual_preload">Virtual Preload</string>

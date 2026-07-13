@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">InstallerX Revived</string>
-    <string name="agreement_title">Policy</string>
     <!--<string name="agreement_text">Here is our user policy, Please read and agree to it. &lt;a href="https://iamr0s.github.io/InstallerXDocs/terms"&gt;User Policy&lt;/a&gt;, &lt;a href="https://iamr0s.github.io/InstallerXDocs/privacy"&gt;Privacy Policy&lt;/a&gt; This message won\'t show up again after you agree.</string>-->
-    <string name="user_terms">User policy</string>
-    <string name="privacy_policy">Privacy policy</string>
-    <string name="agree">Agree</string>
     <string name="warning">Warning</string>
     <string name="open_source_license">Open Source License</string>
     <string name="open_source_license_settings_description">View third-party open-source libraries and their licenses</string>
@@ -28,13 +24,9 @@
     <string name="setting_lsposed_module_desc">Enable this if you have forced the default installer takeover via a third-party LSPosed module. This disables internal status checking, and the home page will constantly show as "Activated"</string>
     <string name="home_stat_authorizers">Available Privileges</string>
     <string name="home_stat_profiles">Profiles</string>
-    <string name="home_root_mode">Root: %s</string>
     <string name="home_label_lsp" translatable="false">LSPosed</string>
     <string name="home_label_lsp_link">Looking for a module?</string>
     <string name="home_lsp_inxlocker_title" translatable="false">InxLocker</string>
-    <string name="home_system_app">System App</string>
-    <string name="activate_mode">Activate mode: %s</string>
-    <string name="shizuku_working_mode">Shizuku working mode: %s</string>
     <string name="shizuku_not_authorized">Please grant permission to access Sui or Shizuku</string>
     <string name="shizuku_not_available">Please activate Sui or Shizuku</string>
     <string name="dhizuku_not_authorized">Please grant permission to access Dhizuku</string>
@@ -72,7 +64,6 @@
     <string name="history_error">Error</string>
     <string name="history_unknown">Unknown</string>
     <string name="history_none">None</string>
-    <string name="app">App</string>
     <string name="preferred">Preferences</string>
     <string name="personalization">Personalization</string>
     <string name="search">Search</string>
@@ -80,7 +71,6 @@
     <string name="about">About</string>
     <string name="other">Other</string>
     <string name="extras">Extras</string>
-    <string name="performance">Performance</string>
     <string name="lab">Laboratory</string>
     <string name="lab_desc">Access experimental and developer features</string>
     <string name="debug">Debug</string>
@@ -107,11 +97,6 @@
     <string name="unstable">Unstable</string>
     <string name="enable_notification_hint">Please enable notification permission to install!</string>
     <string name="enable_storage_permission_hint">Please enable All Files Access to install!</string>
-    <string name="discuss">Chat &amp; Feedback &amp; Update</string>
-    <string name="telegram_group">Telegram group</string>
-    <string name="telegram_group_desc">Join the group!</string>
-    <string name="telegram_channel">Telegram Channel</string>
-    <string name="telegram_channel_desc">Join the channel to receive news and updates!</string>
     <string name="combined_description_format" translatable="false">%1$s\n%2$s</string>
     <string name="theme_settings">Theme Settings</string>
     <string name="theme_settings_ui_style">UI Style</string>
@@ -123,13 +108,10 @@
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Standard Material Design UI</string>
     <string name="theme_settings_ui_engine">UI Engine</string>
-    <string name="theme_settings_use_expressive_ui">Use Expressive UI</string>
-    <string name="theme_settings_use_expressive_ui_desc">Use the new M3 Expressive style</string>
     <string name="theme_settings_use_apple_floating_bar">Enable floating bottom bar</string>
     <string name="theme_settings_use_apple_floating_bar_desc">Display a floating style navigation bar at the bottom of the screen</string>
     <string name="theme_settings_use_blur">Enable Blur</string>
     <string name="theme_settings_use_blur_desc">Enable blur for the app</string>
-    <string name="theme_settings_google_ui_style">Google UI style</string>
     <string name="theme_settings_theme_mode">Theme Mode</string>
     <string name="theme_settings_theme_mode_desc">Select theme mode</string>
     <string name="theme_settings_theme_mode_light">Light theme</string>
@@ -164,12 +146,9 @@
     <string name="color_blue_grey">Blue Grey</string>
     <string name="color_brown">Brown</string>
     <string name="color_grey">Grey</string>
-    <string name="theme_settings_use_live_activity">Live Activity</string>
-    <string name="theme_settings_use_live_activity_desc">Use Live Activity instead of notifications, may not be supported on custom ROMs</string>
     <string name="theme_settings_package_icons">Package icon source</string>
     <string name="theme_settings_prefer_system_icon">Prefer system icon for app to install</string>
     <string name="theme_settings_prefer_system_icon_desc">Attempt to get icon from system, useful when using icon packs. Disable to show icon from installation package</string>
-    <string name="theme_settings_launcher_icons">Launcher icon</string>
     <string name="theme_settings_predictive_back">Predictive Back</string>
     <string name="theme_settings_predictive_back_animation">Predictive Back Animation</string>
     <string name="theme_settings_predictive_back_animation_desc">Select the animation effect for predictive back</string>
@@ -220,7 +199,6 @@
     <string name="use_biometric_confirm_change_auth_settings">Are you sure you want to change this setting</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">To continue, please confirm this action using your device authentication</string>
     <string name="installer_settings_dialog_mode_options">Options for Dialog</string>
-    <string name="installer_settings_notification_mode_options">Options for Notification</string>
     <string name="installer_settings_auto_clear_success_notification">Auto-clear notification</string>
     <string name="installer_settings_auto_clear_success_notification_desc">Auto-clear notification of successful installation</string>
     <string name="installer_settings_auto_clear_time_never">Never</string>
@@ -277,11 +255,6 @@
     <string name="unlock_default_installer_failed">Couldn\'t unset as default installer</string>
     <string name="locking_default_installer">Setting as default installer…</string>
     <string name="unlocking_default_installer">Unsetting default installer…</string>
-    <string name="clear_cache">Clear cache</string>
-    <string name="no_cache">No cache</string>
-    <string name="clearing_cache">Clearing cache…</string>
-    <string name="cache_size">Cache size: %1$s</string>
-    <string name="success">Success</string>
     <string name="details">Details</string>
     <string name="add">Add</string>
     <string name="update">Update</string>
@@ -293,13 +266,9 @@
     <string name="restore">Undo</string>
     <string name="delete_success">Successfully deleted</string>
     <string name="loading">Loading…</string>
-    <string name="empty_configs">No profiles, add one below</string>
-    <string name="filter">Filter</string>
-    <string name="order">Sort</string>
     <string name="config_global_default">Global Default</string>
     <string name="config_status_inactive">Inactive</string>
     <string name="config_name">Profile name</string>
-    <string name="config_info">Info</string>
     <string name="config_scope">Scope</string>
     <string name="config_description">Profile description</string>
     <string name="authorizer_customization">Authorizer Tweaks</string>
@@ -313,7 +282,6 @@
     <string name="config_smart_authorizer_fallback_list_tip">Select at least one item. Drag to sort.</string>
     <string name="config_smart_authorizer_must_choose_one">Must select one!</string>
     <string name="config_authorizer">Authorizer</string>
-    <string name="config_app_authorizer_desc">Authorizer to perform privileged operations</string>
     <string name="config_install_authorizer_desc">Authorizer to install apps</string>
     <string name="config_authorizer_global">Global</string>
     <string name="config_authorizer_global_desc">Global (%1$s)</string>
@@ -328,9 +296,6 @@
     <string name="config_always_use_root_in_system">Use root for privileged operations</string>
     <string name="config_always_use_root_in_system_desc">When working as system package installer, always use root for some privileged operations, such as flashing modules and deleting files</string>
     <string name="config_install_mode">Install mode</string>
-    <string name="config_install_mode_desc">Default Install Mode and related settings</string>
-    <string name="config_install_mode_global">Global</string>
-    <string name="config_install_mode_global_desc">Global (%1$s)</string>
     <string name="config_install_mode_dialog">Dialog</string>
     <string name="config_install_mode_auto_dialog">Auto dialog</string>
     <string name="config_install_mode_notification">Notification</string>
@@ -401,7 +366,6 @@
     <string name="config_label_installer_settings">Installer Settings</string>
     <string name="config_label_install_options">Install Options</string>
     <string name="config_label_install_options_desc">Configure installation parameters such as source, user</string>
-    <string name="config_label_app_bundle_settings">Split APK Packages</string>
     <string name="config_label_preferences">Preferences</string>
     <string name="config_dialog_title_invalid">Invalid Input</string>
     <string name="config_dialog_title_unsaved_changes">Unsaved changes</string>
@@ -418,8 +382,6 @@
     <string name="config_shared_uid_name">Shared User ID name</string>
     <string name="config_shared_uid_value">Shared User ID value</string>
     <string name="config_no_managed_shared_user_id_exempted_packages">Exempted Apps List</string>
-    <string name="config_no_managed_shared_user_id_no_exempted_packages">No Exempted Apps</string>
-    <string name="config_managed_packages_desc">Add or remove managed packages</string>
     <string name="config_add_one_to_get_started">Click \'Add\' below to start</string>
     <string name="config_add_new_package">Add new package</string>
     <string name="config_package_name">Package Name</string>
@@ -451,10 +413,8 @@
     <string name="finish">Done</string>
     <string name="open">Open</string>
     <string name="open_lsposed">Open LSPosed</string>
-    <string name="select">Select</string>
     <string name="clear">Clear</string>
     <string name="global">Global</string>
-    <string name="expand">Expand</string>
     <string name="collapse">Collapse</string>
     <string name="scope_tips">The first profile is the default, no manual selection needed. New profile can be set to specific apps for installations they initiate.</string>
     <string name="got_it">Got it</string>
@@ -485,7 +445,6 @@
     <string name="installer_analysing">Analysing…</string>
     <string name="installer_analyse_failed">Analyse failed</string>
     <string name="installer_analyse_failed_corrupted_archive">Corrupted archive</string>
-    <string name="installer_analyse_success">Analyse success</string>
     <string name="installer_select_install">Select apps to install</string>
     <string name="installer_select_split">Select APK splits</string>
     <string name="installer_select_split_desc">Re-select the APK splits to install</string>
@@ -510,12 +469,7 @@
     <string name="tag_identical">Identical</string>
     <string name="installer_prepare_identical_notice">This package is identical to the installed app. You can safely skip this installation.</string>
     <string name="installer_prepare_sdk_incompatible">System SDK lower than app requires</string>
-    <string name="installer_prepare_type_new_install">Preparing to install new app</string>
-    <string name="installer_prepare_type_upgrade">Preparing to upgrade app</string>
     <string name="installer_prepare_type_downgrade">This is a downgrade, which may cause data loss or app instability</string>
-    <string name="installer_prepare_type_reinstall">Will reinstall the current version of the app</string>
-    <string name="installer_prepare_type_sidegrade">Will change the current version of the app</string>
-    <string name="installer_prepare_type_unarchive">Will unarchive the current app</string>
     <string name="installer_prepare_type_unknown_confirm">Are you sure you want to install?</string>
     <string name="installer_prepare_signature_new_install">New install. No installed app with the same package name was found.</string>
     <string name="installer_prepare_signature_match">Signature match. The current package uses the same signer set as the installed app.</string>
@@ -566,7 +520,6 @@
     <string name="installer_install_complete">Install complete</string>
     <string name="batch_install_result_message">Batch installation: %1$d/%2$d successful</string>
     <string name="installer_move_to_background">Run in background</string>
-    <string name="installer_error_reason">Error Reason</string>
     <string name="installer_unknown_error">Unknown Error</string>
     <string name="install_confirm_question_update_owner_reminder">This app is usually updated by %1$s. If you update it from another source, your phone may receive future updates from any source. App functionality may change.</string>
     <string name="install_confirm_external_request_tip">Approve installation request from %1$s ?</string>
@@ -681,14 +634,12 @@
     <string name="installer_package_target_sdk_label">Target SDK:</string>
     <string name="installer_package_min_label" translatable="false">Min: </string>
     <string name="installer_package_target_label" translatable="false">Target: </string>
-    <string name="installer_package_sdk_value" translatable="false">%1$s(Android%2$s)</string>
     <string name="installer_package_min_sdk_label_short" translatable="false">Min: %1$s</string>
     <string name="installer_package_target_sdk_label_short" translatable="false">Target: %1$s</string>
     <string name="installer_package_minOsdkVersion_label" translatable="false">MinOsdkVersion: </string>
     <string name="installer_package_minOsdkVersion" translatable="false">MinOsdkVersion: %1$s</string>
     <string name="installer_package_size_label">Size: </string>
     <string name="installer_module_author_label">Author: </string>
-    <string name="installer_file_path">Path: %1$s</string>
     <string name="exception_install_failed_unknown">Unknown error</string>
     <string name="exception_install_failed_all_authorizers_failed">All authorizers failed</string>
     <string name="exception_resolve_failed">Resolve URI failed</string>
@@ -799,7 +750,6 @@
     <string name="close_session_countdown">Close session countdown</string>
     <string name="close_session_countdown_desc">In the absence of privileges, some CN customized systems will intercept the associated startup. Modifying this value can increase the reaction time when the system intercept pop-up remains.</string>
     <string name="dhizuku_unsupported_desc">Dhizuku is not supported</string>
-    <string name="grant_permission_after_install">Click to grant permission after installation</string>
     <string name="show_intelligent_suggestion">Show Smart Suggestions</string>
     <string name="show_intelligent_suggestion_desc">Show smart suggestions on install failure</string>
     <string name="permission_list">Permission List</string>
@@ -833,10 +783,6 @@
     <string name="config_split_choose_all_desc">Select all splits by default instead of selecting best suitable</string>
     <string name="config_apk_choose_all">Select all APKs by default during batch install</string>
     <string name="config_apk_choose_all_desc">Select all APKs by default for multiple-file sessions.</string>
-    <string name="force_volume_uuid">Force Volume UUID</string>
-    <string name="force_volume_uuid_desc">Allows specifying a volume UUID to install the package to</string>
-    <string name="force_permission_prompt">Force Permission Prompt</string>
-    <string name="force_permission_prompt_desc">Forces even system installers to show the install confirmation prompt</string>
     <string name="instant_app">Instant App</string>
     <string name="instant_app_desc">Install the package as an instant app</string>
     <string name="dont_kill_app">Don\'t Kill App</string>
@@ -855,8 +801,6 @@
     <string name="disable_verification_desc">Disables package verification during install. This is not signature verification</string>
     <string name="staged">Staged</string>
     <string name="staged_desc">Indicates this package is being installed as part of a staged install</string>
-    <string name="config_all_whitelist_restricted_permissions">Allow Restricted Permissions</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">Allow restricted permissions to be granted for the package being installed</string>
     <string name="disable_allowed_apex_update_check">Disable Allowed APEX Update Check</string>
     <string name="disable_allowed_apex_update_check_desc">Don\'t check whether the installed APEX can be updated</string>
     <string name="config_bypass_low_target_sdk">Bypass Low Target SDK Block</string>
@@ -870,9 +814,6 @@
     <string name="config_request_update_ownership">Request Update Ownership</string>
     <string name="config_request_update_ownership_desc">Set this installer as the source for future updates</string>
     <string name="unarchive">Unarchive</string>
-    <string name="unarchive_desc">Unarchive an existing package</string>
-    <string name="replace_existing">Replace Existing</string>
-    <string name="replace_existing_desc">If the package being installed already exists, replace/upgrade it</string>
     <!--  InstallOptions End  -->
 
     <!-- MultiApkZip Installer -->
@@ -883,9 +824,7 @@
     <string name="installer_multi_apk_description">Please select the applications you want to install</string>
     <string name="installer_multi_apk_description_notification">Please click on the notification to select items to install</string>
     <string name="installing_progress_text">Installing %1$s (%2$d/%3$d)</string>
-    <string name="installer_completed">Install complete</string>
     <string name="installer_completed_subtitle">Successful %1$s, failed %2$s</string>
-    <string name="installer_current_install_mode_not_supported">Current mode does not support installing this type of file</string>
     <string name="installer_mixed_module_zip_description">This file contains both a module and applications. Choose how to install</string>
     <!-- MultiApkZip End -->
 
@@ -944,17 +883,12 @@
     <string name="suggestion_allow_unknown_source_desc">Open Android settings to allow this app to request package installs</string>
     <string name="suggestion_retry_install_desc">Try install again</string>
     <string name="lab_tip">Experimental features in the lab may be unstable or risky and could change or be removed at any time. Use at your own risk</string>
-    <string name="lab_use_hook_mode">Use BinderWrapper mode</string>
-    <string name="lab_use_hook_mode_desc">Use BinderWrapper instead of UserService to get better performance, works both for Shizuku and Root</string>
     <string name="lab_module_flashing">Enable module flashing</string>
     <string name="lab_module_flashing_desc">Always check twice before flashing any modules!</string>
     <string name="lab_module_flashing_show_art">Display ASCII art</string>
     <string name="lab_module_flashing_show_art_desc">Display InstallerX ASCII art when installation starts"</string>
     <string name="lab_module_select_root_impl">Choose root implementation</string>
-    <string name="lab_http_save_file">Save downloaded files</string>
-    <string name="lab_http_save_file_desc">Save files to the Downloads folder after download is complete</string>
     <string name="lab_http_profile">HTTP Security Policy</string>
-    <string name="lab_http_profile_desc">Restrict cleartext HTTP access for security</string>
     <string name="lab_http_profile_secure">Secure connections only (HTTPS)</string>
     <string name="lab_http_profile_local">Allow local cleartext (Localhost)</string>
     <string name="lab_http_profile_all">Allow all (Insecure)</string>
@@ -963,20 +897,15 @@
     <string name="lab_update_github_proxy_7ed">7ED Proxy</string>
     <string name="lab_update_github_proxy_custom">Custom GHProxy</string>
     <string name="lab_update_github_proxy_url">Custom URL</string>
-    <string name="lab_update_github_proxy_url_desc">Proxy URL</string>
     <string name="lab_unstable_features">Unstable features</string>
-    <string name="lab_ui_settings">Experimental UI feature</string>
     <string name="lab_show_apk_path">Show file path</string>
     <string name="lab_show_apk_path_label">File path</string>
     <string name="lab_show_apk_path_desc">Display the file path in app details</string>
     <string name="lab_show_install_initiator">Show install initiator</string>
     <string name="lab_show_install_initiator_label">Install initiator</string>
     <string name="lab_show_install_initiator_desc">Display which app started the installation</string>
-    <string name="lab_set_install_requester">Set Install Requester</string>
-    <string name="lab_set_install_requester_desc">Show OriginatingUid field customization in profiles when enabled</string>
     <string name="lab_install_without_user_action">Install without user action</string>
     <string name="lab_install_without_user_action_desc">Attempt to update apps without user confirmation. Enabling this option may completely prevent installation on systems where OEMs have broken PackageInstaller APIs</string>
-    <string name="lab_mi_island">Mi Super Island</string>
     <string name="lab_mi_island_countdown">XMSF block duration</string>
     <string name="lab_mi_island_countdown_desc">Sets the XMSF network block duration. Only applies to Shizuku. Modify only if you understand the consequences!</string>
     <string name="lab_tap_icon_to_share">Tap icon to share apk</string>
@@ -984,7 +913,6 @@
     <string name="notification_settings">Notification Settings</string>
     <string name="notification_settings_desc">Customize the appearance of installation progress notifications</string>
     <string name="notification_style">Notification Style</string>
-    <string name="notification_style_desc">Select the display style for progress notifications</string>
     <string name="notification_style_standard">Standard Notification</string>
     <string name="notification_style_live_activity">Live Activity</string>
     <string name="notification_style_mi_island">Xiaomi Mi Island</string>

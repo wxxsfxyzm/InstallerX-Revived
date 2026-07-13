@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">السياسة</string>
-    <string name="user_terms">سياسة المستخدم</string>
-    <string name="privacy_policy">سياسة الخصوصية</string>
-    <string name="agree">أوافق</string>
     <string name="open_source_license">تراخيص المصادر المفتوحة</string>
     <string name="back">رجوع</string>
     <string name="home">الرئيسية</string>
     <string name="config">الملفات الشخصية</string>
-    <string name="app">التطبيق</string>
     <string name="preferred">التفضيلات</string>
     <string name="personalization">التخصيص</string>
     <string name="search">بحث</string>
@@ -25,19 +20,13 @@
     <string name="unstable">غير مستقر</string>
     <string name="enable_notification_hint">يرجى تمكين إذن الإشعارات لإتمام التثبيت!</string>
     <string name="enable_storage_permission_hint">يرجى تمكين صلاحية الوصول لجميع الملفات لإتمام التثبيت!</string>
-    <string name="discuss">محادثة وملاحظات وتحديثات</string>
-    <string name="telegram_group">مجموعة تيليجرام</string>
-    <string name="telegram_group_desc">انضم إلى المجموعة!</string>
     <string name="theme_settings">إعدادات السمة</string>
     <string name="theme_settings_ui_style">نمط واجهة المستخدم</string>
     <string name="theme_settings_desc">تغيير سمة التطبيق</string>
-    <string name="theme_settings_use_expressive_ui">استخدام الواجهة المحدثة</string>
-    <string name="theme_settings_use_expressive_ui_desc">استخدام واجهة جوجل الجديدة للتطبيق</string>
     <string name="installer_settings">إعدادات المُثبِّت</string>
     <string name="installer_settings_desc">تغيير الإعدادات العامة للمُثبِّت</string>
     <string name="installer_settings_global_installer">عام</string>
     <string name="installer_settings_dialog_mode_options">خيارات نافذة الحوار</string>
-    <string name="installer_settings_notification_mode_options">خيارات الإشعارات</string>
     <string name="basic">أساسي</string>
     <string name="disable_adb_install_verify">تعطيل التحقق من التثبيت عبر ADB</string>
     <string name="disable_adb_install_verify_desc">يعطل التحقق من التثبيت عبر ADB، وهو أمر مفيد في بعض الأنظمة حيث يؤدي التثبيت إلى تشغيل فحص (مثل Play Protect)</string>
@@ -54,8 +43,6 @@
     <string name="unlock_default_installer_desc">إلغاء تعيين InstallerX كمُثبِّت افتراضي لحزم APK</string>
     <string name="unlock_default_installer_success">تم إلغاء التعيين كمُثبِّت افتراضي بنجاح</string>
     <string name="unlock_default_installer_failed">تعذر إلغاء التعيين كمُثبِّت افتراضي</string>
-    <string name="clear_cache">مسح الذاكرة المؤقتة</string>
-    <string name="success">نجاح</string>
     <string name="details">تفاصيل</string>
     <string name="add">إضافة</string>
     <string name="update">تحديث</string>
@@ -67,11 +54,7 @@
     <string name="restore">تراجع</string>
     <string name="delete_success">تم الحذف بنجاح</string>
     <string name="loading">جارٍ التحميل…</string>
-    <string name="empty_configs">لا توجد ملفات شخصية، أضف واحداً أدناه</string>
-    <string name="filter">تصفية</string>
-    <string name="order">ترتيب</string>
     <string name="config_name">اسم الملف الشخصي</string>
-    <string name="config_info">معلومات</string>
     <string name="config_description">وصف الملف الشخصي</string>
     <string name="config_authorizer">المُفوِّض</string>
     <string name="config_authorizer_global">عام</string>
@@ -82,8 +65,6 @@
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">مخصص</string>
     <string name="config_install_mode">وضع التثبيت</string>
-    <string name="config_install_mode_global">عام</string>
-    <string name="config_install_mode_global_desc">عام (%1$s)</string>
     <string name="config_install_mode_dialog">نافذة حوار</string>
     <string name="config_install_mode_auto_dialog">نافذة حوار تلقائية</string>
     <string name="config_install_mode_notification">إشعار</string>
@@ -111,7 +92,6 @@
     <string name="config_managed_blacklist_by_package_name_title">التطبيقات المحظور تثبيتها</string>
     <string name="config_no_preset_install_sources">لا توجد مصادر تثبيت مُعدة مسبقًا</string>
     <string name="config_no_managed_blacklist">أدخل أسماء حزم التطبيقات المحظورة هنا</string>
-    <string name="config_managed_packages_desc">إضافة أو إزالة الحزم المُدارة</string>
     <string name="config_add_one_to_get_started">انقر على إضافة أدناه للبدء</string>
     <string name="config_add_new_package">إضافة حزمة جديدة</string>
     <string name="config_package_name">اسم الحزمة</string>
@@ -133,7 +113,6 @@
     <string name="close">إغلاق</string>
     <string name="finish">تم</string>
     <string name="open">فتح</string>
-    <string name="select">تحديد</string>
     <string name="clear">مسح</string>
     <string name="global">عام</string>
     <string name="options">خيارات</string>
@@ -158,18 +137,12 @@
     <string name="installer_prepare_install_empty">يرجى تحديد حزمة واحدة على الأقل</string>
     <string name="installer_prepare_install_too_many">يرجى تحديد ملف base.apk واحد فقط</string>
     <string name="installer_prepare_sdk_incompatible">إصدار SDK للنظام أقل مما يتطلبه التطبيق</string>
-    <string name="installer_prepare_type_new_install">التحضير لتثبيت تطبيق جديد</string>
-    <string name="installer_prepare_type_upgrade">التحضير لترقية التطبيق</string>
     <string name="installer_prepare_type_downgrade">هذا رجوع لإصدار أقدم، مما قد يتسبب في فقدان البيانات أو عدم استقرار التطبيق</string>
-    <string name="installer_prepare_type_reinstall">سيتم إعادة تثبيت الإصدار الحالي من التطبيق</string>
-    <string name="installer_prepare_type_sidegrade">سيتم تغيير الإصدار الحالي من التطبيق</string>
-    <string name="installer_prepare_type_unarchive">سيتم إلغاء أرشفة التطبيق الحالي</string>
     <string name="installer_prepare_type_unknown_confirm">هل أنت متأكد أنك تريد التثبيت؟</string>
     <string name="installer_installing">جارٍ التثبيت…</string>
     <string name="installer_install_failed">فشل التثبيت</string>
     <string name="installer_install_success">نجح التثبيت</string>
     <string name="installer_move_to_background">تثبيت صامت</string>
-    <string name="installer_error_reason">سبب الخطأ</string>
     <string name="installer_unknown_error">خطأ غير معروف</string>
     <string name="installer_channel_name">إشعار التثبيت</string>
     <string name="installer_progress_channel_name">إشعار تقدم التثبيت</string>
@@ -234,7 +207,6 @@
     <string name="installer_version">الإصدار: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">الحزمة: %1$s</string>
-    <string name="installer_file_path">المسار: %1$s</string>
     <string name="exception_install_failed_unknown">خطأ غير معروف</string>
     <string name="exception_resolve_failed">فشل في تحليل URI</string>
     <string name="exception_resolve_failed_no_internet_access">هذا الإصدار لا يمكنه الوصول إلى الإنترنت، لاستخدام هذه الميزة، أعد تثبيت إصدار آخر.</string>
@@ -291,7 +263,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">إغفال نافذة الحوار سيؤدي إلى الخروج الصامت</string>
     <string name="close_session_countdown">ضبط العد التنازلي</string>
     <string name="close_session_countdown_desc">عد تنازلي للإغلاق التلقائي بعد نجاح التثبيت عبر Dhizuku</string>
-    <string name="grant_permission_after_install">انقر لمنح الإذن بعد التثبيت</string>
     <string name="show_intelligent_suggestion">عرض الاقتراحات الذكية (تجريبي)</string>
     <string name="show_intelligent_suggestion_desc">عرض اقتراحات ذكية عند فشل التثبيت</string>
     <string name="permission_list">قائمة الأذونات</string>
@@ -311,10 +282,6 @@
     <string name="config_allow_downgrade_desc">محاولة الرجوع من الإصدار المثبت حاليًا إلى الإصدار الذي يتم تثبيته (قد لا يعمل على جميع الرومات)</string>
     <string name="config_grant_all_permissions">منح جميع الأذونات المطلوبة</string>
     <string name="config_grant_all_permissions_desc">منح جميع الأذونات التي تطلبها الحزمة تلقائيًا. لاحظ أن هذا ينطبق فقط على أذونات وقت التشغيل، ولن يتم منح الأذونات الخاصة مثل الوصول إلى جميع الملفات أو إمكانية الوصول تلقائيًا.</string>
-    <string name="force_volume_uuid">فرض UUID لوحدة التخزين</string>
-    <string name="force_volume_uuid_desc">يسمح بتحديد UUID لوحدة التخزين لتثبيت الحزمة عليها.</string>
-    <string name="force_permission_prompt">فرض طلب الإذن</string>
-    <string name="force_permission_prompt_desc">يفرض حتى على مُثبِّتات النظام إظهار نافذة تأكيد التثبيت.</string>
     <string name="instant_app">تطبيق فوري</string>
     <string name="instant_app_desc">تثبيت الحزمة كتطبيق فوري.</string>
     <string name="dont_kill_app">عدم إنهاء التطبيق</string>
@@ -332,8 +299,6 @@
     <string name="disable_verification_desc">يعطل التحقق من الحزمة أثناء التثبيت. هذا ليس تحققًا من التوقيع.</string>
     <string name="staged">تدريجي</string>
     <string name="staged_desc">يشير إلى أن هذه الحزمة يتم تثبيتها كجزء من تثبيت تدريجي.</string>
-    <string name="config_all_whitelist_restricted_permissions">السماح بالأذونات المقيدة</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">السماح بمنح الأذونات المقيدة للحزمة التي يتم تثبيتها.</string>
     <string name="disable_allowed_apex_update_check">تعطيل التحقق من تحديث APEX المسموح به</string>
     <string name="disable_allowed_apex_update_check_desc">عدم التحقق مما إذا كان يمكن تحديث حزمة APEX المثبتة.</string>
     <string name="config_bypass_low_target_sdk">تجاوز حظر SDK المستهدف المنخفض</string>
@@ -343,9 +308,6 @@
     <string name="config_request_update_ownership">طلب ملكية التحديث</string>
     <string name="config_request_update_ownership_desc">تعيين هذا المُثبِّت كمصدر للتحديثات المستقبلية.</string>
     <string name="unarchive">إلغاء الأرشفة</string>
-    <string name="unarchive_desc">إلغاء أرشفة حزمة موجودة.</string>
-    <string name="replace_existing">استبدال الموجود</string>
-    <string name="replace_existing_desc">إذا كانت الحزمة قيد التثبيت موجودة بالفعل، فاستبدلها/حدثها.</string>
     <!--  InstallOptions End  -->
 
     <!-- MultiApkZip Installer -->
@@ -354,9 +316,7 @@
     <string name="installer_multi_apk_zip_description">يحتوي هذا الملف على عدة تطبيقات منفصلة، يرجى تحديد التطبيقات التي تريد تثبيتها</string>
     <string name="installer_multi_apk_description">يرجى تحديد التطبيقات التي تريد تثبيتها</string>
     <string name="installing_progress_text">جارٍ تثبيت %1$s (%2$d/%3$d)</string>
-    <string name="installer_completed">اكتمل التثبيت</string>
     <string name="installer_completed_subtitle">نجح %1$s، فشل %2$s</string>
-    <string name="installer_current_install_mode_not_supported">الوضع الحالي لا يدعم تثبيت هذا النوع من الملفات</string>
     <!-- MultiApkZip End -->
 
     <!-- SplitNameUtil Start -->
@@ -385,22 +345,16 @@
     <string name="suggestion_user_restricted">اذهب إلى خيارات المطور لتمكين التثبيت عبر USB</string>
     <string name="suggestion_bypass_low_target_sdk">السماح مؤقتًا بتجاوز القيود وإعادة المحاولة</string>
     <string name="warning">تحذير</string>
-    <string name="telegram_channel">قناة تيلجرام</string>
     <string name="get_source_code">التحقق من مصدر الكود</string>
     <string name="get_source_code_detail">التحقق من مصدر الكود على - GitHub</string>
-    <string name="telegram_channel_desc">انضم للقناة لمتابعة آخر الإخبار والتحديثات!</string>
     <string name="theme_settings_miuix_ui">واجهة شاومي Miuix</string>
     <string name="theme_settings_miuix_ui_desc">مشابة لـ HyperOS</string>
     <string name="theme_settings_google_ui">واجهة Google Material 3</string>
     <string name="theme_settings_google_ui_desc">واجهة Meterial Design UI الإفتراضية</string>
     <string name="theme_settings_ui_engine">محرك واجهة المستخدم</string>
-    <string name="theme_settings_google_ui_style">اسلوب Google UI</string>
-    <string name="theme_settings_use_live_activity">الفعاليات المباشرة</string>
-    <string name="theme_settings_use_live_activity_desc">استخدام الفعاليات المباشرة بدلاً من الإشعارات٫ قد يكون غير مدعوماً في الـ ROMs المعدلة</string>
     <string name="theme_settings_package_icons">مصدر حزمة الايقونات</string>
     <string name="theme_settings_prefer_system_icon">تفضيل ايقونة النظام لتنزيل التطبيق</string>
     <string name="theme_settings_prefer_system_icon_desc">محاولة الحصول على ايقونة من النطام٫ مفيد عند استخدام حزمة ايقونات. تعطيل لعرض ايقونة من حزمة التنزيل</string>
-    <string name="theme_settings_launcher_icons">ايقونة الـ Launcher</string>
     <string name="theme_settings_hide_launcher_icon">اخفاء ايقونة الـ launcher</string>
     <string name="uninstall_title">إلغاء تثبيت InstallerX Revived</string>
     <string name="uninstall_content">بعد إلغاء تثبيت هذا التطبيق، لن تستطيع إستخدام InstallerX Revived لتثبيت التطبيقات</string>
@@ -414,7 +368,6 @@
     <string name="theme_settings_dynamic_color">لون ديناميكي</string>
     <string name="theme_settings_miuix_custom_colors">ألوان مخصّصة</string>
     <string name="theme_settings_miuix_custom_colors_desc">تخصيص ألوان السمة ضمن نمط Miuix</string>
-    <string name="performance">الأداء</string>
     <string name="lab">المختبر</string>
     <string name="lab_desc">الوصول إلى الميزات التجريبية والمطورة</string>
     <string name="updating">جاري التحديث. . .</string>
@@ -447,7 +400,6 @@
     <string name="reinstall">إعادة التثبيت</string>
     <string name="visit_home_page">زيارة الصفحة الرئيسية</string>
     <string name="open_lsposed">فتح LSPosed</string>
-    <string name="expand">توسيع</string>
     <string name="collapse">الانهيار</string>
     <string name="scope_tips">الملف الأول هو الافتراضي، لا حاجة لاختيار يدوي. يمكن تعيين ملف تعريف جديد لتطبيقات محددة للتثبيت التي يبدأونها.</string>
     <string name="got_it">فهمت</string>
@@ -474,11 +426,7 @@
     <string name="setting_lsposed_module_desc">فعّل هذا الخيار إذا كنت قد فرضت استخدام المثبّت الافتراضي عبر وحدة LSPosed خارجية. سيؤدي ذلك إلى تعطيل التحقق من الحالة الداخلية، وستظهر الصفحة الرئيسية دائمًا على أنها مُفعّلة</string>
     <string name="home_stat_authorizers">الامتيازات المتاحة</string>
     <string name="home_stat_profiles">الملفات الشخصية</string>
-    <string name="home_root_mode">روت: %s</string>
     <string name="home_label_lsp_link">هل تبحث عن وحدة دراسية؟</string>
-    <string name="home_system_app">تطبيقات التظام</string>
-    <string name="activate_mode">تفعيل الوضع: %s</string>
-    <string name="shizuku_working_mode">وضع عمل Shizuku: %s</string>
     <string name="shizuku_not_authorized">يرجى منح الإذن بالوصول إلى Sui أو Shizuku</string>
     <string name="shizuku_not_available">يرجى تفعيل Sui أو Shizuku</string>
     <string name="dhizuku_not_authorized">يرجى منح الإذن بوصول Dhizuku</string>

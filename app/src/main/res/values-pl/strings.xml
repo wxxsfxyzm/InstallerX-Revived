@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">Polityka</string>
-    <string name="user_terms">Zasady użytkowania</string>
-    <string name="privacy_policy">Polityka prywatności</string>
-    <string name="agree">Zgoda</string>
     <string name="warning">Ostrzeżenie</string>
     <string name="open_source_license">Licencja Open Source</string>
     <string name="back">Wróć</string>
     <string name="home">Strona główna</string>
     <string name="config">Profile</string>
-    <string name="app">Aplikacja</string>
     <string name="preferred">Ustawienia</string>
     <string name="personalization">Personalizacja</string>
     <string name="search">Wyszukaj</string>
@@ -36,11 +31,6 @@
     <string name="unstable">Niestabilna</string>
     <string name="enable_notification_hint">Włącz zgody powiadomień, aby zainstalować!</string>
     <string name="enable_storage_permission_hint">Włącz dostęp do wszystkich plików, aby zainstalować!</string>
-    <string name="discuss">Czat, Opinie, Atualizacja</string>
-    <string name="telegram_group">Grupa na Telegramie</string>
-    <string name="telegram_group_desc">Dołącz do grupy!</string>
-    <string name="telegram_channel">Kanał Telegram</string>
-    <string name="telegram_channel_desc">Dołącz do kanału, aby otrzymywać wiadomości i aktualizacje!</string>
     <string name="theme_settings">Ustawienia motywu</string>
     <string name="theme_settings_ui_style">Styl UI</string>
     <string name="theme_settings_desc">Zmień motyw aplikacji</string>
@@ -51,9 +41,6 @@
     <string name="theme_settings_google_ui">Google material 3</string>
     <string name="theme_settings_google_ui_desc">Standardowy Material Design UI</string>
     <string name="theme_settings_ui_engine">Silnik UI</string>
-    <string name="theme_settings_use_expressive_ui">Włącz ekspresyjny interfejs</string>
-    <string name="theme_settings_use_expressive_ui_desc">Użyj nowego motywu ekspresyjnego M3</string>
-    <string name="theme_settings_google_ui_style">Styl Google UI</string>
     <string name="theme_settings_theme_mode">Tryb motywu</string>
     <string name="theme_settings_theme_mode_desc">Wybierz tryb motywu</string>
     <string name="theme_settings_theme_mode_light">Jasny motyw</string>
@@ -86,8 +73,6 @@
     <string name="color_blue_grey">Niebieskoszary</string>
     <string name="color_brown">Brązowy</string>
     <string name="color_grey">Szary</string>
-    <string name="theme_settings_use_live_activity">Aktywność na żywo</string>
-    <string name="theme_settings_use_live_activity_desc">Użyj Aktywności na żywo zamiast powiadomień. Może nie być obsługiwane na niestandardowych ROM-ach</string>
     <string name="theme_settings_package_icons">Źródło ikony pakietu</string>
     <string name="theme_settings_prefer_system_icon">Użyj ikony systemowej dla instalacji aplikacji</string>
     <string name="inactivate">Dezaktywuj</string>

@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">Política</string>
-    <string name="user_terms">Política de usuário</string>
-    <string name="privacy_policy">Política de privacidade</string>
-    <string name="agree">Concordo</string>
     <string name="warning">Atenção</string>
     <string name="open_source_license">Licença de Código Aberto</string>
     <string name="back">Voltar</string>
     <string name="home">Início</string>
     <string name="config">Perfis</string>
-    <string name="app">App</string>
     <string name="preferred">Preferências</string>
     <string name="personalization">Personalização</string>
     <string name="search">Procurar</string>
@@ -26,11 +21,6 @@
     <string name="unstable">Instável</string>
     <string name="enable_notification_hint">Ative a permissão de notificação para poder instalar!</string>
     <string name="enable_storage_permission_hint">Por favor, para instalar, habilite o Acesso a Todos os Arquivos!</string>
-    <string name="discuss">Conversar, Dar Feedback e Atualizar</string>
-    <string name="telegram_group">Grupo no Telegram</string>
-    <string name="telegram_group_desc">Juntar-se ao grupo!</string>
-    <string name="telegram_channel">Canal no Telegram</string>
-    <string name="telegram_channel_desc">Junte-se ao canal para receber notícias e atualizações!</string>
     <string name="theme_settings">Configurações de Tema</string>
     <string name="theme_settings_ui_style">Estilo da Interface</string>
     <string name="theme_settings_desc">Alterar o tema do app</string>
@@ -39,10 +29,6 @@
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Interface Padrão Material Design</string>
     <string name="theme_settings_ui_engine">Mecanismo de Interface</string>
-    <string name="theme_settings_use_expressive_ui">Usar Interface Expressiva</string>
-    <string name="theme_settings_use_expressive_ui_desc">Usar o novo estilo Expressivo M3</string>
-    <string name="theme_settings_google_ui_style">Interface estilo Google</string>
-    <string name="theme_settings_launcher_icons">Ícone do lançador</string>
     <string name="theme_settings_hide_launcher_icon">Ocultar ícone do lançador</string>
     <string name="theme_settings_hide_launcher_icon_desc">Digite *#*#46789#*#* para abrir as configurações</string>
     <string name="theme_settings_hide_launcher_icon_warning">Por gentileza tenha certeza de que você consegue acessar está página antes de ocultar o ícone do lançador!</string>
@@ -51,7 +37,6 @@
     <string name="installer_settings_desc">Alterar as configurações globais do instalador</string>
     <string name="installer_settings_global_installer">Global</string>
     <string name="installer_settings_dialog_mode_options">Opções de Diálogo</string>
-    <string name="installer_settings_notification_mode_options">Opções de Notificação</string>
     <string name="basic">Básico</string>
     <string name="disable_adb_install_verify">Desligar Verificação ADB</string>
     <string name="disable_adb_install_verify_desc">Desabilitar a verificação de instalação do ADB, útil em alguns sistemas onde uma instalação acionará uma verificação (Play Protect)</string>
@@ -68,8 +53,6 @@
     <string name="unlock_default_installer_desc">Não ser mais o instalador padrão de apks</string>
     <string name="unlock_default_installer_success">Sucesso ao desfazer como instalador padrão</string>
     <string name="unlock_default_installer_failed">Não foi possível desfazê-lo como Instalador padrão</string>
-    <string name="clear_cache">Limpar cache</string>
-    <string name="success">Sucesso</string>
     <string name="details">Detalhes</string>
     <string name="add">Adicionar</string>
     <string name="update">Atualizar</string>
@@ -81,11 +64,7 @@
     <string name="restore">Desfazer</string>
     <string name="delete_success">Apagado com sucesso</string>
     <string name="loading">Carregando…</string>
-    <string name="empty_configs">Não há perfis, adicione um abaixo</string>
-    <string name="filter">Filtro</string>
-    <string name="order">Ordenar</string>
     <string name="config_name">Nome do perfil</string>
-    <string name="config_info">Informação</string>
     <string name="config_description">Descrição do perfil</string>
     <string name="config_authorizer">Autorizador</string>
     <string name="config_authorizer_global">Global</string>
@@ -96,8 +75,6 @@
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Customizado</string>
     <string name="config_install_mode">Modo de instalação</string>
-    <string name="config_install_mode_global">Global</string>
-    <string name="config_install_mode_global_desc">Global (%1$s)</string>
     <string name="config_install_mode_dialog">Diálogo</string>
     <string name="config_install_mode_auto_dialog">Diálogo automático</string>
     <string name="config_install_mode_notification">Notificação</string>
@@ -132,8 +109,6 @@
     <string name="config_shared_uid_name">Nome de ID de usuário compartilhado</string>
     <string name="config_shared_uid_value">Valor do ID do usuário compartilhado</string>
     <string name="config_no_managed_shared_user_id_exempted_packages">Lista de apps isentos</string>
-    <string name="config_no_managed_shared_user_id_no_exempted_packages">Nenhum app isento</string>
-    <string name="config_managed_packages_desc">Adicionar ou remover pacotes gerenciados</string>
     <string name="config_add_one_to_get_started">Clique abaixo em \'Adicionar\' para iniciar</string>
     <string name="config_add_new_package">Adicionar novo pacote</string>
     <string name="config_package_name">Nome do Pacote</string>
@@ -158,7 +133,6 @@
     <string name="close">Fechar</string>
     <string name="finish">Concluído</string>
     <string name="open">Abrir</string>
-    <string name="select">Selecionar</string>
     <string name="clear">Limpar</string>
     <string name="global">Global</string>
     <string name="options">Opções</string>
@@ -183,12 +157,7 @@
     <string name="installer_prepare_install_empty">Por gentileza selecione ao menos um pacote</string>
     <string name="installer_prepare_install_too_many">Por gentileza selecione uma base.apk</string>
     <string name="installer_prepare_sdk_incompatible">SDK do sistema inferior ao exigido pelo app</string>
-    <string name="installer_prepare_type_new_install">Preparando para instalar o novo app</string>
-    <string name="installer_prepare_type_upgrade">Preparando para atualizar o app</string>
     <string name="installer_prepare_type_downgrade">Este é um downgrade, que pode causar perda de dados ou instabilidade do app</string>
-    <string name="installer_prepare_type_reinstall">Reinstalará a versão atual do app</string>
-    <string name="installer_prepare_type_sidegrade">Alterará a versão atual do app</string>
-    <string name="installer_prepare_type_unarchive">Desarquivará o app atual</string>
     <string name="installer_prepare_type_unknown_confirm">Você tem certeza que deseja instalar?</string>
     <string name="installer_prepare_signature_mismatch">Incompatibilidade de assinatura! Continuar a instalação pode causar perda de dados ou riscos à segurança.</string>
     <string name="installer_prepare_signature_unknown">Não é possível verificar a assinatura do app, prossiga com cautela.</string>
@@ -196,7 +165,6 @@
     <string name="installer_install_failed">Falha na instalação</string>
     <string name="installer_install_success">Instalação bem sucedida</string>
     <string name="installer_move_to_background">Executar em segundo plano</string>
-    <string name="installer_error_reason">Motivo do erro</string>
     <string name="installer_unknown_error">Erro Desconhecido</string>
     <string name="installer_channel_name">Notificação de Instalação</string>
     <string name="installer_progress_channel_name">Notificação do Processo de Instalação</string>
@@ -261,7 +229,6 @@
     <string name="installer_version">Versão: %1$s (%2$s)</string>
     <string name="installer_version2">%1$s (%2$s)</string>
     <string name="installer_package_name">Pacote: %1$s</string>
-    <string name="installer_file_path">Caminho: %1$s</string>
     <string name="exception_install_failed_unknown">Erro desconhecido</string>
     <string name="exception_resolve_failed">Falha ao resolver URI</string>
     <string name="exception_resolve_failed_no_internet_access">Esta versão não pode acessar a Internet, para usar esta funcionalidade, reinstale outra versão</string>
@@ -319,7 +286,6 @@
     <string name="close_notification_immediately_on_dialog_dismiss">Fechar a caixa de diálogo cancelará a instalação em vez de minimizá-la para as notificações</string>
     <string name="close_session_countdown">Definir contagem regressiva</string>
     <string name="close_session_countdown_desc">Na ausência de privilégios, alguns sistemas personalizados da China interceptarão o processo de inicialização associado. A alteração desse valor pode aumentar o tempo de resposta quando o sistema de interceptar popups se manter.</string>
-    <string name="grant_permission_after_install">Clique para conceder permissão após a instalação</string>
     <string name="show_intelligent_suggestion">Exibir sugestões inteligentes (Experimental)</string>
     <string name="show_intelligent_suggestion_desc">Exibir sugestões inteligentes quando falhar a instalação</string>
     <string name="permission_list">Lista de Permissões</string>
@@ -338,10 +304,6 @@
     <string name="config_allow_downgrade_desc">Tenta fazer o downgrade da versão atualmente instalada do pacote para a que está sendo instalada (Android 15+ requer permissão ROOT)</string>
     <string name="config_grant_all_permissions">Conceder Todas as Permissões</string>
     <string name="config_grant_all_permissions_desc">Conceder automaticamente todas as permissões solicitadas pelo pacote. Observe que isso se aplica apenas às permissões de tempo de execução. Permissões especiais, como \"Acesso a Todos os Arquivos\" ou \"Acessibilidade\", não serão concedidas automaticamente</string>
-    <string name="force_volume_uuid">Forçar Volume UUID</string>
-    <string name="force_volume_uuid_desc">Permite especificar um UUID de volume para instalar o pacote</string>
-    <string name="force_permission_prompt">Forçar a Solicitação de Permissões</string>
-    <string name="force_permission_prompt_desc">Força até mesmo os instaladores do sistema a mostrar o diálogo de confirmação de instalação</string>
     <string name="instant_app">App Instantâneo</string>
     <string name="instant_app_desc">Instalar o pacote como um app instantâneo</string>
     <string name="dont_kill_app">Não Matar o App</string>
@@ -359,8 +321,6 @@
     <string name="disable_verification_desc">Desabilitar verificação do pacote durante a instalação. Isto não é o mesmo que verificação de assinatura</string>
     <string name="staged">Liberação em Etapas</string>
     <string name="staged_desc">Indica que este pacote está sendo instalado como parte de uma instalação em etapas</string>
-    <string name="config_all_whitelist_restricted_permissions">Conceder Permissões Restritas</string>
-    <string name="config_all_whitelist_restricted_permissions_desc">Conceder permissões restritas ao pacote sendo instalado</string>
     <string name="disable_allowed_apex_update_check">Desativar verificação de atualização permitida do APEX</string>
     <string name="disable_allowed_apex_update_check_desc">Não verificar se o APEX instalado pode ser atualizado</string>
     <string name="config_bypass_low_target_sdk">Ignorar Bloqueio de SDK Antigo</string>
@@ -370,17 +330,12 @@
     <string name="config_request_update_ownership">Solicitar atualização de propriedade</string>
     <string name="config_request_update_ownership_desc">Definir este instalador como a fonte para futuras atualizações</string>
     <string name="unarchive">Desarquivar</string>
-    <string name="unarchive_desc">Desarquivar um pacote existente</string>
-    <string name="replace_existing">Substituir o existente</string>
-    <string name="replace_existing_desc">Se o pacote sendo instalado já existir, substituir/atualizar o mesmo</string>
     <string name="installer_file_name">Arquivo: %1$s</string>
     <string name="installer_select_from_zip">Selecionar de um arquivo zip</string>
     <string name="installer_multi_apk_zip_description">Este arquivo contém vários apps separados, selecione os aplicativos que deseja instalar</string>
     <string name="installer_multi_apk_description">Por gentileza selecione os apps que você deseja instalar</string>
     <string name="installing_progress_text">Instalando %1$s (%2$d/%3$d)</string>
-    <string name="installer_completed">Instalação concluída</string>
     <string name="installer_completed_subtitle">Sucesso %1$s, falha %2$s</string>
-    <string name="installer_current_install_mode_not_supported">O modo atual não suporta a instalação deste tipo de arquivo</string>
     <string name="split_name_language">Parte de idioma: %1$s</string>
     <string name="split_name_architecture">Parte de arquitetura: %1$s</string>
     <string name="split_name_density">Densidade da tela: %1$s</string>
@@ -424,15 +379,10 @@
     <string name="config_target_user">Usuário Alvo</string>
     <string name="exception_install_failed_origin_os_blacklist">Adicione uma fonte de instalação válida para instalar o app Vivo System</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Permitir instalar uma vez</string>
-    <string name="theme_settings_use_live_activity">Atividade ao Vivo</string>
-    <string name="theme_settings_use_live_activity_desc">Use atividades ao vivo em vez de notificações, não pode ser suportado em ROMs personalizados</string>
     <string name="installer_live_channel_name">Progresso da Instalação</string>
-    <string name="cache_size">Tamanho do Cache: %1$s</string>
     <string name="theme_settings_package_icons">Fonte do ícone do pacote</string>
     <string name="theme_settings_prefer_system_icon">Prefira o ícone do sistema para instalação do app</string>
     <string name="theme_settings_prefer_system_icon_desc">Tente obter o ícone do sistema, útil ao usar pacotes de ícones. Desative para mostrar o ícone do pacote de instalação</string>
-    <string name="no_cache">Sem cache</string>
-    <string name="clearing_cache">Limpando o cache…</string>
     <string name="config_authorizer_none_tips">Quando não se utilizam privilégios, a maioria das opções fica desativada.</string>
     <string name="scope_tips">O primeiro perfil é o padrão. O novo perfil pode ser definido como apps específicos para instalações que eles iniciam.</string>
     <string name="got_it">Entendi</string>
@@ -460,7 +410,6 @@
     <string name="auto_lock_default_installer">Definir como padrão automaticamente</string>
     <string name="auto_lock_default_installer_desc">Definir automaticamente este app como instalador ao iniciar uma nova instalação</string>
     <string name="config_label_install_options_desc">Configurar os parâmetros de instalação, como origem, usuário</string>
-    <string name="expand">Expandir</string>
     <string name="collapse">Recolher</string>
     <string name="installer_select_split">Selecione as partes do APK</string>
     <string name="installer_select_split_desc">Selecione de novo as partes do APK para instalar</string>
@@ -478,7 +427,6 @@
     <string name="uninstall_content">Após desinstalar este app, você não poderá mais usar o InstallerX Revived para instalar apps.</string>
     <string name="exception_install_parse_failed_no_certificates">Certificados ausentes</string>
     <string name="config_install_authorizer_desc">Autorizador para instalar aplicativos</string>
-    <string name="config_app_authorizer_desc">Autorizador para realizar operações privilegiadas</string>
     <string name="installer_choice_install_as_module">Instalar como Módulo</string>
     <string name="installer_module_id">ID do Módulo: %1$s</string>
     <string name="installer_choice_install_as_app">Instalar como App(s)</string>
@@ -544,8 +492,6 @@
     <string name="exception_module_install_failed_incompatible_authorizer">Autorizador incompatível</string>
     <string name="installer_mixed_module_apk_description_notification">Clique na notificação para selecionar o tipo de instalação</string>
     <string name="lab_tip">Os recursos experimentais no laboratório podem ser instáveis ou arriscados e podem ser alterados ou removidos a qualquer momento. Use por sua própria conta e risco</string>
-    <string name="lab_use_hook_mode">Usar o modo BinderWrapper</string>
-    <string name="lab_use_hook_mode_desc">Usar modo BinderWrapper em vez de UserService para obter melhor desempenho, funciona tanto para Shizuku quanto para Root</string>
     <string name="lab_module_flashing">Habilitar flasheamento de módulo</string>
     <string name="lab_module_flashing_desc">Pense duas vezes e sempre confira antes de flashear qualquer módulo!</string>
     <string name="lab_module_select_root_impl">Escolha a implementação de root</string>
@@ -559,7 +505,6 @@
     <string name="theme_settings_miuix_custom_colors_desc">Personalize as cores do tema no estilo Miuix</string>
     <string name="theme_settings_live_activity_dynamic_color_follow_icon">Colorir Progresso da Atividade ao Vivo</string>
     <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">O segmento de progresso da atividade ao vivo utilizará cores extraídas do ícone do pacote</string>
-    <string name="config_install_mode_desc">Modo de Instalação Padrão e configurações relacionadas</string>
     <string name="installer_install_complete">Instalação concluída</string>
     <string name="updating">Atualizando…</string>
     <string name="update_available">Atualização Disponível: %1$s</string>
@@ -567,7 +512,6 @@
     <string name="get_update_directly_desc">Obter atualizações diretamente do GitHub e instalar, nenhum cache será deixado para trás</string>
     <string name="config_display_size">Exibir tamanho do pacote</string>
     <string name="config_display_size_desc">Mostrar o tamanho do pacote na tela de instalação</string>
-    <string name="config_label_app_bundle_settings">Pacotes APK Divididos</string>
     <string name="installer_install_confirm">Confirmar Instalação</string>
     <string name="permission_flashlight">Controlar lanterna</string>
     <string name="permission_write_secure_settings">Alterar configurações protegidas</string>
@@ -577,10 +521,7 @@
     <string name="exception_http_restricted_for_localhost">HTTP em texto simples restrito ao localhost</string>
     <string name="config_split_choose_all">Selecionar todas as partes por padrão</string>
     <string name="config_split_choose_all_desc">Selecionar todas as partes por padrão em vez de somente as mais adequadas</string>
-    <string name="lab_http_save_file">Salvar arquivos baixados</string>
-    <string name="lab_http_save_file_desc">Salvar os arquivos na pasta Downloads após a conclusão do download</string>
     <string name="lab_http_profile">Política de Segurança HTTP</string>
-    <string name="lab_http_profile_desc">Restringir o acesso HTTP com texto simples por motivos de segurança</string>
     <string name="lab_http_profile_secure">Apenas conexões seguras (HTTPS)</string>
     <string name="lab_http_profile_local">Permitir texto simples em modo local (Localhost)</string>
     <string name="lab_http_profile_all">Permitir tudo (Inseguro)</string>
@@ -601,8 +542,6 @@
     <string name="installer_split_name_label">Nome da Parte:</string>
     <string name="exception_uninstall_failed_aborted">Desinstalação cancelada pelo usuário</string>
     <string name="lab_unstable_features">Funções instáveis</string>
-    <string name="lab_set_install_requester">Definir Solicitante de Instalação</string>
-    <string name="lab_set_install_requester_desc">Mostrar a personalização do campo OriginatingUid nos perfis quando ativada</string>
     <string name="config_error_package_not_found">Pacote não encontrado</string>
     <string name="config_customize_install_reason_desc">Especificar o motivo da instalação dos apps recém-instalados. Ao selecionar “Usuário”, geralmente o iniciador cria um ícone na área de trabalho.</string>
     <string name="config_install_reason_unknown">Motivo Desconhecido</string>
@@ -630,7 +569,6 @@
     <string name="uninstall_call_uninstaller_manually_desc">Desinstalar app pelo nome do pacote fornecido</string>
     <string name="uninstall_progress_text">Desinstalando…</string>
     <string name="uninstall_enter_package_name">Digite o nome do pacote para desinstalar</string>
-    <string name="performance">Desempenho</string>
     <string name="installer_notification_tap_to_disable">Notificação de serviço em primeiro plano, toque para desativar</string>
     <string name="lab_module_flashing_show_art">Exibir arte ASCII</string>
     <string name="lab_module_flashing_show_art_desc">Exibir arte ASCII do InstallerX quando a instalação começar</string>
@@ -673,7 +611,6 @@
     <string name="installer_notification_desc">Notificação de serviço em segundo plano, inútil</string>
     <string name="installer_live_channel_name_desc">Mostrar o progresso da instalação em tempo real</string>
     <string name="installer_live_channel_short_text_pending_install">Pendente</string>
-    <string name="installer_analyse_success">Sucesso na análise</string>
     <string name="installer_live_channel_short_text_analyse_failed">Falha</string>
     <string name="exception_resolve_failed_link_not_valid">Este link não contém um arquivo válido</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
@@ -686,7 +623,6 @@
     <string name="installer_prepare_identical_notice">Este pacote é idêntico ao aplicativo instalado. Você pode ignorar esta instalação com segurança.</string>
     <string name="config_apk_choose_all">Selecionar todos os APKs por padrão durante uma instalação em lote</string>
     <string name="config_apk_choose_all_desc">Selecionar todos os APKs por padrão para sessões com vários arquivos.</string>
-    <string name="lab_mi_island">Xiaomi HyperIsland</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Apps não pré-carregados são proibidos de usar o UID compartilhado do sistema</string>
     <string name="installer_xposed_min_api">API Mín:</string>
     <string name="installer_xposed_target_api">API Alvo:</string>
@@ -734,11 +670,9 @@
     <string name="lab_update_github_proxy_7ed">Proxy 7ED</string>
     <string name="lab_update_github_proxy_custom">GHProxy Personalizado</string>
     <string name="lab_update_github_proxy_url">URL Personalizada</string>
-    <string name="lab_update_github_proxy_url_desc">URL Proxy</string>
     <string name="notification_settings">Configurações de Notificação</string>
     <string name="notification_settings_desc">Personalize a aparência das notificações de progresso da instalação</string>
     <string name="notification_style">Estilo de Notificação</string>
-    <string name="notification_style_desc">Selecione o estilo de exibição para notificações de progresso</string>
     <string name="notification_style_standard">Notificação Padrão</string>
     <string name="notification_style_live_activity">Atividade ao Vivo</string>
     <string name="notification_style_mi_island">Xiaomi HyperIsland</string>
@@ -761,7 +695,6 @@
     <string name="installer_temp_settings_tip">Essas configurações são temporárias para esta sessão. Para mantê-las, acesse Configurações</string>
     <string name="install_confirm_question_update_owner_reminder">Este aplicativo é normalmente atualizado via %1$s. Se você atualizá-lo a partir de outra fonte, seu celular poderá receber atualizações futuras de qualquer fonte. A funcionalidade do aplicativo pode ser diferente.</string>
     <string name="install_confirm_external_request_tip">Aprovar a solicitação de instalação de %1$s?</string>
-    <string name="lab_ui_settings">Interface Experimental</string>
     <string name="lab_show_apk_path">Mostrar caminho do arquivo</string>
     <string name="lab_show_apk_path_label">Caminho do arquivo</string>
     <string name="lab_show_apk_path_desc">Exibir o caminho do arquivo nos detalhes do app</string>
@@ -787,11 +720,7 @@
     <string name="setting_lsposed_module_desc">Ative esta opção se você tiver forçado a substituição do instalador padrão por meio de um módulo LSPosed de terceiros. Isso desativa a verificação interna de status, e a página inicial permanecerá constantemente como “Ativado”</string>
     <string name="home_stat_authorizers">Privilégios Disponíveis</string>
     <string name="home_stat_profiles">Perfis</string>
-    <string name="home_root_mode">Root: %s</string>
     <string name="home_label_lsp_link">Procurando um módulo?</string>
-    <string name="home_system_app">App de Sistema</string>
-    <string name="activate_mode">Ativar modo: %s</string>
-    <string name="shizuku_working_mode">Modo de operação Shizuku: %s</string>
     <string name="shizuku_not_authorized">Por favor, conceda permissão para acessar o Sui ou o Shizuku</string>
     <string name="shizuku_not_available">Por favor, ative o Sui ou o Shizuku</string>
     <string name="dhizuku_not_authorized">Por favor, conceda permissão para acessar o Dhizuku</string>

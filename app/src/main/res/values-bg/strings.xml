@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">Политика</string>
-    <string name="privacy_policy">Политика за Поверителност</string>
-    <string name="agree">Съгласи</string>
     <string name="warning">Внимание</string>
     <string name="open_source_license">Лиценз за Отворен Код</string>
     <string name="back">Назад</string>
@@ -18,13 +15,8 @@
     <string name="setting_lsposed_module_title">LSPosed модул активиран</string>
     <string name="home_stat_authorizers">Налични Привилегии</string>
     <string name="home_stat_profiles">Профили</string>
-    <string name="home_root_mode">Root: %s</string>
     <string name="home_label_lsp_link">Търсиш модул?</string>
-    <string name="home_system_app">Системно Приложение</string>
-    <string name="activate_mode">Активирай режим: %s</string>
-    <string name="shizuku_working_mode">Работещ режим на Shizuku: %s</string>
     <string name="config">Профили</string>
-    <string name="app">Приложение</string>
     <string name="preferred">Преференции</string>
     <string name="personalization">Персонализация</string>
     <string name="search">Търси</string>
@@ -32,11 +24,9 @@
     <string name="about">Относно</string>
     <string name="other">Други</string>
     <string name="extras">Екстри</string>
-    <string name="performance">Производителност</string>
     <string name="lab">Лаборатория</string>
     <string name="debug">Дебъг</string>
     <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
-    <string name="user_terms">Политика за Потребителя</string>
     <string name="shizuku_not_available">Моля активирай Sui или Shizuku</string>
     <string name="about_detail">Относно InstallerX Revived</string>
     <string name="updating">Актуализиране…</string>
@@ -51,7 +41,6 @@
     <string name="stable">Стабилен</string>
     <string name="preview">Прегледай</string>
     <string name="unstable">Нестабилен</string>
-    <string name="telegram_group">Telegram група</string>
     <string name="open_source_license_settings_description">Преглед на библиотеки с отворен код от трета страна и техните лицензи</string>
     <string name="working_status_default_installer_desc">Приложението в момента е инсталаторът по подразбиране</string>
     <string name="working_status_system_installer">Работи като инсталатор на системни пакети</string>
@@ -69,10 +58,6 @@
     <string name="uninstall_title">Деинсталирай InstallerX Revived</string>
     <string name="enable_notification_hint">Моля активирай право за нотификаций за да инсталирате!</string>
     <string name="enable_storage_permission_hint">Моля активирай All Files право за да инсталирате!</string>
-    <string name="discuss">Чат и Обратна Връзка и Актуализаций</string>
-    <string name="telegram_group_desc">Присъедини се в групата!</string>
-    <string name="telegram_channel">Telegram Канал</string>
-    <string name="telegram_channel_desc">Присъедини се в канала за да получиш новини и актуализаций!</string>
     <string name="theme_settings">Настройки за Темата</string>
     <string name="theme_settings_ui_style">Стил на Интерфейса</string>
     <string name="theme_settings_desc">Промени темата на приложението</string>
@@ -83,13 +68,10 @@
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Стандартен Material Design интерфейс</string>
     <string name="theme_settings_ui_engine">Интерфейсов \"Двигател\" (!)</string>
-    <string name="theme_settings_use_expressive_ui">Използвай Expressive Интерфейс</string>
-    <string name="theme_settings_use_expressive_ui_desc">Използвай новият M3 Expressive стил</string>
     <string name="theme_settings_use_apple_floating_bar">Включи плаващ бар отдолу</string>
     <string name="theme_settings_use_apple_floating_bar_desc">Покажи плаващ бар за навигация на дъното на екрана</string>
     <string name="theme_settings_use_blur">Активирай Блър</string>
     <string name="theme_settings_use_blur_desc">Активирай блър за приложението</string>
-    <string name="theme_settings_google_ui_style">Google интерфейсов стил</string>
     <string name="theme_settings_theme_mode">Темен Режим</string>
     <string name="theme_settings_theme_mode_desc">Избери темен режим</string>
     <string name="theme_settings_theme_mode_light">Светла тема</string>
@@ -121,8 +103,6 @@
     <string name="color_blue_grey">Синьо-сиво</string>
     <string name="color_brown">Кафяв</string>
     <string name="color_grey">Сив</string>
-    <string name="theme_settings_use_live_activity">Сегашна Активност</string>
-    <string name="theme_settings_launcher_icons">Икона на стартера</string>
     <string name="theme_settings_predictive_back_exit_direction">Дирекция за Изход</string>
     <string name="theme_settings_predictive_back_animation_none">Няма</string>
     <string name="theme_settings_predictive_back_animation_aosp">AOSP</string>
@@ -146,7 +126,6 @@
     <string name="installer_biometric_auth_mode_enable">Активирай Биометрични Данни</string>
     <string name="installer_biometric_auth_mode_follow_config">Следвай Профил</string>
     <string name="installer_settings_dialog_mode_options">Опции за Диалог</string>
-    <string name="installer_settings_notification_mode_options">Опции за Нотификации</string>
     <string name="installer_settings_auto_clear_success_notification">Авто-изчисти нотификация</string>
     <string name="installer_settings_auto_clear_time_never">Никога</string>
     <string name="installer_settings_auto_clear_time_seconds_format">%d секунди</string>
@@ -155,11 +134,6 @@
     <string name="disable_adb_install_verify_not_support_dhizuku_desc">Не поддържа Dhizuku</string>
     <string name="ignore_battery_optimizations_desc_disabled">Вече Игнориран</string>
     <string name="default_installer">Инсталатор по Подразбиране</string>
-    <string name="clear_cache">Изчисти Кеш Памет</string>
-    <string name="no_cache">Няма кеш памет</string>
-    <string name="clearing_cache">Изчистване на кеш памет…</string>
-    <string name="cache_size">Размер на кеш памет: %1$s</string>
-    <string name="success">Готово</string>
     <string name="details">Детайли</string>
     <string name="add">Добави</string>
     <string name="update">Актуализирай</string>
@@ -171,12 +145,9 @@
     <string name="restore">Върни</string>
     <string name="delete_success">Изтрито</string>
     <string name="loading">Зареждане…</string>
-    <string name="filter">Филтрирай</string>
-    <string name="order">Сортирай</string>
     <string name="config_global_default">По Подразбиране, Глобално</string>
     <string name="config_status_inactive">Неактивен</string>
     <string name="config_name">Име на профил</string>
-    <string name="config_info">Информация</string>
     <string name="config_description">Описание на профил</string>
     <string name="config_authorizer_global">Глобален</string>
     <string name="config_authorizer_global_desc">Глобален (%1$s)</string>
@@ -186,8 +157,6 @@
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">Персонализиран</string>
     <string name="config_install_mode">Режим на инсталиране</string>
-    <string name="config_install_mode_global">Глобален</string>
-    <string name="config_install_mode_global_desc">Глобален (%1$s)</string>
     <string name="config_install_mode_dialog">Диалог</string>
     <string name="config_install_mode_auto_dialog">Авто диалог</string>
     <string name="config_install_mode_notification">Нотификация</string>
@@ -219,12 +188,10 @@
     <string name="lab_mi_island_outer_glow">Външен Блясък</string>
     <string name="home_learn_more_installerx_title">Научи за InstallerX Revived</string>
     <string name="home_learn_more_installerx_desc">Научи как да настроиш и използваш InstallerX</string>
-    <string name="lab_mi_island">Mi Super Island</string>
     <string name="lab_show_apk_path_label">Файлова локация</string>
     <string name="lab_show_apk_path">Покажи файлова локация</string>
     <string name="lab_update_github_proxy_official">Официален</string>
     <string name="lab_update_github_proxy">GitHub Канал за Актуализаций</string>
-    <string name="lab_http_save_file">Запази изтеглени файлове</string>
     <string name="suggestion_bypass_blacklist_set_by_user">Позволи за се инсталира веднъж</string>
     <string name="suggestion_allow_test_app">Позволи Тест</string>
     <string name="config_allow_test">Позволи Тест</string>
@@ -236,12 +203,10 @@
     <string name="split_dpi_hdpi">Висок (~240 DPI)</string>
     <string name="split_dpi_mdpi">Среден (~160 DPI)</string>
     <string name="split_dpi_ldpi">Нисък (~120 DPI)</string>
-    <string name="installer_completed">Инсталация Завършена</string>
     <string name="installer_install_complete">Инсталация Завършена</string>
     <string name="installing_progress_text">Изтегляне на %1$s (%2$d/%3$d)</string>
     <string name="installer_select_from_zip">Избери от zip файл</string>
     <string name="installer_file_name">Файл: %1$s</string>
-    <string name="unarchive_desc">Деархивирай съществуващ пакет</string>
     <string name="unarchive">Деархивирай</string>
     <string name="dry_run">Стартирай на Сухо</string>
     <string name="staged">Поетапно</string>

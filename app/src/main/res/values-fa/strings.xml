@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="agreement_title">سیاست</string>
-    <string name="user_terms">سیاست کاربری</string>
-    <string name="privacy_policy">سیاست حفظ حریم خصوصی</string>
-    <string name="agree">موافقت</string>
     <string name="warning">هشدار</string>
     <string name="open_source_license">مجوز متن‌باز</string>
     <string name="open_source_license_settings_description">مشاهده کتابخانه‌های متن‌باز شخص ثالث و مجوزهای آن‌ها</string>
     <string name="back">بازگشت</string>
     <string name="home">صفحه اصلی</string>
     <string name="config">پروفایل‌ها</string>
-    <string name="app">برنامه</string>
     <string name="preferred">تنظیمات</string>
     <string name="personalization">شخصی‌سازی</string>
     <string name="search">جستجو</string>
     <string name="menu">منو</string>
     <string name="about">درباره</string>
     <string name="other">سایر</string>
-    <string name="performance">عملکرد</string>
     <string name="lab">آزمایشگاه</string>
     <string name="lab_desc">دسترسی به ویژگی‌های آزمایشی و توسعه‌دهنده</string>
     <string name="debug">اشکال‌زدایی</string>
@@ -43,11 +37,6 @@
     <string name="unstable">ناپایدار</string>
     <string name="enable_notification_hint">لطفاً دسترسی اعلان‌ها را برای نصب فعال کنید!</string>
     <string name="enable_storage_permission_hint">لطفاً دسترسی کامل به فایل‌ها را برای نصب فعال کنید!</string>
-    <string name="discuss">چت، بازخورد و به‌روزرسانی</string>
-    <string name="telegram_group">گروه تلگرام</string>
-    <string name="telegram_group_desc">به گروه بپیوندید!</string>
-    <string name="telegram_channel">کانال تلگرام</string>
-    <string name="telegram_channel_desc">برای دریافت اخبار و به‌روزرسانی‌ها به کانال بپیوندید!</string>
     <string name="theme_settings">تنظیمات پوسته</string>
     <string name="theme_settings_ui_style">سبک رابط کاربری</string>
     <string name="theme_settings_desc">تغییر پوسته برنامه</string>
@@ -57,11 +46,8 @@
     <string name="theme_settings_miuix_custom_colors_desc">شخصی‌سازی رنگ‌های پوسته به سبک Miuix</string>
     <string name="theme_settings_google_ui_desc">رابط کاربری استاندارد بر پایه متریال دیزاین</string>
     <string name="theme_settings_ui_engine">موتور رابط کاربری</string>
-    <string name="theme_settings_use_expressive_ui">استفاده از رابط کاربری Expressive</string>
-    <string name="theme_settings_use_expressive_ui_desc">استفاده از سبک جدید M3 Expressive</string>
     <string name="theme_settings_use_blur">فعال‌سازی حالت محو</string>
     <string name="theme_settings_use_blur_desc">فعال‌سازی حالت محو برای برنامه</string>
-    <string name="theme_settings_google_ui_style">سبک رابط کاربری گوگل</string>
     <string name="theme_settings_theme_mode">حالت پوسته</string>
     <string name="theme_settings_theme_mode_desc">انتخاب حالت پوسته</string>
     <string name="theme_settings_theme_mode_light">پوسته روشن</string>
@@ -94,12 +80,9 @@
     <string name="color_blue_grey">آبی خاکستری</string>
     <string name="color_brown">قهوه‌ای</string>
     <string name="color_grey">خاکستری</string>
-    <string name="theme_settings_use_live_activity">فعالیت زنده</string>
-    <string name="theme_settings_use_live_activity_desc">استفاده از فعالیت زنده به جای اعلان‌ها، ممکن است در رام‌های سفارشی پشتیبانی نشود</string>
     <string name="theme_settings_package_icons">منبع آیکون بسته</string>
     <string name="theme_settings_prefer_system_icon">استفاده از آیکون سیستم برای برنامه‌ای که قرار است نصب شود</string>
     <string name="theme_settings_prefer_system_icon_desc">تلاش برای دریافت آیکون از سیستم، هنگام استفاده از بسته‌های آیکون مفید است. غیرفعال کردن این گزینه باعث می‌شود آیکون از بسته نصب شده نمایش داده شود</string>
-    <string name="theme_settings_launcher_icons">آیکون لانچر</string>
     <string name="theme_settings_hide_launcher_icon">مخفی کردن آیکون لانچر</string>
     <string name="theme_settings_hide_launcher_icon_desc">با شماره گیری *#*#46789#*#* تنظیمات را باز کنید</string>
     <string name="theme_settings_hide_launcher_icon_warning">لطفاً مطمئن شوید که قبل از مخفی کردن آیکون لانچر، به این صفحه دسترسی دارید!</string>
@@ -116,7 +99,6 @@
     <string name="use_biometric_confirm_change_auth_settings">آیا مطمئن هستید که می‌خواهید این تنظیمات را تغییر دهید</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">برای ادامه، لطفاً این اقدام را با احراز هویت دستگاه خود تأیید کنید</string>
     <string name="installer_settings_dialog_mode_options">گزینه‌های دیالوگ</string>
-    <string name="installer_settings_notification_mode_options">گزینه‌های اعلان</string>
     <string name="installer_settings_auto_clear_success_notification">پاک‌سازی خودکار اعلان</string>
     <string name="installer_settings_auto_clear_success_notification_desc">پاک‌سازی خودکار اعلان نصب موفق</string>
     <string name="installer_settings_auto_clear_time_never">هرگز</string>
@@ -141,11 +123,6 @@
     <string name="unlock_default_installer_desc">لغو تنظیم InstallerX به‌عنوان نصب‌کننده پیش‌فرض برای نصب فایل‌های apk</string>
     <string name="unlock_default_installer_success">با موفقیت لغو شد و دیگر به‌عنوان نصب‌کننده پیش‌فرض تنظیم نیست</string>
     <string name="unlock_default_installer_failed">لغو تنظیم به‌عنوان نصب‌کننده پیش‌فرض انجام نشد</string>
-    <string name="clear_cache">پاک‌سازی کش</string>
-    <string name="no_cache">کش ندارد</string>
-    <string name="clearing_cache">درحال پاک‌سازی کش…</string>
-    <string name="cache_size">حجم کش: %1$s</string>
-    <string name="success">موفق</string>
     <string name="details">جزئیات</string>
     <string name="add">افزودن</string>
     <string name="update">به‌روزرسانی</string>
@@ -157,16 +134,11 @@
     <string name="restore">لغو تغییرات</string>
     <string name="delete_success">با موفقیت حذف شد</string>
     <string name="loading">درحال بارگزاری…</string>
-    <string name="empty_configs">هیچ پروفایلی وجود ندارد، یکی را در پایین اضافه کنید</string>
-    <string name="filter">فیلتر</string>
-    <string name="order">مرتب‌سازی</string>
     <string name="config_global_default">پیش‌فرض سراسری</string>
     <string name="config_name">نام پروفایل</string>
-    <string name="config_info">اطلاعات</string>
     <string name="config_scope">محدوده</string>
     <string name="config_description">توضیحات پروفایل</string>
     <string name="config_authorizer">مجوزدهنده</string>
-    <string name="config_app_authorizer_desc">انتخاب مجوزدهنده برای انجام عملیات با دسترسی ویژه</string>
     <string name="config_install_authorizer_desc">مجوزدهنده برای نصب برنامه‌ها</string>
     <string name="config_authorizer_global">سراسری</string>
     <string name="config_authorizer_global_desc">سراسری (%1$s)</string>
@@ -178,9 +150,6 @@
     <string name="config_authorizer_dhizuku">Dhizuku</string>
     <string name="config_authorizer_customize">سفارشی</string>
     <string name="config_install_mode">حالت نصب</string>
-    <string name="config_install_mode_desc">حالت نصب پیش‌فرض و تنظیمات مربوط به آن</string>
-    <string name="config_install_mode_global">سراسری</string>
-    <string name="config_install_mode_global_desc">سراسری (%1$s)</string>
     <string name="config_install_mode_dialog">دیالوگ</string>
     <string name="config_install_mode_auto_dialog">دیالوگ خودکار</string>
     <string name="config_install_mode_notification">اعلان</string>
@@ -231,7 +200,6 @@
     <string name="config_label_installer_settings">تنظیمات نصب‌کننده</string>
     <string name="config_label_install_options">گزینه های نصب</string>
     <string name="config_label_install_options_desc">پیکربندی پارامترهای نصب مانند منبع و کاربر</string>
-    <string name="config_label_app_bundle_settings">بسته‌های APK تقسیم‌شده</string>
     <string name="config_dialog_title_invalid">ورودی نامعتبر</string>
     <string name="config_dialog_title_unsaved_changes">تغییرات ذخیره‌نشده</string>
     <string name="config_dialog_message_unsaved_changes">خروج بدون ذخیره؟</string>
@@ -248,8 +216,6 @@
     <string name="config_shared_uid_name">نام شناسه کاربر مشترک</string>
     <string name="config_shared_uid_value">مقدار شناسه کاربر مشترک</string>
     <string name="config_no_managed_shared_user_id_exempted_packages">فهرست برنامه‌های معاف شده</string>
-    <string name="config_no_managed_shared_user_id_no_exempted_packages">هیچ برنامه معاف شده‌ای وجود ندارد</string>
-    <string name="config_managed_packages_desc">افزودن یا حذف بسته‌های مدیریت‌شده</string>
     <string name="config_add_one_to_get_started">برای شروع روی \'افزودن\' در پایین کلیک کنید</string>
     <string name="config_add_new_package">افزودن بسته جدید</string>
     <string name="config_package_name">نام بسته</string>
@@ -280,10 +246,8 @@
     <string name="finish">انجام شد</string>
     <string name="open">باز کردن</string>
     <string name="open_lsposed">باز کردن LSPosed</string>
-    <string name="select">انتخاب</string>
     <string name="clear">پاک کردن</string>
     <string name="global">سراسری</string>
-    <string name="expand">گسترش دادن</string>
     <string name="collapse">کوچک کردن</string>
     <string name="scope_tips">اولین پروفایل پیش‌فرض است و نیازی به انتخاب دستی ندارد. پروفایل جدید می‌تواند برای برنامه‌های خاصی که نصب را شروع می‌کنند، تنظیم شود.</string>
     <string name="got_it">فهمیدم</string>
@@ -326,9 +290,6 @@
     <string name="working_status_not_default_installer_click_details">کلیک کن تا جزئیات را ببینی</string>
     <string name="home_stat_profiles">پروفایل ها</string>
     <string name="home_label_lsp_link">دنبال یک ماژول هستی؟</string>
-    <string name="home_system_app">برنامه ی سیستمی</string>
-    <string name="activate_mode">حالت فعال: %s</string>
-    <string name="shizuku_working_mode">حالت فعال بودن شیزوکو: %s</string>
     <string name="shizuku_not_authorized">لطفا دسترسی به sui یا شیزوکو رو بدید</string>
     <string name="shizuku_not_available">لطفا sui یا شیزوکو رو فعال کنید</string>
     <string name="dhizuku_not_authorized">لطفا دسترسی به دیزوکو رو بدید</string>
