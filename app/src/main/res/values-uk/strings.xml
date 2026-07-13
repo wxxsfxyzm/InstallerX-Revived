@@ -266,7 +266,7 @@
     <string name="theme_settings_google_ui_desc">Стандартний дизайн Material UI</string>
     <string name="theme_settings_ui_engine">Двигун UI</string>
     <string name="theme_settings_use_expressive_ui">Використовуйте виразний UI</string>
-    <string name="theme_settings_use_expressive_ui_desc">Використовувати новий стиль виразу Material 3</string>
+    <string name="theme_settings_use_expressive_ui_desc">Використовувати новий виразний стиль Material 3</string>
     <string name="theme_settings_use_blur">Увімкнути розмиття</string>
     <string name="theme_settings_use_blur_desc">Увімкніть розмиття для програми</string>
     <string name="theme_settings_google_ui_style">Стиль Google UI</string>

@@ -161,7 +161,7 @@
     <string name="installer_installing">Instalando…</string>
     <string name="installer_install_failed">Error al instalar</string>
     <string name="installer_install_success">Instalación exitosa</string>
-    <string name="installer_move_to_background">Instalación Silenciosa</string>
+    <string name="installer_move_to_background">Instalación silenciosa</string>
     <string name="installer_error_reason">Motivo del error</string>
     <string name="installer_unknown_error">Error desconocido</string>
     <string name="installer_channel_name">Notificación de instalación</string>
@@ -996,4 +996,11 @@
     <string name="config_customize_package_source_disabled_desc">Cuando la opción Respetar la política de la plataforma está habilitada, se rellena automáticamente desde la fuente</string>
     <string name="config_authorizer_command_desc">Comando: %1$s</string>
     <string name="dhizuku_unsupported_desc">Dhizuku no es compatible</string>
+    <string name="install_comparison_display_behavior">Comportamiento de visualización de la comparación de datos</string>
+    <string name="install_comparison_show_all">Mostrar todo</string>
+    <string name="install_comparison_show_all_desc">Mostrar siempre tanto los valores antiguos como los nuevos</string>
+    <string name="install_comparison_show_differences_only">Mostrar solo las diferencias</string>
+    <string name="install_comparison_show_differences_only_desc">Mostrar los datos idénticos como un único valor</string>
+    <string name="expand_temporary_settings_by_default">Expandir el panel por defecto</string>
+    <string name="expand_temporary_settings_by_default_desc">Expandir la configuración temporal al abrir el cuadro de diálogo de instalación</string>
 </resources>
