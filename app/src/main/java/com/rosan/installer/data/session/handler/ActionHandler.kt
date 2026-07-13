@@ -3,12 +3,17 @@
 package com.rosan.installer.data.session.handler
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.content.IntentCompat
 import com.rosan.installer.R
+import com.rosan.installer.core.app.ActivityContracts.KEY_INSTALLER_ID
 import com.rosan.installer.data.session.repository.InstallerSessionRepositoryImpl
 import com.rosan.installer.data.session.resolver.ConfigResolver
 import com.rosan.installer.data.session.resolver.SourceResolver
@@ -78,6 +83,8 @@ class ActionHandler(
 
     // A separate job for the current heavy task (Resolve, Install, etc.)
     private var processingJob: Job? = null
+
+    private var originalIntent: Intent? = null
 
     // Helper property to get ID for logging
     private val sessionId get() = session.id
@@ -184,6 +191,13 @@ class ActionHandler(
                 if (e is CancellationException) {
                     Timber.d("[id=$sessionId] Action ${action::class.simpleName} was cancelled.")
                     // Usually we don't need to emit error on cancellation, just stop.
+                } else if (e is AnalyseException) {
+                    Timber.d("[id=$sessionId] Action ${action::class.simpleName} was unsupported file.")
+                    if (!tryForwardIntentToOtherProcess()) {
+                        Timber.d("[id=$sessionId] No external activity found for unsupported file.")
+                        session.error = e
+                        session.progress.emit(ProgressEntity.InstallAnalysedFailed)
+                    }
                 } else {
                     Timber.e(e, "[id=$sessionId] Action ${action::class.simpleName} failed")
                     session.error = e
@@ -285,6 +299,7 @@ class ActionHandler(
         resetState()
         Timber.d("[id=$sessionId] resolve: State has been reset. Emitting ProgressEntity.InstallResolving.")
         session.progress.emit(ProgressEntity.InstallResolving)
+        originalIntent = Intent(activity.intent)
 
         // Resolve Config
         session.config = configResolver.resolve(activity)
@@ -687,6 +702,107 @@ class ActionHandler(
         session.progress.emit(ProgressEntity.UninstallSuccess)
     }
 
+    private suspend fun tryForwardIntentToOtherProcess(): Boolean {
+        val baseIntent = originalIntent ?: return false
+        val intent = baseIntent.apply {
+            component = null
+            setPackage(null)
+            removeExtra(KEY_INSTALLER_ID)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        val excludedPackages = setOfNotNull(
+            context.packageName,
+            session.config.initiatorPackageName
+        )
+        val resolveInfos = context.packageManager
+            .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        val externalResolveInfos = resolveInfos
+            .filter { it.activityInfo.packageName !in excludedPackages }
+
+        if (externalResolveInfos.isEmpty()) return false
+
+        val targetIntents = externalResolveInfos.map { resolveInfo ->
+            Intent(intent).apply {
+                component = ComponentName(
+                    resolveInfo.activityInfo.packageName,
+                    resolveInfo.activityInfo.name
+                )
+                setPackage(null)
+            }
+        }
+
+        grantForwardIntentUriPermissions(
+            intent = intent,
+            packageNames = externalResolveInfos.map { it.activityInfo.packageName }.distinct()
+        )
+
+        val chooserResultSender = BroadcastHandler
+            .namedIntent(context, session, BroadcastHandler.Name.Finish)
+            .intentSender
+        val chooser = Intent.createChooser(targetIntents.first(), null, chooserResultSender).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            if (targetIntents.size > 1) {
+                putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.drop(1).toTypedArray())
+            }
+        }
+
+        val chooserShown = runCatching {
+            Timber.d("[id=$sessionId] Showing chooser for unsupported file intent.")
+            context.startActivity(chooser)
+        }.onFailure {
+            Timber.e(it, "[id=$sessionId] Failed to show unsupported file intent chooser.")
+        }.isSuccess
+
+        if (chooserShown) {
+            // MIUI needs the caller activity to stay alive, but its loading dialog must not remain visible.
+            session.progress.emit(ProgressEntity.Ready)
+        }
+
+        return chooserShown
+    }
+
+    private fun grantForwardIntentUriPermissions(intent: Intent, packageNames: List<String>) {
+        val uris = grantUrisOf(intent)
+        if (uris.isEmpty()) return
+
+        packageNames.forEach { packageName ->
+            uris.forEach { uri ->
+                runCatching {
+                    context.grantUriPermission(
+                        packageName,
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }.onFailure {
+                    Timber.w(
+                        it,
+                        "[id=$sessionId] Failed to grant URI permission to $packageName for $uri"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun streamUrisOf(intent: Intent): List<Uri> =
+        buildList {
+            IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                ?.let(::add)
+            IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                ?.let(::addAll)
+        }
+
+    private fun grantUrisOf(intent: Intent): Set<Uri> =
+        buildSet {
+            intent.data?.let(::add)
+            intent.clipData?.let { clip ->
+                repeat(clip.itemCount) { index ->
+                    clip.getItemAt(index).uri?.let(::add)
+                }
+            }
+            addAll(streamUrisOf(intent))
+        }
+
     private suspend fun handleConfirm(sessionId: Int, granted: Boolean) {
         val detailsBeforeApprove = session.confirmationDetails.value
         Timber.d("[id=${this.sessionId}] ApproveSession: $granted for session $sessionId")
@@ -772,6 +888,7 @@ class ActionHandler(
     private fun resetState() {
         session.error = Throwable()
         session.config = default
+        originalIntent = null
         session.sourceUris = emptyList()
         session.referrerUri = null
         session.data = emptyList()
