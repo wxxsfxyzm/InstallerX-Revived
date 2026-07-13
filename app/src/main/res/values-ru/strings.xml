@@ -986,4 +986,11 @@
     <string name="config_customize_package_source_disabled_desc">При включении политики платформы заполняется автоматически из источника</string>
     <string name="config_authorizer_command_desc">Команда: %1$s</string>
     <string name="dhizuku_unsupported_desc">Dhizuku не поддерживается</string>
+    <string name="install_comparison_display_behavior">Поведение отображения сравнения данных</string>
+    <string name="install_comparison_show_all">Показать все</string>
+    <string name="install_comparison_show_all_desc">Всегда показывать как старые, так и новые значения</string>
+    <string name="install_comparison_show_differences_only">Показать только различия</string>
+    <string name="install_comparison_show_differences_only_desc">Показать идентичные данные как одно значение</string>
+    <string name="expand_temporary_settings_by_default">Развернуть панель по умолчанию</string>
+    <string name="expand_temporary_settings_by_default_desc">Развернуть временные настройки при открытии диалогового окна установки</string>
 </resources>
