@@ -47,6 +47,7 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.framework.auth.safeBiometricAuthOrThrow
+import com.rosan.installer.framework.packageupdate.SelfUpdateRecoveryManager
 import com.rosan.installer.framework.service.AutoLockService
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CancellationException
@@ -54,6 +55,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -87,6 +89,7 @@ class ActionHandler(
     private val shellExecutionProvider by inject<ShellExecutionProvider>()
     private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
     private val autoLockService by inject<AutoLockService>()
+    private val selfUpdateRecoveryManager by inject<SelfUpdateRecoveryManager>()
     private val configResolver by inject<ConfigResolver>()
     private val uninstallResolver by inject<UninstallResolver>()
     private val unarchiveResolver by inject<UnarchiveResolver>()
@@ -454,18 +457,20 @@ class ActionHandler(
                     val entitiesToInstall = appEntities.map { it.copy(selected = true) }
                     val tempResults = listOf(targetResult.copy(appEntities = entitiesToInstall))
 
-                    // Perform install
-                    processInstallation(
-                        config = session.config,
-                        analysisResults = tempResults,
-                        metadata = installMetadata(),
-                        current = currentProgressIndex,
-                        total = totalCount
-                    ).collect { progress ->
-                        if (progress is ProgressEntity.InstallingModule) {
-                            session.moduleLog = progress.output
+                    runWithSelfUpdateRecovery(tempResults) {
+                        // Perform install
+                        processInstallation(
+                            config = session.config,
+                            analysisResults = tempResults,
+                            metadata = installMetadata(),
+                            current = currentProgressIndex,
+                            total = totalCount
+                        ).collect { progress ->
+                            if (progress is ProgressEntity.InstallingModule) {
+                                session.moduleLog = progress.output
+                            }
+                            session.progress.emit(progress)
                         }
-                        session.progress.emit(progress)
                     }
 
                     appEntities.forEach { entity ->
@@ -517,17 +522,19 @@ class ActionHandler(
     private suspend fun performInstallLogic() {
         Timber.d("[id=$sessionId] install: Starting installation process via UseCase.")
 
-        processInstallation(
-            config = session.config,
-            analysisResults = session.analysisResults,
-            metadata = installMetadata()
-        ).collect { progress ->
-            // Sync module logs back to the session repository if applicable
-            if (progress is ProgressEntity.InstallingModule) {
-                session.moduleLog = progress.output
+        runWithSelfUpdateRecovery(session.analysisResults) {
+            processInstallation(
+                config = session.config,
+                analysisResults = session.analysisResults,
+                metadata = installMetadata()
+            ).collect { progress ->
+                // Sync module logs back to the session repository if applicable
+                if (progress is ProgressEntity.InstallingModule) {
+                    session.moduleLog = progress.output
+                }
+                // Emit progress to the UI layer
+                session.progress.emit(progress)
             }
-            // Emit progress to the UI layer
-            session.progress.emit(progress)
         }
 
         // Cache cleanup strategy
@@ -537,6 +544,29 @@ class ActionHandler(
             clearCache()
         } else {
             Timber.d("[id=$sessionId] Multi-app install step succeeded. Deferring cache cleanup.")
+        }
+    }
+
+    private suspend fun runWithSelfUpdateRecovery(
+        analysisResults: List<PackageAnalysisResult>,
+        install: suspend () -> Unit
+    ) {
+        val selfUpdate = analysisResults.firstOrNull { result ->
+            result.packageName == context.packageName && result.appEntities.any { it.selected }
+        }
+        // Android 17 may kill this process before a successful self-update call returns.
+        // Persist the expected package state immediately before handing control to PackageManager.
+        val recoveryArmed = selfUpdate != null && selfUpdateRecoveryManager.arm(sessionId)
+
+        try {
+            install()
+        } catch (error: Throwable) {
+            if (recoveryArmed) {
+                withContext(NonCancellable) {
+                    selfUpdateRecoveryManager.clear(sessionId)
+                }
+            }
+            throw error
         }
     }
 

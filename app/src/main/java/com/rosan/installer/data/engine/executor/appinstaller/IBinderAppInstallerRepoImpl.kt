@@ -33,6 +33,7 @@ import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.engine.model.install.InstallOption
+import com.rosan.installer.domain.engine.model.install.shouldAutoDeleteSource
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
@@ -412,13 +413,7 @@ abstract class IBinderAppInstallerRepoImpl(
         if (result.isSuccess) {
             val packageName = entities.firstOrNull()?.packageName ?: return
 
-            val isDeleteCapable = entities.firstOrNull()?.sourceType !in listOf(
-                DataType.MULTI_APK_ZIP,
-                DataType.MIXED_MODULE_APK,
-                DataType.MIXED_MODULE_ZIP
-            )
-
-            val shouldDelete = config.autoDelete && (isDeleteCapable || config.autoDeleteZip)
+            val shouldDelete = config.shouldAutoDeleteSource(entities.firstOrNull()?.sourceType)
 
             val pathsToDelete = if (shouldDelete) entities.sourcePath().toList() else emptyList()
 

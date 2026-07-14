@@ -501,6 +501,7 @@
     <string name="installer_installing_module">安装模块中</string>
     <string name="installer_install_failed">安装失败</string>
     <string name="installer_install_success">安装成功</string>
+    <string name="self_update_install_success">InstallerX 更新安装成功</string>
     <string name="installer_install_complete">安装完成</string>
     <string name="batch_install_result_message">批量安装：%1$d/%2$d 成功</string>
     <string name="installer_move_to_background">后台运行</string>

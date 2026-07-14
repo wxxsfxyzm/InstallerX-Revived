@@ -517,6 +517,7 @@
     <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>
     <string name="installer_install_success">Install success</string>
+    <string name="self_update_install_success">InstallerX was updated successfully</string>
     <string name="installer_install_complete">Install complete</string>
     <string name="batch_install_result_message">Batch installation: %1$d/%2$d successful</string>
     <string name="installer_move_to_background">Run in background</string>

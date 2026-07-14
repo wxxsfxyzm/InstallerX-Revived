@@ -3,6 +3,7 @@
 package com.rosan.installer.data.engine.repository
 
 import android.content.Context
+import android.os.Build
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.engine.executor.appinstaller.DhizukuAppInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appinstaller.NoneAppInstallerRepoImpl
@@ -13,7 +14,11 @@ import com.rosan.installer.data.engine.policy.PlatformInstallPolicyChecker
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.engine.model.install.shouldAutoDeleteSource
+import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
+import com.rosan.installer.domain.packageupdate.model.PendingSourceDeletion
+import com.rosan.installer.domain.packageupdate.repository.SelfUpdateRecoveryRepository
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
@@ -21,8 +26,10 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
+import java.io.File
 
 class AppInstallerRepositoryImpl(
     private val context: Context,
@@ -30,7 +37,8 @@ class AppInstallerRepositoryImpl(
     private val appSettingsRepo: AppSettingsRepository,
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val postInstallTaskProvider: PostInstallTaskProvider,
-    private val platformInstallPolicyChecker: PlatformInstallPolicyChecker
+    private val platformInstallPolicyChecker: PlatformInstallPolicyChecker,
+    private val selfUpdateRecoveryRepository: SelfUpdateRecoveryRepository
 ) : AppInstallerRepository {
     override suspend fun resolveInstallerPackageName(config: ConfigModel): String? =
         executeWithRepo(config) { repo ->
@@ -46,6 +54,8 @@ class AppInstallerRepositoryImpl(
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>
     ) = executeWithRepo(config) { repo ->
+        persistSelfUpdateSourceDeletion(config, entities, metadata)
+
         val requestedRespectPlatformInstallPolicy = respectPlatformInstallPolicy ||
                 appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy).first()
         val canCheckPlatformInstallPolicy = canCheckPlatformInstallPolicy(config)
@@ -82,6 +92,43 @@ class AppInstallerRepositoryImpl(
             sharedUserIdBlacklist,
             sharedUserIdExemption
         )
+    }
+
+    private suspend fun persistSelfUpdateSourceDeletion(
+        config: ConfigModel,
+        entities: List<InstallEntity>,
+        metadata: InstallMetadata
+    ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) return
+        if (entities.firstOrNull()?.packageName != context.packageName) return
+        val sessionId = metadata.operationSessionKey ?: return
+
+        val shouldDelete = config.shouldAutoDeleteSource(entities.firstOrNull()?.sourceType)
+        val deletePaths = if (shouldDelete) {
+            // This is the normal post-install delete input. Keep only absolute filesystem paths;
+            // Android 17 recovery must not persist a transient content URI or a URI grant.
+            entities.sourcePath()
+                .filter { File(it).isAbsolute }
+                .distinct()
+        } else {
+            emptyList()
+        }
+        val sourceDeletion = deletePaths.takeIf { it.isNotEmpty() }?.let { paths ->
+            PendingSourceDeletion(
+                paths = paths,
+                authorizer = config.authorizer,
+                customizeAuthorizer = config.customizeAuthorizer
+            )
+        }
+
+        try {
+            selfUpdateRecoveryRepository.updateSourceDeletion(sessionId, sourceDeletion)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            // Failure to persist optional cleanup must not prevent the package update itself.
+            Timber.w(error, "Failed to persist Android 17 self-update source deletion.")
+        }
     }
 
     private fun canCheckPlatformInstallPolicy(config: ConfigModel): Boolean =

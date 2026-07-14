@@ -7,8 +7,10 @@ import android.content.IntentHidden
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstallerHidden
 import android.content.pm.PackageManagerHidden
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
+import android.os.Process
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,7 +42,9 @@ import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.framework.auth.BiometricAuthBridge
+import com.rosan.installer.framework.packageupdate.SelfUpdateRecoveryManager
 import com.rosan.installer.ui.common.permission.PermissionRequester
+import com.rosan.installer.util.platformLaunchReferrer
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -78,6 +82,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     private val deviceCapabilityProvider: DeviceCapabilityProvider by inject()
     private val permissionChecker: PermissionChecker by inject()
     private val unknownSourcePermissionChecker: UnknownSourcePermissionChecker by inject()
+    private val selfUpdateRecoveryManager: SelfUpdateRecoveryManager by inject()
     private lateinit var permissionRequester: PermissionRequester
 
     // Flag to track if the activity is stopped due to a permission request
@@ -114,6 +119,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate. SavedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}")
 
+        lifecycleScope.launch {
+            // Re-check after configuration recreation as well: a previous lifecycle coroutine may
+            // have been cancelled while waiting for the recovery DataStore transaction.
+            if (recoverFromAndroid17SelfUpdate()) return@launch
+            initializeInstaller(savedInstanceState)
+        }
+    }
+
+    private fun initializeInstaller(savedInstanceState: Bundle?) {
         when {
             savedInstanceState != null -> {
                 returnInstallResultRequested = savedInstanceState.getBoolean(KEY_RETURN_INSTALL_RESULT_REQUESTED)
@@ -154,6 +168,34 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         }
 
         showContent()
+    }
+
+    private suspend fun recoverFromAndroid17SelfUpdate(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) return false
+
+        // WM Shell rebuilds the task base intent after an Android 17 package update, but it does
+        // not preserve the original URI grants or ClipData. Intercept it before creating a session
+        // so the incomplete VIEW/SEND intent is treated as completion instead of a new install.
+        val platformReferrerPackage = platformLaunchReferrer()
+            ?.takeIf { it.scheme == "android-app" }
+            ?.host
+        val recovered = selfUpdateRecoveryManager.consumeSystemUiRecovery(
+            launchedFromUid = launchedFromUidCompat(),
+            platformReferrerPackage = platformReferrerPackage,
+            intentFlags = intent.flags
+        )
+        if (!recovered) return false
+
+        Timber.i("Redirecting InstallerActivity restored by SystemUI after self-update.")
+        startActivity(SettingsActivity.createSelfUpdateRecoveryIntent(this))
+        finishAndRemoveTask()
+        return true
+    }
+
+    @Suppress("DEPRECATION")
+    private fun launchedFromUidCompat(): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) return Process.INVALID_UID
+        return launchedFromUid
     }
 
     private fun checkPermissionsAndStartProcess() {

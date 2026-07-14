@@ -8,6 +8,7 @@ import com.rosan.installer.di.engineModule
 import com.rosan.installer.di.initModule
 import com.rosan.installer.di.installerModule
 import com.rosan.installer.di.networkModule
+import com.rosan.installer.di.packageUpdateModule
 import com.rosan.installer.di.privilegedModule
 import com.rosan.installer.di.serializationModule
 import com.rosan.installer.di.settingsModule
@@ -19,6 +20,7 @@ val appModules = listOf(
     serializationModule,
     installerModule,
     coreModule,
+    packageUpdateModule,
     settingsModule,
     engineModule,
     networkModule,

@@ -10,9 +10,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManagerHidden
 import android.content.pm.ProviderInfo
-import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Process
 import com.rosan.installer.core.app.ActivityContracts
 import com.rosan.installer.core.bitmask.addFlag
@@ -20,6 +18,7 @@ import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.session.model.InstallSourceConfidence
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCase
+import com.rosan.installer.util.platformLaunchReferrer
 import timber.log.Timber
 
 class ConfigResolver(
@@ -100,7 +99,7 @@ class ConfigResolver(
 
         // Check referrer before URI authority: browsers such as Chrome may hand us a media or
         // downloads provider URI, while the install requester is still the activity referrer.
-        val referrer = realLaunchReferrer()
+        val referrer = platformLaunchReferrer()
         Timber.tag(TAG).d("activity.referrer: $referrer")
         val referrerHost = referrer?.host
         if (referrer?.scheme == "android-app" && referrerHost != null) {
@@ -138,21 +137,6 @@ class ConfigResolver(
 
         Timber.tag(TAG).w("Could not determine calling package. Using default config.")
         return InstallSource.unknown()
-    }
-
-    private fun Activity.realLaunchReferrer(): Uri? {
-        val originalExtras = intent.extras?.let(::Bundle)
-
-        return try {
-            // Custom referrer extras are caller-controlled. Temporarily remove them so
-            // Activity.referrer can expose the platform launch referrer without changing
-            // the intent later used for install metadata.
-            intent.removeExtra(Intent.EXTRA_REFERRER_NAME)
-            intent.removeExtra(Intent.EXTRA_REFERRER)
-            referrer
-        } finally {
-            intent.replaceExtras(originalExtras)
-        }
     }
 
     private fun Activity.resolveTrustedProxySource(proxyPackageName: String): InstallSource {
