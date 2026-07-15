@@ -925,4 +925,12 @@
     <string name="unarchive_error_action_required_message">在此應用程式能被還原之前需要額外操作</string>
     <string name="config_authorizer_command_desc">命令： %1$s</string>
     <string name="dhizuku_unsupported_desc">不支援 Dhizuku</string>
+    <string name="self_update_install_success">InstallerX 更新安裝成功</string>
+    <string name="install_comparison_display_behavior">資料比對的顯示行為</string>
+    <string name="install_comparison_show_all">顯示全部</string>
+    <string name="install_comparison_show_all_desc">一律顯示新舊資料的值</string>
+    <string name="install_comparison_show_differences_only">僅顯示差異項目</string>
+    <string name="install_comparison_show_differences_only_desc">相同資料僅顯示單一數值</string>
+    <string name="expand_temporary_settings_by_default">預設展開面板</string>
+    <string name="expand_temporary_settings_by_default_desc">開啟安裝視窗時預設展開臨時設定</string>
 </resources>

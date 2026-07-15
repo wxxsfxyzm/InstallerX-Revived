@@ -915,4 +915,11 @@
     <string name="config_customize_package_source_disabled_desc">Quando a \"Respeitar a política da plataforma\" preencher automaticamente a partir da origem</string>
     <string name="config_authorizer_command_desc">Comando: %1$s</string>
     <string name="dhizuku_unsupported_desc">O Dhizuku não é compatível</string>
+    <string name="install_comparison_display_behavior">Comportamento da exibição da comparação de dados</string>
+    <string name="install_comparison_show_all">Mostrar todos</string>
+    <string name="install_comparison_show_all_desc">Sempre mostrar os valores antigos e novos</string>
+    <string name="install_comparison_show_differences_only">Mostrar apenas as diferenças</string>
+    <string name="install_comparison_show_differences_only_desc">Exibir dados idênticos como um único valor</string>
+    <string name="expand_temporary_settings_by_default">Expandir o painel por padrão</string>
+    <string name="expand_temporary_settings_by_default_desc">Expandir as configurações temporárias ao abrir a caixa de diálogo de instalação</string>
 </resources>

@@ -857,4 +857,9 @@
     <string name="installer_prepare_signature_rotation_compatible">Tương thích xoay chữ ký. Chứng chỉ gói hiện tại tồn tại trong dòng chứng chỉ ký ứng dụng đã cài đặt. Tính tương thích của bản cập nhật cuối cùng được quyết định bởi hệ thống.</string>
     <string name="installer_prepare_signature_candidate_rotation_unconfirmed">Bằng chứng xoay vòng ký được phát hiện, nhưng tính tương thích với ứng dụng đã cài đặt không thể xác nhận. Kết quả cuối cùng phụ thuộc vào xác minh hệ thống.</string>
     <string name="installer_prepare_signature_analysis_issue">Phân tích chữ ký APK đã tìm thấy vấn đề. Cài đặt có thể thất bại; kết quả cuối cùng phụ thuộc vào xác minh hệ thống.</string>
+    <string name="installer_signature_pending_package">Chữ ký gói hiện tại</string>
+    <string name="installer_signature_installed_package">Chữ ký ứng dụng đã cài đặt</string>
+    <string name="installer_signature_analysis_issues">Các vấn đề về chữ ký bộ APK</string>
+    <string name="installer_signature_verification_failed_files">Các tệp mà thất bại khi xác minh chữ ký</string>
+    <string name="installer_signature_split_mismatch_files">Các bản chia tách được ký khác với cơ sở hoặc ứng dụng đã cài đặt</string>
 </resources>
