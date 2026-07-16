@@ -151,8 +151,8 @@ This project uses code from, or is based on the implementation of, the following
 
 <a href="https://www.star-history.com/?repos=wxxsfxyzm%2FInstallerX-Revived&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&theme=dark&legend=top-left&sealed_token=Hp_xa69sA4KNmnl8KwAi2TAJjRZIIXpI5DPfwe6ULCpe2Pd8lyr0waU2bPCAvZLLDbLc1BlQRnH1U41HhtaLsI7tyxICKwqGErPPLjnj4nJT-SJhIOi6lP5mfsymarUIh2ZcACpqUBL5p32Xd6RHLsZXvOVz3OCwdVMjrQ8XSyOKAAq-0nxFt7qJlGuU" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left&sealed_token=Hp_xa69sA4KNmnl8KwAi2TAJjRZIIXpI5DPfwe6ULCpe2Pd8lyr0waU2bPCAvZLLDbLc1BlQRnH1U41HhtaLsI7tyxICKwqGErPPLjnj4nJT-SJhIOi6lP5mfsymarUIh2ZcACpqUBL5p32Xd6RHLsZXvOVz3OCwdVMjrQ8XSyOKAAq-0nxFt7qJlGuU" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left&sealed_token=Hp_xa69sA4KNmnl8KwAi2TAJjRZIIXpI5DPfwe6ULCpe2Pd8lyr0waU2bPCAvZLLDbLc1BlQRnH1U41HhtaLsI7tyxICKwqGErPPLjnj4nJT-SJhIOi6lP5mfsymarUIh2ZcACpqUBL5p32Xd6RHLsZXvOVz3OCwdVMjrQ8XSyOKAAq-0nxFt7qJlGuU" />
  </picture>
 </a>
