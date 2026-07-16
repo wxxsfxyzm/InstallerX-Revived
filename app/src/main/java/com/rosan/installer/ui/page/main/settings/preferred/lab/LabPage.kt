@@ -265,22 +265,24 @@ fun LabPage(
                     }
                 }
             }
-            item {
-                SegmentedColumn(
-                    title = stringResource(R.string.lab_unstable_features)
-                ) {
-                    item {
-                        SwitchWidget(
-                            icon = AppIcons.InstallRequester,
-                            title = stringResource(R.string.lab_respect_platform_install_policy),
-                            description = stringResource(R.string.lab_respect_platform_install_policy_desc),
-                            checked = uiState.labRespectPlatformInstallPolicy,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
-                                )
-                            }
-                        )
+            if (AppConfig.isRespectPlatformInstallPolicyAvailable) {
+                item {
+                    SegmentedColumn(
+                        title = stringResource(R.string.lab_unstable_features)
+                    ) {
+                        item {
+                            SwitchWidget(
+                                icon = AppIcons.InstallRequester,
+                                title = stringResource(R.string.lab_respect_platform_install_policy),
+                                description = stringResource(R.string.lab_respect_platform_install_policy_desc),
+                                checked = uiState.labRespectPlatformInstallPolicy,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }

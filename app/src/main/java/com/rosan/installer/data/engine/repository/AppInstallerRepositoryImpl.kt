@@ -4,6 +4,7 @@ package com.rosan.installer.data.engine.repository
 
 import android.content.Context
 import android.os.Build
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.engine.executor.appinstaller.DhizukuAppInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appinstaller.NoneAppInstallerRepoImpl
@@ -56,8 +57,10 @@ class AppInstallerRepositoryImpl(
     ) = executeWithRepo(config) { repo ->
         persistSelfUpdateSourceDeletion(config, entities, metadata)
 
-        val requestedRespectPlatformInstallPolicy = respectPlatformInstallPolicy ||
-                appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy).first()
+        val requestedRespectPlatformInstallPolicy =
+            AppConfig.isRespectPlatformInstallPolicyAvailable &&
+                    (respectPlatformInstallPolicy ||
+                            appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy).first())
         val canCheckPlatformInstallPolicy = canCheckPlatformInstallPolicy(config)
         val effectiveRespectPlatformInstallPolicy =
             requestedRespectPlatformInstallPolicy && canCheckPlatformInstallPolicy

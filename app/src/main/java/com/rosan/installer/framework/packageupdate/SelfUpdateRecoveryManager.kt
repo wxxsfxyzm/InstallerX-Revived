@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Process
 import android.os.SystemClock
+import androidx.annotation.RequiresApi
 import com.rosan.installer.domain.packageupdate.model.PendingSelfUpdate
 import com.rosan.installer.domain.packageupdate.repository.SelfUpdateRecoveryRepository
 import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
@@ -115,8 +116,7 @@ class SelfUpdateRecoveryManager(
         val pendingUpdate = readPendingUpdate()
             ?: return consumeRecentPackageUpdateExit()
         val now = SystemClock.elapsedRealtime()
-        if (pendingUpdate.armedAtElapsed <= 0L ||
-            now < pendingUpdate.armedAtElapsed ||
+        if (pendingUpdate.armedAtElapsed !in 1..now ||
             now - pendingUpdate.armedAtElapsed > RECOVERY_TIMEOUT_MILLIS
         ) {
             clearPendingUpdate()
@@ -198,6 +198,7 @@ class SelfUpdateRecoveryManager(
         null
     }
 
+    @RequiresApi(Build.VERSION_CODES.CINNAMON_BUN)
     private suspend fun consumeRecentPackageUpdateExit(lastUpdateTime: Long? = null): Boolean {
         val packageUpdateTime = lastUpdateTime ?: runCatching {
             appContext.packageManager.getPackageInfo(appContext.packageName, 0).lastUpdateTime

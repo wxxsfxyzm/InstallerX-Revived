@@ -283,24 +283,26 @@ fun MiuixLabPage(
                     }
                 }
             }
-            // item { SmallTitle(stringResource(R.string.lab_ui_settings)) }
-            item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.lab_respect_platform_install_policy),
-                        description = stringResource(R.string.lab_respect_platform_install_policy_desc),
-                        checked = uiState.labRespectPlatformInstallPolicy,
-                        onCheckedChange = {
-                            viewModel.dispatch(
-                                LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
-                            )
-                        }
-                    )
+            if (AppConfig.isRespectPlatformInstallPolicyAvailable) {
+                // item { SmallTitle(stringResource(R.string.lab_ui_settings)) }
+                item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp)
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.lab_respect_platform_install_policy),
+                            description = stringResource(R.string.lab_respect_platform_install_policy_desc),
+                            checked = uiState.labRespectPlatformInstallPolicy,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
+                                )
+                            }
+                        )
+                    }
                 }
             }
             if (AppConfig.isInternetAccessEnabled) {

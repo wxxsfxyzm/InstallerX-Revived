@@ -4,6 +4,7 @@ package com.rosan.installer.data.settings.repository
 
 import android.os.Build
 import androidx.datastore.preferences.core.Preferences
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.settings.local.datastore.AppDataStore
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.app.NamedPackage
@@ -133,7 +134,9 @@ class AppSettingsRepositoryImpl(
             labShowFilePath = prefs[AppDataStore.LAB_SHOW_FILE_PATH] ?: false,
             labShowInstallInitiator = prefs[AppDataStore.LAB_SHOW_INSTALL_INITIATOR] ?: false,
             labInstallWithoutUserAction = prefs[AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION] ?: false,
-            labRespectPlatformInstallPolicy = prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false,
+            labRespectPlatformInstallPolicy =
+                AppConfig.isRespectPlatformInstallPolicyAvailable &&
+                        (prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false),
             enableFileLogging = prefs[AppDataStore.ENABLE_FILE_LOGGING] ?: true,
             // UI State
             themeMode = ThemeMode.fromValueOrDefault(prefs[AppDataStore.THEME_MODE] ?: ThemeMode.SYSTEM.name),
@@ -176,7 +179,13 @@ class AppSettingsRepositoryImpl(
         appDataStore.putBoolean(booleanKey(setting), value)
 
     override fun getBoolean(setting: BooleanSetting, default: Boolean): Flow<Boolean> =
-        appDataStore.getBoolean(booleanKey(setting), default)
+        appDataStore.getBoolean(booleanKey(setting), default).map { value ->
+            if (setting == BooleanSetting.LabRespectPlatformInstallPolicy) {
+                value && AppConfig.isRespectPlatformInstallPolicyAvailable
+            } else {
+                value
+            }
+        }
 
     override suspend fun putNamedPackageList(
         setting: NamedPackageListSetting,

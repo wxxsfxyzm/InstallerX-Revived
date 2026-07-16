@@ -18,5 +18,6 @@ object AppConfig {
     const val VERSION_NAME: String = BuildConfig.VERSION_NAME
     const val VERSION_CODE: Int = BuildConfig.VERSION_CODE
 
+    val isRespectPlatformInstallPolicyAvailable = LEVEL == Level.UNSTABLE
     val isLogEnabled = LEVEL == Level.PREVIEW || LEVEL == Level.UNSTABLE || isDebug
 }
