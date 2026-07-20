@@ -379,22 +379,24 @@ abstract class IBinderAppInstallerRepoImpl(
 
     private fun installIt(entity: InstallEntity, session: Session) {
         Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
-        val inputStream = entity.data.getInputStreamWhileNotEmpty()
-            ?: throw IllegalStateException("Unable to open install entity input stream: ${entity.data}")
         val sizeBytes = entity.data.getSize()
 
         if (sizeBytes == 0L || sizeBytes < AssetFileDescriptor.UNKNOWN_LENGTH) {
             throw IllegalStateException("Invalid data size: $sizeBytes.")
         }
-        session.openWrite(
-            entity.name,
-            0,
-            sizeBytes
-        ).use { outputStream ->
-            inputStream.copyTo(outputStream)
-            session.fsync(outputStream)
+
+        val inputStream = entity.data.getInputStreamWhileNotEmpty()
+            ?: throw IllegalStateException("Unable to open install entity input stream: ${entity.data}")
+        inputStream.use { input ->
+            session.openWrite(
+                entity.name,
+                0,
+                sizeBytes
+            ).use { outputStream ->
+                input.copyTo(outputStream)
+                session.fsync(outputStream)
+            }
         }
-        inputStream.close()
     }
 
     @SuppressLint("RequestInstallPackagesPolicy")
