@@ -14,10 +14,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import java.io.File
-import java.util.zip.ZipFile
 
 class PackagePreprocessor(
-    private val installedAppInfoProvider: InstalledAppInfoProvider
+    private val installedAppInfoProvider: InstalledAppInfoProvider,
+    private val unifiedZipFileProvider: UnifiedZipFileProvider
 ) {
 
     data class ProcessedGroup(
@@ -115,13 +115,16 @@ class PackagePreprocessor(
             is DataEntity.ZipFileEntity -> {
                 // Zip Entry optimization: Use CRC + Size only, no decompression, extremely fast
                 try {
-                    ZipFile(data.parent.path).use { zip ->
+                    val allowLocalHeaderFallback = entity.sourceType?.allowsLocalHeaderFallback ?: true
+                    unifiedZipFileProvider.open(data.parent.path, allowLocalHeaderFallback).use { zip ->
                         zip.getEntry(data.name)?.let { "${it.crc}|${it.size}" }
                     } ?: "${data.name}_${entity.versionCode}"
                 } catch (_: Exception) {
                     "${data.name}_${entity.versionCode}"
                 }
             }
+
+            is DataEntity.SeekableZipEntryEntity -> "${data.crc}|${data.getSize()}"
 
             else -> "${entity.packageName}_${entity.versionCode}"
         }

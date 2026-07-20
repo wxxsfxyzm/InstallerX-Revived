@@ -3,13 +3,13 @@
 package com.rosan.installer.data.engine.signature
 
 import com.android.apksig.ApkVerifier
+import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import timber.log.Timber
 import java.io.File
 import java.security.cert.X509Certificate
 import java.util.UUID
-import java.util.zip.ZipFile
 
 /**
  * APK signature analyzer.
@@ -27,7 +27,6 @@ class PendingApkSignatureAnalyzer(
     fun analyze(data: DataEntity, cacheDirectory: String): AppSignatureInfo? {
         return when (data) {
             is DataEntity.FileEntity -> analyze(File(data.path), data.path)
-            is DataEntity.ZipFileEntity -> analyzeZipEntry(data, cacheDirectory)
             else -> analyzeStream(data, cacheDirectory)
         }
     }
@@ -56,28 +55,6 @@ class PendingApkSignatureAnalyzer(
         }
     }
 
-    private fun analyzeZipEntry(
-        data: DataEntity.ZipFileEntity,
-        cacheDirectory: String
-    ): AppSignatureInfo {
-        val tempFile = createSignatureTempFile(cacheDirectory)
-        return try {
-            ZipFile(data.parent.path).use { zip ->
-                val entry = zip.getEntry(data.name)
-                    ?: return failedSignatureInfo("Missing zip entry: ${data.name}")
-                zip.getInputStream(entry).use { input ->
-                    tempFile.outputStream().use { output -> input.copyTo(output) }
-                }
-            }
-            analyze(tempFile, data.toString())
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to get signature hash from APK entry: $data")
-            failedSignatureInfo(e.message ?: e::class.java.simpleName)
-        } finally {
-            tempFile.delete()
-        }
-    }
-
     private fun analyzeStream(
         data: DataEntity,
         cacheDirectory: String
@@ -90,6 +67,8 @@ class PendingApkSignatureAnalyzer(
                 tempFile.outputStream().use { output -> source.copyTo(output) }
             }
             analyze(tempFile, data.toString())
+        } catch (e: AnalyseException) {
+            throw e
         } catch (e: Exception) {
             Timber.e(e, "Failed to get signature hash from APK data: $data")
             failedSignatureInfo(e.message ?: e::class.java.simpleName)

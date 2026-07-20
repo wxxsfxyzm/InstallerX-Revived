@@ -3,9 +3,12 @@
 package com.rosan.installer.di
 
 import com.rosan.installer.data.engine.parser.ApkParser
+import com.rosan.installer.data.engine.parser.CommonsZipFileProvider
 import com.rosan.installer.data.engine.parser.FileTypeDetector
 import com.rosan.installer.data.engine.parser.PackagePreprocessor
+import com.rosan.installer.data.engine.parser.SeekableZipReader
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
+import com.rosan.installer.data.engine.parser.UnifiedZipFileProvider
 import com.rosan.installer.data.engine.provider.InstalledAppInfoProviderImpl
 import com.rosan.installer.data.engine.parser.strategy.ApkmStrategy
 import com.rosan.installer.data.engine.parser.strategy.ApksStrategy
@@ -49,6 +52,8 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val engineModule = module {
+    singleOf(::CommonsZipFileProvider)
+
     // Signature analysis
     singleOf(::CertificateFormatter)
     singleOf(::PendingApkSignatureAnalyzer)
@@ -59,6 +64,8 @@ val engineModule = module {
     // Parser
     singleOf(::ApkParser)
     // Parser Tools
+    singleOf(::SeekableZipReader)
+    singleOf(::UnifiedZipFileProvider)
     singleOf(::FileTypeDetector)
     // Strategies
     singleOf(::SingleApkStrategy)
