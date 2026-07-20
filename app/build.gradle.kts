@@ -175,6 +175,9 @@ room3 {
 }
 
 dependencies {
+    testImplementation(libs.kotlin.test.junit)
+
+    implementation(libs.commons.compress)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.android.tools.apksig)
     "baselineProfile"(project(":baselineprofile"))
