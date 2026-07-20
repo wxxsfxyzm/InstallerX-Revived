@@ -40,6 +40,7 @@ uiautomator = "2.4.0"
 benchmarkMacroJunit4 = "1.4.1"
 baselineprofile = "1.5.0-alpha07"
 profileinstaller = "1.4.1"
+commonsCompress = "1.28.0"
 
 [plugins]
 installerx-application = { id = "installerx.android.application" }
@@ -60,6 +61,7 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 android-tools-apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidx-annotation" }
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.19.0" }
@@ -93,6 +95,7 @@ ktx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-seria
 # https://github.com/LSPosed/AndroidHiddenApiBypass
 hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version = "6.1" }
 commons-cli = { group = "commons-cli", name = "commons-cli", version = "1.11.0" }
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 
 # Koin Inject
 # https://insert-koin.io/docs/setup/koin
