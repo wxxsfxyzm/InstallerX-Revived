@@ -30,83 +30,96 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.util.UUID
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
 
 class ApkParser(
     private val reflect: ReflectionProvider,
-    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
+    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer,
+    private val unifiedZipFileProvider: UnifiedZipFileProvider
 ) {
     @SuppressLint("DiscouragedPrivateApi")
     fun parseFull(
         data: DataEntity,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
+        zipFile: UnifiedZipFile? = null
     ): List<AppEntity> {
         val fileEntity = data as? DataEntity.FileEntity
             ?: throw IllegalArgumentException("ApkParser expects a FileEntity, got: ${data::class.simpleName}")
 
         val path = fileEntity.path
         Timber.d("ApkParser: Processing file path: $path")
+        val archive = zipFile ?: unifiedZipFileProvider.open(path)
 
-        val bestArch = analyseAndSelectBestArchitecture(path, DeviceConfig.supportedArchitectures)
-        Timber.d("ApkParser: Selected Arch for $path is $bestArch")
+        return try {
+            val bestArch = analyseAndSelectBestArchitecture(archive, DeviceConfig.supportedArchitectures)
+            Timber.d("ApkParser: Selected Arch for $path is $bestArch")
 
-        return useResources { resources ->
-            try {
-                val apkResources = loadApkResources(resources, path)
-                Timber.d("ApkParser: Resources loaded successfully for $path")
+            useResources { resources ->
+                try {
+                    val apkResources = loadApkResources(resources, path)
+                    Timber.d("ApkParser: Resources loaded successfully for $path")
 
-                val entity = if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
-                    loadAppEntity(
-                        apkResources.resources,
-                        apkResources.resources.newTheme(),
-                        apkResources.openManifestParser,
-                        path,
-                        data,
-                        extra,
-                        bestArch ?: Architecture.UNKNOWN
-                    )
-                } else {
-                    loadAppEntity(
-                        apkResources.resources,
-                        apkResources.resources.newTheme(),
-                        apkResources.openManifestParser,
-                        path,
-                        data,
-                        extra,
-                        bestArch ?: Architecture.UNKNOWN
-                    )
+                    val entity = if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
+                        loadAppEntity(
+                            apkResources.resources,
+                            apkResources.resources.newTheme(),
+                            apkResources.openManifestParser,
+                            archive,
+                            path,
+                            data,
+                            extra,
+                            bestArch ?: Architecture.UNKNOWN
+                        )
+                    } else {
+                        loadAppEntity(
+                            apkResources.resources,
+                            apkResources.resources.newTheme(),
+                            apkResources.openManifestParser,
+                            archive,
+                            path,
+                            data,
+                            extra,
+                            bestArch ?: Architecture.UNKNOWN
+                        )
+                    }
+                    Timber.d("ApkParser: Entity parsed successfully -> Pkg: ${entity.packageName}")
+                    listOf(entity)
+                } catch (e: AnalyseException) {
+                    throw e
+                } catch (e: Exception) {
+                    Timber.e(e, "ApkParser: Failed to parse $path")
+                    emptyList()
                 }
-                Timber.d("ApkParser: Entity parsed successfully -> Pkg: ${entity.packageName}")
-                listOf(entity)
-            } catch (e: Exception) {
-                Timber.e(e, "ApkParser: Failed to parse $path")
-                emptyList()
             }
+        } finally {
+            if (zipFile == null) archive.close()
         }
     }
 
-    fun parseZipEntryFull(
-        zipFile: ZipFile,
-        entry: ZipEntry,
-        parentData: DataEntity,
+    fun parseArchiveEntryFull(
+        zipFile: UnifiedZipFile,
+        entry: UnifiedZipEntry,
+        parentData: DataEntity.FileEntity,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         val tempFile = File.createTempFile("anl_${UUID.randomUUID()}", ".apk", File(extra.cacheDirectory))
+        val entryData = zipFile.toDataEntity(entry, parentData)
 
         return try {
-            zipFile.getInputStream(entry).use { input ->
+            zipFile.openEntry(entry).use { input ->
                 tempFile.outputStream().use { output -> input.copyTo(output) }
             }
 
             val tempData = DataEntity.FileEntity(tempFile.absolutePath).apply {
-                source = DataEntity.ZipFileEntity(entry.name, parentData as DataEntity.FileEntity)
+                source = entryData
             }
 
             val results = parseFull(tempData, extra)
 
             if (results.isEmpty()) tempFile.delete()
             results
+        } catch (e: AnalyseException) {
+            tempFile.delete()
+            throw e
         } catch (e: Exception) {
             Timber.e(e, "Failed to parse zip entry: ${entry.name}")
             tempFile.delete()
@@ -198,6 +211,7 @@ class ApkParser(
         resources: Resources,
         theme: Resources.Theme?,
         openManifestParser: () -> XmlResourceParser,
+        zipFile: UnifiedZipFile,
         path: String,
         data: DataEntity,
         extra: AnalyseExtraEntity,
@@ -367,15 +381,16 @@ class ApkParser(
 
         // Final Xposed verification and data extraction
         var xposedInfo: XposedModuleInfo? = null
-        ZipFile(path).use { zip ->
-            // Check modern Xposed indicators if legacy ones were not found
-            if (!isPotentialXposed && (zip.getEntry("META-INF/xposed/module.prop") != null || zip.getEntry("assets/xposed_init") != null)) {
-                isPotentialXposed = true
-            }
+        // Check modern Xposed indicators if legacy ones were not found
+        if (!isPotentialXposed &&
+            (zipFile.getEntry("META-INF/xposed/module.prop") != null ||
+                    zipFile.getEntry("assets/xposed_init") != null)
+        ) {
+            isPotentialXposed = true
+        }
 
-            if (isPotentialXposed) {
-                xposedInfo = XposedUtils.extract(zip, metaDataMap, appDescription)
-            }
+        if (isPotentialXposed) {
+            xposedInfo = XposedUtils.extract(zipFile, metaDataMap, appDescription)
         }
 
         Timber.d("ApkParser: Manifest parsed. Package: $packageName, Split: $splitName, IsXposed: ${xposedInfo != null}")
@@ -470,19 +485,17 @@ class ApkParser(
 
     private fun Exception.isRecoverableManifestParseException() = this is XmlPullParserException || this is IOException
 
-    private fun analyseAndSelectBestArchitecture(path: String, deviceSupportedArchs: List<Architecture>): Architecture? {
+    private fun analyseAndSelectBestArchitecture(
+        zipFile: UnifiedZipFile,
+        deviceSupportedArchs: List<Architecture>
+    ): Architecture? {
         val apkArchs = mutableSetOf<Architecture>()
-        runCatching {
-            ZipFile(path).use { zip ->
-                val entries = zip.entries()
-                while (entries.hasMoreElements()) {
-                    val name = entries.nextElement().name
-                    if (name.startsWith("lib/") && name.count { it == '/' } >= 2) {
-                        Architecture.fromArchString(name.split('/')[1])
-                            .takeIf { it != Architecture.UNKNOWN }
-                            ?.let { apkArchs.add(it) }
-                    }
-                }
+        zipFile.entries.forEach { entry ->
+            val name = entry.name
+            if (name.startsWith("lib/") && name.count { it == '/' } >= 2) {
+                Architecture.fromArchString(name.split('/')[1])
+                    .takeIf { it != Architecture.UNKNOWN }
+                    ?.let { apkArchs.add(it) }
             }
         }
 

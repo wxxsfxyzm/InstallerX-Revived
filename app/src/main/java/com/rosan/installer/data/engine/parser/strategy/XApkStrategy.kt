@@ -4,6 +4,7 @@ package com.rosan.installer.data.engine.parser.strategy
 
 import android.graphics.drawable.Drawable
 import com.rosan.installer.data.engine.parser.ApkParser
+import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
@@ -25,7 +26,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.io.File
-import java.util.zip.ZipFile
 
 class XApkStrategy(
     private val json: Json,
@@ -38,30 +38,33 @@ class XApkStrategy(
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
-        zipFile: ZipFile?,
+        zipFile: UnifiedZipFile?,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
-        requireNotNull(zipFile)
+        val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
 
         // 1. Parse Manifest
-        val manifestEntry = zipFile.getEntry("manifest.json") ?: return emptyList()
+        val manifestEntry = archive.getEntry("manifest.json") ?: return emptyList()
         val manifest = withContext(Dispatchers.IO) {
-            zipFile.getInputStream(manifestEntry)
+            archive.openEntry(manifestEntry)
         }.use {
             json.decodeFromStream<Manifest>(it)
         }
 
         // 2. Load Icon (if available)
-        val icon = zipFile.getEntry("icon.png")?.let {
-            Drawable.createFromStream(zipFile.getInputStream(it), it.name)
+        val icon = archive.getEntry("icon.png")?.let { entry ->
+            archive.openEntry(entry).use { input ->
+                Drawable.createFromStream(input, entry.name)
+            }
         }
 
         // 3. Map Splits to Entities
         return manifest.splits.flatMap { split ->
             val entryName = split.name
             // Construct the virtual data entity for the entry
-            val entryData = DataEntity.ZipFileEntity(entryName, data)
+            val entry = archive.getEntry(entryName) ?: return@flatMap emptyList()
+            val entryData = archive.toDataEntity(entry, data)
 
             val file = File(entryName)
             when (file.extension) {
@@ -100,17 +103,14 @@ class XApkStrategy(
 
                         // Fallback: If label is missing from JSON, parse the Base APK fully to extract it
                         if (resolvedLabel.isNullOrBlank()) {
-                            val baseEntry = zipFile.getEntry(entryName)
-                            if (baseEntry != null) {
-                                val parsedEntities = apkParser.parseZipEntryFull(zipFile, baseEntry, data, extra)
-                                val parsedBase = parsedEntities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
+                            val parsedEntities = apkParser.parseArchiveEntryFull(archive, entry, data, extra)
+                            val parsedBase = parsedEntities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
 
-                                if (parsedBase != null) {
-                                    resolvedLabel = parsedBase.label
-                                    // Optionally fallback the icon as well if missing from zip root
-                                    if (resolvedIcon == null) {
-                                        resolvedIcon = parsedBase.icon
-                                    }
+                            if (parsedBase != null) {
+                                resolvedLabel = parsedBase.label
+                                // Optionally fallback the icon as well if missing from zip root
+                                if (resolvedIcon == null) {
+                                    resolvedIcon = parsedBase.icon
                                 }
                             }
                         }

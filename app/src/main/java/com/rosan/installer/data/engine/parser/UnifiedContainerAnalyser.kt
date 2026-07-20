@@ -15,11 +15,10 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.zip.ZipFile
 
 /**
  * A unified entry point for analyzing any package format.
- * It manages the lifecycle of the ZipFile (if applicable) to ensure it's opened only once.
+ * It manages the lifecycle of the unified ZIP layer so each source is opened only once.
  */
 class UnifiedContainerAnalyser(
     singleApkStrategy: SingleApkStrategy,
@@ -27,7 +26,8 @@ class UnifiedContainerAnalyser(
     apkmStrategy: ApkmStrategy,
     xapkStrategy: XApkStrategy,
     multiApkZipStrategy: MultiApkZipStrategy,
-    moduleStrategy: ModuleStrategy
+    moduleStrategy: ModuleStrategy,
+    private val unifiedZipFileProvider: UnifiedZipFileProvider
 ) {
 
     private val strategies = mapOf(
@@ -49,13 +49,11 @@ class UnifiedContainerAnalyser(
     ): List<AppEntity> = withContext(Dispatchers.IO) {
         val strategy = strategies[type] ?: return@withContext emptyList()
 
-        // If it's a file entity and NOT a raw APK, treat it as a Zip Container
-        if (data is DataEntity.FileEntity && type != DataType.APK) {
-            ZipFile(data.path).use { zip ->
-                strategy.analyze(config, data, zip, extra)
+        if (data is DataEntity.FileEntity) {
+            unifiedZipFileProvider.open(data.path, type.allowsLocalHeaderFallback).use { zipFile ->
+                strategy.analyze(config, data, zipFile, extra)
             }
         } else {
-            // Single APK or other non-zip stream sources
             strategy.analyze(config, data, null, extra)
         }
     }

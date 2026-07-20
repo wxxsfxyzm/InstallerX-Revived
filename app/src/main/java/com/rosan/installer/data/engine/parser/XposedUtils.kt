@@ -2,9 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
 import java.util.Properties
-import java.util.zip.ZipFile
 
 object XposedUtils {
     // Defines the modern Xposed configuration file path in the APK archive
@@ -23,13 +23,13 @@ object XposedUtils {
     /**
      * Extracts Xposed module information from an APK file.
      *
-     * @param zipFile The opened ZipFile instance of the APK.
+     * @param zipFile The opened unified ZIP instance of the APK.
      * @param metaDataMap A map containing meta-data key-value pairs parsed from AndroidManifest.xml.
      * @param manifestDescription The application description explicitly parsed from AndroidManifest.xml, if available.
      * @return [XposedModuleInfo] containing minApi, targetApi, and description.
      */
     fun extract(
-        zipFile: ZipFile,
+        zipFile: UnifiedZipFile,
         metaDataMap: Map<String, String>,
         manifestDescription: String? = null
     ): XposedModuleInfo {
@@ -47,14 +47,16 @@ object XposedUtils {
     }
 
     // Safely loads the properties from the module.prop file if it exists
-    private fun loadModuleProp(zipFile: ZipFile): Properties? {
+    private fun loadModuleProp(zipFile: UnifiedZipFile): Properties? {
         val entry = zipFile.getEntry(MODULE_PROP_PATH) ?: return null
         return try {
             Properties().apply {
-                zipFile.getInputStream(entry).use { inputStream ->
+                zipFile.openEntry(entry).use { inputStream ->
                     load(inputStream)
                 }
             }
+        } catch (e: AnalyseException) {
+            throw e
         } catch (_: Exception) {
             null
         }

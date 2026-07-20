@@ -3,6 +3,7 @@
 package com.rosan.installer.data.engine.parser.strategy
 
 import com.rosan.installer.data.engine.parser.ApkParser
+import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -12,7 +13,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
-import java.util.zip.ZipFile
 
 class MultiApkZipStrategy(
     private val apkParser: ApkParser
@@ -21,14 +21,14 @@ class MultiApkZipStrategy(
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
-        zipFile: ZipFile?,
+        zipFile: UnifiedZipFile?,
         extra: AnalyseExtraEntity
     ): List<AppEntity> = coroutineScope {
-        requireNotNull(zipFile) { "MultiApkZipStrategy requires a valid ZipFile" }
+        val archive = requireNotNull(zipFile) { "MultiApkZipStrategy requires a unified ZIP file" }
         require(data is DataEntity.FileEntity) { "DataEntity must be FileEntity" }
 
         // Filter valid APK entries (exclude directories)
-        val apkEntries = zipFile.entries().asSequence()
+        val apkEntries = archive.entries.asSequence()
             .filter { !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true) }
             .toList()
 
@@ -38,8 +38,8 @@ class MultiApkZipStrategy(
         apkEntries.map { entry ->
             async(Dispatchers.IO) {
                 // Use ApkParser to handle extraction and deep analysis
-                apkParser.parseZipEntryFull(
-                    zipFile,
+                apkParser.parseArchiveEntryFull(
+                    archive,
                     entry,
                     data,
                     extra

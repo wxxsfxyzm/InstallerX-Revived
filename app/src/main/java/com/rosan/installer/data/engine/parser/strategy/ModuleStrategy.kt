@@ -3,6 +3,8 @@
 package com.rosan.installer.data.engine.parser.strategy
 
 import android.graphics.drawable.Drawable
+import com.rosan.installer.data.engine.parser.UnifiedZipFile
+import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -12,7 +14,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 import java.util.Properties
-import java.util.zip.ZipFile
 
 class ModuleStrategy(
     private val singleApkStrategy: SingleApkStrategy,
@@ -21,53 +22,41 @@ class ModuleStrategy(
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
-        zipFile: ZipFile?,
+        zipFile: UnifiedZipFile?,
         extra: AnalyseExtraEntity
     ): List<AppEntity> = coroutineScope {
         require(data is DataEntity.FileEntity)
+        val archive = requireNotNull(zipFile) { "Module analysis requires a unified ZIP file" }
 
-        // For MIXED_MODULE_APK, zipFile might be null (if not passed by the caller), ensure zipFile exists here.
-        val ensureZip = zipFile ?: ZipFile(data.path)
+        // 1. Analyze Module Props (Always)
+        val moduleDeferred = async {
+            parseModuleProp(data, archive, extra)
+        }
 
-        val useZipBlock = suspend {
-            // 1. Analyze Module Props (Always)
-            val moduleDeferred = async {
-                parseModuleProp(data, ensureZip, extra)
-            }
-
-            // 2. Analyze Application Content based on Type
-            val appDeferred = async {
-                when (extra.dataType) {
-                    DataType.MIXED_MODULE_APK -> {
-                        // It's an APK that is also a Module.
-                        // We use SingleApkStrategy logic (via ApkParser)
-                        singleApkStrategy.analyze(config, data, ensureZip, extra)
-                    }
-
-                    DataType.MIXED_MODULE_ZIP -> {
-                        // It's a Zip containing APKs + Module prop
-                        multiApkZipStrategy.analyze(config, data, ensureZip, extra)
-                    }
-
-                    else -> emptyList() // Pure MODULE_ZIP
+        // 2. Analyze Application Content based on Type
+        val appDeferred = async {
+            when (extra.dataType) {
+                DataType.MIXED_MODULE_APK -> {
+                    // It's an APK that is also a Module.
+                    // We use SingleApkStrategy logic (via ApkParser)
+                    singleApkStrategy.analyze(config, data, archive, extra)
                 }
+
+                DataType.MIXED_MODULE_ZIP -> {
+                    // It's a Zip containing APKs + Module prop
+                    multiApkZipStrategy.analyze(config, data, archive, extra)
+                }
+
+                else -> emptyList() // Pure MODULE_ZIP
             }
-
-            moduleDeferred.await() + appDeferred.await()
         }
 
-        // If we created the ZipFile locally, we must close it.
-        // If it was passed in, UnifiedContainerAnalyser manages it.
-        if (zipFile == null) {
-            ensureZip.use { useZipBlock() }
-        } else {
-            useZipBlock()
-        }
+        moduleDeferred.await() + appDeferred.await()
     }
 
     private fun parseModuleProp(
         data: DataEntity,
-        zipFile: ZipFile,
+        zipFile: UnifiedZipFile,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
         try {
@@ -81,7 +70,7 @@ class ModuleStrategy(
                 return emptyList()
             }
 
-            zipFile.getInputStream(modulePropEntry).buffered().use { inputStream ->
+            zipFile.openEntry(modulePropEntry).buffered().use { inputStream ->
                 // --- BOM Handling ---
                 inputStream.mark(3)
                 val bom = ByteArray(3)
@@ -117,13 +106,15 @@ class ModuleStrategy(
                         val iconEntry = zipFile.getEntry(iconPath)
                         if (iconEntry != null) {
                             try {
-                                zipFile.getInputStream(iconEntry).use { iconStream ->
+                                zipFile.openEntry(iconEntry).use { iconStream ->
                                     iconDrawable = Drawable.createFromStream(iconStream, iconPath)
                                 }
                                 // Break the loop if the icon is successfully loaded
                                 if (iconDrawable != null) {
                                     break
                                 }
+                            } catch (e: AnalyseException) {
+                                throw e
                             } catch (e: Exception) {
                                 Timber.w(e, "Module: Failed to decode $key from entry: $iconPath")
                             }
@@ -147,6 +138,8 @@ class ModuleStrategy(
                     )
                 )
             }
+        } catch (e: AnalyseException) {
+            throw e
         } catch (e: Exception) {
             Timber.e(e, "Module: Exception occurred while parsing module.prop in $data")
             return emptyList()
