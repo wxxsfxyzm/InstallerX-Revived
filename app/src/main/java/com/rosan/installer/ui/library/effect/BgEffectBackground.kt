@@ -4,7 +4,6 @@
 package com.rosan.installer.ui.library.effect
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
@@ -23,7 +22,6 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.floor
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun BgEffectBackground(
     dynamicBackground: Boolean,
@@ -36,7 +34,7 @@ fun BgEffectBackground(
     content: @Composable (BoxScope.() -> Unit),
 ) {
     val shaderSupported = remember { isRuntimeShaderSupported() }
-    if (!shaderSupported) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || !shaderSupported) {
         Box(modifier = modifier, content = content)
         return
     }

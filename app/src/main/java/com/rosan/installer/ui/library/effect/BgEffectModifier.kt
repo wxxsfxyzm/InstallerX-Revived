@@ -1,5 +1,6 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
+@file:androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.TIRAMISU)
 
 package com.rosan.installer.ui.library.effect
 

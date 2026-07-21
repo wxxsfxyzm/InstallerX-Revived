@@ -5,9 +5,7 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.about
 
 import android.content.Context
-import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -32,7 +30,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -53,7 +50,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -62,9 +58,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -98,10 +92,8 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
-import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -121,7 +113,6 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
@@ -130,10 +121,8 @@ import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -173,21 +162,12 @@ fun MiuixAboutPage(
         }
     }
 
-    // Delegate to version specific implementation
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        MiuixBlendAboutPageInternal(
-            uiState = uiState,
-            viewModel = viewModel,
-            onShowUpdateDialog = { showUpdateDialog.value = true }
-        )
-    } else {
-        MiuixAboutPageLegacyInternal(
-            useBlur = useBlur,
-            uiState = uiState,
-            viewModel = viewModel,
-            onShowUpdateDialog = { showUpdateDialog.value = true }
-        )
-    }
+    MiuixAboutPageInternal(
+        useBlur = useBlur,
+        uiState = uiState,
+        viewModel = viewModel,
+        onShowUpdateDialog = { showUpdateDialog.value = true }
+    )
 
     // Hoisted common dialogs
     MiuixUpdateDialog(
@@ -220,9 +200,8 @@ fun MiuixAboutPage(
     }
 }
 
-// Android 12 and below implementation
 @Composable
-private fun MiuixAboutPageLegacyInternal(
+private fun MiuixAboutPageInternal(
     useBlur: Boolean,
     uiState: AboutState,
     viewModel: AboutViewModel,
@@ -231,7 +210,6 @@ private fun MiuixAboutPageLegacyInternal(
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val scrollBehavior = MiuixScrollBehavior()
 
     val internetAccessHint = if (AppConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
     else stringResource(R.string.internet_access_disabled)
@@ -249,163 +227,8 @@ private fun MiuixAboutPageLegacyInternal(
         AppConfig.VERSION_NAME,
         AppConfig.VERSION_CODE
     )
-
-    val layoutDirection = LocalLayoutDirection.current
-    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
-    val topBarBackdrop = rememberMiuixBlurBackdrop(useBlur)
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
-                title = stringResource(id = R.string.about),
-                scrollBehavior = scrollBehavior,
-                navigationIcon = { MiuixBackButton(onClick = { navigator.pop() }) }
-            )
-        },
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
-            ),
-            overscrollEffect = null
-        ) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 48.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (uiState.appIcon != null) {
-                        Image(
-                            bitmap = uiState.appIcon,
-                            modifier = Modifier.size(80.dp),
-                            contentDescription = stringResource(id = R.string.app_name)
-                        )
-                    } else {
-                        Box(modifier = Modifier.size(80.dp))
-                    }
-                    Text(
-                        text = stringResource(id = R.string.app_name),
-                        style = MiuixTheme.textStyles.title2,
-                    )
-                    Text(
-                        text = versionInfoText,
-                        style = MiuixTheme.textStyles.subtitle,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                    )
-                    if (uiState.hasUpdate)
-                        Text(
-                            text = stringResource(R.string.update_available, uiState.remoteVersion),
-                            style = MiuixTheme.textStyles.subtitle,
-                            color = MiuixTheme.colorScheme.primary
-                        )
-                    Spacer(modifier = Modifier.size(12.dp))
-                }
-            }
-            item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.about)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixNavigationItemWidget(
-                        title = stringResource(R.string.get_source_code),
-                        description = stringResource(R.string.get_source_code_detail),
-                        onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
-                    )
-                    MiuixNavigationItemWidget(
-                        title = stringResource(R.string.open_source_license),
-                        description = stringResource(R.string.open_source_license_settings_description),
-                        onClick = { navigator.push(Route.OpenSourceLicense) }
-                    )
-                    MiuixNavigationItemWidget(
-                        title = stringResource(R.string.get_update),
-                        description = stringResource(R.string.get_update_detail),
-                        onClick = onShowUpdateDialog
-                    )
-                    if (uiState.hasUpdate)
-                        MiuixNavigationItemWidget(
-                            title = stringResource(R.string.get_update_directly),
-                            description = stringResource(R.string.get_update_directly_desc),
-                            onClick = { viewModel.dispatch(AboutAction.PerformUpdate) }
-                        )
-                }
-            }
-            if (AppConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID) {
-                item { SmallTitle(stringResource(R.string.debug)) }
-                item {
-                    Card(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp)
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.save_logs),
-                            description = stringResource(R.string.save_logs_desc),
-                            checked = uiState.enableFileLogging,
-                            onCheckedChange = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) }
-                        )
-                        AnimatedVisibility(
-                            visible = uiState.enableFileLogging,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            BasicComponent(
-                                title = stringResource(R.string.export_logs),
-                                summary = stringResource(R.string.export_logs_desc),
-                                onClick = { viewModel.dispatch(AboutAction.ShareLog) }
-                            )
-                        }
-                    }
-                }
-            }
-            item { Spacer(Modifier.navigationBarsPadding()) }
-        }
-    }
-}
-
-// Android 13+ implementation
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@Composable
-private fun MiuixBlendAboutPageInternal(
-    uiState: AboutState,
-    viewModel: AboutViewModel,
-    onShowUpdateDialog: () -> Unit
-) {
-    val navigator = LocalNavigator.current
-    val context = LocalContext.current
-    val uriHandler = LocalUriHandler.current
-
-    val internetAccessHint = if (AppConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
-    else stringResource(R.string.internet_access_disabled)
-
-    val level = when (AppConfig.LEVEL) {
-        Level.STABLE -> stringResource(id = R.string.stable)
-        Level.PREVIEW -> stringResource(id = R.string.preview)
-        Level.UNSTABLE -> stringResource(id = R.string.unstable)
-    }
-
-    val versionInfoText = stringResource(
-        id = R.string.app_version_info_format,
-        internetAccessHint,
-        level,
-        AppConfig.VERSION_NAME,
-        AppConfig.VERSION_CODE
-    )
+    val blurSupported = useBlur && isRuntimeShaderSupported()
+    val topBarBackdrop = rememberMiuixBlurBackdrop(blurSupported)
 
     // Scroll state and progress calculations for animations
     val lazyListState = rememberLazyListState()
@@ -427,42 +250,53 @@ private fun MiuixBlendAboutPageInternal(
     Scaffold(
         topBar = {
             SmallTopAppBar(
+                modifier = Modifier.installerMiuixBlurEffect(
+                    backdrop = topBarBackdrop,
+                    enabled = scrollProgress == 1f,
+                ),
                 title = stringResource(id = R.string.about),
                 scrollBehavior = topAppBarScrollBehavior,
-                color = MiuixTheme.colorScheme.surface.copy(alpha = if (scrollProgress == 1f) 1f else 0f),
+                color = if (topBarBackdrop != null && scrollProgress == 1f) {
+                    Color.Transparent
+                } else {
+                    MiuixTheme.colorScheme.surface.copy(alpha = if (scrollProgress == 1f) 1f else 0f)
+                },
                 titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress),
                 defaultWindowInsetsPadding = false,
                 navigationIcon = { MiuixBackButton(onClick = { navigator.pop() }) }
             )
         },
     ) { innerPadding ->
-        AboutContentBody(
-            padding = innerPadding,
-            uiState = uiState,
-            versionInfoText = versionInfoText,
-            lazyListState = lazyListState,
-            scrollProgress = scrollProgress,
-            topAppBarScrollBehavior = topAppBarScrollBehavior,
-            onLogoHeightChanged = { logoHeightPx = it },
-            onGetUpdateClicked = onShowUpdateDialog,
-            onDirectUpdateClicked = { viewModel.dispatch(AboutAction.PerformUpdate) },
-            onLicenseClicked = { navigator.push(Route.OpenSourceLicense) },
-            onLogToggle = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) },
-            onLogExport = { viewModel.dispatch(AboutAction.ShareLog) },
-            uriHandler = uriHandler,
-            context = context
-        )
+        Box(modifier = topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier) {
+            AboutContentBody(
+                padding = innerPadding,
+                uiState = uiState,
+                versionInfoText = versionInfoText,
+                lazyListState = lazyListState,
+                scrollProgressProvider = { scrollProgress },
+                useBlur = blurSupported,
+                topAppBarScrollBehavior = topAppBarScrollBehavior,
+                onLogoHeightChanged = { logoHeightPx = it },
+                onGetUpdateClicked = onShowUpdateDialog,
+                onDirectUpdateClicked = { viewModel.dispatch(AboutAction.PerformUpdate) },
+                onLicenseClicked = { navigator.push(Route.OpenSourceLicense) },
+                onLogToggle = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) },
+                onLogExport = { viewModel.dispatch(AboutAction.ShareLog) },
+                uriHandler = uriHandler,
+                context = context
+            )
+        }
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 private fun AboutContentBody(
     padding: PaddingValues,
     uiState: AboutState,
     versionInfoText: String,
     lazyListState: LazyListState,
-    scrollProgress: Float,
+    scrollProgressProvider: () -> Float,
+    useBlur: Boolean,
     topAppBarScrollBehavior: ScrollBehavior,
     onLogoHeightChanged: (Int) -> Unit,
     onGetUpdateClicked: () -> Unit,
@@ -478,7 +312,7 @@ private fun AboutContentBody(
 
     // Texture set states
     var showTextureSet by remember { mutableStateOf(false) }
-    var blurEnable by remember { mutableStateOf(isRenderEffectSupported()) }
+    var blurEnable by remember(useBlur) { mutableStateOf(useBlur) }
     val dynamicBackground = remember { mutableStateOf(isRuntimeShaderSupported()) }
     val effectBackground = remember { mutableStateOf(isRuntimeShaderSupported()) }
     var isOs3Effect by remember { mutableStateOf(true) }
@@ -489,7 +323,7 @@ private fun AboutContentBody(
     var contrast by remember { mutableFloatStateOf(1f) }
     var saturation by remember { mutableFloatStateOf(1f) }
 
-    val backdrop = rememberLayerBackdrop()
+    val backdrop = rememberMiuixBlurBackdrop(useBlur)
     val surface = MiuixTheme.colorScheme.surface.copy(alpha = 0.6f)
 
     // Blend configurations map
@@ -535,49 +369,9 @@ private fun AboutContentBody(
         }
     }
 
-    // Animation states
+    // Layout state
     val density = LocalDensity.current
     var logoHeightDp by remember { mutableStateOf(300.dp) }
-    var logoAreaY by remember { mutableFloatStateOf(0f) }
-    var iconY by remember { mutableFloatStateOf(0f) }
-    var projectNameY by remember { mutableFloatStateOf(0f) }
-    var versionCodeY by remember { mutableFloatStateOf(0f) }
-
-    var iconProgress by remember { mutableFloatStateOf(0f) }
-    var projectNameProgress by remember { mutableFloatStateOf(0f) }
-    var versionCodeProgress by remember { mutableFloatStateOf(0f) }
-    var initialLogoAreaY by remember { mutableFloatStateOf(0f) }
-
-    LaunchedEffect(lazyListState) {
-        snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
-            .onEach { offset ->
-                if (lazyListState.firstVisibleItemIndex > 0) {
-                    if (iconProgress != 1f) iconProgress = 1f
-                    if (projectNameProgress != 1f) projectNameProgress = 1f
-                    if (versionCodeProgress != 1f) versionCodeProgress = 1f
-                    return@onEach
-                }
-
-                if (initialLogoAreaY == 0f && logoAreaY > 0f) {
-                    initialLogoAreaY = logoAreaY
-                }
-                val refLogoAreaY = if (initialLogoAreaY > 0f) initialLogoAreaY else logoAreaY
-
-                val stage1TotalLength = refLogoAreaY - versionCodeY
-                val stage2TotalLength = versionCodeY - projectNameY
-                val stage3TotalLength = projectNameY - iconY
-
-                val versionCodeDelay = stage1TotalLength * 0.5f
-                versionCodeProgress = ((offset.toFloat() - versionCodeDelay) / (stage1TotalLength - versionCodeDelay).coerceAtLeast(1f))
-                    .coerceIn(0f, 1f)
-                projectNameProgress = ((offset.toFloat() - stage1TotalLength) / stage2TotalLength.coerceAtLeast(1f))
-                    .coerceIn(0f, 1f)
-                iconProgress = ((offset.toFloat() - stage1TotalLength - stage2TotalLength) / stage3TotalLength.coerceAtLeast(1f))
-                    .coerceIn(0f, 1f)
-            }
-            .collect { }
-    }
-
     val displayCutoutInsets = WindowInsets.displayCutout.asPaddingValues()
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
@@ -598,9 +392,9 @@ private fun AboutContentBody(
         dynamicBackground = dynamicBackground.value,
         isOs3Effect = isOs3Effect,
         modifier = Modifier.fillMaxSize(),
-        bgModifier = Modifier.layerBackdrop(backdrop),
+        bgModifier = backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier,
         effectBackground = effectBackground.value,
-        alpha = { 1f - scrollProgress },
+        alpha = { 1f - scrollProgressProvider() },
     ) {
         // Sticky animated header section
         Column(
@@ -621,56 +415,60 @@ private fun AboutContentBody(
                 modifier = Modifier
                     .size(88.dp)
                     .graphicsLayer {
+                        val iconProgress = ((scrollProgressProvider() - 0.35f) / 0.15f).coerceIn(0f, 1f)
                         alpha = 1 - iconProgress
                         scaleX = 1 - (iconProgress * 0.05f)
                         scaleY = 1 - (iconProgress * 0.05f)
-                    }
-                    .onGloballyPositioned { coordinates ->
-                        if (iconY != 0f) return@onGloballyPositioned
-                        val y = coordinates.positionInWindow().y
-                        val size = coordinates.size
-                        iconY = y + size.height
                     },
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_monochrome),
-                    modifier = Modifier
-                        .requiredSize(160.dp)
-                        .textureBlur(
-                            backdrop = backdrop,
-                            shape = RoundedCornerShape(16.dp),
-                            blurRadius = 200f,
-                            noiseCoefficient = BlurDefaults.NoiseCoefficient,
-                            colors = BlurColors(blendColors = logoBlend),
-                            contentBlendMode = BlendMode.DstIn,
-                            enabled = blurEnable,
-                        ),
-                    contentDescription = null
-                )
+                if (backdrop != null) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_monochrome),
+                        modifier = Modifier
+                            .requiredSize(160.dp)
+                            .textureBlur(
+                                backdrop = backdrop,
+                                shape = RoundedCornerShape(16.dp),
+                                blurRadius = 200f,
+                                noiseCoefficient = BlurDefaults.NoiseCoefficient,
+                                colors = BlurColors(blendColors = logoBlend),
+                                contentBlendMode = BlendMode.DstIn,
+                                enabled = blurEnable,
+                            ),
+                        contentDescription = null
+                    )
+                } else if (uiState.appIcon != null) {
+                    Image(
+                        bitmap = uiState.appIcon,
+                        modifier = Modifier.size(80.dp),
+                        contentDescription = stringResource(id = R.string.app_name)
+                    )
+                }
             }
 
             Text(
                 modifier = Modifier
                     .padding(top = 12.dp, bottom = 5.dp)
-                    .onGloballyPositioned { coordinates ->
-                        if (projectNameY != 0f) return@onGloballyPositioned
-                        val y = coordinates.positionInWindow().y
-                        val size = coordinates.size
-                        projectNameY = y + size.height
-                    }
                     .graphicsLayer {
+                        val projectNameProgress = ((scrollProgressProvider() - 0.20f) / 0.15f).coerceIn(0f, 1f)
                         alpha = 1 - projectNameProgress
                         scaleX = 1 - (projectNameProgress * 0.05f)
                         scaleY = 1 - (projectNameProgress * 0.05f)
                     }
-                    .textureBlur(
-                        backdrop = backdrop,
-                        shape = RoundedCornerShape(16.dp),
-                        blurRadius = 150f,
-                        noiseCoefficient = noiseCoefficient,
-                        colors = BlurColors(blendColors = logoBlend),
-                        contentBlendMode = ComposeBlendMode.DstIn,
-                        enabled = blurEnable,
+                    .then(
+                        if (backdrop != null) {
+                            Modifier.textureBlur(
+                                backdrop = backdrop,
+                                shape = RoundedCornerShape(16.dp),
+                                blurRadius = 150f,
+                                noiseCoefficient = noiseCoefficient,
+                                colors = BlurColors(blendColors = logoBlend),
+                                contentBlendMode = ComposeBlendMode.DstIn,
+                                enabled = blurEnable,
+                            )
+                        } else {
+                            Modifier
+                        }
                     ),
                 text = stringResource(id = R.string.app_name),
                 fontWeight = FontWeight.Bold,
@@ -681,15 +479,10 @@ private fun AboutContentBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .graphicsLayer {
+                        val versionCodeProgress = ((scrollProgressProvider() - 0.05f) / 0.15f).coerceIn(0f, 1f)
                         alpha = 1 - versionCodeProgress
                         scaleX = 1 - (versionCodeProgress * 0.05f)
                         scaleY = 1 - (versionCodeProgress * 0.05f)
-                    }
-                    .onGloballyPositioned { coordinates ->
-                        if (versionCodeY != 0f) return@onGloballyPositioned
-                        val y = coordinates.positionInWindow().y
-                        val size = coordinates.size
-                        versionCodeY = y + size.height
                     },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -738,11 +531,6 @@ private fun AboutContentBody(
                                     showTextureSet = true
                                 }
                             }
-                        }
-                        .onGloballyPositioned { coordinates ->
-                            val y = coordinates.positionInWindow().y
-                            val size = coordinates.size
-                            logoAreaY = y + size.height
                         },
                     contentAlignment = Alignment.TopCenter,
                     content = { }
@@ -761,21 +549,27 @@ private fun AboutContentBody(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
                             .padding(bottom = 12.dp)
-                            .textureBlur(
-                                backdrop = backdrop,
-                                shape = RoundedCornerShape(16.dp),
-                                blurRadius = blurRadius,
-                                noiseCoefficient = noiseCoefficient,
-                                colors = BlurColors(
-                                    blendColors = currentConfigValue,
-                                    brightness = brightness,
-                                    contrast = contrast,
-                                    saturation = saturation,
-                                ),
-                                enabled = blurEnable,
+                            .then(
+                                if (backdrop != null) {
+                                    Modifier.textureBlur(
+                                        backdrop = backdrop,
+                                        shape = RoundedCornerShape(16.dp),
+                                        blurRadius = blurRadius,
+                                        noiseCoefficient = noiseCoefficient,
+                                        colors = BlurColors(
+                                            blendColors = currentConfigValue,
+                                            brightness = brightness,
+                                            contrast = contrast,
+                                            saturation = saturation,
+                                        ),
+                                        enabled = blurEnable,
+                                    )
+                                } else {
+                                    Modifier
+                                }
                             ),
                         colors = CardDefaults.defaultColors(
-                            if (blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
+                            if (backdrop != null && blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
                             Color.Transparent,
                         ),
                     ) {
@@ -809,21 +603,27 @@ private fun AboutContentBody(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
                                 .padding(bottom = 12.dp)
-                                .textureBlur(
-                                    backdrop = backdrop,
-                                    shape = RoundedCornerShape(16.dp),
-                                    blurRadius = blurRadius,
-                                    noiseCoefficient = noiseCoefficient,
-                                    colors = BlurColors(
-                                        blendColors = currentConfigValue,
-                                        brightness = brightness,
-                                        contrast = contrast,
-                                        saturation = saturation,
-                                    ),
-                                    enabled = blurEnable,
+                                .then(
+                                    if (backdrop != null) {
+                                        Modifier.textureBlur(
+                                            backdrop = backdrop,
+                                            shape = RoundedCornerShape(16.dp),
+                                            blurRadius = blurRadius,
+                                            noiseCoefficient = noiseCoefficient,
+                                            colors = BlurColors(
+                                                blendColors = currentConfigValue,
+                                                brightness = brightness,
+                                                contrast = contrast,
+                                                saturation = saturation,
+                                            ),
+                                            enabled = blurEnable,
+                                        )
+                                    } else {
+                                        Modifier
+                                    }
                                 ),
                             colors = CardDefaults.defaultColors(
-                                if (blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
+                                if (backdrop != null && blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
                                 Color.Transparent,
                             ),
                         ) {
