@@ -2,7 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.requireSupportedZipCompressionMethod
+import org.apache.commons.compress.archivers.EntryStreamOffsets
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
 import java.io.File
@@ -23,6 +25,8 @@ internal class CommonsZipFileProvider {
 
     fun open(file: File): ZipFile = open(file, ignoreLocalFileHeaders = false)
 
+    fun open(file: DataEntity.FileEntity): ZipFile = open(file, ignoreLocalFileHeaders = false)
+
     /**
      * Opens only the central directory up front. Entry local headers are resolved lazily if their
      * payloads are requested, which keeps metadata-only analysis fast for large APKs.
@@ -33,10 +37,33 @@ internal class CommonsZipFileProvider {
     fun openMetadata(file: File): ZipFile =
         open(file, ignoreLocalFileHeaders = true)
 
+    fun openMetadata(file: DataEntity.FileEntity): ZipFile =
+        open(file, ignoreLocalFileHeaders = true)
+
     /** Opens an entry payload after enforcing InstallerX's STORE/DEFLATE-only policy. */
     fun openEntry(zipFile: ZipFile, entry: ZipArchiveEntry): InputStream {
         validateEntry(entry)
-        return zipFile.getInputStream(entry)
+        return synchronized(zipFile) {
+            zipFile.getInputStream(entry)
+        }
+    }
+
+    /** Resolves the raw byte range of a stored entry without reading its payload. */
+    fun resolveStoredDataRange(zipFile: ZipFile, entry: ZipArchiveEntry): StoredDataRange? {
+        if (entry.method != java.util.zip.ZipEntry.STORED ||
+            entry.size <= 0L ||
+            entry.size != entry.compressedSize
+        ) {
+            return null
+        }
+
+        return synchronized(zipFile) {
+            // Commons resolves dataOffset lazily from the local header when metadata-only mode is used.
+            zipFile.getRawInputStream(entry)?.close()
+            entry.dataOffset
+                .takeUnless { it == EntryStreamOffsets.OFFSET_UNKNOWN }
+                ?.let { offset -> StoredDataRange(offset, entry.compressedSize) }
+        }
     }
 
     fun validateEntries(entries: Iterable<ZipArchiveEntry>) {
@@ -49,6 +76,17 @@ internal class CommonsZipFileProvider {
 
     private fun open(file: File, ignoreLocalFileHeaders: Boolean): ZipFile {
         val channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)
+        return open(channel, file.path, ignoreLocalFileHeaders)
+    }
+
+    private fun open(file: DataEntity.FileEntity, ignoreLocalFileHeaders: Boolean): ZipFile =
+        open(file.openChannel(), file.path, ignoreLocalFileHeaders)
+
+    private fun open(
+        channel: java.nio.channels.SeekableByteChannel,
+        displayName: String,
+        ignoreLocalFileHeaders: Boolean
+    ): ZipFile {
         return try {
             ZipFile.builder()
                 .setSeekableByteChannel(channel)
@@ -60,7 +98,7 @@ internal class CommonsZipFileProvider {
             } catch (closeError: Exception) {
                 error.addSuppressed(closeError)
             }
-            throw CommonsZipException("Failed to open ZIP archive: ${file.path}", error)
+            throw CommonsZipException("Failed to open ZIP archive: $displayName", error)
         }
     }
 }

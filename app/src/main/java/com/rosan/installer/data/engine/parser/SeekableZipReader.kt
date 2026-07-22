@@ -2,9 +2,13 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.domain.engine.model.source.DataEntity
+import java.io.Closeable
+import java.io.EOFException
 import java.io.File
 import java.io.IOException
-import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.channels.SeekableByteChannel
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
@@ -37,11 +41,16 @@ internal class SeekableZipException(message: String, cause: Throwable? = null) :
  * when present in the local extra field.
  */
 internal class SeekableZipReader {
-    fun read(file: File): SeekableZipArchive {
-        if (!file.isFile) throw SeekableZipException("Not a regular file: ${file.path}")
+    fun read(file: File): SeekableZipArchive = read(DataEntity.FileEntity(file.path))
+
+    fun read(file: DataEntity.FileEntity): SeekableZipArchive {
+        val physicalFile = if (file is DataEntity.FileDescriptorEntity) null else File(file.path)
+        if (physicalFile != null && !physicalFile.isFile) {
+            throw SeekableZipException("Not a regular file: ${file.path}")
+        }
 
         return try {
-            RandomAccessFile(file, "r").use { input -> read(input) }
+            ChannelRandomAccessReader(file.openChannel()).use { input -> read(input) }
         } catch (e: SeekableZipException) {
             throw e
         } catch (e: IOException) {
@@ -49,8 +58,8 @@ internal class SeekableZipReader {
         }
     }
 
-    private fun read(input: RandomAccessFile): SeekableZipArchive {
-        val fileSize = input.length()
+    private fun read(input: ChannelRandomAccessReader): SeekableZipArchive {
+        val fileSize = input.length
         val entries = mutableListOf<SeekableZipEntry>()
         var offset = 0L
 
@@ -62,7 +71,7 @@ internal class SeekableZipReader {
                 throw SeekableZipException("Truncated ZIP signature at offset $offset")
             }
 
-            input.seek(offset)
+            input.position = offset
             when (val signature = input.readUnsignedIntLittleEndian()) {
                 LOCAL_FILE_HEADER_SIGNATURE -> {
                     if (entries.size >= MAX_ENTRY_COUNT) {
@@ -88,7 +97,7 @@ internal class SeekableZipReader {
     }
 
     private fun readLocalEntry(
-        input: RandomAccessFile,
+        input: ChannelRandomAccessReader,
         localHeaderOffset: Long,
         fileSize: Long
     ): SeekableZipEntry {
@@ -115,7 +124,7 @@ internal class SeekableZipReader {
             throw SeekableZipException("ZIP entry has an empty name at offset $localHeaderOffset")
         }
 
-        val metadataEnd = checkedAdd(input.filePointer, nameLength.toLong(), extraLength.toLong())
+        val metadataEnd = checkedAdd(input.position, nameLength.toLong(), extraLength.toLong())
         if (metadataEnd > fileSize) {
             throw SeekableZipException("ZIP entry metadata exceeds file size at offset $localHeaderOffset")
         }
@@ -220,14 +229,14 @@ internal class SeekableZipReader {
         return result
     }
 
-    private fun RandomAccessFile.readUnsignedShortLittleEndian(): Int {
+    private fun ChannelRandomAccessReader.readUnsignedShortLittleEndian(): Int {
         val low = read()
         val high = read()
         if (low < 0 || high < 0) throw SeekableZipException("Unexpected end of ZIP local header")
         return low or (high shl Byte.SIZE_BITS)
     }
 
-    private fun RandomAccessFile.readUnsignedIntLittleEndian(): Long {
+    private fun ChannelRandomAccessReader.readUnsignedIntLittleEndian(): Long {
         var result = 0L
         repeat(INT_SIZE) { index ->
             val value = read()
@@ -252,6 +261,47 @@ internal class SeekableZipReader {
         val uncompressedSize: Long,
         val compressedSize: Long
     )
+
+    private class ChannelRandomAccessReader(
+        private val channel: SeekableByteChannel
+    ) : Closeable {
+        private val singleByte = ByteBuffer.allocate(1)
+
+        val length: Long
+            get() = channel.size()
+
+        var position: Long
+            get() = channel.position()
+            set(value) {
+                channel.position(value)
+            }
+
+        fun read(): Int {
+            singleByte.clear()
+            while (true) {
+                when (val count = channel.read(singleByte)) {
+                    -1 -> return -1
+                    0 -> continue
+                    else -> {
+                        check(count == 1)
+                        return singleByte.array()[0].toInt() and 0xFF
+                    }
+                }
+            }
+        }
+
+        fun readFully(bytes: ByteArray) {
+            val buffer = ByteBuffer.wrap(bytes)
+            while (buffer.hasRemaining()) {
+                when (channel.read(buffer)) {
+                    -1 -> throw EOFException("Unexpected end of ZIP local header")
+                    0 -> continue
+                }
+            }
+        }
+
+        override fun close() = channel.close()
+    }
 
     private companion object {
         const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034B50L

@@ -8,8 +8,10 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.channels.FileChannel
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -18,6 +20,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 
@@ -72,6 +75,169 @@ class UnifiedZipFileProviderTest {
             assertEquals(UnifiedZipBackend.COMMONS_CENTRAL_DIRECTORY, archive.backend)
             val entry = requireNotNull(archive.getEntry("AndroidManifest.xml"))
             assertContentEquals(payload, archive.openEntry(entry).use { it.readBytes() })
+        }
+    }
+
+    @Test
+    fun `reads a descriptor-backed archive without opening its display path`() {
+        val payload = "manifest".toByteArray()
+        val backingFile = File(tempDirectory, "descriptor-source.apk")
+        ZipOutputStream(backingFile.outputStream()).use { output ->
+            output.writeStoredEntry("AndroidManifest.xml", payload)
+        }
+        val displayPath = File(tempDirectory, "unreadable/source.apk").path
+        val source = DataEntity.FileDescriptorEntity(
+            path = displayPath,
+            startOffset = 0L,
+            length = backingFile.length(),
+            channelFactory = {
+                FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
+            },
+            descriptorFactory = { error("ZIP parsing must not request a raw descriptor") }
+        ).apply {
+            this.source = DataEntity.FileEntity(displayPath)
+        }
+
+        assertFalse(File(displayPath).exists())
+        assertContentEquals(backingFile.readBytes(), source.getInputStream().use { it.readBytes() })
+        provider.open(source).use { archive ->
+            assertEquals(UnifiedZipBackend.COMMONS_CENTRAL_DIRECTORY, archive.backend)
+            val entry = requireNotNull(archive.getEntry("AndroidManifest.xml"))
+            assertContentEquals(payload, archive.openEntry(entry).use { it.readBytes() })
+        }
+
+        val detector = FileTypeDetector(Json.Default, provider)
+        assertEquals(
+            DataType.APK,
+            detector.detect(
+                source,
+                AnalyseExtraEntity(
+                    cacheDirectory = tempDirectory.path,
+                    isModuleFlashEnabled = false,
+                    checkAppSignature = false
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `maps stored descriptor entries to bounded fd views but keeps compressed entries streamed`() {
+        val storedPayload = "stored-apk".toByteArray()
+        val compressedPayload = "compressed-apk-".repeat(32).toByteArray()
+        val backingFile = File(tempDirectory, "descriptor-container.apks")
+        ZipOutputStream(backingFile.outputStream()).use { output ->
+            output.writeStoredEntry("base.apk", storedPayload)
+            output.putNextEntry(ZipEntry("split_config.en.apk"))
+            output.write(compressedPayload)
+            output.closeEntry()
+        }
+
+        val displayPath = File(tempDirectory, "missing/container.apks").path
+        val source = DataEntity.FileDescriptorEntity(
+            path = displayPath,
+            startOffset = 0L,
+            length = backingFile.length(),
+            channelFactory = {
+                FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
+            },
+            descriptorFactory = { error("The bounded entry test must not request a raw descriptor") }
+        )
+
+        lateinit var storedEntity: DataEntity
+        lateinit var compressedEntity: DataEntity
+        provider.open(source).use { archive ->
+            storedEntity = archive.toDataEntity(requireNotNull(archive.getEntry("base.apk")), source)
+            compressedEntity = archive.toDataEntity(
+                requireNotNull(archive.getEntry("split_config.en.apk")),
+                source
+            )
+            assertIs<DataEntity.FileDescriptorEntity>(storedEntity)
+            assertIs<DataEntity.ZipFileEntity>(compressedEntity)
+        }
+
+        assertContentEquals(storedPayload, storedEntity.getInputStream()!!.use { it.readBytes() })
+        assertContentEquals(compressedPayload, compressedEntity.getInputStream()!!.use { it.readBytes() })
+    }
+
+    @Test
+    fun `maps stored APK payloads for every supported package container to fd views`() {
+        val detector = FileTypeDetector(Json.Default, provider)
+        val cases = listOf(
+            DetectionCase(
+                fileName = "splits.apks",
+                entries = listOf(
+                    TestEntry("base.apk", "apks-base".toByteArray()),
+                    TestEntry("split_config.en.apk", "apks-split".toByteArray())
+                ),
+                expectedType = DataType.APKS
+            ),
+            DetectionCase(
+                fileName = "bundle.apkm",
+                entries = listOf(
+                    TestEntry("info.json", "{\"pname\":\"pkg\",\"versioncode\":\"1\"}".toByteArray()),
+                    TestEntry("base.apk", "apkm-base".toByteArray())
+                ),
+                expectedType = DataType.APKM
+            ),
+            DetectionCase(
+                fileName = "bundle.xapk",
+                entries = listOf(
+                    TestEntry(
+                        "manifest.json",
+                        "{\"package_name\":\"pkg\",\"version_code\":1,\"split_apks\":[]}".toByteArray()
+                    ),
+                    TestEntry("base.apk", "xapk-base".toByteArray())
+                ),
+                expectedType = DataType.XAPK
+            ),
+            DetectionCase(
+                fileName = "multiple.zip",
+                entries = listOf(
+                    TestEntry("first.apk", "multi-first".toByteArray()),
+                    TestEntry("second.apk", "multi-second".toByteArray())
+                ),
+                expectedType = DataType.MULTI_APK_ZIP
+            )
+        )
+        val extra = AnalyseExtraEntity(
+            cacheDirectory = tempDirectory.path,
+            isModuleFlashEnabled = false,
+            checkAppSignature = false
+        )
+
+        cases.forEach { case ->
+            val backingFile = File(tempDirectory, "backing-${case.fileName}")
+            ZipOutputStream(backingFile.outputStream()).use { output ->
+                case.entries.forEach { entry -> output.writeStoredEntry(entry.name, entry.payload) }
+            }
+            val displayPath = File(tempDirectory, "missing/${case.fileName}").path
+            val source = DataEntity.FileDescriptorEntity(
+                path = displayPath,
+                startOffset = 0L,
+                length = backingFile.length(),
+                channelFactory = {
+                    FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
+                },
+                descriptorFactory = { error("Container mapping must not request a raw descriptor") }
+            ).apply {
+                this.source = DataEntity.FileEntity(displayPath)
+            }
+
+            assertEquals(case.expectedType, detector.detect(source, extra), case.fileName)
+            provider.open(source).use { archive ->
+                case.entries.filter { it.name.endsWith(".apk") }.forEach { expectedEntry ->
+                    val data = archive.toDataEntity(
+                        requireNotNull(archive.getEntry(expectedEntry.name)),
+                        source
+                    )
+                    val descriptorData = assertIs<DataEntity.FileDescriptorEntity>(data, case.fileName)
+                    assertContentEquals(
+                        expectedEntry.payload,
+                        descriptorData.getInputStream().use { it.readBytes() },
+                        "${case.fileName}!${expectedEntry.name}"
+                    )
+                }
+            }
         }
     }
 

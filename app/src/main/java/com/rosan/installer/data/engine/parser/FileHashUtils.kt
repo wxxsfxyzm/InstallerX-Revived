@@ -2,9 +2,11 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStream
 import java.security.MessageDigest
 
 /**
@@ -21,18 +23,26 @@ fun File.calculateSHA256(): String? {
 
     // Use a try-catch block for robustness against security or IO exceptions.
     return try {
-        val digest = MessageDigest.getInstance("SHA-256")
-        FileInputStream(this).use { fis ->
-            val buffer = ByteArray(8192) // 8KB buffer
-            var bytesRead: Int
-            while (fis.read(buffer).also { bytesRead = it } != -1) {
-                digest.update(buffer, 0, bytesRead)
-            }
-        }
-        // Convert the byte array to a hex string and return.
-        digest.digest().joinToString("") { "%02x".format(it) }
+        FileInputStream(this).use(InputStream::calculateSHA256)
     } catch (e: Exception) {
         Timber.e(e, "Failed to calculate SHA-256 for file: ${this.path}")
         null
     }
+}
+
+fun DataEntity.FileEntity.calculateSHA256(): String? = try {
+    getInputStream().use(InputStream::calculateSHA256)
+} catch (e: Exception) {
+    Timber.e(e, "Failed to calculate SHA-256 for source: $path")
+    null
+}
+
+private fun InputStream.calculateSHA256(): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val buffer = ByteArray(8192)
+    var bytesRead: Int
+    while (read(buffer).also { bytesRead = it } != -1) {
+        digest.update(buffer, 0, bytesRead)
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
 }

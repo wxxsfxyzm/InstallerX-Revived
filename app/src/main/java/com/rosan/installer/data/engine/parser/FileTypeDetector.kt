@@ -9,7 +9,7 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.util.isZipArchive
+import com.rosan.installer.util.isZipMagicNumber
 import dalvik.system.ZipPathValidator
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -55,21 +55,24 @@ class FileTypeDetector(
         }
 
         val file = File(fileEntity.path)
+        val descriptorBacked = fileEntity is DataEntity.FileDescriptorEntity
         val sourcePath = (fileEntity.getSourceTop() as? DataEntity.FileEntity)?.path
         val sourceExtension = sourcePath?.let { File(it).extension }.orEmpty()
-        val isZip = file.isZipArchive()
+        val isZip = fileEntity.hasZipMagic()
 
         Timber.d(
             "File type detection started: workingPath=${fileEntity.path}, sourcePath=$sourcePath, " +
                     "workingExtension=${file.extension.ifBlank { "<none>" }}, " +
                     "sourceExtension=${sourceExtension.ifBlank { "<none>" }}, " +
-                    "exists=${file.exists()}, isFile=${file.isFile}, canRead=${file.canRead()}, " +
-                    "size=${file.length()}, header=${file.readHeaderForLog()}, zipMagic=$isZip, " +
+                    "descriptorBacked=$descriptorBacked, " +
+                    "exists=${descriptorBacked || file.exists()}, isFile=${descriptorBacked || file.isFile}, " +
+                    "canRead=${descriptorBacked || file.canRead()}, size=${fileEntity.getSize()}, " +
+                    "header=${fileEntity.readHeaderForLog()}, zipMagic=$isZip, " +
                     "moduleDetection=${extra.isModuleFlashEnabled}"
         )
 
         return try {
-            val detectedType = detectArchiveType(file, sourceExtension, extra)
+            val detectedType = detectArchiveType(fileEntity, sourceExtension, extra)
 
             Timber.d(
                 "File type detection finished: workingPath=${fileEntity.path}, " +
@@ -110,7 +113,7 @@ class FileTypeDetector(
     }
 
     private fun detectArchiveType(
-        file: File,
+        file: DataEntity.FileEntity,
         sourceExtension: String,
         extra: AnalyseExtraEntity
     ): DataType {
@@ -339,8 +342,15 @@ class FileTypeDetector(
         return if (omittedCount > 0) "$shownEntries, ... (+$omittedCount more)" else shownEntries
     }
 
-    private fun File.readHeaderForLog(): String = runCatching {
-        inputStream().use { input ->
+    private fun DataEntity.FileEntity.hasZipMagic(): Boolean = runCatching {
+        getInputStream().use { input ->
+            val buffer = ByteArray(4)
+            input.read(buffer) == buffer.size && buffer.isZipMagicNumber()
+        }
+    }.getOrDefault(false)
+
+    private fun DataEntity.FileEntity.readHeaderForLog(): String = runCatching {
+        getInputStream().use { input ->
             val buffer = ByteArray(FILE_HEADER_LOG_BYTES)
             val bytesRead = input.read(buffer)
             if (bytesRead <= 0) {

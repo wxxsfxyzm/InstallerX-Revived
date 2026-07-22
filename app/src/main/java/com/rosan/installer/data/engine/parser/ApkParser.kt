@@ -47,7 +47,7 @@ class ApkParser(
 
         val path = fileEntity.path
         Timber.d("ApkParser: Processing file path: $path")
-        val archive = zipFile ?: unifiedZipFileProvider.open(path)
+        val archive = zipFile ?: unifiedZipFileProvider.open(fileEntity)
 
         return try {
             val bestArch = analyseAndSelectBestArchitecture(archive, DeviceConfig.supportedArchitectures)
@@ -55,7 +55,7 @@ class ApkParser(
 
             useResources { resources ->
                 try {
-                    val apkResources = loadApkResources(resources, path)
+                    val apkResources = loadApkResources(resources, fileEntity)
                     Timber.d("ApkParser: Resources loaded successfully for $path")
 
                     val entity = if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
@@ -101,8 +101,22 @@ class ApkParser(
         parentData: DataEntity.FileEntity,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
-        val tempFile = File.createTempFile("anl_${UUID.randomUUID()}", ".apk", File(extra.cacheDirectory))
         val entryData = zipFile.toDataEntity(entry, parentData)
+
+        // A stored entry from a retained descriptor is already a bounded APK view. Keep the
+        // original fd and let ApkAssets/apksig read that range directly instead of extracting it.
+        if (entryData is DataEntity.FileDescriptorEntity &&
+            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || entryData.startOffset == 0L)
+        ) {
+            return parseFull(entryData, extra)
+        }
+
+        Timber.d(
+            "Extracting ZIP entry for full APK analysis: name=${entry.name}, " +
+                    "compression=${entry.compressionMethod}, " +
+                    "descriptorBacked=${entryData is DataEntity.FileDescriptorEntity}"
+        )
+        val tempFile = File.createTempFile("anl_${UUID.randomUUID()}", ".apk", File(extra.cacheDirectory))
 
         return try {
             zipFile.openEntry(entry).use { input ->
@@ -149,10 +163,34 @@ class ApkParser(
         val closeResourcesAfterUse: Boolean
     )
 
-    private fun loadApkResources(systemResources: Resources, path: String): ApkResourceContext {
+    private fun loadApkResources(
+        systemResources: Resources,
+        file: DataEntity.FileEntity
+    ): ApkResourceContext {
+        val path = file.path
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
-                val apkAssets = ApkAssets.loadFromPath(path)
+                val apkAssets = if (file is DataEntity.FileDescriptorEntity) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && file.startOffset != 0L) {
+                        throw IOException("Android 9 and 10 cannot load APK resources from an fd range")
+                    }
+                    file.withFileDescriptor { descriptor ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            ApkAssets.loadFromFd(
+                                descriptor,
+                                path,
+                                file.startOffset,
+                                file.length,
+                                0,
+                                null
+                            )
+                        } else {
+                            ApkAssets.loadFromFd(descriptor, path, false, false)
+                        }
+                    }
+                } else {
+                    ApkAssets.loadFromPath(path)
+                }
                 val assetManager = `AssetManager$Builder`()
                     .addApkAssets(apkAssets)
                     .build()
@@ -173,6 +211,12 @@ class ApkParser(
                 )
             }
         } else {
+            if (file is DataEntity.FileDescriptorEntity) {
+                throw AnalyseException(
+                    errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
+                    message = "Descriptor-backed APK resources require Android 9 or newer"
+                )
+            }
             val constructor = reflect.getDeclaredConstructor(AssetManager::class.java)
                 ?: throw AnalyseException(
                     errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
@@ -230,9 +274,9 @@ class ApkParser(
         var minSdk: String? = null
         var targetSdk: String? = null
         val permissions = mutableListOf<String>()
-        val signatureInfo = (data as? DataEntity.FileEntity)?.path?.takeIf { extra.checkAppSignature }?.let {
-            pendingApkSignatureAnalyzer.analyze(it)
-        }
+        val signatureInfo = if (extra.checkAppSignature) {
+            pendingApkSignatureAnalyzer.analyze(data, extra.cacheDirectory)
+        } else null
         val signatureHash = signatureInfo?.primarySha256
 
         // Variables for Xposed extraction

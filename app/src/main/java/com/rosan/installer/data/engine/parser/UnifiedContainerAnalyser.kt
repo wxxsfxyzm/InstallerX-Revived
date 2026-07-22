@@ -50,7 +50,7 @@ class UnifiedContainerAnalyser(
         val strategy = strategies[type] ?: return@withContext emptyList()
 
         if (data is DataEntity.FileEntity) {
-            unifiedZipFileProvider.open(data.path, type.allowsLocalHeaderFallback).use { zipFile ->
+            unifiedZipFileProvider.open(data, type.allowsLocalHeaderFallback).use { zipFile ->
                 strategy.analyze(config, data, zipFile, extra)
             }
         } else {
