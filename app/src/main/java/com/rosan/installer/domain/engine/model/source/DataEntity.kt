@@ -1,12 +1,17 @@
 package com.rosan.installer.domain.engine.model.source
 
 import org.apache.commons.compress.archivers.zip.ZipFile
+import java.io.Closeable
 import java.io.File
-import java.io.FileInputStream
+import java.io.FileDescriptor
 import java.io.FilterInputStream
 import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.channels.Channels
 import java.nio.channels.FileChannel
+import java.nio.channels.SeekableByteChannel
 import java.nio.file.StandardOpenOption
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.CRC32
 import java.util.zip.Inflater
 import java.util.zip.InflaterInputStream
@@ -24,17 +29,86 @@ sealed class DataEntity(open var source: DataEntity? = null) {
 
     fun getSourceTop(): DataEntity = source?.getSourceTop() ?: this
 
-    class FileEntity(val path: String) : DataEntity() {
-        override fun getInputStream() = File(path).inputStream()
+    open class FileEntity(val path: String) : DataEntity() {
+        open fun openChannel(): SeekableByteChannel =
+            FileChannel.open(File(path).toPath(), StandardOpenOption.READ)
+
+        override fun getInputStream(): InputStream = File(path).inputStream()
 
         override fun getSize(): Long = File(path).length()
 
         override fun toString() = path
     }
 
+    class FileDescriptorEntity(
+        path: String,
+        val startOffset: Long,
+        val length: Long,
+        private val channelFactory: () -> SeekableByteChannel,
+        private val descriptorFactory: () -> OwnedFileDescriptor
+    ) : FileEntity(path) {
+        init {
+            require(startOffset >= 0L) { "startOffset must be non-negative" }
+            require(length > 0L) { "length must be positive" }
+        }
+
+        override fun openChannel(): SeekableByteChannel = channelFactory()
+
+        override fun getInputStream(): InputStream = Channels.newInputStream(openChannel())
+
+        override fun getSize(): Long = length
+
+        fun <R> withFileDescriptor(block: (FileDescriptor) -> R): R =
+            descriptorFactory().use { descriptor -> block(descriptor.fileDescriptor) }
+
+        /**
+         * Creates a view over a byte range of this descriptor without opening the source path.
+         * The descriptor factory is intentionally shared so platform consumers can receive the
+         * original fd together with the adjusted absolute range.
+         */
+        fun subrange(relativeOffset: Long, subrangeLength: Long): FileDescriptorEntity {
+            require(relativeOffset >= 0L) { "relativeOffset must be non-negative" }
+            require(subrangeLength > 0L) { "subrangeLength must be positive" }
+            require(relativeOffset <= length && subrangeLength <= length - relativeOffset) {
+                "Requested subrange exceeds descriptor bounds"
+            }
+            require(relativeOffset <= Long.MAX_VALUE - startOffset) {
+                "Descriptor offset overflow"
+            }
+
+            val parent = this
+            return FileDescriptorEntity(
+                path = path,
+                startOffset = startOffset + relativeOffset,
+                length = subrangeLength,
+                channelFactory = {
+                    BoundedSeekableByteChannel(
+                        delegate = parent.openChannel(),
+                        startOffset = relativeOffset,
+                        rangeLength = subrangeLength
+                    )
+                },
+                descriptorFactory = descriptorFactory
+            ).apply {
+                source = parent.source
+            }
+        }
+    }
+
+    class OwnedFileDescriptor(
+        val fileDescriptor: FileDescriptor,
+        private val closeAction: () -> Unit
+    ) : Closeable {
+        private val closed = AtomicBoolean(false)
+
+        override fun close() {
+            if (closed.compareAndSet(false, true)) closeAction()
+        }
+    }
+
     class ZipFileEntity(val name: String, val parent: FileEntity) : DataEntity() {
         override fun getInputStream(): InputStream? {
-            val zipFile = openCommonsZipFile(parent.path)
+            val zipFile = openCommonsZipFile(parent)
             val entry = zipFile.getEntry(name)
             if (entry == null) {
                 zipFile.close()
@@ -52,7 +126,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         private val cachedSize: Long by lazy {
             try {
                 // Open the parent file (e.g., .xapk or .apks archive)
-                openCommonsZipFile(parent.path).use { zip ->
+                openCommonsZipFile(parent).use { zip ->
                     // Get the entry with the specified name (e.g., split_config.arm64_v8a.apk)
                     val entry = zip.getEntry(name)
                     // entry.size returns -1 when unknown, so handle that case
@@ -93,7 +167,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         }
 
         override fun getInputStream(): InputStream {
-            val slice = FileSliceInputStream(parent.path, dataOffset, compressedSize)
+            val slice = FileSliceInputStream(parent, dataOffset, compressedSize)
             val decoded = when (compressionMethod) {
                 ZipEntry.STORED -> slice
                 ZipEntry.DEFLATED -> RawDeflateInputStream(slice)
@@ -108,34 +182,6 @@ sealed class DataEntity(open var source: DataEntity? = null) {
 
         override fun toString(): String = "$parent!$name"
     }
-
-    /*    class FileDescriptorEntity(private val pid: Int, private val descriptor: Int) : DataEntity() {
-            @SuppressLint("DiscouragedPrivateApi")
-            fun getFileDescriptor(): FileDescriptor? {
-                if (Os.getpid() != pid) return null
-                val fileDescriptor = FileDescriptor()
-                kotlin.runCatching { FileDescriptor::class.java.getDeclaredField("descriptor") }
-                    .onSuccess {
-                        it.isAccessible = true
-                        it.set(fileDescriptor, descriptor)
-                    }.onFailure {
-                        it.printStackTrace()
-                    }
-                if (!fileDescriptor.valid()) return null
-                Os.lseek(fileDescriptor, 0, OsConstants.SEEK_SET)
-                return fileDescriptor
-            }
-
-            override fun getInputStream(): InputStream {
-                val fileDescriptor = getFileDescriptor()
-                if (fileDescriptor != null) {
-                    return FileInputStream(fileDescriptor)
-                }
-                return File("/proc/$pid/fd/$descriptor").inputStream()
-            }
-
-            override fun toString() = "/proc/$pid/fd/$descriptor"
-        }*/
 
     class ZipInputStreamEntity(val name: String, val parent: DataEntity) : DataEntity() {
         override fun getInputStream(): InputStream? {
@@ -177,8 +223,8 @@ sealed class DataEntity(open var source: DataEntity? = null) {
     }
 }
 
-private fun openCommonsZipFile(path: String): ZipFile {
-    val channel = FileChannel.open(File(path).toPath(), StandardOpenOption.READ)
+private fun openCommonsZipFile(source: DataEntity.FileEntity): ZipFile {
+    val channel = source.openChannel()
     return try {
         ZipFile.builder()
             .setSeekableByteChannel(channel)
@@ -208,33 +254,42 @@ private class ZipFileClosingInputStream(
 }
 
 private class FileSliceInputStream(
-    path: String,
+    source: DataEntity.FileEntity,
     offset: Long,
     length: Long
 ) : InputStream() {
-    private val input = FileInputStream(path)
+    private val channel = source.openChannel()
+    private val singleByte = ByteBuffer.allocate(1)
     private var remaining = length
 
     init {
         try {
-            val fileSize = input.channel.size()
+            val fileSize = channel.size()
             if (offset < 0 || length < 0 || offset > fileSize || length > fileSize - offset) {
                 throw ZipException(
                     "ZIP entry slice exceeds parent file: offset=$offset, length=$length, size=$fileSize"
                 )
             }
-            input.channel.position(offset)
+            channel.position(offset)
         } catch (e: Exception) {
-            input.close()
+            channel.close()
             throw e
         }
     }
 
     override fun read(): Int {
         if (remaining == 0L) return -1
-        val value = input.read()
-        if (value >= 0) remaining--
-        return value
+        singleByte.clear()
+        while (true) {
+            when (channel.read(singleByte)) {
+                -1 -> return -1
+                0 -> continue
+                else -> {
+                    remaining--
+                    return singleByte.array()[0].toInt() and 0xFF
+                }
+            }
+        }
     }
 
     override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
@@ -243,7 +298,7 @@ private class FileSliceInputStream(
         if (remaining == 0L) return -1
 
         val allowed = min(length.toLong(), remaining).toInt()
-        val count = input.read(buffer, offset, allowed)
+        val count = channel.read(ByteBuffer.wrap(buffer, offset, allowed))
         if (count > 0) remaining -= count
         return count
     }
@@ -251,14 +306,76 @@ private class FileSliceInputStream(
     override fun skip(count: Long): Long {
         if (count <= 0 || remaining == 0L) return 0L
         val skipped = min(count, remaining)
-        input.channel.position(input.channel.position() + skipped)
+        channel.position(channel.position() + skipped)
         remaining -= skipped
         return skipped
     }
 
     override fun available(): Int = min(remaining, Int.MAX_VALUE.toLong()).toInt()
 
-    override fun close() = input.close()
+    override fun close() = channel.close()
+}
+
+private class BoundedSeekableByteChannel(
+    private val delegate: SeekableByteChannel,
+    private val startOffset: Long,
+    private val rangeLength: Long
+) : SeekableByteChannel {
+    private var position = 0L
+    private var closed = false
+
+    override fun read(destination: ByteBuffer): Int {
+        ensureOpen()
+        if (!destination.hasRemaining()) return 0
+        if (position >= rangeLength) return -1
+
+        val bytesToRead = min(destination.remaining().toLong(), rangeLength - position).toInt()
+        val originalLimit = destination.limit()
+        return try {
+            destination.limit(destination.position() + bytesToRead)
+            delegate.position(startOffset + position)
+            delegate.read(destination).also { count ->
+                if (count > 0) position += count
+            }
+        } finally {
+            destination.limit(originalLimit)
+        }
+    }
+
+    override fun write(source: ByteBuffer): Int = throw java.nio.channels.NonWritableChannelException()
+
+    override fun position(): Long {
+        ensureOpen()
+        return position
+    }
+
+    override fun position(newPosition: Long): SeekableByteChannel {
+        ensureOpen()
+        require(newPosition >= 0L) { "position must be non-negative" }
+        position = newPosition
+        return this
+    }
+
+    override fun size(): Long {
+        ensureOpen()
+        return rangeLength
+    }
+
+    override fun truncate(size: Long): SeekableByteChannel =
+        throw java.nio.channels.NonWritableChannelException()
+
+    override fun isOpen(): Boolean = !closed && delegate.isOpen
+
+    override fun close() {
+        if (!closed) {
+            closed = true
+            delegate.close()
+        }
+    }
+
+    private fun ensureOpen() {
+        if (!isOpen) throw java.nio.channels.ClosedChannelException()
+    }
 }
 
 internal class RawDeflateInputStream(

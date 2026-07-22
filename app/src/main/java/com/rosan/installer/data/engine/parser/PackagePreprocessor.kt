@@ -109,14 +109,14 @@ class PackagePreprocessor(
         return when (val data = entity.data) {
             is DataEntity.FileEntity -> {
                 // Full file hash (slower but accurate)
-                File(data.path).calculateSHA256() ?: "${data.path}_${entity.versionCode}"
+                data.calculateSHA256() ?: "${data.path}_${entity.versionCode}"
             }
 
             is DataEntity.ZipFileEntity -> {
                 // Zip Entry optimization: Use CRC + Size only, no decompression, extremely fast
                 try {
                     val allowLocalHeaderFallback = entity.sourceType?.allowsLocalHeaderFallback ?: true
-                    unifiedZipFileProvider.open(data.parent.path, allowLocalHeaderFallback).use { zip ->
+                    unifiedZipFileProvider.open(data.parent, allowLocalHeaderFallback).use { zip ->
                         zip.getEntry(data.name)?.let { "${it.crc}|${it.size}" }
                     } ?: "${data.name}_${entity.versionCode}"
                 } catch (_: Exception) {
@@ -169,15 +169,13 @@ class PackagePreprocessor(
         val fileData = baseEntity.data as? DataEntity.FileEntity
             ?: return@coroutineScope PackageIdentityStatus.ERROR
 
-        val newApkFile = File(fileData.path)
-
         // 4. Fast-fail optimization: compare file sizes first.
-        if (newApkFile.length() != installedApkFile.length()) {
+        if (fileData.getSize() != installedApkFile.length()) {
             return@coroutineScope PackageIdentityStatus.DIFFERENT
         }
 
         // 5. Heavy validation: Full SHA-256 Hash Comparison.
-        val newAppHashDeferred = async(Dispatchers.IO) { newApkFile.calculateSHA256() }
+        val newAppHashDeferred = async(Dispatchers.IO) { fileData.calculateSHA256() }
         val installedAppHashDeferred = async(Dispatchers.IO) { installedApkFile.calculateSHA256() }
 
         val newAppHash = newAppHashDeferred.await()

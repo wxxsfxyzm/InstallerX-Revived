@@ -409,13 +409,13 @@ class DefaultPrivilegedService private constructor(
     }
 
     override fun startActivityPrivileged(intent: Intent): Boolean {
-        try {
-            val am = iActivityManager
+        val am = iActivityManager
 
-            val userId = AndroidProcess.myUid() / 100000
-            val callerPackage = runtime.activityCallerPackage(context)
-            val resolvedType = intent.resolveType(context.contentResolver)
+        val userId = AndroidProcess.myUid() / 100000
+        val callerPackage = runtime.activityCallerPackage(context)
+        val resolvedType = intent.resolveType(context.contentResolver)
 
+        return try {
             val result = am.startActivityAsUser(
                 null as IApplicationThread?,
                 callerPackage,
@@ -432,15 +432,15 @@ class DefaultPrivilegedService private constructor(
 
             // A result code >= 0 indicates success.
             // See ActivityManager.START_SUCCESS, START_DELIVERED_TO_TOP, etc.
-            return result >= 0
+            result >= 0
         } catch (e: SecurityException) {
             // Log security exceptions specifically, as they indicate a permission issue.
             Timber.tag(TAG).e(e, "startActivityPrivileged failed due to SecurityException")
-            return false
+            false
         } catch (e: Exception) {
             // Catch other potential exceptions, such as RemoteException.
             Timber.tag(TAG).e(e, "startActivityPrivileged failed with an exception")
-            return false
+            false
         }
     }
 

@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.net.Uri
+import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.os.RemoteException
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.system.Os
@@ -33,8 +36,13 @@ import timber.log.Timber
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
-import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.channels.ClosedChannelException
+import java.nio.channels.NonWritableChannelException
+import java.nio.channels.SeekableByteChannel
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.min
 
 class SourceResolver(
     private val context: Context,
@@ -183,9 +191,8 @@ class SourceResolver(
     }
 
     private suspend fun resolveContentUri(uri: Uri): List<DataEntity> {
-        val afd = try {
-            context.contentResolver?.openAssetFileDescriptor(uri, "r")
-                ?: throw IOException("Cannot open file descriptor: $uri")
+        val providerAsset = try {
+            openUnstableProviderAsset(uri)
         } catch (e: SecurityException) {
             val message = e.message.orEmpty()
             val isUriPermissionDenial =
@@ -204,83 +211,243 @@ class SourceResolver(
             // Rethrow if it doesn't match the signature or initiator is unknown
             throw e
         }
-        // Resolve real path
-        val fd = afd.parcelFileDescriptor.fd
-        val procPath = "/proc/${Os.getpid()}/fd/$fd"
-        // Attempt to resolve the real path, e.g., /storage/... or /data/...
-        val realPath = runCatching {
-            Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
-        }.getOrDefault("")
 
-        // If the path exists and we have permission to read it directly, detach immediately
-        if (realPath.isNotEmpty() && File(realPath).canRead()) {
-            // Perform a defensive check to prevent File.canRead() from reporting false positives in certain SELinux contexts
-            val detachedSuccess = runCatching {
-                RandomAccessFile(realPath, "r").use { }
-                true
-            }.getOrDefault(false)
+        var retainProviderAsset = false
+        try {
+            val afd = providerAsset.descriptor
+            val fd = afd.parcelFileDescriptor.fd
+            val procPath = "/proc/${Os.getpid()}/fd/$fd"
+            val realPath = runCatching {
+                Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
+            }.getOrDefault("")
 
-            if (detachedSuccess) {
-                Timber.d("Detached mode success! File is directly readable: $realPath")
-                // Close the afd immediately to completely cut off the Binder connection with the ContentProvider (e.g., MT Manager)
-                // This ensures that even if the provider app is killed, the system won't kill this process due to the association mechanism
-                afd.close()
-                return listOf(DataEntity.FileEntity(realPath).apply { source = DataEntity.FileEntity(realPath) })
+            val range = resolveDescriptorRange(providerAsset)
+            if (range != null) {
+                val displayPath = realPath.ifBlank { uri.lastPathSegment ?: uri.toString() }
+                val entity = DataEntity.FileDescriptorEntity(
+                    path = displayPath,
+                    startOffset = range.offset,
+                    length = range.length,
+                    channelFactory = { providerAsset.openChannel(range) },
+                    descriptorFactory = providerAsset::duplicateDescriptor
+                ).apply {
+                    source = DataEntity.FileEntity(displayPath)
+                }
+                closeables += providerAsset
+                retainProviderAsset = true
+                Timber.d(
+                    "Using retained content descriptor without cache or path reopen: " +
+                            "path=$displayPath, offset=${range.offset}, length=${range.length}"
+                )
+                return listOf(entity)
+            }
+
+            Timber.d("Content descriptor is not seekable ($realPath). Falling back to cache.")
+            return cacheStream(uri, afd, realPath)
+        } finally {
+            if (!retainProviderAsset) providerAsset.close()
+        }
+    }
+
+    private fun openUnstableProviderAsset(uri: Uri): ProviderAsset {
+        // ContentResolver.openAssetFileDescriptor() upgrades a successful open to a stable
+        // provider reference and keeps it until the returned descriptor is closed. Open through
+        // an unstable client instead, then release the client immediately and retain only the AFD.
+        val client = context.contentResolver.acquireUnstableContentProviderClient(uri)
+            ?: throw IOException("Cannot acquire content provider: $uri")
+
+        return try {
+            val descriptor = client.openAssetFile(uri, "r", null)
+                ?: throw IOException("Cannot open file descriptor: $uri")
+            ProviderAsset(descriptor)
+        } catch (e: Exception) {
+            if (e is RemoteException) throw IOException("Content provider died while opening: $uri", e)
+            throw e
+        } finally {
+            client.close()
+        }
+    }
+
+    private fun resolveDescriptorRange(providerAsset: ProviderAsset): ContentRange? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            Timber.d("Descriptor-backed APK parsing requires Android 9 or newer.")
+            return null
+        }
+
+        return runCatching {
+            val afd = providerAsset.descriptor
+            val stat = Os.fstat(afd.fileDescriptor)
+            if (!OsConstants.S_ISREG(stat.st_mode)) throw IOException("Descriptor is not a regular file")
+
+            val offset = afd.startOffset
+            if (offset < 0L) throw IOException("Descriptor has a negative start offset")
+            val length = if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) {
+                afd.declaredLength
+            } else {
+                stat.st_size - offset
+            }
+            if (length <= 0L) throw IOException("Descriptor length is unknown or empty")
+            if (stat.st_size > 0L && (offset > stat.st_size || length > stat.st_size - offset)) {
+                throw IOException("Descriptor range exceeds the underlying file")
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
+                (offset != 0L || stat.st_size <= 0L || length != stat.st_size)
+            ) {
+                throw IOException("Android 9 and 10 require a whole-file descriptor")
+            }
+
+            ContentRange(offset, length).also { range ->
+                providerAsset.openChannel(range).use { channel ->
+                    val firstByte = ByteBuffer.allocate(1)
+                    while (true) {
+                        when (channel.read(firstByte)) {
+                            -1 -> throw IOException("Descriptor is empty")
+                            0 -> continue
+                            else -> break
+                        }
+                    }
+                }
+            }
+        }.onFailure { error ->
+            Timber.d(error, "Content descriptor cannot provide positional reads.")
+        }.getOrNull()
+    }
+
+    private data class ContentRange(val offset: Long, val length: Long)
+
+    private class ProviderAsset(
+        val descriptor: AssetFileDescriptor
+    ) : Closeable {
+        private val closed = AtomicBoolean(false)
+
+        fun openChannel(range: ContentRange): SeekableByteChannel {
+            ensureOpen()
+            val duplicate = ParcelFileDescriptor.dup(descriptor.fileDescriptor)
+            val input = ParcelFileDescriptor.AutoCloseInputStream(duplicate)
+            return try {
+                PositionalFileDescriptorChannel(input, range.offset, range.length)
+            } catch (error: Exception) {
+                input.close()
+                throw error
             }
         }
 
-        // If we reach here, the file is likely in a private directory (EACCES) or the path could not be resolved.
-        // To prevent association killing, we no longer attempt to read via /proc/self/fd/ in a "dependent" manner.
-        // Fall back to caching mode: copy the data out and disconnect.
-        Timber.d("File is private or unreadable ($realPath). Falling back to Cache to avoid dependency kill.")
+        fun duplicateDescriptor(): DataEntity.OwnedFileDescriptor {
+            ensureOpen()
+            val duplicate = ParcelFileDescriptor.dup(descriptor.fileDescriptor)
+            return DataEntity.OwnedFileDescriptor(duplicate.fileDescriptor, duplicate::close)
+        }
 
-        return cacheStream(uri, afd, realPath)
+        private fun ensureOpen() {
+            if (closed.get()) throw IOException("Content descriptor is already closed")
+        }
+
+        override fun close() {
+            if (!closed.compareAndSet(false, true)) return
+            descriptor.close()
+        }
+    }
+
+    private class PositionalFileDescriptorChannel(
+        private val input: ParcelFileDescriptor.AutoCloseInputStream,
+        private val startOffset: Long,
+        private val rangeLength: Long
+    ) : SeekableByteChannel {
+        private val channel = input.channel
+        private var position = 0L
+        private val closed = AtomicBoolean(false)
+
+        override fun read(destination: ByteBuffer): Int {
+            ensureOpen()
+            if (position >= rangeLength) return -1
+            if (!destination.hasRemaining()) return 0
+
+            val bytesToRead = min(destination.remaining().toLong(), rangeLength - position).toInt()
+            val originalLimit = destination.limit()
+            return try {
+                destination.limit(destination.position() + bytesToRead)
+                channel.read(destination, startOffset + position).also { count ->
+                    if (count > 0) position += count
+                }
+            } finally {
+                destination.limit(originalLimit)
+            }
+        }
+
+        override fun write(source: ByteBuffer): Int = throw NonWritableChannelException()
+
+        override fun position(): Long {
+            ensureOpen()
+            return position
+        }
+
+        override fun position(newPosition: Long): SeekableByteChannel {
+            ensureOpen()
+            require(newPosition >= 0L) { "position must be non-negative" }
+            position = newPosition
+            return this
+        }
+
+        override fun size(): Long {
+            ensureOpen()
+            return rangeLength
+        }
+
+        override fun truncate(size: Long): SeekableByteChannel = throw NonWritableChannelException()
+
+        override fun isOpen(): Boolean = !closed.get() && channel.isOpen
+
+        override fun close() {
+            if (closed.compareAndSet(false, true)) input.close()
+        }
+
+        private fun ensureOpen() {
+            if (!isOpen) throw ClosedChannelException()
+        }
     }
 
     private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> =
         withContext(Dispatchers.IO) {
-            afd.use { descriptor ->
-                val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
-                val knownLength =
-                    if (descriptor.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) descriptor.declaredLength else guessContentLength(
-                        uri,
-                        descriptor
+            val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
+            val knownLength =
+                if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) afd.declaredLength else guessContentLength(
+                    uri,
+                    afd
+                )
+
+            Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $knownLength")
+
+            var nioSuccess = false
+            try {
+                val fd = afd.fileDescriptor
+                if (fd.valid() && knownLength > 0) {
+                    Timber.d("Attempting NIO FileChannel transfer...")
+                    transferWithProgress(
+                        sourceFd = fd,
+                        sourceOffset = afd.startOffset,
+                        destFile = tempFile,
+                        totalSize = knownLength,
+                        progressFlow = progressFlow
                     )
-
-                Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $knownLength")
-
-                var nioSuccess = false
-                try {
-                    val fd = descriptor.fileDescriptor
-                    if (fd != null && fd.valid() && knownLength > 0) {
-                        Timber.d("Attempting NIO FileChannel transfer...")
-                        transferWithProgress(
-                            sourceFd = fd,
-                            sourceOffset = descriptor.startOffset,
-                            destFile = tempFile,
-                            totalSize = knownLength,
-                            progressFlow = progressFlow
-                        )
-                        nioSuccess = true
-                        Timber.d("NIO transfer successful.")
-                    }
-                } catch (e: Exception) {
-                    Timber.w(e, "NIO transfer failed, falling back to legacy stream copy.")
-                    if (tempFile.exists()) tempFile.delete()
-                    tempFile.createNewFile()
+                    nioSuccess = true
+                    Timber.d("NIO transfer successful.")
                 }
-
-                if (!nioSuccess) {
-                    Timber.d("Using legacy Stream copy.")
-                    descriptor.createInputStream().use { input ->
-                        tempFile.outputStream().use { output ->
-                            input.copyToWithProgress(output, knownLength, progressFlow)
-                        }
-                    }
-                }
-
-                listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+            } catch (e: Exception) {
+                Timber.w(e, "NIO transfer failed, falling back to legacy stream copy.")
+                if (tempFile.exists()) tempFile.delete()
+                tempFile.createNewFile()
             }
+
+            if (!nioSuccess) {
+                Timber.d("Using legacy Stream copy.")
+                afd.createInputStream().use { input ->
+                    tempFile.outputStream().use { output ->
+                        input.copyToWithProgress(output, knownLength, progressFlow)
+                    }
+                }
+            }
+
+            listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
         }
 
     /**
