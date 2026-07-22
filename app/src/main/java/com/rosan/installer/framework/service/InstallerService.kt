@@ -62,10 +62,16 @@ class InstallerService : Service() {
     private val uiEffectJobs = mutableMapOf<String, Job>()
 
     private var idleTimeoutJob: Job? = null
+    private var latestStartId = 0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        synchronized(sessionScopes) {
+            latestStartId = startId
+            cancelIdleTimeoutLocked()
+        }
+
         val actionString = intent?.action
         val id = intent?.getStringExtra(EXTRA_ID)
 
@@ -141,13 +147,14 @@ class InstallerService : Service() {
         val id = session.id
 
         synchronized(sessionScopes) {
+            cancelIdleTimeoutLocked()
+
             if (sessionScopes.containsKey(id)) {
                 Timber.d("[id=$id] Scope already exists. Skipping setup.")
                 return
             }
 
             Timber.d("[id=$id] Creating new execution scope and handlers.")
-            idleTimeoutJob?.cancel()
 
             val scope = CoroutineScope(Dispatchers.IO + Job())
             sessionScopes[id] = scope
@@ -180,19 +187,41 @@ class InstallerService : Service() {
 
     private fun checkIdleState() {
         synchronized(sessionScopes) {
+            if (sessionScopes.isNotEmpty()) {
+                cancelIdleTimeoutLocked()
+                return
+            }
+
             // Note: updateForegroundState() is completely removed.
             // We already promoted to foreground at the top of onStartCommand.
+            cancelIdleTimeoutLocked()
 
-            if (sessionScopes.isEmpty()) {
-                Timber.d("No active scopes. Scheduling shutdown in $IDLE_TIMEOUT_MS ms.")
-                idleTimeoutJob?.cancel()
-                idleTimeoutJob = serviceScope.launch {
-                    delay(IDLE_TIMEOUT_MS)
+            val scheduledStartId = latestStartId
+            Timber.d("No active scopes. Scheduling shutdown in $IDLE_TIMEOUT_MS ms.")
+            idleTimeoutJob = serviceScope.launch {
+                delay(IDLE_TIMEOUT_MS)
+
+                val shouldStop = synchronized(sessionScopes) {
+                    if (sessionScopes.isNotEmpty() || latestStartId != scheduledStartId) {
+                        false
+                    } else {
+                        idleTimeoutJob = null
+                        true
+                    }
+                }
+
+                if (shouldStop && stopSelfResult(scheduledStartId)) {
                     Timber.i("Idle timeout reached. Stopping service.")
-                    stopSelf()
+                } else if (shouldStop) {
+                    Timber.d("Idle timeout ignored because a newer service start is pending.")
                 }
             }
         }
+    }
+
+    private fun cancelIdleTimeoutLocked() {
+        idleTimeoutJob?.cancel()
+        idleTimeoutJob = null
     }
 
     private fun promoteToForeground() {

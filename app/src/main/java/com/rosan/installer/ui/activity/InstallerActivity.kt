@@ -689,7 +689,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             val background by session.background.collectAsState(false)
             val progress by session.progress.collectAsState(ProgressEntity.Ready)
 
-            if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.Finish)
+            if (background || progress is ProgressEntity.Ready || progress is ProgressEntity.Finish)
                 return@setContent
 
             InstallerActivityContent(session = session, themeStateProvider = themeStateProvider)
