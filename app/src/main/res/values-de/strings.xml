@@ -428,8 +428,6 @@
     <string name="installer_settings_auto_clear_success_notification_desc">Lösche Benachrichtigungen von erfolgreichen Installationen automatisch</string>
     <string name="installer_settings_auto_clear_time_never">Nie</string>
     <string name="installer_settings_auto_clear_time_seconds_format">%d Sekunden</string>
-    <string name="auto_lock_default_installer">Automatisch als Standart Installationsprogramm auswählen</string>
-    <string name="auto_lock_default_installer_desc">Diese App beim Start einer neuen Installation automatisch als Installierprogramm festlegen</string>
     <string name="config_global_default">Globaler Standart</string>
     <string name="config_install_authorizer_desc">Autorisierung zum Installieren von Apps</string>
     <string name="config_authorizer_none_tips">Bei Verwendung des Systeminstallers sind die meisten Optionen hier ungültig.</string>

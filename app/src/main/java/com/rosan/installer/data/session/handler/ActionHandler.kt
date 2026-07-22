@@ -48,7 +48,6 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.framework.auth.safeBiometricAuthOrThrow
 import com.rosan.installer.framework.packageupdate.SelfUpdateRecoveryManager
-import com.rosan.installer.framework.service.AutoLockService
 import com.rosan.installer.util.getErrorMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -88,7 +87,6 @@ class ActionHandler(
     private val appSettingsRepo by inject<AppSettingsRepository>()
     private val shellExecutionProvider by inject<ShellExecutionProvider>()
     private val deviceCapabilityProvider by inject<DeviceCapabilityProvider>()
-    private val autoLockService by inject<AutoLockService>()
     private val selfUpdateRecoveryManager by inject<SelfUpdateRecoveryManager>()
     private val configResolver by inject<ConfigResolver>()
     private val uninstallResolver by inject<UninstallResolver>()
@@ -317,9 +315,6 @@ class ActionHandler(
             Timber.d("[id=$sessionId] resolve: Batch share or module file detected. Forcing install mode to Dialog.")
             session.config = session.config.copy(installMode = InstallMode.Dialog)
         }
-
-        Timber.d("[id=$sessionId] resolve: Requesting AutoLockManager check.")
-        autoLockService.onResolveInstall(session.config.authorizer)
 
         if (session.config.installMode.isNotification) {
             Timber.d("[id=$sessionId] Notification mode detected early. Switching to background.")

@@ -213,7 +213,6 @@ When introducing a new injectable dependency:
 * Monet setup for older platform versions,
 * conditional logging setup,
 * Koin bootstrap,
-* privileged auto-lock service initialization.
 
 Treat the order and presence of this startup logic as sensitive. Do not reorder or remove initialization steps unless the task requires it and the consequences are understood.
 

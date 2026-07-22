@@ -3,7 +3,6 @@
 package com.rosan.installer.ui.page.main.settings.preferred
 
 sealed interface PreferredViewAction {
-    data class ChangeAutoLockInstaller(val autoLockInstaller: Boolean) : PreferredViewAction
     data class SetAdbVerifyEnabledState(val enabled: Boolean) : PreferredViewAction
     data object RequestIgnoreBatteryOptimization : PreferredViewAction
     data object RefreshIgnoreBatteryOptimizationStatus : PreferredViewAction

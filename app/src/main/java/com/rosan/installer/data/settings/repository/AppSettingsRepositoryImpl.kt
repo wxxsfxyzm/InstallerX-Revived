@@ -82,7 +82,6 @@ class AppSettingsRepositoryImpl(
             useMiIslandBypassRestriction = prefs[AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION] ?: false,
             useMiIslandOuterGlow = prefs[AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW] ?: true,
             useMiIslandBlockingIntervalMs = prefs[AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS] ?: 100,
-            autoLockInstaller = prefs[AppDataStore.AUTO_LOCK_INSTALLER] ?: false,
             autoSilentInstall = prefs[AppDataStore.DIALOG_AUTO_SILENT_INSTALL] ?: false,
             longClickBackgroundInstall = prefs[AppDataStore.DIALOG_LONG_CLICK_BACKGROUND_INSTALL] ?: true,
             tryMultipleAuthorizersOnInstall = prefs[AppDataStore.TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL] ?: false,
@@ -259,7 +258,6 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.UserSetLSPosedActive -> AppDataStore.USER_SET_LSPOSED_ACTIVE
             BooleanSetting.PreferSystemIconForInstall -> AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL
             BooleanSetting.ShowDialogWhenPressingNotification -> AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION
-            BooleanSetting.AutoLockInstaller -> AppDataStore.AUTO_LOCK_INSTALLER
             BooleanSetting.UserReadScopeTips -> AppDataStore.USER_READ_SCOPE_TIPS
             BooleanSetting.ApplyOrderInReverse -> AppDataStore.APPLY_ORDER_IN_REVERSE
             BooleanSetting.ApplySelectedFirst -> AppDataStore.APPLY_SELECTED_FIRST

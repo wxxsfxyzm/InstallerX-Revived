@@ -107,7 +107,6 @@ class HomePageViewModel(
             isSystemApp = capabilityProvider.isSystemApp,
             availableAuthorizerCount = availableCount,
             userSetLSPosedActive = prefs.userSetLSPosedActive,
-            autoLockInstaller = prefs.autoLockInstaller,
             defaultInstaller = caps.defaultInstaller,
             deviceName = caps.deviceName
         )
@@ -124,13 +123,6 @@ class HomePageViewModel(
                 // Refresh is safely dispatched to IO thread inside the provider
                 capabilityProvider.refreshPrivilegeStatus()
                 refreshFlow.value++
-            }
-
-            is HomePageViewAction.ChangeAutoLockInstaller -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.AutoLockInstaller,
-                    action.autoLockInstaller
-                )
             }
 
             is HomePageViewAction.SetDefaultInstaller -> setDefaultInstaller(action.lock, action)

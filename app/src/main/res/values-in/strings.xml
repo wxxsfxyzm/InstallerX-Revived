@@ -82,8 +82,6 @@
     <string name="installer_settings_auto_clear_time_seconds_format">%d detik</string>
     <string name="basic">Dasar</string>
     <string name="disable_adb_install_verify">Nonaktifkan Verifikasi ADB</string>
-    <string name="auto_lock_default_installer">Atur otomatis sebagai pemasang bawaan</string>
-    <string name="auto_lock_default_installer_desc">Atur aplikasi ini secara otomatis sebagai pemasang saat memulai pemasangan baru</string>
     <string name="lock_default_installer">Atur sebagai pemasang bawaan</string>
     <string name="lock_default_installer_desc">Atur InstallerX sebagai aplikasi bawaan untuk memasang apk</string>
     <string name="lock_default_installer_success">Berhasil diatur sebagai pemasang bawaan</string>

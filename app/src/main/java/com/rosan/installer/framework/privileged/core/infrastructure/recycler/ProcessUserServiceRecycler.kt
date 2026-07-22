@@ -6,9 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Binder
 import android.os.IBinder
-import android.os.Process
 import android.os.RemoteException
-import android.system.Os
 import androidx.annotation.Keep
 import com.rosan.app_process.AppProcess
 import com.rosan.installer.IAppProcessService
@@ -74,16 +72,8 @@ class ProcessUserServiceRecycler(
         private val privileged = DefaultPrivilegedService.userService()
 
         override fun quit() {
-            try {
-                // Kill parent shell to ensure clean exit (su/sh process)
-                val ppid = Os.getppid()
-                Timber.i("Quitting... Killing parent shell (PID: $ppid)")
-                Process.killProcess(ppid)
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to kill parent process")
-            } finally {
-                exitProcess(0)
-            }
+            Timber.i("Quitting AppProcessService")
+            exitProcess(0)
         }
 
         override fun getPrivilegedService(): IPrivilegedService = privileged
@@ -109,6 +99,11 @@ class ProcessUserServiceRecycler(
     override fun onMake(): UserServiceProxy {
         val appProcessRecycler = appProcessRecyclerManager.get(terminal)
         val appProcessHandle = appProcessRecycler.make()
+
+        if (!appProcessHandle.entity.init(context)) {
+            appProcessHandle.recycle()
+            throw IllegalStateException("Failed to initialize AppProcess for User Service.")
+        }
 
         val binder = try {
             appProcessHandle.entity.isolatedServiceBinder(

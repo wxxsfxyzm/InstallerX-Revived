@@ -16,7 +16,6 @@ import com.rosan.installer.framework.privileged.core.infrastructure.recycler.Pro
 import com.rosan.installer.framework.privileged.core.infrastructure.recycler.ShizukuHookRecycler
 import com.rosan.installer.framework.privileged.core.infrastructure.recycler.ShizukuUserServiceRecycler
 import com.rosan.installer.framework.privileged.core.infrastructure.process.AppProcessTerminal
-import com.rosan.installer.framework.service.AutoLockService
 import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.engine.provider.SessionDetailsProvider
@@ -47,9 +46,6 @@ val privilegedModule = module {
     singleOf(::PostInstallTaskProviderImpl) { bind<PostInstallTaskProvider>() }
     singleOf(::SystemInfoProviderImpl) { bind<SystemInfoProvider>() }
     singleOf(::SessionDetailsProviderImpl) { bind<SessionDetailsProvider>() }
-
-    // Services
-    singleOf(::AutoLockService)
 
     // UseCases
     factoryOf(::OpenAppUseCase)

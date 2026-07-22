@@ -376,8 +376,6 @@
     <string name="installer_settings_auto_clear_success_notification_desc">Авто-удаление уведомления об успешной установке</string>
     <string name="installer_settings_auto_clear_time_never">Никогда</string>
     <string name="installer_settings_auto_clear_time_seconds_format">%d секунд</string>
-    <string name="auto_lock_default_installer">Установщик по умолчанию</string>
-    <string name="auto_lock_default_installer_desc">Автоназначение этого приложения установщиком по умолчанию при новой установке</string>
     <string name="config_global_default">Глобальный по умолчанию</string>
     <string name="config_scope">Область действия</string>
     <string name="config_authorizer_none_tips">При отсутствии привилегий большинство параметров становятся недействительными.</string>

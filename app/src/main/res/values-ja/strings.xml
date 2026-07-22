@@ -89,8 +89,6 @@
     <string name="ignore_battery_optimizations">バッテリーの最適化を無視</string>
     <string name="ignore_battery_optimizations_desc">厳格なバックグラウンドポリシーを持つ ROM で役立ちます。通知が表示され続ける場合は、「バッテリーの最適化を無視」を有効にしてみてください</string>
     <string name="ignore_battery_optimizations_desc_disabled">すでに無視されています</string>
-    <string name="auto_lock_default_installer">デフォルトのインストーラーとして自動的に設定</string>
-    <string name="auto_lock_default_installer_desc">新規にインストールを開始するときに、このアプリを自動的にインストーラーとして設定します</string>
     <string name="lock_default_installer">デフォルトインストーラーの設定</string>
     <string name="lock_default_installer_desc">InstallerX を APK をインストールするためのデフォルトのアプリとして設定します</string>
     <string name="lock_default_installer_success">デフォルトのインストーラーとして正常に設定されました</string>

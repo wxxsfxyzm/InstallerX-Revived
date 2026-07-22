@@ -106,8 +106,6 @@
     <string name="ignore_battery_optimizations">Akkumulátoroptimalizálások figyelmen kívül hagyása</string>
     <string name="ignore_battery_optimizations_desc">Hasznos néhány olyan egyéni ROM-on, amelyek karakterláncos háttérpolitikával rendelkeznek.</string>
     <string name="ignore_battery_optimizations_desc_disabled">Már figyelmen kívül hagyva</string>
-    <string name="auto_lock_default_installer">Automatikus beállítás alapértelmezett telepítőként</string>
-    <string name="auto_lock_default_installer_desc">Automatikusan beállítja ezt az alkalmazást telepítőként új telepítés indításakor</string>
     <string name="lock_default_installer">Beállítás alapértelmezett telepítőként</string>
     <string name="lock_default_installer_desc">Az InstallerX beállítása alapértelmezett alkalmazásként az apk-k telepítéséhez</string>
     <string name="lock_default_installer_success">Sikeresen beállítva alapértelmezett telepítőként</string>

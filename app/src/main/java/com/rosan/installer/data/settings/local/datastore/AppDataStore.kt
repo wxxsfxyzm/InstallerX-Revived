@@ -98,9 +98,6 @@ class AppDataStore(
         val NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS =
             register(intPreferencesKey("notification_success_auto_clear_seconds"), PreferenceValueType.INT)
 
-        // Auto Lock Installer
-        val AUTO_LOCK_INSTALLER = register(booleanPreferencesKey("auto_lock_installer"), PreferenceValueType.BOOLEAN)
-
         // ConfigUtil
         val AUTHORIZER = register(stringPreferencesKey("authorizer"), PreferenceValueType.STRING)
         val CUSTOMIZE_AUTHORIZER = register(stringPreferencesKey("customize_authorizer"), PreferenceValueType.STRING)

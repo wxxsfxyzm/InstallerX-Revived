@@ -169,8 +169,6 @@
     <string name="ignore_battery_optimizations_desc">Útil em ROMs com políticas de execução em segundo plano rigorosas. Se a notificação ficar travada, tente ignorar a otimização da pilha</string>
     <string name="ignore_battery_optimizations_desc_disabled">Já Ignorado</string>
     <string name="default_installer">Instalador Padrão</string>
-    <string name="auto_lock_default_installer">Definir como padrão automaticamente</string>
-    <string name="auto_lock_default_installer_desc">Definir automaticamente esta app como instalador ao iniciar uma nova instalação</string>
     <string name="lock_default_installer">Definir como instalador padrão</string>
     <string name="lock_default_installer_desc">Definir o InstallerX como o instalador padrão de apks</string>
     <string name="lock_default_installer_success">Sucesso ao definir como instalador padrão</string>

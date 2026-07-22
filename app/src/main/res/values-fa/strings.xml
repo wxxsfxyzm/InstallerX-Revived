@@ -113,8 +113,6 @@
     <string name="ignore_battery_optimizations">نادیده گرفتن بهینه‌سازی باتری</string>
     <string name="ignore_battery_optimizations_desc">در رام‌هایی با محدودیت‌های سخت‌گیرانه برای اجرای پس‌زمینه مفید است. اگر اعلان گیر کرد، نادیده گرفتن بهینه‌سازی باتری را امتحان کنید</string>
     <string name="ignore_battery_optimizations_desc_disabled">از قبل نادیده گرفته شده</string>
-    <string name="auto_lock_default_installer">تنظیم خودکار به‌عنوان نصب‌کننده پیش‌فرض</string>
-    <string name="auto_lock_default_installer_desc">به‌طور خودکار این برنامه را هنگام شروع نصب جدید به‌عنوان نصب‌کننده تنظیم کنید</string>
     <string name="lock_default_installer">تنظیم به‌عنوان نصب‌کننده پیش‌فرض</string>
     <string name="lock_default_installer_desc">تنظیم InstallerX به‌عنوان برنامه پیش‌فرض برای نصب فایل‌های apk</string>
     <string name="lock_default_installer_success">با موفقیت به‌عنوان نصب‌کننده پیش‌فرض تنظیم شد</string>

@@ -11,12 +11,10 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
-import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.backup.ExportBackupUseCase
 import com.rosan.installer.domain.settings.usecase.backup.PrepareBackupRestoreUseCase
 import com.rosan.installer.domain.settings.usecase.backup.RestoreBackupUseCase
 import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
-import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import com.rosan.installer.domain.updater.repository.UpdateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -38,7 +36,6 @@ class PreferredViewModel(
     private val updateRepo: UpdateRepository,
     private val systemEnvProvider: SystemEnvProvider,
     private val privilegedProvider: PrivilegedProvider,
-    private val updateSetting: UpdateSettingUseCase,
     private val setLauncherIcon: SetLauncherIconUseCase,
     private val exportBackup: ExportBackupUseCase,
     private val prepareBackupRestore: PrepareBackupRestoreUseCase,
@@ -69,7 +66,6 @@ class PreferredViewModel(
         PreferredViewState(
             authorizer = prefs.authorizer,
             customizeAuthorizer = customizeAuthorizer,
-            autoLockInstaller = prefs.autoLockInstaller,
             showLauncherIcon = prefs.showLauncherIcon,
             adbVerifyEnabled = adbVerify,
             isIgnoringBatteryOptimizations = batteryOpt,
@@ -91,13 +87,6 @@ class PreferredViewModel(
 
     fun dispatch(action: PreferredViewAction) {
         when (action) {
-            is PreferredViewAction.ChangeAutoLockInstaller -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.AutoLockInstaller,
-                    action.autoLockInstaller
-                )
-            }
-
             is PreferredViewAction.SetAdbVerifyEnabledState -> setAdbVerifyEnabled(action.enabled, action)
             is PreferredViewAction.RequestIgnoreBatteryOptimization -> requestIgnoreBatteryOptimization()
             is PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus -> refreshIgnoreBatteryOptStatus()

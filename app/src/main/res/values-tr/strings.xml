@@ -409,8 +409,6 @@
     <string name="exception_uninstall_failed_internal_error">Paket Yöneticisi iç hatası</string>
     <string name="uninstall_title">InstallerX Revived\'ı Kaldır</string>
     <string name="uninstall_content">Bu uygulamayı kaldırırsanız, InstallerX Revived üzerinden artık uygulama yükleyemezsiniz.</string>
-    <string name="auto_lock_default_installer">Varsayılan yükleyici olarak otomatik ayarla</string>
-    <string name="auto_lock_default_installer_desc">Yeni bir yükleme başlatıldığında bu uygulamayı otomatikmen yükleyici olarak ayarlar</string>
     <string name="config_label_install_options_desc">Kaynak, kullanıcı gibi yükleme parametrelerini yapılandırın</string>
     <string name="collapse">Daralt</string>
     <string name="installer_select_split">APK bölümlerini seçin</string>

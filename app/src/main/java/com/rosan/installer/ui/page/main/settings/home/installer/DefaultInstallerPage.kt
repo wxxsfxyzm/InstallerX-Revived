@@ -176,15 +176,6 @@ fun DefaultInstallerPage(
                     val defaultInstallerActionsEnabled =
                         uiState.globalAuthorizer != Authorizer.None && !uiState.userSetLSPosedActive
                     item {
-                        SwitchWidget(
-                            icon = AppIcons.AutoLockDefault,
-                            title = stringResource(R.string.auto_lock_default_installer),
-                            description = stringResource(R.string.auto_lock_default_installer_desc),
-                            checked = uiState.autoLockInstaller,
-                            enabled = defaultInstallerActionsEnabled
-                        ) { viewModel.dispatch(HomePageViewAction.ChangeAutoLockInstaller(it)) }
-                    }
-                    item {
                         BaseWidget(
                             icon = AppIcons.LockDefault,
                             title = stringResource(R.string.lock_default_installer),

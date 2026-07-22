@@ -164,13 +164,6 @@ fun MiuixDefaultInstallerPage(
                 ) {
                     val defaultInstallerActionsEnabled =
                         uiState.globalAuthorizer != Authorizer.None && !uiState.userSetLSPosedActive
-                    MiuixAutoLockInstaller(
-                        checked = uiState.autoLockInstaller,
-                        enabled = defaultInstallerActionsEnabled,
-                        onCheckedChange = {
-                            viewModel.dispatch(HomePageViewAction.ChangeAutoLockInstaller(it))
-                        }
-                    )
                     MiuixDefaultInstaller(
                         lock = true,
                         enabled = defaultInstallerActionsEnabled
@@ -244,21 +237,6 @@ fun MiuixDefaultInstallerPage(
     MiuixBlockingLoadingDialog(
         visible = showDefaultInstallerProgress,
         text = stringResource(defaultInstallerProgressTextResId)
-    )
-}
-
-@Composable
-private fun MiuixAutoLockInstaller(
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    MiuixSwitchWidget(
-        title = stringResource(R.string.auto_lock_default_installer),
-        description = stringResource(R.string.auto_lock_default_installer_desc),
-        checked = checked,
-        enabled = enabled,
-        onCheckedChange = onCheckedChange
     )
 }
 

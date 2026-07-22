@@ -49,7 +49,6 @@ enum class BooleanSetting {
     ShowLauncherIcon,
     PreferSystemIconForInstall,
     ShowDialogWhenPressingNotification,
-    AutoLockInstaller,
     UserReadScopeTips,
     ApplyOrderInReverse,
     ApplySelectedFirst,

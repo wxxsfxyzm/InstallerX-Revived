@@ -244,8 +244,6 @@
     <string name="ignore_battery_optimizations">Bỏ qua Tối ưu hoá Pin</string>
     <string name="ignore_battery_optimizations_desc">Hữu ích trên các ROM có chính sách chạy nền nghiêm ngặt. Nếu thông báo bị kẹt, hãy thử bỏ qua tối ưu hóa pin</string>
     <string name="ignore_battery_optimizations_desc_disabled">Đã bỏ qua</string>
-    <string name="auto_lock_default_installer">Tự động đặt làm trình cài đặt mặc định</string>
-    <string name="auto_lock_default_installer_desc">Tự động đặt ứng dụng này làm trình cài đặt khi bắt đầu một lần cài đặt mới</string>
     <string name="lock_default_installer">Đặt làm trình cài đặt mặc định</string>
     <string name="lock_default_installer_desc">Đặt InstallerX làm ứng dụng mặc định để cài đặt các apk</string>
     <string name="lock_default_installer_success">Thành công đặt làm trình cài đặt mặc định</string>

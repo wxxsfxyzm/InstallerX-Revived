@@ -404,8 +404,6 @@
     <string name="config_global_default">Valeur par défaut globale</string>
     <string name="uninstall_title">Désinstaller InstallerX Revived</string>
     <string name="uninstall_content">Après avoir désinstallé l\'appli, vous ne pourrez plus utiliser InstallerX Revived pour installer des applis.</string>
-    <string name="auto_lock_default_installer">Définir automatiquement comme installateur par défaut</string>
-    <string name="auto_lock_default_installer_desc">Définir automatiquement cette appli comme installateur lors du démarrage d\'une nouvelle installation</string>
     <string name="config_install_authorizer_desc">Autorisateur pour installer des applis</string>
     <string name="config_label_install_options_desc">Configurez les paramètres d\'installation tels que la source et l\'utilisateur</string>
     <string name="collapse">Réduire</string>

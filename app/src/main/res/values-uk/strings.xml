@@ -210,8 +210,6 @@
     <string name="permission_answer_phone_calls">Відповідати на дзвінки</string>
     <string name="permission_schedule_exact_alarm">Запланувати точний будильник</string>
     <string name="permission_request_ignore_battery_optimizations">Запит на ігнорування оптимізації батареї</string>
-    <string name="auto_lock_default_installer">Автоматично встановлювати як типовий встановлювач</string>
-    <string name="auto_lock_default_installer_desc">Автоматично встановлювати цей застосунок як встановлювач під час початку нового встановлення</string>
     <string name="warning">Попередження</string>
     <string name="open_source_license_settings_description">Переглянути сторонні бібліотеки з відкритим кодом та їхні ліцензії</string>
     <string name="lab">Лабораторія</string>

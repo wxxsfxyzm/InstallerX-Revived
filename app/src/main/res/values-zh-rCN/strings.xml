@@ -235,8 +235,6 @@
     <string name="ignore_battery_optimizations_desc">适用于后台管理严格的 ROM。若安装通知卡住，请尝试忽略电池优化</string>
     <string name="ignore_battery_optimizations_desc_disabled">已被忽略</string>
     <string name="default_installer">默认安装器</string>
-    <string name="auto_lock_default_installer">自动锁定安装器</string>
-    <string name="auto_lock_default_installer_desc">在开始安装时自动将本应用设置为默认安装器</string>
     <string name="lock_default_installer">锁定为默认安装器</string>
     <string name="lock_default_installer_desc">多个授权方式配合效果更佳，少数系统需要配合 Xposed 模块</string>
     <string name="lock_default_installer_success">锁定成功</string>

@@ -243,8 +243,6 @@
     <string name="ignore_battery_optimizations_desc">Useful on ROMs with strict background policies. If the notification gets stuck, try ignoring battery optimization</string>
     <string name="ignore_battery_optimizations_desc_disabled">Already Ignored</string>
     <string name="default_installer">Default Installer</string>
-    <string name="auto_lock_default_installer">Auto set as default installer</string>
-    <string name="auto_lock_default_installer_desc">Automatically set this app as installer when starting a new install</string>
     <string name="lock_default_installer">Set as default installer</string>
     <string name="lock_default_installer_desc">Set InstallerX as the default app to install apks</string>
     <string name="lock_default_installer_success">Successfully set as default installer</string>

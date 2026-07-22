@@ -345,8 +345,6 @@
     <string name="theme_settings_hide_launcher_icon_desc">Escribir *#*#46789#*#* en el marcador para abrir los ajustes</string>
     <string name="theme_settings_hide_launcher_icon_warning">¡Asegúrate de poder acceder a esta página antes de ocultar el icono del lanzador!</string>
     <string name="theme_settings_hide_launcher_icon_warning_xiaomi">En HyperOS, permite el inicio automático y Abrir nuevas ventanas mientras se ejecuta en segundo plano para recibir el código del marcador!</string>
-    <string name="auto_lock_default_installer">Configurar automáticamente como instalador predeterminado</string>
-    <string name="auto_lock_default_installer_desc">Configurar automáticamente esta aplicación como instalador al iniciar una nueva instalación</string>
     <string name="config_global_default">Global por defecto</string>
     <string name="config_scope">Alcance</string>
     <string name="config_install_authorizer_desc">Autorización para instalar aplicaciones</string>

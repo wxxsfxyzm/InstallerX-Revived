@@ -407,8 +407,6 @@
     <string name="installer_package_min_sdk_label">SDK Mín:</string>
     <string name="installer_package_target_sdk_label">SDK Alvo:</string>
     <string name="exception_uninstall_failed_internal_error">Erro interno do Gerenciador de Pacotes</string>
-    <string name="auto_lock_default_installer">Definir como padrão automaticamente</string>
-    <string name="auto_lock_default_installer_desc">Definir automaticamente este app como instalador ao iniciar uma nova instalação</string>
     <string name="config_label_install_options_desc">Configurar os parâmetros de instalação, como origem, usuário</string>
     <string name="collapse">Recolher</string>
     <string name="installer_select_split">Selecione as partes do APK</string>

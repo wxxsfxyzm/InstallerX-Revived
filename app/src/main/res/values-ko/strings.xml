@@ -99,8 +99,6 @@
     <string name="ignore_battery_optimizations">배터리 최적화 무시</string>
     <string name="ignore_battery_optimizations_desc">백그라운드 정책이 엄격한 ROM에 유용합니다. 알림이 멈춰 있으면 배터리 최적화 무시를 시도해 보세요</string>
     <string name="ignore_battery_optimizations_desc_disabled">이미 제외됨</string>
-    <string name="auto_lock_default_installer">기본 설치 프로그램으로 자동 설정</string>
-    <string name="auto_lock_default_installer_desc">새 설치를 시작할 때 이 앱을 설치 프로그램으로 자동 설정합니다</string>
     <string name="lock_default_installer">기본 설치 프로그램으로 설정</string>
     <string name="lock_default_installer_desc">APK 설치 시 InstallerX를 기본 앱으로 설정합니다</string>
     <string name="lock_default_installer_success">기본 설치 프로그램으로 설정되었습니다</string>
