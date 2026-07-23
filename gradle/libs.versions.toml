@@ -8,8 +8,8 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "9.3.0"
-apksig = "9.3.0"
+agp = "9.3.1"
+apksig = "9.3.1"
 biometric = "1.4.0-alpha07"
 focusApi = "1.4"
 kotlin = "2.4.10"
