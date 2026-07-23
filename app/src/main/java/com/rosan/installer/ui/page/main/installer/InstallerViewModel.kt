@@ -720,10 +720,10 @@ class InstallerViewModel(
         Timber.d(
             "[id=${session.id}] UI requested background: trigger=$trigger, " +
                     "stage=${state.stage::class.simpleName}, " +
-                    "progress=${session.progress.value::class.simpleName}, " +
+                    "progress=${(session.progress as? StateFlow<*>)?.value?.let { it::class.simpleName }}, " +
                     "dismissible=${state.isDismissible}, " +
                     "installMode=${session.config.installMode}, " +
-                    "alreadyBackground=${session.background.value}"
+                    "alreadyBackground=${(session.background as? StateFlow<*>)?.value}"
         )
         session.background(true)
     }

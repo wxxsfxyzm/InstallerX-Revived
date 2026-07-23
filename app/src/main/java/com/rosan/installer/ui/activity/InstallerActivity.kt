@@ -49,6 +49,7 @@ import com.rosan.installer.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -315,7 +316,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
                     "isRequestingPermission=$isRequestingPermission, " +
                     "isAuthenticating=${BiometricAuthBridge.isAuthenticating}, " +
                     "progress=${latestProgress::class.simpleName}, " +
-                    "background=${session?.background?.value}"
+                    "background=${(session?.background as? StateFlow<*>)?.value}"
         )
 
         if (BiometricAuthBridge.isAuthenticating) {
