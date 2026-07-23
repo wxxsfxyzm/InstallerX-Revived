@@ -69,7 +69,11 @@ fun installSuccessDialog(
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 )
             }
-            viewModel.dispatch(InstallerViewAction.Background)
+            viewModel.dispatch(
+                InstallerViewAction.Background(
+                    InstallerViewAction.BackgroundTrigger.MaterialOpenAppDetails
+                )
+            )
         }
     )
 

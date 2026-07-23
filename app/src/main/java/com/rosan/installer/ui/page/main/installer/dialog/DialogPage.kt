@@ -139,7 +139,11 @@ fun DialogPage(
                             if (currentUiState.viewSettings.disableNotificationOnDismiss) {
                                 viewModel.dispatch(InstallerViewAction.Close)
                             } else {
-                                viewModel.dispatch(InstallerViewAction.Background)
+                                viewModel.dispatch(
+                                    InstallerViewAction.Background(
+                                        InstallerViewAction.BackgroundTrigger.MaterialDialogDismiss
+                                    )
+                                )
                             }
                         }
                     },

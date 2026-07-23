@@ -309,6 +309,15 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
     override fun onStop() {
         super.onStop()
 
+        Timber.d(
+            "onStop: Snapshot: isFinishing=$isFinishing, " +
+                    "isChangingConfigurations=$isChangingConfigurations, " +
+                    "isRequestingPermission=$isRequestingPermission, " +
+                    "isAuthenticating=${BiometricAuthBridge.isAuthenticating}, " +
+                    "progress=${latestProgress::class.simpleName}, " +
+                    "background=${session?.background?.value}"
+        )
+
         if (BiometricAuthBridge.isAuthenticating) {
             Timber.d("onStop: Ignored background trigger due to active biometric authentication.")
             return

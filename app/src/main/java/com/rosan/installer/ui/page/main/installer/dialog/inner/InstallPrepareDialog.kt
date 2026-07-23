@@ -455,13 +455,21 @@ fun installPrepareDialog(
                                 viewModel.dispatch(InstallerViewAction.Install(true))
                                 // Force background auto silent install regardless of settings
                                 if (!viewModel.isInstallingModule) {
-                                    viewModel.dispatch(InstallerViewAction.Background)
+                                    viewModel.dispatch(
+                                        InstallerViewAction.Background(
+                                            InstallerViewAction.BackgroundTrigger.MaterialLongPressInstall
+                                        )
+                                    )
                                 }
                             },
                             onClick = {
                                 viewModel.dispatch(InstallerViewAction.Install(true))
                                 if (settings.autoSilentInstall && !viewModel.isInstallingModule)
-                                    viewModel.dispatch(InstallerViewAction.Background)
+                                    viewModel.dispatch(
+                                        InstallerViewAction.Background(
+                                            InstallerViewAction.BackgroundTrigger.MaterialAutoSilentInstall
+                                        )
+                                    )
                             }
                         )
                     )

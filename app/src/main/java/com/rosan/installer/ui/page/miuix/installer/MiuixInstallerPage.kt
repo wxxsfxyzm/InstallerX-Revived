@@ -76,6 +76,7 @@ import com.rosan.installer.ui.util.WindowBlurEffect
 import com.rosan.installer.ui.util.getSupportTitle
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
@@ -372,9 +373,17 @@ fun MiuixInstallerPage(
                 onDismissFinished = {
                     val action = pendingDismissAction.value
                     pendingDismissAction.value = null
+                    Timber.d(
+                        "Miuix sheet dismiss finished: stage=${stage::class.simpleName}, " +
+                                "hasPendingAction=${action != null}"
+                    )
                     action?.invoke()
                 },
                 onDismissRequest = {
+                    Timber.d(
+                        "Miuix sheet dismiss requested: stage=${stage::class.simpleName}, " +
+                                "dismissible=${uiState.isDismissible}, show=${showBottomSheet.value}"
+                    )
                     if (uiState.isDismissible) {
                         // If we are in the confirmation stage and the user taps outside or swipes back
                         if (stage is InstallerStage.InstallConfirm) {
@@ -399,7 +408,9 @@ fun MiuixInstallerPage(
                             val action = if (isModule || disableNotif || isUninstall || isUnarchive) {
                                 InstallerViewAction.Close
                             } else {
-                                InstallerViewAction.Background
+                                InstallerViewAction.Background(
+                                    InstallerViewAction.BackgroundTrigger.MiuixSheetDismiss
+                                )
                             }
 
                             viewModel.dispatch(action)
@@ -484,7 +495,11 @@ fun MiuixInstallerPage(
                                 viewModel = viewModel,
                                 onBackground = {
                                     dismissSheet {
-                                        viewModel.dispatch(InstallerViewAction.Background)
+                                        viewModel.dispatch(
+                                            InstallerViewAction.Background(
+                                                InstallerViewAction.BackgroundTrigger.MiuixPreparingButton
+                                            )
+                                        )
                                     }
                                 }
                             )
@@ -546,7 +561,11 @@ fun MiuixInstallerPage(
                                                 viewModel.dispatch(InstallerViewAction.Install(true))
                                                 if (settings.autoSilentInstall && !viewModel.isInstallingModule) {
                                                     dismissSheet {
-                                                        viewModel.dispatch(InstallerViewAction.Background)
+                                                        viewModel.dispatch(
+                                                            InstallerViewAction.Background(
+                                                                InstallerViewAction.BackgroundTrigger.MiuixAutoSilentInstall
+                                                            )
+                                                        )
                                                     }
                                                 }
                                             },
@@ -557,7 +576,11 @@ fun MiuixInstallerPage(
                                                 // Force background auto silent install regardless of settings
                                                 if (!viewModel.isInstallingModule) {
                                                     dismissSheet {
-                                                        viewModel.dispatch(InstallerViewAction.Background)
+                                                        viewModel.dispatch(
+                                                            InstallerViewAction.Background(
+                                                                InstallerViewAction.BackgroundTrigger.MiuixLongPressInstall
+                                                            )
+                                                        )
                                                     }
                                                 }
                                             }
@@ -573,7 +596,11 @@ fun MiuixInstallerPage(
                                 appInfo = appInfoState,
                                 onButtonClick = {
                                     dismissSheet {
-                                        viewModel.dispatch(InstallerViewAction.Background)
+                                        viewModel.dispatch(
+                                            InstallerViewAction.Background(
+                                                InstallerViewAction.BackgroundTrigger.MiuixInstallingButton
+                                            )
+                                        )
                                     }
                                 }
                             )

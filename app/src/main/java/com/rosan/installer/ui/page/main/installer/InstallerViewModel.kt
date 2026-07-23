@@ -186,7 +186,7 @@ class InstallerViewModel(
             is InstallerViewAction.InstallMultiple -> installMultiple()
             is InstallerViewAction.Install -> install()
             is InstallerViewAction.RequestUnknownSourcePermission -> requestUnknownSourcePermission()
-            is InstallerViewAction.Background -> background()
+            is InstallerViewAction.Background -> background(action.trigger)
             is InstallerViewAction.Reboot -> session.reboot(action.reason)
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData, action.conflictingPackage)
             is InstallerViewAction.Uninstall -> session.uninstallInfo.value?.packageName?.let { session.uninstall(it) }
@@ -715,7 +715,18 @@ class InstallerViewModel(
         _uiEvents.tryEmit(InstallerViewEvent.RequestUnknownSourcePermission)
     }
 
-    private fun background() = session.background(true)
+    private fun background(trigger: InstallerViewAction.BackgroundTrigger) {
+        val state = uiState.value
+        Timber.d(
+            "[id=${session.id}] UI requested background: trigger=$trigger, " +
+                    "stage=${state.stage::class.simpleName}, " +
+                    "progress=${session.progress.value::class.simpleName}, " +
+                    "dismissible=${state.isDismissible}, " +
+                    "installMode=${session.config.installMode}, " +
+                    "alreadyBackground=${session.background.value}"
+        )
+        session.background(true)
+    }
 
     fun toggleSelection(packageName: String, entityToToggle: SelectInstallEntity, isMultiSelect: Boolean) {
         val currentResults = _localState.value.analysisResults.toMutableList()

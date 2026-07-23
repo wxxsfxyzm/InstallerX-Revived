@@ -9,6 +9,20 @@ import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.config.InstallerMode
 
 sealed interface InstallerViewAction {
+    enum class BackgroundTrigger {
+        MaterialDialogDismiss,
+        MaterialPreparingButton,
+        MaterialInstallingButton,
+        MaterialAutoSilentInstall,
+        MaterialLongPressInstall,
+        MaterialOpenAppDetails,
+        MiuixSheetDismiss,
+        MiuixPreparingButton,
+        MiuixInstallingButton,
+        MiuixAutoSilentInstall,
+        MiuixLongPressInstall
+    }
+
     data class CollectSession(val session: InstallerSessionRepository) : InstallerViewAction
     data object PrepareClose : InstallerViewAction
     data object Close : InstallerViewAction
@@ -36,7 +50,7 @@ sealed interface InstallerViewAction {
      */
     data class Install(val triggerAuth: Boolean) : InstallerViewAction
     data object RequestUnknownSourcePermission : InstallerViewAction
-    data object Background : InstallerViewAction
+    data class Background(val trigger: BackgroundTrigger) : InstallerViewAction
     data object Cancel : InstallerViewAction
     data class Reboot(val reason: String) : InstallerViewAction
 

@@ -101,7 +101,11 @@ fun preparingDialog(
         ) {
             listOf(
                 DialogButton(stringResource(R.string.installer_move_to_background)) {
-                    viewModel.dispatch(InstallerViewAction.Background)
+                    viewModel.dispatch(
+                        InstallerViewAction.Background(
+                            InstallerViewAction.BackgroundTrigger.MaterialPreparingButton
+                        )
+                    )
                 },
                 DialogButton(stringResource(R.string.cancel)) {
                     viewModel.dispatch(InstallerViewAction.Cancel)
