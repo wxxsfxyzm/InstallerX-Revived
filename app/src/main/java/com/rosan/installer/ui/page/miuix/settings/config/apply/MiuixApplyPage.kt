@@ -311,7 +311,7 @@ fun MiuixApplyPage(
                                 // Retrieve the dynamically loaded icon from the state
                                 val iconBitmap = uiState.displayIcons[app.packageName]
 
-                                MiuixItemWidget(
+                                ItemWidget(
                                     modifier = Modifier
                                         .padding(horizontal = 12.dp)
                                         .zIndex(-index.toFloat())
@@ -346,7 +346,7 @@ fun MiuixApplyPage(
 }
 
 @Composable
-private fun MiuixItemWidget(
+private fun ItemWidget(
     modifier: Modifier = Modifier,
     app: ApplyViewApp,
     icon: ImageBitmap?,
@@ -404,7 +404,7 @@ private fun MiuixItemWidget(
                 AnimatedVisibility(showPackageName) {
                     Text(
                         text = app.packageName,
-                        style = MiuixTheme.textStyles.subtitle,
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
                         color = MiuixTheme.colorScheme.onSurfaceVariantActions
                     )
                 }
