@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.ui.page.main.installer.InstallerStage
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoSlot
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
@@ -104,7 +105,13 @@ fun InstallingContent(
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     color = contentColor,
-                    text = stringResource(R.string.installer_installing)
+                    text = stringResource(
+                        if (stage.total == 1 && stage.phase == InstallPhase.WRITING) {
+                            R.string.installer_writing
+                        } else {
+                            R.string.installer_installing
+                        }
+                    )
                 )
             }
         }

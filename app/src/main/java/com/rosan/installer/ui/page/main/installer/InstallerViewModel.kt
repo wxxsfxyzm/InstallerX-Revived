@@ -232,8 +232,19 @@ class InstallerViewModel(
         }
 
         is ProgressEntity.Installing -> {
-            val floatProgress = if (progress.total > 1) progress.current.toFloat() / progress.total.toFloat() else 0f
-            InstallerStage.Installing(floatProgress, progress.current, progress.total, progress.appLabel)
+            val floatProgress = progress.overallProgress()
+                ?: if (progress.total > 1) {
+                    (progress.current - 1).coerceAtLeast(0).toFloat() / progress.total.toFloat()
+                } else {
+                    0f
+                }
+            InstallerStage.Installing(
+                progress = floatProgress,
+                current = progress.current,
+                total = progress.total,
+                appLabel = progress.appLabel,
+                phase = progress.phase
+            )
         }
 
         is ProgressEntity.InstallCompleted -> InstallerStage.InstallCompleted(progress.results)

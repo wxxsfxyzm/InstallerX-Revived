@@ -495,7 +495,8 @@
     <string name="installer_install_confirm">安装确认</string>
     <string name="installer_install_pre_approval">安装预批准</string>
     <string name="installer_permissions_confirm">权限确认</string>
-    <string name="installer_installing">安装中…</string>
+    <string name="installer_writing">正在写入…</string>
+    <string name="installer_installing">正在安装…</string>
     <string name="installer_installing_module">安装模块中</string>
     <string name="installer_install_failed">安装失败</string>
     <string name="installer_install_success">安装成功</string>

@@ -511,6 +511,7 @@
     <string name="installer_install_confirm">Install Confirm</string>
     <string name="installer_install_pre_approval">Install Pre-approval</string>
     <string name="installer_permissions_confirm">Permissions Confirm</string>
+    <string name="installer_writing">Writing…</string>
     <string name="installer_installing">Installing…</string>
     <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>

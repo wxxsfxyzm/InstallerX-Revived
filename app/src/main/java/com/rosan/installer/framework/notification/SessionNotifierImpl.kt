@@ -165,13 +165,18 @@ class SessionNotifierImpl(
             combine(stateFlow.filterNotNull(), ticker) { state, _ -> state }
                 .distinctUntilChanged { old, new ->
                     if (old.first != new.first || old.second != new.second) return@distinctUntilChanged false
-                    if (canAnimate) return@distinctUntilChanged !(new.first is ProgressEntity.Installing && new.second)
+                    if (canAnimate) {
+                        val installing = new.first as? ProgressEntity.Installing
+                        val shouldAnimate =
+                            installing != null && installing.writeProgress == null && new.second
+                        return@distinctUntilChanged !shouldAnimate
+                    }
                     return@distinctUntilChanged true
                 }.collect { (progress, background) ->
 
                     // UI Animation logic extracted from data layer
                     var fakeItemProgress = 0f
-                    if (progress is ProgressEntity.Installing) {
+                    if (progress is ProgressEntity.Installing && progress.writeProgress == null) {
                         val key = "${progress.current}|${progress.total}|${progress.appLabel}"
                         if (currentInstallKey != key) {
                             currentInstallKey = key
@@ -182,7 +187,8 @@ class SessionNotifierImpl(
 
                     if (background) {
                         val isSameState = lastNotifiedEntity?.let { it::class == progress::class } == true
-                        val currentRequiresAnimation = canAnimate && progress is ProgressEntity.Installing
+                        val currentRequiresAnimation =
+                            canAnimate && progress is ProgressEntity.Installing && progress.writeProgress == null
 
                         // Pack all context into a single consistent payload
                         val payload = NotificationPayload(
@@ -287,13 +293,30 @@ class SessionNotifierImpl(
             return
         }
 
-        val currentProgress = (progress as? ProgressEntity.InstallPreparing)?.progress ?: -1f
+        val currentProgress = when (progress) {
+            is ProgressEntity.InstallPreparing -> progress.progress
+            is ProgressEntity.Installing -> progress.overallProgress() ?: -1f
+            else -> -1f
+        }
+        val previousInstalling = lastNotifiedEntity as? ProgressEntity.Installing
+        val installingItemChanged =
+            progress is ProgressEntity.Installing &&
+                    previousInstalling != null &&
+                    (progress.current != previousInstalling.current ||
+                            progress.total != previousInstalling.total ||
+                            progress.appLabel != previousInstalling.appLabel)
 
         val shouldUpdate = when {
             isCriticalState -> isDataChanged
             isEnteringInstalling -> true
-            progress is ProgressEntity.Installing && isDataChanged -> true
+            installingItemChanged -> true
             timeSinceLastUpdate < NOTIFICATION_UPDATE_INTERVAL_MS -> false
+            progress is ProgressEntity.Installing && currentProgress >= 0f -> {
+                lastProgressValue < 0f ||
+                        currentProgress < lastProgressValue ||
+                        currentProgress - lastProgressValue >= PROGRESS_UPDATE_THRESHOLD ||
+                        currentProgress >= 0.99f
+            }
             progress is ProgressEntity.Installing -> requiresAnimation
             currentProgress < 0 -> true
             else -> currentProgress > lastProgressValue && ((currentProgress - lastProgressValue) >= PROGRESS_UPDATE_THRESHOLD || currentProgress >= 0.99f)

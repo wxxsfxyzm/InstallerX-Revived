@@ -142,8 +142,8 @@ class MiIslandNotificationBuilder(
                 val total = progress.total.coerceAtLeast(1).toFloat()
                 val currentBase = (progress.current - 1).coerceAtLeast(0).toFloat()
 
-                // Calculate actual static progress without fake animation ticks
-                val batchFraction = currentBase / total
+                val itemProgress = progress.writeProgress ?: 0f
+                val batchFraction = (currentBase + itemProgress) / total
                 progressValue = (100 * batchFraction).toInt()
             }
 

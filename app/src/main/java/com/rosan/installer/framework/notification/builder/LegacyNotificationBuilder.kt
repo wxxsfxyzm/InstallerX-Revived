@@ -73,7 +73,15 @@ class LegacyNotificationBuilder(
         val legacyProgressValue = when (progress) {
             is ProgressEntity.InstallResolving -> 0
             is ProgressEntity.InstallAnalysing -> 40
-            is ProgressEntity.Installing -> 50 + (40 * (if (progress.total > 0) progress.current.toFloat() / progress.total.toFloat() else 0.5f)).toInt()
+            is ProgressEntity.Installing -> {
+                val installProgress = progress.overallProgress()
+                    ?: if (progress.total > 0) {
+                        (progress.current - 1).coerceAtLeast(0).toFloat() / progress.total.toFloat()
+                    } else {
+                        0.5f
+                    }
+                50 + (40 * installProgress).toInt()
+            }
             is ProgressEntity.InstallingModule -> 70
             else -> null
         }

@@ -8,6 +8,8 @@ import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.engine.model.install.InstallPhase
+import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
@@ -34,7 +36,9 @@ class ProcessAppInstallerRepoImpl(
         respectPlatformInstallPolicy: Boolean,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
-        sharedUserIdExemption: List<String>
+        sharedUserIdExemption: List<String>,
+        onProgress: suspend (InstallWriteProgress) -> Unit,
+        onPhaseChanged: suspend (InstallPhase) -> Unit
     ) = runWithProcess(config) {
         super.doInstallWork(
             config,
@@ -43,7 +47,9 @@ class ProcessAppInstallerRepoImpl(
             respectPlatformInstallPolicy,
             blacklist,
             sharedUserIdBlacklist,
-            sharedUserIdExemption
+            sharedUserIdExemption,
+            onProgress,
+            onPhaseChanged
         )
     }
 

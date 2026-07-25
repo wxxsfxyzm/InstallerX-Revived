@@ -13,6 +13,7 @@ apksig = "9.3.1"
 biometric = "1.4.0-alpha07"
 focusApi = "1.4"
 kotlin = "2.4.10"
+kotlinxCoroutines = "1.9.0"
 ksp = "2.3.10"
 composeBom = "2026.06.01"
 compose = "1.11.4"
@@ -62,6 +63,7 @@ android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref
 android-tools-apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidx-annotation" }
 androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.19.0" }
