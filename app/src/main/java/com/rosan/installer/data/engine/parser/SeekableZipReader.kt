@@ -2,7 +2,10 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.domain.engine.exception.SeekableZipException
 import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.engine.model.source.SeekableZipArchive
+import com.rosan.installer.domain.engine.model.source.SeekableZipEntry
 import java.io.Closeable
 import java.io.EOFException
 import java.io.File
@@ -11,27 +14,6 @@ import java.nio.ByteBuffer
 import java.nio.channels.SeekableByteChannel
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
-
-internal data class SeekableZipArchive(
-    val entries: List<SeekableZipEntry>,
-    val hasCentralDirectory: Boolean
-)
-
-internal data class SeekableZipEntry(
-    val name: String,
-    val localHeaderOffset: Long,
-    val dataOffset: Long,
-    val compressedSize: Long,
-    val uncompressedSize: Long,
-    val crc: Long,
-    val compressionMethod: Int,
-    val flags: Int
-) {
-    val isDirectory: Boolean
-        get() = name.endsWith('/')
-}
-
-internal class SeekableZipException(message: String, cause: Throwable? = null) : IOException(message, cause)
 
 /**
  * Reads ZIP local-file-header metadata without walking entry payloads.
@@ -89,11 +71,45 @@ internal class SeekableZipReader {
                     return SeekableZipArchive(entries, hasCentralDirectory = true)
                 }
 
-                else -> throw SeekableZipException(
-                    "Unexpected ZIP signature 0x${signature.toString(16)} at offset $offset"
-                )
+                else -> {
+                    if (isApkSigningBlock(input, offset, fileSize)) {
+                        return SeekableZipArchive(entries, hasCentralDirectory = true)
+                    }
+                    throw SeekableZipException(
+                        "Unexpected ZIP signature 0x${signature.toString(16)} at offset $offset"
+                    )
+                }
             }
         }
+    }
+
+    /**
+     * APK Signature Scheme v2+ inserts an APK Signing Block between the last entry payload and
+     * the central directory. Its leading bytes are a size field rather than a ZIP signature, so
+     * local-header traversal must recognize the complete outer envelope before stopping there.
+     */
+    private fun isApkSigningBlock(
+        input: ChannelRandomAccessReader,
+        blockOffset: Long,
+        fileSize: Long
+    ): Boolean {
+        val remainingSize = fileSize - blockOffset
+        if (remainingSize < APK_SIGNING_BLOCK_MIN_TOTAL_SIZE + SIGNATURE_SIZE) return false
+
+        input.position = blockOffset
+        val blockSize = input.readSignedLongLittleEndian()
+        if (blockSize < APK_SIGNING_BLOCK_MIN_SIZE) return false
+        if (blockSize > remainingSize - LONG_SIZE - SIGNATURE_SIZE) return false
+
+        val blockEnd = blockOffset + LONG_SIZE + blockSize
+        input.position = blockEnd - APK_SIGNING_BLOCK_FOOTER_SIZE
+        if (input.readSignedLongLittleEndian() != blockSize) return false
+
+        val magic = ByteArray(APK_SIGNING_BLOCK_MAGIC.size).also(input::readFully)
+        if (!magic.contentEquals(APK_SIGNING_BLOCK_MAGIC)) return false
+
+        input.position = blockEnd
+        return input.readUnsignedIntLittleEndian() == CENTRAL_DIRECTORY_SIGNATURE
     }
 
     private fun readLocalEntry(
@@ -116,9 +132,7 @@ internal class SeekableZipReader {
             throw SeekableZipException("Encrypted ZIP entry is unsupported at offset $localHeaderOffset")
         }
         if (flags and DATA_DESCRIPTOR_FLAG != 0) {
-            throw SeekableZipException(
-                "ZIP entry uses a data descriptor and cannot be seeked safely at offset $localHeaderOffset"
-            )
+            throw SeekableZipException("ZIP entry uses a data descriptor at offset $localHeaderOffset")
         }
         if (nameLength == 0) {
             throw SeekableZipException("ZIP entry has an empty name at offset $localHeaderOffset")
@@ -152,8 +166,7 @@ internal class SeekableZipReader {
             throw SeekableZipException("Stored ZIP entry has mismatched sizes: $name")
         }
 
-        val dataOffset = metadataEnd
-        val dataEnd = checkedAdd(dataOffset, compressedSize)
+        val dataEnd = checkedAdd(metadataEnd, compressedSize)
         if (dataEnd > fileSize) {
             throw SeekableZipException(
                 "ZIP entry payload exceeds file size: $name, end=$dataEnd, fileSize=$fileSize"
@@ -163,7 +176,7 @@ internal class SeekableZipReader {
         return SeekableZipEntry(
             name = name,
             localHeaderOffset = localHeaderOffset,
-            dataOffset = dataOffset,
+            dataOffset = metadataEnd,
             compressedSize = compressedSize,
             uncompressedSize = uncompressedSize,
             crc = crc,
@@ -246,6 +259,16 @@ internal class SeekableZipReader {
         return result
     }
 
+    private fun ChannelRandomAccessReader.readSignedLongLittleEndian(): Long {
+        var result = 0L
+        repeat(LONG_SIZE) { index ->
+            val value = read()
+            if (value < 0) throw SeekableZipException("Unexpected end of APK Signing Block")
+            result = result or (value.toLong() shl (index * Byte.SIZE_BITS))
+        }
+        return result
+    }
+
     private fun checkedAdd(vararg values: Long): Long {
         var result = 0L
         values.forEach { value ->
@@ -321,6 +344,10 @@ internal class SeekableZipReader {
         const val SHORT_SIZE = 2
         const val INT_SIZE = 4
         const val LONG_SIZE = 8
+        const val APK_SIGNING_BLOCK_MIN_SIZE = 24L
+        const val APK_SIGNING_BLOCK_MIN_TOTAL_SIZE = LONG_SIZE + APK_SIGNING_BLOCK_MIN_SIZE
+        const val APK_SIGNING_BLOCK_FOOTER_SIZE = LONG_SIZE + 16L
+        val APK_SIGNING_BLOCK_MAGIC = "APK Sig Block 42".toByteArray(StandardCharsets.US_ASCII)
         val CP437: Charset = runCatching { Charset.forName("Cp437") }
             .getOrDefault(StandardCharsets.ISO_8859_1)
     }

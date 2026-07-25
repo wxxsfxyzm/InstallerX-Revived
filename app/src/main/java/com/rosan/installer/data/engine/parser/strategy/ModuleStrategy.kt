@@ -3,6 +3,7 @@
 package com.rosan.installer.data.engine.parser.strategy
 
 import android.graphics.drawable.Drawable
+import com.rosan.installer.data.engine.parser.ModuleSourceMaterializer
 import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
@@ -15,9 +16,10 @@ import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 import java.util.Properties
 
-class ModuleStrategy(
+class ModuleStrategy internal constructor(
     private val singleApkStrategy: SingleApkStrategy,
-    private val multiApkZipStrategy: MultiApkZipStrategy
+    private val multiApkZipStrategy: MultiApkZipStrategy,
+    private val moduleSourceMaterializer: ModuleSourceMaterializer
 ) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
@@ -55,7 +57,7 @@ class ModuleStrategy(
     }
 
     private fun parseModuleProp(
-        data: DataEntity,
+        data: DataEntity.FileEntity,
         zipFile: UnifiedZipFile,
         extra: AnalyseExtraEntity
     ): List<AppEntity> {
@@ -124,6 +126,10 @@ class ModuleStrategy(
                     }
                 }
 
+                val installData = moduleSourceMaterializer.materializeForInstall(
+                    data = data,
+                    cacheDirectory = extra.cacheDirectory
+                )
                 return listOf(
                     AppEntity.ModuleEntity(
                         id = id,
@@ -132,7 +138,7 @@ class ModuleStrategy(
                         versionCode = properties.getProperty("versionCode", "-1").toLongOrNull() ?: -1L,
                         author = properties.getProperty("author", ""),
                         description = properties.getProperty("description", ""),
-                        data = data,
+                        data = installData,
                         icon = iconDrawable,
                         sourceType = extra.dataType
                     )

@@ -3,9 +3,11 @@
 package com.rosan.installer.data.engine.parser
 
 import com.rosan.installer.domain.engine.exception.AnalyseException
+import com.rosan.installer.domain.engine.exception.SeekableZipException
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.RawDeflateInputStream
+import com.rosan.installer.domain.engine.model.source.SeekableZipEntry
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -75,6 +77,74 @@ class SeekableZipReaderTest {
 
         assertTrue(archive.hasCentralDirectory)
         assertEquals(listOf("base.apk"), archive.entries.map { it.name })
+    }
+
+    @Test
+    fun `stops at an APK Signing Block before the central directory`() {
+        val file = writeArchive(
+            entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
+            includeCentralDirectoryMarker = false
+        )
+        file.appendBytes(apkSigningBlock(totalSize = 4096))
+
+        val archive = reader.read(file)
+
+        assertTrue(archive.hasCentralDirectory)
+        assertEquals(listOf("AndroidManifest.xml"), archive.entries.map { it.name })
+    }
+
+    @Test
+    fun `rejects an APK Signing Block with mismatched sizes`() {
+        val file = writeArchive(
+            entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
+            includeCentralDirectoryMarker = false
+        )
+        file.appendBytes(apkSigningBlock(totalSize = 4096, trailingSize = 4087))
+
+        assertUnexpectedSignature(file)
+    }
+
+    @Test
+    fun `rejects an APK Signing Block with the wrong magic`() {
+        val file = writeArchive(
+            entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
+            includeCentralDirectoryMarker = false
+        )
+        file.appendBytes(
+            apkSigningBlock(
+                totalSize = 4096,
+                magic = "APK Sig Block XX".toByteArray(StandardCharsets.US_ASCII)
+            )
+        )
+
+        assertUnexpectedSignature(file)
+    }
+
+    @Test
+    fun `rejects an APK Signing Block whose declared size exceeds the file`() {
+        val file = writeArchive(
+            entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
+            includeCentralDirectoryMarker = false
+        )
+        file.appendBytes(apkSigningBlock(totalSize = 32, leadingSize = Long.MAX_VALUE))
+
+        assertUnexpectedSignature(file)
+    }
+
+    @Test
+    fun `rejects an APK Signing Block not followed by a central directory`() {
+        val file = writeArchive(
+            entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
+            includeCentralDirectoryMarker = false
+        )
+        file.appendBytes(
+            apkSigningBlock(
+                totalSize = 4096,
+                nextSignature = END_OF_CENTRAL_DIRECTORY_SIGNATURE
+            )
+        )
+
+        assertUnexpectedSignature(file)
     }
 
     @Test
@@ -194,6 +264,30 @@ class SeekableZipReaderTest {
             crc = crc
         )
 
+    private fun assertUnexpectedSignature(file: File) {
+        val error = assertFailsWith<SeekableZipException> { reader.read(file) }
+
+        assertTrue(error.message.orEmpty().contains("Unexpected ZIP signature"))
+    }
+
+    private fun apkSigningBlock(
+        totalSize: Int,
+        leadingSize: Long = totalSize.toLong() - Long.SIZE_BYTES,
+        trailingSize: Long = totalSize.toLong() - Long.SIZE_BYTES,
+        magic: ByteArray = APK_SIGNING_BLOCK_MAGIC,
+        nextSignature: Long = CENTRAL_DIRECTORY_SIGNATURE
+    ): ByteArray {
+        require(totalSize >= APK_SIGNING_BLOCK_MIN_TOTAL_SIZE)
+        require(magic.size == APK_SIGNING_BLOCK_MAGIC.size)
+        return ByteArrayOutputStream().apply {
+            writeLongLittleEndian(leadingSize)
+            write(ByteArray(totalSize - Long.SIZE_BYTES * 2 - magic.size))
+            writeLongLittleEndian(trailingSize)
+            write(magic)
+            writeIntLittleEndian(nextSignature)
+        }.toByteArray()
+    }
+
     private fun writeArchive(
         entries: List<TestEntry>,
         includeCentralDirectoryMarker: Boolean
@@ -254,6 +348,10 @@ class SeekableZipReaderTest {
         repeat(Int.SIZE_BYTES) { index -> write((value ushr (index * Byte.SIZE_BITS)).toInt()) }
     }
 
+    private fun ByteArrayOutputStream.writeLongLittleEndian(value: Long) {
+        repeat(Long.SIZE_BYTES) { index -> write((value ushr (index * Byte.SIZE_BITS)).toInt()) }
+    }
+
     private fun ByteArray.rawDeflate(): ByteArray {
         val output = ByteArrayOutputStream()
         val deflater = Deflater(Deflater.DEFAULT_COMPRESSION, true)
@@ -282,8 +380,11 @@ class SeekableZipReaderTest {
     private companion object {
         const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034B50L
         const val CENTRAL_DIRECTORY_SIGNATURE = 0x02014B50L
+        const val END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054B50L
         const val UTF8_FLAG = 1 shl 11
         const val DATA_DESCRIPTOR_FLAG = 1 shl 3
         const val XZ_METHOD = 95
+        const val APK_SIGNING_BLOCK_MIN_TOTAL_SIZE = 32
+        val APK_SIGNING_BLOCK_MAGIC = "APK Sig Block 42".toByteArray(StandardCharsets.US_ASCII)
     }
 }

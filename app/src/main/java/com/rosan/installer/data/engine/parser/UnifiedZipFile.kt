@@ -4,6 +4,8 @@ package com.rosan.installer.data.engine.parser
 
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.source.SeekableZipArchive
+import com.rosan.installer.domain.engine.model.source.SeekableZipEntry
 import com.rosan.installer.domain.engine.model.source.requireSupportedZipCompressionMethod
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
@@ -149,9 +151,11 @@ class UnifiedZipFile internal constructor(
 }
 
 /**
- * Opens Android package ZIPs through Commons Compress and verifies that its central-directory
- * view agrees with local file headers. A missing or inconsistent central view falls back to the
- * local-header backend when that backend can safely locate entry payloads.
+ * Opens Android package ZIPs through Commons Compress.
+ *
+ * Local-file-header traversal is only a recovery path for archives whose central directory is
+ * missing or cannot be opened. Valid central-directory archives do not pay the cost of a second
+ * full metadata scan.
  */
 class UnifiedZipFileProvider internal constructor(
     private val commonsZipFileProvider: CommonsZipFileProvider,
@@ -172,57 +176,29 @@ class UnifiedZipFileProvider internal constructor(
         allowLocalHeaderFallback: Boolean = true
     ): UnifiedZipFile {
         val commonsResult = runCatching { openCommonsView(file) }
-        if (!allowLocalHeaderFallback) {
-            return commonsResult.getOrThrow().toUnifiedZipFile(file, commonsZipFileProvider)
+        commonsResult.getOrNull()?.let { commonsView ->
+            Timber.d(
+                "Unified ZIP selected central-directory backend: path=${file.path}, " +
+                        "entries=${commonsView.entries.size}"
+            )
+            return commonsView.toUnifiedZipFile(file, commonsZipFileProvider)
         }
+
+        if (!allowLocalHeaderFallback) throw commonsResult.exceptionOrNull()!!
 
         val localResult = runCatching { seekableZipReader.read(file) }
-        val commonsView = commonsResult.getOrNull()
         val localView = localResult.getOrNull()
-
-        return when {
-            commonsView == null && localView == null -> {
-                val error = requireNotNull(commonsResult.exceptionOrNull())
-                localResult.exceptionOrNull()?.let(error::addSuppressed)
-                throw error
-            }
-
-            commonsView == null -> {
-                Timber.w(
-                    commonsResult.exceptionOrNull(),
-                    "Unified ZIP selected local-header fallback because the central directory " +
-                            "could not be opened: ${file.path}"
-                )
-                requireNotNull(localView).toUnifiedZipFile(file, commonsZipFileProvider)
-            }
-
-            localView == null -> {
-                Timber.d(
-                    localResult.exceptionOrNull(),
-                    "Unified ZIP local-header comparison unavailable; using central directory: ${file.path}"
-                )
-                commonsView.toUnifiedZipFile(file, commonsZipFileProvider)
-            }
-
-            viewsMatch(commonsView.entries, localView.entries) -> {
-                Timber.d(
-                    "Unified ZIP selected central-directory backend: path=${file.path}, " +
-                            "entries=${commonsView.entries.size}"
-                )
-                commonsView.toUnifiedZipFile(file, commonsZipFileProvider, localView.entries)
-            }
-
-            else -> {
-                Timber.w(
-                    "Unified ZIP selected local-header fallback because metadata views differ: " +
-                            "path=${file.path}, centralEntries=${commonsView.entries.size}, " +
-                            "localEntries=${localView.entries.size}, " +
-                            "centralDirectoryPresent=${localView.hasCentralDirectory}"
-                )
-                commonsView.zipFile.close()
-                localView.toUnifiedZipFile(file, commonsZipFileProvider)
-            }
+        if (localView == null) {
+            val error = commonsResult.exceptionOrNull()!!
+            localResult.exceptionOrNull()?.let(error::addSuppressed)
+            throw error
         }
+
+        Timber.d(
+            "Unified ZIP selected local-header fallback: path=${file.path}, " +
+                    "reason=${commonsResult.exceptionOrNull()?.message ?: "central directory unavailable"}"
+        )
+        return localView.toUnifiedZipFile(file, commonsZipFileProvider)
     }
 
     private fun openCommonsView(file: DataEntity.FileEntity): CommonsView {
@@ -237,17 +213,10 @@ class UnifiedZipFileProvider internal constructor(
 
     private fun CommonsView.toUnifiedZipFile(
         file: DataEntity.FileEntity,
-        provider: CommonsZipFileProvider,
-        localEntries: List<SeekableZipEntry>? = null
+        provider: CommonsZipFileProvider
     ): UnifiedZipFile = try {
-        val localEntriesByOffset = localEntries.orEmpty().associateBy { it.localHeaderOffset }
         val unifiedEntries = entries.map { entry ->
             requireSupportedZipCompressionMethod(entry.method, entry.name)
-            val storedDataRange = localEntriesByOffset[entry.localHeaderOffset]
-                ?.takeIf { localEntry ->
-                    localEntry.toMetadata() == entry.toMetadata()
-                }
-                ?.storedDataRange()
             UnifiedZipEntry(
                 name = entry.name,
                 isDirectory = entry.isDirectory,
@@ -255,7 +224,7 @@ class UnifiedZipFileProvider internal constructor(
                 compressedSize = entry.compressedSize,
                 crc = entry.crc,
                 compressionMethod = entry.method,
-                storedDataRange = storedDataRange,
+                storedDataRange = null,
                 source = UnifiedZipEntrySource.Commons(entry)
             )
         }
@@ -297,44 +266,6 @@ class UnifiedZipFileProvider internal constructor(
         )
     }
 
-    private fun viewsMatch(
-        commonsEntries: List<ZipArchiveEntry>,
-        localEntries: List<SeekableZipEntry>
-    ): Boolean {
-        if (commonsEntries.size != localEntries.size) return false
-
-        val commonsMetadata = commonsEntries.map { it.toMetadata() }.sortedWith(metadataComparator)
-        val localMetadata = localEntries.map { it.toMetadata() }.sortedWith(metadataComparator)
-        if (commonsMetadata != localMetadata) return false
-
-        if (commonsEntries.any { it.localHeaderOffset < 0 }) return true
-        val commonsPhysicalOrder = commonsEntries
-            .sortedBy { it.localHeaderOffset }
-            .map { it.localHeaderOffset to it.toMetadata() }
-        val localPhysicalOrder = localEntries
-            .sortedBy { it.localHeaderOffset }
-            .map { it.localHeaderOffset to it.toMetadata() }
-        return commonsPhysicalOrder == localPhysicalOrder
-    }
-
-    private fun ZipArchiveEntry.toMetadata() = EntryMetadata(
-        name = name,
-        isDirectory = isDirectory,
-        size = size,
-        compressedSize = compressedSize,
-        crc = crc,
-        compressionMethod = method
-    )
-
-    private fun SeekableZipEntry.toMetadata() = EntryMetadata(
-        name = name,
-        isDirectory = isDirectory,
-        size = uncompressedSize,
-        compressedSize = compressedSize,
-        crc = crc,
-        compressionMethod = compressionMethod
-    )
-
     private fun SeekableZipEntry.storedDataRange(): StoredDataRange? =
         if (compressionMethod == ZipEntry.STORED && compressedSize == uncompressedSize) {
             StoredDataRange(dataOffset, compressedSize)
@@ -346,24 +277,4 @@ class UnifiedZipFileProvider internal constructor(
         val zipFile: ZipFile,
         val entries: List<ZipArchiveEntry>
     )
-
-    private data class EntryMetadata(
-        val name: String,
-        val isDirectory: Boolean,
-        val size: Long,
-        val compressedSize: Long,
-        val crc: Long,
-        val compressionMethod: Int
-    )
-
-    private companion object {
-        val metadataComparator = compareBy<EntryMetadata>(
-            EntryMetadata::name,
-            EntryMetadata::isDirectory,
-            EntryMetadata::size,
-            EntryMetadata::compressedSize,
-            EntryMetadata::crc,
-            EntryMetadata::compressionMethod
-        )
-    }
 }

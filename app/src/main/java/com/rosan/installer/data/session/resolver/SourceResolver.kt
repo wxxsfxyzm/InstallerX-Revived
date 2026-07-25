@@ -231,6 +231,9 @@ class SourceResolver(
                     channelFactory = { providerAsset.openChannel(range) },
                     descriptorFactory = providerAsset::duplicateDescriptor
                 ).apply {
+                    // Keep the provider-derived display path as source identity. It may represent a
+                    // virtual provider path rather than a real file, so path-only consumers must
+                    // validate it or materialize the descriptor before use.
                     source = DataEntity.FileEntity(displayPath)
                 }
                 closeables += providerAsset

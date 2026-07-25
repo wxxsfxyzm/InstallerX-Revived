@@ -5,19 +5,30 @@ package com.rosan.installer.data.engine.executor
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
-import com.rosan.installer.domain.engine.model.install.sourcePath
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import java.io.File
 
 object ModuleInstallerUtils {
     /**
-     * Resolves the module path or throws an exception if not found.
+     * Resolves the local path passed directly to the selected root implementation.
+     *
+     * Magisk, KernelSU, and APatch accept a local absolute file path rather than a content URI or
+     * retained file descriptor. Descriptor-backed modules are materialized before this point, so
+     * installation must use the current backing file rather than the original source identity.
      */
-    fun getModulePathOrThrow(module: AppEntity.ModuleEntity): String =
-        module.data.sourcePath()
+    fun getModulePathOrThrow(module: AppEntity.ModuleEntity): String {
+        val data = module.data as? DataEntity.FileEntity
+        val localFile = data
+            ?.takeUnless { it is DataEntity.FileDescriptorEntity }
+            ?.let { File(it.path) }
+            ?.takeIf { it.isAbsolute && it.isFile }
+        return localFile?.absolutePath
             ?: throw ModuleInstallException(
                 errorType = ModuleInstallErrorType.GENERIC_FAILED,
-                message = "Could not resolve module file path for ${module.name}"
+                message = "Could not resolve a local module file for ${module.name}"
             )
+    }
 
     /**
      * Returns the raw command arguments for installing a module.

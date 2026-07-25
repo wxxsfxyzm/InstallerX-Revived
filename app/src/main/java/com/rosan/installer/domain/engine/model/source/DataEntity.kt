@@ -90,6 +90,9 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 },
                 descriptorFactory = descriptorFactory
             ).apply {
+                // A ZIP entry slice still originates from the same top-level source. Do not replace
+                // it with the parent descriptor: grouping and source cleanup intentionally resolve
+                // the original source identity through this chain.
                 source = parent.source
             }
         }

@@ -40,9 +40,9 @@ class UnifiedZipFileProviderTest {
     }
 
     @Test
-    fun `uses local headers when a nested central directory hides outer entries`() {
-        val basePayload = validInnerApk("base")
-        val splitPayload = validInnerApk("split")
+    fun `uses local headers when the central directory is missing`() {
+        val basePayload = "base".toByteArray()
+        val splitPayload = "split".toByteArray()
         val file = writeLocalOnlyArchive(
             "broken.apks",
             listOf(

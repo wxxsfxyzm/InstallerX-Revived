@@ -5,6 +5,7 @@ package com.rosan.installer.di
 import com.rosan.installer.data.engine.parser.ApkParser
 import com.rosan.installer.data.engine.parser.CommonsZipFileProvider
 import com.rosan.installer.data.engine.parser.FileTypeDetector
+import com.rosan.installer.data.engine.parser.ModuleSourceMaterializer
 import com.rosan.installer.data.engine.parser.PackagePreprocessor
 import com.rosan.installer.data.engine.parser.SeekableZipReader
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
@@ -67,6 +68,7 @@ val engineModule = module {
     singleOf(::SeekableZipReader)
     singleOf(::UnifiedZipFileProvider)
     singleOf(::FileTypeDetector)
+    singleOf(::ModuleSourceMaterializer)
     // Strategies
     singleOf(::SingleApkStrategy)
     singleOf(::MultiApkZipStrategy)

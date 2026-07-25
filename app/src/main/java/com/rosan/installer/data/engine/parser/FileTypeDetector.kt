@@ -131,8 +131,8 @@ class FileTypeDetector(
                 throw e
             } catch (e: IOException) {
                 Timber.d(
-                    e,
-                    "Module central-directory precheck unavailable; trying Android package fallback: ${file.path}"
+                    "Module central-directory precheck unavailable; trying Android package fallback: " +
+                            "path=${file.path}, reason=${e.message ?: "central directory unavailable"}"
                 )
             }
         }
