@@ -15,7 +15,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-includeBuild("D:/code/miuix") {
+/*includeBuild("D:/code/miuix") {
     dependencySubstitution {
         substitute(module("top.yukonga.miuix.kmp:miuix-core-android")).using(project(":miuix-core"))
         substitute(module("top.yukonga.miuix.kmp:miuix-ui-android")).using(project(":miuix-ui"))
@@ -25,7 +25,7 @@ includeBuild("D:/code/miuix") {
         substitute(module("top.yukonga.miuix.kmp:miuix-icons-android")).using(project(":miuix-icons"))
         substitute(module("top.yukonga.miuix.kmp:miuix-navigation3-ui-android")).using(project(":miuix-nav"))
     }
-}
+}*/
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)

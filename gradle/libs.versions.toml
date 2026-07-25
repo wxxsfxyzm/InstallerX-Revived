@@ -28,7 +28,7 @@ aboutLibraries = "15.0.4"
 appiconloader = "1.5.0"
 androidx-annotation = "1.10.0"
 timber = "5.0.1"
-miuix = "0.9.3"
+miuix = "0.9.3-b76d23ce-SNAPSHOT"
 okhttp = "5.4.0"
 monetcompat = "0.4.1"
 materialKolor = "5.0.0"
@@ -134,7 +134,7 @@ miuix-shader = { group = "top.yukonga.miuix.kmp", name = "miuix-shader-android",
 miuix-blur = { group = "top.yukonga.miuix.kmp", name = "miuix-blur-android", version.ref = "miuix" }
 miuix-preference = { group = "top.yukonga.miuix.kmp", name = "miuix-preference-android", version.ref = "miuix" }
 miuix-icons = { group = "top.yukonga.miuix.kmp", name = "miuix-icons-android", version.ref = "miuix" }
-miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-navigation3-ui-android", version.ref = "miuix" }
+miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-nav-android", version.ref = "miuix" }
 
 # okhttp
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }
