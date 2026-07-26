@@ -2,9 +2,6 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.util
 
-import java.io.File
-import java.io.FileInputStream
-
 /**
  * Checks if the given byte array starts with a valid ZIP magic number.
  * Requires an array of at least 4 bytes.
@@ -32,27 +29,4 @@ fun ByteArray.isZipMagicNumber(): Boolean {
     val isSpannedZip = (b2 == 0x07 && b3 == 0x08)
 
     return isStandardZip || isEmptyZip || isSpannedZip
-}
-
-/**
- * Checks if the local file has a valid ZIP magic number.
- *
- * @receiver File to check.
- * @return true if the file starts with a valid ZIP signature, false otherwise.
- */
-fun File.isZipArchive(): Boolean {
-    if (!this.exists() || !this.isFile || this.length() < 4) return false
-
-    return try {
-        FileInputStream(this).use { fis ->
-            val buffer = ByteArray(4)
-            if (fis.read(buffer) == 4) {
-                buffer.isZipMagicNumber()
-            } else {
-                false
-            }
-        }
-    } catch (_: Exception) {
-        false
-    }
 }
