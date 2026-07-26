@@ -71,6 +71,7 @@ class AppSettingsRepositoryImpl(
             sdkCompareInMultiLine = prefs[AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE] ?: false,
             showOPPOSpecial = prefs[AppDataStore.DIALOG_SHOW_OPPO_SPECIAL] ?: false,
             checkAppSignature = prefs[AppDataStore.CHECK_APP_SIGNATURE] ?: true,
+            checkSplitPackageSignatures = prefs[AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES] ?: false,
             showSignatureInfoOnMatch = prefs[AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH] ?: false,
             showSignatureDetails = prefs[AppDataStore.SHOW_SIGNATURE_DETAILS] ?: false,
             installerRequireBiometricAuth = BiometricAuthMode.fromValueOrDefault(
@@ -272,6 +273,7 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.DialogDisableNotificationOnDismiss -> AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS
             BooleanSetting.DialogShowOppoSpecial -> AppDataStore.DIALOG_SHOW_OPPO_SPECIAL
             BooleanSetting.CheckAppSignature -> AppDataStore.CHECK_APP_SIGNATURE
+            BooleanSetting.CheckSplitPackageSignatures -> AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES
             BooleanSetting.ShowSignatureInfoOnMatch -> AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH
             BooleanSetting.ShowSignatureDetails -> AppDataStore.SHOW_SIGNATURE_DETAILS
             BooleanSetting.DialogAutoSilentInstall -> AppDataStore.DIALOG_AUTO_SILENT_INSTALL

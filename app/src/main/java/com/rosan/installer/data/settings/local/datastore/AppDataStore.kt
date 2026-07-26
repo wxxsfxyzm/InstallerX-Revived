@@ -133,6 +133,8 @@ class AppDataStore(
             register(booleanPreferencesKey("show_oppo_special"), PreferenceValueType.BOOLEAN)
         val CHECK_APP_SIGNATURE =
             register(booleanPreferencesKey("check_app_signature"), PreferenceValueType.BOOLEAN)
+        val CHECK_SPLIT_PACKAGE_SIGNATURES =
+            register(booleanPreferencesKey("check_split_package_signatures"), PreferenceValueType.BOOLEAN)
         val SHOW_SIGNATURE_INFO_ON_MATCH =
             register(booleanPreferencesKey("show_signature_info_on_match"), PreferenceValueType.BOOLEAN)
         val SHOW_SIGNATURE_DETAILS =

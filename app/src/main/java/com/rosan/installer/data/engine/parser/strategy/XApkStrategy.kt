@@ -44,6 +44,8 @@ class XApkStrategy(
     ): List<AppEntity> {
         val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
+        val checkSignatures = extra.shouldCheckAppSignatures()
+        val baseExtra = if (checkSignatures) extra else extra.copy(checkAppSignature = false)
 
         // 1. Parse Manifest
         val manifestEntry = archive.getEntry("manifest.json") ?: return emptyList()
@@ -86,7 +88,7 @@ class XApkStrategy(
                             type = metadata.type,
                             filterType = metadata.filterType,
                             configValue = metadata.configValue,
-                            signatureInfo = if (extra.checkAppSignature) {
+                            signatureInfo = if (checkSignatures) {
                                 pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                             } else {
                                 null
@@ -100,7 +102,7 @@ class XApkStrategy(
 
                         // Fallback: If label is missing from JSON, parse the Base APK fully to extract it
                         if (resolvedLabel.isNullOrBlank()) {
-                            val parsedEntities = apkParser.parseArchiveEntryFull(archive, entry, data, extra)
+                            val parsedEntities = apkParser.parseArchiveEntryFull(archive, entry, data, baseExtra)
                             val parsedBase = parsedEntities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
 
                             if (parsedBase != null) {
@@ -122,7 +124,7 @@ class XApkStrategy(
                             }
                         }
 
-                        if (signatureInfo == null && extra.checkAppSignature) {
+                        if (signatureInfo == null && checkSignatures) {
                             signatureInfo = pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                         }
 

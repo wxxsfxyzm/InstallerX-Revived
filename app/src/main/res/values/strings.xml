@@ -175,6 +175,8 @@
     <string name="installer_settings_signature_check">Signature checks</string>
     <string name="config_check_app_signature">Check app signatures</string>
     <string name="config_check_app_signature_desc">Analyze APK signatures before installation and compare them with installed apps</string>
+    <string name="config_check_split_package_signatures">Analyze split package signatures</string>
+    <string name="config_check_split_package_signatures_desc">Analyze APK signatures in APKS, APKM, and XAPK packages. This can significantly increase analysis time</string>
     <string name="config_show_signature_info_on_match">Show info for normal signature states</string>
     <string name="config_show_signature_info_on_match_desc">Show signature notices for matching signatures and new installs</string>
     <string name="config_show_signature_details">Show signature details</string>

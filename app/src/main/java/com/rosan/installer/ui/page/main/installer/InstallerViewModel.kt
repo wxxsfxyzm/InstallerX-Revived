@@ -655,13 +655,15 @@ class InstallerViewModel(
 
                 result.copy(
                     appEntities = clearedEntities,
-                    signatureMatchStatus = clearedEntities.analyzePackageSignatureMatch(
-                        installedInfo = result.installedAppInfo,
-                        hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
-                    ),
-                    signatureAnalysis = clearedEntities.analyzePackageSignatureSelection(
-                        result.installedAppInfo
-                    )
+                    signatureMatchStatus = if (result.signatureCheckPerformed) {
+                        clearedEntities.analyzePackageSignatureMatch(
+                            installedInfo = result.installedAppInfo,
+                            hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+                        )
+                    } else result.signatureMatchStatus,
+                    signatureAnalysis = if (result.signatureCheckPerformed) {
+                        clearedEntities.analyzePackageSignatureSelection(result.installedAppInfo)
+                    } else result.signatureAnalysis
                 )
             }
             // Sync the updated list back to the underlying session
@@ -744,13 +746,15 @@ class InstallerViewModel(
                 updatedEntities.replaceAll { it.copy(selected = false) }
             }
 
-            val newSignatureAnalysis = updatedEntities.analyzePackageSignatureSelection(
-                packageToUpdate.installedAppInfo
-            )
-            val newSignatureMatchStatus = updatedEntities.analyzePackageSignatureMatch(
-                installedInfo = packageToUpdate.installedAppInfo,
-                hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
-            )
+            val newSignatureAnalysis = if (packageToUpdate.signatureCheckPerformed) {
+                updatedEntities.analyzePackageSignatureSelection(packageToUpdate.installedAppInfo)
+            } else packageToUpdate.signatureAnalysis
+            val newSignatureMatchStatus = if (packageToUpdate.signatureCheckPerformed) {
+                updatedEntities.analyzePackageSignatureMatch(
+                    installedInfo = packageToUpdate.installedAppInfo,
+                    hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+                )
+            } else packageToUpdate.signatureMatchStatus
 
             val newPackageAnalysisResult = packageToUpdate.copy(
                 appEntities = updatedEntities,

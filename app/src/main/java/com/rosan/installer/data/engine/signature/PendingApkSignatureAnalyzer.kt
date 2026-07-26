@@ -28,14 +28,28 @@ class PendingApkSignatureAnalyzer(
      * apksig is the source of truth for pending APK signer certificates.
      */
     fun analyze(apkPath: String): AppSignatureInfo {
-        return analyze(File(apkPath), apkPath)
+        val startedAt = System.nanoTime()
+        return analyze(File(apkPath), apkPath).also {
+            Timber.d("Pending APK signature analysis finished: route=file, elapsedMs=${startedAt.elapsedMillis()}, source=$apkPath")
+        }
     }
 
     fun analyze(data: DataEntity, cacheDirectory: String): AppSignatureInfo? {
+        val startedAt = System.nanoTime()
+        val route = when (data) {
+            is DataEntity.FileDescriptorEntity -> "descriptor"
+            is DataEntity.FileEntity -> "file"
+            else -> "materialized-stream"
+        }
         return when (data) {
             is DataEntity.FileDescriptorEntity -> analyze(data)
             is DataEntity.FileEntity -> analyze(File(data.path), data.path)
             else -> analyzeStream(data, cacheDirectory)
+        }.also {
+            Timber.d(
+                "Pending APK signature analysis finished: route=$route, " +
+                        "elapsedMs=${startedAt.elapsedMillis()}, source=$data"
+            )
         }
     }
 
@@ -88,10 +102,23 @@ class PendingApkSignatureAnalyzer(
         return try {
             val input = data.getInputStream()
                 ?: return failedSignatureInfo("Unable to open APK input stream")
+            val materializeStartedAt = System.nanoTime()
             input.use { source ->
-                tempFile.outputStream().use { output -> source.copyTo(output) }
+                tempFile.outputStream().use { output ->
+                    source.copyTo(output, SIGNATURE_COPY_BUFFER_SIZE)
+                }
             }
-            analyze(tempFile, data.toString())
+            Timber.d(
+                "Materialized APK for signature analysis: bytes=${tempFile.length()}, " +
+                        "elapsedMs=${materializeStartedAt.elapsedMillis()}, source=$data"
+            )
+            val verificationStartedAt = System.nanoTime()
+            analyze(tempFile, data.toString()).also {
+                Timber.d(
+                    "Verified materialized APK signature: elapsedMs=${verificationStartedAt.elapsedMillis()}, " +
+                            "source=$data"
+                )
+            }
         } catch (e: AnalyseException) {
             throw e
         } catch (e: Exception) {
@@ -134,6 +161,8 @@ class PendingApkSignatureAnalyzer(
             emptyList()
         }
     }
+
+    private fun Long.elapsedMillis(): Long = (System.nanoTime() - this) / 1_000_000L
 
     private class SeekableChannelDataSource(
         private val channel: SeekableByteChannel,
@@ -213,5 +242,9 @@ class PendingApkSignatureAnalyzer(
         private companion object {
             const val FEED_BUFFER_SIZE = 1024 * 1024
         }
+    }
+
+    private companion object {
+        const val SIGNATURE_COPY_BUFFER_SIZE = 1024 * 1024
     }
 }

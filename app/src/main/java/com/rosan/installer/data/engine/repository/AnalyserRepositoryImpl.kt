@@ -63,7 +63,10 @@ class AnalyserRepositoryImpl(
         }
 
         // Step 2: Group, Deduplicate
-        val processedGroups = packagePreprocessor.process(rawEntities, includeSignature = extra.checkAppSignature)
+        val includeSignature = rawEntities.any { entity ->
+            extra.shouldCheckAppSignatures(entity.sourceType)
+        }
+        val processedGroups = packagePreprocessor.process(rawEntities, includeSignature = includeSignature)
 
         Timber.d("AnalyserRepo: Step 2 Processed. Groups count: ${processedGroups.size}")
         processedGroups.forEach { group ->
@@ -115,7 +118,14 @@ class AnalyserRepositoryImpl(
                 ?.app as? AppEntity.BaseEntity
                 ?: baseEntity
 
-            val signatureStatus = if (extra.checkAppSignature) {
+            val signatureCheckPerformed = selectableEntities
+                .asSequence()
+                .filter { it.selected }
+                .map { it.app }
+                .filter { it is AppEntity.BaseEntity || it is AppEntity.SplitEntity }
+                .any { entity -> extra.shouldCheckAppSignatures(entity.sourceType) }
+
+            val signatureStatus = if (signatureCheckPerformed) {
                 packageSignatureAnalyzer.match(
                     selectedBaseEntity,
                     group.installedInfo
@@ -124,7 +134,7 @@ class AnalyserRepositoryImpl(
                 SignatureMatchStatus.NOT_INSTALLED
             }
 
-            val signatureAnalysis = if (extra.checkAppSignature) {
+            val signatureAnalysis = if (signatureCheckPerformed) {
                 packageSignatureAnalyzer.analyzeSelection(
                     selectableEntities,
                     group.installedInfo
@@ -144,6 +154,7 @@ class AnalyserRepositoryImpl(
                 packageName = group.packageName,
                 appEntities = selectableEntities,
                 installedAppInfo = group.installedInfo,
+                signatureCheckPerformed = signatureCheckPerformed,
                 signatureMatchStatus = signatureStatus,
                 signatureAnalysis = signatureAnalysis,
                 identityStatus = identityStatus,

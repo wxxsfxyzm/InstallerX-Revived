@@ -254,12 +254,13 @@ fun InstallPrepareContent(
     }
 
     // Execute domain logic and map to UI state within the remember block
+    val checkAppSignature = settings.checkAppSignature && currentPackage.signatureCheckPerformed
     val installStateResult = remember(
         currentPackage,
         entityToInstall,
         isSplitUpdateMode,
         containerType,
-        settings.checkAppSignature,
+        checkAppSignature,
         settings.showSignatureInfoOnMatch,
         settings.showSignatureDetails,
         settings.detectXposedModule,
@@ -274,7 +275,7 @@ fun InstallPrepareContent(
             containerType = containerType,
             systemArch = DeviceConfig.currentArchitecture,
             systemSdkInt = Build.VERSION.SDK_INT,
-            checkAppSignature = settings.checkAppSignature,
+            checkAppSignature = checkAppSignature,
             showSignatureInfoOnMatch = settings.showSignatureInfoOnMatch,
             showSignatureDetails = settings.showSignatureDetails,
             detectXposedModule = settings.detectXposedModule

@@ -230,6 +230,21 @@ fun MiuixInstallerGlobalSettingsPage(
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         MiuixSwitchWidget(
+                            title = stringResource(R.string.config_check_split_package_signatures),
+                            description = stringResource(R.string.config_check_split_package_signatures_desc),
+                            checked = uiState.checkSplitPackageSignatures,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeCheckSplitPackageSignatures(it))
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = uiState.checkAppSignature,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        MiuixSwitchWidget(
                             title = stringResource(R.string.config_show_signature_info_on_match),
                             description = stringResource(R.string.config_show_signature_info_on_match_desc),
                             checked = uiState.showSignatureInfoOnMatch,

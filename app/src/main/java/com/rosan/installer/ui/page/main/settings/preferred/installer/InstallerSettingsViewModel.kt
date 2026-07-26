@@ -36,6 +36,7 @@ class InstallerSettingsViewModel(
             installerRequireBiometricAuth = prefs.installerRequireBiometricAuth,
             showOPPOSpecial = prefs.showOPPOSpecial,
             checkAppSignature = prefs.checkAppSignature,
+            checkSplitPackageSignatures = prefs.checkSplitPackageSignatures,
             showSignatureInfoOnMatch = prefs.showSignatureInfoOnMatch,
             showSignatureDetails = prefs.showSignatureDetails,
             detectXposedModule = prefs.detectXposedModule,
@@ -72,6 +73,13 @@ class InstallerSettingsViewModel(
             is InstallerSettingsAction.ChangeCheckAppSignature -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.CheckAppSignature,
+                    action.check
+                )
+            }
+
+            is InstallerSettingsAction.ChangeCheckSplitPackageSignatures -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.CheckSplitPackageSignatures,
                     action.check
                 )
             }

@@ -33,6 +33,7 @@ class ApkmStrategy(
     ): List<AppEntity> {
         val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
+        val checkSignatures = extra.shouldCheckAppSignatures()
 
         // 1. Parse Info
         val infoEntry = archive.getEntry("info.json") ?: return emptyList()
@@ -76,14 +77,14 @@ class ApkmStrategy(
                                 type = metadata.type,
                                 filterType = metadata.filterType,
                                 configValue = metadata.configValue,
-                                signatureInfo = if (extra.checkAppSignature) {
+                                signatureInfo = if (checkSignatures) {
                                     pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                                 } else {
                                     null
                                 }
                             )
                         } else {
-                            val signatureInfo = if (extra.checkAppSignature) {
+                            val signatureInfo = if (checkSignatures) {
                                 pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                             } else {
                                 null

@@ -199,6 +199,7 @@ class ProcessInstallationUseCase(
         val selectedResults = results.filter { result -> result.appEntities.any { it.selected } }
 
         for (result in selectedResults) {
+            if (!result.signatureCheckPerformed) continue
             if (!shouldApplySignaturePolicy(result)) continue
 
             val signatureAnalysis = result.appEntities.analyzePackageSignatureSelection(

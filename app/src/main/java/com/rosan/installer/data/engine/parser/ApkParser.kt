@@ -43,6 +43,7 @@ class ApkParser(
         extra: AnalyseExtraEntity,
         zipFile: UnifiedZipFile? = null
     ): List<AppEntity> {
+        val parseStartedAt = System.nanoTime()
         val fileEntity = data as? DataEntity.FileEntity
             ?: throw IllegalArgumentException("ApkParser expects a FileEntity, got: ${data::class.simpleName}")
 
@@ -52,23 +53,39 @@ class ApkParser(
         // Some APKs are rejected by our ZIP backends but still load through the platform's more
         // lenient native asset parser. Parse without a ZIP view then; only architecture selection
         // and Xposed entry probing are lost.
+        val archiveOpenStartedAt = System.nanoTime()
         val archive = zipFile ?: runCatching { unifiedZipFileProvider.open(fileEntity) }
             .onFailure { error ->
                 Timber.w(error, "ApkParser: ZIP view unavailable, relying on platform asset loader: $sourceContext")
             }
             .getOrNull()
+        if (zipFile == null) {
+            Timber.d(
+                "ApkParser timing: ZIP view opened in ${archiveOpenStartedAt.elapsedMillis()} ms " +
+                        "for $sourceContext"
+            )
+        }
 
         return try {
+            val architectureStartedAt = System.nanoTime()
             val bestArch = archive?.let {
                 analyseAndSelectBestArchitecture(it, DeviceConfig.supportedArchitectures)
             }
-            Timber.d("ApkParser: Selected Arch for $sourceContext is $bestArch")
+            Timber.d(
+                "ApkParser: Selected Arch for $sourceContext is $bestArch " +
+                        "in ${architectureStartedAt.elapsedMillis()} ms"
+            )
 
             useResources { resources ->
                 try {
+                    val resourcesStartedAt = System.nanoTime()
                     val apkResources = loadApkResources(resources, fileEntity)
-                    Timber.d("ApkParser: Resources loaded successfully for $sourceContext")
+                    Timber.d(
+                        "ApkParser: Resources loaded successfully for $sourceContext " +
+                                "in ${resourcesStartedAt.elapsedMillis()} ms"
+                    )
 
+                    val entityStartedAt = System.nanoTime()
                     val entity = if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
                         loadAppEntity(
                             apkResources.resources,
@@ -92,7 +109,10 @@ class ApkParser(
                             bestArch ?: Architecture.UNKNOWN
                         )
                     }
-                    Timber.d("ApkParser: Entity parsed successfully -> Pkg: ${entity.packageName}")
+                    Timber.d(
+                        "ApkParser: Entity parsed successfully -> Pkg: ${entity.packageName}, " +
+                                "entityElapsedMs=${entityStartedAt.elapsedMillis()}"
+                    )
                     listOf(entity)
                 } catch (e: AnalyseException) {
                     throw e
@@ -103,6 +123,7 @@ class ApkParser(
             }
         } finally {
             if (zipFile == null) archive?.close()
+            Timber.d("ApkParser timing: full analysis finished in ${parseStartedAt.elapsedMillis()} ms for $sourceContext")
         }
     }
 
@@ -136,9 +157,16 @@ class ApkParser(
         val tempFile = File.createTempFile("anl_${UUID.randomUUID()}", ".apk", File(extra.cacheDirectory))
 
         return try {
+            val extractionStartedAt = System.nanoTime()
             zipFile.openEntry(entry).use { input ->
-                tempFile.outputStream().use { output -> input.copyTo(output) }
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output, ANALYSIS_COPY_BUFFER_SIZE)
+                }
             }
+            Timber.d(
+                "Extracted ZIP entry for full APK analysis: name=${entry.name}, " +
+                        "bytes=${tempFile.length()}, elapsedMs=${extractionStartedAt.elapsedMillis()}"
+            )
 
             val tempData = DataEntity.FileEntity(tempFile.absolutePath).apply {
                 source = entryData
@@ -545,6 +573,12 @@ class ApkParser(
     }
 
     private fun Exception.isRecoverableManifestParseException() = this is XmlPullParserException || this is IOException
+
+    private fun Long.elapsedMillis(): Long = (System.nanoTime() - this) / 1_000_000L
+
+    private companion object {
+        const val ANALYSIS_COPY_BUFFER_SIZE = 1024 * 1024
+    }
 
     private fun analyseAndSelectBestArchitecture(
         zipFile: UnifiedZipFile,

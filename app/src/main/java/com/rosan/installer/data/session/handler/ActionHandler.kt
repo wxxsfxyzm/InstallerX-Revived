@@ -343,10 +343,16 @@ class ActionHandler(
         val checkAppSignature = appSettingsRepo.getBoolean(BooleanSetting.CheckAppSignature, true).first()
         Timber.d("[id=$sessionId] App signature checks enabled: $checkAppSignature")
 
+        val checkSplitPackageSignatures = appSettingsRepo
+            .getBoolean(BooleanSetting.CheckSplitPackageSignatures, false)
+            .first()
+        Timber.d("[id=$sessionId] Split package signature checks enabled: $checkSplitPackageSignatures")
+
         val extra = AnalyseExtraEntity(
             cacheDirectory = cacheDirectory,
             isModuleFlashEnabled = isModuleEnabled,
-            checkAppSignature = checkAppSignature
+            checkAppSignature = checkAppSignature,
+            checkSplitPackageSignatures = checkSplitPackageSignatures
         )
 
         val results = analyzePackage(
