@@ -4,6 +4,7 @@ package com.rosan.installer.ui.page.main.installer
 
 import android.graphics.Bitmap
 import com.rosan.installer.domain.archive.model.UnarchiveStatus
+import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.model.InstallResult
 
@@ -23,7 +24,13 @@ sealed interface InstallerStage {
     data object InstallPrepare : InstallerStage
     data object InstallExtendedMenu : InstallerStage
     data object InstallExtendedSubMenu : InstallerStage
-    data class Installing(val progress: Float, val current: Int, val total: Int, val appLabel: String?) : InstallerStage
+    data class Installing(
+        val progress: Float,
+        val current: Int,
+        val total: Int,
+        val appLabel: String?,
+        val phase: InstallPhase
+    ) : InstallerStage
     data class InstallingModule(val output: List<String>, val isFinished: Boolean = false) : InstallerStage
     data object InstallWaitingUnknownSource : InstallerStage
     data object InstallSuccess : InstallerStage

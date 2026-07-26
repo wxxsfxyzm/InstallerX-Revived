@@ -348,7 +348,8 @@ class AppIconRepositoryImpl(
     }
 
     private fun AppEntity?.apkPath(): String? {
-        return ((this as? AppEntity.BaseEntity)?.data as? DataEntity.FileEntity)?.path
+        val data = (this as? AppEntity.BaseEntity)?.data as? DataEntity.FileEntity
+        return data?.takeUnless { it is DataEntity.FileDescriptorEntity }?.path
     }
 
     private fun getInstalledApplicationInfo(packageName: String): ApplicationInfo? {

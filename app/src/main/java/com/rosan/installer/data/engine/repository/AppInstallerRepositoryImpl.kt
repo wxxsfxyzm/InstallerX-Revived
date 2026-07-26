@@ -15,6 +15,8 @@ import com.rosan.installer.data.engine.policy.PlatformInstallPolicyChecker
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.engine.model.install.InstallPhase
+import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
 import com.rosan.installer.domain.engine.model.install.shouldAutoDeleteSource
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
@@ -53,7 +55,9 @@ class AppInstallerRepositoryImpl(
         respectPlatformInstallPolicy: Boolean,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
-        sharedUserIdExemption: List<String>
+        sharedUserIdExemption: List<String>,
+        onProgress: suspend (InstallWriteProgress) -> Unit,
+        onPhaseChanged: suspend (InstallPhase) -> Unit
     ) = executeWithRepo(config) { repo ->
         persistSelfUpdateSourceDeletion(config, entities, metadata)
 
@@ -93,7 +97,9 @@ class AppInstallerRepositoryImpl(
             effectiveRespectPlatformInstallPolicy,
             blacklist,
             sharedUserIdBlacklist,
-            sharedUserIdExemption
+            sharedUserIdExemption,
+            onProgress,
+            onPhaseChanged
         )
     }
 

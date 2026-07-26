@@ -3,24 +3,38 @@
 package com.rosan.installer.data.engine.parser
 
 import android.os.Build
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.util.isZipArchive
+import com.rosan.installer.util.isZipMagicNumber
 import dalvik.system.ZipPathValidator
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import timber.log.Timber
+import java.io.Closeable
 import java.io.File
-import java.util.zip.ZipEntry
-import java.util.zip.ZipException
-import java.util.zip.ZipFile
+import java.io.IOException
+
+internal class DetectedFileType(
+    val type: DataType,
+    val archive: UnifiedZipFile?
+) : Closeable {
+    override fun close() = archive?.close() ?: Unit
+}
 
 class FileTypeDetector(
-    private val json: Json
+    private val json: Json,
+    private val unifiedZipFileProvider: UnifiedZipFileProvider
 ) {
+
+    private companion object {
+        const val ENTRY_LOG_LIMIT = 20
+        const val ENTRY_NAME_LOG_LIMIT = 160
+        const val FILE_HEADER_LOG_BYTES = 8
+    }
 
     init {
         disableZipPathValidation()
@@ -38,46 +52,119 @@ class FileTypeDetector(
         }
     }
 
-    fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType {
-        val fileEntity = data as? DataEntity.FileEntity ?: return DataType.NONE
-        val isZip = File(fileEntity.path).isZipArchive()
+    fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType =
+        detectWithArchive(data, extra).use { it.type }
+
+    internal fun detectWithArchive(data: DataEntity, extra: AnalyseExtraEntity): DetectedFileType {
+        val fileEntity = data as? DataEntity.FileEntity
+        if (fileEntity == null) {
+            Timber.d(
+                "File type detection skipped: entity=${data::class.java.simpleName}, " +
+                        "source=${data.source}"
+            )
+            return DetectedFileType(DataType.NONE, null)
+        }
+
+        val file = File(fileEntity.path)
+        val descriptorBacked = fileEntity is DataEntity.FileDescriptorEntity
+        val sourcePath = (fileEntity.getSourceTop() as? DataEntity.FileEntity)?.path
+        val sourceExtension = sourcePath?.let { File(it).extension }.orEmpty()
+        val isApkSource = sourceExtension.equals("apk", ignoreCase = true) ||
+                file.extension.equals("apk", ignoreCase = true)
+        val isZip = fileEntity.hasZipMagic()
+
+        Timber.d(
+            "File type detection started: workingPath=${fileEntity.path}, sourcePath=$sourcePath, " +
+                    "workingExtension=${file.extension.ifBlank { "<none>" }}, " +
+                    "sourceExtension=${sourceExtension.ifBlank { "<none>" }}, " +
+                    "descriptorBacked=$descriptorBacked, " +
+                    "exists=${descriptorBacked || file.exists()}, isFile=${descriptorBacked || file.isFile}, " +
+                    "canRead=${descriptorBacked || file.canRead()}, size=${fileEntity.getSize()}, " +
+                    "header=${fileEntity.readHeaderForLog()}, zipMagic=$isZip, " +
+                    "moduleDetection=${extra.isModuleFlashEnabled}"
+        )
 
         return try {
-            ZipFile(fileEntity.path).use { zip ->
-                // Convert entries to List because we might iterate multiple times
-                val entries = zip.entries().asSequence().toList()
+            val detected = detectArchiveType(fileEntity, sourceExtension, extra)
+            val detectedType = detected.type
 
-                // Priority 1: Module Types (only if enabled)
-                if (extra.isModuleFlashEnabled) {
-                    detectModuleType(zip, entries)?.let { return it }
+            Timber.d(
+                "File type detection finished: workingPath=${fileEntity.path}, " +
+                        "sourcePath=$sourcePath, result=$detectedType"
+            )
+            if (sourceExtension.equals("apks", ignoreCase = true) && detectedType != DataType.APKS) {
+                Timber.w(
+                    "File type/extension mismatch: source extension is .apks but content detector " +
+                            "selected $detectedType. See archive diagnostics and selected-rule logs above."
+                )
+            }
+            detected
+        } catch (e: Exception) {
+            if (e is AnalyseException) throw e
+
+            when {
+                e is IOException && isZip && isApkSource -> {
+                    // Some malformed APK ZIPs are rejected by Commons/local-header parsing but
+                    // remain loadable by Android's native asset parser. This fallback is restricted
+                    // to a source explicitly named as one APK; package containers stay strict.
+                    Timber.w(e, "APK ZIP metadata is unusable; deferring to the platform parser: ${fileEntity.path}")
+                    DetectedFileType(DataType.APK, null)
                 }
 
-                // Priority 2: Standard App Types
-                detectStandardType(zip, entries)
-            }
-        } catch (e: Exception) {
-            if (e is ZipException) {
-                if (isZip) {
-                    // The file contains the ZIP magic number but failed to open.
-                    // This typically means the file is truncated or corrupted.
+                e is IOException && isZip -> {
+                    // The file has ZIP magic, but neither the central nor local-header view was usable.
                     Timber.e(e, "Archive is corrupted or truncated: ${fileEntity.path}")
                     throw AnalyseException(
                         errorType = AnalyseErrorType.CORRUPTED_ARCHIVE,
                         message = "Archive is corrupted or truncated",
                         cause = e
                     )
-                } else {
-                    // The file does not have the ZIP magic number, so it is not a ZIP file at all.
-                    handleNonZipFallback(fileEntity, e)
                 }
-            } else {
-                Timber.e(e, "Failed to detect file type for path: ${fileEntity.path}")
-                DataType.NONE
+
+                e is IOException -> {
+                    // The file does not have the ZIP magic number, so it is not a ZIP file at all.
+                    DetectedFileType(handleNonZipFallback(fileEntity, e), null)
+                }
+
+                else -> {
+                    Timber.e(e, "Failed to detect file type for path: ${fileEntity.path}")
+                    DetectedFileType(DataType.NONE, null)
+                }
             }
         }
     }
 
-    private fun detectModuleType(zipFile: ZipFile, entries: List<ZipEntry>): DataType? {
+    private fun detectArchiveType(
+        file: DataEntity.FileEntity,
+        sourceExtension: String,
+        extra: AnalyseExtraEntity
+    ): DetectedFileType {
+        val zipFile = unifiedZipFileProvider.open(file, allowLocalHeaderFallback = true)
+        return try {
+            if (extra.isModuleFlashEnabled &&
+                zipFile.backend == UnifiedZipBackend.COMMONS_CENTRAL_DIRECTORY
+            ) {
+                detectModuleType(zipFile)?.let { result ->
+                    if (shouldLogArchiveDiagnostics(sourceExtension, result, zipFile.entries)) {
+                        logArchiveDiagnostics(file.path, zipFile)
+                    }
+                    return DetectedFileType(result, zipFile)
+                }
+            }
+
+            val result = detectStandardType(zipFile)
+            if (shouldLogArchiveDiagnostics(sourceExtension, result, zipFile.entries)) {
+                logArchiveDiagnostics(file.path, zipFile)
+            }
+            DetectedFileType(result, zipFile)
+        } catch (error: Exception) {
+            zipFile.close()
+            throw error
+        }
+    }
+
+    private fun detectModuleType(zipFile: UnifiedZipFile): DataType? {
+        val entries = zipFile.entries
         // Core feature: presence of module.prop
         val hasModuleProp = entries.any {
             it.name == "module.prop" || it.name == "common/module.prop"
@@ -107,12 +194,13 @@ class FileTypeDetector(
         }
     }
 
-    private fun detectStandardType(zipFile: ZipFile, entries: List<ZipEntry>): DataType {
+    private fun detectStandardType(zipFile: UnifiedZipFile): DataType {
+        val entries = zipFile.entries
         // 1. XAPK (manifest.json)
         val manifestEntry = zipFile.getEntry("manifest.json")
         if (manifestEntry != null) {
             try {
-                val content = zipFile.getInputStream(manifestEntry).use { input ->
+                val content = zipFile.openEntry(manifestEntry).use { input ->
                     input.reader().readText()
                 }
 
@@ -132,6 +220,8 @@ class FileTypeDetector(
                 } else {
                     Timber.d("manifest.json found, but missing payload definitions (split_apks or expansions). Skipping XAPK detection.")
                 }
+            } catch (e: AnalyseException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Failed to parse manifest.json via kotlinx.serialization. Skipping XAPK detection.")
             }
@@ -141,7 +231,7 @@ class FileTypeDetector(
         val infoEntry = zipFile.getEntry("info.json")
         if (infoEntry != null) {
             try {
-                val content = zipFile.getInputStream(infoEntry).use { input ->
+                val content = zipFile.openEntry(infoEntry).use { input ->
                     input.reader().readText()
                 }
 
@@ -155,28 +245,37 @@ class FileTypeDetector(
                 } else {
                     Timber.d("Found info.json but missing APKM keys (pname/versioncode). Skipping APKM detection.")
                 }
+            } catch (e: AnalyseException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Failed to parse info.json via kotlinx.serialization. Skipping APKM detection.")
             }
         }
 
         // 3. Standard APK (AndroidManifest.xml)
-        if (zipFile.getEntry("AndroidManifest.xml") != null) return DataType.APK
+        val androidManifestEntry = zipFile.getEntry("AndroidManifest.xml")
+        if (androidManifestEntry != null) {
+            val tocEntry = zipFile.getEntry("toc.pb")
+            val baseApkEntries = entries.filter { it.isBaseApkMarker() }
+            val apkEntries = entries.filter { it.isApkFile() }
+            Timber.d(
+                "File type selected: APK (rule=root AndroidManifest.xml; " +
+                        "lower-priority APKS markers: toc.pb=${tocEntry != null}, " +
+                        "baseApk=${baseApkEntries.summarizeNamesForLog()}, " +
+                        "nestedApkCount=${apkEntries.size})."
+            )
+            return DataType.APK
+        }
 
         // 4. APKS (Split APKs)
         val hasTocPb = zipFile.getEntry("toc.pb") != null
         if (hasTocPb) return DataType.APKS
 
-        val hasBaseApk = entries.any {
-            val name = File(it.name).name
-            name.equals("base.apk", true) || name.startsWith("base-master")
-        }
+        val hasBaseApk = entries.any { it.isBaseApkMarker() }
         if (hasBaseApk) return DataType.APKS
 
         // 5. Multi-APK Zip
-        val hasApkFiles = entries.any {
-            !it.isDirectory && it.name.endsWith(".apk", ignoreCase = true)
-        }
+        val hasApkFiles = entries.any { it.isApkFile() }
         if (hasApkFiles) return DataType.MULTI_APK_ZIP
 
         return DataType.NONE
@@ -185,9 +284,101 @@ class FileTypeDetector(
     private fun handleNonZipFallback(fileEntity: DataEntity.FileEntity, e: Exception): DataType =
         if (fileEntity.path.endsWith(".apk", ignoreCase = true)) {
             // Fallback: assume APK if path ends with .apk and zip open failed
+            Timber.w(e, "File type selected: APK (rule=non-ZIP .apk path fallback): ${fileEntity.path}")
             DataType.APK
         } else {
             Timber.e(e, "File is not a valid ZIP archive: ${fileEntity.path}")
             DataType.NONE
         }
+
+    private fun shouldLogArchiveDiagnostics(
+        sourceExtension: String,
+        detectedType: DataType,
+        entries: List<UnifiedZipEntry>
+    ): Boolean = if (AppConfig.isDebug) true else sourceExtension.equals("apks", ignoreCase = true) ||
+            detectedType == DataType.APK && entries.any {
+        it.isApkFile() || it.isBaseApkCandidate() || File(it.name).name.equals("toc.pb", ignoreCase = true)
+    }
+
+    private fun logArchiveDiagnostics(
+        path: String,
+        zipFile: UnifiedZipFile
+    ) {
+        val entries = zipFile.entries
+        val files = entries.filterNot { it.isDirectory }
+        val androidManifestCandidates = entries.filter {
+            File(it.name).name.equals("AndroidManifest.xml", ignoreCase = true)
+        }
+        val tocCandidates = entries.filter {
+            File(it.name).name.equals("toc.pb", ignoreCase = true)
+        }
+        val baseApkCandidates = entries.filter { it.isBaseApkCandidate() }
+        val apkEntries = entries.filter { it.isApkFile() }
+
+        Timber.d(
+            "Archive diagnostics: backend=${zipFile.backend}, path=$path, " +
+                    "entries=${entries.size}, files=${files.size}, " +
+                    "directories=${entries.size - files.size}, nestedApkCount=${apkEntries.size}"
+        )
+        Timber.d(
+            "Archive diagnostics markers: rootAndroidManifest=${zipFile.getEntry("AndroidManifest.xml") != null}, " +
+                    "rootTocPb=${zipFile.getEntry("toc.pb") != null}, " +
+                    "AndroidManifest.xml(any depth/case)=${androidManifestCandidates.summarizeNamesForLog()}, " +
+                    "toc.pb(any depth/case)=${tocCandidates.summarizeNamesForLog()}, " +
+                    "baseApk(any depth/case)=${baseApkCandidates.summarizeNamesForLog()}"
+        )
+        Timber.d("Archive diagnostics nested APKs: ${apkEntries.summarizeNamesForLog()}")
+        Timber.d("Archive diagnostics entry sample: ${entries.summarizeNamesForLog()}")
+    }
+
+    private fun UnifiedZipEntry.isApkFile(): Boolean =
+        !isDirectory && name.endsWith(".apk", ignoreCase = true)
+
+    private fun UnifiedZipEntry.isBaseApkMarker(): Boolean {
+        val leafName = File(name).name
+        return leafName.equals("base.apk", ignoreCase = true) || leafName.startsWith("base-master")
+    }
+
+    private fun UnifiedZipEntry.isBaseApkCandidate(): Boolean {
+        val leafName = File(name).name
+        return leafName.equals("base.apk", ignoreCase = true) ||
+                leafName.startsWith("base-master", ignoreCase = true)
+    }
+
+    private fun List<UnifiedZipEntry>.summarizeNamesForLog(): String {
+        if (isEmpty()) return "<none>"
+
+        val shownEntries = take(ENTRY_LOG_LIMIT).joinToString { entry ->
+            if (entry.name.length <= ENTRY_NAME_LOG_LIMIT) {
+                entry.name
+            } else {
+                entry.name.take(ENTRY_NAME_LOG_LIMIT) + "..."
+            }
+        }
+        val omittedCount = size - ENTRY_LOG_LIMIT
+        return if (omittedCount > 0) "$shownEntries, ... (+$omittedCount more)" else shownEntries
+    }
+
+    private fun DataEntity.FileEntity.hasZipMagic(): Boolean = runCatching {
+        getInputStream().use { input ->
+            val buffer = ByteArray(4)
+            input.read(buffer) == buffer.size && buffer.isZipMagicNumber()
+        }
+    }.getOrDefault(false)
+
+    private fun DataEntity.FileEntity.readHeaderForLog(): String = runCatching {
+        getInputStream().use { input ->
+            val buffer = ByteArray(FILE_HEADER_LOG_BYTES)
+            val bytesRead = input.read(buffer)
+            if (bytesRead <= 0) {
+                "<empty>"
+            } else {
+                buffer.take(bytesRead).joinToString(separator = " ") { byte ->
+                    "%02X".format(byte.toInt() and 0xFF)
+                }
+            }
+        }
+    }.getOrElse { error ->
+        "<unreadable:${error::class.java.simpleName}:${error.message}>"
+    }
 }

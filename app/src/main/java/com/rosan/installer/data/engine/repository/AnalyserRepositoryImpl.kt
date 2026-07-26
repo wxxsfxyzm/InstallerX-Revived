@@ -3,9 +3,11 @@
 package com.rosan.installer.data.engine.repository
 
 import com.rosan.installer.data.engine.parser.FileTypeDetector
+import com.rosan.installer.data.engine.parser.CommonsZipException
 import com.rosan.installer.data.engine.parser.PackagePreprocessor
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
 import com.rosan.installer.data.engine.signature.PackageSignatureAnalyzer
+import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageSignatureAnalysis
@@ -161,14 +163,21 @@ class AnalyserRepositoryImpl(
     ): List<AppEntity> =
         try {
             // Detect type efficiently
-            val fileType = fileTypeDetector.detect(data, extra)
-            Timber.d("AnalyserRepo: FileType -> $fileType")
-            if (fileType == DataType.NONE) return emptyList()
-            // Delegate to the Unified Analyzer
-            unifiedContainerAnalyser.analyze(config, data, fileType, extra.copy(dataType = fileType))
+            fileTypeDetector.detectWithArchive(data, extra).use { detected ->
+                val fileType = detected.type
+                Timber.d("AnalyserRepo: FileType -> $fileType")
+                if (fileType == DataType.NONE) return emptyList()
+                unifiedContainerAnalyser.analyzeWithArchive(
+                    config = config,
+                    data = data,
+                    type = fileType,
+                    archive = detected.archive,
+                    extra = extra.copy(dataType = fileType)
+                )
+            }
         } catch (e: Exception) {
             Timber.e(e, "Fatal error analyzing source: ${data.source}")
-            if (e is ZipException) throw e
-            else emptyList()
+            if (e is AnalyseException || e is CommonsZipException || e is ZipException) throw e
+            emptyList()
         }
 }

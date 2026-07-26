@@ -4,3 +4,10 @@
 
 # Ignore warnings for optional Material Components dependency in MonetCompat
 -dontwarn com.google.android.material.color.DynamicColors
+
+# Commons Compress exposes optional XZ and Zstandard ZIP decoders. InstallerX deliberately
+# supports only STORE and DEFLATE entries, so these optional runtime backends are not bundled.
+-dontwarn com.github.luben.zstd.ZstdInputStream
+-dontwarn org.tukaani.xz.MemoryLimitException
+-dontwarn org.tukaani.xz.SingleXZInputStream
+-dontwarn org.tukaani.xz.XZInputStream

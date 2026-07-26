@@ -8,9 +8,16 @@ fun List<InstallEntity>.sourcePath(): Array<String> = mapNotNull {
     it.data.sourcePath()
 }.distinct().toTypedArray()
 
+/**
+ * Resolves the original source identity rather than the current analysis backing source.
+ *
+ * A provider-derived value may be a virtual path that is unsuitable for direct filesystem access.
+ * Consumers that require a real local path must validate or materialize their current data.
+ */
 fun DataEntity.sourcePath(): String? = when (val source = this.getSourceTop()) {
     is DataEntity.FileEntity -> source.path
     is DataEntity.ZipFileEntity -> source.parent.path
+    is DataEntity.SeekableZipEntryEntity -> source.parent.path
     is DataEntity.ZipInputStreamEntity -> source.parent.sourcePath()
     else -> null
 }

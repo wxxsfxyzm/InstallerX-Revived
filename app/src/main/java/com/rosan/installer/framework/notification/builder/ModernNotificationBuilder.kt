@@ -203,7 +203,8 @@ class ModernNotificationBuilder(
 
                 val total = progress.total.coerceAtLeast(1).toFloat()
                 val currentBase = (progress.current - 1).coerceAtLeast(0).toFloat()
-                val batchFraction = (currentBase + fakeItemProgress) / total
+                val itemProgress = progress.writeProgress ?: fakeItemProgress
+                val batchFraction = (currentBase + itemProgress) / total
                 progressStyle.setProgress((previousStagesWeight + (installStages[3].weight * batchFraction)).toInt())
             }
 

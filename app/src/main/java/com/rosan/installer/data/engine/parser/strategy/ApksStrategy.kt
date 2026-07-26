@@ -3,6 +3,7 @@
 package com.rosan.installer.data.engine.parser.strategy
 
 import com.rosan.installer.data.engine.parser.ApkParser
+import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
@@ -13,7 +14,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 import java.io.File
-import java.util.zip.ZipFile
 
 class ApksStrategy(
     private val apkParser: ApkParser,
@@ -22,22 +22,19 @@ class ApksStrategy(
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
-        zipFile: ZipFile?,
+        zipFile: UnifiedZipFile?,
         extra: AnalyseExtraEntity
     ): List<AppEntity> = coroutineScope {
-        requireNotNull(zipFile) { "APKS requires a valid ZipFile" }
+        require(data is DataEntity.FileEntity) { "APKS requires a FileEntity" }
+        val archive = requireNotNull(zipFile) { "APKS requires a unified ZIP file" }
 
         Timber.d("ApksStrategy: Starting analysis for source: ${data.source}")
-
-        val entries = zipFile.entries().asSequence().toList()
-        Timber.d("ApksStrategy: Zip file contains ${entries.size} entries.")
+        val entries = archive.entries
+        Timber.d("ApksStrategy: Container contains ${entries.size} entries.")
 
         // 1. Identify Base and Splits
         // Use 'File(entry.name).name' to handle nested directories (e.g., "splits/base-master.apk")
-        val baseEntry = entries.find { entry ->
-            val fileName = File(entry.name).name
-            fileName.equals("base.apk", true) || fileName.equals("base-master.apk", true)
-        }
+        val baseEntry = entries.find { entry -> entry.name.isBaseApkName() }
 
         if (baseEntry == null) {
             Timber.e("ApksStrategy: CRITICAL - Base APK not found. Checked for 'base.apk' or 'base-master.apk' in all directories.")
@@ -51,7 +48,7 @@ class ApksStrategy(
         // 2. Parse Base APK (Heavy operation - needs Icon/Label)
         val baseDeferred = async {
             Timber.d("ApksStrategy: Parsing base entry full details...")
-            apkParser.parseZipEntryFull(zipFile, baseEntry, data, extra)
+            apkParser.parseArchiveEntryFull(archive, baseEntry, data, extra)
         }
 
         // 3. Process Splits (Lightweight operation)
@@ -96,7 +93,7 @@ class ApksStrategy(
 
         val splits = splitEntities.map { (entry, name) ->
             val metadata = name.parseSplitMetadata()
-            val entryData = DataEntity.ZipFileEntity(entry.name, data as DataEntity.FileEntity)
+            val entryData = archive.toDataEntity(entry, data)
 
             AppEntity.SplitEntity(
                 packageName = finalBase.packageName,
@@ -119,5 +116,11 @@ class ApksStrategy(
 
         Timber.d("ApksStrategy: Analysis finished. Returning 1 base + ${splits.size} splits.")
         listOf(finalBase) + splits
+    }
+
+    private fun String.isBaseApkName(): Boolean {
+        val fileName = File(this).name
+        return fileName.equals("base.apk", ignoreCase = true) ||
+                fileName.equals("base-master.apk", ignoreCase = true)
     }
 }

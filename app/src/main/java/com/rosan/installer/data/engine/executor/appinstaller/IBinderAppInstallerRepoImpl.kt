@@ -32,6 +32,8 @@ import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.engine.model.install.InstallPhase
+import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
 import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.engine.model.install.shouldAutoDeleteSource
 import com.rosan.installer.domain.engine.model.install.sourcePath
@@ -167,8 +169,16 @@ abstract class IBinderAppInstallerRepoImpl(
         respectPlatformInstallPolicy: Boolean,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
-        sharedUserIdExemption: List<String>
+        sharedUserIdExemption: List<String>,
+        onProgress: suspend (InstallWriteProgress) -> Unit,
+        onPhaseChanged: suspend (InstallPhase) -> Unit
     ) {
+        onPhaseChanged(InstallPhase.WRITING)
+        val totalBytes = InstallProgressWriter.totalBytesOrNull(entities.map { it.data.getSize() })
+        val progressWriter = totalBytes?.let {
+            InstallProgressWriter(totalBytes = it, onProgress = onProgress)
+        }
+        progressWriter?.start()
         val result = runCatching {
             entities.groupBy { it.packageName }.forEach { (packageName, entities) ->
                 doInnerWork(
@@ -179,7 +189,9 @@ abstract class IBinderAppInstallerRepoImpl(
                     packageName,
                     blacklist,
                     sharedUserIdBlacklist,
-                    sharedUserIdExemption
+                    sharedUserIdExemption,
+                    progressWriter,
+                    onPhaseChanged
                 )
             }
         }
@@ -232,7 +244,9 @@ abstract class IBinderAppInstallerRepoImpl(
         packageName: String,
         managedBlacklistPackages: List<String>,
         sharedUserIdBlacklist: List<String>,
-        sharedUserIdExemption: List<String>
+        sharedUserIdExemption: List<String>,
+        progressWriter: InstallProgressWriter?,
+        onPhaseChanged: suspend (InstallPhase) -> Unit
     ) {
         if (!config.bypassBlacklistInstallSetByUser) {
             // Blacklisted package names
@@ -271,7 +285,8 @@ abstract class IBinderAppInstallerRepoImpl(
                 packageInstaller,
                 packageName
             )
-            installIts(entities, session)
+            installIts(entities, session, progressWriter)
+            onPhaseChanged(InstallPhase.INSTALLING)
             commit(session)
         } catch (e: Exception) {
             session?.abandon()
@@ -373,29 +388,77 @@ abstract class IBinderAppInstallerRepoImpl(
         return session
     }
 
-    private fun installIts(entities: List<InstallEntity>, session: Session) {
-        for (entity in entities) installIt(entity, session)
+    private suspend fun installIts(
+        entities: List<InstallEntity>,
+        session: Session,
+        progressWriter: InstallProgressWriter?
+    ) {
+        val sessionTotalBytes = progressWriter?.let {
+            InstallProgressWriter.totalBytes(entities.map { entity -> entity.data.getSize() })
+        }
+        var sessionCompletedBytes = 0L
+        var stagingProgressSupported =
+            sessionTotalBytes?.let { updateStagingProgress(session, 0f) } ?: false
+
+        for (entity in entities) {
+            installIt(entity, session, progressWriter) { entityBytes ->
+                val total = checkNotNull(sessionTotalBytes)
+                val sessionProgress =
+                    (sessionCompletedBytes + entityBytes).toDouble() / total.toDouble()
+                if (stagingProgressSupported) {
+                    stagingProgressSupported =
+                        updateStagingProgress(session, sessionProgress.toFloat())
+                }
+            }
+            val entitySize = entity.data.getSize()
+            if (entitySize > 0L) sessionCompletedBytes += entitySize
+        }
     }
 
-    private fun installIt(entity: InstallEntity, session: Session) {
+    private suspend fun installIt(
+        entity: InstallEntity,
+        session: Session,
+        progressWriter: InstallProgressWriter?,
+        onEntryProgress: (Long) -> Unit
+    ) {
         Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
-        val inputStream = entity.data.getInputStreamWhileNotEmpty()
-            ?: throw IllegalStateException("Unable to open install entity input stream: ${entity.data}")
         val sizeBytes = entity.data.getSize()
 
         if (sizeBytes == 0L || sizeBytes < AssetFileDescriptor.UNKNOWN_LENGTH) {
             throw IllegalStateException("Invalid data size: $sizeBytes.")
         }
-        session.openWrite(
-            entity.name,
-            0,
-            sizeBytes
-        ).use { outputStream ->
-            inputStream.copyTo(outputStream)
-            session.fsync(outputStream)
+
+        val inputStream = entity.data.getInputStreamWhileNotEmpty()
+            ?: throw IllegalStateException("Unable to open install entity input stream: ${entity.data}")
+        inputStream.use { input ->
+            session.openWrite(
+                entity.name,
+                0,
+                sizeBytes
+            ).use { outputStream ->
+                if (progressWriter != null) {
+                    progressWriter.copy(
+                        input = input,
+                        output = outputStream,
+                        expectedBytes = sizeBytes,
+                        onEntryProgress = onEntryProgress
+                    )
+                } else {
+                    copyInstallSource(input, outputStream)
+                }
+                session.fsync(outputStream)
+            }
         }
-        inputStream.close()
     }
+
+    private fun updateStagingProgress(session: Session, progress: Float): Boolean =
+        try {
+            session.setStagingProgress(progress.coerceIn(0f, 1f))
+            true
+        } catch (error: Exception) {
+            Timber.d("PackageInstaller staging progress is unavailable: ${error.message}")
+            false
+        }
 
     @SuppressLint("RequestInstallPackagesPolicy")
     private suspend fun commit(session: Session) {

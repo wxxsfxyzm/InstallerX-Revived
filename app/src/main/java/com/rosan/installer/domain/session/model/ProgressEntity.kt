@@ -2,6 +2,8 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.domain.session.model
 
+import com.rosan.installer.domain.engine.model.install.InstallPhase
+
 sealed interface ProgressEntity {
     data object Ready : ProgressEntity
     data object Error : ProgressEntity
@@ -22,7 +24,32 @@ sealed interface ProgressEntity {
     data class InstallAnalysedUnsupported(val reason: String) : ProgressEntity
     data object InstallAnalysedSuccess : ProgressEntity
 
-    data class Installing(val current: Int = 1, val total: Int = 1, val appLabel: String? = null) : ProgressEntity
+    /**
+     * @param writeProgress Fraction of the current app's selected APK bytes written to its
+     * PackageInstaller session, or null when byte progress is unavailable.
+     * @param phase Whether payloads are still being written or PackageInstaller is processing the
+     * staged session.
+     */
+    data class Installing(
+        val current: Int = 1,
+        val total: Int = 1,
+        val appLabel: String? = null,
+        val writeProgress: Float? = null,
+        val phase: InstallPhase = InstallPhase.WRITING
+    ) : ProgressEntity {
+        init {
+            require(writeProgress == null || writeProgress in 0f..1f) {
+                "writeProgress must be between zero and one"
+            }
+        }
+
+        fun overallProgress(): Float? {
+            val itemProgress = writeProgress ?: return null
+            val safeTotal = total.coerceAtLeast(1)
+            val completedItems = (current - 1).coerceIn(0, safeTotal)
+            return ((completedItems + itemProgress) / safeTotal).coerceIn(0f, 1f)
+        }
+    }
     data class InstallCompleted(val results: List<InstallResult>) : ProgressEntity
     data object InstallConfirming : ProgressEntity
     data object InstallWaitingUnknownSource : ProgressEntity

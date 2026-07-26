@@ -22,6 +22,7 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
@@ -745,7 +746,15 @@ class ActionHandler(
                 val total = details.totalProgress
                 val label = details.appLabel.toString()
 
-                session.progress.emit(ProgressEntity.Installing(current, total, label))
+                session.progress.emit(
+                    ProgressEntity.Installing(
+                        current = current,
+                        total = total,
+                        appLabel = label,
+                        writeProgress = 1f,
+                        phase = InstallPhase.INSTALLING
+                    )
+                )
             } else {
                 // DO NOT emit InstallFailed manually here!
                 // The system will abort the session and send an INSTALL_FAILED_ABORTED intent

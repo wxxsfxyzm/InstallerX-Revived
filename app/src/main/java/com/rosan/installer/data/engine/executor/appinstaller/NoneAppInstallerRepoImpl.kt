@@ -14,6 +14,8 @@ import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.engine.model.install.InstallPhase
+import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
 import com.rosan.installer.domain.engine.model.install.shouldAutoDeleteSource
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
@@ -44,9 +46,17 @@ class NoneAppInstallerRepoImpl(
         respectPlatformInstallPolicy: Boolean,
         blacklist: List<String>,
         sharedUserIdBlacklist: List<String>,
-        sharedUserIdExemption: List<String>
+        sharedUserIdExemption: List<String>,
+        onProgress: suspend (InstallWriteProgress) -> Unit,
+        onPhaseChanged: suspend (InstallPhase) -> Unit
     ) {
+        onPhaseChanged(InstallPhase.WRITING)
         val allowInstallWithoutUserAction = config.allowInstallWithoutUserAction
+        val totalBytes = InstallProgressWriter.totalBytesOrNull(entities.map { it.data.getSize() })
+        val progressWriter = totalBytes?.let {
+            InstallProgressWriter(totalBytes = it, onProgress = onProgress)
+        }
+        progressWriter?.start()
         val result = runCatching {
             if (!context.packageManager.canRequestPackageInstalls()) {
                 throw InstallException(
@@ -71,15 +81,41 @@ class NoneAppInstallerRepoImpl(
                 val sessionId = packageInstaller.createSession(params)
                 session = packageInstaller.openSession(sessionId)
 
+                var completedBytes = 0L
+                var stagingProgressSupported =
+                    totalBytes?.let { updateStagingProgress(session, 0f) } ?: false
                 for (entity in entities) {
-                    session.openWrite(entity.name, 0, -1).use { outputStream ->
+                    val entitySize = entity.data.getSize()
+                    session.openWrite(
+                        entity.name,
+                        0,
+                        entitySize.takeIf { it > 0L } ?: -1L
+                    ).use { outputStream ->
                         entity.data.getInputStreamWhileNotEmpty()?.use { inputStream ->
-                            inputStream.copyTo(outputStream)
+                            if (progressWriter != null) {
+                                val knownTotalBytes = checkNotNull(totalBytes)
+                                progressWriter.copy(
+                                    input = inputStream,
+                                    output = outputStream,
+                                    expectedBytes = entitySize
+                                ) { entityBytes ->
+                                    val sessionProgress =
+                                        (completedBytes + entityBytes).toDouble() / knownTotalBytes.toDouble()
+                                    if (stagingProgressSupported) {
+                                        stagingProgressSupported =
+                                            updateStagingProgress(session, sessionProgress.toFloat())
+                                    }
+                                }
+                            } else {
+                                copyInstallSource(inputStream, outputStream)
+                            }
                             session.fsync(outputStream)
                         } ?: throw IOException("Failed to open input stream for ${entity.name}")
                     }
+                    if (entitySize > 0L) completedBytes += entitySize
                 }
 
+                onPhaseChanged(InstallPhase.INSTALLING)
                 val receiver = LocalIntentReceiver(reflect)
                 session.commit(receiver.getIntentSender())
 
@@ -98,6 +134,17 @@ class NoneAppInstallerRepoImpl(
         result.onFailure {
             throw it
         }
+    }
+
+    private fun updateStagingProgress(
+        session: PackageInstaller.Session,
+        progress: Float
+    ): Boolean = try {
+        session.setStagingProgress(progress.coerceIn(0f, 1f))
+        true
+    } catch (error: Exception) {
+        Timber.d("PackageInstaller staging progress is unavailable: ${error.message}")
+        false
     }
 
     private fun doFinishWork(

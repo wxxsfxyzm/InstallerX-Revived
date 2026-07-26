@@ -32,3 +32,4 @@ keystore/
 *.iml
 .DS_Store
 /.agents
+/logs
