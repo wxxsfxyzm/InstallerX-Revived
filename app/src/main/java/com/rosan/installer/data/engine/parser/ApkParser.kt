@@ -34,7 +34,8 @@ import java.util.UUID
 class ApkParser(
     private val reflect: ReflectionProvider,
     private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer,
-    private val unifiedZipFileProvider: UnifiedZipFileProvider
+    private val unifiedZipFileProvider: UnifiedZipFileProvider,
+    private val xposedModuleParser: XposedModuleParser
 ) {
     @SuppressLint("DiscouragedPrivateApi")
     fun parseFull(
@@ -450,7 +451,7 @@ class ApkParser(
         }
 
         if (isPotentialXposed && zipFile != null) {
-            xposedInfo = XposedUtils.extract(zipFile, metaDataMap, appDescription)
+            xposedInfo = xposedModuleParser.extract(zipFile, metaDataMap, appDescription)
         }
 
         Timber.d("ApkParser: Manifest parsed. Package: $packageName, Split: $splitName, IsXposed: ${xposedInfo != null}")

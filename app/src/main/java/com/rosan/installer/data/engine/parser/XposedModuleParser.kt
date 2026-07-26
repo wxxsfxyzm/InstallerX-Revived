@@ -6,19 +6,7 @@ import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
 import java.util.Properties
 
-object XposedUtils {
-    // Defines the modern Xposed configuration file path in the APK archive
-    private const val MODULE_PROP_PATH = "META-INF/xposed/module.prop"
-
-    // Keys for modern module.prop file
-    private const val PROP_MIN_API = "minApiVersion"
-    private const val PROP_LEGACY_MIN_API = "xposedMinVersion"
-    private const val PROP_TARGET_API = "targetApiVersion"
-    private const val PROP_DESCRIPTION = "description"
-
-    // Keys for legacy AndroidManifest.xml meta-data
-    private const val META_MIN_VERSION = "xposedminversion"
-    private const val META_DESCRIPTION = "xposeddescription"
+class XposedModuleParser {
 
     /**
      * Extracts Xposed module information from an APK file.
@@ -94,5 +82,20 @@ object XposedUtils {
         }
 
         return null
+    }
+
+    private companion object {
+        // Defines the modern Xposed configuration file path in the APK archive
+        const val MODULE_PROP_PATH = "META-INF/xposed/module.prop"
+
+        // Keys for modern module.prop file
+        const val PROP_MIN_API = "minApiVersion"
+        const val PROP_LEGACY_MIN_API = "xposedMinVersion"
+        const val PROP_TARGET_API = "targetApiVersion"
+        const val PROP_DESCRIPTION = "description"
+
+        // Keys for legacy AndroidManifest.xml meta-data
+        const val META_MIN_VERSION = "xposedminversion"
+        const val META_DESCRIPTION = "xposeddescription"
     }
 }

@@ -10,6 +10,7 @@ import com.rosan.installer.data.engine.parser.PackagePreprocessor
 import com.rosan.installer.data.engine.parser.SeekableZipReader
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
 import com.rosan.installer.data.engine.parser.UnifiedZipFileProvider
+import com.rosan.installer.data.engine.parser.XposedModuleParser
 import com.rosan.installer.data.engine.provider.InstalledAppInfoProviderImpl
 import com.rosan.installer.data.engine.parser.strategy.ApkmStrategy
 import com.rosan.installer.data.engine.parser.strategy.ApksStrategy
@@ -63,6 +64,7 @@ val engineModule = module {
     singleOf(::PackageSignatureAnalyzer)
 
     // Parser
+    singleOf(::XposedModuleParser)
     singleOf(::ApkParser)
     // Parser Tools
     singleOf(::SeekableZipReader)
