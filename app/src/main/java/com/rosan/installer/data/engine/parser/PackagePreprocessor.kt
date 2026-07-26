@@ -5,6 +5,7 @@ package com.rosan.installer.data.engine.parser
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.source.ZipEntryMetadataSource
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
 import com.rosan.installer.domain.engine.model.install.sourcePath
@@ -106,6 +107,10 @@ class PackagePreprocessor(
     }
 
     private fun calculateFingerprint(entity: AppEntity.BaseEntity): String {
+        (entity.data as? ZipEntryMetadataSource)?.zipEntryMetadata
+            ?.takeIf { it.crc >= 0L && it.uncompressedSize >= 0L }
+            ?.let { return "${it.crc}|${it.uncompressedSize}" }
+
         return when (val data = entity.data) {
             is DataEntity.FileEntity -> {
                 // Full file hash (slower but accurate)

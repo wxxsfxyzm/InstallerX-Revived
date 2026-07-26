@@ -2,9 +2,11 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.domain.engine.model.source.ZipEntryMetadataSource
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -20,6 +22,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
@@ -152,7 +155,16 @@ class UnifiedZipFileProviderTest {
                 source
             )
             assertIs<DataEntity.FileDescriptorEntity>(storedEntity)
-            assertIs<DataEntity.ZipFileEntity>(compressedEntity)
+            assertEquals("base.apk", assertIs<DataEntity.FileDescriptorEntity>(storedEntity).archiveEntryName)
+            assertIs<DataEntity.SeekableZipEntryEntity>(compressedEntity)
+            assertEquals(
+                storedPayload.size.toLong(),
+                assertIs<ZipEntryMetadataSource>(storedEntity).zipEntryMetadata?.uncompressedSize
+            )
+            assertEquals(
+                compressedPayload.size.toLong(),
+                assertIs<ZipEntryMetadataSource>(compressedEntity).zipEntryMetadata?.uncompressedSize
+            )
         }
 
         assertContentEquals(storedPayload, storedEntity.getInputStream()!!.use { it.readBytes() })
@@ -231,12 +243,85 @@ class UnifiedZipFileProviderTest {
                         source
                     )
                     val descriptorData = assertIs<DataEntity.FileDescriptorEntity>(data, case.fileName)
+                    assertEquals(expectedEntry.name, descriptorData.archiveEntryName, case.fileName)
                     assertContentEquals(
                         expectedEntry.payload,
                         descriptorData.getInputStream().use { it.readBytes() },
                         "${case.fileName}!${expectedEntry.name}"
                     )
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `recovers outer entries hidden by a nested central directory`() {
+        val file = writeLocalOnlyArchive(
+            "nested.apks",
+            listOf(
+                TestEntry("base.apk", validInnerApk("base")),
+                TestEntry("split_config.en.apk", validInnerApk("split"))
+            )
+        )
+
+        provider.open(file).use { archive ->
+            assertEquals(UnifiedZipBackend.LOCAL_FILE_HEADERS, archive.backend)
+            assertEquals(listOf("base.apk", "split_config.en.apk"), archive.entries.map { it.name })
+        }
+
+        val detector = FileTypeDetector(Json.Default, provider)
+        assertEquals(
+            DataType.APKS,
+            detector.detect(
+                DataEntity.FileEntity(file.path),
+                AnalyseExtraEntity(
+                    cacheDirectory = tempDirectory.path,
+                    isModuleFlashEnabled = false,
+                    checkAppSignature = false
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `recovers outer entries when its central directory is truncated`() {
+        val file = writeLocalOnlyArchive(
+            "truncated-central.apks",
+            listOf(
+                TestEntry("base.apk", validInnerApk("base")),
+                TestEntry("split_config.en.apk", validInnerApk("split"))
+            )
+        ).apply {
+            appendBytes(
+                ByteArrayOutputStream().apply {
+                    writeIntLittleEndian(CENTRAL_DIRECTORY_SIGNATURE)
+                    write(ByteArray(12))
+                }.toByteArray()
+            )
+        }
+
+        provider.open(file).use { archive ->
+            assertEquals(UnifiedZipBackend.LOCAL_FILE_HEADERS, archive.backend)
+            assertEquals(listOf("base.apk", "split_config.en.apk"), archive.entries.map { it.name })
+        }
+    }
+
+    @Test
+    fun `keeps a container listable when an irrelevant entry uses an exotic compression method`() {
+        val apkPayload = "base-apk".toByteArray()
+        val output = ByteArrayOutputStream()
+        output.writeStoredLocalEntry("base.apk", apkPayload)
+        output.writeStoredLocalEntry("notes.bin", "opaque".toByteArray(), compressionMethod = BZIP2_METHOD)
+        val file = File(tempDirectory, "mixed-methods.zip").apply { writeBytes(output.toByteArray()) }
+
+        provider.open(file).use { archive ->
+            assertEquals(listOf("base.apk", "notes.bin"), archive.entries.map { it.name })
+            val base = requireNotNull(archive.getEntry("base.apk"))
+            assertContentEquals(apkPayload, archive.openEntry(base).use { it.readBytes() })
+            val notes = requireNotNull(archive.getEntry("notes.bin"))
+            val notesData = archive.toDataEntity(notes, DataEntity.FileEntity(file.path))
+            assertFailsWith<AnalyseException> {
+                notesData.getInputStream()
             }
         }
     }
@@ -317,6 +402,31 @@ class UnifiedZipFileProviderTest {
     }
 
     @Test
+    fun `defers an apk with rejected ZIP metadata to the platform parser`() {
+        val file = File(tempDirectory, "platform-tolerated.apk").apply {
+            writeBytes(
+                ByteArrayOutputStream().apply {
+                    writeIntLittleEndian(LOCAL_FILE_HEADER_SIGNATURE)
+                    write(ByteArray(5))
+                }.toByteArray()
+            )
+        }
+        val detector = FileTypeDetector(Json.Default, provider)
+
+        assertEquals(
+            DataType.APK,
+            detector.detect(
+                DataEntity.FileEntity(file.path),
+                AnalyseExtraEntity(
+                    cacheDirectory = tempDirectory.path,
+                    isModuleFlashEnabled = false,
+                    checkAppSignature = false
+                )
+            )
+        )
+    }
+
+    @Test
     fun `module detection remains central-directory only`() {
         val detector = FileTypeDetector(Json.Default, provider)
         val extra = AnalyseExtraEntity(
@@ -358,13 +468,17 @@ class UnifiedZipFileProviderTest {
         return File(tempDirectory, fileName).apply { writeBytes(output.toByteArray()) }
     }
 
-    private fun ByteArrayOutputStream.writeStoredLocalEntry(name: String, payload: ByteArray) {
+    private fun ByteArrayOutputStream.writeStoredLocalEntry(
+        name: String,
+        payload: ByteArray,
+        compressionMethod: Int = ZipEntry.STORED
+    ) {
         val nameBytes = name.toByteArray(StandardCharsets.UTF_8)
         val crc = CRC32().apply { update(payload) }.value
         writeIntLittleEndian(LOCAL_FILE_HEADER_SIGNATURE)
         writeShortLittleEndian(10)
         writeShortLittleEndian(UTF8_FLAG)
-        writeShortLittleEndian(ZipEntry.STORED)
+        writeShortLittleEndian(compressionMethod)
         writeShortLittleEndian(0)
         writeShortLittleEndian(0)
         writeIntLittleEndian(crc)
@@ -408,6 +522,8 @@ class UnifiedZipFileProviderTest {
 
     private companion object {
         const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034B50L
+        const val CENTRAL_DIRECTORY_SIGNATURE = 0x02014B50L
         const val UTF8_FLAG = 1 shl 11
+        const val BZIP2_METHOD = 12
     }
 }

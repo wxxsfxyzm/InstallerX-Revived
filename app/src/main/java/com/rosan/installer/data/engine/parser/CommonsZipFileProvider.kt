@@ -11,6 +11,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.nio.channels.FileChannel
+import java.nio.charset.Charset
 import java.nio.file.StandardOpenOption
 
 internal class CommonsZipException(message: String, cause: Throwable? = null) : IOException(message, cause)
@@ -57,6 +58,12 @@ internal class CommonsZipFileProvider {
             return null
         }
 
+        return resolveDataRange(zipFile, entry)
+    }
+
+    /** Resolves compressed payload bytes for STORE/DEFLATE entries while metadata is still open. */
+    fun resolveDataRange(zipFile: ZipFile, entry: ZipArchiveEntry): StoredDataRange? {
+        if (entry.compressedSize < 0L) return null
         return synchronized(zipFile) {
             // Commons resolves dataOffset lazily from the local header when metadata-only mode is used.
             zipFile.getRawInputStream(entry)?.close()
@@ -90,6 +97,9 @@ internal class CommonsZipFileProvider {
         return try {
             ZipFile.builder()
                 .setSeekableByteChannel(channel)
+                // ZIP names without the UTF-8 flag use CP437 by specification. EFS entries still
+                // override this charset to UTF-8 inside Commons Compress.
+                .setCharset(ZIP_FALLBACK_CHARSET)
                 .setIgnoreLocalFileHeader(ignoreLocalFileHeaders)
                 .get()
         } catch (error: Exception) {
@@ -100,5 +110,9 @@ internal class CommonsZipFileProvider {
             }
             throw CommonsZipException("Failed to open ZIP archive: $displayName", error)
         }
+    }
+
+    private companion object {
+        val ZIP_FALLBACK_CHARSET: Charset = Charset.forName("Cp437")
     }
 }

@@ -14,6 +14,14 @@ import java.io.IOException
  * Ordinary APK installation remains descriptor-backed and does not use this materialization path.
  */
 internal class ModuleSourceMaterializer {
+    fun materializeForInstall(data: DataEntity): DataEntity.FileEntity = when (data) {
+        is DataEntity.DeferredFileMaterializationEntity ->
+            materializeForInstall(data.file, data.cacheDirectory)
+
+        is DataEntity.FileEntity -> data
+        else -> throw IOException("Module source is not file-backed: $data")
+    }
+
     fun materializeForInstall(
         data: DataEntity.FileEntity,
         cacheDirectory: String

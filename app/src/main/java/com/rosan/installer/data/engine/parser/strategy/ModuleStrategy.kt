@@ -3,7 +3,6 @@
 package com.rosan.installer.data.engine.parser.strategy
 
 import android.graphics.drawable.Drawable
-import com.rosan.installer.data.engine.parser.ModuleSourceMaterializer
 import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
@@ -18,8 +17,7 @@ import java.util.Properties
 
 class ModuleStrategy internal constructor(
     private val singleApkStrategy: SingleApkStrategy,
-    private val multiApkZipStrategy: MultiApkZipStrategy,
-    private val moduleSourceMaterializer: ModuleSourceMaterializer
+    private val multiApkZipStrategy: MultiApkZipStrategy
 ) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
@@ -126,10 +124,11 @@ class ModuleStrategy internal constructor(
                     }
                 }
 
-                val installData = moduleSourceMaterializer.materializeForInstall(
-                    data = data,
-                    cacheDirectory = extra.cacheDirectory
-                )
+                val installData = if (data is DataEntity.FileDescriptorEntity) {
+                    DataEntity.DeferredFileMaterializationEntity(data, extra.cacheDirectory)
+                } else {
+                    data
+                }
                 return listOf(
                     AppEntity.ModuleEntity(
                         id = id,

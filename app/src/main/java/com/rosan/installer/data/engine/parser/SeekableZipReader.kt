@@ -42,8 +42,12 @@ internal class SeekableZipReader {
 
     private fun read(input: ChannelRandomAccessReader): SeekableZipArchive {
         val fileSize = input.length
+        if (fileSize == 0L) {
+            throw SeekableZipException("Empty file is not a ZIP archive")
+        }
         val entries = mutableListOf<SeekableZipEntry>()
         var offset = 0L
+        var metadataBytes = 0L
 
         while (true) {
             if (offset == fileSize) {
@@ -60,6 +64,15 @@ internal class SeekableZipReader {
                         throw SeekableZipException("ZIP local-header count exceeds $MAX_ENTRY_COUNT")
                     }
                     val entry = readLocalEntry(input, offset, fileSize)
+                    metadataBytes = checkedAdd(
+                        metadataBytes,
+                        entry.dataOffset - offset - LOCAL_FILE_HEADER_SIZE
+                    )
+                    if (metadataBytes > MAX_METADATA_BYTES) {
+                        throw SeekableZipException(
+                            "ZIP local-header metadata exceeds $MAX_METADATA_BYTES bytes"
+                        )
+                    }
                     entries += entry
                     offset = checkedAdd(entry.dataOffset, entry.compressedSize)
                 }
@@ -117,16 +130,15 @@ internal class SeekableZipReader {
         localHeaderOffset: Long,
         fileSize: Long
     ): SeekableZipEntry {
-        input.readUnsignedShortLittleEndian() // version needed to extract
-        val flags = input.readUnsignedShortLittleEndian()
-        val compressionMethod = input.readUnsignedShortLittleEndian()
-        input.readUnsignedShortLittleEndian() // modification time
-        input.readUnsignedShortLittleEndian() // modification date
-        val crc = input.readUnsignedIntLittleEndian()
-        var compressedSize = input.readUnsignedIntLittleEndian()
-        var uncompressedSize = input.readUnsignedIntLittleEndian()
-        val nameLength = input.readUnsignedShortLittleEndian()
-        val extraLength = input.readUnsignedShortLittleEndian()
+        // One bulk read per header: byte-at-a-time channel reads cost ~30 syscalls per entry.
+        val header = input.readBytes(LOCAL_HEADER_REMAINING_SIZE)
+        val flags = header.readUnsignedShortLittleEndian(2)
+        val compressionMethod = header.readUnsignedShortLittleEndian(4)
+        val crc = header.readUnsignedIntLittleEndian(10)
+        var compressedSize = header.readUnsignedIntLittleEndian(14)
+        var uncompressedSize = header.readUnsignedIntLittleEndian(18)
+        val nameLength = header.readUnsignedShortLittleEndian(22)
+        val extraLength = header.readUnsignedShortLittleEndian(24)
 
         if (flags and ENCRYPTED_FLAG != 0) {
             throw SeekableZipException("Encrypted ZIP entry is unsupported at offset $localHeaderOffset")
@@ -202,16 +214,25 @@ internal class SeekableZipReader {
             }
 
             if (headerId == ZIP64_EXTRA_FIELD_ID) {
-                var valueOffset = dataOffset
+                // APPNOTE 4.5.3: a local-header ZIP64 field carries the original (uncompressed)
+                // size first, then the compressed size. Tolerate writers that emit only the
+                // single masked value when just one size overflowed.
+                val requiredSize =
+                    if (needsUncompressedSize && needsCompressedSize) 2 * LONG_SIZE else LONG_SIZE
+                if (dataSize < requiredSize) {
+                    throw SeekableZipException("ZIP64 sizes are missing at offset $localHeaderOffset")
+                }
                 val uncompressedSize = if (needsUncompressedSize) {
-                    extraBytes.readSignedLongLittleEndian(valueOffset).also { valueOffset += LONG_SIZE }
+                    extraBytes.readSignedLongLittleEndian(dataOffset)
                 } else {
                     0L
                 }
-                val compressedSize = if (needsCompressedSize) {
-                    extraBytes.readSignedLongLittleEndian(valueOffset)
-                } else {
-                    0L
+                val compressedSize = when {
+                    !needsCompressedSize -> 0L
+                    dataSize >= 2 * LONG_SIZE ->
+                        extraBytes.readSignedLongLittleEndian(dataOffset + LONG_SIZE)
+
+                    else -> extraBytes.readSignedLongLittleEndian(dataOffset)
                 }
                 if (uncompressedSize < 0 || compressedSize < 0) {
                     throw SeekableZipException("ZIP64 entry size exceeds supported range at offset $localHeaderOffset")
@@ -231,6 +252,17 @@ internal class SeekableZipReader {
                 ((this[offset + 1].toInt() and 0xFF) shl Byte.SIZE_BITS)
     }
 
+    private fun ByteArray.readUnsignedIntLittleEndian(offset: Int): Long {
+        if (offset < 0 || offset + INT_SIZE > size) {
+            throw SeekableZipException("Truncated ZIP local header")
+        }
+        var result = 0L
+        repeat(INT_SIZE) { index ->
+            result = result or ((this[offset + index].toLong() and 0xFF) shl (index * Byte.SIZE_BITS))
+        }
+        return result
+    }
+
     private fun ByteArray.readSignedLongLittleEndian(offset: Int): Long {
         if (offset < 0 || offset + LONG_SIZE > size) {
             throw SeekableZipException("Truncated ZIP64 extra field")
@@ -242,32 +274,14 @@ internal class SeekableZipReader {
         return result
     }
 
-    private fun ChannelRandomAccessReader.readUnsignedShortLittleEndian(): Int {
-        val low = read()
-        val high = read()
-        if (low < 0 || high < 0) throw SeekableZipException("Unexpected end of ZIP local header")
-        return low or (high shl Byte.SIZE_BITS)
-    }
+    private fun ChannelRandomAccessReader.readBytes(count: Int): ByteArray =
+        ByteArray(count).also(::readFully)
 
-    private fun ChannelRandomAccessReader.readUnsignedIntLittleEndian(): Long {
-        var result = 0L
-        repeat(INT_SIZE) { index ->
-            val value = read()
-            if (value < 0) throw SeekableZipException("Unexpected end of ZIP local header")
-            result = result or (value.toLong() shl (index * Byte.SIZE_BITS))
-        }
-        return result
-    }
+    private fun ChannelRandomAccessReader.readUnsignedIntLittleEndian(): Long =
+        readBytes(INT_SIZE).readUnsignedIntLittleEndian(0)
 
-    private fun ChannelRandomAccessReader.readSignedLongLittleEndian(): Long {
-        var result = 0L
-        repeat(LONG_SIZE) { index ->
-            val value = read()
-            if (value < 0) throw SeekableZipException("Unexpected end of APK Signing Block")
-            result = result or (value.toLong() shl (index * Byte.SIZE_BITS))
-        }
-        return result
-    }
+    private fun ChannelRandomAccessReader.readSignedLongLittleEndian(): Long =
+        readBytes(LONG_SIZE).readSignedLongLittleEndian(0)
 
     private fun checkedAdd(vararg values: Long): Long {
         var result = 0L
@@ -288,8 +302,6 @@ internal class SeekableZipReader {
     private class ChannelRandomAccessReader(
         private val channel: SeekableByteChannel
     ) : Closeable {
-        private val singleByte = ByteBuffer.allocate(1)
-
         val length: Long
             get() = channel.size()
 
@@ -298,20 +310,6 @@ internal class SeekableZipReader {
             set(value) {
                 channel.position(value)
             }
-
-        fun read(): Int {
-            singleByte.clear()
-            while (true) {
-                when (val count = channel.read(singleByte)) {
-                    -1 -> return -1
-                    0 -> continue
-                    else -> {
-                        check(count == 1)
-                        return singleByte.array()[0].toInt() and 0xFF
-                    }
-                }
-            }
-        }
 
         fun readFully(bytes: ByteArray) {
             val buffer = ByteBuffer.wrap(bytes)
@@ -338,8 +336,11 @@ internal class SeekableZipReader {
         const val DATA_DESCRIPTOR_FLAG = 1 shl 3
         const val UTF8_FLAG = 1 shl 11
         const val STORED_METHOD = 0
-        const val MAX_ENTRY_COUNT = 10_000
+        const val MAX_ENTRY_COUNT = 100_000
+        const val MAX_METADATA_BYTES = 64L * 1024L * 1024L
         const val SIGNATURE_SIZE = 4L
+        const val LOCAL_FILE_HEADER_SIZE = 30L
+        const val LOCAL_HEADER_REMAINING_SIZE = 26
         const val EXTRA_FIELD_HEADER_SIZE = 4
         const val SHORT_SIZE = 2
         const val INT_SIZE = 4

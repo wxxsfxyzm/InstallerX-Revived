@@ -163,11 +163,18 @@ class AnalyserRepositoryImpl(
     ): List<AppEntity> =
         try {
             // Detect type efficiently
-            val fileType = fileTypeDetector.detect(data, extra)
-            Timber.d("AnalyserRepo: FileType -> $fileType")
-            if (fileType == DataType.NONE) return emptyList()
-            // Delegate to the Unified Analyzer
-            unifiedContainerAnalyser.analyze(config, data, fileType, extra.copy(dataType = fileType))
+            fileTypeDetector.detectWithArchive(data, extra).use { detected ->
+                val fileType = detected.type
+                Timber.d("AnalyserRepo: FileType -> $fileType")
+                if (fileType == DataType.NONE) return emptyList()
+                unifiedContainerAnalyser.analyzeWithArchive(
+                    config = config,
+                    data = data,
+                    type = fileType,
+                    archive = detected.archive,
+                    extra = extra.copy(dataType = fileType)
+                )
+            }
         } catch (e: Exception) {
             Timber.e(e, "Fatal error analyzing source: ${data.source}")
             if (e is AnalyseException || e is CommonsZipException || e is ZipException) throw e

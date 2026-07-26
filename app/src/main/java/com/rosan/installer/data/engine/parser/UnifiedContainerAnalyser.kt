@@ -15,6 +15,8 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.io.IOException
 
 /**
  * A unified entry point for analyzing any package format.
@@ -50,11 +52,32 @@ class UnifiedContainerAnalyser(
         val strategy = strategies[type] ?: return@withContext emptyList()
 
         if (data is DataEntity.FileEntity) {
-            unifiedZipFileProvider.open(data, type.allowsLocalHeaderFallback).use { zipFile ->
-                strategy.analyze(config, data, zipFile, extra)
+            val zipFile = try {
+                unifiedZipFileProvider.open(data, type.allowsLocalHeaderFallback)
+            } catch (e: IOException) {
+                // Detection may classify a non-ZIP file as APK by its extension; the platform
+                // asset loader is more lenient than our ZIP backends, so let ApkParser try
+                // without a ZIP view instead of failing here. Containers still need the view.
+                if (type != DataType.APK) throw e
+                Timber.w(e, "ZIP view unavailable for APK analysis, parsing without it: ${data.path}")
+                null
             }
+            zipFile?.use { strategy.analyze(config, data, it, extra) }
+                ?: strategy.analyze(config, data, null, extra)
         } else {
             strategy.analyze(config, data, null, extra)
         }
+    }
+
+    /** Analyzes with the archive retained by file-type detection; the caller owns its lifecycle. */
+    internal suspend fun analyzeWithArchive(
+        config: ConfigModel,
+        data: DataEntity,
+        type: DataType,
+        archive: UnifiedZipFile?,
+        extra: AnalyseExtraEntity
+    ): List<AppEntity> = withContext(Dispatchers.IO) {
+        val strategy = strategies[type] ?: return@withContext emptyList()
+        strategy.analyze(config, data, archive, extra)
     }
 }

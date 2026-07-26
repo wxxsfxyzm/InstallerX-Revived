@@ -67,6 +67,15 @@ class SeekableZipReaderTest {
     }
 
     @Test
+    fun `rejects a zero byte file instead of accepting an empty archive`() {
+        val file = File(tempDirectory, "empty.apk").apply { writeBytes(ByteArray(0)) }
+
+        val error = assertFailsWith<SeekableZipException> { reader.read(file) }
+
+        assertTrue(error.message.orEmpty().contains("Empty file"))
+    }
+
+    @Test
     fun `stops at a central directory marker`() {
         val file = writeArchive(
             entries = listOf(TestEntry("base.apk", "base".toByteArray())),
@@ -211,17 +220,19 @@ class SeekableZipReaderTest {
     }
 
     @Test
-    fun `slice entity rejects unsupported ZIP compression with an analysis exception`() {
+    fun `slice entity rejects unsupported ZIP compression only when opened`() {
+        val entity = DataEntity.SeekableZipEntryEntity(
+            name = "base.apk",
+            parent = DataEntity.FileEntity(File(tempDirectory, "unused.apks").path),
+            dataOffset = 0,
+            compressedSize = 0,
+            uncompressedSize = 0,
+            compressionMethod = XZ_METHOD,
+            crc = 0
+        )
+
         val error = assertFailsWith<AnalyseException> {
-            DataEntity.SeekableZipEntryEntity(
-                name = "base.apk",
-                parent = DataEntity.FileEntity(File(tempDirectory, "unused.apks").path),
-                dataOffset = 0,
-                compressedSize = 0,
-                uncompressedSize = 0,
-                compressionMethod = XZ_METHOD,
-                crc = 0
-            )
+            entity.getInputStream()
         }
 
         assertEquals(AnalyseErrorType.ALL_FILES_UNSUPPORTED, error.errorType)
@@ -253,6 +264,20 @@ class SeekableZipReaderTest {
         }
     }
 
+    @Test
+    fun `slice entity verifies CRC when exact length is read before close`() {
+        val payload = "base".toByteArray()
+        val file = writeArchive(
+            entries = listOf(TestEntry("base.apk", payload, crcOverride = 0)),
+            includeCentralDirectoryMarker = false
+        )
+        val entity = reader.read(file).entries.single().toDataEntity(file)
+        val input = entity.getInputStream()
+
+        assertContentEquals(payload, input.readNBytes(payload.size))
+        assertFailsWith<ZipException> { input.close() }
+    }
+
     private fun SeekableZipEntry.toDataEntity(file: File): DataEntity.SeekableZipEntryEntity =
         DataEntity.SeekableZipEntryEntity(
             name = name,
@@ -268,6 +293,42 @@ class SeekableZipReaderTest {
         val error = assertFailsWith<SeekableZipException> { reader.read(file) }
 
         assertTrue(error.message.orEmpty().contains("Unexpected ZIP signature"))
+    }
+
+    @Test
+    fun `reads spec-layout ZIP64 sizes when only the compressed size is masked`() {
+        val payload = "zip64 payload ".repeat(64).toByteArray()
+        val compressedPayload = payload.rawDeflate()
+        // APPNOTE 4.5.3 layout: original (uncompressed) size first, then compressed size.
+        val extra = ByteArrayOutputStream().apply {
+            writeShortLittleEndian(ZIP64_EXTRA_FIELD_ID)
+            writeShortLittleEndian(Long.SIZE_BYTES * 2)
+            writeLongLittleEndian(payload.size.toLong())
+            writeLongLittleEndian(compressedPayload.size.toLong())
+        }.toByteArray()
+        val output = ByteArrayOutputStream()
+        output.writeLocalHeader(
+            name = "split_config.en.apk",
+            flags = UTF8_FLAG,
+            compressionMethod = ZipEntry.DEFLATED,
+            crc = CRC32().apply { update(payload) }.value,
+            compressedSize = UINT32_MAX,
+            uncompressedSize = payload.size.toLong(),
+            extra = extra
+        )
+        output.write(compressedPayload)
+        val file = File(tempDirectory, "zip64-masked-compressed.apks").apply {
+            writeBytes(output.toByteArray())
+        }
+
+        val entry = reader.read(file).entries.single()
+
+        assertEquals(compressedPayload.size.toLong(), entry.compressedSize)
+        assertEquals(payload.size.toLong(), entry.uncompressedSize)
+        assertContentEquals(
+            payload,
+            entry.toDataEntity(file).getInputStream().use { it.readBytes() }
+        )
     }
 
     private fun apkSigningBlock(
@@ -323,7 +384,8 @@ class SeekableZipReaderTest {
         compressionMethod: Int,
         crc: Long,
         compressedSize: Long,
-        uncompressedSize: Long
+        uncompressedSize: Long,
+        extra: ByteArray = ByteArray(0)
     ) {
         val nameBytes = name.toByteArray(StandardCharsets.UTF_8)
         writeIntLittleEndian(LOCAL_FILE_HEADER_SIGNATURE)
@@ -336,8 +398,9 @@ class SeekableZipReaderTest {
         writeIntLittleEndian(compressedSize)
         writeIntLittleEndian(uncompressedSize)
         writeShortLittleEndian(nameBytes.size)
-        writeShortLittleEndian(0)
+        writeShortLittleEndian(extra.size)
         write(nameBytes)
+        write(extra)
     }
 
     private fun ByteArrayOutputStream.writeShortLittleEndian(value: Int) {
@@ -384,6 +447,8 @@ class SeekableZipReaderTest {
         const val UTF8_FLAG = 1 shl 11
         const val DATA_DESCRIPTOR_FLAG = 1 shl 3
         const val XZ_METHOD = 95
+        const val ZIP64_EXTRA_FIELD_ID = 0x0001
+        const val UINT32_MAX = 0xFFFF_FFFFL
         const val APK_SIGNING_BLOCK_MIN_TOTAL_SIZE = 32
         val APK_SIGNING_BLOCK_MAGIC = "APK Sig Block 42".toByteArray(StandardCharsets.US_ASCII)
     }

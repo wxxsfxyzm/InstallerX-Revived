@@ -119,7 +119,11 @@ class OkHttpNetworkResolver(
                 downloadSingleThreaded(client, uri.toString(), tempFile, progressFlow)
             }
 
-            return@withContext listOf(DataEntity.FileEntity(tempFile.absolutePath))
+            return@withContext listOf(
+                DataEntity.FileEntity(tempFile.absolutePath).apply {
+                    source = DataEntity.FileEntity(uri.toString())
+                }
+            )
 
         } catch (e: Exception) {
             if (tempFile.exists()) tempFile.delete()

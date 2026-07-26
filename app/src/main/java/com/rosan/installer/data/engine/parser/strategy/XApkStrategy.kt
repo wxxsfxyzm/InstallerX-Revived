@@ -9,6 +9,7 @@ import com.rosan.installer.data.engine.parser.parseSplitMetadata
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlinx.coroutines.Dispatchers
@@ -95,11 +96,7 @@ class XApkStrategy(
                         // Handle Base APK
                         var resolvedLabel = manifest.label
                         var resolvedIcon = icon
-                        val signatureInfo = if (extra.checkAppSignature) {
-                            pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
-                        } else {
-                            null
-                        }
+                        var signatureInfo: AppSignatureInfo? = null
 
                         // Fallback: If label is missing from JSON, parse the Base APK fully to extract it
                         if (resolvedLabel.isNullOrBlank()) {
@@ -112,7 +109,21 @@ class XApkStrategy(
                                 if (resolvedIcon == null) {
                                     resolvedIcon = parsedBase.icon
                                 }
+                                signatureInfo = parsedBase.signatureInfo
+                                // XAPK keeps the original entry entity for installation. A temporary
+                                // APK created solely for label/icon analysis is no longer needed.
+                                val parsedData = parsedBase.data
+                                if (parsedData is DataEntity.FileEntity &&
+                                    parsedData !is DataEntity.FileDescriptorEntity &&
+                                    parsedData.source === entryData
+                                ) {
+                                    File(parsedData.path).delete()
+                                }
                             }
+                        }
+
+                        if (signatureInfo == null && extra.checkAppSignature) {
+                            signatureInfo = pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                         }
 
                         AppEntity.BaseEntity(

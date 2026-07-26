@@ -6,6 +6,7 @@ import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -67,6 +68,40 @@ class CommonsZipFileProviderTest {
             requireNotNull(entity.getInputStream()).use { it.readBytes() }
         )
         assertEquals(splitPayload.size.toLong(), entity.getSize())
+    }
+
+    @Test
+    fun `uses CP437 consistently when the UTF-8 flag is absent`() {
+        val entryName = "gr\u00fc\u00dfe.apk"
+        val payload = "apk".toByteArray()
+        val archiveFile = File(tempDirectory, "cp437.zip")
+        ZipArchiveOutputStream(archiveFile).use { output ->
+            output.setEncoding("Cp437")
+            output.setUseLanguageEncodingFlag(false)
+            output.setCreateUnicodeExtraFields(ZipArchiveOutputStream.UnicodeExtraFieldPolicy.NEVER)
+            output.putArchiveEntry(ZipArchiveEntry(entryName))
+            output.write(payload)
+            output.closeArchiveEntry()
+        }
+
+        provider.openMetadata(archiveFile).use { archive ->
+            assertEquals(entryName, archive.entries.asSequence().single().name)
+        }
+        assertEquals(entryName, SeekableZipReader().read(archiveFile).entries.single().name)
+        val entity = DataEntity.ZipFileEntity(entryName, DataEntity.FileEntity(archiveFile.path))
+        assertContentEquals(payload, requireNotNull(entity.getInputStream()).use { it.readBytes() })
+    }
+
+    @Test
+    fun `reports an unknown zip entry size as -1 instead of a substitute value`() {
+        val archiveFile = File(tempDirectory, "sized.apks")
+        ZipOutputStream(archiveFile.outputStream()).use { output ->
+            output.writeEntry("base.apk", validInnerApk("base"))
+        }
+
+        val missing = DataEntity.ZipFileEntity("missing.apk", DataEntity.FileEntity(archiveFile.path))
+
+        assertEquals(-1L, missing.getSize())
     }
 
     @Test

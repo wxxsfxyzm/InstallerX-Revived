@@ -46,17 +46,27 @@ class ApkParser(
             ?: throw IllegalArgumentException("ApkParser expects a FileEntity, got: ${data::class.simpleName}")
 
         val path = fileEntity.path
-        Timber.d("ApkParser: Processing file path: $path")
-        val archive = zipFile ?: unifiedZipFileProvider.open(fileEntity)
+        val sourceContext = fileEntity.apkLogContext()
+        Timber.d("ApkParser: Processing source: $sourceContext")
+        // Some APKs are rejected by our ZIP backends but still load through the platform's more
+        // lenient native asset parser. Parse without a ZIP view then; only architecture selection
+        // and Xposed entry probing are lost.
+        val archive = zipFile ?: runCatching { unifiedZipFileProvider.open(fileEntity) }
+            .onFailure { error ->
+                Timber.w(error, "ApkParser: ZIP view unavailable, relying on platform asset loader: $sourceContext")
+            }
+            .getOrNull()
 
         return try {
-            val bestArch = analyseAndSelectBestArchitecture(archive, DeviceConfig.supportedArchitectures)
-            Timber.d("ApkParser: Selected Arch for $path is $bestArch")
+            val bestArch = archive?.let {
+                analyseAndSelectBestArchitecture(it, DeviceConfig.supportedArchitectures)
+            }
+            Timber.d("ApkParser: Selected Arch for $sourceContext is $bestArch")
 
             useResources { resources ->
                 try {
                     val apkResources = loadApkResources(resources, fileEntity)
-                    Timber.d("ApkParser: Resources loaded successfully for $path")
+                    Timber.d("ApkParser: Resources loaded successfully for $sourceContext")
 
                     val entity = if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
                         loadAppEntity(
@@ -86,12 +96,12 @@ class ApkParser(
                 } catch (e: AnalyseException) {
                     throw e
                 } catch (e: Exception) {
-                    Timber.e(e, "ApkParser: Failed to parse $path")
+                    Timber.e(e, "ApkParser: Failed to parse $sourceContext")
                     emptyList()
                 }
             }
         } finally {
-            if (zipFile == null) archive.close()
+            if (zipFile == null) archive?.close()
         }
     }
 
@@ -108,7 +118,13 @@ class ApkParser(
         if (entryData is DataEntity.FileDescriptorEntity &&
             (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || entryData.startOffset == 0L)
         ) {
-            return parseFull(entryData, extra)
+            try {
+                return parseFull(entryData, extra)
+            } catch (e: Exception) {
+                // Keep failure semantics aligned with the extraction route below: one bad entry
+                // must not abort the whole container analysis, so give extraction a chance.
+                Timber.w(e, "Descriptor-backed APK analysis failed, extracting entry instead: ${entry.name}")
+            }
         }
 
         Timber.d(
@@ -255,7 +271,7 @@ class ApkParser(
         resources: Resources,
         theme: Resources.Theme?,
         openManifestParser: () -> XmlResourceParser,
-        zipFile: UnifiedZipFile,
+        zipFile: UnifiedZipFile?,
         path: String,
         data: DataEntity,
         extra: AnalyseExtraEntity,
@@ -426,14 +442,14 @@ class ApkParser(
         // Final Xposed verification and data extraction
         var xposedInfo: XposedModuleInfo? = null
         // Check modern Xposed indicators if legacy ones were not found
-        if (!isPotentialXposed &&
+        if (!isPotentialXposed && zipFile != null &&
             (zipFile.getEntry("META-INF/xposed/module.prop") != null ||
                     zipFile.getEntry("assets/xposed_init") != null)
         ) {
             isPotentialXposed = true
         }
 
-        if (isPotentialXposed) {
+        if (isPotentialXposed && zipFile != null) {
             xposedInfo = XposedUtils.extract(zipFile, metaDataMap, appDescription)
         }
 
@@ -566,5 +582,20 @@ class ApkParser(
             ?: apkArchs.firstOrNull { it == Architecture.X86_64 }
             ?: apkArchs.firstOrNull { it == Architecture.X86 }
             ?: apkArchs.firstOrNull()
+    }
+}
+
+private fun DataEntity.FileEntity.apkLogContext(): String = buildString {
+    append("path=")
+    append(path)
+    if (this@apkLogContext is DataEntity.FileDescriptorEntity) {
+        archiveEntryName?.let {
+            append(", entry=")
+            append(it)
+        }
+        append(", rangeOffset=")
+        append(startOffset)
+        append(", rangeLength=")
+        append(this@apkLogContext.length)
     }
 }

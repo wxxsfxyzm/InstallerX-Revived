@@ -14,8 +14,16 @@ import dalvik.system.ZipPathValidator
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import timber.log.Timber
+import java.io.Closeable
 import java.io.File
 import java.io.IOException
+
+internal class DetectedFileType(
+    val type: DataType,
+    val archive: UnifiedZipFile?
+) : Closeable {
+    override fun close() = archive?.close() ?: Unit
+}
 
 class FileTypeDetector(
     private val json: Json,
@@ -44,20 +52,25 @@ class FileTypeDetector(
         }
     }
 
-    fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType {
+    fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType =
+        detectWithArchive(data, extra).use { it.type }
+
+    internal fun detectWithArchive(data: DataEntity, extra: AnalyseExtraEntity): DetectedFileType {
         val fileEntity = data as? DataEntity.FileEntity
         if (fileEntity == null) {
             Timber.d(
                 "File type detection skipped: entity=${data::class.java.simpleName}, " +
                         "source=${data.source}"
             )
-            return DataType.NONE
+            return DetectedFileType(DataType.NONE, null)
         }
 
         val file = File(fileEntity.path)
         val descriptorBacked = fileEntity is DataEntity.FileDescriptorEntity
         val sourcePath = (fileEntity.getSourceTop() as? DataEntity.FileEntity)?.path
         val sourceExtension = sourcePath?.let { File(it).extension }.orEmpty()
+        val isApkSource = sourceExtension.equals("apk", ignoreCase = true) ||
+                file.extension.equals("apk", ignoreCase = true)
         val isZip = fileEntity.hasZipMagic()
 
         Timber.d(
@@ -72,7 +85,8 @@ class FileTypeDetector(
         )
 
         return try {
-            val detectedType = detectArchiveType(fileEntity, sourceExtension, extra)
+            val detected = detectArchiveType(fileEntity, sourceExtension, extra)
+            val detectedType = detected.type
 
             Timber.d(
                 "File type detection finished: workingPath=${fileEntity.path}, " +
@@ -84,11 +98,19 @@ class FileTypeDetector(
                             "selected $detectedType. See archive diagnostics and selected-rule logs above."
                 )
             }
-            detectedType
+            detected
         } catch (e: Exception) {
             if (e is AnalyseException) throw e
 
             when {
+                e is IOException && isZip && isApkSource -> {
+                    // Some malformed APK ZIPs are rejected by Commons/local-header parsing but
+                    // remain loadable by Android's native asset parser. This fallback is restricted
+                    // to a source explicitly named as one APK; package containers stay strict.
+                    Timber.w(e, "APK ZIP metadata is unusable; deferring to the platform parser: ${fileEntity.path}")
+                    DetectedFileType(DataType.APK, null)
+                }
+
                 e is IOException && isZip -> {
                     // The file has ZIP magic, but neither the central nor local-header view was usable.
                     Timber.e(e, "Archive is corrupted or truncated: ${fileEntity.path}")
@@ -101,12 +123,12 @@ class FileTypeDetector(
 
                 e is IOException -> {
                     // The file does not have the ZIP magic number, so it is not a ZIP file at all.
-                    handleNonZipFallback(fileEntity, e)
+                    DetectedFileType(handleNonZipFallback(fileEntity, e), null)
                 }
 
                 else -> {
                     Timber.e(e, "Failed to detect file type for path: ${fileEntity.path}")
-                    DataType.NONE
+                    DetectedFileType(DataType.NONE, null)
                 }
             }
         }
@@ -116,33 +138,28 @@ class FileTypeDetector(
         file: DataEntity.FileEntity,
         sourceExtension: String,
         extra: AnalyseExtraEntity
-    ): DataType {
-        if (extra.isModuleFlashEnabled) {
-            try {
-                unifiedZipFileProvider.open(file, allowLocalHeaderFallback = false).use { zipFile ->
-                    detectModuleType(zipFile)?.let { result ->
-                        if (shouldLogArchiveDiagnostics(sourceExtension, result, zipFile.entries)) {
-                            logArchiveDiagnostics(file.path, zipFile)
-                        }
-                        return result
+    ): DetectedFileType {
+        val zipFile = unifiedZipFileProvider.open(file, allowLocalHeaderFallback = true)
+        return try {
+            if (extra.isModuleFlashEnabled &&
+                zipFile.backend == UnifiedZipBackend.COMMONS_CENTRAL_DIRECTORY
+            ) {
+                detectModuleType(zipFile)?.let { result ->
+                    if (shouldLogArchiveDiagnostics(sourceExtension, result, zipFile.entries)) {
+                        logArchiveDiagnostics(file.path, zipFile)
                     }
+                    return DetectedFileType(result, zipFile)
                 }
-            } catch (e: AnalyseException) {
-                throw e
-            } catch (e: IOException) {
-                Timber.d(
-                    "Module central-directory precheck unavailable; trying Android package fallback: " +
-                            "path=${file.path}, reason=${e.message ?: "central directory unavailable"}"
-                )
             }
-        }
 
-        return unifiedZipFileProvider.open(file, allowLocalHeaderFallback = true).use { zipFile ->
             val result = detectStandardType(zipFile)
             if (shouldLogArchiveDiagnostics(sourceExtension, result, zipFile.entries)) {
                 logArchiveDiagnostics(file.path, zipFile)
             }
-            result
+            DetectedFileType(result, zipFile)
+        } catch (error: Exception) {
+            zipFile.close()
+            throw error
         }
     }
 
