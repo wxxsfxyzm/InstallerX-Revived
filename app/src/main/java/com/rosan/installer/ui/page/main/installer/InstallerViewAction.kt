@@ -14,6 +14,7 @@ sealed interface InstallerViewAction {
     data object Close : InstallerViewAction
     data object Analyse : InstallerViewAction
     data object InstallChoice : InstallerViewAction
+    data class SelectMixedModuleType(val installAsModule: Boolean) : InstallerViewAction
     data object InstallExtendedMenu : InstallerViewAction
     data object InstallExtendedSubMenu : InstallerViewAction
 

@@ -196,24 +196,9 @@ private fun ChoiceContent(
                             title = baseEntityInfo.label ?: "N/A",
                             description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
                             onClick = {
-                                if (moduleSelectableEntity?.selected == true) {
-                                    viewModel.dispatch(
-                                        InstallerViewAction.ToggleSelection(
-                                            packageName = moduleSelectableEntity.app.packageName,
-                                            entity = moduleSelectableEntity,
-                                            isMultiSelect = true
-                                        )
-                                    )
-                                }
-
                                 viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
-                                        packageName = entity.app.packageName,
-                                        entity = entity,
-                                        isMultiSelect = false
-                                    )
+                                    InstallerViewAction.SelectMixedModuleType(installAsModule = false)
                                 )
-                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
                             }
                         )
                     }
@@ -226,24 +211,9 @@ private fun ChoiceContent(
                             title = moduleEntityInfo.name,
                             description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                             onClick = {
-                                if (baseSelectableEntity?.selected == true) {
-                                    viewModel.dispatch(
-                                        InstallerViewAction.ToggleSelection(
-                                            packageName = baseSelectableEntity.app.packageName,
-                                            entity = baseSelectableEntity,
-                                            isMultiSelect = true
-                                        )
-                                    )
-                                }
-
                                 viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
-                                        packageName = entity.app.packageName,
-                                        entity = entity,
-                                        isMultiSelect = false
-                                    )
+                                    InstallerViewAction.SelectMixedModuleType(installAsModule = true)
                                 )
-                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
                             }
                         )
                     }
@@ -263,25 +233,9 @@ private fun ChoiceContent(
                             title = stringResource(R.string.installer_choice_install_as_module),
                             description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                             onClick = {
-                                analysisResults.flatMap { it.appEntities }
-                                    .filter { it.app !is AppEntity.ModuleEntity && it.selected }
-                                    .forEach { apkEntity ->
-                                        viewModel.dispatch(
-                                            InstallerViewAction.ToggleSelection(
-                                                packageName = apkEntity.app.packageName,
-                                                entity = apkEntity,
-                                                isMultiSelect = true
-                                            )
-                                        )
-                                    }
                                 viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
-                                        packageName = entity.app.packageName,
-                                        entity = entity,
-                                        isMultiSelect = false
-                                    )
+                                    InstallerViewAction.SelectMixedModuleType(installAsModule = true)
                                 )
-                                viewModel.dispatch(InstallerViewAction.InstallPrepare)
                             }
                         )
                     }

@@ -179,6 +179,7 @@ class InstallerViewModel(
                 _localState.update { it.copy(navigatedFromPrepareToChoice = uiState.value.stage is InstallerStage.InstallPrepare) }
                 installChoice()
             }
+            is InstallerViewAction.SelectMixedModuleType -> selectMixedModuleType(action.installAsModule)
 
             is InstallerViewAction.InstallPrepare -> installPrepare()
             is InstallerViewAction.InstallExtendedMenu -> installExtendedMenu()
@@ -678,6 +679,38 @@ class InstallerViewModel(
                 analysisResults = currentResults // Ensure the UI receives the latest list
             )
         }
+    }
+
+    private fun selectMixedModuleType(installAsModule: Boolean) {
+        val currentResults = _localState.value.analysisResults
+        val targetEntity = currentResults
+            .flatMap { it.appEntities }
+            .firstOrNull { entity ->
+                if (installAsModule) entity.app is AppEntity.ModuleEntity
+                else entity.app is AppEntity.BaseEntity
+            } ?: return
+
+        val updatedResults = currentResults.map { result ->
+            val updatedEntities = result.appEntities.map { entity ->
+                entity.copy(selected = entity.app === targetEntity.app)
+            }
+            result.copy(
+                appEntities = updatedEntities,
+                signatureMatchStatus = if (result.signatureCheckPerformed) {
+                    updatedEntities.analyzePackageSignatureMatch(
+                        installedInfo = result.installedAppInfo,
+                        hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+                    )
+                } else result.signatureMatchStatus,
+                signatureAnalysis = if (result.signatureCheckPerformed) {
+                    updatedEntities.analyzePackageSignatureSelection(result.installedAppInfo)
+                } else result.signatureAnalysis
+            )
+        }
+
+        session.analysisResults = updatedResults.toMutableList()
+        _localState.update { it.copy(analysisResults = updatedResults) }
+        installPrepare()
     }
 
     private fun installPrepare() {

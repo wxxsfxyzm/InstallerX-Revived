@@ -3,16 +3,17 @@
 package com.rosan.installer.ui.navigation
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import timber.log.Timber
+import top.yukonga.miuix.kmp.nav.core.NavBackStack
+import top.yukonga.miuix.kmp.nav.core.NavKey
 
 // kang from KernelSU manager
 // with some modify (anti reenter page) from ReSukiSU manager
 class Navigator(
-    val backStack: MutableList<NavKey>
+    val backStack: NavBackStack
 ) {
     private val resultBus = mutableMapOf<String, MutableSharedFlow<Any>>()
 

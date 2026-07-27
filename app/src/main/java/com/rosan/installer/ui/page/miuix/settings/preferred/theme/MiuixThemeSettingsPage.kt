@@ -42,7 +42,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
@@ -71,7 +70,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
-@SuppressLint("RestrictedApi")
 @Composable
 fun MiuixThemeSettingsPage(
     viewModel: ThemeSettingsViewModel = koinViewModel()
@@ -79,7 +77,6 @@ fun MiuixThemeSettingsPage(
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
-    val transition = LocalNavAnimatedContentScope.current.transition
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -315,33 +312,18 @@ fun MiuixThemeSettingsPage(
                         MiuixPredictiveBackAnimationWidget(
                             currentAnimation = uiState.predictiveBackAnimation,
                             onAnimationChange = { newAnim ->
-                                // Hey Google
-                                // Why you keep playing the animation even we are already play completed?
-                                // This is very dirty, We are using RestrictedApi, but we don't have other choice
-                                transition.setPlaytimeAfterInitialAndTargetStateEstablished(
-                                    transition.targetState,
-                                    transition.targetState,
-                                    transition.playTimeNanos
-                                )
-
                                 viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(newAnim))
                             }
                         )
 
                         AnimatedVisibility(
-                            visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
-                                    uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP,
+                            visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale,
                             enter = fadeIn() + expandVertically(),
                             exit = fadeOut() + shrinkVertically()
                         ) {
                             MiuixPredictiveBackExitDirectionWidget(
                                 currentDirection = uiState.predictiveBackExitDirection,
                                 onDirectionChange = {
-                                    transition.setPlaytimeAfterInitialAndTargetStateEstablished(
-                                        transition.targetState,
-                                        transition.targetState,
-                                        transition.playTimeNanos
-                                    )
                                     viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackExitDirection(it))
                                 }
                             )
