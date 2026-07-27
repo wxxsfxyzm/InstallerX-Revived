@@ -920,4 +920,5 @@
     <string name="install_comparison_show_differences_only_desc">Exibir dados idênticos como um único valor</string>
     <string name="expand_temporary_settings_by_default">Expandir o painel por padrão</string>
     <string name="expand_temporary_settings_by_default_desc">Expandir as configurações temporárias ao abrir a caixa de diálogo de instalação</string>
+    <string name="self_update_install_success">O InstallerX foi atualizado com sucesso</string>
 </resources>
