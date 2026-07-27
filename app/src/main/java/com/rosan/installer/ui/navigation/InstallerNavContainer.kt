@@ -114,7 +114,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                     }
                 }
             }
-            entry<Route.EditConfig>(swipeDismiss = swipeBackDirection) { key ->
+            entry<Route.EditConfig>(swipeDismiss = NavSwipeDirection.None) { key ->
                 InstallerNavEntry(interceptPredictiveBack, onBack) {
                     val id = key.id
                     if (uiState.useMiuix) {
