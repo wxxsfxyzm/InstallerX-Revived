@@ -325,12 +325,12 @@
     <string name="get_source_code_detail">Проверьте исходный код на GitHub</string>
     <string name="internet_access_enabled">Онлайн</string>
     <string name="internet_access_disabled">Офлайн</string>
-    <string name="uninstall_title">Удалить InstallerX Revived</string>
+    <string name="uninstall_title">Деинсталировать InstallerX Revived</string>
     <string name="uninstall_content">После удаления этого приложения вы больше не сможете использовать InstallerX Revived для установки приложений.</string>
     <string name="theme_settings_miuix_ui">MiuiX</string>
     <string name="theme_settings_miuix_ui_desc">Похоже на HyperOS</string>
     <string name="theme_settings_google_ui_desc">Стандартный Material Design UI</string>
-    <string name="theme_settings_ui_engine">Стиль интерфейса</string>
+    <string name="theme_settings_ui_engine">Двигатель UI</string>
     <string name="theme_settings_theme_mode">Режим темы</string>
     <string name="theme_settings_theme_mode_desc">Выбрать режим темы</string>
     <string name="theme_settings_theme_mode_light">Светлая тема</string>
@@ -339,14 +339,14 @@
     <string name="theme_settings_palette_style">Стиль палитры</string>
     <string name="theme_settings_palette_style_desc">Выбрать стиль палитры</string>
     <string name="theme_settings_dynamic_color">Динамический цвет</string>
-    <string name="theme_settings_miuix_custom_colors">Пользовательские цвета</string>
+    <string name="theme_settings_miuix_custom_colors">Свои цвета</string>
     <string name="theme_settings_miuix_custom_colors_desc">Настройка цветов темы в стиле темы Miuix</string>
     <string name="theme_settings_dynamic_color_desc">Цвет темы на основе обоев</string>
     <string name="theme_settings_theme_color">Цвет темы</string>
-    <string name="theme_settings_dynamic_color_follow_icon">Цвет диалогов</string>
+    <string name="theme_settings_dynamic_color_follow_icon">Красочный диалог</string>
     <string name="theme_settings_dynamic_color_follow_icon_desc">Диалоговое окно установки больше не будет соответствовать цветам темы приложения. Вместо этого он будет использовать цвета, извлеченные из иконки устанавливаемого пакета</string>
-    <string name="theme_settings_live_activity_dynamic_color_follow_icon">Цвет прогресса Live Activity</string>
-    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">Цвета прогресс-бара будут использоваться из иконки устанавливаемого приложения</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon">Красочный прогресс Live Activity</string>
+    <string name="theme_settings_live_activity_dynamic_color_follow_icon_desc">Сегмент прогресса live activity будет использовать цвета, полученные из иконки пакета</string>
     <string name="color_default">По умолчанию</string>
     <string name="color_pink">Розовый</string>
     <string name="color_red">Красный</string>
@@ -407,7 +407,7 @@
     <string name="upgrade">Обновить</string>
     <string name="reinstall">Переустановить</string>
     <string name="install_anyway">Переустановить</string>
-    <string name="uninstall">Удалить</string>
+    <string name="uninstall">Деинсталировать</string>
     <string name="collapse">Скрыть</string>
     <string name="scope_tips">Базовый профиль активен по умолчанию. Новые профили можно привязывать к отдельным приложениям для кастомизации их сценариев установки.</string>
     <string name="got_it">Понятно</string>
@@ -437,7 +437,7 @@
     <string name="installer_live_channel_short_text_installing">Установка</string>
     <string name="installer_live_channel_short_text_success">Успешно</string>
     <string name="installer_live_channel_short_text_resolve_failed">Провалено</string>
-    <string name="installer_live_channel_short_text_install_failed">Провалено</string>
+    <string name="installer_live_channel_short_text_install_failed">Не удалось</string>
     <string name="installer_uninstall_app">Удалить приложение</string>
     <string name="installer_uninstalling">Удаляем</string>
     <string name="uninstall_keep_data">Сохранять данные</string>
@@ -616,7 +616,7 @@
     <string name="installer_prepare_identical_notice">Пакет идентичен установленному. Установка не требуется.</string>
     <string name="theme_settings_color_spec">Спецификация цвета</string>
     <string name="theme_settings_color_spec_only_2021">Текущий стиль палитры поддерживает только Spec 2021</string>
-    <string name="installer_live_channel_short_text_analyse_failed">Ошибка</string>
+    <string name="installer_live_channel_short_text_analyse_failed">Не удалось</string>
     <string name="exception_resolve_failed_link_not_valid">Эта ссылка не содержит действительный файл</string>
     <string name="tag_arch_emulated">Разрядность</string>
     <string name="exception_install_parse_failed_bad_shared_user_id">Сторонним приложениям запрещено использовать системный ID</string>
@@ -626,8 +626,8 @@
     <string name="error_no_package_to_uninstall">Нет доступного пакета для удаления</string>
     <string name="installer_xposed_target_api">Целевой API:</string>
     <string name="installer_xposed_min_api">Мин. API:</string>
-    <string name="theme_settings_use_apple_floating_bar_desc">Отображать плавающую панель навигации в нижней части экрана</string>
-    <string name="theme_settings_use_apple_floating_bar">Плавающая панель снизу</string>
+    <string name="theme_settings_use_apple_floating_bar_desc">Отображение плавающей панели навигации внизу экрана</string>
+    <string name="theme_settings_use_apple_floating_bar">Включить плавающую нижнюю панель</string>
     <string name="copied_format">Скопировано: %1$s</string>
     <string name="config_install_show_toast_desc">Показывать всплывающее уведомление после установки</string>
     <string name="config_install_show_toast">Всплывающее сообщение</string>
@@ -760,7 +760,7 @@
     <string name="history_clear_confirm_desc">Все записи об установке и удалении будут удалены. Это невозможно отменить.</string>
     <string name="history_clear">Очистить историю</string>
     <string name="history">История</string>
-    <string name="history_apk_path">APK path</string>
+    <string name="history_apk_path">Путь APK</string>
     <string name="history_authorizer">Авторизатор</string>
     <string name="history_clear_confirm_title">Очистить историю?</string>
     <string name="history_empty_desc">История установок и удалений появится здесь после завершения операций.</string>
@@ -771,11 +771,11 @@
     <string name="history_method_package_manager">Диспетчер приложений</string>
     <string name="history_method">Метод</string>
     <string name="history_method_session">Подтверждение сессии</string>
-    <string name="history_none">Отсутствует</string>
-    <string name="history_operation_install">Установка</string>
+    <string name="history_none">Ни один</string>
+    <string name="history_operation_install">Установить</string>
     <string name="history_operation_session_confirm">Сессия</string>
     <string name="history_operation_type">Тип операции</string>
-    <string name="history_operation_uninstall">Удаление</string>
+    <string name="history_operation_uninstall">Деинсталлировать</string>
     <string name="history_package_name">Название пакета</string>
     <string name="history_status_failed">Неудачно</string>
     <string name="history_status_success">Успешно</string>
@@ -783,9 +783,9 @@
     <string name="history_unknown">Неизвестно</string>
     <string name="history_version_change">Изменение в версии</string>
     <string name="history_version_code">Код версии</string>
-    <string name="history_version_downgrade">Понижение версии</string>
+    <string name="history_version_downgrade">Понижение</string>
     <string name="history_version_fresh_install">Свежая установка</string>
-    <string name="history_version_name">Имя Версии</string>
+    <string name="history_version_name">Название версии</string>
     <string name="history_version_pair">%1$s → %2$s</string>
     <string name="history_version_same">Та же версия</string>
     <string name="history_version_update">Обновление</string>
@@ -921,4 +921,7 @@
     <string name="expand_temporary_settings_by_default">Развернуть панель по умолчанию</string>
     <string name="expand_temporary_settings_by_default_desc">Развернуть временные настройки при открытии диалогового окна установки</string>
     <string name="self_update_install_success">InstallerX был успешно обновлён</string>
+    <string name="installer_writing">Записываю…</string>
+    <string name="config_check_split_package_signatures">Анализируйте подписи split пакетов</string>
+    <string name="config_check_split_package_signatures_desc">Анализируйте APK сигнатуры в APKS, APKM и XAPK пакетах. Это может значительно увеличить время анализа</string>
 </resources>

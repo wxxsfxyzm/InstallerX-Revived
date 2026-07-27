@@ -88,4 +88,6 @@
     <string name="running">Uruchomiony</string>
     <string name="activate">Aktywuj</string>
     <string name="working_status_system_installer">Działa jako Instalator Pakietów Systemowych</string>
+    <string name="open_source_license_settings_description">Wyświetl zewnętrzne otwartoźródłowe biblioteki i ich licencje</string>
+    <string name="working_status_system_installer_desc">Ta aplikacja działa jako systemowy instalator aplikacji</string>
 </resources>

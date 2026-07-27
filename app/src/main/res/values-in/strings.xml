@@ -913,4 +913,7 @@
     <string name="config_declare_installer_system_default_desc">Default ke pihak yang memulai pemasangan</string>
     <string name="config_authorizer_command_desc">Perintah: %1$s</string>
     <string name="dhizuku_unsupported_desc">Dhizuku tidak didukung</string>
+    <string name="self_update_install_success">InstallerX berhasil diperbarui</string>
+    <string name="install_comparison_display_behavior">Perilaku tampilan perbandingan data</string>
+    <string name="install_comparison_show_all">Tampilkan semua</string>
 </resources>
