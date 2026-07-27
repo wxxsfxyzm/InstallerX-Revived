@@ -4,12 +4,16 @@ package com.rosan.installer.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.ui.animation.predictiveback.installerNavTransition
@@ -47,6 +51,7 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun InstallerNavContainer(uiState: ThemeState) {
@@ -56,6 +61,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
 
     val backStack = rememberNavBackStack<Route>(Route.Main)
     val navigator = remember(backStack) { Navigator(backStack) }
+    val onBack = remember(navigator) { { navigator.pop() } }
     val useBlur = uiState.useBlur
 
     CompositionLocalProvider(
@@ -65,13 +71,19 @@ fun InstallerNavContainer(uiState: ThemeState) {
         val roundAllCorners = uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP ||
                 uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
                 uiState.predictiveBackAnimation == PredictiveBackAnimation.Classic
-        val effects = remember(navCornerRadius, roundAllCorners) {
+        val backdropColor = if (uiState.useMiuix) {
+            MiuixTheme.colorScheme.surface
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        }
+        val effects = remember(navCornerRadius, roundAllCorners, backdropColor) {
             NavDisplayEffects(
                 enableCornerClip = true,
                 cornerClipRadius = if (roundAllCorners && navCornerRadius <= 0.dp) 32.dp else navCornerRadius,
                 cornerClipMode = if (roundAllCorners) NavCornerClipMode.All else NavCornerClipMode.Leading,
                 dimAmount = 0.5f,
-                blockInputDuringTransition = true,
+                backdropColor = backdropColor,
+                blockInputDuringTransition = false,
             )
         }
         val transition = remember(uiState.predictiveBackAnimation, uiState.predictiveBackExitDirection) {
@@ -84,119 +96,164 @@ fun InstallerNavContainer(uiState: ThemeState) {
             LayoutDirection.Rtl -> NavSwipeDirection.RightToLeft
             LayoutDirection.Ltr -> NavSwipeDirection.LeftToRight
         }
+        val interceptPredictiveBack =
+            uiState.predictiveBackAnimation == PredictiveBackAnimation.None && backStack.size > 1
 
         NavDisplay(
             backStack = backStack,
-            onBack = { navigator.pop() },
+            onBack = onBack,
             transition = transition,
             effects = effects,
         ) {
             entry<Route.Main> {
-                if (uiState.useMiuix) {
-                    MiuixMainPageWrapper(uiState, sharedViewModel)
-                } else {
-                    Material3MainPageWrapper(uiState, sharedViewModel)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixMainPageWrapper(uiState, sharedViewModel)
+                    } else {
+                        Material3MainPageWrapper(uiState, sharedViewModel)
+                    }
                 }
             }
             entry<Route.EditConfig>(swipeDismiss = swipeBackDirection) { key ->
-                val id = key.id
-                if (uiState.useMiuix) {
-                    MiuixEditPage(
-                        id = if (id != -1L) id else null,
-                        useBlur = useBlur
-                    )
-                } else {
-                    EditPage(
-                        id = if (id != -1L) id else null,
-                        useBlur = useBlur
-                    )
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    val id = key.id
+                    if (uiState.useMiuix) {
+                        MiuixEditPage(
+                            id = if (id != -1L) id else null,
+                            useBlur = useBlur
+                        )
+                    } else {
+                        EditPage(
+                            id = if (id != -1L) id else null,
+                            useBlur = useBlur
+                        )
+                    }
                 }
             }
             entry<Route.ApplyConfig>(swipeDismiss = swipeBackDirection) { key ->
-                val id = key.id
-                if (uiState.useMiuix) {
-                    MiuixApplyPage(id, useBlur)
-                } else {
-                    ApplyPage(id, useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    val id = key.id
+                    if (uiState.useMiuix) {
+                        MiuixApplyPage(id, useBlur)
+                    } else {
+                        ApplyPage(id, useBlur)
+                    }
                 }
             }
             entry<Route.About>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixAboutPage(useBlur)
-                } else {
-                    AboutPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixAboutPage(useBlur)
+                    } else {
+                        AboutPage(useBlur)
+                    }
                 }
             }
             entry<Route.OpenSourceLicense>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixOpenSourceLicensePage(useBlur)
-                } else {
-                    OpenSourceLicensePage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixOpenSourceLicensePage(useBlur)
+                    } else {
+                        OpenSourceLicensePage(useBlur)
+                    }
                 }
             }
             entry<Route.Theme>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixThemeSettingsPage()
-                } else {
-                    ThemeSettingsPage()
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixThemeSettingsPage()
+                    } else {
+                        ThemeSettingsPage()
+                    }
                 }
             }
             entry<Route.InstallerGlobal>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixInstallerGlobalSettingsPage(useBlur)
-                } else {
-                    InstallerGlobalSettingsPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixInstallerGlobalSettingsPage(useBlur)
+                    } else {
+                        InstallerGlobalSettingsPage(useBlur)
+                    }
                 }
             }
             entry<Route.AuthorizerCust>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixAuthorizerCustPage(useBlur)
-                } else {
-                    AuthorizerCustPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixAuthorizerCustPage(useBlur)
+                    } else {
+                        AuthorizerCustPage(useBlur)
+                    }
                 }
             }
             entry<Route.DialogSettings>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixDialogSettingsPage(useBlur)
-                } else {
-                    DialogSettingsPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixDialogSettingsPage(useBlur)
+                    } else {
+                        DialogSettingsPage(useBlur)
+                    }
                 }
             }
             entry<Route.NotificationSettings>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixNotificationSettingsPage(useBlur)
-                } else {
-                    NotificationSettingsPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixNotificationSettingsPage(useBlur)
+                    } else {
+                        NotificationSettingsPage(useBlur)
+                    }
                 }
             }
             entry<Route.UninstallerGlobal>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixUninstallerGlobalSettingsPage(useBlur)
-                } else {
-                    UninstallerGlobalSettingsPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixUninstallerGlobalSettingsPage(useBlur)
+                    } else {
+                        UninstallerGlobalSettingsPage(useBlur)
+                    }
                 }
             }
             entry<Route.Lab>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixLabPage(useBlur)
-                } else {
-                    LabPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixLabPage(useBlur)
+                    } else {
+                        LabPage(useBlur)
+                    }
                 }
             }
             entry<Route.DefaultInstaller>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixDefaultInstallerPage(useBlur)
-                } else {
-                    DefaultInstallerPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixDefaultInstallerPage(useBlur)
+                    } else {
+                        DefaultInstallerPage(useBlur)
+                    }
                 }
             }
             entry<Route.Priv>(swipeDismiss = swipeBackDirection) {
-                if (uiState.useMiuix) {
-                    MiuixPrivPage(useBlur)
-                } else {
-                    PrivPage(useBlur)
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixPrivPage(useBlur)
+                    } else {
+                        PrivPage(useBlur)
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun InstallerNavEntry(
+    interceptPredictiveBack: Boolean,
+    onBack: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val navigationEventState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = navigationEventState,
+        isBackEnabled = interceptPredictiveBack,
+        onBackCompleted = onBack,
+    )
+    content()
 }

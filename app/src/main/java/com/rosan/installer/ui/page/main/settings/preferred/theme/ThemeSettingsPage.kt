@@ -373,8 +373,8 @@ fun ThemeSettingsPage(
                     ) {
                         item { PredictiveBackAnimationWidget(uiState) { showPredictiveBackAnimationDialog = true } }
                         item(
-                            animatedVisibility = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
-                                    uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
+                            animatedVisibility =
+                                uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale
                         ) {
                             PredictiveBackAnimationDirectionWidget(uiState) { showPredictiveBackExitDirectionDialog = true }
                         }

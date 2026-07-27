@@ -92,8 +92,6 @@ class MainPagerState(
 fun rememberMainPagerState(
     pagerState: PagerState,
     coroutineScope: CoroutineScope = rememberCoroutineScope()
-): MainPagerState {
-    return remember(pagerState, coroutineScope) {
-        MainPagerState(pagerState, coroutineScope)
-    }
+) = remember(pagerState, coroutineScope) {
+    MainPagerState(pagerState, coroutineScope)
 }
