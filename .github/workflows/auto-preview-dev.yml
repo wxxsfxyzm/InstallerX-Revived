@@ -8,6 +8,10 @@ on:
       - 'renovate/**'
     paths:
       - 'app/**'
+      - 'app-process/**'
+      - 'hidden-api/**'
+      - 'baselineprofile/**'
+      - 'build-plugins/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
