@@ -19,6 +19,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.components.PositionDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.ModuleInstallSheetContent
+import com.rosan.installer.ui.navigation.Material3ModalBottomSheetBackBridge
 import com.rosan.installer.ui.page.main.widget.util.InstallerEventCollector
 import com.rosan.installer.ui.theme.InstallerMaterialExpressiveTheme
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -102,6 +103,7 @@ fun DialogPage(
                     containerColor = colorScheme.surfaceContainer,
                     contentColor = colorScheme.onSurface
                 ) {
+                    Material3ModalBottomSheetBackBridge()
                     val blurRadius = if (sheetState.targetValue == SheetValue.Expanded) 30 else 0
                     AnimatedContent(targetState = blurRadius) { targetState ->
                         WindowBlurEffect(useBlur = useBlur, blurRadius = targetState)

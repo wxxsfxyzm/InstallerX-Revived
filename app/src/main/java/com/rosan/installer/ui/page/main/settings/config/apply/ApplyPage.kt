@@ -91,6 +91,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Material3ModalBottomSheetBackBridge
 import com.rosan.installer.ui.page.main.widget.chip.Chip
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
@@ -292,6 +293,7 @@ fun ApplyPage(
     }
 
     if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+        Material3ModalBottomSheetBackBridge()
         BottomSheetContent(uiState = uiState, viewModel = viewModel)
     }
 }

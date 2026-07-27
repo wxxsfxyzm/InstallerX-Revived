@@ -57,6 +57,7 @@ import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Material3ModalBottomSheetBackBridge
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelectionDialog
@@ -328,6 +329,7 @@ fun LabPage(
         ModalBottomSheet(
             onDismissRequest = { showSmartAuthorizerSheet.value = false }
         ) {
+            Material3ModalBottomSheetBackBridge()
             SmartAuthorizerBottomSheet(
                 candidates = uiState.smartAuthorizerCandidates,
                 rootMode = rootMode,

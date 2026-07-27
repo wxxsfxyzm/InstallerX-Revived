@@ -66,6 +66,7 @@ import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.navigation.Material3ModalBottomSheetBackBridge
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
@@ -246,6 +247,7 @@ fun HistoryPage(
                 )
             }
         ) {
+            Material3ModalBottomSheetBackBridge()
             HistoryRecordDetailContent(
                 record = selectedRecord!!,
                 isSystemApp = state.isSystemApp,

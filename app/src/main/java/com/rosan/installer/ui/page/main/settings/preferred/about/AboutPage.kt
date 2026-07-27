@@ -47,6 +47,7 @@ import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
+import com.rosan.installer.ui.navigation.Material3ModalBottomSheetBackBridge
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -196,6 +197,7 @@ fun AboutPage(
     }
     if (showBottomSheet) {
         ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+            Material3ModalBottomSheetBackBridge()
             BottomSheetContent(
                 title = stringResource(R.string.get_update),
                 hasUpdate = uiState.hasUpdate,
