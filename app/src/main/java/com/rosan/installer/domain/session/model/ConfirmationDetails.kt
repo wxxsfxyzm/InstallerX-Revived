@@ -3,6 +3,7 @@
 package com.rosan.installer.domain.session.model
 
 import android.graphics.Bitmap
+import android.os.Process
 
 data class ConfirmationDetails(
     val sessionId: Int,
@@ -14,6 +15,8 @@ data class ConfirmationDetails(
     // A generic label for the related app (either the update owner or the initiator)
     val sourceAppLabel: CharSequence? = null,
     val installerPackageName: String? = null,
+    val installerUid: Int = Process.INVALID_UID,
+    val isCallerVerified: Boolean = false,
     val requestType: ConfirmationRequestType = ConfirmationRequestType.INSTALL,
     val isPreApprovalRequested: Boolean = false,
 

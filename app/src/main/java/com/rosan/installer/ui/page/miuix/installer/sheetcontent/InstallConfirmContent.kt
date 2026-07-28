@@ -121,6 +121,7 @@ fun InstallConfirmContent(
             ) {
                 TextButton(
                     onClick = onCancel,
+                    enabled = !uiState.isConfirmationSubmitting,
                     text = stringResource(R.string.cancel),
                     colors = ButtonDefaults.textButtonColors(
                         color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
@@ -139,6 +140,7 @@ fun InstallConfirmContent(
 
                 TextButton(
                     onClick = onConfirm,
+                    enabled = !uiState.isConfirmationSubmitting,
                     text = confirmText,
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     modifier = Modifier.weight(1f)

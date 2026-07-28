@@ -99,10 +99,16 @@ fun installConfirmDialog(
             }
 
             listOf(
-                DialogButton(confirmText) {
+                DialogButton(
+                    text = confirmText,
+                    enabled = !viewModel.uiState.value.isConfirmationSubmitting
+                ) {
                     viewModel.dispatch(InstallerViewAction.ApproveSession(sessionInfo.sessionId, true))
                 },
-                DialogButton(stringResource(R.string.cancel)) {
+                DialogButton(
+                    text = stringResource(R.string.cancel),
+                    enabled = !viewModel.uiState.value.isConfirmationSubmitting
+                ) {
                     viewModel.dispatch(InstallerViewAction.ApproveSession(sessionInfo.sessionId, false))
                 }
             )

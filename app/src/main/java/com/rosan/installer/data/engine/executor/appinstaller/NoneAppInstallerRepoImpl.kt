@@ -67,6 +67,7 @@ class NoneAppInstallerRepoImpl(
 
             val packageInstaller = context.packageManager.packageInstaller
             var session: PackageInstaller.Session? = null
+            var platformSessionId: Int? = null
 
             try {
                 val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
@@ -80,6 +81,8 @@ class NoneAppInstallerRepoImpl(
 
                 val sessionId = packageInstaller.createSession(params)
                 session = packageInstaller.openSession(sessionId)
+                platformSessionId = sessionId
+                metadata.onPlatformSessionActiveChanged(sessionId, true)
 
                 var completedBytes = 0L
                 var stagingProgressSupported =
@@ -126,6 +129,9 @@ class NoneAppInstallerRepoImpl(
                 throw e
             } finally {
                 session?.close()
+                platformSessionId?.let { sessionId ->
+                    metadata.onPlatformSessionActiveChanged(sessionId, false)
+                }
             }
         }
 

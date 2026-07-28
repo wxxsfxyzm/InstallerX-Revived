@@ -731,6 +731,7 @@ class DefaultPrivilegedService private constructor(
             resolvedLabel?.let { putCharSequence("appLabel", it) }
             putString("packageName", packageName)
             putString("installerPackageName", sessionInfo.installerPackageName)
+            putInt("installerUid", sessionInfo.installerUid)
             path?.let { putString("resolvedBaseCodePath", it) }
             putBoolean("isUpdate", isUpdate)
             putBoolean("isOwnershipConflict", isOwnershipConflict)

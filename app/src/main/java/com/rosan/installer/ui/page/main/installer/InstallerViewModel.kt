@@ -27,6 +27,7 @@ import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppLabelUseCase
 import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.session.model.ProgressEntity
+import com.rosan.installer.domain.session.model.ConfirmationState
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.config.Authorizer
@@ -354,10 +355,13 @@ class InstallerViewModel(
         collectRepoJob = viewModelScope.launch {
             settingsLoadingJob.join()
 
-            // Core fix: Listen to both progress and uninstallInfo flows simultaneously
-            combine(session.progress, session.uninstallInfo) { progress, uninstallInfo ->
-                Pair(progress, uninstallInfo)
-            }.collect { (progress, uninstallInfo) ->
+            combine(
+                session.progress,
+                session.uninstallInfo,
+                session.confirmationState
+            ) { progress, uninstallInfo, confirmationState ->
+                Triple(progress, uninstallInfo, confirmationState)
+            }.collect { (progress, uninstallInfo, confirmationState) ->
 
                 if (progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallPreparing || progress is ProgressEntity.InstallAnalysing) {
                     if (isInstallingModule) {
@@ -464,6 +468,8 @@ class InstallerViewModel(
                     currentState.copy(
                         config = session.config,
                         stage = newStage,
+                        isConfirmationSubmitting =
+                            confirmationState is ConfirmationState.Submitting,
                         currentPackageName = newPackageName,
                         uiUninstallInfo = mergedUninstallInfo,
                         error = session.error

@@ -5,6 +5,7 @@ package com.rosan.installer.ui.page.main.installer.dialog
 data class DialogButton(
     val text: String,
     val weight: Float = 1f,
+    val enabled: Boolean = true,
     val onLongClick: (() -> Unit)? = null,
     val onClick: () -> Unit
 )

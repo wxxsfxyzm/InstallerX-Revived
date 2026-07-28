@@ -9,6 +9,8 @@ interface InstallerSessionManager {
     fun enqueueForegroundInstall(intent: Intent)
     fun takeNextForegroundInstall(): Intent?
     fun clearForegroundInstallQueue()
+    fun enqueueForegroundConfirmation(intent: Intent, callerUid: Int)
+    fun takeNextForegroundConfirmation(): Pair<Intent, Int>?
     fun enqueueForegroundUninstall(intent: Intent)
     fun takeNextForegroundUninstall(): Intent?
 }

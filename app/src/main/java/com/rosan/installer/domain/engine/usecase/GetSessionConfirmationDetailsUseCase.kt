@@ -5,6 +5,7 @@ package com.rosan.installer.domain.engine.usecase
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.os.Process
 import com.rosan.installer.domain.engine.provider.SessionDetailsProvider
 import com.rosan.installer.domain.session.model.ConfirmationDetails
 import com.rosan.installer.domain.session.model.ConfirmationRequestType
@@ -37,6 +38,7 @@ class GetSessionConfirmationDetailsUseCase(
         var isPreApprovalRequested = false
         var sourceAppLabel: CharSequence? = null
         var installerPackageName: String? = null
+        var installerUid = Process.INVALID_UID
 
         Timber.d("Getting session details via service (Authorizer: ${config.authorizer})")
 
@@ -55,6 +57,7 @@ class GetSessionConfirmationDetailsUseCase(
             isPreApprovalRequested = bundle.getBoolean("isPreApprovalRequested", false)
             sourceAppLabel = bundle.getCharSequence("sourceAppLabel")
             installerPackageName = bundle.getString("installerPackageName")
+            installerUid = bundle.getInt("installerUid", Process.INVALID_UID)
 
             try {
                 icon = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -79,6 +82,7 @@ class GetSessionConfirmationDetailsUseCase(
             isOwnershipConflict = isOwnershipConflict,
             sourceAppLabel = sourceAppLabel,
             installerPackageName = installerPackageName,
+            installerUid = installerUid,
             requestType = requestType,
             isPreApprovalRequested = isPreApprovalRequested,
             isSelfSession = isSelfSession,

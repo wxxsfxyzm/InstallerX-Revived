@@ -26,6 +26,7 @@ class InstallerSessionManagerImpl(
 
     // Queue for deferred foreground installs
     private val foregroundInstallQueue = ArrayDeque<Intent>()
+    private val foregroundConfirmationQueue = ArrayDeque<Pair<Intent, Int>>()
     private val foregroundUninstallQueue = ArrayDeque<Intent>()
 
     /**
@@ -87,6 +88,26 @@ class InstallerSessionManagerImpl(
             Timber.d("InstallerSessionManager: Foreground install queue cleared. Removed count=$count")
         }
     }
+
+    override fun enqueueForegroundConfirmation(intent: Intent, callerUid: Int) {
+        synchronized(foregroundConfirmationQueue) {
+            foregroundConfirmationQueue.addLast(Intent(intent) to callerUid)
+            Timber.d(
+                "InstallerSessionManager: Confirmation deferred. " +
+                        "Pending count=${foregroundConfirmationQueue.size}"
+            )
+        }
+    }
+
+    override fun takeNextForegroundConfirmation(): Pair<Intent, Int>? =
+        synchronized(foregroundConfirmationQueue) {
+            foregroundConfirmationQueue.removeFirstOrNull()?.also {
+                Timber.d(
+                    "InstallerSessionManager: Confirmation dequeued. " +
+                            "Pending count=${foregroundConfirmationQueue.size}"
+                )
+            }
+        }
 
     override fun enqueueForegroundUninstall(intent: Intent) {
         synchronized(foregroundUninstallQueue) {

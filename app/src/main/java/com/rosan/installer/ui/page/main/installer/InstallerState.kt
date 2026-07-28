@@ -22,6 +22,7 @@ data class InstallerState(
     val showMiuixSheetRightActionSettings: Boolean = false,
     val showMiuixPermissionList: Boolean = false,
     val navigatedFromPrepareToChoice: Boolean = false,
+    val isConfirmationSubmitting: Boolean = false,
     // Used to temporarily override the persistent setting during this session
     val tempShowOPPOSpecial: Boolean? = null,
     val tempLabShowFilePath: Boolean? = null,

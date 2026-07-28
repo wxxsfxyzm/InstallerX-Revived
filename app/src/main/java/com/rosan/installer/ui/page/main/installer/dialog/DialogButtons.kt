@@ -105,6 +105,7 @@ private fun InnerButton(
     }
 
     TextButton(
+        enabled = button.enabled,
         onClick = {
             // Only trigger normal click if long press didn't happen
             if (!hasLongPressed) {
