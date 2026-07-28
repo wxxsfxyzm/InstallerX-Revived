@@ -18,7 +18,13 @@ public interface IPackageManager extends IInterface {
     ApplicationInfo getApplicationInfo(String packageName, int flags, int userId)
             throws RemoteException;
 
+    ApplicationInfo getApplicationInfo(String packageName, long flags, int userId)
+            throws RemoteException;
+
     PackageInfo getPackageInfo(String packageName, int flags, int userId)
+            throws RemoteException;
+
+    PackageInfo getPackageInfo(String packageName, long flags, int userId)
             throws RemoteException;
 
     int getPackageUid(String packageName, int flags, int userId) throws RemoteException;
@@ -54,6 +60,8 @@ public interface IPackageManager extends IInterface {
             throws RemoteException;
 
     IPackageInstaller getPackageInstaller() throws RemoteException;
+
+    InstallSourceInfo getInstallSourceInfo(String packageName, int userId) throws RemoteException;
 
     int installExistingPackageAsUser(String packageName, int userId, int installFlags,
                                      int installReason) throws RemoteException;

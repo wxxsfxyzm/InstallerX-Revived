@@ -3,11 +3,10 @@
 package com.rosan.installer.framework.privileged.provider
 
 import android.os.Bundle
-import com.rosan.installer.framework.privileged.core.execution.dispatcher.useDirectPrivileged
-import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useDirectPrivileged
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -35,17 +34,15 @@ class SystemInfoProviderImpl(
 
     override suspend fun getSessionDetails(authorizer: Authorizer, sessionId: Int): Bundle? =
         withContext(Dispatchers.IO) {
-            var details: Bundle? = null
-            useUserService(
-                isSystemApp = capabilityProvider.isSystemApp,
-                authorizer = authorizer
-            ) {
-                try {
-                    details = it.privileged.getSessionDetails(sessionId)
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to get session details")
-                }
-            }
-            details
+            runCatching {
+                resolveSessionDetails(
+                    capabilityProvider = capabilityProvider,
+                    authorizer = authorizer,
+                    customizeAuthorizer = "",
+                    sessionId = sessionId
+                )
+            }.onFailure { error ->
+                Timber.e(error, "Failed to get session details")
+            }.getOrNull()
         }
 }

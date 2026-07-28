@@ -7,6 +7,8 @@ import android.os.IInterface;
 import android.os.RemoteException;
 
 public interface IPackageInstaller extends IInterface {
+    PackageInstaller.SessionInfo getSessionInfo(int sessionId) throws RemoteException;
+
     void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags, IntentSender statusReceiver, int userId) throws RemoteException;
 
     void abandonSession(int sessionId) throws RemoteException;

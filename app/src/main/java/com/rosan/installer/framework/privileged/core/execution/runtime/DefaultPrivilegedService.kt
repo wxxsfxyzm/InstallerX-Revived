@@ -12,7 +12,9 @@ import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
 import android.content.pm.IPackageManager
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
@@ -28,6 +30,7 @@ import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.os.ResultReceiver
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.rosan.installer.ICommandOutputListener
@@ -73,6 +76,10 @@ class DefaultPrivilegedService private constructor(
         runtime.packageManager()
     }
 
+    private val iPackageInstaller by lazy {
+        runtime.packageInstaller()
+    }
+
     private val iActivityManager: IActivityManager by lazy {
         runtime.activityManager()
     }
@@ -92,6 +99,30 @@ class DefaultPrivilegedService private constructor(
     private val appOpsManager: AppOpsManager by lazy {
         runtime.appOpsManager(context, reflect)
     }
+
+    private fun getApplicationInfo(
+        packageName: String,
+        flags: Long,
+        userId: Int
+    ): ApplicationInfo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        iPackageManager.getApplicationInfo(packageName, flags, userId)
+    } else {
+        iPackageManager.getApplicationInfo(packageName, flags.toInt(), userId)
+    }
+
+    private fun getPackageInfo(
+        packageName: String,
+        flags: Long,
+        userId: Int
+    ): PackageInfo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        iPackageManager.getPackageInfo(packageName, flags, userId)
+    } else {
+        iPackageManager.getPackageInfo(packageName, flags.toInt(), userId)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun getUpdateOwnerPackageName(packageName: String, userId: Int): String? =
+        iPackageManager.getInstallSourceInfo(packageName, userId).updateOwnerPackageName
 
     override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
 
@@ -493,17 +524,57 @@ class DefaultPrivilegedService private constructor(
             }
         }
 
+    override fun parsePackageArchive(path: String): Bundle? {
+        Timber.tag(TAG).d("parsePackageArchive: path=$path")
+
+        return runCatching {
+            val packageManager = context.packageManager
+            val packageInfo = packageManager.getPackageArchiveInfo(path, PackageManager.GET_META_DATA)
+                ?: return@runCatching null
+            val applicationInfo = packageInfo.applicationInfo ?: return@runCatching null
+
+            applicationInfo.publicSourceDir = path
+            applicationInfo.sourceDir = path
+
+            val label = runCatching {
+                applicationInfo.loadLabel(packageManager)
+            }.onFailure { error ->
+                Timber.tag(TAG).w(error, "Failed to load APK label from $path")
+            }.getOrNull()
+
+            val icon = runCatching {
+                val drawable = applicationInfo.loadIcon(packageManager)
+                if (drawable is BitmapDrawable) {
+                    drawable.bitmap
+                } else {
+                    val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 1
+                    val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 1
+                    drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
+                }
+            }.onFailure { error ->
+                Timber.tag(TAG).w(error, "Failed to load APK icon from $path")
+            }.getOrNull()
+
+            Bundle().apply {
+                putString("packageName", packageInfo.packageName)
+                label?.let { putCharSequence("appLabel", it) }
+                icon?.let { putParcelable("appIcon", it) }
+            }
+        }.onFailure { error ->
+            Timber.tag(TAG).w(error, "Failed to parse package archive $path")
+        }.getOrNull()
+    }
+
     override fun getSessionDetails(sessionId: Int): Bundle? {
         Timber.tag(TAG).d("getSessionDetails: sessionId=$sessionId")
 
-        val packageInstaller = context.packageManager.packageInstaller
-        val sessionInfo = packageInstaller.getSessionInfo(sessionId) ?: run {
+        val sessionInfo = iPackageInstaller.getSessionInfo(sessionId) ?: run {
             Timber.tag(TAG).w("getSessionDetails: sessionInfo is null for id $sessionId")
             return null
         }
 
-        var resolvedLabel: CharSequence? = null
-        var resolvedIcon: Bitmap? = null
+        var resolvedLabel: CharSequence? = sessionInfo.appLabel
+        var resolvedIcon: Bitmap? = reflect.getValue(sessionInfo, "appIcon")
         var path: String?
 
         // ---------------------------------------------------------
@@ -511,7 +582,7 @@ class DefaultPrivilegedService private constructor(
         // ---------------------------------------------------------
         path = reflect.getValue<String>(sessionInfo, "resolvedBaseCodePath")
 
-        if (path == null) {
+        if (path == null && runtime == PrivilegedRuntime.SystemApp) {
             val stageDir = reflect.getValue<File>(sessionInfo, "stageDir")
             if (stageDir != null && stageDir.exists() && stageDir.isDirectory) {
                 path = stageDir.listFiles { _, name -> name.endsWith(".apk") }
@@ -521,9 +592,9 @@ class DefaultPrivilegedService private constructor(
         }
 
         // ---------------------------------------------------------
-        // STRATEGY 2.5: Root/Privileged Direct File Access
+        // STRATEGY 2.5: System App Direct File Access
         // ---------------------------------------------------------
-        if (path == null) {
+        if (path == null && runtime == PrivilegedRuntime.SystemApp) {
             val sessionDir = File("/data/app/vmdl${sessionId}.tmp")
             if (sessionDir.exists() && sessionDir.isDirectory) {
                 val apkFiles = sessionDir.listFiles { _, name -> name.endsWith(".apk", true) }
@@ -538,36 +609,22 @@ class DefaultPrivilegedService private constructor(
         // ---------------------------------------------------------
         // Parse APK from path (if found)
         // ---------------------------------------------------------
-        if (!path.isNullOrEmpty()) {
-            runCatching {
-                val pm = context.packageManager
-                val pkgInfo = pm.getPackageArchiveInfo(path, PackageManager.GET_META_DATA)
-                pkgInfo?.applicationInfo?.let { appInfo ->
-                    appInfo.publicSourceDir = path
-                    appInfo.sourceDir = path
-
-                    resolvedLabel = appInfo.loadLabel(pm)
-
-                    val drawable = appInfo.loadIcon(pm)
-                    resolvedIcon = if (drawable is BitmapDrawable) {
-                        drawable.bitmap
-                    } else {
-                        val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 1
-                        val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 1
-                        drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
-                    }
-                }
-            }.onFailure { e ->
-                Timber.tag(TAG).e(e, "Failed to parse APK from path: $path")
+        if (!path.isNullOrEmpty() && runtime == PrivilegedRuntime.SystemApp) {
+            parsePackageArchive(path)?.let { archiveDetails ->
+                archiveDetails.getCharSequence("appLabel")?.let { resolvedLabel = it }
+                @Suppress("DEPRECATION")
+                (archiveDetails.getParcelable("appIcon") as? Bitmap)?.let { resolvedIcon = it }
             }
         }
 
         val packageName = sessionInfo.appPackageName ?: ""
 
         // Try to get the exact target User ID for this session, fallback to current process user
-        val targetUserId = runCatching {
-            sessionInfo.user.hashCode() // On modern Android, userHandle.hashCode() == userId
-        }.getOrDefault(AndroidProcess.myUid() / 100000)
+        val targetUserId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            sessionInfo.user.hashCode() // UserHandle.hashCode() == userId
+        } else {
+            reflect.getValue<Int>(sessionInfo, "userId") ?: (AndroidProcess.myUid() / 100000)
+        }
 
         // ---------------------------------------------------------
         // STRATEGY 3: Fallback to Installed App Info (Crucial for Updates)
@@ -575,7 +632,7 @@ class DefaultPrivilegedService private constructor(
         if ((resolvedLabel == null || resolvedIcon == null) && packageName.isNotEmpty()) {
             runCatching {
                 // [Optimized] Use our hidden iPackageManager to respect the correct userId
-                val appInfo = iPackageManager.getApplicationInfo(packageName, 0, targetUserId)
+                val appInfo = getApplicationInfo(packageName, 0L, targetUserId) ?: return@runCatching
                 val pm = context.packageManager
 
                 if (resolvedLabel == null) resolvedLabel = appInfo.loadLabel(pm)
@@ -590,11 +647,14 @@ class DefaultPrivilegedService private constructor(
                     }
                 }
                 Timber.tag(TAG).d("Fallback: Loaded missing info from installed app")
+            }.onFailure { error ->
+                Timber.tag(TAG).w(error, "Failed to load installed app fallback for $packageName")
             }
         }
 
         var isUpdate = false
         var isOwnershipConflict = false
+        var updateOwnerPackageName: String? = null
         val isPreApprovalRequested = runCatching {
             reflect.invoke<Boolean>(
                 sessionInfo,
@@ -608,55 +668,70 @@ class DefaultPrivilegedService private constructor(
         if (packageName.isNotEmpty()) {
             // 1. Check if this is an update using iPackageManager and specific userId
             isUpdate = runCatching {
-                iPackageManager.getPackageInfo(packageName, 0, targetUserId) != null
+                getPackageInfo(packageName, 0L, targetUserId) != null
+            }.onFailure { error ->
+                Timber.tag(TAG).w(error, "Failed to query installed package $packageName for user $targetUserId")
             }.getOrDefault(false)
 
             // 2. Check for Android 14+ Update Ownership Conflict
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                runCatching {
+                val pendingReasonResult = runCatching {
                     val pendingReason = reflect.invoke<Int>(
                         sessionInfo, "getPendingUserActionReason",
                         sessionInfo::class.java, emptyArray()
                     ) ?: 0
                     isOwnershipConflict = (pendingReason == REASON_REMIND_OWNERSHIP)
-                }.onFailure {
-                    // Fallback inference
-                    runCatching {
-                        val ownerPkg = context.packageManager.getInstallSourceInfo(packageName).updateOwnerPackageName
-                        if (!ownerPkg.isNullOrEmpty() && ownerPkg != context.packageName) {
-                            isOwnershipConflict = true
-                        }
-                    }
+                }
+
+                if (isOwnershipConflict || pendingReasonResult.isFailure) {
+                    updateOwnerPackageName = runCatching {
+                        getUpdateOwnerPackageName(packageName, targetUserId)
+                    }.onFailure { error ->
+                        Timber.tag(TAG).w(error, "Failed to resolve update owner for $packageName")
+                    }.getOrNull()
+                }
+
+                // Fallback inference when the pending-reason API is unavailable on an OEM build.
+                if (pendingReasonResult.isFailure &&
+                    !updateOwnerPackageName.isNullOrEmpty() &&
+                    updateOwnerPackageName != context.packageName
+                ) {
+                    isOwnershipConflict = true
                 }
             }
 
             // 3. Determine the appropriate source app label
             runCatching {
-                val pm = context.packageManager
                 val targetPkgToResolve = if (isOwnershipConflict) {
-                    pm.getInstallSourceInfo(packageName).updateOwnerPackageName
+                    updateOwnerPackageName
                 } else {
                     sessionInfo.installerPackageName
                 }
 
                 if (!targetPkgToResolve.isNullOrEmpty()) {
-                    val appInfo = pm.getApplicationInfo(targetPkgToResolve, 0) // No need for flags if 0
-                    sourceAppLabel = pm.getApplicationLabel(appInfo)
-                    Timber.tag(TAG).d("Source app label resolved: $sourceAppLabel (Conflict: $isOwnershipConflict)")
+                    val appInfo = getApplicationInfo(targetPkgToResolve, 0L, targetUserId)
+                    if (appInfo != null) {
+                        sourceAppLabel = appInfo.loadLabel(context.packageManager)
+                        Timber.tag(TAG).d("Source app label resolved: $sourceAppLabel (Conflict: $isOwnershipConflict)")
+                    } else {
+                        Timber.tag(TAG).w("Source app info is null for $targetPkgToResolve, user $targetUserId")
+                    }
                 }
+            }.onFailure { error ->
+                Timber.tag(TAG).w(error, "Failed to resolve source app label for session $sessionId")
             }
         }
 
         // ---------------------------------------------------------
         // Final Data Preparation
         // ---------------------------------------------------------
-        val finalLabel = resolvedLabel ?: sessionInfo.appLabel ?: "N/A"
-        Timber.tag(TAG).d("Final Data -> Label: '$finalLabel', Has Icon: ${resolvedIcon != null}")
+        Timber.tag(TAG).d("Final Data -> Label: '$resolvedLabel', Has Icon: ${resolvedIcon != null}")
 
         return Bundle().apply {
-            putCharSequence("appLabel", finalLabel)
+            resolvedLabel?.let { putCharSequence("appLabel", it) }
             putString("packageName", packageName)
             putString("installerPackageName", sessionInfo.installerPackageName)
+            path?.let { putString("resolvedBaseCodePath", it) }
             putBoolean("isUpdate", isUpdate)
             putBoolean("isOwnershipConflict", isOwnershipConflict)
             putBoolean("isPreApprovalRequested", isPreApprovalRequested)

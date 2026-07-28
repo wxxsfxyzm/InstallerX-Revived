@@ -6,9 +6,15 @@
 
 # Keep the hidden framework method signatures used by the privileged uninstall path.
 -keep,allowobfuscation class android.content.pm.IPackageInstaller {
+    public android.content.pm.PackageInstaller$SessionInfo getSessionInfo(int);
     public void uninstall(android.content.pm.VersionedPackage, java.lang.String, int, android.content.IntentSender, int);
 }
 
 -keep,allowobfuscation class android.content.pm.IPackageManager {
+    public android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String, int, int);
+    public android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String, long, int);
+    public android.content.pm.PackageInfo getPackageInfo(java.lang.String, int, int);
+    public android.content.pm.PackageInfo getPackageInfo(java.lang.String, long, int);
     public android.content.pm.IPackageInstaller getPackageInstaller();
+    public android.content.pm.InstallSourceInfo getInstallSourceInfo(java.lang.String, int);
 }

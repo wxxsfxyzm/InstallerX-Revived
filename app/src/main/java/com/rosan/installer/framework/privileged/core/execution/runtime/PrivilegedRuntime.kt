@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.app.IActivityManager
 import android.content.Context
+import android.content.pm.IPackageInstaller
 import android.content.pm.IPackageManager
 import android.net.IConnectivityManager
 import android.os.IBinder
@@ -30,6 +31,8 @@ internal sealed interface PrivilegedRuntime {
     fun activityCallerPackage(context: Context): String
 
     fun packageManager(): IPackageManager
+
+    fun packageInstaller(): IPackageInstaller
 
     fun activityManager(): IActivityManager
 
@@ -70,6 +73,11 @@ internal sealed interface PrivilegedRuntime {
         override fun packageManager(): IPackageManager {
             Timber.tag(TAG).d("Getting IPackageManager in $name mode.")
             return ShizukuHook.hookedPackageManager
+        }
+
+        override fun packageInstaller(): IPackageInstaller {
+            Timber.tag(TAG).d("Getting IPackageInstaller in $name mode.")
+            return ShizukuHook.hookedPackageInstaller
         }
 
         override fun activityManager(): IActivityManager {
@@ -118,6 +126,12 @@ internal sealed interface PrivilegedRuntime {
             Timber.tag(TAG).d("Getting IPackageManager in $name mode.")
             val original = ServiceManager.getService("package")
             return IPackageManager.Stub.asInterface(binderWrapper(original))
+        }
+
+        override fun packageInstaller(): IPackageInstaller {
+            Timber.tag(TAG).d("Getting IPackageInstaller in $name mode.")
+            val original = packageManager().packageInstaller
+            return IPackageInstaller.Stub.asInterface(binderWrapper(original.asBinder()))
         }
 
         override fun activityManager(): IActivityManager {
@@ -170,6 +184,11 @@ internal sealed interface PrivilegedRuntime {
         override fun packageManager(): IPackageManager {
             Timber.tag(TAG).d("Getting IPackageManager in $name mode.")
             return IPackageManager.Stub.asInterface(ServiceManager.getService("package"))
+        }
+
+        override fun packageInstaller(): IPackageInstaller {
+            Timber.tag(TAG).d("Getting IPackageInstaller in $name mode.")
+            return packageManager().packageInstaller
         }
 
         override fun activityManager(): IActivityManager {

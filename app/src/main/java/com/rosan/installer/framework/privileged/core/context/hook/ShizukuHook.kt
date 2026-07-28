@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.IActivityManager
 import android.content.Context
+import android.content.pm.IPackageInstaller
 import android.content.pm.IPackageManager
 import android.net.IConnectivityManager
 import android.os.IBinder
@@ -31,6 +32,15 @@ object ShizukuHook : KoinComponent {
         val wrapper = ShizukuBinderWrapper(originalPM.asBinder())
         IPackageManager.Stub.asInterface(wrapper).also {
             Timber.tag("ShizukuHook").i("On-demand hooked IPackageManager created.")
+        }
+    }
+
+    val hookedPackageInstaller: IPackageInstaller by lazy {
+        Timber.tag("ShizukuHook").d("Creating on-demand hooked IPackageInstaller...")
+        val original = hookedPackageManager.packageInstaller
+        val wrapper = ShizukuBinderWrapper(original.asBinder())
+        IPackageInstaller.Stub.asInterface(wrapper).also {
+            Timber.tag("ShizukuHook").i("On-demand hooked IPackageInstaller created.")
         }
     }
 

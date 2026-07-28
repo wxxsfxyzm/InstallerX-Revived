@@ -4,7 +4,6 @@ package com.rosan.installer.data.session.handler
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.IntentSender
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -549,10 +548,20 @@ class ActionHandler(
         }
     }
 
+    /**
+     * Performs the installation logic with self-update recovery.
+     * @param analysisResults The list of [PackageAnalysisResult] to install.
+     * @param install The suspend function to perform the installation.
+     */
     private suspend fun runWithSelfUpdateRecovery(
         analysisResults: List<PackageAnalysisResult>,
         install: suspend () -> Unit
     ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) {
+            install()
+            return
+        }
+
         val selfUpdate = analysisResults.firstOrNull { result ->
             result.packageName == context.packageName && result.appEntities.any { it.selected }
         }

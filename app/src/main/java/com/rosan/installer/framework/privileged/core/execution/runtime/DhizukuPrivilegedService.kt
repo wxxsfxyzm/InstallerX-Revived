@@ -109,6 +109,8 @@ class DhizukuPrivilegedService(
 
     override fun getSessionDetails(sessionId: Int): Bundle? = unsupported()
 
+    override fun parsePackageArchive(path: String): Bundle? = unsupported()
+
     override fun setPackageNetworkingEnabled(uid: Int, enabled: Boolean) {
         unsupported<Unit>()
     }

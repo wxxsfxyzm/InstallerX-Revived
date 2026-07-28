@@ -24,8 +24,9 @@ private const val DIRECT_TAG = "DirectPrivileged"
  * Runs privileged binder/API operations directly in the app process.
  *
  * This is intentionally separate from [useUserService]. Binder hook backends should not be
- * shaped as IPrivilegedService user services; the only remote path left for that helper is
- * shell execution, file deletion, and session detail extraction.
+ * shaped as IPrivilegedService user services; the remote helper is reserved for operations such
+ * as shell execution, file deletion, and staged APK parsing that cannot be represented by wrapped
+ * framework binders.
  */
 fun useDirectPrivileged(
     isSystemApp: Boolean,

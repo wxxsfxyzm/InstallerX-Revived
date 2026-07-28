@@ -10,7 +10,6 @@ import android.content.pm.PackageManagerHidden
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
-import android.os.Process
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -180,7 +179,7 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
             ?.takeIf { it.scheme == "android-app" }
             ?.host
         val recovered = selfUpdateRecoveryManager.consumeSystemUiRecovery(
-            launchedFromUid = launchedFromUidCompat(),
+            launchedFromUid = launchedFromUid,
             platformReferrerPackage = platformReferrerPackage,
             intentFlags = intent.flags
         )
@@ -190,12 +189,6 @@ class InstallerActivity : ComponentActivity(), KoinComponent {
         startActivity(SettingsActivity.createSelfUpdateRecoveryIntent(this))
         finishAndRemoveTask()
         return true
-    }
-
-    @Suppress("DEPRECATION")
-    private fun launchedFromUidCompat(): Int {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) return Process.INVALID_UID
-        return launchedFromUid
     }
 
     private fun checkPermissionsAndStartProcess() {

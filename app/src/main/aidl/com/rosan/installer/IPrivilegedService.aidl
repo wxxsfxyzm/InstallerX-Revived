@@ -1,6 +1,5 @@
 package com.rosan.installer;
 
-import android.content.ComponentName;
 import com.rosan.installer.ICommandOutputListener;
 
 /**
@@ -29,15 +28,8 @@ interface IPrivilegedService {
     void execArrWithCallback(in String[] command, ICommandOutputListener listener);
 
     /**
-     * Configures this app as the default package installer.
+     * Parses an APK that is only readable from this privileged process.
      */
-    void setDefaultInstaller(in ComponentName component, boolean enable);
+    Bundle parsePackageArchive(String path);
 
-    /**
-     * Retrieves detailed information about an installation session (app name, icon).
-     * @param sessionId The ID of the session to query.
-     * @return A Bundle containing "appLabel" (String) and "appIcon" (byte[]),
-     * or null if the session is invalid or the query fails.
-     */
-    Bundle getSessionDetails(int sessionId);
 }
