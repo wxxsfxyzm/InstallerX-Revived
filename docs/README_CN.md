@@ -149,8 +149,8 @@ InstallerX Revived 基于 [GNU General Public License v3](http://www.gnu.org/lic
 
 <a href="https://www.star-history.com/?repos=wxxsfxyzm%2FInstallerX-Revived&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&theme=dark&legend=top-left&sealed_token=Hp_xa69sA4KNmnl8KwAi2TAJjRZIIXpI5DPfwe6ULCpe2Pd8lyr0waU2bPCAvZLLDbLc1BlQRnH1U41HhtaLsI7tyxICKwqGErPPLjnj4nJT-SJhIOi6lP5mfsymarUIh2ZcACpqUBL5p32Xd6RHLsZXvOVz3OCwdVMjrQ8XSyOKAAq-0nxFt7qJlGuU" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left&sealed_token=Hp_xa69sA4KNmnl8KwAi2TAJjRZIIXpI5DPfwe6ULCpe2Pd8lyr0waU2bPCAvZLLDbLc1BlQRnH1U41HhtaLsI7tyxICKwqGErPPLjnj4nJT-SJhIOi6lP5mfsymarUIh2ZcACpqUBL5p32Xd6RHLsZXvOVz3OCwdVMjrQ8XSyOKAAq-0nxFt7qJlGuU" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left&sealed_token=Hp_xa69sA4KNmnl8KwAi2TAJjRZIIXpI5DPfwe6ULCpe2Pd8lyr0waU2bPCAvZLLDbLc1BlQRnH1U41HhtaLsI7tyxICKwqGErPPLjnj4nJT-SJhIOi6lP5mfsymarUIh2ZcACpqUBL5p32Xd6RHLsZXvOVz3OCwdVMjrQ8XSyOKAAq-0nxFt7qJlGuU" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&theme=dark&legend=top-left&sealed_token=4WKKKz4XjZ9ldQlKAfsk7E2GQ42zBtkvT-bmfxyDlj45I6TozulC7ZI0jvDQMXLLuzj3tl4Op907o79iWf3-uN2zcV9T8ql1e-OIQHQMvJixDgDuoNhHmOH9RNWXKKgJ4pNrBR2FyTIdvQxDgeb_sV2a51PQLkKFX0uNG2Y5trJWkXGEhWC29t-PSiKX" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left&sealed_token=4WKKKz4XjZ9ldQlKAfsk7E2GQ42zBtkvT-bmfxyDlj45I6TozulC7ZI0jvDQMXLLuzj3tl4Op907o79iWf3-uN2zcV9T8ql1e-OIQHQMvJixDgDuoNhHmOH9RNWXKKgJ4pNrBR2FyTIdvQxDgeb_sV2a51PQLkKFX0uNG2Y5trJWkXGEhWC29t-PSiKX" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=wxxsfxyzm/InstallerX-Revived&type=date&legend=top-left&sealed_token=4WKKKz4XjZ9ldQlKAfsk7E2GQ42zBtkvT-bmfxyDlj45I6TozulC7ZI0jvDQMXLLuzj3tl4Op907o79iWf3-uN2zcV9T8ql1e-OIQHQMvJixDgDuoNhHmOH9RNWXKKgJ4pNrBR2FyTIdvQxDgeb_sV2a51PQLkKFX0uNG2Y5trJWkXGEhWC29t-PSiKX" />
  </picture>
 </a>
