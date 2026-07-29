@@ -135,9 +135,13 @@ fun PrivPage(
                             title = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer) else stringResource(
                                 R.string.config_authorizer_none
                             ),
-                            description = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer_desc)
-                            else stringResource(R.string.working_status_none_authorizer_desc),
+                            description = when {
+                                !uiState.isSessionInstallSupported -> stringResource(R.string.unavailable)
+                                uiState.isSystemApp -> stringResource(R.string.working_status_system_installer_desc)
+                                else -> stringResource(R.string.working_status_none_authorizer_desc)
+                            },
                             selected = selected,
+                            enabled = uiState.isSessionInstallSupported,
                             onClick = {
                                 viewModel.dispatch(
                                     HomePageViewAction.ChangeAuthorizer(

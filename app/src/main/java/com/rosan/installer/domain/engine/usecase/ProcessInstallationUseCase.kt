@@ -411,7 +411,7 @@ class ProcessInstallationUseCase(
             value = appSettingsRepo
                 .getString(StringSetting.SmartAuthorizerCandidates)
                 .first(),
-            isSystemApp = capabilityProvider.isSystemApp
+            isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
         )
             .filter { it.enabled }
             .map { it.authorizer }

@@ -88,7 +88,7 @@ class AppSettingsRepositoryImpl(
             tryMultipleAuthorizersOnInstall = prefs[AppDataStore.TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL] ?: false,
             smartAuthorizerCandidates = SmartAuthorizerPreferences.decode(
                 value = prefs[AppDataStore.SMART_AUTHORIZER_CANDIDATES].orEmpty(),
-                isSystemApp = capabilityProvider.isSystemApp
+                isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
             ),
             showMiuixUI = prefs[AppDataStore.UI_USE_MIUIX] ?: false,
             preferSystemIcon = prefs[AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL] ?: false,

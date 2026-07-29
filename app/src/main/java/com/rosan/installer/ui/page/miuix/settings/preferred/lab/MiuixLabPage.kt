@@ -91,6 +91,7 @@ fun MiuixLabPage(
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
+    val isSystemApp = capabilityProvider.isSystemApp
     val rootMode by capabilityProvider.rootModeFlow.collectAsStateWithLifecycle()
     val shizukuMode by capabilityProvider.shizukuModeFlow.collectAsStateWithLifecycle()
     val shizukuAuthorized by capabilityProvider.shizukuAuthorizedFlow.collectAsStateWithLifecycle()
@@ -149,7 +150,7 @@ fun MiuixLabPage(
     val smartAuthorizerSummary = uiState.smartAuthorizerCandidates
         .filter { it.enabled }
         .joinToString("->") {
-            miuixSmartAuthorizerDisplayName(it.authorizer, context::getString)
+            miuixSmartAuthorizerDisplayName(it.authorizer, isSystemApp, context::getString)
         }
 
     val topBarBackdrop = rememberMiuixBlurBackdrop(useBlur)
@@ -380,6 +381,7 @@ fun MiuixLabPage(
             shizukuAuthorized = shizukuAuthorized,
             dhizukuAvailable = dhizukuAvailable,
             dhizukuAuthorized = dhizukuAuthorized,
+            isSystemApp = isSystemApp,
             onCandidatesChange = {
                 viewModel.dispatch(LabSettingsAction.LabChangeSmartAuthorizerCandidates(it))
             }
@@ -395,6 +397,7 @@ private fun MiuixSmartAuthorizerBottomSheet(
     shizukuAuthorized: Boolean,
     dhizukuAvailable: Boolean,
     dhizukuAuthorized: Boolean,
+    isSystemApp: Boolean,
     onCandidatesChange: (List<SmartAuthorizerCandidate>) -> Unit
 ) {
     val context = LocalContext.current
@@ -433,7 +436,9 @@ private fun MiuixSmartAuthorizerBottomSheet(
         MiuixDraggableList(
             items = sheetCandidates,
             itemKey = { it.authorizer.value },
-            itemName = { miuixSmartAuthorizerDisplayName(it.authorizer, context::getString) },
+            itemName = {
+                miuixSmartAuthorizerDisplayName(it.authorizer, isSystemApp, context::getString)
+            },
             itemDescription = {
                 miuixSmartAuthorizerAvailabilityDescription(
                     authorizer = it.authorizer,
@@ -442,6 +447,7 @@ private fun MiuixSmartAuthorizerBottomSheet(
                     shizukuAuthorized = shizukuAuthorized,
                     dhizukuAvailable = dhizukuAvailable,
                     dhizukuAuthorized = dhizukuAuthorized,
+                    isSystemApp = isSystemApp,
                     getString = context::getString
                 )
             },
@@ -468,10 +474,14 @@ private fun MiuixSmartAuthorizerBottomSheet(
 
 private fun miuixSmartAuthorizerDisplayName(
     authorizer: Authorizer,
+    isSystemApp: Boolean,
     getString: (Int) -> String
 ): String =
     if (authorizer == Authorizer.None) {
-        getString(R.string.working_status_system_installer)
+        getString(
+            if (isSystemApp) R.string.working_status_system_installer
+            else R.string.config_authorizer_none
+        )
     } else {
         getString(authorizer.displayNameRes)
     }
@@ -483,6 +493,7 @@ private fun miuixSmartAuthorizerAvailabilityDescription(
     shizukuAuthorized: Boolean,
     dhizukuAvailable: Boolean,
     dhizukuAuthorized: Boolean,
+    isSystemApp: Boolean,
     getString: (Int) -> String
 ): String =
     when (authorizer) {
@@ -504,7 +515,10 @@ private fun miuixSmartAuthorizerAvailabilityDescription(
             else -> getString(R.string.dhizuku_not_available)
         }
 
-        Authorizer.None -> getString(R.string.working_status_system_installer_desc)
+        Authorizer.None -> getString(
+            if (isSystemApp) R.string.working_status_system_installer_desc
+            else R.string.working_status_none_authorizer_desc
+        )
         else -> authorizer.value
     }
 

@@ -17,13 +17,16 @@ object SmartAuthorizerPreferences {
         Authorizer.None
     )
 
-    fun defaultCandidates(isSystemApp: Boolean): List<SmartAuthorizerCandidate> =
+    fun defaultCandidates(isSessionInstallSupported: Boolean): List<SmartAuthorizerCandidate> =
         supportedAuthorizers
-            .filter { it != Authorizer.None || isSystemApp }
+            .filter { it != Authorizer.None || isSessionInstallSupported }
             .map { SmartAuthorizerCandidate(authorizer = it, enabled = true) }
 
-    fun decode(value: String, isSystemApp: Boolean): List<SmartAuthorizerCandidate> {
-        if (value.isBlank()) return defaultCandidates(isSystemApp)
+    fun decode(
+        value: String,
+        isSessionInstallSupported: Boolean
+    ): List<SmartAuthorizerCandidate> {
+        if (value.isBlank()) return defaultCandidates(isSessionInstallSupported)
 
         val parsed = value
             .split(',')
@@ -38,11 +41,11 @@ object SmartAuthorizerPreferences {
                 )
             }
             .distinctBy { it.authorizer }
-            .filter { it.authorizer != Authorizer.None || isSystemApp }
+            .filter { it.authorizer != Authorizer.None || isSessionInstallSupported }
 
-        if (parsed.isEmpty()) return defaultCandidates(isSystemApp)
+        if (parsed.isEmpty()) return defaultCandidates(isSessionInstallSupported)
 
-        val missing = defaultCandidates(isSystemApp)
+        val missing = defaultCandidates(isSessionInstallSupported)
             .filterNot { candidate -> parsed.any { it.authorizer == candidate.authorizer } }
 
         return parsed + missing

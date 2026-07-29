@@ -105,6 +105,7 @@ class HomePageViewModel(
 
             rootMode = caps.rootMode,
             isSystemApp = capabilityProvider.isSystemApp,
+            isSessionInstallSupported = capabilityProvider.isSessionInstallSupported,
             availableAuthorizerCount = availableCount,
             userSetLSPosedActive = prefs.userSetLSPosedActive,
             defaultInstaller = caps.defaultInstaller,

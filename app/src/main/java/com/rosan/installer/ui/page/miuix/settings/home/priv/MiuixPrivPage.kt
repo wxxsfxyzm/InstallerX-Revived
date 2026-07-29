@@ -139,9 +139,13 @@ fun MiuixPrivPage(
                     CheckboxPreference(
                         checkboxLocation = CheckboxLocation.End,
                         title = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer) else stringResource(R.string.config_authorizer_none),
-                        summary = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer_desc)
-                        else stringResource(R.string.working_status_none_authorizer_desc),
+                        summary = when {
+                            !uiState.isSessionInstallSupported -> stringResource(R.string.unavailable)
+                            uiState.isSystemApp -> stringResource(R.string.working_status_system_installer_desc)
+                            else -> stringResource(R.string.working_status_none_authorizer_desc)
+                        },
                         checked = uiState.globalAuthorizer == Authorizer.None,
+                        enabled = uiState.isSessionInstallSupported,
                         onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.None)) }
                     )
 

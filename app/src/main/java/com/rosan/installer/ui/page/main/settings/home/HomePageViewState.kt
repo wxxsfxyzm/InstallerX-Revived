@@ -21,6 +21,7 @@ class HomePageViewState(
 
     val rootMode: RootMode = RootMode.None,
     val isSystemApp: Boolean = false,
+    val isSessionInstallSupported: Boolean = false,
     val availableAuthorizerCount: Int = 0,
     val userSetLSPosedActive: Boolean = false,
     val customizeAuthorizer: String = "",

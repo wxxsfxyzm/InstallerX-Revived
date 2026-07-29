@@ -86,6 +86,7 @@ fun LabPage(
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
+    val isSystemApp = capabilityProvider.isSystemApp
     val rootMode by capabilityProvider.rootModeFlow.collectAsStateWithLifecycle()
     val shizukuMode by capabilityProvider.shizukuModeFlow.collectAsStateWithLifecycle()
     val shizukuAuthorized by capabilityProvider.shizukuAuthorizedFlow.collectAsStateWithLifecycle()
@@ -155,7 +156,7 @@ fun LabPage(
     val smartAuthorizerSummary = uiState.smartAuthorizerCandidates
         .filter { it.enabled }
         .joinToString("->") {
-            smartAuthorizerDisplayName(it.authorizer, context::getString)
+            smartAuthorizerDisplayName(it.authorizer, isSystemApp, context::getString)
         }
 
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
@@ -337,6 +338,7 @@ fun LabPage(
                 shizukuAuthorized = shizukuAuthorized,
                 dhizukuAvailable = dhizukuAvailable,
                 dhizukuAuthorized = dhizukuAuthorized,
+                isSystemApp = isSystemApp,
                 onCandidatesChange = {
                     viewModel.dispatch(LabSettingsAction.LabChangeSmartAuthorizerCandidates(it))
                 }
@@ -353,6 +355,7 @@ private fun SmartAuthorizerBottomSheet(
     shizukuAuthorized: Boolean,
     dhizukuAvailable: Boolean,
     dhizukuAuthorized: Boolean,
+    isSystemApp: Boolean,
     onCandidatesChange: (List<SmartAuthorizerCandidate>) -> Unit
 ) {
     val context = LocalContext.current
@@ -396,7 +399,9 @@ private fun SmartAuthorizerBottomSheet(
         DraggableList(
             items = sheetCandidates,
             itemKey = { it.authorizer.value },
-            itemName = { smartAuthorizerDisplayName(it.authorizer, context::getString) },
+            itemName = {
+                smartAuthorizerDisplayName(it.authorizer, isSystemApp, context::getString)
+            },
             itemDescription = {
                 smartAuthorizerAvailabilityDescription(
                     authorizer = it.authorizer,
@@ -405,6 +410,7 @@ private fun SmartAuthorizerBottomSheet(
                     shizukuAuthorized = shizukuAuthorized,
                     dhizukuAvailable = dhizukuAvailable,
                     dhizukuAuthorized = dhizukuAuthorized,
+                    isSystemApp = isSystemApp,
                     getString = context::getString
                 )
             },
@@ -432,10 +438,14 @@ private fun SmartAuthorizerBottomSheet(
 
 private fun smartAuthorizerDisplayName(
     authorizer: Authorizer,
+    isSystemApp: Boolean,
     getString: (Int) -> String
 ): String =
     if (authorizer == Authorizer.None) {
-        getString(R.string.working_status_system_installer)
+        getString(
+            if (isSystemApp) R.string.working_status_system_installer
+            else R.string.config_authorizer_none
+        )
     } else {
         getString(authorizer.displayNameRes)
     }
@@ -457,6 +467,7 @@ private fun smartAuthorizerAvailabilityDescription(
     shizukuAuthorized: Boolean,
     dhizukuAvailable: Boolean,
     dhizukuAuthorized: Boolean,
+    isSystemApp: Boolean,
     getString: (Int) -> String
 ): String =
     when (authorizer) {
@@ -478,7 +489,10 @@ private fun smartAuthorizerAvailabilityDescription(
             else -> getString(R.string.dhizuku_not_available)
         }
 
-        Authorizer.None -> getString(R.string.working_status_system_installer_desc)
+        Authorizer.None -> getString(
+            if (isSystemApp) R.string.working_status_system_installer_desc
+            else R.string.working_status_none_authorizer_desc
+        )
         else -> authorizer.value
     }
 
