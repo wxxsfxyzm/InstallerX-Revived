@@ -90,6 +90,7 @@ fun InstallerGlobalSettingsPage(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    var isReordering by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
@@ -128,7 +129,8 @@ fun InstallerGlobalSettingsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
+            userScrollEnabled = !isReordering
         ) {
             // --- Group 1: Global Installer Settings ---
             item {
@@ -344,7 +346,8 @@ fun InstallerGlobalSettingsPage(
                                         toIndex
                                     )
                                 )
-                            }
+                            },
+                            onDragStateChange = { isReordering = it }
                         )
                     }
                 }
@@ -381,7 +384,8 @@ fun InstallerGlobalSettingsPage(
                                         toIndex
                                     )
                                 )
-                            }
+                            },
+                            onDragStateChange = { isReordering = it }
                         )
                     }
                 }
@@ -418,7 +422,8 @@ fun InstallerGlobalSettingsPage(
                                         to
                                     )
                                 )
-                            }
+                            },
+                            onDragStateChange = { isReordering = it }
                         )
                     }
 
@@ -450,7 +455,8 @@ fun InstallerGlobalSettingsPage(
                                         toIndex
                                     )
                                 )
-                            }
+                            },
+                            onDragStateChange = { isReordering = it }
                         )
                     }
                 }
@@ -513,7 +519,8 @@ private fun ManagedPackagesWidget(
     infoColor: Color = MaterialTheme.colorScheme.primary,
     onAddPackage: (NamedPackage) -> Unit,
     onRemovePackage: (NamedPackage) -> Unit,
-    onMovePackage: (fromIndex: Int, toIndex: Int) -> Unit
+    onMovePackage: (fromIndex: Int, toIndex: Int) -> Unit,
+    onDragStateChange: (Boolean) -> Unit
 ) {
     var deleteTarget by remember { mutableStateOf<NamedPackage?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -526,6 +533,7 @@ private fun ManagedPackagesWidget(
         itemDescription = { it.packageName },
         leadingIcon = AppIcons.Android,
         onMove = onMovePackage,
+        onDragStateChange = onDragStateChange,
         noContentTitle = noContentTitle,
         trailingContent = { item ->
             IconButton(onClick = { deleteTarget = item }) {
@@ -596,7 +604,8 @@ private fun ManagedUidsWidget(
     uids: List<SharedUid>,
     onAddUid: (SharedUid) -> Unit,
     onRemoveUid: (SharedUid) -> Unit,
-    onMoveUid: (fromIndex: Int, toIndex: Int) -> Unit
+    onMoveUid: (fromIndex: Int, toIndex: Int) -> Unit,
+    onDragStateChange: (Boolean) -> Unit
 ) {
     var deleteTarget by remember { mutableStateOf<SharedUid?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -609,6 +618,7 @@ private fun ManagedUidsWidget(
         itemDescription = { "UID: ${it.uidValue}" },
         leadingIcon = AppIcons.BugReport,
         onMove = onMoveUid,
+        onDragStateChange = onDragStateChange,
         noContentTitle = noContentTitle,
         trailingContent = { item ->
             IconButton(onClick = { deleteTarget = item }) {

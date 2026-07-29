@@ -58,6 +58,7 @@ import com.rosan.installer.R
  * @param leadingIcon The icon displayed at the start of each item.
  * @param itemLeadingIcon Optional per-item icon. If set, it takes precedence over [leadingIcon].
  * @param onMove Callback invoked when an item is moved to a new position.
+ * @param onDragStateChange Callback invoked when item reordering starts or stops.
  * @param onItemClick Optional callback invoked when an item row is clicked.
  * @param noContentTitle Title shown when the list is empty.
  * @param noContentDescription Optional description shown when the list is empty.
@@ -74,6 +75,7 @@ fun <T> DraggableList(
     leadingIcon: ImageVector? = null,
     itemLeadingIcon: (@Composable (T) -> ImageVector?)? = null,
     onMove: (from: Int, to: Int) -> Unit,
+    onDragStateChange: (Boolean) -> Unit = {},
     onItemClick: ((T) -> Unit)? = null,
     noContentTitle: String,
     noContentDescription: String? = stringResource(R.string.config_add_one_to_get_started),
@@ -137,7 +139,10 @@ fun <T> DraggableList(
                             onDragStart = { offset ->
                                 if (itemHeightPx > 0) {
                                     val index = (offset.y / itemHeightPx).toInt()
-                                    if (index in localItems.indices) draggedIndex = index
+                                    if (index in localItems.indices) {
+                                        draggedIndex = index
+                                        onDragStateChange(true)
+                                    }
                                 }
                             },
                             onDrag = { change, dragAmount ->
@@ -145,22 +150,25 @@ fun <T> DraggableList(
                                 dragOffsetY += dragAmount.y
                             },
                             onDragEnd = {
-                                if (draggedIndex != null && targetIndex != null && draggedIndex != targetIndex) {
-                                    val from = draggedIndex!!
-                                    val to = targetIndex!!
+                                val from = draggedIndex
+                                val to = targetIndex
+                                if (from != null && to != null && from != to) {
                                     val newList = localItems.toMutableList()
                                     val item = newList.removeAt(from)
                                     newList.add(to, item)
                                     localItems = newList
                                     isWaitingForUpdate = true
-                                    onMove(from, to)
                                 }
                                 draggedIndex = null
                                 dragOffsetY = 0f
+                                if (from != null) onDragStateChange(false)
+                                if (from != null && to != null && from != to) onMove(from, to)
                             },
                             onDragCancel = {
+                                val wasDragging = draggedIndex != null
                                 draggedIndex = null
                                 dragOffsetY = 0f
+                                if (wasDragging) onDragStateChange(false)
                             }
                         )
                     },
