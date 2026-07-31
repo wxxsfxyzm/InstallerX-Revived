@@ -77,7 +77,8 @@ class OkHttpNetworkResolver(
     private data class PreFlightResult(
         val contentLength: Long,
         val supportsRange: Boolean,
-        val isArchive: Boolean
+        val isArchive: Boolean,
+        val remoteIdentity: RemoteSourceIdentity? = null
     )
 
     private class RangeNotSupportedException(message: String) : IOException(message)
@@ -111,6 +112,11 @@ class OkHttpNetworkResolver(
         val contentLength = preFlight.contentLength
         val supportsRange = preFlight.supportsRange
         val platformSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+        val canUseRemoteSource = mode.shouldTryRemoteSource(
+            supportsRange,
+            contentLength,
+            platformSupported
+        ) && preFlight.remoteIdentity != null
 
         if (!preFlight.isArchive) {
             throw ResolveException(
@@ -119,11 +125,11 @@ class OkHttpNetworkResolver(
             )
         }
 
-        if (mode.shouldTryRemoteSource(supportsRange, contentLength, platformSupported)) {
+        if (canUseRemoteSource) {
             val remoteEntity = createRemoteEntity(
                 client,
                 uri.toString(),
-                contentLength,
+                requireNotNull(preFlight.remoteIdentity),
                 calculateRuntimeRangeCacheBudget(
                     requestedMaxBytes = rangeCacheSizeMiB.toRangeCacheBytes(),
                     maxHeapBytes = Runtime.getRuntime().maxMemory(),
@@ -136,7 +142,7 @@ class OkHttpNetworkResolver(
                 return@withContext listOf(remoteEntity)
             }
             Timber.i("Remote source is a package archive. Using the full-download path.")
-        } else if (mode.requiresRemoteSource(supportsRange, contentLength, platformSupported)) {
+        } else if (mode == NetworkSourceMode.LowStorage) {
             val errorType = if (platformSupported) {
                 ResolveErrorType.RANGE_REQUIRED
             } else {
@@ -145,7 +151,11 @@ class OkHttpNetworkResolver(
             throw ResolveException(
                 errorType = errorType,
                 message = if (platformSupported) {
-                    "The server does not expose a seekable HTTP range source."
+                    if (supportsRange && contentLength > 0L) {
+                        "The server does not expose a stable ETag or Last-Modified validator."
+                    } else {
+                        "The server does not expose a seekable HTTP range source."
+                    }
                 } else {
                     "Descriptor-backed network APK parsing requires Android 9 or newer."
                 }
@@ -191,16 +201,17 @@ class OkHttpNetworkResolver(
 
     private fun createRemoteEntity(
         client: OkHttpClient,
-        url: String,
-        contentLength: Long,
+        originalUrl: String,
+        identity: RemoteSourceIdentity,
         rangeCacheMaxBytes: Int
     ): DataEntity.FileDescriptorEntity {
+        val contentLength = identity.contentLength
         val analysisRangeCache = SeekableBlockCache(
             contentLength = contentLength,
             blockSize = RANGE_CACHE_BLOCK_SIZE,
             maxCachedBytes = rangeCacheMaxBytes
         ) { offset, size ->
-            loadRangeBlock(client, url, contentLength, offset, size)
+            loadRangeBlock(client, identity, offset, size)
         }
         Timber.d(
             "Remote range source configured: size=$contentLength, " +
@@ -208,19 +219,19 @@ class OkHttpNetworkResolver(
                     "signatureVerification=PackageInstaller"
         )
         return DataEntity.FileDescriptorEntity(
-            path = url,
+            path = identity.url.toString(),
             startOffset = 0L,
             length = contentLength,
             channelFactory = { HttpRangeSeekableByteChannel(analysisRangeCache, contentLength) },
             descriptorFactory = { createProxyDescriptor(analysisRangeCache, contentLength) },
             inputStreamFactory = {
                 analysisRangeCache.clear()
-                openSequentialStream(client, url)
+                openSequentialStream(client, identity)
             },
             preInstallSignatureAnalysis = false,
             preInstallIdentityAnalysis = false
         ).apply {
-            source = DataEntity.FileEntity(url)
+            source = DataEntity.FileEntity(originalUrl)
         }
     }
 
@@ -261,13 +272,26 @@ class OkHttpNetworkResolver(
         }
     }
 
-    private fun openSequentialStream(client: OkHttpClient, url: String): InputStream {
-        val request = Request.Builder().url(url).addDefaultHeaders().build()
+    private fun openSequentialStream(client: OkHttpClient, identity: RemoteSourceIdentity): InputStream {
+        val request = identity.newRequestBuilder().addDefaultHeaders().build()
         val response = client.newCall(request).execute()
         if (!response.isSuccessful) {
             val code = response.code
             response.close()
             throw IOException("HTTP $code")
+        }
+        try {
+            identity.validateResponse(response)
+            val responseLength = response.body.contentLength()
+            if (responseLength != identity.contentLength) {
+                throw IOException(
+                    "Remote source length changed after preflight: " +
+                            "expected=${identity.contentLength}, actual=$responseLength"
+                )
+            }
+        } catch (error: Exception) {
+            response.close()
+            throw error
         }
         return object : FilterInputStream(response.body.byteStream()) {
             override fun close() {
@@ -344,20 +368,20 @@ class OkHttpNetworkResolver(
 
     private fun loadRangeBlock(
         client: OkHttpClient,
-        url: String,
-        contentLength: Long,
+        identity: RemoteSourceIdentity,
         offset: Long,
         requestedSize: Int
     ): ByteArray {
+        val contentLength = identity.contentLength
         if (offset >= contentLength) return ByteArray(0)
         val size = min(requestedSize.toLong(), contentLength - offset).toInt()
-        val request = Request.Builder()
-            .url(url)
+        val request = identity.newRequestBuilder()
             .addDefaultHeaders()
             .header("Range", "bytes=$offset-${offset + size - 1}")
             .build()
         client.newCall(request).execute().use { response ->
             if (response.code != 206) throw IOException("HTTP range request returned ${response.code}")
+            identity.validateResponse(response)
             val destination = ByteArray(size)
             response.body.byteStream().use { input ->
                 var total = 0
@@ -569,7 +593,12 @@ class OkHttpNetworkResolver(
                 return PreFlightResult(
                     contentLength = length,
                     supportsRange = supportsRange,
-                    isArchive = isArchive
+                    isArchive = isArchive,
+                    remoteIdentity = if (supportsRange) {
+                        RemoteSourceIdentity.fromResponse(response, length)
+                    } else {
+                        null
+                    }
                 )
             }
         } catch (e: Exception) {
@@ -592,7 +621,16 @@ class OkHttpNetworkResolver(
 
                 // Preserve the previous behavior: if the lightweight archive probe cannot
                 // complete, do not reject otherwise valid download sources.
-                PreFlightResult(length, supports, isArchive = true)
+                PreFlightResult(
+                    contentLength = length,
+                    supportsRange = supports,
+                    isArchive = true,
+                    remoteIdentity = if (supports) {
+                        RemoteSourceIdentity.fromResponse(response, length)
+                    } else {
+                        null
+                    }
+                )
             }
         } catch (e: Exception) {
             Timber.w(e, "Pre-flight HEAD request failed. Assuming single thread.")
