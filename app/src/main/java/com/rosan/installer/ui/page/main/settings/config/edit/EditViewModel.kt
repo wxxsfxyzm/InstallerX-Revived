@@ -13,6 +13,8 @@ import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
+import com.rosan.installer.domain.settings.model.config.normalizedNetworkRangeCacheSizeMiB
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
@@ -111,6 +113,8 @@ class EditViewModel(
                     is EditViewAction.ChangeDataEnableManualDexopt -> changeDataEnableManualDexopt(action.enable)
                     is EditViewAction.ChangeDataForceDexopt -> changeDataForceDexopt(action.force)
                     is EditViewAction.ChangeDataDexoptMode -> changeDataDexoptMode(action.mode)
+                    is EditViewAction.ChangeNetworkSourceMode -> changeNetworkSourceMode(action.mode)
+                    is EditViewAction.ChangeNetworkRangeCacheSizeMiB -> changeNetworkRangeCacheSizeMiB(action.sizeMiB)
                     is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
                     is EditViewAction.ChangeDataZipAutoDelete -> changeDataZipAutoDelete(action.autoDelete)
                     is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
@@ -262,6 +266,16 @@ class EditViewModel(
 
     private fun changeDataDexoptMode(mode: DexoptMode) {
         _data.update { it.copy(dexoptMode = mode) }
+    }
+
+    private fun changeNetworkSourceMode(mode: NetworkSourceMode) {
+        _data.update { it.copy(networkSourceMode = mode) }
+    }
+
+    private fun changeNetworkRangeCacheSizeMiB(sizeMiB: Int) {
+        _data.update {
+            it.copy(networkRangeCacheSizeMiB = sizeMiB.normalizedNetworkRangeCacheSizeMiB())
+        }
     }
 
     private fun changeDataAutoDelete(autoDelete: Boolean) {

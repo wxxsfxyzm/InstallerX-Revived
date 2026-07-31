@@ -8,14 +8,28 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
@@ -25,6 +39,9 @@ import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
+import com.rosan.installer.domain.settings.model.config.MAX_NETWORK_RANGE_CACHE_SIZE_MIB
+import com.rosan.installer.domain.settings.model.config.MIN_NETWORK_RANGE_CACHE_SIZE_MIB
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.ui.icons.AppIcons
@@ -32,15 +49,20 @@ import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
 import com.rosan.installer.ui.page.main.settings.config.edit.dhizukuAwareDescription
 import com.rosan.installer.ui.page.miuix.widgets.MiuixHintTextField
+import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.util.isSystemPackageInstallerActive
 import org.koin.compose.koinInject
+import kotlinx.coroutines.delay
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun MiuixDataNameWidget(
@@ -727,6 +749,119 @@ fun MiuixDataAutoDeleteWidget(state: EditViewState, dispatch: (EditViewAction) -
             }
         )
     }
+}
+
+@Composable
+fun MiuixNetworkSourceModeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val modes = linkedMapOf(
+        NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache),
+        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart),
+        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage)
+    )
+    val descriptions = mapOf(
+        NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache_desc),
+        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart_desc),
+        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc)
+    )
+    val currentMode = state.data.networkSourceMode
+    val entries = modes.values.map { DropdownItem(title = it) }
+    WindowSpinnerPreference(
+        title = stringResource(R.string.config_network_source_mode),
+        summary = descriptions.getValue(currentMode),
+        items = entries,
+        selectedIndex = modes.keys.indexOf(currentMode).coerceAtLeast(0),
+        onSelectedIndexChange = { index ->
+            modes.keys.elementAtOrNull(index)?.let { mode ->
+                dispatch(EditViewAction.ChangeNetworkSourceMode(mode))
+            }
+        }
+    )
+}
+
+@Composable
+fun MiuixNetworkRangeCacheSizeWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val configuredSize = state.data.networkRangeCacheSizeMiB
+    var showEditor by remember { mutableStateOf(false) }
+    var input by remember(configuredSize, showEditor) {
+        mutableStateOf(configuredSize.toString())
+    }
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val parsed = input.toIntOrNull()
+    val valid = parsed in MIN_NETWORK_RANGE_CACHE_SIZE_MIB..MAX_NETWORK_RANGE_CACHE_SIZE_MIB
+
+    fun confirmInput() {
+        parsed?.takeIf { valid }
+            ?.let { dispatch(EditViewAction.ChangeNetworkRangeCacheSizeMiB(it)) }
+        if (valid) showEditor = false
+    }
+
+    LaunchedEffect(showEditor) {
+        if (showEditor) {
+            delay(200)
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+
+    AnimatedVisibility(
+        visible = state.data.networkSourceMode != NetworkSourceMode.Cache,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        MiuixIntNumberPickerWidget(
+            title = stringResource(R.string.config_network_range_cache_size),
+            description = stringResource(R.string.config_network_range_cache_size_desc),
+            value = configuredSize,
+            startInt = MIN_NETWORK_RANGE_CACHE_SIZE_MIB,
+            endInt = MAX_NETWORK_RANGE_CACHE_SIZE_MIB,
+            valueSuffix = " MiB",
+            subduedValue = true,
+            onValueClick = { showEditor = true },
+            onValueChange = {
+                dispatch(EditViewAction.ChangeNetworkRangeCacheSizeMiB(it))
+            }
+        )
+    }
+
+    WindowDialog(
+        show = showEditor,
+        onDismissRequest = { showEditor = false },
+        title = stringResource(R.string.config_network_range_cache_size),
+        content = {
+            Column {
+                TextField(
+                    modifier = Modifier.focusRequester(focusRequester),
+                    value = input,
+                    onValueChange = { value ->
+                        input = value.filter(Char::isDigit).take(3)
+                    },
+                    label = stringResource(R.string.config_network_range_cache_size_supporting),
+                    useLabelAsPlaceholder = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = { showEditor = false }
+                    )
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.confirm),
+                        enabled = valid,
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
+                        onClick = ::confirmInput
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable

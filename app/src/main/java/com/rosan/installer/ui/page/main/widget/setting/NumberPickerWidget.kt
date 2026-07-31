@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +52,9 @@ fun IntNumberPickerWidget(
     endInt: Int,
     stepSize: Int = 0, // 0 for continuous dragging, > 0 for discrete snap steps
     showTooltip: Boolean = true, // Toggle for the floating tooltip
+    valueSuffix: String = "",
+    subduedValue: Boolean = false,
+    onValueClick: (() -> Unit)? = null,
     onValueChange: (Int) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
@@ -132,11 +136,28 @@ fun IntNumberPickerWidget(
                 }
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = value.toString(),
-                modifier = Modifier.defaultMinSize(minWidth = 36.dp),
-                textAlign = TextAlign.End
-            )
+            val valueModifier = Modifier
+                .defaultMinSize(minWidth = 36.dp)
+                .then(
+                    if (onValueClick != null) Modifier.clickable(onClick = onValueClick)
+                    else Modifier
+                )
+                .padding(horizontal = 4.dp, vertical = 8.dp)
+            if (subduedValue) {
+                Text(
+                    text = "$value$valueSuffix",
+                    modifier = valueModifier,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End
+                )
+            } else {
+                Text(
+                    text = "$value$valueSuffix",
+                    modifier = valueModifier,
+                    textAlign = TextAlign.End
+                )
+            }
         }
         Spacer(modifier = Modifier.size(8.dp))
     }

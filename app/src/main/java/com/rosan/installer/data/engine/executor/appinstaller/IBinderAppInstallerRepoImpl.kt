@@ -435,7 +435,7 @@ abstract class IBinderAppInstallerRepoImpl(
             throw IllegalStateException("Invalid data size: $sizeBytes.")
         }
 
-        val inputStream = entity.data.getInputStreamWhileNotEmpty()
+        val inputStream = entity.data.getInstallInputStreamWhileNotEmpty()
             ?: throw IllegalStateException("Unable to open install entity input stream: ${entity.data}")
         inputStream.use { input ->
             session.openWrite(

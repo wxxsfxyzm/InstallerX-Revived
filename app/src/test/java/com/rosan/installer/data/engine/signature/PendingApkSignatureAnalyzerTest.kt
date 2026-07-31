@@ -67,4 +67,25 @@ class PendingApkSignatureAnalyzerTest {
         assertEquals(fileResult.verifiedSchemes, descriptorResult.verifiedSchemes)
         assertEquals(fileResult.errors, descriptorResult.errors)
     }
+
+    @Test
+    fun `descriptor can delegate signature verification to PackageInstaller`() {
+        var channelOpened = false
+        val source = DataEntity.FileDescriptorEntity(
+            path = "remote.apk",
+            startOffset = 0L,
+            length = 1L,
+            channelFactory = {
+                channelOpened = true
+                error("System-verified source must skip pre-install signature reads")
+            },
+            descriptorFactory = { error("descriptor is unused") },
+            preInstallSignatureAnalysis = false
+        )
+
+        val result = analyzer.analyze(source, tempDirectory.path)
+
+        assertEquals(null, result)
+        assertFalse(channelOpened)
+    }
 }

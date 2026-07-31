@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
@@ -268,6 +269,10 @@ fun MiuixEditPage(
                     MiuixDataDeclareInstallerWidget(state = state, dispatch = dispatch)
                     MiuixDataManualDexoptWidget(state = state, dispatch = dispatch)
                     MiuixDataAutoDeleteWidget(state = state, dispatch = dispatch)
+                    if (AppConfig.isInternetAccessEnabled) {
+                        MiuixNetworkSourceModeWidget(state = state, dispatch = dispatch)
+                        MiuixNetworkRangeCacheSizeWidget(state = state, dispatch = dispatch)
+                    }
                     MiuixDisplaySdkWidget(state = state, dispatch = dispatch)
                     MiuixDisplaySizeWidget(state = state, dispatch = dispatch)
                 }

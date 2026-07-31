@@ -64,7 +64,7 @@ class AnalyserRepositoryImpl(
 
         // Step 2: Group, Deduplicate
         val includeSignature = rawEntities.any { entity ->
-            extra.shouldCheckAppSignatures(entity.sourceType)
+            extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureAnalysisResult()
         }
         val processedGroups = packagePreprocessor.process(rawEntities, includeSignature = includeSignature)
 
@@ -123,7 +123,9 @@ class AnalyserRepositoryImpl(
                 .filter { it.selected }
                 .map { it.app }
                 .filter { it is AppEntity.BaseEntity || it is AppEntity.SplitEntity }
-                .any { entity -> extra.shouldCheckAppSignatures(entity.sourceType) }
+                .any { entity ->
+                    extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureAnalysisResult()
+                }
 
             val signatureStatus = if (signatureCheckPerformed) {
                 packageSignatureAnalyzer.match(
@@ -191,4 +193,10 @@ class AnalyserRepositoryImpl(
             if (e is AnalyseException || e is CommonsZipException || e is ZipException) throw e
             emptyList()
         }
+}
+
+private fun AppEntity.hasSignatureAnalysisResult(): Boolean = when (this) {
+    is AppEntity.BaseEntity -> signatureInfo != null
+    is AppEntity.SplitEntity -> signatureInfo != null
+    else -> false
 }

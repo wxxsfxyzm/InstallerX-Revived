@@ -47,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
@@ -253,6 +254,10 @@ fun EditPage(
                     dataDeclareInstallerWidget(state, dispatch)
                     dataManualDexoptWidget(state, dispatch)
                     dataAutoDeleteWidget(state, dispatch)
+                    if (AppConfig.isInternetAccessEnabled) {
+                        networkSourceModeWidget(state, dispatch)
+                        networkRangeCacheSizeWidget(state, dispatch)
+                    }
                     item { DisplaySdkWidget(state, dispatch) }
                     item { DisplaySizeWidget(state, dispatch) }
                 }

@@ -25,6 +25,7 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.model.ResolveResult
 import com.rosan.installer.domain.session.repository.NetworkResolver
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -56,7 +57,11 @@ class SourceResolver(
 
     fun getTrackedCloseables(): List<Closeable> = closeables
 
-    suspend fun resolve(intent: Intent): ResolveResult {
+    suspend fun resolve(
+        intent: Intent,
+        networkSourceMode: NetworkSourceMode,
+        networkRangeCacheSizeMiB: Int
+    ): ResolveResult {
         val uris = extractUris(intent)
         Timber.d("resolve: URIs extracted from intent (${uris.size}).")
 
@@ -64,7 +69,7 @@ class SourceResolver(
         for (uri in uris) {
             // Check cancellation between items
             if (!currentCoroutineContext().isActive) throw CancellationException()
-            data.addAll(resolveSingleUri(uri))
+            data.addAll(resolveSingleUri(uri, networkSourceMode, networkRangeCacheSizeMiB))
         }
 
         // Return the packaged result
@@ -158,7 +163,11 @@ class SourceResolver(
         return uris
     }
 
-    private suspend fun resolveSingleUri(uri: Uri): List<DataEntity> {
+    private suspend fun resolveSingleUri(
+        uri: Uri,
+        networkSourceMode: NetworkSourceMode,
+        networkRangeCacheSizeMiB: Int
+    ): List<DataEntity> {
         Timber.d("Source URI: $uri")
 
         // Handle null scheme (unlikely but safe to handle)
@@ -182,7 +191,13 @@ class SourceResolver(
                     )
                 }
 
-                networkResolver.resolve(uri, cacheDirectory, progressFlow)
+                networkResolver.resolve(
+                    uri,
+                    cacheDirectory,
+                    networkSourceMode,
+                    networkRangeCacheSizeMiB,
+                    progressFlow
+                )
             }
 
             else -> throw ResolveException(

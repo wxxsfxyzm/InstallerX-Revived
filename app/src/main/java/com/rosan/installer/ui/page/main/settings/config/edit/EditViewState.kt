@@ -11,6 +11,7 @@ import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
@@ -79,6 +80,8 @@ data class EditViewState(
         val enableManualDexopt: Boolean,
         val forceDexopt: Boolean,
         val dexoptMode: DexoptMode,
+        val networkSourceMode: NetworkSourceMode,
+        val networkRangeCacheSizeMiB: Int,
         val autoDelete: Boolean,
         val autoDeleteZip: Boolean,
         val displaySdk: Boolean,
@@ -122,6 +125,8 @@ data class EditViewState(
             targetUserId = this.targetUserId,
             enableManualDexopt = this.enableManualDexopt,
             dexoptMode = this.dexoptMode,
+            networkSourceMode = this.networkSourceMode,
+            networkRangeCacheSizeMiB = this.networkRangeCacheSizeMiB,
             forceDexopt = this.forceDexopt,
             autoDelete = this.autoDelete,
             autoDeleteZip = this.autoDeleteZip,
@@ -163,6 +168,8 @@ data class EditViewState(
                 enableManualDexopt = config.enableManualDexopt,
                 forceDexopt = config.forceDexopt,
                 dexoptMode = config.dexoptMode,
+                networkSourceMode = config.networkSourceMode,
+                networkRangeCacheSizeMiB = config.networkRangeCacheSizeMiB,
                 autoDelete = config.autoDelete,
                 autoDeleteZip = config.autoDeleteZip,
                 displaySdk = config.displaySdk,

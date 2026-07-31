@@ -10,6 +10,8 @@ enum class ResolveErrorType(@param:StringRes val stringResId: Int) {
     NO_INTERNET_ACCESS(R.string.exception_resolve_failed_no_internet_access),
     INITIATOR_NOT_VISIBLE(R.string.exception_initiator_not_visible),
     LINK_NOT_VALID(R.string.exception_resolve_failed_link_not_valid),
+    RANGE_REQUIRED(R.string.exception_resolve_failed_range_required),
+    LOW_STORAGE_UNSUPPORTED(R.string.exception_resolve_failed_low_storage_unsupported),
 
     HTTP_RESTRICTED_FOR_LOCALHOST(R.string.exception_http_restricted_for_localhost),
     HTTP_NOT_ALLOWED(R.string.exception_http_not_allowed)

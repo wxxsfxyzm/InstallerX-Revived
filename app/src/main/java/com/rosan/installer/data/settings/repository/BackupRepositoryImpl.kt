@@ -38,6 +38,10 @@ import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
+import com.rosan.installer.domain.settings.model.config.MAX_NETWORK_RANGE_CACHE_SIZE_MIB
+import com.rosan.installer.domain.settings.model.config.MIN_NETWORK_RANGE_CACHE_SIZE_MIB
+import com.rosan.installer.domain.settings.model.config.normalizedNetworkRangeCacheSizeMiB
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.domain.settings.repository.BackupRepository
@@ -351,6 +355,8 @@ class BackupRepositoryImpl(
             enableManualDexopt = enableManualDexopt,
             forceDexopt = forceDexopt,
             dexoptMode = dexoptMode.value,
+            networkSourceMode = networkSourceMode.value,
+            networkRangeCacheSizeMiB = networkRangeCacheSizeMiB.normalizedNetworkRangeCacheSizeMiB(),
             autoDelete = autoDelete,
             autoDeleteZip = autoDeleteZip,
             displaySize = displaySize,
@@ -426,6 +432,8 @@ class BackupRepositoryImpl(
             enableManualDexopt = enableManualDexopt,
             forceDexopt = forceDexopt,
             dexoptMode = DexoptMode.entries.find { it.value == dexoptMode } ?: DexoptMode.SpeedProfile,
+            networkSourceMode = NetworkSourceMode.fromValue(networkSourceMode),
+            networkRangeCacheSizeMiB = networkRangeCacheSizeMiB.normalizedNetworkRangeCacheSizeMiB(),
             autoDelete = autoDelete,
             autoDeleteZip = autoDeleteZip,
             displaySize = displaySize,
@@ -473,6 +481,16 @@ class BackupRepositoryImpl(
         }
         if (DexoptMode.entries.none { it.value == profile.dexoptMode }) {
             issues += invalidProfileField("dexoptMode=${profile.dexoptMode}")
+        }
+        if (NetworkSourceMode.entries.none { it.value == profile.networkSourceMode }) {
+            issues += invalidProfileField("networkSourceMode=${profile.networkSourceMode}")
+        }
+        if (profile.networkRangeCacheSizeMiB !in
+            MIN_NETWORK_RANGE_CACHE_SIZE_MIB..MAX_NETWORK_RANGE_CACHE_SIZE_MIB
+        ) {
+            issues += invalidProfileField(
+                "networkRangeCacheSizeMiB=${profile.networkRangeCacheSizeMiB}"
+            )
         }
     }
 

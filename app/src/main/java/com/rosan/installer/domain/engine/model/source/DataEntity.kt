@@ -35,9 +35,14 @@ interface ZipEntryMetadataSource {
 sealed class DataEntity(open var source: DataEntity? = null) {
     abstract fun getInputStream(): InputStream?
 
+    open fun getInstallInputStream(): InputStream? = getInputStream()
+
     abstract fun getSize(): Long
 
     fun getInputStreamWhileNotEmpty(): InputStream? = getInputStream() ?: source?.getInputStream()
+
+    fun getInstallInputStreamWhileNotEmpty(): InputStream? =
+        getInstallInputStream() ?: source?.getInstallInputStream()
 
     fun getSourceTop(): DataEntity = source?.getSourceTop() ?: this
 
@@ -58,6 +63,9 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         val length: Long,
         private val channelFactory: () -> SeekableByteChannel,
         private val descriptorFactory: () -> OwnedFileDescriptor,
+        private val inputStreamFactory: (() -> InputStream)? = null,
+        val preInstallSignatureAnalysis: Boolean = true,
+        val preInstallIdentityAnalysis: Boolean = true,
         override val zipEntryMetadata: ZipEntryMetadata? = null,
         val archiveEntryName: String? = null
     ) : FileEntity(path), ZipEntryMetadataSource {
@@ -69,6 +77,9 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         override fun openChannel(): SeekableByteChannel = channelFactory()
 
         override fun getInputStream(): InputStream = Channels.newInputStream(openChannel())
+
+        override fun getInstallInputStream(): InputStream =
+            inputStreamFactory?.invoke() ?: getInputStream()
 
         override fun getSize(): Long = length
 
@@ -108,6 +119,8 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                     )
                 },
                 descriptorFactory = descriptorFactory,
+                preInstallSignatureAnalysis = parent.preInstallSignatureAnalysis,
+                preInstallIdentityAnalysis = parent.preInstallIdentityAnalysis,
                 zipEntryMetadata = zipEntryMetadata,
                 archiveEntryName = archiveEntryName
             ).apply {

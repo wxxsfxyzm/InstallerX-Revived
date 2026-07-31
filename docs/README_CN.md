@@ -49,7 +49,59 @@ InstallerX Revived 是一款现代 Android 软件包安装器，也是原 [Insta
 
 反馈问题时请尽量使用最新 Alpha 或 CI 版本复现，因为 Stable 中的问题可能已经被修复。
 
-InstallerX 现在只发布一个 APK，通过应用内开关控制联网。开启时支持分享 APK 下载直链和在线更新；关闭时会阻止网络请求，但本地安装流程仍可正常使用。为了兼容旧版应用内更新客户端，发布文件名仍保留 `online`，这不再代表独立的构建变体。
+InstallerX 现在只发布一个 APK，通过应用内开关控制联网。开启时支持分享 APK 下载直链和在线更新；网络流式安装通过有界 HTTP Range 读取应用信息，跳过安装前的全文件签名扫描和字节身份哈希，将 APK 流式写入系统安装 Session，并由 Android 在 Session 提交时完成最终验证。关闭联网后会阻止网络请求，但本地安装流程仍可正常使用。为了兼容旧版应用内更新客户端，发布文件名仍保留 `online`，这不再代表独立的构建变体。
+
+## 网络源处理流程
+
+“检查应用签名”控制 InstallerX 的安装前 `apksig` 分析。Android 系统在提交安装 Session 时始终执行最终完整性、签名和更新兼容性验证。
+
+```mermaid
+flowchart TD
+    A["分享网络链接到 InstallerX"] --> B["HTTP 预检<br/>文件类型、Content-Length、Range 支持"]
+    B --> C{"有效 APK / ZIP？"}
+    C -- "否" --> ERR0["链接无效<br/>结束"]
+    C -- "是" --> MODE{"网络源处理模式"}
+
+    MODE -- "完整下载" --> DOWNLOAD["完整下载到 InstallerX 缓存目录"]
+
+    MODE -- "智能" --> SMART{"满足流式条件？<br/>服务器支持 Range<br/>Content-Length > 0<br/>Android 9+"}
+    SMART -- "否" --> DOWNLOAD
+    SMART -- "是" --> PROBE["通过 HTTP Range 检查 ZIP 中央目录"]
+
+    MODE -- "低存储占用" --> LOW{"满足流式条件？<br/>服务器支持 Range<br/>Content-Length > 0<br/>Android 9+"}
+    LOW -- "服务器条件不足" --> ERR1["报告需要 Range 支持"]
+    LOW -- "Android 版本不足" --> ERR2["报告系统版本不支持"]
+    LOW -- "是" --> PROBE
+
+    PROBE --> SINGLE{"单个 APK？"}
+    SINGLE -- "否：APKS / APKM / XAPK / ZIP" --> DOWNLOAD
+    SINGLE -- "是" --> BUDGET["计算实际 Range 缓存上限"]
+
+    USER["用户配置上限<br/>1–512 MiB"] --> BUDGET
+    HEAP["当前 Java 堆<br/>剩余可用空间"] --> BUDGET
+    BUDGET --> FORMULA["实际上限 = min（用户上限，<br/>max（1 MiB，剩余堆 ÷ 8））"]
+    FORMULA --> RANGE["1 MiB 固定块<br/>LRU 内存缓存<br/>满时先淘汰最旧块"]
+    RANGE --> META["稀疏 Range 读取<br/>ZIP 中央目录、Manifest、资源和图标"]
+    META --> INFO["显示应用名、图标、版本、SDK 和大小"]
+
+    INFO --> STREAMSIG{"检查应用签名"}
+    STREAMSIG -- "开启" --> SKIPSIG["流式源跳过安装前 apksig<br/>跳过全文件身份 SHA-256"]
+    STREAMSIG -- "关闭" --> SKIPSIG
+    SKIPSIG --> STREAMINSTALL["清空分析缓存<br/>建立顺序 HTTP 响应流"]
+    STREAMINSTALL --> SESSION["直接写入 PackageInstaller Session"]
+
+    DOWNLOAD --> LOCALSIG{"检查应用签名"}
+    LOCALSIG -- "开启" --> APKSIG["对本地完整文件运行 apksig<br/>读取证书和签名方案"]
+    LOCALSIG -- "关闭" --> LOCALSKIP["跳过 InstallerX 签名分析"]
+    APKSIG --> IDENTITY["条件适用时执行完整 SHA-256 身份比较"]
+    LOCALSKIP --> IDENTITY
+    IDENTITY --> SESSION
+
+    SESSION --> COMMIT["提交安装 Session"]
+    COMMIT --> SYSTEM{"Android 系统最终验证"}
+    SYSTEM -- "通过" --> OK["安装成功<br/>清理 InstallerX 下载缓存"]
+    SYSTEM -- "失败" --> FAIL["安装失败<br/>返回系统错误"]
+```
 
 ## 构建项目
 

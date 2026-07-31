@@ -174,6 +174,10 @@ class PackagePreprocessor(
         val fileData = baseEntity.data as? DataEntity.FileEntity
             ?: return@coroutineScope PackageIdentityStatus.ERROR
 
+        if (fileData is DataEntity.FileDescriptorEntity && !fileData.preInstallIdentityAnalysis) {
+            return@coroutineScope PackageIdentityStatus.NOT_APPLICABLE
+        }
+
         // 4. Fast-fail optimization: compare file sizes first.
         if (fileData.getSize() != installedApkFile.length()) {
             return@coroutineScope PackageIdentityStatus.DIFFERENT

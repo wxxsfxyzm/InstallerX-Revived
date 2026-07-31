@@ -80,6 +80,8 @@ data class BackupProfile(
     val enableManualDexopt: Boolean = false,
     val forceDexopt: Boolean = false,
     val dexoptMode: String = "speed-profile",
+    val networkSourceMode: String = "cache",
+    val networkRangeCacheSizeMiB: Int = 8,
     val autoDelete: Boolean = false,
     val autoDeleteZip: Boolean = false,
     val displaySize: Boolean = false,

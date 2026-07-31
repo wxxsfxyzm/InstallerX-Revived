@@ -6,12 +6,20 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.ParcelFileDescriptor
+import android.os.ProxyFileDescriptorCallback
+import android.os.storage.StorageManager
 import com.rosan.installer.data.session.util.copyToWithProgress
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.session.exception.ResolveException
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.repository.NetworkResolver
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
+import com.rosan.installer.domain.settings.model.config.normalizedNetworkRangeCacheSizeMiB
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.util.isZipMagicNumber
@@ -27,11 +35,17 @@ import kotlinx.coroutines.withContext
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.apache.commons.compress.archivers.zip.ZipFile
 import timber.log.Timber
 import java.io.File
+import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.channels.ClosedChannelException
+import java.nio.channels.NonWritableChannelException
+import java.nio.channels.SeekableByteChannel
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -54,6 +68,7 @@ class OkHttpNetworkResolver(
 
         const val MIN_CHUNK_SIZE = 2 * 1024 * 1024L              // 2MB
         const val DOWNLOAD_BUFFER_SIZE = 1024 * 1024             // 1MB
+        const val RANGE_CACHE_BLOCK_SIZE = 1024 * 1024           // 1MB
     }
 
     private enum class NetworkType { WIFI, MOBILE, ETHERNET, UNKNOWN }
@@ -70,6 +85,8 @@ class OkHttpNetworkResolver(
     override suspend fun resolve(
         uri: Uri,
         cacheDirectory: String,
+        mode: NetworkSourceMode,
+        rangeCacheSizeMiB: Int,
         progressFlow: MutableSharedFlow<ProgressEntity>
     ): List<DataEntity> = withContext(Dispatchers.IO) {
         val preferences = appSettingsRepo.preferencesFlow.first()
@@ -93,11 +110,45 @@ class OkHttpNetworkResolver(
         val preFlight = performPreFlightCheck(client, uri.toString())
         val contentLength = preFlight.contentLength
         val supportsRange = preFlight.supportsRange
+        val platformSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
 
         if (!preFlight.isArchive) {
             throw ResolveException(
                 errorType = ResolveErrorType.LINK_NOT_VALID,
                 message = "The target file is not a valid ZIP/APK archive."
+            )
+        }
+
+        if (mode.shouldTryRemoteSource(supportsRange, contentLength, platformSupported)) {
+            val remoteEntity = createRemoteEntity(
+                client,
+                uri.toString(),
+                contentLength,
+                calculateRuntimeRangeCacheBudget(
+                    requestedMaxBytes = rangeCacheSizeMiB.toRangeCacheBytes(),
+                    maxHeapBytes = Runtime.getRuntime().maxMemory(),
+                    allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
+                    blockSize = RANGE_CACHE_BLOCK_SIZE
+                )
+            )
+            if (isSingleApk(remoteEntity)) {
+                Timber.i("Using low-storage HTTP range source. Size: $contentLength")
+                return@withContext listOf(remoteEntity)
+            }
+            Timber.i("Remote source is a package archive. Using the full-download path.")
+        } else if (mode.requiresRemoteSource(supportsRange, contentLength, platformSupported)) {
+            val errorType = if (platformSupported) {
+                ResolveErrorType.RANGE_REQUIRED
+            } else {
+                ResolveErrorType.LOW_STORAGE_UNSUPPORTED
+            }
+            throw ResolveException(
+                errorType = errorType,
+                message = if (platformSupported) {
+                    "The server does not expose a seekable HTTP range source."
+                } else {
+                    "Descriptor-backed network APK parsing requires Android 9 or newer."
+                }
             )
         }
 
@@ -135,6 +186,189 @@ class OkHttpNetworkResolver(
         } catch (e: Exception) {
             if (tempFile.exists()) tempFile.delete()
             throw e
+        }
+    }
+
+    private fun createRemoteEntity(
+        client: OkHttpClient,
+        url: String,
+        contentLength: Long,
+        rangeCacheMaxBytes: Int
+    ): DataEntity.FileDescriptorEntity {
+        val analysisRangeCache = SeekableBlockCache(
+            contentLength = contentLength,
+            blockSize = RANGE_CACHE_BLOCK_SIZE,
+            maxCachedBytes = rangeCacheMaxBytes
+        ) { offset, size ->
+            loadRangeBlock(client, url, contentLength, offset, size)
+        }
+        Timber.d(
+            "Remote range source configured: size=$contentLength, " +
+                    "cacheMaxBytes=$rangeCacheMaxBytes, analysisBlockSize=$RANGE_CACHE_BLOCK_SIZE, " +
+                    "signatureVerification=PackageInstaller"
+        )
+        return DataEntity.FileDescriptorEntity(
+            path = url,
+            startOffset = 0L,
+            length = contentLength,
+            channelFactory = { HttpRangeSeekableByteChannel(analysisRangeCache, contentLength) },
+            descriptorFactory = { createProxyDescriptor(analysisRangeCache, contentLength) },
+            inputStreamFactory = {
+                analysisRangeCache.clear()
+                openSequentialStream(client, url)
+            },
+            preInstallSignatureAnalysis = false,
+            preInstallIdentityAnalysis = false
+        ).apply {
+            source = DataEntity.FileEntity(url)
+        }
+    }
+
+    private fun Int.toRangeCacheBytes(): Int =
+        normalizedNetworkRangeCacheSizeMiB() * 1024 * 1024
+
+    private fun isSingleApk(entity: DataEntity.FileDescriptorEntity): Boolean =
+        runCatching {
+            ZipFile.builder()
+                .setSeekableByteChannel(entity.openChannel())
+                .setIgnoreLocalFileHeader(true)
+                .get().use { archive -> archive.getEntry("AndroidManifest.xml") != null }
+        }.onFailure { error ->
+            Timber.w(error, "Unable to inspect remote package as a seekable APK.")
+        }.getOrDefault(false)
+
+    private fun createProxyDescriptor(
+        rangeCache: SeekableBlockCache,
+        contentLength: Long
+    ): DataEntity.OwnedFileDescriptor {
+        val storageManager = context.getSystemService(StorageManager::class.java)
+        val thread = HandlerThread("InstallerX-HTTP-range").apply { start() }
+        val callback = HttpRangeProxyCallback(rangeCache, contentLength) {
+            thread.quitSafely()
+        }
+        val descriptor = try {
+            storageManager.openProxyFileDescriptor(
+                ParcelFileDescriptor.MODE_READ_ONLY,
+                callback,
+                Handler(thread.looper)
+            )
+        } catch (error: Exception) {
+            thread.quitSafely()
+            throw error
+        }
+        return DataEntity.OwnedFileDescriptor(descriptor.fileDescriptor) {
+            descriptor.close()
+        }
+    }
+
+    private fun openSequentialStream(client: OkHttpClient, url: String): InputStream {
+        val request = Request.Builder().url(url).addDefaultHeaders().build()
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) {
+            val code = response.code
+            response.close()
+            throw IOException("HTTP $code")
+        }
+        return object : FilterInputStream(response.body.byteStream()) {
+            override fun close() {
+                try {
+                    super.close()
+                } finally {
+                    response.close()
+                }
+            }
+        }
+    }
+
+    private inner class HttpRangeProxyCallback(
+        private val rangeCache: SeekableBlockCache,
+        private val contentLength: Long,
+        private val release: () -> Unit
+    ) : ProxyFileDescriptorCallback() {
+        override fun onGetSize(): Long = contentLength
+
+        override fun onRead(offset: Long, size: Int, data: ByteArray): Int =
+            rangeCache.read(offset, size, data)
+
+        override fun onRelease() = release()
+    }
+
+    private inner class HttpRangeSeekableByteChannel(
+        private val rangeCache: SeekableBlockCache,
+        private val contentLength: Long
+    ) : SeekableByteChannel {
+        private var position = 0L
+        private var open = true
+
+        override fun read(destination: ByteBuffer): Int {
+            ensureOpen()
+            if (position >= contentLength) return -1
+            if (!destination.hasRemaining()) return 0
+            val size = min(destination.remaining(), DOWNLOAD_BUFFER_SIZE)
+            val data = ByteArray(size)
+            val count = rangeCache.read(position, size, data)
+            if (count <= 0) return -1
+            destination.put(data, 0, count)
+            position += count
+            return count
+        }
+
+        override fun write(source: ByteBuffer): Int = throw NonWritableChannelException()
+
+        override fun position(): Long {
+            ensureOpen()
+            return position
+        }
+
+        override fun position(newPosition: Long): SeekableByteChannel {
+            ensureOpen()
+            require(newPosition >= 0L) { "position must be non-negative" }
+            position = newPosition
+            return this
+        }
+
+        override fun size(): Long = contentLength
+
+        override fun truncate(size: Long): SeekableByteChannel = throw NonWritableChannelException()
+
+        override fun isOpen(): Boolean = open
+
+        override fun close() {
+            open = false
+        }
+
+        private fun ensureOpen() {
+            if (!open) throw ClosedChannelException()
+        }
+    }
+
+    private fun loadRangeBlock(
+        client: OkHttpClient,
+        url: String,
+        contentLength: Long,
+        offset: Long,
+        requestedSize: Int
+    ): ByteArray {
+        if (offset >= contentLength) return ByteArray(0)
+        val size = min(requestedSize.toLong(), contentLength - offset).toInt()
+        val request = Request.Builder()
+            .url(url)
+            .addDefaultHeaders()
+            .header("Range", "bytes=$offset-${offset + size - 1}")
+            .build()
+        client.newCall(request).execute().use { response ->
+            if (response.code != 206) throw IOException("HTTP range request returned ${response.code}")
+            val destination = ByteArray(size)
+            response.body.byteStream().use { input ->
+                var total = 0
+                while (total < size) {
+                    val count = input.read(destination, total, size - total)
+                    if (count < 0) break
+                    if (count > 0) total += count
+                }
+                Timber.d("Fetched HTTP range block: offset=$offset, bytes=$total")
+                return if (total == size) destination else destination.copyOf(total)
+            }
         }
     }
 
