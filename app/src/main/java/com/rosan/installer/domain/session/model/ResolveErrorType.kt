@@ -12,6 +12,7 @@ enum class ResolveErrorType(@param:StringRes val stringResId: Int) {
     LINK_NOT_VALID(R.string.exception_resolve_failed_link_not_valid),
     RANGE_REQUIRED(R.string.exception_resolve_failed_range_required),
     LOW_STORAGE_UNSUPPORTED(R.string.exception_resolve_failed_low_storage_unsupported),
+    STREAMING_PROBE_FAILED(R.string.exception_resolve_failed_streaming_probe),
 
     HTTP_RESTRICTED_FOR_LOCALHOST(R.string.exception_http_restricted_for_localhost),
     HTTP_NOT_ALLOWED(R.string.exception_http_not_allowed)

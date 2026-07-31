@@ -637,8 +637,9 @@
     <string name="exception_install_failed_all_authorizers_failed">所有授权方式尝试均失败</string>
     <string name="exception_resolve_failed">URI 解析失败</string>
     <string name="exception_resolve_failed_link_not_valid">该链接不包含有效的文件</string>
-    <string name="exception_resolve_failed_range_required">低存储占用模式需要服务器支持 HTTP 范围请求</string>
+    <string name="exception_resolve_failed_range_required">低存储占用模式需要稳定且可定位的 HTTP Range 来源</string>
     <string name="exception_resolve_failed_low_storage_unsupported">网络源低存储占用模式需要 Android 9 或更高版本</string>
+    <string name="exception_resolve_failed_streaming_probe">低存储占用模式无法通过 HTTP Range 请求检查此安装包</string>
     <string name="exception_initiator_not_visible">InstallerX 对发起安装的应用不可见。如果使用了“隐藏应用列表”等模块，请对 InstallerX 放行</string>
     <string name="exception_resolve_failed_no_internet_access">应用内网络访问已关闭。请在实验室设置中开启后再使用此功能。</string>
     <string name="exception_analyse_failed_all_files_unsupported">不支持的文件格式</string>

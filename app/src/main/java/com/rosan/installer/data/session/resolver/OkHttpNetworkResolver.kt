@@ -112,12 +112,6 @@ class OkHttpNetworkResolver(
         val contentLength = preFlight.contentLength
         val supportsRange = preFlight.supportsRange
         val platformSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-        val canUseRemoteSource = mode.shouldTryRemoteSource(
-            supportsRange,
-            contentLength,
-            platformSupported
-        ) && preFlight.remoteIdentity != null
-
         if (!preFlight.isArchive) {
             throw ResolveException(
                 errorType = ResolveErrorType.LINK_NOT_VALID,
@@ -125,41 +119,49 @@ class OkHttpNetworkResolver(
             )
         }
 
-        if (canUseRemoteSource) {
-            val remoteEntity = createRemoteEntity(
-                client,
-                uri.toString(),
-                requireNotNull(preFlight.remoteIdentity),
-                calculateRuntimeRangeCacheBudget(
-                    requestedMaxBytes = rangeCacheSizeMiB.toRangeCacheBytes(),
-                    maxHeapBytes = Runtime.getRuntime().maxMemory(),
-                    allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
-                    blockSize = RANGE_CACHE_BLOCK_SIZE
+        if (mode != NetworkSourceMode.Cache) {
+            var remoteEntity: DataEntity.FileDescriptorEntity? = null
+            val probeResult = when {
+                !platformSupported -> RemotePackageProbeResult.StreamingUnsupported(
+                    StreamingUnsupportedReason.Platform
                 )
-            )
-            if (isSingleApk(remoteEntity)) {
-                Timber.i("Using low-storage HTTP range source. Size: $contentLength")
-                return@withContext listOf(remoteEntity)
-            }
-            Timber.i("Remote source is a package archive. Using the full-download path.")
-        } else if (mode == NetworkSourceMode.LowStorage) {
-            val errorType = if (platformSupported) {
-                ResolveErrorType.RANGE_REQUIRED
-            } else {
-                ResolveErrorType.LOW_STORAGE_UNSUPPORTED
-            }
-            throw ResolveException(
-                errorType = errorType,
-                message = if (platformSupported) {
-                    if (supportsRange && contentLength > 0L) {
-                        "The server does not expose a stable ETag or Last-Modified validator."
-                    } else {
-                        "The server does not expose a seekable HTTP range source."
-                    }
-                } else {
-                    "Descriptor-backed network APK parsing requires Android 9 or newer."
+
+                !supportsRange || contentLength <= 0L -> RemotePackageProbeResult.StreamingUnsupported(
+                    StreamingUnsupportedReason.RangeSource
+                )
+
+                preFlight.remoteIdentity == null -> RemotePackageProbeResult.StreamingUnsupported(
+                    StreamingUnsupportedReason.StableIdentity
+                )
+
+                else -> {
+                    remoteEntity = createRemoteEntity(
+                        client,
+                        uri.toString(),
+                        preFlight.remoteIdentity,
+                        calculateRuntimeRangeCacheBudget(
+                            requestedMaxBytes = rangeCacheSizeMiB.toRangeCacheBytes(),
+                            maxHeapBytes = Runtime.getRuntime().maxMemory(),
+                            allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
+                            blockSize = RANGE_CACHE_BLOCK_SIZE
+                        )
+                    )
+                    probeRemotePackage(requireNotNull(remoteEntity))
                 }
-            )
+            }
+
+            when (mode.actionFor(probeResult)) {
+                RemotePackageAction.Stream -> {
+                    Timber.i("Using low-storage HTTP range source. Size: $contentLength")
+                    return@withContext listOf(requireNotNull(remoteEntity))
+                }
+
+                RemotePackageAction.FullDownload -> {
+                    Timber.i("Remote source probe selected the full-download path: $probeResult")
+                }
+
+                RemotePackageAction.Reject -> throw probeResult.toLowStorageException()
+            }
         }
 
         val tempFile = File(cacheDirectory, UUID.randomUUID().toString())
@@ -238,15 +240,50 @@ class OkHttpNetworkResolver(
     private fun Int.toRangeCacheBytes(): Int =
         normalizedNetworkRangeCacheSizeMiB() * 1024 * 1024
 
-    private fun isSingleApk(entity: DataEntity.FileDescriptorEntity): Boolean =
-        runCatching {
+    private fun probeRemotePackage(entity: DataEntity.FileDescriptorEntity): RemotePackageProbeResult =
+        try {
             ZipFile.builder()
                 .setSeekableByteChannel(entity.openChannel())
                 .setIgnoreLocalFileHeader(true)
-                .get().use { archive -> archive.getEntry("AndroidManifest.xml") != null }
-        }.onFailure { error ->
+                .get().use { archive ->
+                    if (archive.getEntry("AndroidManifest.xml") != null) {
+                        RemotePackageProbeResult.SingleApk
+                    } else {
+                        RemotePackageProbeResult.PackageArchive
+                    }
+                }
+        } catch (error: Exception) {
             Timber.w(error, "Unable to inspect remote package as a seekable APK.")
-        }.getOrDefault(false)
+            RemotePackageProbeResult.ProbeFailed(error)
+        }
+
+    private fun RemotePackageProbeResult.toLowStorageException(): ResolveException = when (this) {
+        is RemotePackageProbeResult.StreamingUnsupported -> when (reason) {
+            StreamingUnsupportedReason.Platform -> ResolveException(
+                errorType = ResolveErrorType.LOW_STORAGE_UNSUPPORTED,
+                message = "Descriptor-backed network APK parsing requires Android 9 or newer."
+            )
+
+            StreamingUnsupportedReason.RangeSource -> ResolveException(
+                errorType = ResolveErrorType.RANGE_REQUIRED,
+                message = "The server does not expose a seekable HTTP range source."
+            )
+
+            StreamingUnsupportedReason.StableIdentity -> ResolveException(
+                errorType = ResolveErrorType.RANGE_REQUIRED,
+                message = "The server does not expose a stable ETag or Last-Modified validator."
+            )
+        }
+
+        is RemotePackageProbeResult.ProbeFailed -> ResolveException(
+            errorType = ResolveErrorType.STREAMING_PROBE_FAILED,
+            message = "Unable to inspect the remote package through HTTP range requests.",
+            cause = cause
+        )
+
+        RemotePackageProbeResult.SingleApk,
+        RemotePackageProbeResult.PackageArchive -> error("A successful probe cannot be rejected")
+    }
 
     private fun createProxyDescriptor(
         rangeCache: SeekableBlockCache,
