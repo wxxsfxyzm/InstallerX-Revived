@@ -382,6 +382,10 @@ class OkHttpNetworkResolver(
         client.newCall(request).execute().use { response ->
             if (response.code != 206) throw IOException("HTTP range request returned ${response.code}")
             identity.validateResponse(response)
+            val expectedEnd = offset + size - 1L
+            val contentRange = ContentRange.parse(response.header("Content-Range"))
+                ?: throw IOException("HTTP range response omitted a valid Content-Range")
+            contentRange.requireMatches(offset, expectedEnd, contentLength)
             val destination = ByteArray(size)
             response.body.byteStream().use { input ->
                 var total = 0
@@ -390,8 +394,11 @@ class OkHttpNetworkResolver(
                     if (count < 0) break
                     if (count > 0) total += count
                 }
+                if (total != size) {
+                    throw IOException("HTTP range response ended early: expected=$size, actual=$total")
+                }
                 Timber.d("Fetched HTTP range block: offset=$offset, bytes=$total")
-                return if (total == size) destination else destination.copyOf(total)
+                return destination
             }
         }
     }
@@ -580,12 +587,11 @@ class OkHttpNetworkResolver(
                 val bytesRead = response.body.byteStream().readUpTo(buffer)
                 val isArchive = bytesRead >= 4 && buffer.isZipMagicNumber()
 
-                val contentRange = response.header("Content-Range")
-                val rangeTotal = parseContentRangeTotal(contentRange)
+                val contentRange = ContentRange.parse(response.header("Content-Range"))
                 val responseLength = response.header("Content-Length")?.toLongOrNull() ?: response.body.contentLength()
-                val supportsRange = response.code == 206 && rangeTotal > 0
+                val supportsRange = response.code == 206 && contentRange?.matches(0L, 3L) == true
                 val length = when {
-                    rangeTotal > 0 -> rangeTotal
+                    supportsRange -> requireNotNull(contentRange).total
                     response.code == 200 -> responseLength
                     else -> -1L
                 }
@@ -617,31 +623,19 @@ class OkHttpNetworkResolver(
         return try {
             client.newCall(request).execute().use { response ->
                 val length = response.header("Content-Length")?.toLongOrNull() ?: -1L
-                val supports = response.header("Accept-Ranges").equals("bytes", ignoreCase = true)
-
                 // Preserve the previous behavior: if the lightweight archive probe cannot
                 // complete, do not reject otherwise valid download sources.
                 PreFlightResult(
                     contentLength = length,
-                    supportsRange = supports,
+                    supportsRange = false,
                     isArchive = true,
-                    remoteIdentity = if (supports) {
-                        RemoteSourceIdentity.fromResponse(response, length)
-                    } else {
-                        null
-                    }
+                    remoteIdentity = null
                 )
             }
         } catch (e: Exception) {
             Timber.w(e, "Pre-flight HEAD request failed. Assuming single thread.")
             PreFlightResult(-1L, supportsRange = false, isArchive = true)
         }
-    }
-
-    private fun parseContentRangeTotal(contentRange: String?): Long {
-        if (contentRange.isNullOrBlank()) return -1L
-        val total = contentRange.substringAfter('/', missingDelimiterValue = "")
-        return total.toLongOrNull() ?: -1L
     }
 
     private fun InputStream.readUpTo(buffer: ByteArray): Int {
