@@ -17,7 +17,7 @@ class ShizukuContext(base: Context) : ContextWrapper(base) {
             val builder = AttributionSource.Builder(shellUid)
                 .setPackageName("com.android.shell")
 
-            if (Build.VERSION.SDK_INT >= 34) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 builder.setPid(android.os.Process.INVALID_PID)
             }
 
