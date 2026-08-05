@@ -931,4 +931,7 @@
     <string name="install_comparison_show_differences_only_desc">相同資料僅顯示單一數值</string>
     <string name="expand_temporary_settings_by_default">預設展開面板</string>
     <string name="expand_temporary_settings_by_default_desc">開啟安裝視窗時預設展開臨時設定</string>
+    <string name="config_check_split_package_signatures_desc">分析 APKS、APKM 與 XAPK 套件中的 APK 簽章。這可能會顯著增加分析時間</string>
+    <string name="installer_writing">寫入中…</string>
+    <string name="config_check_split_package_signatures">檢查分割套件簽章</string>
 </resources>
