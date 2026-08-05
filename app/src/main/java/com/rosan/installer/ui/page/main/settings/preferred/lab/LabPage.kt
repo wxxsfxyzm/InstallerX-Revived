@@ -57,7 +57,6 @@ import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.navigation.Material3ModalBottomSheetBackBridge
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelectionDialog
@@ -75,6 +74,7 @@ import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.nav.gesture.WindowNavigationEventBridge
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -330,7 +330,7 @@ fun LabPage(
         ModalBottomSheet(
             onDismissRequest = { showSmartAuthorizerSheet.value = false }
         ) {
-            Material3ModalBottomSheetBackBridge()
+            WindowNavigationEventBridge()
             SmartAuthorizerBottomSheet(
                 candidates = uiState.smartAuthorizerCandidates,
                 rootMode = rootMode,
@@ -493,6 +493,7 @@ private fun smartAuthorizerAvailabilityDescription(
             if (isSystemApp) R.string.working_status_system_installer_desc
             else R.string.working_status_none_authorizer_desc
         )
+
         else -> authorizer.value
     }
 

@@ -66,7 +66,6 @@ import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.navigation.Material3ModalBottomSheetBackBridge
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
@@ -78,6 +77,7 @@ import com.rosan.installer.util.toast
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.nav.gesture.WindowNavigationEventBridge
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -247,7 +247,7 @@ fun HistoryPage(
                 )
             }
         ) {
-            Material3ModalBottomSheetBackBridge()
+            WindowNavigationEventBridge()
             HistoryRecordDetailContent(
                 record = selectedRecord!!,
                 isSystemApp = state.isSystemApp,
