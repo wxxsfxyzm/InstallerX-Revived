@@ -79,35 +79,39 @@ class ApkParser(
             useResources { resources ->
                 try {
                     val resourcesStartedAt = System.nanoTime()
-                    val apkResources = loadApkResources(resources, fileEntity)
+                    val apkResources = loadApkResources(resources, fileEntity, extra.cacheDirectory)
                     Timber.d(
                         "ApkParser: Resources loaded successfully for $sourceContext " +
                                 "in ${resourcesStartedAt.elapsedMillis()} ms"
                     )
 
                     val entityStartedAt = System.nanoTime()
-                    val entity = if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
-                        loadAppEntity(
-                            apkResources.resources,
-                            apkResources.resources.newTheme(),
-                            apkResources.openManifestParser,
-                            archive,
-                            path,
-                            data,
-                            extra,
-                            bestArch ?: Architecture.UNKNOWN
-                        )
-                    } else {
-                        loadAppEntity(
-                            apkResources.resources,
-                            apkResources.resources.newTheme(),
-                            apkResources.openManifestParser,
-                            archive,
-                            path,
-                            data,
-                            extra,
-                            bestArch ?: Architecture.UNKNOWN
-                        )
+                    val entity = try {
+                        if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
+                            loadAppEntity(
+                                apkResources.resources,
+                                apkResources.resources.newTheme(),
+                                apkResources.openManifestParser,
+                                archive,
+                                path,
+                                data,
+                                extra,
+                                bestArch ?: Architecture.UNKNOWN
+                            )
+                        } else {
+                            loadAppEntity(
+                                apkResources.resources,
+                                apkResources.resources.newTheme(),
+                                apkResources.openManifestParser,
+                                archive,
+                                path,
+                                data,
+                                extra,
+                                bestArch ?: Architecture.UNKNOWN
+                            )
+                        }
+                    } finally {
+                        apkResources.cleanup()
                     }
                     Timber.d(
                         "ApkParser: Entity parsed successfully -> Pkg: ${entity.packageName}, " +
@@ -205,12 +209,14 @@ class ApkParser(
     private data class ApkResourceContext(
         val resources: Resources,
         val openManifestParser: () -> XmlResourceParser,
-        val closeResourcesAfterUse: Boolean
+        val closeResourcesAfterUse: Boolean,
+        val cleanup: () -> Unit = {}
     )
 
     private fun loadApkResources(
         systemResources: Resources,
-        file: DataEntity.FileEntity
+        file: DataEntity.FileEntity,
+        cacheDirectory: String
     ): ApkResourceContext {
         val path = file.path
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -236,19 +242,20 @@ class ApkParser(
                 } else {
                     ApkAssets.loadFromPath(path)
                 }
-                val assetManager = `AssetManager$Builder`()
-                    .addApkAssets(apkAssets)
-                    .build()
-
-                @Suppress("DEPRECATION")
-                val apkResources = Resources(assetManager, systemResources.displayMetrics, systemResources.configuration)
-                return ApkResourceContext(
-                    resources = apkResources,
-                    openManifestParser = { apkAssets.openXml("AndroidManifest.xml") },
-                    closeResourcesAfterUse = true
-                )
+                return createApkResourceContext(systemResources, apkAssets)
             } catch (e: IOException) {
-                Timber.e(e, "Failed to load APK assets from path: $path")
+                if (file is DataEntity.FileDescriptorEntity) {
+                    val cachedResources = tryLoadApkResourcesFromCache(
+                        systemResources = systemResources,
+                        file = file,
+                        cacheDirectory = cacheDirectory
+                    )
+                    if (cachedResources != null) {
+                        return cachedResources
+                    }
+                }
+
+                Timber.e(e, "Failed to load APK assets from FD/cache: $path")
                 throw AnalyseException(
                     errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
                     message = "Failed to load APK assets.",
@@ -293,6 +300,72 @@ class ApkParser(
                 openManifestParser = { apkResources.assets.openXmlResourceParser("AndroidManifest.xml") },
                 closeResourcesAfterUse = true
             )
+        }
+    }
+
+    private fun createApkResourceContext(
+        systemResources: Resources,
+        apkAssets: ApkAssets,
+        cleanup: () -> Unit = {}
+    ): ApkResourceContext {
+        val assetManager = `AssetManager$Builder`()
+            .addApkAssets(apkAssets)
+            .build()
+
+        @Suppress("DEPRECATION")
+        val apkResources = Resources(assetManager, systemResources.displayMetrics, systemResources.configuration)
+        return ApkResourceContext(
+            resources = apkResources,
+            openManifestParser = { apkAssets.openXml("AndroidManifest.xml") },
+            closeResourcesAfterUse = true,
+            cleanup = cleanup
+        )
+    }
+
+    private fun tryLoadApkResourcesFromCache(
+        systemResources: Resources,
+        file: DataEntity.FileDescriptorEntity,
+        cacheDirectory: String
+    ): ApkResourceContext? {
+        val directory = File(cacheDirectory)
+        if ((!directory.exists() && !directory.mkdirs()) || !directory.isDirectory) {
+            Timber.w("ApkParser: Unable to create APK analysis cache directory: $cacheDirectory")
+            return null
+        }
+
+        val cachedFile = try {
+            File.createTempFile("apk-analysis-", ".apk", directory)
+        } catch (error: Exception) {
+            Timber.w(error, "ApkParser: Unable to create APK analysis cache file")
+            return null
+        }
+
+        return try {
+            val copiedSize = file.getInputStream().use { input ->
+                cachedFile.outputStream().use { output ->
+                    input.copyTo(output, ANALYSIS_COPY_BUFFER_SIZE)
+                }
+            }
+            if (copiedSize != file.length) {
+                throw IOException(
+                    "Incomplete APK analysis cache: expected=${file.length}, actual=$copiedSize"
+                )
+            }
+
+            val apkAssets = ApkAssets.loadFromPath(cachedFile.path)
+            Timber.i(
+                "ApkParser: Loaded APK assets from analysis cache: " +
+                        "path=${cachedFile.path}, source=${file.path}, size=$copiedSize"
+            )
+            createApkResourceContext(systemResources, apkAssets) {
+                if (!cachedFile.delete() && cachedFile.exists()) {
+                    Timber.w("ApkParser: Failed to delete APK analysis cache: ${cachedFile.path}")
+                }
+            }
+        } catch (error: Exception) {
+            cachedFile.delete()
+            Timber.w(error, "ApkParser: Failed to load APK assets from analysis cache: ${cachedFile.path}")
+            null
         }
     }
 
