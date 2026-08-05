@@ -900,4 +900,5 @@
     <string name="exception_install_failed_all_authorizers_failed">すべての承認者が失敗しました</string>
     <string name="exception_install_failed_blocked_by_profile_signature_mismatch">プロファイルは、署名が異なるアプリのインストールをブロックします</string>
     <string name="exception_install_failed_blocked_by_profile_signature_unknown">プロファイルは、署名を検証できないアプリのインストールをブロックします</string>
+    <string name="installer_writing">書き込み中…</string>
 </resources>

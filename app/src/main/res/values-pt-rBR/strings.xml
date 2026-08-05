@@ -921,4 +921,7 @@
     <string name="expand_temporary_settings_by_default">Expandir o painel por padrão</string>
     <string name="expand_temporary_settings_by_default_desc">Expandir as configurações temporárias ao abrir a caixa de diálogo de instalação</string>
     <string name="self_update_install_success">O InstallerX foi atualizado com sucesso</string>
+    <string name="config_check_split_package_signatures_desc">Analisar as assinaturas de APK em pacotes APKS, APKM e XAPK. Isso pode aumentar significativamente o tempo de análise</string>
+    <string name="installer_writing">Gravando…</string>
+    <string name="config_check_split_package_signatures">Analisar assinaturas de pacotes divididos</string>
 </resources>
