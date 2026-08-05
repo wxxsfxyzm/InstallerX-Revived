@@ -280,7 +280,10 @@ class SessionNotifierImpl(
         val timeSinceLastUpdate = currentTime - lastNotificationUpdateTime
         val isCriticalState =
             progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallCompleted || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallWaitingUnknownSource
-        val isEnteringInstalling = progress is ProgressEntity.Installing && lastProgressClass != ProgressEntity.Installing::class
+        // A stage transition must be visible immediately. The interval throttle is only for
+        // repeated updates within the same stage; otherwise fast resolve -> analyse transitions
+        // can leave the notification showing the stale resolving state indefinitely.
+        val isStageChanged = lastProgressClass != progress::class
         val isDataChanged = progress != lastNotifiedEntity
 
         if (progress is ProgressEntity.InstallingModule) {
@@ -308,7 +311,7 @@ class SessionNotifierImpl(
 
         val shouldUpdate = when {
             isCriticalState -> isDataChanged
-            isEnteringInstalling -> true
+            isStageChanged -> true
             installingItemChanged -> true
             timeSinceLastUpdate < NOTIFICATION_UPDATE_INTERVAL_MS -> false
             progress is ProgressEntity.Installing && currentProgress >= 0f -> {
