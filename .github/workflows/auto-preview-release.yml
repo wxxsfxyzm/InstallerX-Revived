@@ -3,14 +3,25 @@ name: Automatic Alpha Pre-Release (Latest Only)
 on:
   push:
     branches: [ "main" ]
-    # Only trigger on specific path changes
+    # Build only when application code or build inputs change.
     paths:
-      - 'app/**'
+      - 'app/src/**'
+      - 'app/build.gradle.kts'
+      - 'app-process/src/**'
+      - 'app-process/build.gradle.kts'
+      - 'hidden-api/src/**'
+      - 'hidden-api/build.gradle.kts'
+      - 'baselineprofile/src/**'
+      - 'baselineprofile/build.gradle.kts'
+      - 'build-plugins/src/**'
+      - 'build-plugins/build.gradle.kts'
+      - 'build-plugins/settings.gradle.kts'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
       - 'gradle/**'
-      - '.github/workflows/auto-preview-release.yml'
+      - 'gradlew'
+      - 'gradlew.bat'
 
 jobs:
   build_and_prerelease:
