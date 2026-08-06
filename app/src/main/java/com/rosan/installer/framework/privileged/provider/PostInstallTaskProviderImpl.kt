@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.framework.privileged.provider
 
+import android.content.Context
 import com.rosan.installer.util.deletePaths
 import com.rosan.installer.framework.privileged.core.execution.dispatcher.useDirectPrivileged
 import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class PostInstallTaskProviderImpl(
+    private val context: Context,
     private val appSettingsRepo: AppSettingsRepository,
     private val capabilityProvider: DeviceCapabilityProvider
 ) : PostInstallTaskProvider {
@@ -77,7 +79,7 @@ class PostInstallTaskProviderImpl(
                         // Local deletion for non-privileged authorizers, silently fails on errors.
                         if (noPerm) {
                             Timber.d("Attempting local file deletion for non-privileged authorizer: $finalAuthorizer")
-                            deletePaths(info.deletePaths)
+                            deletePaths(context, info.deletePaths)
                             Timber.i("Local delete completed")
                         } else {
                             // Privileged deletion using UserService.
