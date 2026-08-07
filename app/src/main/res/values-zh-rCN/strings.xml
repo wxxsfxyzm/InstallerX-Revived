@@ -203,6 +203,7 @@
     <string name="installer_settings_auto_clear_time_seconds_format">%d 秒</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">%d 秒后自动清理安装成功通知</string>
     <string name="basic">常规</string>
+    <string name="network_settings">网络设置</string>
     <string name="backup_settings">备份与还原</string>
     <string name="backup_settings_export">导出设置</string>
     <string name="backup_settings_export_desc">将配置文件和应用设置保存到备份文件</string>

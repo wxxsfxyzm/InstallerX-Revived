@@ -254,10 +254,6 @@ fun EditPage(
                     dataDeclareInstallerWidget(state, dispatch)
                     dataManualDexoptWidget(state, dispatch)
                     dataAutoDeleteWidget(state, dispatch)
-                    if (AppConfig.isInternetAccessEnabled) {
-                        networkSourceModeWidget(state, dispatch)
-                        networkRangeCacheSizeWidget(state, dispatch)
-                    }
                     item { DisplaySdkWidget(state, dispatch) }
                     item { DisplaySizeWidget(state, dispatch) }
                 }

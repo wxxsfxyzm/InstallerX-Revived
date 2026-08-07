@@ -111,7 +111,7 @@ class ActionHandler(
     private val sourceResolver = SourceResolver(
         context = context,
         networkResolver = networkResolver,
-        appSettingsRepo = appSettingsRepo,
+        appSettingsRepository = appSettingsRepo,
         cacheDirectory = cacheDirectory,
         progressFlow = mutableProgressFlow
     )
@@ -297,11 +297,7 @@ class ActionHandler(
 
         // Resolve Data (IO Heavy - Cancellable via SourceResolver)
         Timber.d("[id=$sessionId] resolve: Resolving data URIs...")
-        val resolveResult = sourceResolver.resolve(
-            activity.intent,
-            session.config.networkSourceMode,
-            session.config.networkRangeCacheSizeMiB
-        )
+        val resolveResult = sourceResolver.resolve(activity.intent)
 
         // Check active after IO
         if (!currentCoroutineContext().isActive) throw CancellationException()

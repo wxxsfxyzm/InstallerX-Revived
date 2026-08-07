@@ -8,7 +8,6 @@ import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
-import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
 
@@ -33,8 +32,6 @@ sealed interface EditViewAction {
     data class ChangeDataEnableManualDexopt(val enable: Boolean) : EditViewAction
     data class ChangeDataForceDexopt(val force: Boolean) : EditViewAction
     data class ChangeDataDexoptMode(val mode: DexoptMode) : EditViewAction
-    data class ChangeNetworkSourceMode(val mode: NetworkSourceMode) : EditViewAction
-    data class ChangeNetworkRangeCacheSizeMiB(val sizeMiB: Int) : EditViewAction
     data class ChangeDataAutoDelete(val autoDelete: Boolean) : EditViewAction
     data class ChangeDataZipAutoDelete(val autoDelete: Boolean) : EditViewAction
     data class ChangeDisplaySdk(val displaySdk: Boolean) : EditViewAction

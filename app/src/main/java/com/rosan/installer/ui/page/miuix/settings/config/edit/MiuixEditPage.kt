@@ -269,10 +269,6 @@ fun MiuixEditPage(
                     MiuixDataDeclareInstallerWidget(state = state, dispatch = dispatch)
                     MiuixDataManualDexoptWidget(state = state, dispatch = dispatch)
                     MiuixDataAutoDeleteWidget(state = state, dispatch = dispatch)
-                    if (AppConfig.isInternetAccessEnabled) {
-                        MiuixNetworkSourceModeWidget(state = state, dispatch = dispatch)
-                        MiuixNetworkRangeCacheSizeWidget(state = state, dispatch = dispatch)
-                    }
                     MiuixDisplaySdkWidget(state = state, dispatch = dispatch)
                     MiuixDisplaySizeWidget(state = state, dispatch = dispatch)
                 }

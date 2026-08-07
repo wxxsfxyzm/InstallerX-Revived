@@ -11,6 +11,9 @@ import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.config.DEFAULT_NETWORK_RANGE_CACHE_SIZE_MIB
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
+import com.rosan.installer.domain.settings.model.config.normalizedNetworkRangeCacheSizeMiB
 import com.rosan.installer.domain.settings.model.preferences.AppPreferences
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
@@ -120,6 +123,12 @@ class AppSettingsRepositoryImpl(
             ),
             // Uninstaller
             uninstallFlags = prefs[AppDataStore.UNINSTALL_FLAGS] ?: 0,
+            // Network
+            networkSourceMode = NetworkSourceMode.fromValue(
+                prefs[AppDataStore.NETWORK_SOURCE_MODE] ?: NetworkSourceMode.Cache.value
+            ),
+            networkRangeCacheSizeMiB = (prefs[AppDataStore.NETWORK_RANGE_CACHE_SIZE_MIB]
+                ?: DEFAULT_NETWORK_RANGE_CACHE_SIZE_MIB).normalizedNetworkRangeCacheSizeMiB(),
             // Updater
             allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
@@ -224,6 +233,7 @@ class AppSettingsRepositoryImpl(
             StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
             StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
             StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
+            StringSetting.NetworkSourceMode -> AppDataStore.NETWORK_SOURCE_MODE
             StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
             StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION
             StringSetting.GithubUpdateChannel -> AppDataStore.GITHUB_UPDATE_CHANNEL
@@ -239,6 +249,7 @@ class AppSettingsRepositoryImpl(
             IntSetting.NotificationSuccessAutoClearSeconds -> AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS
             IntSetting.CloseSessionCountdown -> AppDataStore.CLOSE_SESSION_COUNTDOWN
             IntSetting.UninstallFlags -> AppDataStore.UNINSTALL_FLAGS
+            IntSetting.NetworkRangeCacheSizeMiB -> AppDataStore.NETWORK_RANGE_CACHE_SIZE_MIB
         }
 
     private fun booleanKey(setting: BooleanSetting): Preferences.Key<Boolean> =

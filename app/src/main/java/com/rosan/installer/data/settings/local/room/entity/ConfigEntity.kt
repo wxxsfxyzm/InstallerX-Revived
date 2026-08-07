@@ -7,13 +7,11 @@ import androidx.room3.Entity
 import androidx.room3.Ignore
 import androidx.room3.PrimaryKey
 import com.rosan.installer.domain.settings.model.config.Authorizer
-import com.rosan.installer.domain.settings.model.config.DEFAULT_NETWORK_RANGE_CACHE_SIZE_MIB
 import com.rosan.installer.domain.settings.model.config.DexoptMode
 import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallerMode
-import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
 
@@ -65,10 +63,6 @@ data class ConfigEntity(
     var forceDexopt: Boolean = false,
     @ColumnInfo(name = "dexopt_mode", defaultValue = "'speed-profile'")
     var dexoptMode: DexoptMode = DexoptMode.SpeedProfile,
-    @ColumnInfo(name = "network_source_mode", defaultValue = "'cache'")
-    var networkSourceMode: NetworkSourceMode = NetworkSourceMode.Cache,
-    @ColumnInfo(name = "network_range_cache_size_mib", defaultValue = "8")
-    var networkRangeCacheSizeMiB: Int = DEFAULT_NETWORK_RANGE_CACHE_SIZE_MIB,
     @ColumnInfo(name = "auto_delete", defaultValue = "0")
     var autoDelete: Boolean,
     @ColumnInfo(name = "auto_delete_zip", defaultValue = "0")

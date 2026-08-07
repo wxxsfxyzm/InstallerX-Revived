@@ -29,6 +29,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer.
 import com.rosan.installer.ui.page.main.settings.preferred.installer.dialog.DialogSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabPage
+import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkPage
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsPage
 import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.UninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
@@ -42,6 +43,7 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.installer.authorizer
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.dialog.MiuixDialogSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.installer.notification.MiuixNotificationSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.lab.MiuixLabPage
+import com.rosan.installer.ui.page.miuix.settings.preferred.network.MiuixNetworkPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.uninstaller.MiuixUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.util.rememberDeviceCornerRadius
@@ -164,6 +166,15 @@ fun InstallerNavContainer(uiState: ThemeState) {
                         MiuixThemeSettingsPage()
                     } else {
                         ThemeSettingsPage()
+                    }
+                }
+            }
+            entry<Route.Network>(swipeDismiss = swipeBackDirection) {
+                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                    if (uiState.useMiuix) {
+                        MiuixNetworkPage(useBlur)
+                    } else {
+                        NetworkPage(useBlur)
                     }
                 }
             }

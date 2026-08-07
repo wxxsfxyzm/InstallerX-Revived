@@ -24,14 +24,13 @@ import com.rosan.installer.data.settings.local.room.entity.converter.InstallMode
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallReasonConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallRequesterModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.InstallerModeConverter
-import com.rosan.installer.data.settings.local.room.entity.converter.NetworkSourceModeConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.PackageSourceConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.StringListConverter
 import com.rosan.installer.data.settings.local.room.entity.converter.ToastModeConverter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-const val INSTALLER_ROOM_SCHEMA_VERSION = 19
+const val INSTALLER_ROOM_SCHEMA_VERSION = 17
 
 @Database(
     entities = [AppEntity::class, ConfigEntity::class, OperationHistoryEntity::class],
@@ -51,8 +50,6 @@ const val INSTALLER_ROOM_SCHEMA_VERSION = 19
         AutoMigration(from = 14, to = 15),
         AutoMigration(from = 15, to = 16),
         AutoMigration(from = 16, to = 17),
-        AutoMigration(from = 17, to = 18),
-        AutoMigration(from = 18, to = 19),
     ]
 )
 @ColumnTypeConverters(
@@ -64,8 +61,7 @@ const val INSTALLER_ROOM_SCHEMA_VERSION = 19
     PackageSourceConverter::class,
     InstallReasonConverter::class,
     StringListConverter::class,
-    ToastModeConverter::class,
-    NetworkSourceModeConverter::class
+    ToastModeConverter::class
 )
 abstract class InstallerRoom : RoomDatabase() {
     companion object : KoinComponent {

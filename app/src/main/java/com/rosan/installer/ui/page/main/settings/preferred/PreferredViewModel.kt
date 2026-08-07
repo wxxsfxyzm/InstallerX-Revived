@@ -11,10 +11,12 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.usecase.backup.ExportBackupUseCase
 import com.rosan.installer.domain.settings.usecase.backup.PrepareBackupRestoreUseCase
 import com.rosan.installer.domain.settings.usecase.backup.RestoreBackupUseCase
 import com.rosan.installer.domain.settings.usecase.settings.SetLauncherIconUseCase
+import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import com.rosan.installer.domain.updater.repository.UpdateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -37,6 +39,7 @@ class PreferredViewModel(
     private val systemEnvProvider: SystemEnvProvider,
     private val privilegedProvider: PrivilegedProvider,
     private val setLauncherIcon: SetLauncherIconUseCase,
+    private val updateSetting: UpdateSettingUseCase,
     private val exportBackup: ExportBackupUseCase,
     private val prepareBackupRestore: PrepareBackupRestoreUseCase,
     private val restoreBackup: RestoreBackupUseCase
@@ -69,6 +72,7 @@ class PreferredViewModel(
             showLauncherIcon = prefs.showLauncherIcon,
             adbVerifyEnabled = adbVerify,
             isIgnoringBatteryOptimizations = batteryOpt,
+            allowInternetAccess = prefs.allowInternetAccess,
             hasUpdate = prefs.allowInternetAccess && (updateInfo?.hasUpdate ?: false),
             remoteVersion = if (prefs.allowInternetAccess) updateInfo?.remoteVersion.orEmpty() else "",
             backupBusy = backupBusy
@@ -87,6 +91,10 @@ class PreferredViewModel(
 
     fun dispatch(action: PreferredViewAction) {
         when (action) {
+            is PreferredViewAction.ChangeInternetAccess -> viewModelScope.launch {
+                updateSetting(BooleanSetting.AllowInternetAccess, action.enabled)
+            }
+
             is PreferredViewAction.SetAdbVerifyEnabledState -> setAdbVerifyEnabled(action.enabled, action)
             is PreferredViewAction.RequestIgnoreBatteryOptimization -> requestIgnoreBatteryOptimization()
             is PreferredViewAction.RefreshIgnoreBatteryOptimizationStatus -> refreshIgnoreBatteryOptStatus()

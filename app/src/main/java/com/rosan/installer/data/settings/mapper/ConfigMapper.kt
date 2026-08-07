@@ -5,7 +5,6 @@ package com.rosan.installer.data.settings.mapper
 import com.rosan.installer.data.settings.local.room.entity.ConfigEntity
 import com.rosan.installer.data.settings.local.room.entity.ConfigWithScopeCount
 import com.rosan.installer.domain.settings.model.config.ConfigModel
-import com.rosan.installer.domain.settings.model.config.normalizedNetworkRangeCacheSizeMiB
 
 /**
  * Map Room database entity to pure business domain model
@@ -33,8 +32,6 @@ fun ConfigEntity.toDomainModel(scopeCount: Int = 0): ConfigModel {
         enableManualDexopt = this.enableManualDexopt,
         forceDexopt = this.forceDexopt,
         dexoptMode = this.dexoptMode,
-        networkSourceMode = this.networkSourceMode,
-        networkRangeCacheSizeMiB = this.networkRangeCacheSizeMiB.normalizedNetworkRangeCacheSizeMiB(),
         autoDelete = this.autoDelete,
         autoDeleteZip = this.autoDeleteZip,
         displaySize = this.displaySize,
@@ -93,8 +90,6 @@ fun ConfigModel.toEntity(): ConfigEntity {
         enableManualDexopt = this.enableManualDexopt,
         forceDexopt = this.forceDexopt,
         dexoptMode = this.dexoptMode,
-        networkSourceMode = this.networkSourceMode,
-        networkRangeCacheSizeMiB = this.networkRangeCacheSizeMiB.normalizedNetworkRangeCacheSizeMiB(),
         autoDelete = this.autoDelete,
         autoDeleteZip = this.autoDeleteZip,
         displaySize = this.displaySize,

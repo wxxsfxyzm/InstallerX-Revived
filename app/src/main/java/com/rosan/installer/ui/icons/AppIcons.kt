@@ -59,6 +59,7 @@ import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.InstallMobile
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.Language
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
@@ -174,6 +175,7 @@ object AppIcons {
     val InstallWithOutAction = Icons.TwoTone.InstallMobile
     val PressInstallBackground = Icons.TwoTone.TouchApp
     val Settings = Icons.TwoTone.Settings
+    val Network = Icons.TwoTone.Language
     val OEMSpecial = Icons.TwoTone.FindInPage
     val ShowSize = Icons.AutoMirrored.TwoTone.CompareArrows
     val Bypass = Icons.TwoTone.NoEncryption

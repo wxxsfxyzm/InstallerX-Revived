@@ -3,8 +3,6 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,18 +30,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.rosan.installer.R
@@ -54,20 +46,15 @@ import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
 import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
-import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
-import com.rosan.installer.domain.settings.model.config.MAX_NETWORK_RANGE_CACHE_SIZE_MIB
-import com.rosan.installer.domain.settings.model.config.MIN_NETWORK_RANGE_CACHE_SIZE_MIB
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
-import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumnScope
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.util.isSystemPackageInstallerActive
 import org.koin.compose.koinInject
-import kotlinx.coroutines.delay
 
 @Composable
 fun DataNameWidget(
@@ -763,124 +750,6 @@ fun SegmentedColumnScope.dataAutoDeleteWidget(state: EditViewState, dispatch: (E
             )
         }
     )
-}
-
-fun SegmentedColumnScope.networkSourceModeWidget(
-    state: EditViewState,
-    dispatch: (EditViewAction) -> Unit
-) {
-    item {
-        val modes = linkedMapOf(
-            NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache),
-            NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart),
-            NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage)
-        )
-        val descriptions = mapOf(
-            NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache_desc),
-            NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart_desc),
-            NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc)
-        )
-        val currentMode = state.data.networkSourceMode
-        DropDownMenuWidget(
-            title = stringResource(R.string.config_network_source_mode),
-            description = descriptions.getValue(currentMode),
-            choice = modes.keys.indexOf(currentMode),
-            data = modes.values.toList()
-        ) { index ->
-            modes.keys.elementAtOrNull(index)?.let { mode ->
-                dispatch(EditViewAction.ChangeNetworkSourceMode(mode))
-            }
-        }
-    }
-}
-
-fun SegmentedColumnScope.networkRangeCacheSizeWidget(
-    state: EditViewState,
-    dispatch: (EditViewAction) -> Unit
-) {
-    item(animatedVisibility = state.data.networkSourceMode != NetworkSourceMode.Cache) {
-        val configuredSize = state.data.networkRangeCacheSizeMiB
-        var showEditor by remember { mutableStateOf(false) }
-        var input by remember(configuredSize, showEditor) {
-            mutableStateOf(configuredSize.toString())
-        }
-        val focusRequester = remember { FocusRequester() }
-        val keyboardController = LocalSoftwareKeyboardController.current
-        val parsed = input.toIntOrNull()
-        val valid = parsed in MIN_NETWORK_RANGE_CACHE_SIZE_MIB..MAX_NETWORK_RANGE_CACHE_SIZE_MIB
-
-        fun confirmInput() {
-            parsed?.takeIf { valid }
-                ?.let { dispatch(EditViewAction.ChangeNetworkRangeCacheSizeMiB(it)) }
-            if (valid) showEditor = false
-        }
-
-        LaunchedEffect(showEditor) {
-            if (showEditor) {
-                delay(200)
-                focusRequester.requestFocus()
-                keyboardController?.show()
-            }
-        }
-
-        BaseItemContainer {
-            IntNumberPickerWidget(
-                icon = Icons.TwoTone.Memory,
-                title = stringResource(R.string.config_network_range_cache_size),
-                description = stringResource(R.string.config_network_range_cache_size_desc),
-                value = configuredSize,
-                startInt = MIN_NETWORK_RANGE_CACHE_SIZE_MIB,
-                endInt = MAX_NETWORK_RANGE_CACHE_SIZE_MIB,
-                stepSize = 1,
-                valueSuffix = " MiB",
-                subduedValue = true,
-                onValueClick = { showEditor = true },
-                onValueChange = {
-                    dispatch(EditViewAction.ChangeNetworkRangeCacheSizeMiB(it))
-                }
-            )
-        }
-
-        if (showEditor) {
-            AlertDialog(
-                onDismissRequest = { showEditor = false },
-                title = { Text(stringResource(R.string.config_network_range_cache_size)) },
-                text = {
-                    OutlinedTextField(
-                        modifier = Modifier.focusRequester(focusRequester),
-                        value = input,
-                        onValueChange = { value ->
-                            input = value.filter(Char::isDigit).take(3)
-                        },
-                        suffix = { Text("MiB") },
-                        supportingText = {
-                            Text(stringResource(R.string.config_network_range_cache_size_supporting))
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { confirmInput() }),
-                        isError = !valid,
-                        singleLine = true
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        enabled = valid,
-                        onClick = ::confirmInput
-                    ) {
-                        Text(stringResource(R.string.confirm))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showEditor = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
-            )
-        }
-    }
 }
 
 @Composable

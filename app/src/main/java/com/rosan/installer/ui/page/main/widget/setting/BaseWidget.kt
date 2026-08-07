@@ -2,11 +2,15 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.widget.setting
 
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +20,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
@@ -59,12 +64,13 @@ val LocalSegmentedItemShape = compositionLocalOf<Shape> { RoundedCornerShape(Cor
  * @param descriptionColor Optional color applied to the [description] text.
  * If null, an adaptive color derived from the resolved content color is used.
  * @param enabled Controls the enabled state of the widget.
- * If [onClick] is null, this only affects visual/semantic disabled state.
- * If [onClick] is not null, this also controls clickability.
+ * This also controls clickability for [onClick] and [onTrailingClick] when those callbacks are provided.
  * @param isError If true, applies the error color to the description text.
  * @param selected If true, highlights the widget with a primary container background.
- * @param onClick Callback to be invoked when the widget is clicked. If null, the widget is not clickable.
+ * @param onClick Callback to be invoked when the main/left area is clicked. If null, the main area is not clickable.
+ * @param onTrailingClick Callback to be invoked when the trailing/right area is clicked.
  * @param clickHaptic The type of haptic feedback to perform on click. Set to null to disable.
+ * @param trailingDivider If true, displays a vertical divider before [trailingContent].
  * @param foreContent A composable slot for content displayed alongside/over the headline.
  * @param trailingContent A composable slot for trailing content, e.g. switches, checkboxes, or arrows.
  */
@@ -84,7 +90,9 @@ fun BaseWidget(
     isError: Boolean = false,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null,
+    onTrailingClick: (() -> Unit)? = null,
     clickHaptic: HapticFeedbackType? = HapticFeedbackType.VirtualKey,
+    trailingDivider: Boolean = false,
     foreContent: @Composable BoxScope.() -> Unit = {},
     trailingContent: @Composable BoxScope.(interactionSource: MutableInteractionSource) -> Unit = {}
 ) {
@@ -92,6 +100,16 @@ fun BaseWidget(
     val alpha = if (enabled) 1f else 0.38f
 
     val interactionSource = remember { MutableInteractionSource() }
+    val trailingInteractionSource = remember { MutableInteractionSource() }
+    val trailingContentInteractionSource =
+        if (onTrailingClick != null || trailingDivider) trailingInteractionSource else interactionSource
+
+    val handleTrailingClick = onTrailingClick?.let { callback ->
+        {
+            clickHaptic?.let { haptic.performHapticFeedback(it) }
+            callback()
+        }
+    }
 
     val density = LocalDensity.current
     val dynamicInternalPadding = (4 * density.fontScale).dp
@@ -198,11 +216,31 @@ fun BaseWidget(
         }
 
     val trailing: @Composable () -> Unit = {
-        Box(
+        Row(
             modifier = Modifier.alpha(alpha),
-            contentAlignment = Alignment.Center
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            trailingContent(interactionSource)
+            if (trailingDivider) VerticalDivider(modifier = Modifier.height(32.dp))
+
+            Box(
+                modifier = Modifier
+                    .then(
+                        if (handleTrailingClick != null) {
+                            Modifier.clickable(
+                                enabled = enabled,
+                                interactionSource = trailingInteractionSource,
+                                indication = LocalIndication.current,
+                                onClick = handleTrailingClick
+                            )
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .padding(start = if (trailingDivider) 16.dp else 0.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                trailingContent(trailingContentInteractionSource)
+            }
         }
     }
 

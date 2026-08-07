@@ -49,7 +49,7 @@ import kotlin.math.min
 class SourceResolver(
     private val context: Context,
     private val networkResolver: NetworkResolver,
-    private val appSettingsRepo: AppSettingsRepository,
+    private val appSettingsRepository: AppSettingsRepository,
     private val cacheDirectory: String,
     private val progressFlow: MutableSharedFlow<ProgressEntity>
 ) {
@@ -57,11 +57,8 @@ class SourceResolver(
 
     fun getTrackedCloseables(): List<Closeable> = closeables
 
-    suspend fun resolve(
-        intent: Intent,
-        networkSourceMode: NetworkSourceMode,
-        networkRangeCacheSizeMiB: Int
-    ): ResolveResult {
+    suspend fun resolve(intent: Intent): ResolveResult {
+        val networkSettings = appSettingsRepository.preferencesFlow.first()
         val uris = extractUris(intent)
         Timber.d("resolve: URIs extracted from intent (${uris.size}).")
 
@@ -69,7 +66,13 @@ class SourceResolver(
         for (uri in uris) {
             // Check cancellation between items
             if (!currentCoroutineContext().isActive) throw CancellationException()
-            data.addAll(resolveSingleUri(uri, networkSourceMode, networkRangeCacheSizeMiB))
+            data.addAll(
+                resolveSingleUri(
+                    uri,
+                    networkSettings.networkSourceMode,
+                    networkSettings.networkRangeCacheSizeMiB
+                )
+            )
         }
 
         // Return the packaged result
@@ -183,7 +186,7 @@ class SourceResolver(
             "content" -> resolveContentUri(uri)
 
             "http", "https" -> {
-                if (!appSettingsRepo.preferencesFlow.first().allowInternetAccess) {
+                if (!appSettingsRepository.preferencesFlow.first().allowInternetAccess) {
                     Timber.d("Internet access is disabled in app settings. Aborting network request.")
                     throw ResolveException(
                         errorType = ResolveErrorType.NO_INTERNET_ACCESS,

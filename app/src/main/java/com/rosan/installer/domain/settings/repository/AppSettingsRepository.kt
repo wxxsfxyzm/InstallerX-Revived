@@ -16,6 +16,7 @@ enum class StringSetting {
     ApplyOrderType,
     LabRootImplementation,
     LabHttpProfile,
+    NetworkSourceMode,
     PredictiveBackAnimation,
     PredictiveBackExitDirection,
     GithubUpdateChannel,
@@ -29,7 +30,8 @@ enum class IntSetting {
     ShowMiIslandBlockingInterval,
     NotificationSuccessAutoClearSeconds,
     CloseSessionCountdown,
-    UninstallFlags
+    UninstallFlags,
+    NetworkRangeCacheSizeMiB
 }
 
 enum class BooleanSetting {

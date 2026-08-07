@@ -211,6 +211,7 @@
     <string name="installer_settings_auto_clear_time_seconds_format">%d seconds</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Clear install success notification after %d seconds</string>
     <string name="basic">Basic</string>
+    <string name="network_settings">Network settings</string>
     <string name="backup_settings">Backup &amp; Restore</string>
     <string name="backup_settings_export">Export Settings</string>
     <string name="backup_settings_export_desc">Save profiles and app settings to a backup file</string>
