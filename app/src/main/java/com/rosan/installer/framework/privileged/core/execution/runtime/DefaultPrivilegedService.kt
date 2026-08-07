@@ -124,7 +124,7 @@ class DefaultPrivilegedService private constructor(
     private fun getUpdateOwnerPackageName(packageName: String, userId: Int): String? =
         iPackageManager.getInstallSourceInfo(packageName, userId).updateOwnerPackageName
 
-    override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
+    override fun delete(paths: Array<out String>) = deletePaths(context, paths.toList())
 
     override fun performDexOpt(
         packageName: String,
@@ -731,7 +731,7 @@ class DefaultPrivilegedService private constructor(
             resolvedLabel?.let { putCharSequence("appLabel", it) }
             putString("packageName", packageName)
             putString("installerPackageName", sessionInfo.installerPackageName)
-            putInt("installerUid", sessionInfo.installerUid)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) putInt("installerUid", sessionInfo.installerUid)
             path?.let { putString("resolvedBaseCodePath", it) }
             putBoolean("isUpdate", isUpdate)
             putBoolean("isOwnershipConflict", isOwnershipConflict)

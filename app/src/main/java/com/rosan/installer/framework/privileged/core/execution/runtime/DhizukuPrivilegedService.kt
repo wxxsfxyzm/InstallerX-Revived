@@ -58,7 +58,7 @@ class DhizukuPrivilegedService(
         }
     }
 
-    override fun delete(paths: Array<out String>) = deletePaths(paths.toList())
+    override fun delete(paths: Array<out String>) = deletePaths(context, paths.toList())
 
     override fun setDefaultInstaller(component: ComponentName, enable: Boolean) {
         try {
