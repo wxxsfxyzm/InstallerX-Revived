@@ -636,7 +636,7 @@
     <string name="exception_install_parse_failed_bad_shared_user_id">非預先安裝應用程式禁止使用系統級 UID</string>
     <string name="config_apk_choose_all">默認選擇所有 APK</string>
     <string name="config_apk_choose_all_desc">單次安裝會話含有多個 APK 檔案時預設勾選所有 APK 文件</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="batch_install_result_message">批次安裝：%1$d/%2$d 成功</string>
     <string name="config_always_use_root_in_system">使用 root 執行特權操作</string>
     <string name="config_always_use_root_in_system_desc">以系統套件管理器執行時，始終使用 root 執行特權操作，例如刷寫模組和刪除檔案</string>

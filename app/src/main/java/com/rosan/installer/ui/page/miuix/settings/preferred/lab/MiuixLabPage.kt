@@ -306,14 +306,22 @@ fun MiuixLabPage(
                     }
                 }
             }
-            if (AppConfig.isInternetAccessEnabled) {
-                item { SmallTitle(stringResource(R.string.internet_access_enabled)) }
-                item {
-                    Card(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp)
-                    ) {
+            item { SmallTitle(stringResource(R.string.network_access)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.allow_internet_access),
+                        description = stringResource(R.string.allow_internet_access_desc),
+                        checked = uiState.allowInternetAccess,
+                        onCheckedChange = {
+                            viewModel.dispatch(LabSettingsAction.LabChangeInternetAccess(it))
+                        }
+                    )
+                    if (uiState.allowInternetAccess) {
                         val currentProfile = uiState.labHttpProfile
                         val allowSecureString = stringResource(R.string.lab_http_profile_secure)
                         val allowLocalString = stringResource(R.string.lab_http_profile_local)

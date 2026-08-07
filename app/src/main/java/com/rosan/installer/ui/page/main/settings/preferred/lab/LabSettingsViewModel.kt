@@ -22,6 +22,7 @@ class LabSettingsViewModel(
 
     val state: StateFlow<LabSettingsState> = appSettingsRepo.preferencesFlow.map { prefs ->
         LabSettingsState(
+            allowInternetAccess = prefs.allowInternetAccess,
             labRootEnableModuleFlash = prefs.labRootEnableModuleFlash,
             labRootShowModuleArt = prefs.labRootShowModuleArt,
             labRootMode = prefs.labRootMode,
@@ -42,6 +43,10 @@ class LabSettingsViewModel(
 
     fun dispatch(action: LabSettingsAction) {
         when (action) {
+            is LabSettingsAction.LabChangeInternetAccess -> viewModelScope.launch {
+                updateSetting(BooleanSetting.AllowInternetAccess, action.enable)
+            }
+
             is LabSettingsAction.LabChangeRootModuleFlash -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.LabEnableModuleFlash,

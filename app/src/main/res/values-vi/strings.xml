@@ -16,7 +16,7 @@
     <string name="lab_desc">Truy cập các tính năng thử nghiệm và dành cho nhà phát triển</string>
     <string name="debug">Gỡ lỗi</string>
     <string name="about_detail">Về InstallerX Revived</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="updating">Đang cập nhật…</string>
     <string name="get_update">Nhận bản cập nhật</string>
     <string name="get_update_detail">Kiểm tra các bản cập nhật phần mềm và tính năng mới</string>

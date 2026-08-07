@@ -612,7 +612,7 @@
     <string name="installer_live_channel_short_text_analyse_failed">Falha</string>
     <string name="exception_resolve_failed_link_not_valid">Este link não contém um arquivo válido</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="theme_settings_color_spec">Especificações de Cor</string>
     <string name="theme_settings_color_spec_only_2021">O estilo atual da paleta suporta apenas a Especificação 2021</string>
     <string name="config_label_preferences">Preferências</string>

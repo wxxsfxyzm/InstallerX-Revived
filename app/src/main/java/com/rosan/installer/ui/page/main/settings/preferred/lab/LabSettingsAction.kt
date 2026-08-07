@@ -8,6 +8,7 @@ import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 
 sealed interface LabSettingsAction {
+    data class LabChangeInternetAccess(val enable: Boolean) : LabSettingsAction
     data class LabChangeRootModuleFlash(val enable: Boolean) : LabSettingsAction
     data class LabChangeRootShowModuleArt(val enable: Boolean) : LabSettingsAction
     data class LabChangeRootImplementation(val implementation: RootMode) : LabSettingsAction

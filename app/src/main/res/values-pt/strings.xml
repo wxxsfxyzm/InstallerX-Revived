@@ -39,7 +39,7 @@
     <string name="lab_desc">Acede recursos experimentais e para programadores</string>
     <string name="debug">Depuração</string>
     <string name="about_detail">Sobre o InstallerX Revived</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="updating">A atualizar…</string>
     <string name="get_update">Obter atualização</string>
     <string name="get_update_detail">Verifique se há atualizações de software e novos recursos</string>

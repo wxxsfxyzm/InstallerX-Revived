@@ -14,7 +14,6 @@ import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
-import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.util.isZipMagicNumber
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -73,14 +72,22 @@ class OkHttpNetworkResolver(
         cacheDirectory: String,
         progressFlow: MutableSharedFlow<ProgressEntity>
     ): List<DataEntity> = withContext(Dispatchers.IO) {
+        val preferences = appSettingsRepo.preferencesFlow.first()
+        if (!preferences.allowInternetAccess) {
+            throw ResolveException(
+                errorType = ResolveErrorType.NO_INTERNET_ACCESS,
+                message = "Internet access is disabled in app settings."
+            )
+        }
+
         Timber.d("Starting smart download for URI: $uri")
         progressFlow.emit(ProgressEntity.InstallPreparing(-1f))
 
         // 1. Security & Config Checks
-        val httpProfileName = appSettingsRepo.getString(StringSetting.LabHttpProfile).first()
-        validateSecurity(uri, HttpProfile.fromString(httpProfileName))
+        val httpProfile = preferences.labHttpProfile
+        validateSecurity(uri, httpProfile)
 
-        val client = buildClientForScheme(uri, HttpProfile.fromString(httpProfileName))
+        val client = buildClientForScheme(uri, httpProfile)
 
         // 2. Pre-flight Check
         val preFlight = performPreFlightCheck(client, uri.toString())

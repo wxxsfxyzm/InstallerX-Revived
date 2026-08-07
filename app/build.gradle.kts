@@ -102,20 +102,9 @@ android {
         includeInBundle = false
     }
 
-    flavorDimensions.addAll(listOf("connectivity", "level"))
+    flavorDimensions.add("level")
 
     productFlavors {
-        create("online") {
-            dimension = "connectivity"
-            buildConfigField("boolean", "INTERNET_ACCESS_ENABLED", "true")
-            isDefault = true
-        }
-
-        create("offline") {
-            dimension = "connectivity"
-            buildConfigField("boolean", "INTERNET_ACCESS_ENABLED", "false")
-        }
-
         create("Unstable") {
             dimension = "level"
             isDefault = true

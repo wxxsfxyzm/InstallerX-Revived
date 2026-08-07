@@ -44,7 +44,7 @@ Several product behaviors are intentionally flow-specific. Do **not** assume a f
 
 ## Critical project constraints
 
-* Preserve the **online/offline** product boundary. The offline flavor must not silently gain network-only behavior or permissions.
+* Preserve the runtime network-access boundary. The unified APK may declare network permissions, but network requests must remain disabled when the in-app network setting is off.
 * Prefer the repository’s existing **native API** paths and abstractions. Do not introduce shell-command implementations as a shortcut unless the maintainer explicitly requests it.
 * Treat flow-specific behavior as flow-specific. A capability that exists for dialog installation is not automatically valid for notification or automatic installation.
 * When changing behavior that is described in `docs/README.md`, update it or call out the documentation impact in the handoff.
@@ -111,16 +111,16 @@ Never commit credentials, inline them into tracked files, or weaken the existing
 
 ### Standard smoke build
 
-For changes that do not affect connectivity flavors or variant-specific behavior, prefer the faster single-variant smoke build:
+For changes that do not affect variant-specific behavior, prefer the faster single-variant smoke build:
 
 ```bash
-./gradlew assembleOnlineUnstableDebug
+./gradlew assembleUnstableDebug
 ```
 
-Use the full PR-CI pair when the change can reasonably affect app compilation across connectivity flavors, resources, dependency wiring, or variant-sensitive behavior:
+Use the PR-equivalent build when the change can reasonably affect app compilation, resources, dependency wiring, or variant-sensitive behavior:
 
 ```bash
-./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug
+./gradlew assemblePreviewDebug
 ```
 
 For local agent-run verification, do not pass a custom `APP_ID` unless the maintainer explicitly asks for an alternate application ID.
@@ -141,12 +141,8 @@ Do not imply a build or test passed unless it actually did.
 
 ### Flavors and build levels
 
-The app currently uses two flavor dimensions:
+The app currently uses one flavor dimension:
 
-* connectivity:
-
-    * `online`
-    * `offline`
 * level:
 
     * `Unstable`
@@ -155,7 +151,6 @@ The app currently uses two flavor dimensions:
 
 Important build behavior includes:
 
-* connectivity-specific `INTERNET_ACCESS_ENABLED`,
 * build-level-specific `BUILD_LEVEL`,
 * git-hash version suffixes for unstable/preview outputs,
 * an optional `VERSION_NAME` Gradle override for release automation.

@@ -111,6 +111,7 @@ class ActionHandler(
     private val sourceResolver = SourceResolver(
         context = context,
         networkResolver = networkResolver,
+        appSettingsRepo = appSettingsRepo,
         cacheDirectory = cacheDirectory,
         progressFlow = mutableProgressFlow
     )

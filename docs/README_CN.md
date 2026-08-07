@@ -49,12 +49,7 @@ InstallerX Revived 是一款现代 Android 软件包安装器，也是原 [Insta
 
 反馈问题时请尽量使用最新 Alpha 或 CI 版本复现，因为 Stable 中的问题可能已经被修复。
 
-InstallerX 发布时提供两个变体：
-
-- **Online：** 支持分享 APK 下载直链和在线更新相关功能。联网权限只用于安装相关功能。
-- **Offline：** 不申请联网权限。使用 Online 专属功能时会给出明确错误提示。
-
-两个变体的包名、版本号和签名相同，会互相覆盖安装，不能并存。
+InstallerX 现在只发布一个 APK，通过应用内开关控制联网。开启时支持分享 APK 下载直链和在线更新；关闭时会阻止网络请求，但本地安装流程仍可正常使用。为了兼容旧版应用内更新客户端，发布文件名仍保留 `online`，这不再代表独立的构建变体。
 
 ## 构建项目
 
@@ -85,13 +80,13 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 本地 Debug 构建：
 
 ```bash
-./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug
+./gradlew assembleUnstableDebug
 ```
 
 使用单独应用 ID 的 PR 检查构建：
 
 ```bash
-./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+./gradlew assemblePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
 
 ## 常见问题

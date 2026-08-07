@@ -289,11 +289,22 @@ fun LabPage(
                 }
             }
 
-            if (AppConfig.isInternetAccessEnabled)
-                item {
-                    SegmentedColumn(
-                        title = stringResource(R.string.internet_access_enabled)
-                    ) {
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.network_access)
+                ) {
+                    item {
+                        SwitchWidget(
+                            iconPlaceholder = false,
+                            title = stringResource(R.string.allow_internet_access),
+                            description = stringResource(R.string.allow_internet_access_desc),
+                            checked = uiState.allowInternetAccess,
+                            onCheckedChange = {
+                                viewModel.dispatch(LabSettingsAction.LabChangeInternetAccess(it))
+                            }
+                        )
+                    }
+                    if (uiState.allowInternetAccess) {
                         /*item {
                             SwitchWidget(
                                 icon = Icons.Default.Download,
@@ -323,6 +334,7 @@ fun LabPage(
                         }
                     }
                 }
+            }
         }
     }
 

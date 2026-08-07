@@ -63,12 +63,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Stable Release APKs
+      - name: Build Stable Release APK
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Explicitly pass the user input to override the dynamic date version in Gradle
-        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PVERSION_NAME="${{ inputs.version_tag }}"
+        run: ./gradlew assembleStableRelease -PVERSION_NAME="${{ inputs.version_tag }}"
 
       - name: Find and Rename Universal APKs
         id: rename_apk
@@ -76,22 +76,26 @@ jobs:
           PROJECT_NAME="InstallerX-Revived"
           VERSION_TAG="${{ inputs.version_tag }}"
           
-          for FLAVOR in online offline; do
-            APK_DIR="app/build/outputs/apk/${FLAVOR}Stable/release/"
-            ORIGINAL_APK=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk" | head -n 1)
+          APK_DIR=$(find app/build/outputs/apk -type d | grep -iE '/stable/release$' | head -n 1)
+          if [ -z "$APK_DIR" ]; then
+            echo "ERROR: Stable APK output directory not found"
+            ls -R app/build/outputs/apk
+            exit 1
+          fi
+          ORIGINAL_APK=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk" | head -n 1)
 
-            if [ -z "$ORIGINAL_APK" ]; then
-              echo "ERROR: APK not found in $APK_DIR!"
-              ls -R app/build/outputs/apk
-              exit 1
-            fi
+          if [ -z "$ORIGINAL_APK" ]; then
+            echo "ERROR: Stable APK not found in $APK_DIR!"
+            ls -R app/build/outputs/apk
+            exit 1
+          fi
 
-            NEW_APK_NAME="${PROJECT_NAME}-${FLAVOR}-${VERSION_TAG}.apk"
-            NEW_APK_PATH="${APK_DIR}${NEW_APK_NAME}"
+          NEW_APK_NAME="${PROJECT_NAME}-online-${VERSION_TAG}.apk"
+          NEW_APK_PATH="${APK_DIR}/${NEW_APK_NAME}"
 
-            echo "Renaming $ORIGINAL_APK -> $NEW_APK_PATH"
-            mv "$ORIGINAL_APK" "$NEW_APK_PATH"
-          done
+          echo "Renaming $ORIGINAL_APK -> $NEW_APK_PATH"
+          mv "$ORIGINAL_APK" "$NEW_APK_PATH"
+          echo "apk=${NEW_APK_PATH}" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
@@ -105,5 +109,4 @@ jobs:
           # Explicitly prevent GitHub from auto-generating release notes in the body
           generate_release_notes: false
           files: |
-            app/build/outputs/apk/onlineStable/release/InstallerX-Revived-online-${{ inputs.version_tag }}.apk
-            app/build/outputs/apk/offlineStable/release/InstallerX-Revived-offline-${{ inputs.version_tag }}.apk
+            ${{ steps.rename_apk.outputs.apk }}

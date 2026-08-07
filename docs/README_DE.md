@@ -85,13 +85,13 @@ Committe diese Zugangsdaten nicht in dieses Repository.
 Lokaler Debug-Build:
 
 ```bash
-./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug
+./gradlew assembleUnstableDebug
 ```
 
 PR-Testbuild mit separater App-ID:
 
 ```bash
-./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+./gradlew assemblePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
 
 ## Häufige Fragen

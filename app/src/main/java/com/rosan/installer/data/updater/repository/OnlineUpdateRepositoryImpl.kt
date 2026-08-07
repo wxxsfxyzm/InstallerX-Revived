@@ -3,14 +3,14 @@
 package com.rosan.installer.data.updater.repository
 
 import android.content.Context
+import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.env.AppConfig.OFFICIAL_PACKAGE_NAME
 import com.rosan.installer.data.updater.model.GithubRelease
-import com.rosan.installer.core.device.model.Level
-import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.updater.model.UpdateInfo
 import com.rosan.installer.domain.updater.repository.UpdateRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,9 +34,6 @@ class OnlineUpdateRepositoryImpl(
     companion object {
         private const val REPO_OWNER = "wxxsfxyzm"
         private const val REPO_NAME = "InstallerX-Revived"
-
-        private const val URL_NONE = ""
-        private const val PROXY_7ED = "https://gh.sevencdn.com/"
     }
 
     private val _updateInfoFlow = MutableStateFlow<UpdateInfo?>(null)
@@ -59,13 +56,26 @@ class OnlineUpdateRepositoryImpl(
                 return@withContext _updateInfoFlow.value
             }
 
-            if (AppConfig.isDebug || AppConfig.LEVEL == Level.UNSTABLE || context.packageName != OFFICIAL_PACKAGE_NAME) {
-                // Log the exact values to see which condition caused the skip
-                Timber.d("checkUpdate: Skipped. isDebug=${AppConfig.isDebug}, LEVEL=${AppConfig.LEVEL}, package=${context.packageName}")
-                return@withContext null
-            }
-
             try {
+                val prefs = appSettingsRepository.preferencesFlow.first()
+                if (!OnlineUpdatePolicy.canCheckUpdates(
+                        allowInternetAccess = prefs.allowInternetAccess,
+                        isDebug = AppConfig.isDebug,
+                        level = AppConfig.LEVEL,
+                        packageName = context.packageName,
+                        officialPackageName = OFFICIAL_PACKAGE_NAME
+                    )
+                ) {
+                    Timber.d(
+                        "checkUpdate: Skipped. allowInternetAccess=${prefs.allowInternetAccess}, " +
+                                "isDebug=${AppConfig.isDebug}, LEVEL=${AppConfig.LEVEL}, " +
+                                "package=${context.packageName}"
+                    )
+                    _updateInfoFlow.value = null
+                    hasChecked = false
+                    return@withLock null
+                }
+
                 val remoteRelease = fetchRemoteRelease()
                 if (remoteRelease == null) {
                     // Log if network request or parsing failed
@@ -75,10 +85,7 @@ class OnlineUpdateRepositoryImpl(
                 // Log successful fetch
                 Timber.d("checkUpdate: Successfully fetched release. TagName=${remoteRelease.tagName}")
 
-                val apkAsset = remoteRelease.assets.find {
-                    it.name.contains("online", ignoreCase = true) &&
-                            it.name.endsWith(".apk", ignoreCase = true)
-                }
+                val apkAsset = OnlineUpdatePolicy.selectOnlineApkAsset(remoteRelease)
 
                 if (apkAsset == null) {
                     // Log if no matching asset was found
@@ -88,38 +95,19 @@ class OnlineUpdateRepositoryImpl(
                     Timber.d("checkUpdate: Found APK asset: ${apkAsset.name}")
                 }
 
-                val prefs = appSettingsRepository.preferencesFlow.first()
-                val proxyUrl = when (prefs.githubUpdateChannel) {
-                    GithubUpdateChannel.OFFICIAL -> URL_NONE
-                    GithubUpdateChannel.PROXY_7ED -> PROXY_7ED
-                    GithubUpdateChannel.CUSTOM -> prefs.customGithubProxyUrl
-                }
-                val browserDownloadUrl = apkAsset?.browserDownloadUrl ?: URL_NONE
-                val downloadUrl = if (browserDownloadUrl.isNotEmpty() && proxyUrl.isNotEmpty()) {
-                    if (proxyUrl.endsWith("/")) {
-                        proxyUrl + browserDownloadUrl
-                    } else {
-                        "$proxyUrl/$browserDownloadUrl"
-                    }
-                } else {
-                    browserDownloadUrl
-                }
-
-                val fileName = apkAsset?.name ?: ""
-
-                // Updated regex: APK names no longer have 'v', they look like '...-online-26.03.1a2b3c4.apk'
-                val versionRegex = Regex("-(\\d.+?)\\.apk", RegexOption.IGNORE_CASE)
-                val matchResult = versionRegex.find(fileName)
-
-                val remoteVersion = matchResult?.groupValues?.get(1)
-                    ?: remoteRelease.tagName.removePrefix("v")
+                val downloadUrl = OnlineUpdatePolicy.resolveDownloadUrl(
+                    asset = apkAsset,
+                    channel = prefs.githubUpdateChannel,
+                    customProxyUrl = prefs.customGithubProxyUrl
+                )
+                val remoteVersion = OnlineUpdatePolicy.resolveRemoteVersion(remoteRelease, apkAsset)
 
                 val currentVersion = AppConfig.VERSION_NAME
 
                 // Log versions before comparison to catch potential parsing issues
                 Timber.d("checkUpdate: Preparing to compare. Local=$currentVersion, Remote=$remoteVersion")
 
-                val hasUpdate = compareVersions(remoteVersion, currentVersion) > 0
+                val hasUpdate = OnlineUpdatePolicy.compareVersions(remoteVersion, currentVersion) > 0
 
                 Timber.i("Update check: Local=$currentVersion, Remote=$remoteVersion, HasUpdate=$hasUpdate")
 
@@ -135,6 +123,8 @@ class OnlineUpdateRepositoryImpl(
                 hasChecked = true
 
                 return@withContext updateInfo
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 // Log the stacktrace to identify crashes like NullPointerException or Regex errors
                 Timber.e(e, "checkUpdate: Exception caught during execution")
@@ -163,93 +153,17 @@ class OnlineUpdateRepositoryImpl(
                 json.decodeFromString<GithubRelease>(bodyString)
             } else {
                 val releases = json.decodeFromString<List<GithubRelease>>(bodyString)
-                releases.firstOrNull { it.isPrerelease }
+                OnlineUpdatePolicy.selectPreviewRelease(releases)
             }
         }
-    }
-
-    /**
-     * Compare two version strings.
-     * Format: yy.MM[.patch][.hash]
-     *
-     * Rules:
-     * 1. Compare numeric parts (yy.MM.patch) numerically
-     * 2. If numeric parts are equal and both have hash suffixes:
-     * - Different hashes = treat as update needed (return 1)
-     * - Same hash = no update (return 0)
-     * 3. If numeric parts are equal but only one has hash: prioritize version with hash
-     *
-     * @return positive if v1 > v2, negative if v1 < v2, 0 if equal
-     */
-    private fun compareVersions(v1: String, v2: String): Int {
-        val (numericV1, hashV1) = splitVersion(v1)
-        val (numericV2, hashV2) = splitVersion(v2)
-
-        // Compare numeric parts first
-        val numericComparison = compareNumericVersion(numericV1, numericV2)
-        if (numericComparison != 0) {
-            return numericComparison
-        }
-
-        // Numeric parts are equal, compare hash parts
-        return when {
-            hashV1 != null && hashV2 != null -> {
-                if (hashV1 == hashV2) 0 else 1
-            }
-
-            hashV1 != null && hashV2 == null -> 1
-            hashV1 == null && hashV2 != null -> -1
-            else -> 0
-        }
-    }
-
-    /**
-     * Dynamically split version string into numeric base and optional Git hash.
-     * Supports formats like:
-     * - "26.03" -> Pair("26.03", null)
-     * - "26.03.01" -> Pair("26.03.01", null)
-     * - "26.03.1a2b3c4" -> Pair("26.03", "1a2b3c4")
-     * - "26.03.01.1a2b3c4" -> Pair("26.03.01", "1a2b3c4")
-     */
-    private fun splitVersion(version: String): Pair<String, String?> {
-        val parts = version.split('.')
-        if (parts.isEmpty()) return Pair(version, null)
-
-        val lastPart = parts.last()
-
-        // Git short hashes are hex strings of at least 7 characters.
-        // Stable patches (e.g., "01", "2") are much shorter.
-        val isHash = lastPart.length >= 7 && lastPart.matches(Regex("^[a-fA-F0-9]+\$"))
-
-        return if (isHash) {
-            // Rejoin everything except the last part as the numeric base
-            val numericVersion = parts.dropLast(1).joinToString(".")
-            Pair(numericVersion, lastPart)
-        } else {
-            // It's a pure stable version without a hash
-            Pair(version, null)
-        }
-    }
-
-    /**
-     * Compare numeric version parts only (e.g., "26.03" vs "26.03.01")
-     */
-    private fun compareNumericVersion(v1: String, v2: String): Int {
-        val parts1 = v1.split('.')
-        val parts2 = v2.split('.')
-        val length = maxOf(parts1.size, parts2.size)
-
-        for (i in 0 until length) {
-            val num1 = parts1.getOrNull(i)?.toIntOrNull() ?: 0
-            val num2 = parts2.getOrNull(i)?.toIntOrNull() ?: 0
-
-            val diff = num1.compareTo(num2)
-            if (diff != 0) return diff
-        }
-        return 0
     }
 
     override suspend fun downloadUpdate(url: String): Pair<InputStream, Long>? = withContext(Dispatchers.IO) {
+        if (!appSettingsRepository.preferencesFlow.first().allowInternetAccess) {
+            Timber.d("downloadUpdate: Skipped because internet access is disabled")
+            return@withContext null
+        }
+
         Timber.d("Starting download stream from: $url")
         val request = Request.Builder()
             .url(url)
@@ -267,6 +181,8 @@ class OnlineUpdateRepositoryImpl(
             val contentLength = body.contentLength()
 
             Pair(body.byteStream(), contentLength)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Timber.e(e, "Exception during download request")
             null

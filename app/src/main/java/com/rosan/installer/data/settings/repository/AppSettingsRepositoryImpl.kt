@@ -121,6 +121,7 @@ class AppSettingsRepositoryImpl(
             // Uninstaller
             uninstallFlags = prefs[AppDataStore.UNINSTALL_FLAGS] ?: 0,
             // Updater
+            allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
             customGithubProxyUrl = customGithubProxyUrl,
             // Lab
@@ -242,6 +243,7 @@ class AppSettingsRepositoryImpl(
 
     private fun booleanKey(setting: BooleanSetting): Preferences.Key<Boolean> =
         when (setting) {
+            BooleanSetting.AllowInternetAccess -> AppDataStore.ALLOW_INTERNET_ACCESS
             BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
             BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
             BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX

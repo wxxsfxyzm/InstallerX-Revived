@@ -637,7 +637,7 @@
     <string name="config_always_use_root_in_system_desc">При работе в качестве системного установщика всегда используйте root для привилегированных операций, таких как прошивка модулей и удаление файлов</string>
     <string name="lab_mi_island_countdown">Период блокирования XMSF</string>
     <string name="lab_mi_island_countdown_desc">Период отключения XMSF от сети. Применяется только с Shizuku. Изменяйте только в том случае, если вы понимаете последствия！</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="exception_uninstall_failed_device_policy">Удаление заблокировано политикой устройства</string>
     <string name="exception_uninstall_failed_owner_blocked">Удаление заблокировано владельцем</string>

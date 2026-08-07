@@ -147,7 +147,7 @@
     <string name="dhizuku_not_authorized">Dhizuku 접근 권한을 부여해 주세요</string>
     <string name="dhizuku_not_available">Dhizuku를 활성화해 주세요</string>
     <string name="extras">추가 항목</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="theme_settings_google_ui_desc">표준 Material Design UI</string>
     <string name="theme_settings_use_apple_floating_bar">플로팅 하단 바 활성화</string>
     <string name="theme_settings_use_apple_floating_bar_desc">화면 하단에 플로팅 스타일 내비게이션 바를 표시합니다</string>

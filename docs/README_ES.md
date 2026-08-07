@@ -85,13 +85,13 @@ No confirmes estas credenciales en este repositorio.
 Para una compilación debug local:
 
 ```bash
-./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug
+./gradlew assembleUnstableDebug
 ```
 
 Para una compilación de prueba estilo PR con un identificador de aplicación separado:
 
 ```bash
-./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+./gradlew assemblePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
 
 ## Preguntas comunes

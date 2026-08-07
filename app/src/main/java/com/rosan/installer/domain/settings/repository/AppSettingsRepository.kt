@@ -33,6 +33,7 @@ enum class IntSetting {
 }
 
 enum class BooleanSetting {
+    AllowInternetAccess,
     UiUseBlur,
     ThemeUseDynamicColor,
     UiUseMiuix,

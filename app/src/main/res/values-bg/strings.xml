@@ -26,7 +26,7 @@
     <string name="extras">Екстри</string>
     <string name="lab">Лаборатория</string>
     <string name="debug">Дебъг</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="shizuku_not_available">Моля активирай Sui или Shizuku</string>
     <string name="about_detail">Относно InstallerX Revived</string>
     <string name="updating">Актуализиране…</string>

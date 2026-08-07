@@ -211,9 +211,6 @@ private fun MiuixAboutPageInternal(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
 
-    val internetAccessHint = if (AppConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
-    else stringResource(R.string.internet_access_disabled)
-
     val level = when (AppConfig.LEVEL) {
         Level.STABLE -> stringResource(id = R.string.stable)
         Level.PREVIEW -> stringResource(id = R.string.preview)
@@ -222,7 +219,6 @@ private fun MiuixAboutPageInternal(
 
     val versionInfoText = stringResource(
         id = R.string.app_version_info_format,
-        internetAccessHint,
         level,
         AppConfig.VERSION_NAME,
         AppConfig.VERSION_CODE

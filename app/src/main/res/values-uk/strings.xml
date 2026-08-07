@@ -355,7 +355,7 @@
     <string name="scope_tips">Перший профіль є типовим, вибирати вручну не потрібно. Новий профіль можна налаштувати для встановлення певних додатків, які вони ініціюватимуть.</string>
     <string name="got_it">Зрозуміло</string>
     <string name="auth_to_continue_work">Щоб підтвердити цю операцію, пройдіть автентифікацію</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="pull_to_refresh_hint1">Потягніть униз, щоб оновити</string>
     <string name="pull_to_refresh_hint2">Відпустіть для оновлення</string>
     <string name="pull_to_refresh_hint3">Оновлення…</string>

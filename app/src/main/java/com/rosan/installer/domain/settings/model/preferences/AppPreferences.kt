@@ -55,6 +55,7 @@ data class AppPreferences(
     val managedSharedUserIdExemptedPackages: List<NamedPackage>,
     val uninstallFlags: Int,
     // Lab Settings
+    val allowInternetAccess: Boolean,
     val githubUpdateChannel: GithubUpdateChannel,
     val customGithubProxyUrl: String,
     val labRootEnableModuleFlash: Boolean,

@@ -609,7 +609,7 @@
     <string name="lab_module_flashing_show_art">ASCII sanatını göster</string>
     <string name="lab_module_flashing_show_art_desc">Yükleme başladığında InstallerX ASCII sanatını göster</string>
     <string name="lab_unstable_features">Kararsız özellikler</string>
-    <string name="app_version_info_format">%1$s %2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="installer_live_channel_short_text_analyse_failed">Başarısız</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="exception_resolve_failed_link_not_valid">Bu link geçerli bir dosya içermiyor</string>

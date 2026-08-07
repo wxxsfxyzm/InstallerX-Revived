@@ -15,7 +15,6 @@ import android.system.Os
 import android.system.OsConstants
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
-import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.session.util.copyToWithProgress
 import com.rosan.installer.data.session.util.getRealPathFromUri
 import com.rosan.installer.data.session.util.pathUnify
@@ -26,10 +25,12 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.model.ResolveResult
 import com.rosan.installer.domain.session.repository.NetworkResolver
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -47,6 +48,7 @@ import kotlin.math.min
 class SourceResolver(
     private val context: Context,
     private val networkResolver: NetworkResolver,
+    private val appSettingsRepo: AppSettingsRepository,
     private val cacheDirectory: String,
     private val progressFlow: MutableSharedFlow<ProgressEntity>
 ) {
@@ -172,7 +174,7 @@ class SourceResolver(
             "content" -> resolveContentUri(uri)
 
             "http", "https" -> {
-                if (!AppConfig.isInternetAccessEnabled) {
+                if (!appSettingsRepo.preferencesFlow.first().allowInternetAccess) {
                     Timber.d("Internet access is disabled in app settings. Aborting network request.")
                     throw ResolveException(
                         errorType = ResolveErrorType.NO_INTERNET_ACCESS,

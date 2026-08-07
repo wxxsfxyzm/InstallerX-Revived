@@ -71,7 +71,7 @@
     <string name="lab">实验室</string>
     <string name="lab_desc">访问实验性或开发中的新功能</string>
     <string name="about_detail">关于 InstallerX Revived</string>
-    <string name="app_version_info_format">%1$s%2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="updating">正在更新…</string>
     <string name="get_update_detail">检查软件更新和新功能</string>
     <string name="update_available">有可用更新：%1$s</string>
@@ -85,6 +85,9 @@
     <string name="export_logs_desc">导出应用日志</string>
     <string name="internet_access_enabled">联网</string>
     <string name="internet_access_disabled">离线</string>
+    <string name="network_access">网络访问</string>
+    <string name="allow_internet_access">允许访问互联网</string>
+    <string name="allow_internet_access_desc">允许 InstallerX 检查更新并从网络链接下载 APK</string>
     <string name="uninstall_title">卸载 InstallerX Revived</string>
     <string name="uninstall_content">卸载以后，你将不能再使用 InstallerX Revived 来安装应用。</string>
     <string name="stable">正式版</string>
@@ -625,7 +628,7 @@
     <string name="exception_resolve_failed">URI 解析失败</string>
     <string name="exception_resolve_failed_link_not_valid">该链接不包含有效的文件</string>
     <string name="exception_initiator_not_visible">InstallerX 对发起安装的应用不可见。如果使用了“隐藏应用列表”等模块，请对 InstallerX 放行</string>
-    <string name="exception_resolve_failed_no_internet_access">该版本无法访问互联网，要使用此功能，请安装支持联网的版本</string>
+    <string name="exception_resolve_failed_no_internet_access">应用内网络访问已关闭。请在实验室设置中开启后再使用此功能。</string>
     <string name="exception_analyse_failed_all_files_unsupported">不支持的文件格式</string>
     <string name="installer_analyse_failed_corrupted_archive">损坏的压缩包</string>
     <string name="exception_authentication_failed">用户认证失败</string>

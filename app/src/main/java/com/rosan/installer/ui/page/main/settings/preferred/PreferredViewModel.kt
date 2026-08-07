@@ -69,8 +69,8 @@ class PreferredViewModel(
             showLauncherIcon = prefs.showLauncherIcon,
             adbVerifyEnabled = adbVerify,
             isIgnoringBatteryOptimizations = batteryOpt,
-            hasUpdate = updateInfo?.hasUpdate ?: false,
-            remoteVersion = updateInfo?.remoteVersion ?: "",
+            hasUpdate = prefs.allowInternetAccess && (updateInfo?.hasUpdate ?: false),
+            remoteVersion = if (prefs.allowInternetAccess) updateInfo?.remoteVersion.orEmpty() else "",
             backupBusy = backupBusy
         )
     }.stateIn(

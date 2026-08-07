@@ -612,7 +612,7 @@
     <string name="installer_live_channel_short_text_analyse_failed">Mislukt</string>
     <string name="version_with_prefix_format">%1$s%2$s</string>
     <string name="exception_resolve_failed_link_not_valid">Deze link bevat geen geldig bestand</string>
-    <string name="app_version_info_format">%1$s%2$s %3$s (%4$s)</string>
+    <string name="app_version_info_format">%1$s %2$s (%3$s)</string>
     <string name="theme_settings_color_spec">Kleurspecificatie</string>
     <string name="theme_settings_color_spec_only_2021">De huidige palletstijl ondersteund alleen de 2021 specificatie</string>
     <string name="config_label_preferences">Voorkeuren</string>

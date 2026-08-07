@@ -52,8 +52,8 @@ class AboutViewModel(
     ) { prefs, updateInfo, appIcon ->
         AboutState(
             authorizer = prefs.authorizer,
-            hasUpdate = updateInfo?.hasUpdate ?: false,
-            remoteVersion = updateInfo?.remoteVersion ?: "",
+            hasUpdate = prefs.allowInternetAccess && (updateInfo?.hasUpdate ?: false),
+            remoteVersion = if (prefs.allowInternetAccess) updateInfo?.remoteVersion.orEmpty() else "",
             enableFileLogging = prefs.enableFileLogging,
             appIcon = appIcon
         )

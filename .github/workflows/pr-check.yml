@@ -40,25 +40,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Both Variant (onlinePreview/offlinePreview)
+      - name: Build Preview Debug APK
         # Use GITHUB_TOKEN only if strictly necessary for fetching packages
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+        run: ./gradlew assemblePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 
-      - name: Upload Online Debug APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v7
         with:
-          name: pr-online-debug-apk-${{ github.event.pull_request.head.sha }}
-          path: app/build/outputs/apk/onlinePreview/debug/*.apk
-          retention-days: 7
-          archive: false
-
-      - name: Upload Offline Debug APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: pr-offline-debug-apk-${{ github.event.pull_request.head.sha }}
-          path: app/build/outputs/apk/offlinePreview/debug/*.apk
+          name: pr-debug-apk-${{ github.event.pull_request.head.sha }}
+          path: app/build/outputs/apk/**/debug/*.apk
           retention-days: 7
           archive: false

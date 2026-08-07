@@ -8,6 +8,7 @@ import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 
 data class LabSettingsState(
+    val allowInternetAccess: Boolean = true,
     val labRootEnableModuleFlash: Boolean = false,
     val labRootShowModuleArt: Boolean = true,
     val labRootMode: RootMode = RootMode.Magisk,

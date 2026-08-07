@@ -85,13 +85,13 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 ローカル debug ビルド:
 
 ```bash
-./gradlew assembleOnlineUnstableDebug assembleOfflineUnstableDebug
+./gradlew assembleUnstableDebug
 ```
 
 別のアプリ ID を使う PR 向けテストビルド:
 
 ```bash
-./gradlew assembleOnlinePreviewDebug assembleOfflinePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+./gradlew assemblePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
 ```
 
 ## よくある質問
