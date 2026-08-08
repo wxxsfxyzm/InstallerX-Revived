@@ -7,15 +7,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -59,7 +56,6 @@ import androidx.compose.ui.unit.sp
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.library.FloatingBottomBar
 import com.rosan.installer.ui.library.FloatingBottomBarDefaults
-import com.rosan.installer.ui.library.FloatingBottomBarItem
 import com.rosan.installer.ui.library.FloatingBottomBarMode
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.NavigationTab
@@ -211,13 +207,9 @@ private fun Material3FloatingBottomBar(
         modifier = Modifier.fillMaxWidth()
     ) {
         FloatingBottomBar(
+            items = tabs,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {},
-                )
                 .padding(bottom = 12.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
             selectedIndex = { mainPagerState.selectedPage },
@@ -225,45 +217,38 @@ private fun Material3FloatingBottomBar(
                 mainPagerState.animateToPage(index)
             },
             backdrop = floatingBackdrop,
-            tabsCount = tabs.size,
             mode = if (backdrop != null) FloatingBottomBarMode.Blur else FloatingBottomBarMode.None,
             colors = FloatingBottomBarDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 indicatorColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onSurface
-            )
-        ) {
-            tabs.forEachIndexed { index, tab ->
-                FloatingBottomBarItem(
-                    onClick = {
-                        mainPagerState.animateToPage(index)
-                    },
-                    modifier = Modifier.defaultMinSize(minWidth = 76.dp)
-                ) {
-                    val showBadge = index == 1 && configCount > 1
+            ),
+            iconContent = { tab, index ->
+                val showBadge = index == 1 && configCount > 1
 
-                    BadgedBox(
-                        badge = {
-                            // Badge keeps its own colors defined in ConfigBadge
-                            ConfigBadge(showBadge = showBadge, configCount = configCount)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = tab.icon,
-                            contentDescription = tab.label,
-                        )
-                    }
-                    Text(
-                        text = tab.label,
-                        fontSize = 11.sp,
-                        lineHeight = 14.sp,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Visible
+                BadgedBox(
+                    badge = {
+                        // Badge keeps its own colors defined in ConfigBadge
+                        ConfigBadge(showBadge = showBadge, configCount = configCount)
+                    },
+                ) {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = null,
                     )
                 }
-            }
-        }
+            },
+            labelContent = { tab, _ ->
+                Text(
+                    text = tab.label,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Visible,
+                )
+            },
+        )
     }
 }
 

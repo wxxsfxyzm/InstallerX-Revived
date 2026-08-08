@@ -6,8 +6,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.library.FloatingBottomBar
-import com.rosan.installer.ui.library.FloatingBottomBarItem
 import com.rosan.installer.ui.library.FloatingBottomBarMode
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.MainPagerState
@@ -86,13 +82,9 @@ private fun SettingsFloatingBottomBar(
         modifier = Modifier.fillMaxWidth()
     ) {
         FloatingBottomBar(
+            items = navigationItems,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {},
-                )
                 .padding(
                     bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
                         .calculateBottomPadding()
@@ -102,31 +94,24 @@ private fun SettingsFloatingBottomBar(
                 mainPagerState.animateToPage(index)
             },
             backdrop = floatingBackdrop,
-            tabsCount = navigationItems.size,
-            mode = floatingBottomBarMode
-        ) {
-            navigationItems.forEachIndexed { index, item ->
-                FloatingBottomBarItem(
-                    onClick = {
-                        mainPagerState.animateToPage(index)
-                    },
-                    modifier = Modifier.defaultMinSize(minWidth = 76.dp)
-                ) {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label
-                    )
-                    Text(
-                        text = item.label,
-                        fontSize = 11.sp,
-                        lineHeight = 14.sp,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Visible
-                    )
-                }
-            }
-        }
+            mode = floatingBottomBarMode,
+            iconContent = { item, _ ->
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = null,
+                )
+            },
+            labelContent = { item, _ ->
+                Text(
+                    text = item.label,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Visible,
+                )
+            },
+        )
     }
 }
 
