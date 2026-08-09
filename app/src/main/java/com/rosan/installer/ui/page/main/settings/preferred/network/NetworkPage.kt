@@ -183,8 +183,13 @@ fun NetworkPage(
                             vertical = AospMainSwitchBarMargin
                         ),
                     checked = uiState.allowInternetAccess,
-                    onCheckedChange = {
-                        viewModel.dispatch(NetworkSettingsAction.ChangeInternetAccess(it))
+                    onCheckedChange = { enabled ->
+                        viewModel.dispatch(
+                            NetworkSettingsAction.ChangeInternetAccess(enabled)
+                        )
+                        if (!enabled) {
+                            navigator.pop()
+                        }
                     }
                 )
             }

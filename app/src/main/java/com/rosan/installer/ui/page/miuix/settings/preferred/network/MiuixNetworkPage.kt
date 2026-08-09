@@ -166,8 +166,13 @@ fun MiuixNetworkPage(
                 ) {
                     SwitchPreference(
                         checked = uiState.allowInternetAccess,
-                        onCheckedChange = {
-                            viewModel.dispatch(NetworkSettingsAction.ChangeInternetAccess(it))
+                        onCheckedChange = { enabled ->
+                            viewModel.dispatch(
+                                NetworkSettingsAction.ChangeInternetAccess(enabled)
+                            )
+                            if (!enabled) {
+                                navigator.pop()
+                            }
                         },
                         title = stringResource(R.string.network_access)
                     )
