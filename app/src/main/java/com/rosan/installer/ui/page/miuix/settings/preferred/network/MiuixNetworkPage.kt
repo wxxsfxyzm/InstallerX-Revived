@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,6 +81,13 @@ fun MiuixNetworkPage(
     val showChannelDialog = remember { mutableStateOf(false) }
     val showCustomProxyDialog = remember { mutableStateOf(false) }
     var pendingNetworkSourceMode by rememberSaveable { mutableStateOf<NetworkSourceMode?>(null) }
+    var exitAfterInternetDisable by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(exitAfterInternetDisable, uiState.allowInternetAccess) {
+        if (exitAfterInternetDisable && !uiState.allowInternetAccess) {
+            navigator.pop()
+        }
+    }
 
     NetworkSourceModeWarningDialog(
         mode = pendingNetworkSourceMode,
@@ -170,12 +178,12 @@ fun MiuixNetworkPage(
                     SwitchPreference(
                         checked = uiState.allowInternetAccess,
                         onCheckedChange = { enabled ->
+                            if (!enabled) {
+                                exitAfterInternetDisable = true
+                            }
                             viewModel.dispatch(
                                 NetworkSettingsAction.ChangeInternetAccess(enabled)
                             )
-                            if (!enabled) {
-                                navigator.pop()
-                            }
                         },
                         title = stringResource(R.string.network_access)
                     )

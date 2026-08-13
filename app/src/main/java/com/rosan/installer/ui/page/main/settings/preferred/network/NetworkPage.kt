@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +88,13 @@ fun NetworkPage(
     var showChannelDialog by remember { mutableStateOf(false) }
     var showCustomProxyDialog by remember { mutableStateOf(false) }
     var pendingNetworkSourceMode by rememberSaveable { mutableStateOf<NetworkSourceMode?>(null) }
+    var exitAfterInternetDisable by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(exitAfterInternetDisable, uiState.allowInternetAccess) {
+        if (exitAfterInternetDisable && !uiState.allowInternetAccess) {
+            navigator.pop()
+        }
+    }
 
     pendingNetworkSourceMode?.let { mode ->
         AlertDialog(
@@ -195,12 +203,12 @@ fun NetworkPage(
                         ),
                     checked = uiState.allowInternetAccess,
                     onCheckedChange = { enabled ->
+                        if (!enabled) {
+                            exitAfterInternetDisable = true
+                        }
                         viewModel.dispatch(
                             NetworkSettingsAction.ChangeInternetAccess(enabled)
                         )
-                        if (!enabled) {
-                            navigator.pop()
-                        }
                     }
                 )
             }
