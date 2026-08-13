@@ -17,8 +17,10 @@ import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.PackageSignatureAnalysis
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SigningBlockCertificateStatus
 import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureMatch
 import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureSelection
+import com.rosan.installer.domain.engine.model.packageinfo.selectedSigningBlockCertificateStatus
 import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
@@ -199,8 +201,16 @@ class ProcessInstallationUseCase(
         val selectedResults = results.filter { result -> result.appEntities.any { it.selected } }
 
         for (result in selectedResults) {
-            if (!result.signatureCheckPerformed) continue
             if (!shouldApplySignaturePolicy(result)) continue
+
+            if (result.selectedSigningBlockCertificateStatus()?.isBlockedByUnknownPolicy(
+                    allowSigUnknown = config.allowSigUnknown
+                ) == true
+            ) {
+                throwSignatureUnknownBlocked()
+            }
+
+            if (!result.signatureCheckPerformed) continue
 
             val signatureAnalysis = result.appEntities.analyzePackageSignatureSelection(
                 result.installedAppInfo
@@ -214,10 +224,7 @@ class ProcessInstallationUseCase(
                 (signatureMatchStatus == SignatureMatchStatus.MISMATCH ||
                         signatureAnalysis.hasSignatureMismatchPolicyViolation())
             ) {
-                throw InstallException(
-                    InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_MISMATCH,
-                    "Installing apps with a different signature is blocked by this profile"
-                )
+                throwSignatureMismatchBlocked()
             }
 
             if (!config.allowSigUnknown &&
@@ -225,13 +232,20 @@ class ProcessInstallationUseCase(
                         signatureMatchStatus == SignatureMatchStatus.CANDIDATE_ROTATION_UNCONFIRMED ||
                         signatureAnalysis.hasSignatureUnknownPolicyViolation())
             ) {
-                throw InstallException(
-                    InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_UNKNOWN,
-                    "Installing apps with an unverifiable signature is blocked by this profile"
-                )
+                throwSignatureUnknownBlocked()
             }
         }
     }
+
+    private fun throwSignatureMismatchBlocked(): Nothing = throw InstallException(
+        InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_MISMATCH,
+        "Installing apps with a different signature is blocked by this profile"
+    )
+
+    private fun throwSignatureUnknownBlocked(): Nothing = throw InstallException(
+        InstallErrorType.BLOCKED_BY_PROFILE_SIGNATURE_UNKNOWN,
+        "Installing apps with an unverifiable signature is blocked by this profile"
+    )
 
     private fun shouldApplySignaturePolicy(result: PackageAnalysisResult): Boolean {
         val selectedApps = result.appEntities.filter { it.selected }.map { it.app }
@@ -497,4 +511,13 @@ class ProcessInstallationUseCase(
                 }
             }
     }
+}
+
+internal fun SigningBlockCertificateStatus.isBlockedByUnknownPolicy(
+    allowSigUnknown: Boolean
+): Boolean = when (this) {
+    SigningBlockCertificateStatus.UNKNOWN -> !allowSigUnknown
+
+    SigningBlockCertificateStatus.MATCH,
+    SigningBlockCertificateStatus.NOT_INSTALLED -> false
 }

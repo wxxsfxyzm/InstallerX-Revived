@@ -49,12 +49,7 @@ Soporte limitado significa que InstallerX puede funcionar, pero algunas funcione
 
 Al reportar errores, intenta reproducirlos con la versión Alpha o CI más reciente siempre que sea posible, porque el problema puede estar ya corregido respecto a Stable.
 
-InstallerX se publica en dos variantes:
-
-- **Online:** admite enlaces directos de descarga de APK y funciones de actualización en línea. El permiso de red solo se usa para funciones relacionadas con la instalación.
-- **Offline:** no solicita permiso de red. Las funciones exclusivas de Online mostrarán un error claro.
-
-Ambas variantes comparten el mismo nombre de paquete, código de versión y firma, por lo que se reemplazan entre sí y no se instalan en paralelo.
+InstallerX se publica ahora como un único APK. El acceso a la red se controla mediante un ajuste dentro de la aplicación. El nombre del archivo publicado conserva `online` únicamente por compatibilidad con clientes antiguos de actualización dentro de la aplicación; ya no identifica una variante de compilación independiente.
 
 ## Compilación
 

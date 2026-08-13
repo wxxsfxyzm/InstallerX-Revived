@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -51,15 +49,11 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.ShizukuMode
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
-import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
-import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
-import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
-import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelectionDialog
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.DraggableList
@@ -95,45 +89,7 @@ fun LabPage(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val showRootImplementationDialog = remember { mutableStateOf(false) }
-    val showChannelDialog = remember { mutableStateOf(false) }
-    val showCustomProxyDialog = remember { mutableStateOf(false) }
     val showSmartAuthorizerSheet = remember { mutableStateOf(false) }
-
-    if (showChannelDialog.value)
-        GithubUpdateChannelSelectionDialog(
-            currentSelection = uiState.githubUpdateChannel,
-            onDismiss = { showChannelDialog.value = false },
-            onConfirm = { channel ->
-                showChannelDialog.value = false
-                viewModel.dispatch(LabSettingsAction.LabChangeGithubUpdateChannel(channel))
-                if (channel == GithubUpdateChannel.CUSTOM)
-                    showCustomProxyDialog.value = true
-            }
-        )
-
-    if (showCustomProxyDialog.value)
-        CustomGithubProxyUrlDialog(
-            initialUrl = uiState.customGithubProxyUrl,
-            onDismiss = {
-                showCustomProxyDialog.value = false
-                if (uiState.customGithubProxyUrl.isEmpty())
-                    viewModel.dispatch(
-                        LabSettingsAction.LabChangeGithubUpdateChannel(
-                            GithubUpdateChannel.OFFICIAL
-                        )
-                    )
-            },
-            onConfirm = { url ->
-                showCustomProxyDialog.value = false
-                viewModel.dispatch(LabSettingsAction.LabChangeCustomGithubProxyUrl(url))
-                if (url.isEmpty())
-                    viewModel.dispatch(
-                        LabSettingsAction.LabChangeGithubUpdateChannel(
-                            GithubUpdateChannel.OFFICIAL
-                        )
-                    )
-            }
-        )
 
     if (showRootImplementationDialog.value) {
         RootImplementationSelectionDialog(
@@ -289,52 +245,6 @@ fun LabPage(
                 }
             }
 
-            item {
-                SegmentedColumn(
-                    title = stringResource(R.string.network_access)
-                ) {
-                    item {
-                        SwitchWidget(
-                            iconPlaceholder = false,
-                            title = stringResource(R.string.allow_internet_access),
-                            description = stringResource(R.string.allow_internet_access_desc),
-                            checked = uiState.allowInternetAccess,
-                            onCheckedChange = {
-                                viewModel.dispatch(LabSettingsAction.LabChangeInternetAccess(it))
-                            }
-                        )
-                    }
-                    if (uiState.allowInternetAccess) {
-                        /*item {
-                            SwitchWidget(
-                                icon = Icons.Default.Download,
-                                title = stringResource(R.string.lab_http_save_file),
-                                description = stringResource(R.string.lab_http_save_file_desc),
-                                checked = uiState.labHttpSaveFile,
-                                isM3E = false,
-                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeHttpSaveFile(it)) }
-                            )
-                        }*/
-                        item { LabHttpProfileWidget(viewModel) }
-
-                        val currentChannel = uiState.githubUpdateChannel
-                        item {
-                            val channelSummary = when (currentChannel) {
-                                GithubUpdateChannel.OFFICIAL -> stringResource(R.string.lab_update_github_proxy_official)
-                                GithubUpdateChannel.PROXY_7ED -> stringResource(R.string.lab_update_github_proxy_7ed)
-                                GithubUpdateChannel.CUSTOM -> uiState.customGithubProxyUrl.ifBlank {
-                                    stringResource(R.string.lab_update_github_proxy_custom)
-                                }
-                            }
-                            BaseWidget(
-                                title = stringResource(R.string.lab_update_github_proxy),
-                                description = channelSummary,
-                                onClick = { showChannelDialog.value = true }
-                            ) {}
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -564,39 +474,6 @@ private fun LabRootImplementationWidget(viewModel: LabSettingsViewModel) {
             keys.getOrNull(newIndex)?.let { impl ->
                 viewModel.dispatch(LabSettingsAction.LabChangeRootImplementation(impl))
             }
-        }
-    )
-}
-
-@Composable
-private fun LabHttpProfileWidget(viewModel: LabSettingsViewModel) {
-    val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val profiles = remember {
-        listOf(
-            HttpProfile.ALLOW_SECURE,
-            HttpProfile.ALLOW_LOCAL,
-            HttpProfile.ALLOW_ALL
-        )
-    }
-    val options = profiles.map { profile ->
-        when (profile) {
-            HttpProfile.ALLOW_SECURE -> stringResource(R.string.lab_http_profile_secure)
-            HttpProfile.ALLOW_LOCAL -> stringResource(R.string.lab_http_profile_local)
-            HttpProfile.ALLOW_ALL -> stringResource(R.string.lab_http_profile_all)
-        }
-    }
-
-    val currentIndex = profiles.indexOf(uiState.labHttpProfile).coerceAtLeast(0)
-
-    DropDownMenuWidget(
-        icon = Icons.Default.Security,
-        title = stringResource(R.string.lab_http_profile),
-        description = options.getOrNull(currentIndex),
-        choice = currentIndex,
-        data = options,
-        onChoiceChange = { index ->
-            val selectedProfile = profiles.getOrElse(index) { HttpProfile.ALLOW_SECURE }
-            viewModel.dispatch(LabSettingsAction.LabChangeHttpProfile(selectedProfile))
         }
     )
 }

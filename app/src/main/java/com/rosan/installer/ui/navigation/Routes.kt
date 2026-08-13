@@ -24,6 +24,9 @@ sealed interface Route : NavKey {
     data object Theme : Route
 
     @Serializable
+    data object Network : Route
+
+    @Serializable
     data object InstallerGlobal : Route
 
     @Serializable

@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.widgets
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,9 @@ fun MiuixIntNumberPickerWidget(
     value: Int,
     startInt: Int,
     endInt: Int,
+    valueSuffix: String = "",
+    subduedValue: Boolean = false,
+    onValueClick: (() -> Unit)? = null,
     onValueChange: (Int) -> Unit
 ) {
     // Apply padding to the parent container for uniform spacing on all sides.
@@ -82,12 +86,26 @@ fun MiuixIntNumberPickerWidget(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Display the current integer value dynamically
+            val valueModifier = Modifier
+                .defaultMinSize(minWidth = 36.dp)
+                .then(
+                    if (onValueClick != null) Modifier.clickable(onClick = onValueClick)
+                    else Modifier
+                )
+                .padding(horizontal = 4.dp, vertical = 8.dp)
             Text(
-                text = value.toString(),
-                modifier = Modifier.defaultMinSize(minWidth = 36.dp),
-                style = MiuixTheme.textStyles.button,
-                color = MiuixTheme.colorScheme.primary
+                text = "$value$valueSuffix",
+                modifier = valueModifier,
+                style = if (subduedValue) {
+                    MaterialTheme.typography.bodyMedium
+                } else {
+                    MiuixTheme.textStyles.button
+                },
+                color = if (subduedValue) {
+                    MiuixTheme.colorScheme.onSurfaceVariantSummary
+                } else {
+                    MiuixTheme.colorScheme.primary
+                }
             )
         }
     }

@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.signature
 
+import android.os.Build
 import com.android.apksig.ApkVerifier
 import com.android.apksig.util.DataSink
 import com.android.apksig.util.DataSource
@@ -22,7 +23,8 @@ import kotlin.math.min
  * APK signature analyzer.
  */
 class PendingApkSignatureAnalyzer(
-    private val certificateFormatter: CertificateFormatter
+    private val certificateFormatter: CertificateFormatter,
+    private val lightweightApkSignatureReader: LightweightApkSignatureReader
 ) {
     /**
      * apksig is the source of truth for pending APK signer certificates.
@@ -42,7 +44,16 @@ class PendingApkSignatureAnalyzer(
             else -> "materialized-stream"
         }
         return when (data) {
-            is DataEntity.FileDescriptorEntity -> analyze(data)
+            is DataEntity.FileDescriptorEntity -> {
+                if (data.preInstallSignatureAnalysis) {
+                    analyze(data)
+                } else if (data.preInstallSigningBlockAnalysis) {
+                    lightweightApkSignatureReader.read(data)
+                } else {
+                    Timber.d("Skipping pre-install signature analysis; PackageInstaller will verify: ${data.path}")
+                    null
+                }
+            }
             is DataEntity.FileEntity -> analyze(File(data.path), data.path)
             else -> analyzeStream(data, cacheDirectory)
         }.also {
@@ -55,14 +66,22 @@ class PendingApkSignatureAnalyzer(
 
     private fun analyze(file: File, displayName: String): AppSignatureInfo {
         return verify(displayName) {
-            ApkVerifier.Builder(file).build().verify()
+            ApkVerifier.Builder(file)
+                .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
+                .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
+                .build()
+                .verify()
         }
     }
 
     private fun analyze(data: DataEntity.FileDescriptorEntity): AppSignatureInfo {
         return data.openChannel().use { channel ->
             verify(data.path) {
-                ApkVerifier.Builder(SeekableChannelDataSource(channel)).build().verify()
+                ApkVerifier.Builder(SeekableChannelDataSource(channel))
+                    .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
+                    .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
+                    .build()
+                    .verify()
             }
         }
     }

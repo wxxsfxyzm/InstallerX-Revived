@@ -7,6 +7,7 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.packageinfo.PackageSignatureAnalysis
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureCertificateInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SigningBlockCertificateStatus
 import com.rosan.installer.domain.engine.model.state.DomainInstallState
 import com.rosan.installer.domain.engine.model.state.InstallActionType
 import com.rosan.installer.domain.engine.model.state.InstallNotice
@@ -84,6 +85,20 @@ class InstallStateUiMapper(
                 color = resources.tertiaryColor
             )
 
+            is InstallNotice.SigningBlockOnly -> NoticeModel(
+                shortLabel = resources.tagSignature,
+                fullDescription = buildSignatureDescription(
+                    summary = notice.certificateStatus.toSigningBlockSummaryText(),
+                    details = notice.details
+                ),
+                color = when (notice.certificateStatus) {
+                    SigningBlockCertificateStatus.MATCH,
+                    SigningBlockCertificateStatus.NOT_INSTALLED -> resources.primaryColor
+
+                    SigningBlockCertificateStatus.UNKNOWN -> resources.tertiaryColor
+                }
+            )
+
             is InstallNotice.SdkIncompatible -> NoticeModel(
                 shortLabel = resources.tagSdk,
                 fullDescription = resources.textSdkIncompatible,
@@ -152,6 +167,12 @@ class InstallStateUiMapper(
         SignatureMatchStatus.MATCH -> resources.primaryColor
     }
 
+    private fun SigningBlockCertificateStatus.toSigningBlockSummaryText() = when (this) {
+        SigningBlockCertificateStatus.NOT_INSTALLED -> resources.textSigSigningBlockNotInstalled
+        SigningBlockCertificateStatus.MATCH -> resources.textSigSigningBlockMatch
+        SigningBlockCertificateStatus.UNKNOWN -> resources.textSigSigningBlockUnknown
+    }
+
     private fun buildSignatureDescription(
         summary: String,
         details: SignatureNoticeDetails?
@@ -197,6 +218,9 @@ class InstallStateUiMapper(
         appendLine(title)
         if (info.verifiedSchemes.isNotEmpty()) {
             appendLine("${resources.labelSignatureSchemes}: ${info.verifiedSchemes.joinToString(" + ")}")
+        }
+        if (info.declaredSchemes.isNotEmpty()) {
+            appendLine("${resources.labelSignatureDeclaredSchemes}: ${info.declaredSchemes.joinToString(" + ")}")
         }
         val showSigningCertificateHistory = info.shouldShowSigningCertificateHistory()
         val historyContainsCurrentSigner = info.signerSha256Set.all { sha256 ->

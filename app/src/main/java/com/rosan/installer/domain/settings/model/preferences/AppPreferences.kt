@@ -6,6 +6,7 @@ import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
@@ -54,10 +55,13 @@ data class AppPreferences(
     val managedSharedUserIdBlacklist: List<SharedUid>,
     val managedSharedUserIdExemptedPackages: List<NamedPackage>,
     val uninstallFlags: Int,
-    // Lab Settings
+    // Network Settings
+    val networkSourceMode: NetworkSourceMode,
+    val networkSourceModeWarningAcknowledged: Boolean,
     val allowInternetAccess: Boolean,
     val githubUpdateChannel: GithubUpdateChannel,
     val customGithubProxyUrl: String,
+    // Lab Settings
     val labRootEnableModuleFlash: Boolean,
     val labRootShowModuleArt: Boolean,
     val labRootMode: RootMode,

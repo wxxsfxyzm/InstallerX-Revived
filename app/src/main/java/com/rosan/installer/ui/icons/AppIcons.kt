@@ -32,6 +32,7 @@ import androidx.compose.material.icons.twotone.BlurOn
 import androidx.compose.material.icons.twotone.Bolt
 import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.CallToAction
+import androidx.compose.material.icons.twotone.CloudDownload
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Code
 import androidx.compose.material.icons.twotone.ColorLens
@@ -59,6 +60,7 @@ import androidx.compose.material.icons.twotone.HourglassEmpty
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.InstallMobile
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.Language
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
@@ -174,6 +176,9 @@ object AppIcons {
     val InstallWithOutAction = Icons.TwoTone.InstallMobile
     val PressInstallBackground = Icons.TwoTone.TouchApp
     val Settings = Icons.TwoTone.Settings
+    val Network = Icons.TwoTone.Language
+    val NetworkSource = Icons.TwoTone.CloudDownload
+    val UpdateChannel = Icons.TwoTone.SystemUpdate
     val OEMSpecial = Icons.TwoTone.FindInPage
     val ShowSize = Icons.AutoMirrored.TwoTone.CompareArrows
     val Bypass = Icons.TwoTone.NoEncryption

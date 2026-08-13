@@ -27,6 +27,7 @@ data class EditViewState(
     val globalCustomizeAuthorizer: String = "",
     val globalInstallerBiometricAuthMode: BiometricAuthMode = BiometricAuthMode.Disable,
     val checkAppSignature: Boolean = true,
+    val allowInternetAccess: Boolean = true,
     val labRespectPlatformInstallPolicy: Boolean = false
 ) {
     // Computed property for unsaved changes

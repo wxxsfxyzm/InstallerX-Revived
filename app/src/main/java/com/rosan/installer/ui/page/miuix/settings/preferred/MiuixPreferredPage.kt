@@ -282,6 +282,17 @@ fun MiuixPreferredPage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp)
                 ) {
+                    BasicComponent(
+                        title = stringResource(R.string.network_settings),
+                        summary = stringResource(
+                            if (uiState.allowInternetAccess) {
+                                R.string.network_settings_internet_access_enabled_desc
+                            } else {
+                                R.string.network_settings_internet_access_disabled_desc
+                            }
+                        ),
+                        onClick = { navigator.push(Route.Network) }
+                    )
                     MiuixDisableAdbVerify(
                         checked = !uiState.adbVerifyEnabled,
                         isError = uiState.authorizer == Authorizer.Dhizuku,

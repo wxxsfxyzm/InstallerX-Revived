@@ -94,7 +94,7 @@ class NoneAppInstallerRepoImpl(
                         0,
                         entitySize.takeIf { it > 0L } ?: -1L
                     ).use { outputStream ->
-                        entity.data.getInputStreamWhileNotEmpty()?.use { inputStream ->
+                        entity.data.getInstallInputStreamWhileNotEmpty()?.use { inputStream ->
                             if (progressWriter != null) {
                                 val knownTotalBytes = checkNotNull(totalBytes)
                                 progressWriter.copy(

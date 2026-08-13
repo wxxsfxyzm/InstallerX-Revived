@@ -11,6 +11,7 @@ import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.AppPreferences
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
@@ -120,6 +121,12 @@ class AppSettingsRepositoryImpl(
             ),
             // Uninstaller
             uninstallFlags = prefs[AppDataStore.UNINSTALL_FLAGS] ?: 0,
+            // Network
+            networkSourceMode = NetworkSourceMode.fromValue(
+                prefs[AppDataStore.NETWORK_SOURCE_MODE] ?: NetworkSourceMode.Cache.value
+            ),
+            networkSourceModeWarningAcknowledged =
+                prefs[AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED] ?: false,
             // Updater
             allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
@@ -224,6 +231,7 @@ class AppSettingsRepositoryImpl(
             StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
             StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
             StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
+            StringSetting.NetworkSourceMode -> AppDataStore.NETWORK_SOURCE_MODE
             StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
             StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION
             StringSetting.GithubUpdateChannel -> AppDataStore.GITHUB_UPDATE_CHANNEL
@@ -244,6 +252,8 @@ class AppSettingsRepositoryImpl(
     private fun booleanKey(setting: BooleanSetting): Preferences.Key<Boolean> =
         when (setting) {
             BooleanSetting.AllowInternetAccess -> AppDataStore.ALLOW_INTERNET_ACCESS
+            BooleanSetting.NetworkSourceModeWarningAcknowledged ->
+                AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED
             BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
             BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
             BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX

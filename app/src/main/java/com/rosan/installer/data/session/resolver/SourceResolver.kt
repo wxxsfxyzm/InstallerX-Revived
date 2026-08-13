@@ -25,6 +25,7 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.model.ResolveResult
 import com.rosan.installer.domain.session.repository.NetworkResolver
+import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -48,7 +49,7 @@ import kotlin.math.min
 class SourceResolver(
     private val context: Context,
     private val networkResolver: NetworkResolver,
-    private val appSettingsRepo: AppSettingsRepository,
+    private val appSettingsRepository: AppSettingsRepository,
     private val cacheDirectory: String,
     private val progressFlow: MutableSharedFlow<ProgressEntity>
 ) {
@@ -57,6 +58,7 @@ class SourceResolver(
     fun getTrackedCloseables(): List<Closeable> = closeables
 
     suspend fun resolve(intent: Intent): ResolveResult {
+        val networkSettings = appSettingsRepository.preferencesFlow.first()
         val uris = extractUris(intent)
         Timber.d("resolve: URIs extracted from intent (${uris.size}).")
 
@@ -64,7 +66,12 @@ class SourceResolver(
         for (uri in uris) {
             // Check cancellation between items
             if (!currentCoroutineContext().isActive) throw CancellationException()
-            data.addAll(resolveSingleUri(uri))
+            data.addAll(
+                resolveSingleUri(
+                    uri,
+                    networkSettings.networkSourceMode
+                )
+            )
         }
 
         // Return the packaged result
@@ -72,6 +79,34 @@ class SourceResolver(
             uris = uris.map { it.toString() },
             data = data
         )
+    }
+
+    /**
+     * Replaces the top-level HTTP range source requested by package analysis with one retained
+     * local file. The descriptor's install stream is used deliberately: for HTTP sources it is
+     * bound to the final URL, length, and validator captured during preflight.
+     */
+    suspend fun materializeForAnalysis(
+        data: List<DataEntity>,
+        requestedSource: DataEntity.FileDescriptorEntity
+    ): List<DataEntity> {
+        if (!appSettingsRepository.preferencesFlow.first().allowInternetAccess) {
+            throw ResolveException(
+                errorType = ResolveErrorType.NO_INTERNET_ACCESS,
+                message = "Internet access was disabled before source materialization."
+            )
+        }
+        return materializeAnalysisSource(
+            data = data,
+            requestedSource = requestedSource,
+            cacheDirectory = File(cacheDirectory)
+        ) { input, output, size ->
+            Timber.i(
+                "Materializing descriptor-backed source for analysis and installation: " +
+                        "path=${requestedSource.path}, size=$size"
+            )
+            input.copyToWithProgress(output, size, progressFlow)
+        }
     }
 
     private fun extractUris(intent: Intent): List<Uri> {
@@ -158,7 +193,10 @@ class SourceResolver(
         return uris
     }
 
-    private suspend fun resolveSingleUri(uri: Uri): List<DataEntity> {
+    private suspend fun resolveSingleUri(
+        uri: Uri,
+        networkSourceMode: NetworkSourceMode
+    ): List<DataEntity> {
         Timber.d("Source URI: $uri")
 
         // Handle null scheme (unlikely but safe to handle)
@@ -174,7 +212,7 @@ class SourceResolver(
             "content" -> resolveContentUri(uri)
 
             "http", "https" -> {
-                if (!appSettingsRepo.preferencesFlow.first().allowInternetAccess) {
+                if (!appSettingsRepository.preferencesFlow.first().allowInternetAccess) {
                     Timber.d("Internet access is disabled in app settings. Aborting network request.")
                     throw ResolveException(
                         errorType = ResolveErrorType.NO_INTERNET_ACCESS,
@@ -182,7 +220,12 @@ class SourceResolver(
                     )
                 }
 
-                networkResolver.resolve(uri, cacheDirectory, progressFlow)
+                networkResolver.resolve(
+                    uri,
+                    cacheDirectory,
+                    networkSourceMode,
+                    progressFlow
+                )
             }
 
             else -> throw ResolveException(

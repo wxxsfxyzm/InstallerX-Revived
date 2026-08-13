@@ -45,17 +45,13 @@ import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.device.model.ShizukuMode
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
-import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
-import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.lab.LabSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixCustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDraggableList
-import com.rosan.installer.ui.page.miuix.widgets.MiuixGithubUpdateChannelSelectionDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixRootImplementationDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
@@ -99,39 +95,7 @@ fun MiuixLabPage(
     val dhizukuAuthorized by capabilityProvider.dhizukuAuthorizedFlow.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
     val showRootImplementationDialog = remember { mutableStateOf(false) }
-    val showChannelDialog = remember { mutableStateOf(false) }
-    val showCustomProxyDialog = remember { mutableStateOf(false) }
     val showSmartAuthorizerSheet = remember { mutableStateOf(false) }
-
-    if (showChannelDialog.value)
-        MiuixGithubUpdateChannelSelectionDialog(
-            showState = showChannelDialog,
-            currentSelection = uiState.githubUpdateChannel,
-            onDismiss = { showChannelDialog.value = false },
-            onConfirm = { channel ->
-                showChannelDialog.value = false
-                viewModel.dispatch(LabSettingsAction.LabChangeGithubUpdateChannel(channel))
-                if (channel == GithubUpdateChannel.CUSTOM)
-                    showCustomProxyDialog.value = true
-            }
-        )
-
-    if (showCustomProxyDialog.value)
-        MiuixCustomGithubProxyUrlDialog(
-            showState = showCustomProxyDialog,
-            initialUrl = uiState.customGithubProxyUrl,
-            onDismiss = {
-                showCustomProxyDialog.value = false
-                if (uiState.customGithubProxyUrl.isEmpty())
-                    viewModel.dispatch(LabSettingsAction.LabChangeGithubUpdateChannel(GithubUpdateChannel.OFFICIAL))
-            },
-            onConfirm = { url ->
-                showCustomProxyDialog.value = false
-                viewModel.dispatch(LabSettingsAction.LabChangeCustomGithubProxyUrl(url))
-                if (url.isEmpty())
-                    viewModel.dispatch(LabSettingsAction.LabChangeGithubUpdateChannel(GithubUpdateChannel.OFFICIAL))
-            }
-        )
 
     MiuixRootImplementationDialog(
         showState = showRootImplementationDialog,
@@ -302,72 +266,6 @@ fun MiuixLabPage(
                                     LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
                                 )
                             }
-                        )
-                    }
-                }
-            }
-            item { SmallTitle(stringResource(R.string.network_access)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.allow_internet_access),
-                        description = stringResource(R.string.allow_internet_access_desc),
-                        checked = uiState.allowInternetAccess,
-                        onCheckedChange = {
-                            viewModel.dispatch(LabSettingsAction.LabChangeInternetAccess(it))
-                        }
-                    )
-                    if (uiState.allowInternetAccess) {
-                        val currentProfile = uiState.labHttpProfile
-                        val allowSecureString = stringResource(R.string.lab_http_profile_secure)
-                        val allowLocalString = stringResource(R.string.lab_http_profile_local)
-                        val allowAllString = stringResource(R.string.lab_http_profile_all)
-                        val profileData = remember {
-                            mapOf(
-                                HttpProfile.ALLOW_SECURE to allowSecureString,
-                                HttpProfile.ALLOW_LOCAL to allowLocalString,
-                                HttpProfile.ALLOW_ALL to allowAllString
-                            )
-                        }
-
-                        val profileEntries = remember(profileData) {
-                            profileData.values.map { name ->
-                                DropdownItem(title = name)
-                            }
-                        }
-
-                        val profileIndex = remember(currentProfile, profileData) {
-                            profileData.keys.toList().indexOf(currentProfile).coerceAtLeast(0)
-                        }
-
-                        WindowSpinnerPreference(
-                            title = stringResource(R.string.lab_http_profile),
-                            items = profileEntries,
-                            selectedIndex = profileIndex,
-                            onSelectedIndexChange = { newIndex ->
-                                profileData.keys.elementAtOrNull(newIndex)?.let { profile ->
-                                    viewModel.dispatch(LabSettingsAction.LabChangeHttpProfile(profile))
-                                }
-                            }
-                        )
-
-                        val currentChannel = uiState.githubUpdateChannel
-                        val channelSummary = when (currentChannel) {
-                            GithubUpdateChannel.OFFICIAL -> stringResource(R.string.lab_update_github_proxy_official)
-                            GithubUpdateChannel.PROXY_7ED -> stringResource(R.string.lab_update_github_proxy_7ed)
-                            GithubUpdateChannel.CUSTOM -> uiState.customGithubProxyUrl.ifBlank {
-                                stringResource(R.string.lab_update_github_proxy_custom)
-                            }
-                        }
-
-                        BasicComponent(
-                            title = stringResource(R.string.lab_update_github_proxy),
-                            summary = channelSummary,
-                            onClick = { showChannelDialog.value = true }
                         )
                     }
                 }

@@ -16,6 +16,7 @@ enum class StringSetting {
     ApplyOrderType,
     LabRootImplementation,
     LabHttpProfile,
+    NetworkSourceMode,
     PredictiveBackAnimation,
     PredictiveBackExitDirection,
     GithubUpdateChannel,
@@ -34,6 +35,7 @@ enum class IntSetting {
 
 enum class BooleanSetting {
     AllowInternetAccess,
+    NetworkSourceModeWarningAcknowledged,
     UiUseBlur,
     ThemeUseDynamicColor,
     UiUseMiuix,

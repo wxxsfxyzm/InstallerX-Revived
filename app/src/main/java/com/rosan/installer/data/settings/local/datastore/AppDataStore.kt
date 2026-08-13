@@ -169,7 +169,6 @@ class AppDataStore(
             register(booleanPreferencesKey("always_use_root_in_system"), PreferenceValueType.BOOLEAN)
 
         // Lab
-        val ALLOW_INTERNET_ACCESS = register(booleanPreferencesKey("allow_internet_access"), PreferenceValueType.BOOLEAN)
         val LAB_ENABLE_MODULE_FLASH = register(booleanPreferencesKey("enable_module_flash"), PreferenceValueType.BOOLEAN)
         val LAB_MODULE_FLASH_SHOW_ART = register(booleanPreferencesKey("module_flash_show_art"), PreferenceValueType.BOOLEAN)
         val LAB_ROOT_IMPLEMENTATION = register(stringPreferencesKey("lab_root_implementation"), PreferenceValueType.STRING)
@@ -183,6 +182,12 @@ class AppDataStore(
             register(booleanPreferencesKey("lab_install_without_user_action"), PreferenceValueType.BOOLEAN)
         val LAB_RESPECT_PLATFORM_INSTALL_POLICY =
             register(booleanPreferencesKey("lab_respect_platform_install_policy"), PreferenceValueType.BOOLEAN)
+
+        // Network
+        val ALLOW_INTERNET_ACCESS = register(booleanPreferencesKey("allow_internet_access"), PreferenceValueType.BOOLEAN)
+        val NETWORK_SOURCE_MODE = register(stringPreferencesKey("network_source_mode"), PreferenceValueType.STRING)
+        val NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED =
+            register(booleanPreferencesKey("network_source_mode_warning_acknowledged"), PreferenceValueType.BOOLEAN)
 
         // Debug
         val ENABLE_FILE_LOGGING = register(booleanPreferencesKey("enable_file_logging"), PreferenceValueType.BOOLEAN)

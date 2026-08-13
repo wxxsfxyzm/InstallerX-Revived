@@ -264,6 +264,25 @@ fun PreferredPage(
                     title = stringResource(R.string.basic)
                 ) {
                     item {
+                        SwitchWidget(
+                            icon = AppIcons.Network,
+                            title = stringResource(R.string.network_settings),
+                            description = stringResource(
+                                if (uiState.allowInternetAccess) {
+                                    R.string.network_settings_internet_access_enabled_desc
+                                } else {
+                                    R.string.network_settings_internet_access_disabled_desc
+                                }
+                            ),
+                            checked = uiState.allowInternetAccess,
+                            onClick = { navigator.push(Route.Network) },
+                            trailingDivider = true,
+                            onCheckedChange = {
+                                viewModel.dispatch(PreferredViewAction.ChangeInternetAccess(it))
+                            }
+                        )
+                    }
+                    item {
                         val isError = uiState.authorizer == Authorizer.Dhizuku
                         SwitchWidget(
                             icon = AppIcons.DisableAdbVerify,

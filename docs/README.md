@@ -49,7 +49,7 @@ Limited support means InstallerX may work, but some features can be unavailable 
 
 When reporting bugs, please reproduce them on the latest Alpha or CI build whenever possible, because issues in Stable may already be fixed.
 
-InstallerX is published as one APK with network access controlled by an in-app setting. When enabled, it supports direct APK download links and online update features. When disabled, network requests are blocked while local installation flows continue to work. The APK keeps `online` in its release filename for compatibility with older in-app update clients; this is not a separate build variant.
+InstallerX is now published as a single APK. Network access is controlled by an in-app setting. The release filename continues to include `online` only for compatibility with older in-app update clients; it no longer identifies a separate build variant.
 
 ## Building
 

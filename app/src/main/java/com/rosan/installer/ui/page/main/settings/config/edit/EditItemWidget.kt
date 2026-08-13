@@ -13,6 +13,7 @@ import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material.icons.twotone.Speed
 import androidx.compose.material.icons.twotone.Terminal
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
@@ -27,6 +28,7 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -841,10 +843,17 @@ fun DataAllowSigMismatchWidget(state: EditViewState, dispatch: (EditViewAction) 
 
 @Composable
 fun DataAllowSigUnknownWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val description = buildString {
+        append(stringResource(id = R.string.config_allow_sig_unknown_desc))
+        if (state.allowInternetAccess) {
+            append('\n')
+            append(stringResource(id = R.string.config_allow_sig_unknown_http_lightweight_desc))
+        }
+    }
     SwitchWidget(
         icon = AppIcons.InstallAllowSigUnknown,
         title = stringResource(id = R.string.config_allow_sig_unknown),
-        description = stringResource(id = R.string.config_allow_sig_unknown_desc),
+        description = description,
         checked = !state.data.allowSigUnknown,
         onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigUnknown(!it)) }
     )

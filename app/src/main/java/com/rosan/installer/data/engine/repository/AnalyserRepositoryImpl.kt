@@ -15,6 +15,7 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
@@ -63,9 +64,7 @@ class AnalyserRepositoryImpl(
         }
 
         // Step 2: Group, Deduplicate
-        val includeSignature = rawEntities.any { entity ->
-            extra.shouldCheckAppSignatures(entity.sourceType)
-        }
+        val includeSignature = shouldLoadInstalledSignatures(rawEntities, extra)
         val processedGroups = packagePreprocessor.process(rawEntities, includeSignature = includeSignature)
 
         Timber.d("AnalyserRepo: Step 2 Processed. Groups count: ${processedGroups.size}")
@@ -123,7 +122,9 @@ class AnalyserRepositoryImpl(
                 .filter { it.selected }
                 .map { it.app }
                 .filter { it is AppEntity.BaseEntity || it is AppEntity.SplitEntity }
-                .any { entity -> extra.shouldCheckAppSignatures(entity.sourceType) }
+                .any { entity ->
+                    extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureAnalysisResult()
+                }
 
             val signatureStatus = if (signatureCheckPerformed) {
                 packageSignatureAnalyzer.match(
@@ -191,4 +192,25 @@ class AnalyserRepositoryImpl(
             if (e is AnalyseException || e is CommonsZipException || e is ZipException) throw e
             emptyList()
         }
+}
+
+internal fun shouldLoadInstalledSignatures(
+    entities: List<AppEntity>,
+    extra: AnalyseExtraEntity
+): Boolean = entities.any { entity ->
+    extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureMetadata()
+}
+
+private fun AppEntity.hasSignatureMetadata(): Boolean = when (this) {
+    is AppEntity.BaseEntity -> signatureInfo != null
+    is AppEntity.SplitEntity -> signatureInfo != null
+    else -> false
+}
+
+private fun AppEntity.hasSignatureAnalysisResult(): Boolean = when (this) {
+    is AppEntity.BaseEntity -> signatureInfo != null &&
+            signatureInfo.verificationStatus != SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+    is AppEntity.SplitEntity -> signatureInfo != null &&
+            signatureInfo.verificationStatus != SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+    else -> false
 }

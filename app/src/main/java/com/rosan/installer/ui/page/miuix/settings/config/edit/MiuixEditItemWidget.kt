@@ -8,11 +8,20 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,12 +44,15 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixHintTextField
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.util.isSystemPackageInstallerActive
 import org.koin.compose.koinInject
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun MiuixDataNameWidget(
@@ -827,10 +839,17 @@ fun MiuixDataAllowSigMismatchWidget(state: EditViewState, dispatch: (EditViewAct
 
 @Composable
 fun MiuixDataAllowSigUnknownWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val description = buildString {
+        append(stringResource(id = R.string.config_allow_sig_unknown_desc))
+        if (state.allowInternetAccess) {
+            append('\n')
+            append(stringResource(id = R.string.config_allow_sig_unknown_http_lightweight_desc))
+        }
+    }
     MiuixSwitchWidget(
         icon = AppIcons.InstallAllowRestrictedPermissions,
         title = stringResource(id = R.string.config_allow_sig_unknown),
-        description = stringResource(id = R.string.config_allow_sig_unknown_desc),
+        description = description,
         checked = !state.data.allowSigUnknown,
         onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigUnknown(!it)) }
     )

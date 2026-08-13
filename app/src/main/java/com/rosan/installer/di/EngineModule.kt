@@ -27,6 +27,7 @@ import com.rosan.installer.data.engine.repository.ModuleInstallerRepositoryImpl
 import com.rosan.installer.data.engine.provider.InstalledModuleInfoProviderImpl
 import com.rosan.installer.data.engine.signature.CertificateFormatter
 import com.rosan.installer.data.engine.signature.InstalledPackageSignatureReader
+import com.rosan.installer.data.engine.signature.LightweightApkSignatureReader
 import com.rosan.installer.data.engine.signature.PackageSignatureAnalyzer
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.data.engine.signature.SignatureMatcher
@@ -58,6 +59,7 @@ val engineModule = module {
 
     // Signature analysis
     singleOf(::CertificateFormatter)
+    singleOf(::LightweightApkSignatureReader)
     singleOf(::PendingApkSignatureAnalyzer)
     singleOf(::InstalledPackageSignatureReader) { bind<InstalledPackageSignatureProvider>() }
     singleOf(::SignatureMatcher)

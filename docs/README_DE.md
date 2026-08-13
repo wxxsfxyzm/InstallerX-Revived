@@ -49,12 +49,7 @@ Eingeschränkte Unterstützung bedeutet, dass InstallerX funktionieren kann, ein
 
 Wenn du Fehler meldest, reproduziere sie bitte nach Möglichkeit mit dem neuesten Alpha- oder CI-Build, da Probleme aus Stable möglicherweise bereits behoben wurden.
 
-InstallerX wird in zwei Varianten veröffentlicht:
-
-- **Online:** unterstützt direkte APK-Downloadlinks und Online-Update-Funktionen. Die Netzwerkberechtigung wird nur für installationsbezogene Funktionen verwendet.
-- **Offline:** fordert keine Netzwerkberechtigung an. Online-exklusive Funktionen zeigen eine klare Fehlermeldung.
-
-Beide Varianten haben denselben Paketnamen, Versionscode und dieselbe Signatur, daher ersetzen sie sich gegenseitig und können nicht parallel installiert werden.
+InstallerX wird jetzt als eine einzige APK veröffentlicht. Der Netzwerkzugriff wird über eine Einstellung in der App gesteuert. Der Dateiname der Veröffentlichung enthält nur zur Kompatibilität mit älteren In-App-Update-Clients weiterhin `online`; er kennzeichnet keine separate Build-Variante mehr.
 
 ## Build
 

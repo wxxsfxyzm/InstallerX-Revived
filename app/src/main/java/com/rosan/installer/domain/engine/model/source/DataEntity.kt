@@ -21,23 +21,17 @@ import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
 import kotlin.math.min
 
-data class ZipEntryMetadata(
-    val uncompressedSize: Long,
-    val compressedSize: Long,
-    val crc: Long,
-    val compressionMethod: Int
-)
-
-interface ZipEntryMetadataSource {
-    val zipEntryMetadata: ZipEntryMetadata?
-}
-
 sealed class DataEntity(open var source: DataEntity? = null) {
     abstract fun getInputStream(): InputStream?
+
+    open fun getInstallInputStream(): InputStream? = getInputStream()
 
     abstract fun getSize(): Long
 
     fun getInputStreamWhileNotEmpty(): InputStream? = getInputStream() ?: source?.getInputStream()
+
+    fun getInstallInputStreamWhileNotEmpty(): InputStream? =
+        getInstallInputStream() ?: source?.getInstallInputStream()
 
     fun getSourceTop(): DataEntity = source?.getSourceTop() ?: this
 
@@ -58,17 +52,31 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         val length: Long,
         private val channelFactory: () -> SeekableByteChannel,
         private val descriptorFactory: () -> OwnedFileDescriptor,
+        private val inputStreamFactory: (() -> InputStream)? = null,
+        val preInstallSignatureAnalysis: Boolean = true,
+        val preInstallSigningBlockAnalysis: Boolean = false,
+        val preInstallIdentityAnalysis: Boolean = true,
+        val analysisMaterializationPolicy: AnalysisMaterializationPolicy =
+            AnalysisMaterializationPolicy.TEMPORARY_CACHE,
+        val analysisMaterializationKey: AnalysisMaterializationKey? = null,
         override val zipEntryMetadata: ZipEntryMetadata? = null,
         val archiveEntryName: String? = null
     ) : FileEntity(path), ZipEntryMetadataSource {
         init {
             require(startOffset >= 0L) { "startOffset must be non-negative" }
             require(length > 0L) { "length must be positive" }
+            require(
+                analysisMaterializationPolicy != AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT ||
+                        analysisMaterializationKey != null
+            ) { "Retained source replacement requires a materialization key" }
         }
 
         override fun openChannel(): SeekableByteChannel = channelFactory()
 
         override fun getInputStream(): InputStream = Channels.newInputStream(openChannel())
+
+        override fun getInstallInputStream(): InputStream =
+            inputStreamFactory?.invoke() ?: getInputStream()
 
         override fun getSize(): Long = length
 
@@ -108,6 +116,11 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                     )
                 },
                 descriptorFactory = descriptorFactory,
+                preInstallSignatureAnalysis = parent.preInstallSignatureAnalysis,
+                preInstallSigningBlockAnalysis = parent.preInstallSigningBlockAnalysis,
+                preInstallIdentityAnalysis = parent.preInstallIdentityAnalysis,
+                analysisMaterializationPolicy = parent.analysisMaterializationPolicy,
+                analysisMaterializationKey = parent.analysisMaterializationKey,
                 zipEntryMetadata = zipEntryMetadata,
                 archiveEntryName = archiveEntryName
             ).apply {
@@ -163,7 +176,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                     // DEFLATED entries, whereas -1 just degrades progress to indeterminate.
                     entry?.size?.takeIf { it >= 0L } ?: -1L
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 -1L
             }
         }
@@ -295,10 +308,8 @@ private class ZipFileClosingInputStream(
     private val zipFile: ZipFile
 ) : FilterInputStream(input) {
     override fun close() {
-        try {
+        zipFile.use { _ ->
             super.close()
-        } finally {
-            zipFile.close()
         }
     }
 }

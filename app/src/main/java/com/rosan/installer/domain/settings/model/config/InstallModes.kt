@@ -55,6 +55,29 @@ enum class DexoptMode(val value: String) {
     Everything("everything");
 }
 
+enum class NetworkSourceMode(val value: String) {
+    Cache("cache"),
+    Smart("smart"),
+    LowStorage("low_storage");
+
+    fun shouldTryRemoteSource(
+        supportsRange: Boolean,
+        contentLength: Long,
+        platformSupported: Boolean
+    ): Boolean = this != Cache && supportsRange && contentLength > 0 && platformSupported
+
+    fun requiresRemoteSource(
+        supportsRange: Boolean,
+        contentLength: Long,
+        platformSupported: Boolean
+    ): Boolean = this == LowStorage && !shouldTryRemoteSource(supportsRange, contentLength, platformSupported)
+
+    companion object {
+        fun fromValue(value: String): NetworkSourceMode =
+            entries.find { it.value == value } ?: Cache
+    }
+}
+
 /**
  * Define Install Reasons,
  * Sync with Android's Install Reason
