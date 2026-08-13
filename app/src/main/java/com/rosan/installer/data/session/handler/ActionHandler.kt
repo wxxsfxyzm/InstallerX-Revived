@@ -17,6 +17,7 @@ import com.rosan.installer.data.session.resolver.UninstallResolver
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.exception.AuthenticationFailedException
+import com.rosan.installer.domain.engine.exception.DescriptorAnalysisUnsupportedException
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
@@ -26,6 +27,8 @@ import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationKey
+import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.engine.usecase.AnalyzePackageUseCase
 import com.rosan.installer.domain.engine.usecase.ApproveSessionUseCase
 import com.rosan.installer.domain.engine.usecase.ClearAppIconCacheUseCase
@@ -33,14 +36,14 @@ import com.rosan.installer.domain.engine.usecase.GetSessionConfirmationDetailsUs
 import com.rosan.installer.domain.engine.usecase.ProcessInstallationUseCase
 import com.rosan.installer.domain.engine.usecase.ProcessUninstallUseCase
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
-import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.model.ConfirmationRequest
+import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.model.ConfirmationState
-import com.rosan.installer.domain.session.model.sessionIdOrNull
 import com.rosan.installer.domain.session.model.InstallResult
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.model.UnarchiveErrorInfo
+import com.rosan.installer.domain.session.model.sessionIdOrNull
 import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
@@ -354,12 +357,43 @@ class ActionHandler(
             checkSplitPackageSignatures = checkSplitPackageSignatures
         )
 
-        val results = analyzePackage(
-            sessionId = session.id,
-            config = session.config,
-            data = session.data,
-            extra = extra
-        )
+        val materializedSources = mutableSetOf<AnalysisMaterializationKey>()
+        var results: List<PackageAnalysisResult>
+        while (true) {
+            try {
+                results = analyzePackage(
+                    sessionId = session.id,
+                    config = session.config,
+                    data = session.data,
+                    extra = extra
+                )
+                break
+            } catch (error: DescriptorAnalysisUnsupportedException) {
+                val source = error.source
+                if (
+                    source.analysisMaterializationPolicy !=
+                    AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
+                ) {
+                    // Low Storage deliberately refuses this compatibility fallback: materializing
+                    // here would violate the mode's disk-usage contract.
+                    throw error
+                }
+
+                val key = source.analysisMaterializationKey ?: throw error
+                if (!materializedSources.add(key)) {
+                    Timber.e(error, "Repeated materialization request for the same analysis source")
+                    throw error
+                }
+
+                Timber.i(
+                    error,
+                    "[id=$sessionId] Direct HTTP descriptor analysis is unsupported; " +
+                            "retaining the complete Smart-mode source and retrying."
+                )
+                session.data = sourceResolver.materializeForAnalysis(session.data, source)
+                session.progress.emit(ProgressEntity.InstallAnalysing)
+            }
+        }
 
         if (results.isEmpty()) {
             throw AnalyseException(
@@ -635,7 +669,7 @@ class ActionHandler(
             totalProgress = totalProgress
         )
 
-        val hasCallerIdentity = request.callerUid != Process.INVALID_UID
+        val hasCallerIdentity = request.callerUid != if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) Process.INVALID_UID else INVALID_UID
         val isCallerVerified = isSelfSession ||
                 (hasCallerIdentity && request.callerUid == unresolvedDetails.installerUid) ||
                 request.callerUid == Process.SYSTEM_UID
@@ -678,7 +712,7 @@ class ActionHandler(
 
         val canAutoApproveSession =
             isCallerVerified &&
-            session.config.autoApproveSession &&
+                    session.config.autoApproveSession &&
                     !appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy, false).first()
 
         if (canAutoApproveSession) {
@@ -768,8 +802,7 @@ class ActionHandler(
     }
 
     private suspend fun handleConfirm(sessionId: Int, granted: Boolean) {
-        val state = session.confirmationState.value
-        val detailsBeforeApprove = when (state) {
+        val detailsBeforeApprove = when (val state = session.confirmationState.value) {
             is ConfirmationState.AwaitingDecision -> state.details.takeIf {
                 it.sessionId == sessionId
             }
@@ -809,9 +842,8 @@ class ActionHandler(
         }
         session.confirmationState.value = ConfirmationState.Completed(sessionId)
 
-        val details = detailsBeforeApprove
         if (granted && session.config.toastMode != ToastMode.Disable) {
-            val sourceLabel = details.sourceAppLabel
+            val sourceLabel = detailsBeforeApprove.sourceAppLabel
                 ?: session.config.initiatorPackageName
                 ?: context.getString(R.string.installer_label_unknown)
             val message = context.getString(R.string.install_confirm_approved_toast, sourceLabel)
@@ -819,7 +851,7 @@ class ActionHandler(
             Timber.d("[id=${this.sessionId}] Approve success toast emitted=$emitted")
         }
 
-        val isSelfSession = details.isSelfSession
+        val isSelfSession = detailsBeforeApprove.isSelfSession
 
         if (!isSelfSession) {
             // For external apps, approving/denying the session is the end of our job.
@@ -828,9 +860,9 @@ class ActionHandler(
             // For our own installations, we need to wait for the system callback.
             if (granted) {
                 // Restore the Installing UI while we wait for LocalIntentReceiver.
-                val current = details.currentProgress
-                val total = details.totalProgress
-                val label = details.appLabel.toString()
+                val current = detailsBeforeApprove.currentProgress
+                val total = detailsBeforeApprove.totalProgress
+                val label = detailsBeforeApprove.appLabel.toString()
 
                 session.progress.emit(
                     ProgressEntity.Installing(
@@ -943,4 +975,8 @@ class ActionHandler(
         )
 
     private val InstallMode.isNotification get() = this == InstallMode.Notification || this == InstallMode.AutoNotification
+
+    private companion object {
+        const val INVALID_UID = -1
+    }
 }

@@ -13,6 +13,8 @@ import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import android.os.storage.StorageManager
 import com.rosan.installer.data.session.util.copyToWithProgress
+import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationKey
+import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.session.exception.ResolveException
 import com.rosan.installer.domain.session.model.ProgressEntity
@@ -144,9 +146,10 @@ class OkHttpNetworkResolver(
                             allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
                             blockSize = RANGE_CACHE_BLOCK_SIZE
                         ),
-                        inspectSigningBlock = true
+                        inspectSigningBlock = true,
+                        analysisMaterializationPolicy = mode.streamingAnalysisMaterializationPolicy()
                     )
-                    probeRemotePackage(requireNotNull(remoteEntity))
+                    probeRemotePackage(remoteEntity)
                 }
             }
 
@@ -206,7 +209,8 @@ class OkHttpNetworkResolver(
         originalUrl: String,
         identity: RemoteSourceIdentity,
         rangeCacheMaxBytes: Int,
-        inspectSigningBlock: Boolean
+        inspectSigningBlock: Boolean,
+        analysisMaterializationPolicy: AnalysisMaterializationPolicy
     ): DataEntity.FileDescriptorEntity {
         val contentLength = identity.contentLength
         val analysisRangeCache = SeekableBlockCache(
@@ -233,7 +237,16 @@ class OkHttpNetworkResolver(
             },
             preInstallSignatureAnalysis = false,
             preInstallSigningBlockAnalysis = inspectSigningBlock,
-            preInstallIdentityAnalysis = false
+            preInstallIdentityAnalysis = false,
+            analysisMaterializationPolicy = analysisMaterializationPolicy,
+            analysisMaterializationKey = if (
+                analysisMaterializationPolicy ==
+                AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
+            ) {
+                AnalysisMaterializationKey()
+            } else {
+                null
+            }
         ).apply {
             source = DataEntity.FileEntity(originalUrl)
         }
@@ -333,10 +346,8 @@ class OkHttpNetworkResolver(
             ExpectedLengthInputStream(response.body.byteStream(), identity.contentLength)
         ) {
             override fun close() {
-                try {
+                response.use { _ ->
                     super.close()
-                } finally {
-                    response.close()
                 }
             }
         }
@@ -629,7 +640,7 @@ class OkHttpNetworkResolver(
                 val responseLength = response.header("Content-Length")?.toLongOrNull() ?: response.body.contentLength()
                 val supportsRange = response.code == 206 && contentRange?.matches(0L, 3L) == true
                 val length = when {
-                    supportsRange -> requireNotNull(contentRange).total
+                    supportsRange -> contentRange.total
                     response.code == 200 -> responseLength
                     else -> -1L
                 }

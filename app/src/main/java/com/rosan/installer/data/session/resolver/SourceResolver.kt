@@ -81,6 +81,34 @@ class SourceResolver(
         )
     }
 
+    /**
+     * Replaces the top-level HTTP range source requested by package analysis with one retained
+     * local file. The descriptor's install stream is used deliberately: for HTTP sources it is
+     * bound to the final URL, length, and validator captured during preflight.
+     */
+    suspend fun materializeForAnalysis(
+        data: List<DataEntity>,
+        requestedSource: DataEntity.FileDescriptorEntity
+    ): List<DataEntity> {
+        if (!appSettingsRepository.preferencesFlow.first().allowInternetAccess) {
+            throw ResolveException(
+                errorType = ResolveErrorType.NO_INTERNET_ACCESS,
+                message = "Internet access was disabled before source materialization."
+            )
+        }
+        return materializeAnalysisSource(
+            data = data,
+            requestedSource = requestedSource,
+            cacheDirectory = File(cacheDirectory)
+        ) { input, output, size ->
+            Timber.i(
+                "Materializing descriptor-backed source for analysis and installation: " +
+                        "path=${requestedSource.path}, size=$size"
+            )
+            input.copyToWithProgress(output, size, progressFlow)
+        }
+    }
+
     private fun extractUris(intent: Intent): List<Uri> {
         val action = intent.action
         val uris = mutableListOf<Uri>()

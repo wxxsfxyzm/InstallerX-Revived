@@ -672,6 +672,8 @@
     <string name="exception_initiator_not_visible">Permission denied due to package visibility restrictions. The app requesting the installation is hidden from InstallerX. If you are using modules like \'Hide My Applist\', please allowlist InstallerX</string>
     <string name="exception_resolve_failed_no_internet_access">Internet access is disabled in app settings. Enable it in Network settings to use this feature.</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
+    <string name="exception_analyse_failed_streaming_source_unsupported">This source cannot be analyzed in Low storage mode. Choose Smart or Full download.</string>
+    <string name="exception_analyse_failed_source_materialization">Unable to download the complete source for analysis</string>
     <string name="exception_authentication_failed">User authentication failed</string>
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
     <string name="exception_install_failed_blacklisted_package">You don\'t allow installation of the app!</string>

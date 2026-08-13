@@ -19,11 +19,13 @@ import com.rosan.installer.core.reflection.invoke
 import com.rosan.installer.core.resParser.parser.AxmlTreeParser
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.exception.AnalyseException
+import com.rosan.installer.domain.engine.exception.DescriptorAnalysisUnsupportedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import timber.log.Timber
@@ -245,13 +247,21 @@ class ApkParser(
                 return createApkResourceContext(systemResources, apkAssets)
             } catch (e: IOException) {
                 if (file is DataEntity.FileDescriptorEntity) {
-                    val cachedResources = tryLoadApkResourcesFromCache(
-                        systemResources = systemResources,
-                        file = file,
-                        cacheDirectory = cacheDirectory
-                    )
-                    if (cachedResources != null) {
-                        return cachedResources
+                    when (file.analysisMaterializationPolicy) {
+                        AnalysisMaterializationPolicy.TEMPORARY_CACHE -> {
+                            val cachedResources = tryLoadApkResourcesFromCache(
+                                systemResources = systemResources,
+                                file = file,
+                                cacheDirectory = cacheDirectory
+                            )
+                            if (cachedResources != null) {
+                                return cachedResources
+                            }
+                        }
+
+                        AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
+                        AnalysisMaterializationPolicy.DISALLOW ->
+                            throw DescriptorAnalysisUnsupportedException(file, e)
                     }
                 }
 

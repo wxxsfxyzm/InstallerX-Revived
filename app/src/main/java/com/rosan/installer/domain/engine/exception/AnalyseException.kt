@@ -8,7 +8,7 @@ import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 /**
  * Unified exception for all package analysis failures.
  */
-class AnalyseException(
+open class AnalyseException(
     val errorType: AnalyseErrorType,
     message: String? = null,
     cause: Throwable? = null

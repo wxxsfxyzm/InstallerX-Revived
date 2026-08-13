@@ -650,6 +650,8 @@
     <string name="exception_initiator_not_visible">InstallerX 对发起安装的应用不可见。如果使用了“隐藏应用列表”等模块，请对 InstallerX 放行</string>
     <string name="exception_resolve_failed_no_internet_access">应用内网络访问已关闭。请在网络设置中开启后再使用此功能。</string>
     <string name="exception_analyse_failed_all_files_unsupported">不支持的文件格式</string>
+    <string name="exception_analyse_failed_streaming_source_unsupported">此来源无法在低存储占用模式下完成分析，请改用“智能”或“完整下载”模式。</string>
+    <string name="exception_analyse_failed_source_materialization">无法完整下载来源以继续分析</string>
     <string name="installer_analyse_failed_corrupted_archive">损坏的压缩包</string>
     <string name="exception_authentication_failed">用户认证失败</string>
     <string name="exception_install_failed_already_exists">应用已安装（包名相同、版本相同），请先卸载再安装</string>

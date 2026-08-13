@@ -2,6 +2,7 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.resolver
 
+import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 
 internal sealed interface RemotePackageProbeResult {
@@ -22,6 +23,13 @@ internal enum class RemotePackageAction {
     FullDownload,
     Reject
 }
+
+internal fun NetworkSourceMode.streamingAnalysisMaterializationPolicy(): AnalysisMaterializationPolicy =
+    when (this) {
+        NetworkSourceMode.Smart -> AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
+        NetworkSourceMode.LowStorage -> AnalysisMaterializationPolicy.DISALLOW
+        NetworkSourceMode.Cache -> error("Cache mode does not create remote sources")
+    }
 
 internal fun NetworkSourceMode.actionFor(result: RemotePackageProbeResult): RemotePackageAction =
     when (this) {

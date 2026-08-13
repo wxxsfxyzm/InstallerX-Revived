@@ -7,7 +7,9 @@ import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 
 class DataEntityInputStreamTest {
     @Test
@@ -42,6 +44,7 @@ class DataEntityInputStreamTest {
         Files.write(file, byteArrayOf(1, 2))
 
         try {
+            val materializationKey = AnalysisMaterializationKey()
             val entity = DataEntity.FileDescriptorEntity(
                 path = "remote.apk",
                 startOffset = 0L,
@@ -49,12 +52,20 @@ class DataEntityInputStreamTest {
                 channelFactory = { FileChannel.open(file, StandardOpenOption.READ) },
                 descriptorFactory = { error("descriptor is unused") },
                 preInstallSignatureAnalysis = false,
-                preInstallIdentityAnalysis = false
+                preInstallIdentityAnalysis = false,
+                analysisMaterializationPolicy =
+                    AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
+                analysisMaterializationKey = materializationKey
             )
 
             val subrange = entity.subrange(relativeOffset = 0L, subrangeLength = 1L)
             assertFalse(subrange.preInstallSignatureAnalysis)
             assertFalse(subrange.preInstallIdentityAnalysis)
+            assertEquals(
+                AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
+                subrange.analysisMaterializationPolicy
+            )
+            assertSame(materializationKey, subrange.analysisMaterializationKey)
         } finally {
             Files.deleteIfExists(file)
         }

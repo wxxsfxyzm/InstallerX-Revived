@@ -2,6 +2,7 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.resolver
 
+import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import java.io.IOException
 import kotlin.test.Test
@@ -50,6 +51,18 @@ class RemotePackageProbeResultTest {
         }.forEach { result ->
             assertEquals(RemotePackageAction.Reject, NetworkSourceMode.LowStorage.actionFor(result))
         }
+    }
+
+    @Test
+    fun `streaming analysis fallback follows the selected mode contract`() {
+        assertEquals(
+            AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
+            NetworkSourceMode.Smart.streamingAnalysisMaterializationPolicy()
+        )
+        assertEquals(
+            AnalysisMaterializationPolicy.DISALLOW,
+            NetworkSourceMode.LowStorage.streamingAnalysisMaterializationPolicy()
+        )
     }
 
 }
