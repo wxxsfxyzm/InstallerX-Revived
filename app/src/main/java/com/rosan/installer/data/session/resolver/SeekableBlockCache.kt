@@ -77,22 +77,22 @@ internal class SeekableBlockCache(
 }
 
 internal fun calculateRuntimeRangeCacheBudget(
-    requestedMaxBytes: Int,
+    maximumBytes: Int,
     maxHeapBytes: Long,
     allocatedHeapBytes: Long,
     blockSize: Int
 ): Int {
-    require(requestedMaxBytes > 0) { "requestedMaxBytes must be positive" }
+    require(maximumBytes > 0) { "maximumBytes must be positive" }
     require(maxHeapBytes > 0L) { "maxHeapBytes must be positive" }
     require(allocatedHeapBytes >= 0L) { "allocatedHeapBytes must be non-negative" }
     require(blockSize > 0) { "blockSize must be positive" }
-    require(requestedMaxBytes >= blockSize) { "requestedMaxBytes must cover one block" }
+    require(maximumBytes >= blockSize) { "maximumBytes must cover one block" }
 
     val availableHeapBytes = (maxHeapBytes - allocatedHeapBytes).coerceAtLeast(blockSize.toLong())
     // Asset parsing, decoded resources, networking, and UI retain the rest of the available heap.
     val safeBudgetBytes = (availableHeapBytes / RANGE_CACHE_AVAILABLE_HEAP_DIVISOR)
         .coerceAtLeast(blockSize.toLong())
-    return min(requestedMaxBytes.toLong(), safeBudgetBytes)
+    return min(maximumBytes.toLong(), safeBudgetBytes)
         .coerceAtMost(Int.MAX_VALUE.toLong())
         .toInt()
 }

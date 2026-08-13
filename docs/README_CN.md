@@ -77,9 +77,9 @@ flowchart TD
     SINGLE -- "否：APKS / APKM / XAPK / ZIP" --> DOWNLOAD
     SINGLE -- "是" --> BUDGET["计算实际 Range 缓存上限"]
 
-    USER["用户配置上限<br/>1–512 MiB"] --> BUDGET
+    LIMIT["内部上限<br/>8 MiB"] --> BUDGET
     HEAP["当前 Java 堆<br/>剩余可用空间"] --> BUDGET
-    BUDGET --> FORMULA["实际上限 = min（用户上限，<br/>max（1 MiB，剩余堆 ÷ 8））"]
+    BUDGET --> FORMULA["实际上限 = min（8 MiB，<br/>max（1 MiB，剩余堆 ÷ 8））"]
     FORMULA --> RANGE["1 MiB 固定块<br/>LRU 内存缓存<br/>满时先淘汰最旧块"]
     RANGE --> META["稀疏 Range 读取<br/>ZIP 中央目录、Manifest、资源和图标"]
     META --> INFO["显示应用名、图标、版本、SDK 和大小"]

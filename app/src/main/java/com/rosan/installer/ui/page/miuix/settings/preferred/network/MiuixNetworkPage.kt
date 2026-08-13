@@ -3,8 +3,6 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.network
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -15,30 +13,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.settings.model.config.MAX_NETWORK_RANGE_CACHE_SIZE_MIB
-import com.rosan.installer.domain.settings.model.config.MIN_NETWORK_RANGE_CACHE_SIZE_MIB
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
@@ -48,28 +38,22 @@ import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettin
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixGithubUpdateChannelSelectionDialog
-import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
-import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
-import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun MiuixNetworkPage(
@@ -195,16 +179,6 @@ fun MiuixNetworkPage(
                                 )
                             }
                         )
-                        if (uiState.networkSourceMode != NetworkSourceMode.Cache) {
-                            MiuixNetworkRangeCacheSizePreference(
-                                configuredSize = uiState.networkRangeCacheSizeMiB,
-                                onSizeChange = { size ->
-                                    viewModel.dispatch(
-                                        NetworkSettingsAction.ChangeNetworkRangeCacheSizeMiB(size)
-                                    )
-                                }
-                            )
-                        }
                         val allowSecureString = stringResource(R.string.lab_http_profile_secure)
                         val allowLocalString = stringResource(R.string.lab_http_profile_local)
                         val allowAllString = stringResource(R.string.lab_http_profile_all)
@@ -287,87 +261,6 @@ private fun MiuixNetworkSourceModePreference(
         selectedIndex = modes.keys.indexOf(currentMode).coerceAtLeast(0),
         onSelectedIndexChange = { index ->
             modes.keys.elementAtOrNull(index)?.let(onModeChange)
-        }
-    )
-}
-
-@Composable
-private fun MiuixNetworkRangeCacheSizePreference(
-    configuredSize: Int,
-    onSizeChange: (Int) -> Unit
-) {
-    var showEditor by remember { mutableStateOf(false) }
-    var input by remember(configuredSize, showEditor) {
-        mutableStateOf(configuredSize.toString())
-    }
-    val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val parsed = input.toIntOrNull()
-    val valid = parsed in MIN_NETWORK_RANGE_CACHE_SIZE_MIB..MAX_NETWORK_RANGE_CACHE_SIZE_MIB
-
-    fun confirmInput() {
-        parsed?.takeIf { valid }?.let(onSizeChange)
-        if (valid) showEditor = false
-    }
-
-    LaunchedEffect(showEditor) {
-        if (showEditor) {
-            delay(200)
-            focusRequester.requestFocus()
-            keyboardController?.show()
-        }
-    }
-
-    MiuixIntNumberPickerWidget(
-        title = stringResource(R.string.config_network_range_cache_size),
-        description = stringResource(R.string.config_network_range_cache_size_desc),
-        value = configuredSize,
-        startInt = MIN_NETWORK_RANGE_CACHE_SIZE_MIB,
-        endInt = MAX_NETWORK_RANGE_CACHE_SIZE_MIB,
-        valueSuffix = " MiB",
-        subduedValue = true,
-        onValueClick = { showEditor = true },
-        onValueChange = onSizeChange
-    )
-
-    WindowDialog(
-        show = showEditor,
-        onDismissRequest = { showEditor = false },
-        title = stringResource(R.string.config_network_range_cache_size),
-        content = {
-            Column {
-                TextField(
-                    modifier = Modifier.focusRequester(focusRequester),
-                    value = input,
-                    onValueChange = { value ->
-                        input = value.filter(Char::isDigit).take(3)
-                    },
-                    label = stringResource(R.string.config_network_range_cache_size_supporting),
-                    useLabelAsPlaceholder = true,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    singleLine = true
-                )
-                androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(R.string.cancel),
-                        onClick = { showEditor = false }
-                    )
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(R.string.confirm),
-                        enabled = valid,
-                        colors = ButtonDefaults.textButtonColorsPrimary(),
-                        onClick = ::confirmInput
-                    )
-                }
-            }
         }
     )
 }

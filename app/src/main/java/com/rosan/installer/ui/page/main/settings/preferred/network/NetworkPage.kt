@@ -17,29 +17,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,20 +40,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.domain.settings.model.config.MAX_NETWORK_RANGE_CACHE_SIZE_MIB
-import com.rosan.installer.domain.settings.model.config.MIN_NETWORK_RANGE_CACHE_SIZE_MIB
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
@@ -70,15 +56,12 @@ import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelecti
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
-import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import kotlinx.coroutines.delay
 
 private val AospMainSwitchBarMargin = 16.dp
 private val AospMainSwitchBarMinHeight = 72.dp
@@ -208,16 +191,6 @@ fun NetworkPage(
                                 }
                             )
                         }
-                        item(animatedVisibility = uiState.networkSourceMode != NetworkSourceMode.Cache) {
-                            NetworkRangeCacheSizeWidget(
-                                configuredSize = uiState.networkRangeCacheSizeMiB,
-                                onSizeChange = { size ->
-                                    viewModel.dispatch(
-                                        NetworkSettingsAction.ChangeNetworkRangeCacheSizeMiB(size)
-                                    )
-                                }
-                            )
-                        }
                         item {
                             NetworkHttpProfileWidget(
                                 currentProfile = uiState.httpProfile,
@@ -282,90 +255,6 @@ private fun NetworkSourceModeWidget(
             modes.keys.elementAtOrNull(index)?.let(onModeChange)
         }
     )
-}
-
-@Composable
-private fun NetworkRangeCacheSizeWidget(
-    configuredSize: Int,
-    onSizeChange: (Int) -> Unit
-) {
-    var showEditor by remember { mutableStateOf(false) }
-    var input by remember(configuredSize, showEditor) {
-        mutableStateOf(configuredSize.toString())
-    }
-    val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val parsed = input.toIntOrNull()
-    val valid = parsed in MIN_NETWORK_RANGE_CACHE_SIZE_MIB..MAX_NETWORK_RANGE_CACHE_SIZE_MIB
-
-    fun confirmInput() {
-        parsed?.takeIf { valid }?.let(onSizeChange)
-        if (valid) showEditor = false
-    }
-
-    LaunchedEffect(showEditor) {
-        if (showEditor) {
-            delay(200)
-            focusRequester.requestFocus()
-            keyboardController?.show()
-        }
-    }
-
-    BaseItemContainer {
-        IntNumberPickerWidget(
-            icon = Icons.TwoTone.Memory,
-            title = stringResource(R.string.config_network_range_cache_size),
-            description = stringResource(R.string.config_network_range_cache_size_desc),
-            value = configuredSize,
-            startInt = MIN_NETWORK_RANGE_CACHE_SIZE_MIB,
-            endInt = MAX_NETWORK_RANGE_CACHE_SIZE_MIB,
-            stepSize = 1,
-            valueSuffix = " MiB",
-            subduedValue = true,
-            onValueClick = { showEditor = true },
-            onValueChange = onSizeChange
-        )
-    }
-
-    if (showEditor) {
-        AlertDialog(
-            onDismissRequest = { showEditor = false },
-            title = { Text(stringResource(R.string.config_network_range_cache_size)) },
-            text = {
-                OutlinedTextField(
-                    modifier = Modifier.focusRequester(focusRequester),
-                    value = input,
-                    onValueChange = { value ->
-                        input = value.filter(Char::isDigit).take(3)
-                    },
-                    suffix = { Text("MiB") },
-                    supportingText = {
-                        Text(stringResource(R.string.config_network_range_cache_size_supporting))
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { confirmInput() }),
-                    isError = !valid,
-                    singleLine = true
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    enabled = valid,
-                    onClick = ::confirmInput
-                ) {
-                    Text(stringResource(R.string.confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEditor = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
 }
 
 @Composable

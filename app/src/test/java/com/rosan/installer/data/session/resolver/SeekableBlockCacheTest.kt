@@ -59,7 +59,7 @@ class SeekableBlockCacheTest {
         assertEquals(
             24 * 1024 * 1024,
             calculateRuntimeRangeCacheBudget(
-                requestedMaxBytes = 128 * 1024 * 1024,
+                maximumBytes = 128 * 1024 * 1024,
                 maxHeapBytes = 256 * 1024 * 1024L,
                 allocatedHeapBytes = 64 * 1024 * 1024L,
                 blockSize = 1024 * 1024
@@ -68,11 +68,11 @@ class SeekableBlockCacheTest {
     }
 
     @Test
-    fun `runtime cache budget respects requested and minimum block bounds`() {
+    fun `runtime cache budget respects maximum and minimum block bounds`() {
         assertEquals(
             1024 * 1024,
             calculateRuntimeRangeCacheBudget(
-                requestedMaxBytes = 1024 * 1024,
+                maximumBytes = 1024 * 1024,
                 maxHeapBytes = 256 * 1024 * 1024L,
                 allocatedHeapBytes = 64 * 1024 * 1024L,
                 blockSize = 1024 * 1024
@@ -81,7 +81,7 @@ class SeekableBlockCacheTest {
         assertEquals(
             1024 * 1024,
             calculateRuntimeRangeCacheBudget(
-                requestedMaxBytes = 128 * 1024 * 1024,
+                maximumBytes = 128 * 1024 * 1024,
                 maxHeapBytes = 256 * 1024 * 1024L,
                 allocatedHeapBytes = 255 * 1024 * 1024L,
                 blockSize = 1024 * 1024

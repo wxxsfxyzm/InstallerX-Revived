@@ -4,7 +4,6 @@ package com.rosan.installer.ui.page.main.settings.preferred.network
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rosan.installer.domain.settings.model.config.normalizedNetworkRangeCacheSizeMiB
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
@@ -25,7 +24,6 @@ class NetworkSettingsViewModel(
         NetworkSettingsState(
             allowInternetAccess = prefs.allowInternetAccess,
             networkSourceMode = prefs.networkSourceMode,
-            networkRangeCacheSizeMiB = prefs.networkRangeCacheSizeMiB,
             httpProfile = prefs.labHttpProfile,
             githubUpdateChannel = prefs.githubUpdateChannel,
             customGithubProxyUrl = prefs.customGithubProxyUrl
@@ -46,13 +44,6 @@ class NetworkSettingsViewModel(
                 updateSetting(
                     StringSetting.NetworkSourceMode,
                     action.mode.value
-                )
-            }
-
-            is NetworkSettingsAction.ChangeNetworkRangeCacheSizeMiB -> viewModelScope.launch {
-                updateSetting(
-                    IntSetting.NetworkRangeCacheSizeMiB,
-                    action.sizeMiB.normalizedNetworkRangeCacheSizeMiB()
                 )
             }
 

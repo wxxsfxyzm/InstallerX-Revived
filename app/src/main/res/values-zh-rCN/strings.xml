@@ -356,9 +356,6 @@
     <string name="config_network_source_smart_desc">条件满足时流式处理单 APK，其余来源完整下载</string>
     <string name="config_network_source_low_storage">低存储占用</string>
     <string name="config_network_source_low_storage_desc">单 APK 需要流式支持，应用包归档仍会完整下载</string>
-    <string name="config_network_range_cache_size">Range 缓存内存上限</string>
-    <string name="config_network_range_cache_size_desc">每次分析请求使用的 HTTP Range 缓存上限，可设置 1–512 MiB；实际上限会根据应用可用堆内存自动收紧。</string>
-    <string name="config_network_range_cache_size_supporting">请输入 1 到 512 MiB</string>
     <string name="config_display_sdk_version">显示 SDK 信息</string>
     <string name="config_display_sdk_version_desc">在安装界面显示 target 与 min 信息</string>
     <string name="config_display_module_extra_info_desc">如果是模块则显示额外信息</string>

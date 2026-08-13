@@ -77,9 +77,9 @@ flowchart TD
     SINGLE -- "No: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
     SINGLE -- "Sí" --> BUDGET["Calcular el límite efectivo de caché Range"]
 
-    USER["Límite configurado<br/>1–512 MiB"] --> BUDGET
+    LIMIT["Máximo interno<br/>8 MiB"] --> BUDGET
     HEAP["Heap Java actual<br/>Capacidad disponible"] --> BUDGET
-    BUDGET --> FORMULA["Límite efectivo = min(límite configurado,<br/>max(1 MiB, heap disponible ÷ 8))"]
+    BUDGET --> FORMULA["Límite efectivo = min(8 MiB,<br/>max(1 MiB, heap disponible ÷ 8))"]
     FORMULA --> RANGE["Bloques fijos de 1 MiB<br/>Caché LRU en memoria<br/>Expulsar el bloque más antiguo antes de reemplazar"]
     RANGE --> META["Lecturas Range dispersas<br/>Directorio ZIP, manifiesto, recursos e icono"]
     META --> INFO["Mostrar nombre, icono, versión, SDK y tamaño"]

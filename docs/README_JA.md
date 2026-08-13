@@ -77,9 +77,9 @@ flowchart TD
     SINGLE -- "いいえ: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
     SINGLE -- "はい" --> BUDGET["有効な Range キャッシュ上限を計算"]
 
-    USER["設定した上限<br/>1–512 MiB"] --> BUDGET
+    LIMIT["内部上限<br/>8 MiB"] --> BUDGET
     HEAP["現在の Java ヒープ<br/>利用可能容量"] --> BUDGET
-    BUDGET --> FORMULA["有効上限 = min(設定した上限,<br/>max(1 MiB, 利用可能ヒープ ÷ 8))"]
+    BUDGET --> FORMULA["有効上限 = min(8 MiB,<br/>max(1 MiB, 利用可能ヒープ ÷ 8))"]
     FORMULA --> RANGE["固定 1 MiB ブロック<br/>メモリ内 LRU キャッシュ<br/>置換前に最も古いブロックを削除"]
     RANGE --> META["必要箇所のみ Range 読み取り<br/>ZIP ディレクトリ、Manifest、リソース、アイコン"]
     META --> INFO["アプリ名、アイコン、バージョン、SDK、サイズを表示"]

@@ -77,9 +77,9 @@ flowchart TD
     SINGLE -- "Nein: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
     SINGLE -- "Ja" --> BUDGET["Effektives Range-Cache-Limit berechnen"]
 
-    USER["Konfiguriertes Limit<br/>1–512 MiB"] --> BUDGET
+    LIMIT["Internes Maximum<br/>8 MiB"] --> BUDGET
     HEAP["Aktueller Java-Heap<br/>Verfügbare Kapazität"] --> BUDGET
-    BUDGET --> FORMULA["Effektives Limit = min(konfiguriertes Limit,<br/>max(1 MiB, verfügbarer Heap ÷ 8))"]
+    BUDGET --> FORMULA["Effektives Limit = min(8 MiB,<br/>max(1 MiB, verfügbarer Heap ÷ 8))"]
     FORMULA --> RANGE["Feste 1-MiB-Blöcke<br/>LRU-Speichercache<br/>Ältesten Block vor dem Ersetzen entfernen"]
     RANGE --> META["Verteilte Range-Lesezugriffe<br/>ZIP-Verzeichnis, Manifest, Ressourcen und Symbol"]
     META --> INFO["App-Name, Symbol, Version, SDK und Größe anzeigen"]

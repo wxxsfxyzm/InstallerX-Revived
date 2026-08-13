@@ -77,9 +77,9 @@ flowchart TD
     SINGLE -- "No: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
     SINGLE -- "Yes" --> BUDGET["Calculate the effective Range cache limit"]
 
-    USER["Configured limit<br/>1–512 MiB"] --> BUDGET
+    LIMIT["Internal maximum<br/>8 MiB"] --> BUDGET
     HEAP["Current Java heap<br/>Available capacity"] --> BUDGET
-    BUDGET --> FORMULA["Effective limit = min(configured limit,<br/>max(1 MiB, available heap ÷ 8))"]
+    BUDGET --> FORMULA["Effective limit = min(8 MiB,<br/>max(1 MiB, available heap ÷ 8))"]
     FORMULA --> RANGE["Fixed 1 MiB blocks<br/>In-memory LRU cache<br/>Evict the oldest block before replacement"]
     RANGE --> META["Sparse Range reads<br/>ZIP directory, manifest, resources, and icon"]
     META --> INFO["Show app name, icon, version, SDK, and size"]

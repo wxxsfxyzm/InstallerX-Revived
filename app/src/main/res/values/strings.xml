@@ -368,9 +368,6 @@
     <string name="config_network_source_smart_desc">Stream a single APK when supported; download other sources</string>
     <string name="config_network_source_low_storage">Low storage</string>
     <string name="config_network_source_low_storage_desc">Require streaming support for a single APK; download package archives</string>
-    <string name="config_network_range_cache_size">Range cache memory limit</string>
-    <string name="config_network_range_cache_size_desc">Requested HTTP range cache limit for each analysis, adjustable from 1–512 MiB. The runtime keeps the effective limit within the available app heap.</string>
-    <string name="config_network_range_cache_size_supporting">Enter a value from 1 to 512 MiB</string>
     <string name="config_display_sdk_version">Display SDK information</string>
     <string name="config_display_sdk_version_desc">Show target and min information on the installation interface</string>
     <string name="config_display_module_extra_info_desc">Show extra infos if is module</string>

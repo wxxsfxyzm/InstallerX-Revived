@@ -186,8 +186,6 @@ class AppDataStore(
         // Network
         val ALLOW_INTERNET_ACCESS = register(booleanPreferencesKey("allow_internet_access"), PreferenceValueType.BOOLEAN)
         val NETWORK_SOURCE_MODE = register(stringPreferencesKey("network_source_mode"), PreferenceValueType.STRING)
-        val NETWORK_RANGE_CACHE_SIZE_MIB =
-            register(intPreferencesKey("network_range_cache_size_mib"), PreferenceValueType.INT)
 
         // Debug
         val ENABLE_FILE_LOGGING = register(booleanPreferencesKey("enable_file_logging"), PreferenceValueType.BOOLEAN)

@@ -69,8 +69,7 @@ class SourceResolver(
             data.addAll(
                 resolveSingleUri(
                     uri,
-                    networkSettings.networkSourceMode,
-                    networkSettings.networkRangeCacheSizeMiB
+                    networkSettings.networkSourceMode
                 )
             )
         }
@@ -168,8 +167,7 @@ class SourceResolver(
 
     private suspend fun resolveSingleUri(
         uri: Uri,
-        networkSourceMode: NetworkSourceMode,
-        networkRangeCacheSizeMiB: Int
+        networkSourceMode: NetworkSourceMode
     ): List<DataEntity> {
         Timber.d("Source URI: $uri")
 
@@ -198,7 +196,6 @@ class SourceResolver(
                     uri,
                     cacheDirectory,
                     networkSourceMode,
-                    networkRangeCacheSizeMiB,
                     progressFlow
                 )
             }

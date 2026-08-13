@@ -19,7 +19,6 @@ import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
-import com.rosan.installer.domain.settings.model.config.normalizedNetworkRangeCacheSizeMiB
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.util.isZipMagicNumber
@@ -69,6 +68,7 @@ class OkHttpNetworkResolver(
         const val MIN_CHUNK_SIZE = 2 * 1024 * 1024L              // 2MB
         const val DOWNLOAD_BUFFER_SIZE = 1024 * 1024             // 1MB
         const val RANGE_CACHE_BLOCK_SIZE = 1024 * 1024           // 1MB
+        const val RANGE_CACHE_MAX_BYTES = 8 * 1024 * 1024
     }
 
     private enum class NetworkType { WIFI, MOBILE, ETHERNET, UNKNOWN }
@@ -87,7 +87,6 @@ class OkHttpNetworkResolver(
         uri: Uri,
         cacheDirectory: String,
         mode: NetworkSourceMode,
-        rangeCacheSizeMiB: Int,
         progressFlow: MutableSharedFlow<ProgressEntity>
     ): List<DataEntity> = withContext(Dispatchers.IO) {
         val preferences = appSettingsRepo.preferencesFlow.first()
@@ -140,7 +139,7 @@ class OkHttpNetworkResolver(
                         uri.toString(),
                         preFlight.remoteIdentity,
                         calculateRuntimeRangeCacheBudget(
-                            requestedMaxBytes = rangeCacheSizeMiB.toRangeCacheBytes(),
+                            maximumBytes = RANGE_CACHE_MAX_BYTES,
                             maxHeapBytes = Runtime.getRuntime().maxMemory(),
                             allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
                             blockSize = RANGE_CACHE_BLOCK_SIZE
@@ -236,9 +235,6 @@ class OkHttpNetworkResolver(
             source = DataEntity.FileEntity(originalUrl)
         }
     }
-
-    private fun Int.toRangeCacheBytes(): Int =
-        normalizedNetworkRangeCacheSizeMiB() * 1024 * 1024
 
     private fun probeRemotePackage(entity: DataEntity.FileDescriptorEntity): RemotePackageProbeResult =
         try {

@@ -4,13 +4,11 @@ package com.rosan.installer.ui.page.main.settings.preferred.network
 
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
-import com.rosan.installer.domain.settings.model.config.DEFAULT_NETWORK_RANGE_CACHE_SIZE_MIB
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 
 data class NetworkSettingsState(
     val allowInternetAccess: Boolean = true,
     val networkSourceMode: NetworkSourceMode = NetworkSourceMode.Cache,
-    val networkRangeCacheSizeMiB: Int = DEFAULT_NETWORK_RANGE_CACHE_SIZE_MIB,
     val httpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
     val githubUpdateChannel: GithubUpdateChannel = GithubUpdateChannel.OFFICIAL,
     val customGithubProxyUrl: String = ""

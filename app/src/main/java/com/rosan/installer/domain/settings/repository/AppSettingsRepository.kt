@@ -30,8 +30,7 @@ enum class IntSetting {
     ShowMiIslandBlockingInterval,
     NotificationSuccessAutoClearSeconds,
     CloseSessionCountdown,
-    UninstallFlags,
-    NetworkRangeCacheSizeMiB
+    UninstallFlags
 }
 
 enum class BooleanSetting {

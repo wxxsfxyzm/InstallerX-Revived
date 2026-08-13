@@ -78,13 +78,6 @@ enum class NetworkSourceMode(val value: String) {
     }
 }
 
-const val DEFAULT_NETWORK_RANGE_CACHE_SIZE_MIB = 8
-const val MIN_NETWORK_RANGE_CACHE_SIZE_MIB = 1
-const val MAX_NETWORK_RANGE_CACHE_SIZE_MIB = 512
-
-fun Int.normalizedNetworkRangeCacheSizeMiB(): Int =
-    coerceIn(MIN_NETWORK_RANGE_CACHE_SIZE_MIB, MAX_NETWORK_RANGE_CACHE_SIZE_MIB)
-
 /**
  * Define Install Reasons,
  * Sync with Android's Install Reason

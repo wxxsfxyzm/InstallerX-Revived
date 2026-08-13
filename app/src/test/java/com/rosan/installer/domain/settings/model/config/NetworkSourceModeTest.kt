@@ -50,12 +50,4 @@ class NetworkSourceModeTest {
         assertEquals(NetworkSourceMode.Smart, NetworkSourceMode.fromValue("smart"))
         assertEquals(NetworkSourceMode.LowStorage, NetworkSourceMode.fromValue("low_storage"))
     }
-
-    @Test
-    fun `range cache size is constrained to the supported profile range`() {
-        assertEquals(1, 0.normalizedNetworkRangeCacheSizeMiB())
-        assertEquals(8, 8.normalizedNetworkRangeCacheSizeMiB())
-        assertEquals(512, 512.normalizedNetworkRangeCacheSizeMiB())
-        assertEquals(512, 1024.normalizedNetworkRangeCacheSizeMiB())
-    }
 }
