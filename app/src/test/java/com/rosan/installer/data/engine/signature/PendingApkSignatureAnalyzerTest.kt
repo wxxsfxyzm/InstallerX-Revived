@@ -18,7 +18,11 @@ import kotlin.test.assertTrue
 
 class PendingApkSignatureAnalyzerTest {
     private lateinit var tempDirectory: File
-    private val analyzer = PendingApkSignatureAnalyzer(CertificateFormatter())
+    private val certificateFormatter = CertificateFormatter()
+    private val analyzer = PendingApkSignatureAnalyzer(
+        certificateFormatter,
+        LightweightApkSignatureReader(certificateFormatter)
+    )
 
     @BeforeTest
     fun setUp() {

@@ -49,60 +49,7 @@ Limited support means InstallerX may work, but some features can be unavailable 
 
 When reporting bugs, please reproduce them on the latest Alpha or CI build whenever possible, because issues in Stable may already be fixed.
 
-InstallerX is published as one APK with network access controlled by an in-app setting. When enabled, it supports direct APK download links and online update features. Streamed network installs require a strong HTTP ETag, use bounded HTTP range reads for app information, skip pre-install full-file signature and byte-identity scans, stream the APK into a system installation session, and verify the final response length before installation. Android also performs final integrity, signature, and update-compatibility verification when that session is committed. When network access is disabled, network requests are blocked while local installation flows continue to work. The APK keeps `online` in its release filename for compatibility with older in-app update clients; this is not a separate build variant.
-
-## Network source processing flow
-
-`Check app signatures` controls InstallerX's pre-install `apksig` analysis. Android always performs final integrity, signature, and update-compatibility verification when the installation session is committed.
-
-```mermaid
-flowchart TD
-    A["Share a network link with InstallerX"] --> B["HTTP preflight<br/>File type, Content-Length, and Range support"]
-    B --> C{"Valid APK / ZIP?"}
-    C -- "No" --> ERR0["Invalid link<br/>Stop"]
-    C -- "Yes" --> MODE{"Network source mode"}
-
-    MODE -- "Full download" --> DOWNLOAD["Download the complete source to InstallerX cache"]
-
-    MODE -- "Smart" --> SMART{"Streaming conditions met?<br/>Server supports Range<br/>Content-Length > 0<br/>Strong ETag<br/>Android 9+"}
-    SMART -- "No" --> DOWNLOAD
-    SMART -- "Yes" --> PROBE["Inspect the ZIP central directory through HTTP Range"]
-
-    MODE -- "Low storage" --> LOW{"Streaming conditions met?<br/>Server supports Range<br/>Content-Length > 0<br/>Strong ETag<br/>Android 9+"}
-    LOW -- "Server conditions missing" --> ERR1["Report that Range support is required"]
-    LOW -- "Android version unsupported" --> ERR2["Report unsupported platform version"]
-    LOW -- "Yes" --> PROBE
-
-    PROBE --> SINGLE{"Single APK?"}
-    SINGLE -- "No: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
-    SINGLE -- "Yes" --> BUDGET["Calculate the effective Range cache limit"]
-
-    LIMIT["Internal maximum<br/>8 MiB"] --> BUDGET
-    HEAP["Current Java heap<br/>Available capacity"] --> BUDGET
-    BUDGET --> FORMULA["Effective limit = min(8 MiB,<br/>max(1 MiB, available heap ÷ 8))"]
-    FORMULA --> RANGE["Fixed 1 MiB blocks<br/>In-memory LRU cache<br/>Evict the oldest block before replacement"]
-    RANGE --> META["Sparse Range reads<br/>ZIP directory, manifest, resources, and icon"]
-    META --> INFO["Show app name, icon, version, SDK, and size"]
-
-    INFO --> STREAMSIG{"Check app signatures"}
-    STREAMSIG -- "Enabled" --> SKIPSIG["Streamed sources skip pre-install apksig<br/>and full-file identity SHA-256"]
-    STREAMSIG -- "Disabled" --> SKIPSIG
-    SKIPSIG --> STREAMINSTALL["Clear the analysis cache<br/>Open a sequential HTTP response stream"]
-    STREAMINSTALL --> LENGTH["Validate the response stream against the preflight length"]
-    LENGTH --> SESSION["Write directly into a PackageInstaller session"]
-
-    DOWNLOAD --> LOCALSIG{"Check app signatures"}
-    LOCALSIG -- "Enabled" --> APKSIG["Run apksig on the complete local file<br/>Read certificates and signature schemes"]
-    LOCALSIG -- "Disabled" --> LOCALSKIP["Skip InstallerX signature analysis"]
-    APKSIG --> IDENTITY["Run full SHA-256 identity comparison when applicable"]
-    LOCALSKIP --> IDENTITY
-    IDENTITY --> SESSION
-
-    SESSION --> COMMIT["Commit the installation session"]
-    COMMIT --> SYSTEM{"Android final system verification"}
-    SYSTEM -- "Pass" --> OK["Installation succeeds<br/>Clean InstallerX download cache"]
-    SYSTEM -- "Fail" --> FAIL["Installation fails<br/>Return the system error"]
-```
+InstallerX is now published as a single APK. Network access is controlled by an in-app setting. The release filename continues to include `online` only for compatibility with older in-app update clients; it no longer identifies a separate build variant.
 
 ## Building
 

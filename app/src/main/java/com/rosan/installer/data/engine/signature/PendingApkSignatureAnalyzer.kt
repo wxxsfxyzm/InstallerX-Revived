@@ -23,7 +23,8 @@ import kotlin.math.min
  * APK signature analyzer.
  */
 class PendingApkSignatureAnalyzer(
-    private val certificateFormatter: CertificateFormatter
+    private val certificateFormatter: CertificateFormatter,
+    private val lightweightApkSignatureReader: LightweightApkSignatureReader
 ) {
     /**
      * apksig is the source of truth for pending APK signer certificates.
@@ -46,6 +47,8 @@ class PendingApkSignatureAnalyzer(
             is DataEntity.FileDescriptorEntity -> {
                 if (data.preInstallSignatureAnalysis) {
                     analyze(data)
+                } else if (data.preInstallSigningBlockAnalysis) {
+                    lightweightApkSignatureReader.read(data)
                 } else {
                     Timber.d("Skipping pre-install signature analysis; PackageInstaller will verify: ${data.path}")
                     null

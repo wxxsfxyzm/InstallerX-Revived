@@ -15,6 +15,7 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
@@ -196,7 +197,9 @@ class AnalyserRepositoryImpl(
 }
 
 private fun AppEntity.hasSignatureAnalysisResult(): Boolean = when (this) {
-    is AppEntity.BaseEntity -> signatureInfo != null
-    is AppEntity.SplitEntity -> signatureInfo != null
+    is AppEntity.BaseEntity -> signatureInfo != null &&
+            signatureInfo.verificationStatus != SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+    is AppEntity.SplitEntity -> signatureInfo != null &&
+            signatureInfo.verificationStatus != SignatureVerificationStatus.SIGNING_BLOCK_ONLY
     else -> false
 }

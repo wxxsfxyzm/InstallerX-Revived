@@ -143,7 +143,8 @@ class OkHttpNetworkResolver(
                             maxHeapBytes = Runtime.getRuntime().maxMemory(),
                             allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
                             blockSize = RANGE_CACHE_BLOCK_SIZE
-                        )
+                        ),
+                        inspectSigningBlock = mode == NetworkSourceMode.LowStorage
                     )
                     probeRemotePackage(requireNotNull(remoteEntity))
                 }
@@ -204,7 +205,8 @@ class OkHttpNetworkResolver(
         client: OkHttpClient,
         originalUrl: String,
         identity: RemoteSourceIdentity,
-        rangeCacheMaxBytes: Int
+        rangeCacheMaxBytes: Int,
+        inspectSigningBlock: Boolean
     ): DataEntity.FileDescriptorEntity {
         val contentLength = identity.contentLength
         val analysisRangeCache = SeekableBlockCache(
@@ -230,6 +232,7 @@ class OkHttpNetworkResolver(
                 openSequentialStream(client, identity)
             },
             preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = inspectSigningBlock,
             preInstallIdentityAnalysis = false
         ).apply {
             source = DataEntity.FileEntity(originalUrl)

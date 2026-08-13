@@ -49,60 +49,7 @@ Eingeschränkte Unterstützung bedeutet, dass InstallerX funktionieren kann, ein
 
 Wenn du Fehler meldest, reproduziere sie bitte nach Möglichkeit mit dem neuesten Alpha- oder CI-Build, da Probleme aus Stable möglicherweise bereits behoben wurden.
 
-InstallerX wird als eine einzige APK veröffentlicht, deren Netzwerkzugriff über eine Einstellung in der App gesteuert wird. Wenn er aktiviert ist, werden direkte APK-Downloadlinks und Online-Update-Funktionen unterstützt. Gestreamte Netzwerkinstallationen erfordern einen starken HTTP-ETag, verwenden begrenzte HTTP-Range-Lesezugriffe für App-Informationen, überspringen die vollständige Signatur- und Byte-Identitätsprüfung vor der Installation, streamen die APK in eine Systeminstallationssitzung und prüfen vor der Installation die Länge der endgültigen Antwort. Android führt beim Commit der Sitzung zusätzlich die abschließende Integritäts-, Signatur- und Update-Kompatibilitätsprüfung durch. Wenn der Netzwerkzugriff deaktiviert ist, werden Netzwerkanfragen blockiert, während lokale Installationsabläufe weiter funktionieren. Der Dateiname der veröffentlichten APK enthält zur Kompatibilität mit älteren In-App-Update-Clients weiterhin `online`; dies kennzeichnet keine separate Build-Variante mehr.
-
-## Verarbeitung von Netzwerkquellen
-
-`App-Signaturen prüfen` steuert die `apksig`-Analyse von InstallerX vor der Installation. Android führt beim Commit der Installationssitzung immer die abschließende Integritäts-, Signatur- und Update-Kompatibilitätsprüfung durch.
-
-```mermaid
-flowchart TD
-    A["Einen Netzwerklink mit InstallerX teilen"] --> B["HTTP-Vorabprüfung<br/>Dateityp, Content-Length und Range-Unterstützung"]
-    B --> C{"Gültige APK / ZIP?"}
-    C -- "Nein" --> ERR0["Ungültiger Link<br/>Abbruch"]
-    C -- "Ja" --> MODE{"Modus der Netzwerkquelle"}
-
-    MODE -- "Vollständiger Download" --> DOWNLOAD["Gesamte Quelle in den InstallerX-Cache laden"]
-
-    MODE -- "Intelligent" --> SMART{"Streaming-Bedingungen erfüllt?<br/>Server unterstützt Range<br/>Content-Length > 0<br/>Starker ETag<br/>Android 9+"}
-    SMART -- "Nein" --> DOWNLOAD
-    SMART -- "Ja" --> PROBE["ZIP-Zentralverzeichnis über HTTP Range prüfen"]
-
-    MODE -- "Wenig Speicher" --> LOW{"Streaming-Bedingungen erfüllt?<br/>Server unterstützt Range<br/>Content-Length > 0<br/>Starker ETag<br/>Android 9+"}
-    LOW -- "Serverbedingungen fehlen" --> ERR1["Melden, dass Range-Unterstützung erforderlich ist"]
-    LOW -- "Android-Version nicht unterstützt" --> ERR2["Nicht unterstützte Plattformversion melden"]
-    LOW -- "Ja" --> PROBE
-
-    PROBE --> SINGLE{"Einzelne APK?"}
-    SINGLE -- "Nein: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
-    SINGLE -- "Ja" --> BUDGET["Effektives Range-Cache-Limit berechnen"]
-
-    LIMIT["Internes Maximum<br/>8 MiB"] --> BUDGET
-    HEAP["Aktueller Java-Heap<br/>Verfügbare Kapazität"] --> BUDGET
-    BUDGET --> FORMULA["Effektives Limit = min(8 MiB,<br/>max(1 MiB, verfügbarer Heap ÷ 8))"]
-    FORMULA --> RANGE["Feste 1-MiB-Blöcke<br/>LRU-Speichercache<br/>Ältesten Block vor dem Ersetzen entfernen"]
-    RANGE --> META["Verteilte Range-Lesezugriffe<br/>ZIP-Verzeichnis, Manifest, Ressourcen und Symbol"]
-    META --> INFO["App-Name, Symbol, Version, SDK und Größe anzeigen"]
-
-    INFO --> STREAMSIG{"App-Signaturen prüfen"}
-    STREAMSIG -- "Aktiviert" --> SKIPSIG["Gestreamte Quellen überspringen apksig vor der Installation<br/>und die vollständige SHA-256-Identitätsprüfung"]
-    STREAMSIG -- "Deaktiviert" --> SKIPSIG
-    SKIPSIG --> STREAMINSTALL["Analyse-Cache leeren<br/>Sequenziellen HTTP-Antwortstream öffnen"]
-    STREAMINSTALL --> LENGTH["Antwortstream auf die vorab ermittelte Länge prüfen"]
-    LENGTH --> SESSION["Direkt in eine PackageInstaller-Sitzung schreiben"]
-
-    DOWNLOAD --> LOCALSIG{"App-Signaturen prüfen"}
-    LOCALSIG -- "Aktiviert" --> APKSIG["apksig auf der vollständigen lokalen Datei ausführen<br/>Zertifikate und Signaturschemata lesen"]
-    LOCALSIG -- "Deaktiviert" --> LOCALSKIP["InstallerX-Signaturanalyse überspringen"]
-    APKSIG --> IDENTITY["Falls zutreffend vollständigen SHA-256-Identitätsvergleich ausführen"]
-    LOCALSKIP --> IDENTITY
-    IDENTITY --> SESSION
-
-    SESSION --> COMMIT["Installationssitzung committen"]
-    COMMIT --> SYSTEM{"Abschließende Android-Systemprüfung"}
-    SYSTEM -- "Bestanden" --> OK["Installation erfolgreich<br/>InstallerX-Downloadcache bereinigen"]
-    SYSTEM -- "Fehlgeschlagen" --> FAIL["Installation fehlgeschlagen<br/>Systemfehler zurückgeben"]
-```
+InstallerX wird jetzt als eine einzige APK veröffentlicht. Der Netzwerkzugriff wird über eine Einstellung in der App gesteuert. Der Dateiname der Veröffentlichung enthält nur zur Kompatibilität mit älteren In-App-Update-Clients weiterhin `online`; er kennzeichnet keine separate Build-Variante mehr.
 
 ## Build
 

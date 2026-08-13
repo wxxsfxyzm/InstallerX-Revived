@@ -13,12 +13,11 @@ import java.util.Locale
 import java.util.TimeZone
 
 class CertificateFormatter {
-    fun format(signature: Signature): SignatureCertificateInfo {
-        val encoded = signature.toByteArray()
-        val certificate = encoded.toX509CertificateOrNull()
+    fun format(encodedCertificate: ByteArray): SignatureCertificateInfo {
+        val certificate = encodedCertificate.toX509CertificateOrNull()
         return SignatureCertificateInfo(
-            sha256 = encoded.digestHex(SHA_256),
-            sha1 = encoded.digestHex(SHA_1),
+            sha256 = encodedCertificate.digestHex(SHA_256),
+            sha1 = encodedCertificate.digestHex(SHA_1),
             subject = certificate?.subjectX500Principal?.name ?: UNKNOWN,
             issuer = certificate?.issuerX500Principal?.name ?: UNKNOWN,
             serialNumber = certificate?.serialNumber?.toString(16) ?: UNKNOWN,
@@ -27,6 +26,11 @@ class CertificateFormatter {
             publicKeyAlgorithm = certificate?.publicKey?.algorithm,
             signatureAlgorithm = certificate?.sigAlgName
         )
+    }
+
+    fun format(signature: Signature): SignatureCertificateInfo {
+        val encoded = signature.toByteArray()
+        return format(encoded)
     }
 
     fun format(certificate: X509Certificate): SignatureCertificateInfo {

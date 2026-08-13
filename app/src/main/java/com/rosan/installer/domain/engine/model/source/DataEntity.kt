@@ -65,6 +65,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         private val descriptorFactory: () -> OwnedFileDescriptor,
         private val inputStreamFactory: (() -> InputStream)? = null,
         val preInstallSignatureAnalysis: Boolean = true,
+        val preInstallSigningBlockAnalysis: Boolean = false,
         val preInstallIdentityAnalysis: Boolean = true,
         override val zipEntryMetadata: ZipEntryMetadata? = null,
         val archiveEntryName: String? = null
@@ -120,6 +121,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 },
                 descriptorFactory = descriptorFactory,
                 preInstallSignatureAnalysis = parent.preInstallSignatureAnalysis,
+                preInstallSigningBlockAnalysis = parent.preInstallSigningBlockAnalysis,
                 preInstallIdentityAnalysis = parent.preInstallIdentityAnalysis,
                 zipEntryMetadata = zipEntryMetadata,
                 archiveEntryName = archiveEntryName

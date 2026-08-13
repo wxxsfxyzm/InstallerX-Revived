@@ -395,7 +395,7 @@ class ApkParser(
         val signatureInfo = if (extra.checkAppSignature) {
             pendingApkSignatureAnalyzer.analyze(data, extra.cacheDirectory)
         } else null
-        val signatureHash = signatureInfo?.primarySha256
+        val signatureHash = signatureInfo?.takeIf { it.verified }?.primarySha256
 
         // Variables for Xposed extraction
         val metaDataMap = mutableMapOf<String, String>()

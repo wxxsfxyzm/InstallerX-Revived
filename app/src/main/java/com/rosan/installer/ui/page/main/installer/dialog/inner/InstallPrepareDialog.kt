@@ -182,6 +182,10 @@ fun installPrepareDialog(
     val sigMismatchWarning = stringResource(R.string.installer_prepare_signature_mismatch)
     val sigUnknownWarning = stringResource(R.string.installer_prepare_signature_unknown)
     val sigAnalysisIssue = stringResource(R.string.installer_prepare_signature_analysis_issue)
+    val sigSigningBlockNotInstalled =
+        stringResource(R.string.installer_prepare_signature_signing_block_not_installed)
+    val sigSigningBlockMatch = stringResource(R.string.installer_prepare_signature_signing_block_match)
+    val sigSigningBlockUnknown = stringResource(R.string.installer_prepare_signature_signing_block_unknown)
     val labelPendingSignature = stringResource(R.string.installer_signature_pending_package)
     val labelInstalledSignature = stringResource(R.string.installer_signature_installed_package)
     val labelSignatureAnalysisIssues = stringResource(R.string.installer_signature_analysis_issues)
@@ -189,6 +193,7 @@ fun installPrepareDialog(
     val labelSignatureSplitMismatchFiles = stringResource(R.string.installer_signature_split_mismatch_files)
     val labelSignatureDuplicateSplitNames = stringResource(R.string.installer_signature_duplicate_split_names)
     val labelSignatureSchemes = stringResource(R.string.installer_signature_schemes)
+    val labelSignatureDeclaredSchemes = stringResource(R.string.installer_signature_declared_schemes)
     val labelSignatureCertificate = stringResource(R.string.installer_signature_certificate)
     val labelSignatureCurrentCertificate = stringResource(R.string.installer_signature_current_certificate)
     val labelSignatureCertificateLineage = stringResource(R.string.installer_signature_certificate_lineage)
@@ -232,6 +237,9 @@ fun installPrepareDialog(
             textSigMismatch = sigMismatchWarning,
             textSigUnknown = sigUnknownWarning,
             textSigAnalysisIssue = sigAnalysisIssue,
+            textSigSigningBlockNotInstalled = sigSigningBlockNotInstalled,
+            textSigSigningBlockMatch = sigSigningBlockMatch,
+            textSigSigningBlockUnknown = sigSigningBlockUnknown,
             labelPendingSignature = labelPendingSignature,
             labelInstalledSignature = labelInstalledSignature,
             labelSignatureAnalysisIssues = labelSignatureAnalysisIssues,
@@ -239,6 +247,7 @@ fun installPrepareDialog(
             labelSignatureSplitMismatchFiles = labelSignatureSplitMismatchFiles,
             labelSignatureDuplicateSplitNames = labelSignatureDuplicateSplitNames,
             labelSignatureSchemes = labelSignatureSchemes,
+            labelSignatureDeclaredSchemes = labelSignatureDeclaredSchemes,
             labelSignatureCertificate = labelSignatureCertificate,
             labelSignatureCurrentCertificate = labelSignatureCurrentCertificate,
             labelSignatureCertificateLineage = labelSignatureCertificateLineage,
@@ -281,7 +290,7 @@ fun installPrepareDialog(
     }
 
     // Execute domain logic and map to UI state within the remember block
-    val checkAppSignature = settings.checkAppSignature && currentPackage.signatureCheckPerformed
+    val checkAppSignature = settings.checkAppSignature
     val installStateResult = remember(
         currentPackage,
         entityToInstall,
