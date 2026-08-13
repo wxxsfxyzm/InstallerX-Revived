@@ -286,9 +286,9 @@ fun MiuixPreferredPage(
                         title = stringResource(R.string.network_settings),
                         summary = stringResource(
                             if (uiState.allowInternetAccess) {
-                                R.string.internet_access_enabled
+                                R.string.network_settings_internet_access_enabled_desc
                             } else {
-                                R.string.internet_access_disabled
+                                R.string.network_settings_internet_access_disabled_desc
                             }
                         ),
                         onClick = { navigator.push(Route.Network) }

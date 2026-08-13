@@ -212,6 +212,8 @@
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Clear install success notification after %d seconds</string>
     <string name="basic">Basic</string>
     <string name="network_settings">Network settings</string>
+    <string name="network_settings_internet_access_enabled_desc">The app can access the internet</string>
+    <string name="network_settings_internet_access_disabled_desc">The app cannot access the internet</string>
     <string name="backup_settings">Backup &amp; Restore</string>
     <string name="backup_settings_export">Export Settings</string>
     <string name="backup_settings_export_desc">Save profiles and app settings to a backup file</string>
