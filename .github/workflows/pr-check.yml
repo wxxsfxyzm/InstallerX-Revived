@@ -12,7 +12,8 @@ permissions:
   packages: read # Required if you pull dependencies from GitHub Packages
 
 jobs:
-  build_for_pr:
+  unit_tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -40,12 +41,49 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Preview Debug APK
+      - name: Run Unstable Debug Unit Tests
+        # Use the same application ID override as the APK build.
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew testUnstableDebugUnitTest --no-configuration-cache -PAPP_ID="com.rosan.installer.x.revived.test"
+
+  build_for_pr:
+    name: Build APK
+    needs: unit_tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
+          build-scan-publish: false
+          # Keep read-only to prevent cache poisoning from PRs
+          cache-read-only: true
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Unstable Debug APK
         # Use GITHUB_TOKEN only if strictly necessary for fetching packages
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assemblePreviewDebug -PAPP_ID="com.rosan.installer.x.revived.test"
+        run: ./gradlew assembleUnstableDebug --no-configuration-cache -PAPP_ID="com.rosan.installer.x.revived.test"
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v7
