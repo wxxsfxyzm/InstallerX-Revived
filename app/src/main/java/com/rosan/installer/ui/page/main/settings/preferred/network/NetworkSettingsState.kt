@@ -9,6 +9,7 @@ import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 data class NetworkSettingsState(
     val allowInternetAccess: Boolean = true,
     val networkSourceMode: NetworkSourceMode = NetworkSourceMode.Cache,
+    val networkSourceModeWarningAcknowledged: Boolean = false,
     val httpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
     val githubUpdateChannel: GithubUpdateChannel = GithubUpdateChannel.OFFICIAL,
     val customGithubProxyUrl: String = ""

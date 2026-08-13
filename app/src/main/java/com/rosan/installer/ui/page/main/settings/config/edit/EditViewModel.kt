@@ -71,6 +71,7 @@ class EditViewModel(
             globalCustomizeAuthorizer = prefs.customizeAuthorizer,
             globalInstallerBiometricAuthMode = prefs.installerRequireBiometricAuth,
             checkAppSignature = prefs.checkAppSignature,
+            allowInternetAccess = prefs.allowInternetAccess,
             labRespectPlatformInstallPolicy = prefs.labRespectPlatformInstallPolicy
         )
     }.stateIn(

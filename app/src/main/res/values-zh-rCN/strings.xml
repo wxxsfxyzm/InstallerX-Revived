@@ -352,12 +352,14 @@
     <string name="config_auto_delete_zip">删除压缩包</string>
     <string name="config_auto_delete_zip_desc">不仅删除安装包，还删除包含安装包的压缩文件。</string>
     <string name="config_network_source_mode">网络源处理</string>
+    <string name="network_source_mode_warning_title">签名验证限制</string>
+    <string name="network_source_mode_warning_desc">“智能”和“低存储占用”模式可能流式处理单个 APK。流式处理时，InstallerX 无法执行完整 APK 验签，因此配置中的“禁止安装签名不匹配的应用”无法生效。InstallerX 仍会读取并比较签名证书：证书一致时放行；证书不同或无法确认兼容性时，按“禁止安装签名未知的应用”设置处理。Android 系统仍会在安装时执行最终签名验证。</string>
     <string name="config_network_source_cache">完整下载</string>
-    <string name="config_network_source_cache_desc">分析前完整下载，提供最高兼容性</string>
+    <string name="config_network_source_cache_desc">分析前完整下载，兼容性最好</string>
     <string name="config_network_source_smart">智能</string>
     <string name="config_network_source_smart_desc">条件满足时流式处理单 APK，其余来源完整下载</string>
     <string name="config_network_source_low_storage">低存储占用</string>
-    <string name="config_network_source_low_storage_desc">单 APK 需要流式支持，系统安装前只读取未验证的签名者元数据；应用包归档仍会完整下载</string>
+    <string name="config_network_source_low_storage_desc">为单 APK 提供流式支持，应用包归档仍会完整下载</string>
     <string name="config_display_sdk_version">显示 SDK 信息</string>
     <string name="config_display_sdk_version_desc">在安装界面显示 target 与 min 信息</string>
     <string name="config_display_module_extra_info_desc">如果是模块则显示额外信息</string>
@@ -477,9 +479,9 @@
     <string name="installer_prepare_signature_mismatch">签名不一致！继续安装可能导致数据丢失或带来安全风险。</string>
     <string name="installer_prepare_signature_unknown">无法验证应用签名，请谨慎操作。</string>
     <string name="installer_prepare_signature_analysis_issue">安装包签名分析发现异常，安装可能失败，最终结果以系统校验为准。</string>
-    <string name="installer_prepare_signature_signing_block_not_installed">低存储占用模式读取到了未经验证的签名证书声明；当前是新安装，无已安装应用可供比较。APK 内容尚未验证，最终签名验证由 PackageInstaller 完成。</string>
-    <string name="installer_prepare_signature_signing_block_match">签名一致，但低存储占用模式无法验证比较结果。APK 内容尚未验证，最终签名验证由 PackageInstaller 完成。</string>
-    <string name="installer_prepare_signature_signing_block_unknown">低存储占用模式无法比较未经验证的签名证书声明与已安装应用的证书。APK 内容尚未验证，最终签名验证由 PackageInstaller 完成。</string>
+    <string name="installer_prepare_signature_signing_block_not_installed">HTTP 轻量解析读取到了未经验证的签名证书声明；当前是新安装，无已安装应用可供比较。APK 内容尚未验证，最终签名验证由 PackageInstaller 完成。</string>
+    <string name="installer_prepare_signature_signing_block_match">签名一致，但 HTTP 轻量解析无法验证比较结果。APK 内容尚未验证，最终签名验证由 PackageInstaller 完成。</string>
+    <string name="installer_prepare_signature_signing_block_unknown">HTTP 轻量解析无法比较未经验证的签名证书声明与已安装应用的证书。APK 内容尚未验证，最终签名验证由 PackageInstaller 完成。</string>
     <string name="installer_signature_pending_package">当前安装包签名</string>
     <string name="installer_signature_installed_package">已安装应用签名</string>
     <string name="installer_signature_analysis_issues">APK 集合签名异常</string>
@@ -646,7 +648,7 @@
     <string name="exception_resolve_failed_low_storage_unsupported">网络源低存储占用模式需要 Android 9 或更高版本</string>
     <string name="exception_resolve_failed_streaming_probe">低存储占用模式无法通过 HTTP Range 请求检查此安装包</string>
     <string name="exception_initiator_not_visible">InstallerX 对发起安装的应用不可见。如果使用了“隐藏应用列表”等模块，请对 InstallerX 放行</string>
-    <string name="exception_resolve_failed_no_internet_access">应用内网络访问已关闭。请在实验室设置中开启后再使用此功能。</string>
+    <string name="exception_resolve_failed_no_internet_access">应用内网络访问已关闭。请在网络设置中开启后再使用此功能。</string>
     <string name="exception_analyse_failed_all_files_unsupported">不支持的文件格式</string>
     <string name="installer_analyse_failed_corrupted_archive">损坏的压缩包</string>
     <string name="exception_authentication_failed">用户认证失败</string>
@@ -811,6 +813,7 @@
     <string name="config_allow_sig_mismatch_desc">禁止安装与已安装版本签名不同的应用</string>
     <string name="config_allow_sig_unknown">禁止安装签名未知的应用</string>
     <string name="config_allow_sig_unknown_desc">禁止安装无法验证签名的应用</string>
+    <string name="config_allow_sig_unknown_http_lightweight_desc">HTTP 轻量解析时，任何签名异常都会根据此设置进行判断。</string>
     <string name="dry_run">试运行</string>
     <string name="dry_run_desc">验证包，但不要安装</string>
     <string name="config_request_update_ownership">请求更新所有权</string>

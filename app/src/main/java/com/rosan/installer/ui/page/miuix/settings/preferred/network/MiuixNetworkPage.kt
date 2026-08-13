@@ -3,6 +3,9 @@
 package com.rosan.installer.ui.page.miuix.settings.preferred.network
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -22,6 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -43,17 +48,21 @@ import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun MiuixNetworkPage(
@@ -70,6 +79,16 @@ fun MiuixNetworkPage(
     val topBarBackdrop = rememberMiuixBlurBackdrop(useBlur)
     val showChannelDialog = remember { mutableStateOf(false) }
     val showCustomProxyDialog = remember { mutableStateOf(false) }
+    var pendingNetworkSourceMode by rememberSaveable { mutableStateOf<NetworkSourceMode?>(null) }
+
+    NetworkSourceModeWarningDialog(
+        mode = pendingNetworkSourceMode,
+        onDismiss = { pendingNetworkSourceMode = null },
+        onConfirm = { mode ->
+            pendingNetworkSourceMode = null
+            viewModel.dispatch(NetworkSettingsAction.ConfirmNetworkSourceMode(mode))
+        }
+    )
 
     if (showChannelDialog.value) {
         MiuixGithubUpdateChannelSelectionDialog(
@@ -174,9 +193,15 @@ fun MiuixNetworkPage(
                         MiuixNetworkSourceModePreference(
                             currentMode = uiState.networkSourceMode,
                             onModeChange = { mode ->
-                                viewModel.dispatch(
-                                    NetworkSettingsAction.ChangeNetworkSourceMode(mode)
-                                )
+                                if (mode != NetworkSourceMode.Cache &&
+                                    !uiState.networkSourceModeWarningAcknowledged
+                                ) {
+                                    pendingNetworkSourceMode = mode
+                                } else {
+                                    viewModel.dispatch(
+                                        NetworkSettingsAction.ChangeNetworkSourceMode(mode)
+                                    )
+                                }
                             }
                         )
                         val allowSecureString = stringResource(R.string.lab_http_profile_secure)
@@ -235,6 +260,42 @@ fun MiuixNetworkPage(
             item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
+}
+
+@Composable
+private fun NetworkSourceModeWarningDialog(
+    mode: NetworkSourceMode?,
+    onDismiss: () -> Unit,
+    onConfirm: (NetworkSourceMode) -> Unit
+) {
+    WindowDialog(
+        show = mode != null,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.network_source_mode_warning_title),
+        content = {
+            Column {
+                Text(text = stringResource(R.string.network_source_mode_warning_desc))
+                Spacer(modifier = Modifier.size(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        text = stringResource(R.string.cancel)
+                    )
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { mode?.let(onConfirm) },
+                        text = stringResource(R.string.confirm),
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable

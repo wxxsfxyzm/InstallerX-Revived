@@ -203,15 +203,11 @@ class ProcessInstallationUseCase(
         for (result in selectedResults) {
             if (!shouldApplySignaturePolicy(result)) continue
 
-            when (
-                result.selectedSigningBlockCertificateStatus()?.profilePolicyViolation(
-                    allowSigMismatch = config.allowSigMismatch,
+            if (result.selectedSigningBlockCertificateStatus()?.isBlockedByUnknownPolicy(
                     allowSigUnknown = config.allowSigUnknown
-                )
+                ) == true
             ) {
-                ProfileSignaturePolicyViolation.MISMATCH -> throwSignatureMismatchBlocked()
-                ProfileSignaturePolicyViolation.UNKNOWN -> throwSignatureUnknownBlocked()
-                null -> Unit
+                throwSignatureUnknownBlocked()
             }
 
             if (!result.signatureCheckPerformed) continue
@@ -517,27 +513,11 @@ class ProcessInstallationUseCase(
     }
 }
 
-internal enum class ProfileSignaturePolicyViolation {
-    MISMATCH,
-    UNKNOWN
-}
-
-internal fun SigningBlockCertificateStatus.profilePolicyViolation(
-    allowSigMismatch: Boolean,
+internal fun SigningBlockCertificateStatus.isBlockedByUnknownPolicy(
     allowSigUnknown: Boolean
-): ProfileSignaturePolicyViolation? = when (this) {
-    SigningBlockCertificateStatus.MISMATCH -> if (allowSigMismatch) {
-        null
-    } else {
-        ProfileSignaturePolicyViolation.MISMATCH
-    }
-
-    SigningBlockCertificateStatus.UNKNOWN -> if (allowSigUnknown) {
-        null
-    } else {
-        ProfileSignaturePolicyViolation.UNKNOWN
-    }
+): Boolean = when (this) {
+    SigningBlockCertificateStatus.UNKNOWN -> !allowSigUnknown
 
     SigningBlockCertificateStatus.MATCH,
-    SigningBlockCertificateStatus.NOT_INSTALLED -> null
+    SigningBlockCertificateStatus.NOT_INSTALLED -> false
 }

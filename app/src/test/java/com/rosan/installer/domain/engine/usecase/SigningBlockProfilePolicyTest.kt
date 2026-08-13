@@ -4,32 +4,14 @@ package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.domain.engine.model.packageinfo.SigningBlockCertificateStatus
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class SigningBlockProfilePolicyTest {
     @Test
     fun `matching lightweight certificates bypass unknown policy`() {
-        assertNull(
-            SigningBlockCertificateStatus.MATCH.profilePolicyViolation(
-                allowSigMismatch = false,
-                allowSigUnknown = false
-            )
-        )
-    }
-
-    @Test
-    fun `mismatching lightweight certificates follow mismatch policy`() {
-        assertEquals(
-            ProfileSignaturePolicyViolation.MISMATCH,
-            SigningBlockCertificateStatus.MISMATCH.profilePolicyViolation(
-                allowSigMismatch = false,
-                allowSigUnknown = true
-            )
-        )
-        assertNull(
-            SigningBlockCertificateStatus.MISMATCH.profilePolicyViolation(
-                allowSigMismatch = true,
+        assertFalse(
+            SigningBlockCertificateStatus.MATCH.isBlockedByUnknownPolicy(
                 allowSigUnknown = false
             )
         )
@@ -37,16 +19,13 @@ class SigningBlockProfilePolicyTest {
 
     @Test
     fun `uncomparable lightweight certificates follow unknown policy`() {
-        assertEquals(
-            ProfileSignaturePolicyViolation.UNKNOWN,
-            SigningBlockCertificateStatus.UNKNOWN.profilePolicyViolation(
-                allowSigMismatch = true,
+        assertTrue(
+            SigningBlockCertificateStatus.UNKNOWN.isBlockedByUnknownPolicy(
                 allowSigUnknown = false
             )
         )
-        assertNull(
-            SigningBlockCertificateStatus.UNKNOWN.profilePolicyViolation(
-                allowSigMismatch = false,
+        assertFalse(
+            SigningBlockCertificateStatus.UNKNOWN.isBlockedByUnknownPolicy(
                 allowSigUnknown = true
             )
         )

@@ -24,6 +24,7 @@ class NetworkSettingsViewModel(
         NetworkSettingsState(
             allowInternetAccess = prefs.allowInternetAccess,
             networkSourceMode = prefs.networkSourceMode,
+            networkSourceModeWarningAcknowledged = prefs.networkSourceModeWarningAcknowledged,
             httpProfile = prefs.labHttpProfile,
             githubUpdateChannel = prefs.githubUpdateChannel,
             customGithubProxyUrl = prefs.customGithubProxyUrl
@@ -45,6 +46,11 @@ class NetworkSettingsViewModel(
                     StringSetting.NetworkSourceMode,
                     action.mode.value
                 )
+            }
+
+            is NetworkSettingsAction.ConfirmNetworkSourceMode -> viewModelScope.launch {
+                updateSetting(StringSetting.NetworkSourceMode, action.mode.value)
+                updateSetting(BooleanSetting.NetworkSourceModeWarningAcknowledged, true)
             }
 
             is NetworkSettingsAction.ChangeHttpProfile -> viewModelScope.launch {

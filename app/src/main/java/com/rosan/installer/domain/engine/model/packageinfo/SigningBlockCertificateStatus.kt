@@ -9,7 +9,6 @@ package com.rosan.installer.domain.engine.model.packageinfo
 enum class SigningBlockCertificateStatus {
     NOT_INSTALLED,
     MATCH,
-    MISMATCH,
     UNKNOWN
 }
 
@@ -39,6 +38,6 @@ fun PackageAnalysisResult.selectedSigningBlockCertificateStatus(): SigningBlockC
     return if (pendingSignerSets.all { it == installedSignerSet }) {
         SigningBlockCertificateStatus.MATCH
     } else {
-        SigningBlockCertificateStatus.MISMATCH
+        SigningBlockCertificateStatus.UNKNOWN
     }
 }

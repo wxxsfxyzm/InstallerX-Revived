@@ -125,6 +125,8 @@ class AppSettingsRepositoryImpl(
             networkSourceMode = NetworkSourceMode.fromValue(
                 prefs[AppDataStore.NETWORK_SOURCE_MODE] ?: NetworkSourceMode.Cache.value
             ),
+            networkSourceModeWarningAcknowledged =
+                prefs[AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED] ?: false,
             // Updater
             allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
@@ -250,6 +252,8 @@ class AppSettingsRepositoryImpl(
     private fun booleanKey(setting: BooleanSetting): Preferences.Key<Boolean> =
         when (setting) {
             BooleanSetting.AllowInternetAccess -> AppDataStore.ALLOW_INTERNET_ACCESS
+            BooleanSetting.NetworkSourceModeWarningAcknowledged ->
+                AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED
             BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
             BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
             BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX

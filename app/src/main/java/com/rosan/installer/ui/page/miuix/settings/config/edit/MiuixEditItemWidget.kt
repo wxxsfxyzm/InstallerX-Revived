@@ -839,10 +839,17 @@ fun MiuixDataAllowSigMismatchWidget(state: EditViewState, dispatch: (EditViewAct
 
 @Composable
 fun MiuixDataAllowSigUnknownWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit) {
+    val description = buildString {
+        append(stringResource(id = R.string.config_allow_sig_unknown_desc))
+        if (state.allowInternetAccess) {
+            append('\n')
+            append(stringResource(id = R.string.config_allow_sig_unknown_http_lightweight_desc))
+        }
+    }
     MiuixSwitchWidget(
         icon = AppIcons.InstallAllowRestrictedPermissions,
         title = stringResource(id = R.string.config_allow_sig_unknown),
-        description = stringResource(id = R.string.config_allow_sig_unknown_desc),
+        description = description,
         checked = !state.data.allowSigUnknown,
         onCheckedChange = { dispatch(EditViewAction.ChangeDataAllowSigUnknown(!it)) }
     )

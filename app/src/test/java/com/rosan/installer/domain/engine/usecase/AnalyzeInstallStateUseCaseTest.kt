@@ -124,7 +124,7 @@ class AnalyzeInstallStateUseCaseTest {
     fun `signing block summary compares certificates without exposing details`() {
         val cases = listOf(
             setOf("declared-signer") to SigningBlockCertificateStatus.MATCH,
-            setOf("installed-signer") to SigningBlockCertificateStatus.MISMATCH,
+            setOf("installed-signer") to SigningBlockCertificateStatus.UNKNOWN,
             emptySet<String>() to SigningBlockCertificateStatus.UNKNOWN
         )
 

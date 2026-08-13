@@ -19,6 +19,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material.icons.Icons
@@ -37,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +53,7 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelectionDialog
@@ -82,6 +86,30 @@ fun NetworkPage(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     var showChannelDialog by remember { mutableStateOf(false) }
     var showCustomProxyDialog by remember { mutableStateOf(false) }
+    var pendingNetworkSourceMode by rememberSaveable { mutableStateOf<NetworkSourceMode?>(null) }
+
+    pendingNetworkSourceMode?.let { mode ->
+        AlertDialog(
+            onDismissRequest = { pendingNetworkSourceMode = null },
+            title = { Text(stringResource(R.string.network_source_mode_warning_title)) },
+            text = { Text(stringResource(R.string.network_source_mode_warning_desc)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pendingNetworkSourceMode = null
+                        viewModel.dispatch(NetworkSettingsAction.ConfirmNetworkSourceMode(mode))
+                    }
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingNetworkSourceMode = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     if (showChannelDialog) {
         GithubUpdateChannelSelectionDialog(
@@ -185,9 +213,15 @@ fun NetworkPage(
                             NetworkSourceModeWidget(
                                 currentMode = uiState.networkSourceMode,
                                 onModeChange = { mode ->
-                                    viewModel.dispatch(
-                                        NetworkSettingsAction.ChangeNetworkSourceMode(mode)
-                                    )
+                                    if (mode != NetworkSourceMode.Cache &&
+                                        !uiState.networkSourceModeWarningAcknowledged
+                                    ) {
+                                        pendingNetworkSourceMode = mode
+                                    } else {
+                                        viewModel.dispatch(
+                                            NetworkSettingsAction.ChangeNetworkSourceMode(mode)
+                                        )
+                                    }
                                 }
                             )
                         }
@@ -218,6 +252,7 @@ fun NetworkPage(
                                 }
                             }
                             BaseWidget(
+                                icon = AppIcons.UpdateChannel,
                                 title = stringResource(R.string.lab_update_github_proxy),
                                 description = channelSummary,
                                 onClick = { showChannelDialog = true }
@@ -247,6 +282,7 @@ private fun NetworkSourceModeWidget(
     )
 
     DropDownMenuWidget(
+        icon = AppIcons.NetworkSource,
         title = stringResource(R.string.config_network_source_mode),
         description = descriptions.getValue(currentMode),
         choice = modes.keys.indexOf(currentMode).coerceAtLeast(0),

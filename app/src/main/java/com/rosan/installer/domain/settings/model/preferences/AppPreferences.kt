@@ -57,6 +57,7 @@ data class AppPreferences(
     val uninstallFlags: Int,
     // Network Settings
     val networkSourceMode: NetworkSourceMode,
+    val networkSourceModeWarningAcknowledged: Boolean,
     val allowInternetAccess: Boolean,
     val githubUpdateChannel: GithubUpdateChannel,
     val customGithubProxyUrl: String,

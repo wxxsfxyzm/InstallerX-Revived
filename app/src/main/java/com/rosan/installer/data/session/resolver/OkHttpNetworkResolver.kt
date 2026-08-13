@@ -144,7 +144,7 @@ class OkHttpNetworkResolver(
                             allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
                             blockSize = RANGE_CACHE_BLOCK_SIZE
                         ),
-                        inspectSigningBlock = mode == NetworkSourceMode.LowStorage
+                        inspectSigningBlock = true
                     )
                     probeRemotePackage(requireNotNull(remoteEntity))
                 }

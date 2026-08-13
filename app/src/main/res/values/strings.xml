@@ -364,12 +364,14 @@
     <string name="config_auto_delete_zip">Auto delete zip files</string>
     <string name="config_auto_delete_zip_desc">In addition to deleting the installation package, also delete the compressed file containing the installation package.</string>
     <string name="config_network_source_mode">Network source handling</string>
+    <string name="network_source_mode_warning_title">Signature verification limitations</string>
+    <string name="network_source_mode_warning_desc">Smart and Low storage modes may stream single APKs. While streaming, InstallerX cannot perform full APK signature verification, so the profile setting that blocks apps with mismatched signatures cannot take effect. InstallerX still reads and compares signing certificates: matching certificates are allowed, while different certificates or compatibility that cannot be confirmed follow the profile setting for blocking unknown signatures. Android still performs final signature verification during installation.</string>
     <string name="config_network_source_cache">Full download</string>
-    <string name="config_network_source_cache_desc">Download the complete source before analysis for maximum compatibility</string>
+    <string name="config_network_source_cache_desc">Download the complete source before analysis, Maximum Compatibility</string>
     <string name="config_network_source_smart">Smart</string>
     <string name="config_network_source_smart_desc">Stream a single APK when supported; download other sources</string>
     <string name="config_network_source_low_storage">Low storage</string>
-    <string name="config_network_source_low_storage_desc">Require streaming support for a single APK; only inspect unverified signer metadata before system installation; download package archives</string>
+    <string name="config_network_source_low_storage_desc">Provide streaming support for a single APK; download package archives in full</string>
     <string name="config_display_sdk_version">Display SDK information</string>
     <string name="config_display_sdk_version_desc">Show target and min information on the installation interface</string>
     <string name="config_display_module_extra_info_desc">Show extra infos if is module</string>
@@ -491,9 +493,9 @@
     <string name="installer_prepare_signature_mismatch">Signature mismatch! Continuing installation may cause data loss or security risks.</string>
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
     <string name="installer_prepare_signature_analysis_issue">APK signature analysis found issues. Installation may fail; final result depends on system verification.</string>
-    <string name="installer_prepare_signature_signing_block_not_installed">Low-storage mode read an unverified signer certificate declaration. No installed app exists for comparison. APK content was not verified; PackageInstaller performs final signature verification.</string>
-    <string name="installer_prepare_signature_signing_block_match">Signatures match, but low-storage mode cannot verify the comparison result. APK content remains unverified; PackageInstaller performs final signature verification.</string>
-    <string name="installer_prepare_signature_signing_block_unknown">Low-storage mode could not compare the unverified signer certificate declaration with the installed app. APK content was not verified; PackageInstaller performs final signature verification.</string>
+    <string name="installer_prepare_signature_signing_block_not_installed">Lightweight HTTP analysis read an unverified signer certificate declaration. No installed app exists for comparison. APK content was not verified; PackageInstaller performs final signature verification.</string>
+    <string name="installer_prepare_signature_signing_block_match">Signatures match, but lightweight HTTP analysis cannot verify the comparison result. APK content remains unverified; PackageInstaller performs final signature verification.</string>
+    <string name="installer_prepare_signature_signing_block_unknown">Lightweight HTTP analysis could not compare the unverified signer certificate declaration with the installed app. APK content was not verified; PackageInstaller performs final signature verification.</string>
     <string name="installer_signature_pending_package">Current package signature</string>
     <string name="installer_signature_installed_package">Installed app signature</string>
     <string name="installer_signature_analysis_issues">APK set signature issues</string>
@@ -668,7 +670,7 @@
     <string name="exception_resolve_failed_low_storage_unsupported">Low storage network sources require Android 9 or newer</string>
     <string name="exception_resolve_failed_streaming_probe">Low storage mode could not inspect this package through HTTP range requests</string>
     <string name="exception_initiator_not_visible">Permission denied due to package visibility restrictions. The app requesting the installation is hidden from InstallerX. If you are using modules like \'Hide My Applist\', please allowlist InstallerX</string>
-    <string name="exception_resolve_failed_no_internet_access">Internet access is disabled in app settings. Enable it in Lab settings to use this feature.</string>
+    <string name="exception_resolve_failed_no_internet_access">Internet access is disabled in app settings. Enable it in Network settings to use this feature.</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
     <string name="exception_authentication_failed">User authentication failed</string>
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
@@ -832,6 +834,7 @@
     <string name="config_allow_sig_mismatch_desc">Block installing apps that have a different signature than the installed version</string>
     <string name="config_allow_sig_unknown">Block Unknown Signature</string>
     <string name="config_allow_sig_unknown_desc">Block installing apps whose signature cannot be verified</string>
+    <string name="config_allow_sig_unknown_http_lightweight_desc">During lightweight HTTP analysis, any signature anomaly is evaluated according to this setting.</string>
     <string name="dry_run">Dry Run</string>
     <string name="dry_run_desc">Verify the package, but don\'t install it</string>
     <string name="config_request_update_ownership">Request Update Ownership</string>

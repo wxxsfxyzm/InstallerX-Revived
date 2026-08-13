@@ -95,7 +95,6 @@ class InstallStateUiMapper(
                     SigningBlockCertificateStatus.MATCH,
                     SigningBlockCertificateStatus.NOT_INSTALLED -> resources.primaryColor
 
-                    SigningBlockCertificateStatus.MISMATCH -> resources.errorColor
                     SigningBlockCertificateStatus.UNKNOWN -> resources.tertiaryColor
                 }
             )
@@ -171,7 +170,6 @@ class InstallStateUiMapper(
     private fun SigningBlockCertificateStatus.toSigningBlockSummaryText() = when (this) {
         SigningBlockCertificateStatus.NOT_INSTALLED -> resources.textSigSigningBlockNotInstalled
         SigningBlockCertificateStatus.MATCH -> resources.textSigSigningBlockMatch
-        SigningBlockCertificateStatus.MISMATCH -> resources.textSigMismatch
         SigningBlockCertificateStatus.UNKNOWN -> resources.textSigSigningBlockUnknown
     }
 
