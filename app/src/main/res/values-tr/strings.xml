@@ -251,7 +251,7 @@
     <string name="installer_package_name">Paket: %1$s</string>
     <string name="exception_install_failed_unknown">Bilinmeyen hata</string>
     <string name="exception_resolve_failed">URI\'yi çözme başarısız oldu</string>
-    <string name="exception_resolve_failed_no_internet_access">Bu sürüm İnternet\'e erişemiyor, bu özelliği kullanmak için başka bir sürümü yeniden yükleyin</string>
+    <string name="exception_resolve_failed_no_internet_access">Uygulama ayarlarında internet erişimi devre dışı bırakılmıştır. Bu özelliği kullanmak için Laboratuvar ayarlarından internet erişimini etkinleştirin.</string>
     <string name="exception_analyse_failed_all_files_unsupported">Dosya desteklenmiyor</string>
     <string name="exception_install_failed_already_exists">Bu uygulama sürümü zaten yüklü, lütfen kaldırıp tekrar deneyin</string>
     <string name="exception_install_failed_blacklisted_package">Uygulamanın kurulumuna izin vermiyorsunuz!</string>
@@ -924,4 +924,7 @@
     <string name="installer_writing">Yazılıyor…</string>
     <string name="config_check_split_package_signatures">Bölünmüş paket imzalarını analiz et</string>
     <string name="self_update_install_success">InstallerX başarıyla güncellendi</string>
+    <string name="allow_internet_access">İnternet erişimine izin ver</string>
+    <string name="allow_internet_access_desc">InstallerX\'in ağ bağlantılarından güncellemeleri kontrol etmesine ve APK dosyalarını indirmesine izin verin</string>
+    <string name="network_access">Ağ erişimi</string>
 </resources>

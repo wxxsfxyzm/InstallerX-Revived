@@ -420,7 +420,7 @@
     <string name="installer_package_target_sdk_label">SDK objetivo:</string>
     <string name="installer_module_author_label">Autor:</string>
     <string name="exception_resolve_failed">Error al resolver la URI</string>
-    <string name="exception_resolve_failed_no_internet_access">Esta versión no puede acceder a Internet. Para utilizar esta función, instala la versión online</string>
+    <string name="exception_resolve_failed_no_internet_access">El acceso a Internet está desactivado en los ajustes de la aplicación. Actívalo en los ajustes de Laboratorio para usar esta función.</string>
     <string name="exception_install_failed_missing_install_permission">Por favor, concede permiso para instalar aplicaciones desconocidas e inténtalo de nuevo</string>
     <string name="exception_install_failed_aborted">Instalación cancelada</string>
     <string name="exception_install_failed_missing_split">Faltan los paquetes split necesarios</string>
@@ -934,4 +934,7 @@
     <string name="config_check_split_package_signatures_desc">Analizar las firmas de APK dentro de paquetes APKS, APKM y XAPK. Esto puede aumentar significativamente el tiempo de análisis</string>
     <string name="installer_writing">Escribiendo…</string>
     <string name="config_check_split_package_signatures">Analizar firmas de paquetes divididos</string>
+    <string name="network_access">Acceso a la red</string>
+    <string name="allow_internet_access">Permitir el acceso a Internet</string>
+    <string name="allow_internet_access_desc">Permitir que InstallerX compruebe actualizaciones y descargue APKs desde enlaces de red</string>
 </resources>
