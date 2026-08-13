@@ -1,4 +1,4 @@
-name: Automatic Alpha Pre-Release (Latest Only)
+name: Preview Release
 
 on:
   push:
@@ -25,6 +25,7 @@ on:
 
 jobs:
   build_and_prerelease:
+    name: Build and Publish Preview
     # Skip preview release for version bumps or explicitly skipped commits
     if: |
       !startsWith(github.event.head_commit.message, 'chore: bump version') &&
