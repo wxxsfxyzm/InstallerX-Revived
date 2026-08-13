@@ -10,6 +10,7 @@ on:
 
 jobs:
   pre_job:
+    name: Duplicate Check
     # Do not skip if triggered by schedule, AND skip if the PR source branch is 'weblate-dev'
     if: github.event_name != 'schedule' && github.head_ref != 'weblate-dev'
     runs-on: ubuntu-latest
@@ -26,7 +27,7 @@ jobs:
           concurrent_skipping: 'never'
 
   analyze:
-    name: Analyze
+    name: Analyze Java/Kotlin
     # 依赖检查
     needs: pre_job
     # 如果是定时任务(schedule)直接跑，或者 skip 检查说不跳过才跑

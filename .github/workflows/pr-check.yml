@@ -1,4 +1,4 @@
-name: PR Build and Test Check
+name: PR CI
 
 on:
   pull_request:
@@ -49,7 +49,7 @@ jobs:
         run: ./gradlew testUnstableDebugUnitTest --no-configuration-cache -PAPP_ID="com.rosan.installer.x.revived.test"
 
   build_for_pr:
-    name: Build APK
+    name: Build Unstable Debug APK
     needs: unit_tests
     runs-on: ubuntu-latest
 

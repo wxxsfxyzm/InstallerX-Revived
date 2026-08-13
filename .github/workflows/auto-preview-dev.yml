@@ -1,4 +1,4 @@
-name: Dev Branch Build & Artifact
+name: Branch CI
 
 on:
   push:
@@ -16,6 +16,7 @@ on:
 
 jobs:
   pre_job:
+    name: Duplicate Check
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -78,7 +79,7 @@ jobs:
         run: ./gradlew testUnstableDebugUnitTest --no-configuration-cache
 
   build_and_upload_artifact:
-    name: Build APK
+    name: Build Unstable Release APK
     needs:
       - pre_job
       - unit_tests
