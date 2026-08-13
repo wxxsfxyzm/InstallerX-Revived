@@ -270,8 +270,8 @@ class OkHttpNetworkResolver(
             )
 
             StreamingUnsupportedReason.StableIdentity -> ResolveException(
-                errorType = ResolveErrorType.RANGE_REQUIRED,
-                message = "The server does not expose a stable ETag or Last-Modified validator."
+                errorType = ResolveErrorType.STRONG_ETAG_REQUIRED,
+                message = "The server does not expose a strong ETag validator."
             )
         }
 
@@ -320,7 +320,7 @@ class OkHttpNetworkResolver(
         try {
             identity.validateResponse(response)
             val responseLength = response.body.contentLength()
-            if (responseLength != identity.contentLength) {
+            if (responseLength >= 0L && responseLength != identity.contentLength) {
                 throw IOException(
                     "Remote source length changed after preflight: " +
                             "expected=${identity.contentLength}, actual=$responseLength"
@@ -330,7 +330,9 @@ class OkHttpNetworkResolver(
             response.close()
             throw error
         }
-        return object : FilterInputStream(response.body.byteStream()) {
+        return object : FilterInputStream(
+            ExpectedLengthInputStream(response.body.byteStream(), identity.contentLength)
+        ) {
             override fun close() {
                 try {
                     super.close()

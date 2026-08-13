@@ -661,6 +661,7 @@
     <string name="exception_resolve_failed">Resolve URI failed</string>
     <string name="exception_resolve_failed_link_not_valid">This link does not contain a valid file</string>
     <string name="exception_resolve_failed_range_required">Low storage mode requires a stable, seekable HTTP range source</string>
+    <string name="exception_resolve_failed_strong_etag_required">Low storage mode requires a strong HTTP ETag from the server</string>
     <string name="exception_resolve_failed_low_storage_unsupported">Low storage network sources require Android 9 or newer</string>
     <string name="exception_resolve_failed_streaming_probe">Low storage mode could not inspect this package through HTTP range requests</string>
     <string name="exception_initiator_not_visible">Permission denied due to package visibility restrictions. The app requesting the installation is hidden from InstallerX. If you are using modules like \'Hide My Applist\', please allowlist InstallerX</string>

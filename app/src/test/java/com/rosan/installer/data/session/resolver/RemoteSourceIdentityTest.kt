@@ -6,8 +6,11 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import java.io.ByteArrayInputStream
+import java.io.EOFException
 import java.io.IOException
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
@@ -28,20 +31,14 @@ class RemoteSourceIdentityTest {
     }
 
     @Test
-    fun `last modified is used when a strong etag is unavailable`() {
+    fun `last modified is not sufficient for streaming identity`() {
         val preflight = response(
             headers = mapOf(
                 "ETag" to "W/\"release-1\"",
                 "Last-Modified" to "Fri, 31 Jul 2026 12:00:00 GMT"
             )
         )
-        val identity = requireNotNull(RemoteSourceIdentity.fromResponse(preflight, 100L))
-
-        assertIs<RemoteSourceValidator.LastModified>(identity.validator)
-        assertEquals(
-            "Fri, 31 Jul 2026 12:00:00 GMT",
-            identity.newRequestBuilder().build().header("If-Unmodified-Since")
-        )
+        assertNull(RemoteSourceIdentity.fromResponse(preflight, 100L))
     }
 
     @Test
@@ -69,6 +66,41 @@ class RemoteSourceIdentityTest {
         assertFailsWith<IOException> {
             identity.validateResponse(response(headers = mapOf("ETag" to "\"release-2\"")))
         }
+    }
+
+    @Test
+    fun `expected length stream accepts an exact chunked response`() {
+        val input = ExpectedLengthInputStream(
+            ByteArrayInputStream(byteArrayOf(1, 2, 3)),
+            expectedLength = 3L
+        )
+        val output = ByteArray(3)
+
+        assertEquals(3, input.read(output))
+        assertEquals(-1, input.read())
+        assertContentEquals(byteArrayOf(1, 2, 3), output)
+    }
+
+    @Test
+    fun `expected length stream rejects truncated response`() {
+        val input = ExpectedLengthInputStream(
+            ByteArrayInputStream(byteArrayOf(1, 2)),
+            expectedLength = 3L
+        )
+
+        assertEquals(2, input.read(ByteArray(3)))
+        assertFailsWith<EOFException> { input.read() }
+    }
+
+    @Test
+    fun `expected length stream rejects response with trailing bytes`() {
+        val input = ExpectedLengthInputStream(
+            ByteArrayInputStream(byteArrayOf(1, 2, 3, 4)),
+            expectedLength = 3L
+        )
+
+        assertEquals(3, input.read(ByteArray(4)))
+        assertFailsWith<IOException> { input.read() }
     }
 
     private fun response(

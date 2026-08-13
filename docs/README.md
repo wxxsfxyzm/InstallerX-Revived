@@ -49,7 +49,7 @@ Limited support means InstallerX may work, but some features can be unavailable 
 
 When reporting bugs, please reproduce them on the latest Alpha or CI build whenever possible, because issues in Stable may already be fixed.
 
-InstallerX is published as one APK with network access controlled by an in-app setting. When enabled, it supports direct APK download links and online update features. Streamed network installs use bounded HTTP range reads for app information, skip pre-install full-file signature and byte-identity scans, stream the APK into a system installation session, and rely on Android's final verification when that session is committed. When network access is disabled, network requests are blocked while local installation flows continue to work. The APK keeps `online` in its release filename for compatibility with older in-app update clients; this is not a separate build variant.
+InstallerX is published as one APK with network access controlled by an in-app setting. When enabled, it supports direct APK download links and online update features. Streamed network installs require a strong HTTP ETag, use bounded HTTP range reads for app information, skip pre-install full-file signature and byte-identity scans, stream the APK into a system installation session, and verify the final response length before installation. Android also performs final integrity, signature, and update-compatibility verification when that session is committed. When network access is disabled, network requests are blocked while local installation flows continue to work. The APK keeps `online` in its release filename for compatibility with older in-app update clients; this is not a separate build variant.
 
 ## Network source processing flow
 
@@ -64,11 +64,11 @@ flowchart TD
 
     MODE -- "Full download" --> DOWNLOAD["Download the complete source to InstallerX cache"]
 
-    MODE -- "Smart" --> SMART{"Streaming conditions met?<br/>Server supports Range<br/>Content-Length > 0<br/>Android 9+"}
+    MODE -- "Smart" --> SMART{"Streaming conditions met?<br/>Server supports Range<br/>Content-Length > 0<br/>Strong ETag<br/>Android 9+"}
     SMART -- "No" --> DOWNLOAD
     SMART -- "Yes" --> PROBE["Inspect the ZIP central directory through HTTP Range"]
 
-    MODE -- "Low storage" --> LOW{"Streaming conditions met?<br/>Server supports Range<br/>Content-Length > 0<br/>Android 9+"}
+    MODE -- "Low storage" --> LOW{"Streaming conditions met?<br/>Server supports Range<br/>Content-Length > 0<br/>Strong ETag<br/>Android 9+"}
     LOW -- "Server conditions missing" --> ERR1["Report that Range support is required"]
     LOW -- "Android version unsupported" --> ERR2["Report unsupported platform version"]
     LOW -- "Yes" --> PROBE
@@ -88,7 +88,8 @@ flowchart TD
     STREAMSIG -- "Enabled" --> SKIPSIG["Streamed sources skip pre-install apksig<br/>and full-file identity SHA-256"]
     STREAMSIG -- "Disabled" --> SKIPSIG
     SKIPSIG --> STREAMINSTALL["Clear the analysis cache<br/>Open a sequential HTTP response stream"]
-    STREAMINSTALL --> SESSION["Write directly into a PackageInstaller session"]
+    STREAMINSTALL --> LENGTH["Validate the response stream against the preflight length"]
+    LENGTH --> SESSION["Write directly into a PackageInstaller session"]
 
     DOWNLOAD --> LOCALSIG{"Check app signatures"}
     LOCALSIG -- "Enabled" --> APKSIG["Run apksig on the complete local file<br/>Read certificates and signature schemes"]

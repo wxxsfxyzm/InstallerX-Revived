@@ -49,12 +49,60 @@ InstallerX Revived は、モダンな Android パッケージインストーラ�
 
 不具合を報告する場合は、Stable では既に修正済みの可能性があるため、可能な限り最新の Alpha または CI ビルドで再現してください。
 
-InstallerX は 2 つのバリアントで公開されます:
+InstallerX は 1 つの APK として公開され、ネットワークアクセスはアプリ内設定で制御されます。有効にすると、APK の直接ダウンロードリンクとオンライン更新機能を利用できます。ネットワークストリーミングインストールでは強い HTTP ETag を必須とし、アプリ情報の取得に上限付き HTTP Range 読み取りを使用します。インストール前のファイル全体の署名スキャンとバイト同一性スキャンを省略し、APK をシステムのインストールセッションへストリーミングし、インストール前に最終レスポンスの長さを検証します。Android はセッションのコミット時にも、整合性、署名、更新互換性の最終検証を行います。ネットワークアクセスを無効にするとネットワークリクエストはブロックされますが、ローカルインストールフローは引き続き動作します。古いアプリ内更新クライアントとの互換性のため、公開 APK のファイル名には引き続き `online` が含まれますが、独立したビルドバリアントを意味するものではありません。
 
-- **Online:** APK 直接ダウンロードリンクとオンライン更新機能をサポートします。ネットワーク権限はインストール関連機能にのみ使用されます。
-- **Offline:** ネットワーク権限を要求しません。Online 専用機能を使うと明確なエラーが表示されます。
+## ネットワークソースの処理フロー
 
-両バリアントは同じパッケージ名、バージョンコード、署名を共有するため、同時インストールではなく相互に置き換えられます。
+`アプリの署名を確認` は InstallerX によるインストール前の `apksig` 解析を制御します。Android はインストールセッションのコミット時に、整合性、署名、更新互換性の最終検証を必ず行います。
+
+```mermaid
+flowchart TD
+    A["ネットワークリンクを InstallerX に共有"] --> B["HTTP 事前確認<br/>ファイル形式、Content-Length、Range 対応"]
+    B --> C{"有効な APK / ZIP？"}
+    C -- "いいえ" --> ERR0["無効なリンク<br/>停止"]
+    C -- "はい" --> MODE{"ネットワークソースモード"}
+
+    MODE -- "完全ダウンロード" --> DOWNLOAD["ソース全体を InstallerX のキャッシュへダウンロード"]
+
+    MODE -- "スマート" --> SMART{"ストリーミング条件を満たす？<br/>サーバーが Range に対応<br/>Content-Length > 0<br/>強い ETag<br/>Android 9+"}
+    SMART -- "いいえ" --> DOWNLOAD
+    SMART -- "はい" --> PROBE["HTTP Range で ZIP 中央ディレクトリを検査"]
+
+    MODE -- "低ストレージ" --> LOW{"ストリーミング条件を満たす？<br/>サーバーが Range に対応<br/>Content-Length > 0<br/>強い ETag<br/>Android 9+"}
+    LOW -- "サーバー条件不足" --> ERR1["Range 対応が必要であることを報告"]
+    LOW -- "Android バージョン非対応" --> ERR2["非対応のプラットフォームバージョンを報告"]
+    LOW -- "はい" --> PROBE
+
+    PROBE --> SINGLE{"単一 APK？"}
+    SINGLE -- "いいえ: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
+    SINGLE -- "はい" --> BUDGET["有効な Range キャッシュ上限を計算"]
+
+    USER["設定した上限<br/>1–512 MiB"] --> BUDGET
+    HEAP["現在の Java ヒープ<br/>利用可能容量"] --> BUDGET
+    BUDGET --> FORMULA["有効上限 = min(設定した上限,<br/>max(1 MiB, 利用可能ヒープ ÷ 8))"]
+    FORMULA --> RANGE["固定 1 MiB ブロック<br/>メモリ内 LRU キャッシュ<br/>置換前に最も古いブロックを削除"]
+    RANGE --> META["必要箇所のみ Range 読み取り<br/>ZIP ディレクトリ、Manifest、リソース、アイコン"]
+    META --> INFO["アプリ名、アイコン、バージョン、SDK、サイズを表示"]
+
+    INFO --> STREAMSIG{"アプリの署名を確認"}
+    STREAMSIG -- "有効" --> SKIPSIG["ストリーミングソースではインストール前の apksig と<br/>ファイル全体の SHA-256 同一性検査を省略"]
+    STREAMSIG -- "無効" --> SKIPSIG
+    SKIPSIG --> STREAMINSTALL["解析キャッシュをクリア<br/>連続 HTTP レスポンスストリームを開く"]
+    STREAMINSTALL --> LENGTH["事前取得した長さでレスポンスストリームを検証"]
+    LENGTH --> SESSION["PackageInstaller セッションへ直接書き込み"]
+
+    DOWNLOAD --> LOCALSIG{"アプリの署名を確認"}
+    LOCALSIG -- "有効" --> APKSIG["完全なローカルファイルに apksig を実行<br/>証明書と署名スキームを読み取り"]
+    LOCALSIG -- "無効" --> LOCALSKIP["InstallerX の署名解析を省略"]
+    APKSIG --> IDENTITY["該当する場合はファイル全体の SHA-256 同一性比較を実行"]
+    LOCALSKIP --> IDENTITY
+    IDENTITY --> SESSION
+
+    SESSION --> COMMIT["インストールセッションをコミット"]
+    COMMIT --> SYSTEM{"Android システムの最終検証"}
+    SYSTEM -- "成功" --> OK["インストール成功<br/>InstallerX のダウンロードキャッシュを削除"]
+    SYSTEM -- "失敗" --> FAIL["インストール失敗<br/>システムエラーを返す"]
+```
 
 ## ビルド
 

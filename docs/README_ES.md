@@ -49,12 +49,60 @@ Soporte limitado significa que InstallerX puede funcionar, pero algunas funcione
 
 Al reportar errores, intenta reproducirlos con la versión Alpha o CI más reciente siempre que sea posible, porque el problema puede estar ya corregido respecto a Stable.
 
-InstallerX se publica en dos variantes:
+InstallerX se publica como un único APK cuyo acceso a la red se controla mediante un ajuste dentro de la aplicación. Cuando está activado, admite enlaces directos de descarga de APK y funciones de actualización en línea. Las instalaciones transmitidas desde la red requieren un ETag HTTP fuerte, usan lecturas HTTP Range acotadas para obtener información de la aplicación, omiten los análisis completos de firma e identidad de bytes previos a la instalación, transmiten el APK a una sesión de instalación del sistema y verifican la longitud de la respuesta final antes de instalar. Android también realiza la verificación final de integridad, firma y compatibilidad de actualización al confirmar la sesión. Cuando el acceso a la red está desactivado, se bloquean las solicitudes de red y los flujos de instalación local siguen funcionando. El nombre del APK publicado conserva `online` por compatibilidad con clientes antiguos de actualización dentro de la aplicación; ya no representa una variante de compilación independiente.
 
-- **Online:** admite enlaces directos de descarga de APK y funciones de actualización en línea. El permiso de red solo se usa para funciones relacionadas con la instalación.
-- **Offline:** no solicita permiso de red. Las funciones exclusivas de Online mostrarán un error claro.
+## Flujo de procesamiento de fuentes de red
 
-Ambas variantes comparten el mismo nombre de paquete, código de versión y firma, por lo que se reemplazan entre sí y no se instalan en paralelo.
+`Comprobar firmas de aplicaciones` controla el análisis `apksig` previo a la instalación de InstallerX. Android siempre realiza la verificación final de integridad, firma y compatibilidad de actualización al confirmar la sesión de instalación.
+
+```mermaid
+flowchart TD
+    A["Compartir un enlace de red con InstallerX"] --> B["Comprobación HTTP previa<br/>Tipo de archivo, Content-Length y soporte de Range"]
+    B --> C{"¿APK / ZIP válido?"}
+    C -- "No" --> ERR0["Enlace no válido<br/>Detener"]
+    C -- "Sí" --> MODE{"Modo de fuente de red"}
+
+    MODE -- "Descarga completa" --> DOWNLOAD["Descargar la fuente completa a la caché de InstallerX"]
+
+    MODE -- "Inteligente" --> SMART{"¿Se cumplen las condiciones de streaming?<br/>El servidor admite Range<br/>Content-Length > 0<br/>ETag fuerte<br/>Android 9+"}
+    SMART -- "No" --> DOWNLOAD
+    SMART -- "Sí" --> PROBE["Inspeccionar el directorio central ZIP mediante HTTP Range"]
+
+    MODE -- "Poco almacenamiento" --> LOW{"¿Se cumplen las condiciones de streaming?<br/>El servidor admite Range<br/>Content-Length > 0<br/>ETag fuerte<br/>Android 9+"}
+    LOW -- "Faltan condiciones del servidor" --> ERR1["Informar de que se requiere soporte de Range"]
+    LOW -- "Versión de Android no compatible" --> ERR2["Informar de versión de plataforma no compatible"]
+    LOW -- "Sí" --> PROBE
+
+    PROBE --> SINGLE{"¿Un solo APK?"}
+    SINGLE -- "No: APKS / APKM / XAPK / ZIP" --> DOWNLOAD
+    SINGLE -- "Sí" --> BUDGET["Calcular el límite efectivo de caché Range"]
+
+    USER["Límite configurado<br/>1–512 MiB"] --> BUDGET
+    HEAP["Heap Java actual<br/>Capacidad disponible"] --> BUDGET
+    BUDGET --> FORMULA["Límite efectivo = min(límite configurado,<br/>max(1 MiB, heap disponible ÷ 8))"]
+    FORMULA --> RANGE["Bloques fijos de 1 MiB<br/>Caché LRU en memoria<br/>Expulsar el bloque más antiguo antes de reemplazar"]
+    RANGE --> META["Lecturas Range dispersas<br/>Directorio ZIP, manifiesto, recursos e icono"]
+    META --> INFO["Mostrar nombre, icono, versión, SDK y tamaño"]
+
+    INFO --> STREAMSIG{"Comprobar firmas de aplicaciones"}
+    STREAMSIG -- "Activado" --> SKIPSIG["Las fuentes transmitidas omiten apksig antes de instalar<br/>y la identidad SHA-256 del archivo completo"]
+    STREAMSIG -- "Desactivado" --> SKIPSIG
+    SKIPSIG --> STREAMINSTALL["Vaciar la caché de análisis<br/>Abrir un flujo secuencial de respuesta HTTP"]
+    STREAMINSTALL --> LENGTH["Validar el flujo de respuesta con la longitud obtenida previamente"]
+    LENGTH --> SESSION["Escribir directamente en una sesión de PackageInstaller"]
+
+    DOWNLOAD --> LOCALSIG{"Comprobar firmas de aplicaciones"}
+    LOCALSIG -- "Activado" --> APKSIG["Ejecutar apksig sobre el archivo local completo<br/>Leer certificados y esquemas de firma"]
+    LOCALSIG -- "Desactivado" --> LOCALSKIP["Omitir el análisis de firma de InstallerX"]
+    APKSIG --> IDENTITY["Ejecutar la comparación completa de identidad SHA-256 cuando corresponda"]
+    LOCALSKIP --> IDENTITY
+    IDENTITY --> SESSION
+
+    SESSION --> COMMIT["Confirmar la sesión de instalación"]
+    COMMIT --> SYSTEM{"Verificación final del sistema Android"}
+    SYSTEM -- "Correcta" --> OK["Instalación correcta<br/>Limpiar la caché de descarga de InstallerX"]
+    SYSTEM -- "Fallida" --> FAIL["La instalación falla<br/>Devolver el error del sistema"]
+```
 
 ## Compilación
 

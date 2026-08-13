@@ -5,7 +5,10 @@ package com.rosan.installer.data.session.resolver
 import okhttp3.HttpUrl
 import okhttp3.Request
 import okhttp3.Response
+import java.io.EOFException
+import java.io.FilterInputStream
 import java.io.IOException
+import java.io.InputStream
 
 internal data class RemoteSourceIdentity(
     val url: HttpUrl,
@@ -52,23 +55,66 @@ internal sealed class RemoteSourceValidator(
         value = value
     )
 
-    class LastModified(value: String) : RemoteSourceValidator(
-        requestHeaderName = "If-Unmodified-Since",
-        responseHeaderName = "Last-Modified",
-        value = value
-    )
-
     companion object {
         fun fromResponse(response: Response): RemoteSourceValidator? {
-            response.header("ETag")
+            return response.header("ETag")
                 ?.trim()
                 ?.takeIf { it.isNotEmpty() && !it.startsWith("W/", ignoreCase = true) }
-                ?.let { return StrongEtag(it) }
-
-            return response.header("Last-Modified")
-                ?.trim()
-                ?.takeIf { it.isNotEmpty() }
-                ?.let(::LastModified)
+                ?.let(::StrongEtag)
         }
     }
+}
+
+internal class ExpectedLengthInputStream(
+    input: InputStream,
+    private val expectedLength: Long
+) : FilterInputStream(input) {
+    private var bytesRead = 0L
+    private var endVerified = false
+
+    init {
+        require(expectedLength >= 0L) { "expectedLength must not be negative" }
+    }
+
+    override fun read(): Int {
+        if (bytesRead == expectedLength) {
+            verifyEnd()
+            return -1
+        }
+
+        val value = `in`.read()
+        if (value < 0) throw incompleteSource()
+        bytesRead++
+        return value
+    }
+
+    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+        if (length == 0) return 0
+        if (bytesRead == expectedLength) {
+            verifyEnd()
+            return -1
+        }
+
+        val boundedLength = minOf(length.toLong(), expectedLength - bytesRead).toInt()
+        val count = `in`.read(buffer, offset, boundedLength)
+        if (count < 0) throw incompleteSource()
+        if (count == 0) return 0
+        bytesRead += count
+        return count
+    }
+
+    private fun verifyEnd() {
+        if (endVerified) return
+        if (`in`.read() >= 0) {
+            throw IOException(
+                "Remote source exceeded expected length: expected=$expectedLength"
+            )
+        }
+        endVerified = true
+    }
+
+    private fun incompleteSource() = EOFException(
+        "Remote source ended before expected length: " +
+                "expected=$expectedLength, actual=$bytesRead"
+    )
 }
