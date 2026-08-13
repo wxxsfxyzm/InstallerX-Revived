@@ -74,6 +74,53 @@ class AnalyzeInstallStateUseCaseTest {
     }
 
     @Test
+    fun `fresh install without a signer declaration is unknown`() {
+        val signatureInfo = AppSignatureInfo(
+            verified = false,
+            signerSha256Set = emptySet(),
+            certificates = emptyList(),
+            verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+        )
+        val base = AppEntity.BaseEntity(
+            packageName = "example.app",
+            sharedUserId = null,
+            data = DataEntity.FileEntity("remote.apk"),
+            versionCode = 1,
+            versionName = "1",
+            label = "Example",
+            icon = null,
+            targetSdk = "36",
+            minSdk = "28",
+            sourceType = DataType.APK,
+            signatureInfo = signatureInfo
+        )
+        val currentPackage = PackageAnalysisResult(
+            packageName = base.packageName,
+            sessionMode = SessionMode.Single,
+            appEntities = listOf(SelectInstallEntity(base, selected = true)),
+            installedAppInfo = null,
+            signatureCheckPerformed = false,
+            signatureMatchStatus = SignatureMatchStatus.NOT_INSTALLED,
+            identityStatus = PackageIdentityStatus.NOT_APPLICABLE
+        )
+
+        val result = AnalyzeInstallStateUseCase()(
+            currentPackage = currentPackage,
+            entityToInstall = base,
+            primaryEntity = base,
+            isSplitUpdateMode = false,
+            containerType = DataType.APK,
+            systemArch = Architecture.ARM64,
+            systemSdkInt = 36,
+            checkAppSignature = true,
+            showSignatureDetails = false
+        )
+
+        val notice = assertIs<InstallNotice.SigningBlockOnly>(result.notices.single())
+        assertEquals(SigningBlockCertificateStatus.UNKNOWN, notice.certificateStatus)
+    }
+
+    @Test
     fun `signing block summary compares certificates without exposing details`() {
         val cases = listOf(
             setOf("declared-signer") to SigningBlockCertificateStatus.MATCH,

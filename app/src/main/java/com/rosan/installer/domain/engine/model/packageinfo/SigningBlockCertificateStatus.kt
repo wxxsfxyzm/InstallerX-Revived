@@ -30,9 +30,10 @@ fun PackageAnalysisResult.selectedSigningBlockCertificateStatus(): SigningBlockC
         .toList()
 
     if (pendingSignerSets.isEmpty()) return null
+    if (pendingSignerSets.any { it.isEmpty() }) return SigningBlockCertificateStatus.UNKNOWN
     val installedInfo = installedAppInfo ?: return SigningBlockCertificateStatus.NOT_INSTALLED
     val installedSignerSet = installedInfo.signatureInfo?.signerSha256Set
-    if (installedSignerSet.isNullOrEmpty() || pendingSignerSets.any { it.isEmpty() }) {
+    if (installedSignerSet.isNullOrEmpty()) {
         return SigningBlockCertificateStatus.UNKNOWN
     }
     return if (pendingSignerSets.all { it == installedSignerSet }) {
