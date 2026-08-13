@@ -72,4 +72,8 @@
     <string name="working_status_not_default_installer">Non impostato come installer predefinito</string>
     <string name="running">In esecuzione</string>
     <string name="activate">Attiva</string>
+    <string name="working_status_default_installer_desc">L\'app è attualmente l\'installatore pacchetti predefinito</string>
+    <string name="working_status_system_installer">Funziona come installatore di pacchetti di sistema</string>
+    <string name="working_status_none_authorizer_desc">Non fa uso di alcun privilegio, il permesso origini sconosciute è richiesto per installare le app.</string>
+    <string name="working_status_default_installer_tip">Imposta questa app come programma di installazione di pacchetti predefinito per gestire la maggior parte delle richieste di installazione. Si noti che i seguenti casi non possono essere intercettati:\n- L\'OEM impedisce la modifica del programma di installazione predefinito\n- L\'iniziatore specifica un componente di destinazione\n- L\'iniziatore utilizza un\'installazione di sessione</string>
 </resources>

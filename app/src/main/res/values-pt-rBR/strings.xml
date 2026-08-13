@@ -231,7 +231,7 @@
     <string name="installer_package_name">Pacote: %1$s</string>
     <string name="exception_install_failed_unknown">Erro desconhecido</string>
     <string name="exception_resolve_failed">Falha ao resolver URI</string>
-    <string name="exception_resolve_failed_no_internet_access">Esta versão não pode acessar a Internet, para usar esta funcionalidade, reinstale outra versão</string>
+    <string name="exception_resolve_failed_no_internet_access">O acesso à Internet está desativado nas configurações do app. Ative-o nas configurações Experimentais para usar esse recurso.</string>
     <string name="exception_analyse_failed_all_files_unsupported">Arquivo não suportado</string>
     <string name="exception_install_failed_already_exists">Esta versão do app já está instalada, por gentileza desinstale e tente novamente</string>
     <string name="exception_install_failed_blacklisted_package">Você não permitiu a instalação do app!</string>
@@ -924,4 +924,7 @@
     <string name="config_check_split_package_signatures_desc">Analisar as assinaturas de APK em pacotes APKS, APKM e XAPK. Isso pode aumentar significativamente o tempo de análise</string>
     <string name="installer_writing">Gravando…</string>
     <string name="config_check_split_package_signatures">Analisar assinaturas de pacotes divididos</string>
+    <string name="network_access">Acesso à rede</string>
+    <string name="allow_internet_access">Permitir acesso à internet</string>
+    <string name="allow_internet_access_desc">Permita que o InstallerX verifique se há atualizações e baixe APKs a partir de links na internet</string>
 </resources>

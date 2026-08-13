@@ -427,7 +427,7 @@
     <string name="installer_module_author_label">著者:</string>
     <string name="exception_install_failed_unknown">不明なエラー</string>
     <string name="exception_resolve_failed">URI の解決に失敗しました</string>
-    <string name="exception_resolve_failed_no_internet_access">このバージョンはインターネットにアクセスできません。この機能を使用するには、別のバージョンを再インストールしてください</string>
+    <string name="exception_resolve_failed_no_internet_access">アプリの設定でインターネットへのアクセスが無効になっています。この機能を利用するには、実験的な設定から有効にしてください。</string>
     <string name="exception_analyse_failed_all_files_unsupported">ファイルはサポートされていません</string>
     <string name="exception_authentication_failed">ユーザー認証に失敗しました</string>
     <string name="exception_install_failed_already_exists">このアプリのバージョンは既にインストールされています。アンインストールしてもう一度お試しください</string>
@@ -901,4 +901,11 @@
     <string name="exception_install_failed_blocked_by_profile_signature_mismatch">プロファイルは、署名が異なるアプリのインストールをブロックします</string>
     <string name="exception_install_failed_blocked_by_profile_signature_unknown">プロファイルは、署名を検証できないアプリのインストールをブロックします</string>
     <string name="installer_writing">書き込み中…</string>
+    <string name="tag_signature_match">署名の一致</string>
+    <string name="config_check_split_package_signatures">分割パッケージの署名を分析</string>
+    <string name="config_check_split_package_signatures_desc">APKS、APKM、および XAPK パッケージ内の APK 署名を分析します。これにより、分析時間が大幅に増加する可能性があります</string>
+    <string name="config_auto_approve_session_disabled_desc">「プラットフォームのインストールポリシーを遵守」が有効になっている場合は利用できません</string>
+    <string name="config_auto_approve_session_warning">このスイッチを有効にすると、このプロファイルの適用範囲内のアプリは、ユーザーによる明示的な許可なしに、バックグラウンドでアプリをインストールできるようになります。有効にする際は十分にご注意ください。</string>
+    <string name="config_customize_install_reason_disabled_desc">「プラットフォームのインストールポリシーを遵守」が有効になっている場合、デフォルトは「ユーザー」になります</string>
+    <string name="config_customize_package_source_disabled_desc">「プラットフォームのインストールポリシーを遵守」が有効になっている場合、ソースから自動的に入力されます</string>
 </resources>
