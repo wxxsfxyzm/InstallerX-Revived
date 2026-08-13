@@ -79,6 +79,72 @@ class LightweightApkSignatureReaderTest {
         assertEquals(emptySet(), result.signerSha256Set)
     }
 
+    @Test
+    fun `v3 signer certificate is filtered by the current platform SDK`() {
+        val olderCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x01)
+        val currentCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x02)
+        val apk = File(tempDirectory, "sdk-targeted-v3.apk").apply {
+            writeBytes(
+                createApkWithV3Signers(
+                    createV3Signer(olderCertificate, minSdk = 28, maxSdk = 34),
+                    createV3Signer(currentCertificate, minSdk = 35, maxSdk = Int.MAX_VALUE)
+                )
+            )
+        }
+        val entity = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/app.apk",
+            startOffset = 0L,
+            length = apk.length(),
+            channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
+            descriptorFactory = { error("A raw descriptor is not needed") },
+            preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = true
+        )
+
+        val sdk34Result = reader.read(entity, platformSdk = 34)
+        val sdk35Result = reader.read(entity, platformSdk = 35)
+
+        assertEquals(listOf("V3"), sdk34Result.declaredSchemes)
+        assertEquals(setOf(olderCertificate.sha256()), sdk34Result.signerSha256Set)
+        assertEquals(setOf(currentCertificate.sha256()), sdk35Result.signerSha256Set)
+    }
+
+    @Test
+    fun `v31 signer takes precedence over the v3 fallback on supported platforms`() {
+        val fallbackCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x01)
+        val rotatedCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x02)
+        val apk = File(tempDirectory, "v31-with-v3-fallback.apk").apply {
+            writeBytes(
+                createApkWithSchemePairs(
+                    createSchemePair(
+                        V3_BLOCK_ID,
+                        createV3Signer(fallbackCertificate, minSdk = 28, maxSdk = Int.MAX_VALUE)
+                    ),
+                    createSchemePair(
+                        V31_BLOCK_ID,
+                        createV3Signer(rotatedCertificate, minSdk = 33, maxSdk = Int.MAX_VALUE)
+                    )
+                )
+            )
+        }
+        val entity = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/app.apk",
+            startOffset = 0L,
+            length = apk.length(),
+            channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
+            descriptorFactory = { error("A raw descriptor is not needed") },
+            preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = true
+        )
+
+        val sdk32Result = reader.read(entity, platformSdk = 32)
+        val sdk35Result = reader.read(entity, platformSdk = 35)
+
+        assertEquals(listOf("V3", "V3.1"), sdk35Result.declaredSchemes)
+        assertEquals(setOf(fallbackCertificate.sha256()), sdk32Result.signerSha256Set)
+        assertEquals(setOf(rotatedCertificate.sha256()), sdk35Result.signerSha256Set)
+    }
+
     private fun createApkWithV2Certificate(certificate: ByteArray): ByteArray {
         val certificates = lengthPrefixed(certificate)
         val signedData = concat(
@@ -105,6 +171,47 @@ class LightweightApkSignatureReaderTest {
             .put(APK_SIGNING_BLOCK_MAGIC)
             .array()
         return concat(signingBlock, createEocd(signingBlock.size))
+    }
+
+    private fun createApkWithV3Signers(vararg signers: ByteArray): ByteArray {
+        return createApkWithSchemePairs(createSchemePair(V3_BLOCK_ID, *signers))
+    }
+
+    private fun createSchemePair(id: Int, vararg signers: ByteArray): ByteArray {
+        val schemeBlock = lengthPrefixed(concat(*signers.map(::lengthPrefixed).toTypedArray()))
+        return littleEndianBuffer(8 + 4 + schemeBlock.size)
+            .putLong((4 + schemeBlock.size).toLong())
+            .putInt(id)
+            .put(schemeBlock)
+            .array()
+    }
+
+    private fun createApkWithSchemePairs(vararg pairs: ByteArray): ByteArray {
+        val pairsSize = pairs.sumOf(ByteArray::size)
+        val sizeWithoutHeader = pairsSize + 24L
+        val signingBlock = littleEndianBuffer((sizeWithoutHeader + 8L).toInt())
+            .putLong(sizeWithoutHeader)
+            .apply { pairs.forEach(::put) }
+            .putLong(sizeWithoutHeader)
+            .put(APK_SIGNING_BLOCK_MAGIC)
+            .array()
+        return concat(signingBlock, createEocd(signingBlock.size))
+    }
+
+    private fun createV3Signer(certificate: ByteArray, minSdk: Int, maxSdk: Int): ByteArray {
+        val certificates = lengthPrefixed(certificate)
+        val signedData = concat(
+            lengthPrefixed(byteArrayOf()),
+            lengthPrefixed(certificates),
+            littleEndianBuffer(8).putInt(minSdk).putInt(maxSdk).array(),
+            lengthPrefixed(byteArrayOf())
+        )
+        return concat(
+            lengthPrefixed(signedData),
+            littleEndianBuffer(8).putInt(minSdk).putInt(maxSdk).array(),
+            lengthPrefixed(byteArrayOf()),
+            lengthPrefixed(byteArrayOf())
+        )
     }
 
     private fun createEocd(centralDirectoryOffset: Int): ByteArray =
@@ -140,6 +247,8 @@ class LightweightApkSignatureReaderTest {
 
     private companion object {
         const val V2_BLOCK_ID = 0x7109871a
+        const val V3_BLOCK_ID = 0xf05368c0.toInt()
+        const val V31_BLOCK_ID = 0x1b93ad61
         const val ZIP_EOCD_SIGNATURE = 0x06054b50
         val APK_SIGNING_BLOCK_MAGIC = "APK Sig Block 42".toByteArray(Charsets.US_ASCII)
     }

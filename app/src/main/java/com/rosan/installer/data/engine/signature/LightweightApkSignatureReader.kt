@@ -2,6 +2,7 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.signature
 
+import android.os.Build
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -22,9 +23,15 @@ import java.nio.channels.SeekableByteChannel
 class LightweightApkSignatureReader(
     private val certificateFormatter: CertificateFormatter
 ) {
-    fun read(data: DataEntity.FileDescriptorEntity): AppSignatureInfo {
+    fun read(data: DataEntity.FileDescriptorEntity): AppSignatureInfo =
+        read(data, Build.VERSION.SDK_INT)
+
+    internal fun read(
+        data: DataEntity.FileDescriptorEntity,
+        platformSdk: Int
+    ): AppSignatureInfo {
         val declarations = runCatching {
-            data.openChannel().use(::readDeclarations)
+            data.openChannel().use { channel -> readDeclarations(channel, platformSdk) }
         }.onFailure { error ->
             Timber.w(error, "Unable to read lightweight APK signer declarations: ${data.path}")
         }.getOrDefault(SignatureDeclarations())
@@ -46,13 +53,16 @@ class LightweightApkSignatureReader(
         )
     }
 
-    private fun readDeclarations(channel: SeekableByteChannel): SignatureDeclarations {
+    private fun readDeclarations(
+        channel: SeekableByteChannel,
+        platformSdk: Int
+    ): SignatureDeclarations {
         val fileSize = channel.size()
         if (fileSize < ZIP_EOCD_MIN_SIZE) return SignatureDeclarations()
 
         val eocd = findEocd(channel, fileSize) ?: return SignatureDeclarations()
         val centralDirectoryOffset = eocd.getUnsignedInt(ZIP_EOCD_CENTRAL_DIRECTORY_OFFSET)
-        if (centralDirectoryOffset < APK_SIGNING_BLOCK_FOOTER_SIZE || centralDirectoryOffset > fileSize) {
+        if (centralDirectoryOffset !in APK_SIGNING_BLOCK_FOOTER_SIZE..fileSize) {
             return SignatureDeclarations()
         }
 
@@ -79,7 +89,7 @@ class LightweightApkSignatureReader(
         }
 
         val pairs = block.sliceRange(8, block.limit() - APK_SIGNING_BLOCK_FOOTER_SIZE)
-        val certificates = mutableListOf<ByteArray>()
+        val certificatesByScheme = mutableMapOf<String, MutableList<ByteArray>>()
         val schemes = linkedSetOf<String>()
         while (pairs.hasRemaining()) {
             if (pairs.remaining() < 8) throw IOException("Truncated APK Signing Block pair")
@@ -88,13 +98,29 @@ class LightweightApkSignatureReader(
             if (pair.remaining() < 4) throw IOException("APK Signing Block pair has no ID")
             val id = pair.int
             val scheme = SCHEMES[id] ?: continue
-            certificates += parseSchemeSigners(pair, scheme.hasSdkRange)
+            certificatesByScheme.getOrPut(scheme.label, ::mutableListOf) +=
+                parseSchemeSigners(pair, scheme.hasSdkRange, platformSdk)
             schemes += scheme.label
+        }
+        val certificates = when {
+            platformSdk >= MIN_SDK_WITH_V31_SUPPORT &&
+                    certificatesByScheme[SCHEME_V31].isNullOrEmpty().not() ->
+                certificatesByScheme.getValue(SCHEME_V31)
+
+            platformSdk >= MIN_SDK_WITH_V3_SUPPORT &&
+                    certificatesByScheme[SCHEME_V3].isNullOrEmpty().not() ->
+                certificatesByScheme.getValue(SCHEME_V3)
+
+            else -> certificatesByScheme[SCHEME_V2].orEmpty()
         }
         return SignatureDeclarations(certificates, schemes.toList())
     }
 
-    private fun parseSchemeSigners(block: ByteBuffer, hasSdkRange: Boolean): List<ByteArray> {
+    private fun parseSchemeSigners(
+        block: ByteBuffer,
+        hasSdkRange: Boolean,
+        platformSdk: Int
+    ): List<ByteArray> {
         val signers = block.readLengthPrefixedSlice()
         val certificates = mutableListOf<ByteArray>()
         var signerCount = 0
@@ -102,26 +128,35 @@ class LightweightApkSignatureReader(
             if (++signerCount > MAX_SIGNER_COUNT) throw IOException("Too many APK signer declarations")
             val signer = signers.readLengthPrefixedSlice()
             val signedData = signer.readLengthPrefixedSlice()
-            if (hasSdkRange) {
+            val sdkRange = if (hasSdkRange) {
                 signer.requireRemaining(8, "signer SDK range")
-                signer.position(signer.position() + 8)
-            }
+                readSdkRange(signer, "signer")
+            } else null
             signer.readLengthPrefixedSlice() // signatures
             signer.readLengthPrefixedBytes() // public key
-            parseSignedDataSignerCertificate(signedData, hasSdkRange)?.let(certificates::add)
+            val certificate = parseSignedDataSignerCertificate(signedData, sdkRange)
+            if (sdkRange == null || platformSdk in sdkRange) {
+                certificate?.let(certificates::add)
+            }
         }
         return certificates
     }
 
     private fun parseSignedDataSignerCertificate(
         signedData: ByteBuffer,
-        hasSdkRange: Boolean
+        expectedSdkRange: IntRange?
     ): ByteArray? {
         signedData.readLengthPrefixedSlice() // content digests; deliberately not verified
         val certificateSequence = signedData.readLengthPrefixedSlice()
-        if (hasSdkRange) {
+        if (expectedSdkRange != null) {
             signedData.requireRemaining(8, "signed-data SDK range")
-            signedData.position(signedData.position() + 8)
+            val signedDataSdkRange = readSdkRange(signedData, "signed-data")
+            if (signedDataSdkRange != expectedSdkRange) {
+                throw IOException(
+                    "Signer SDK range differs from signed-data SDK range: " +
+                            "signer=$expectedSdkRange, signedData=$signedDataSdkRange"
+                )
+            }
         }
         signedData.readLengthPrefixedSlice() // additional attributes
 
@@ -140,6 +175,15 @@ class LightweightApkSignatureReader(
             }
         }
         return signerCertificate
+    }
+
+    private fun readSdkRange(buffer: ByteBuffer, label: String): IntRange {
+        val minSdk = buffer.int
+        val maxSdk = buffer.int
+        if (minSdk < 0 || minSdk > maxSdk) {
+            throw IOException("Invalid $label SDK range: min=$minSdk, max=$maxSdk")
+        }
+        return minSdk..maxSdk
     }
 
     private fun findEocd(channel: SeekableByteChannel, fileSize: Long): ByteBuffer? {
@@ -190,7 +234,7 @@ class LightweightApkSignatureReader(
     }
 
     private fun ByteBuffer.sliceRange(start: Int, end: Int): ByteBuffer {
-        if (start < 0 || end < start || end > limit()) throw IOException("Invalid APK buffer range")
+        if (start !in 0..end || end > limit()) throw IOException("Invalid APK buffer range")
         val duplicate = duplicate().order(ByteOrder.LITTLE_ENDIAN)
         duplicate.position(start)
         duplicate.limit(end)
@@ -211,7 +255,7 @@ class LightweightApkSignatureReader(
     }
 
     private fun Int.toBoundedInt(available: Int, label: String): Int {
-        if (this < 0 || this > available) throw IOException("Invalid $label size: $this, available=$available")
+        if (this !in 0..available) throw IOException("Invalid $label size: $this, available=$available")
         return this
     }
 
@@ -243,11 +287,16 @@ class LightweightApkSignatureReader(
         const val MAX_SIGNER_COUNT = 32
         const val MAX_CERTIFICATE_COUNT = 64
         const val MAX_CERTIFICATE_SIZE = 64 * 1024
+        const val MIN_SDK_WITH_V3_SUPPORT = 28
+        const val MIN_SDK_WITH_V31_SUPPORT = 33
+        const val SCHEME_V2 = "V2"
+        const val SCHEME_V3 = "V3"
+        const val SCHEME_V31 = "V3.1"
         val APK_SIGNING_BLOCK_MAGIC = "APK Sig Block 42".toByteArray(Charsets.US_ASCII)
         val SCHEMES = mapOf(
-            0x7109871a to Scheme("V2", hasSdkRange = false),
-            0xf05368c0.toInt() to Scheme("V3", hasSdkRange = true),
-            0x1b93ad61 to Scheme("V3.1", hasSdkRange = true)
+            0x7109871a to Scheme(SCHEME_V2, hasSdkRange = false),
+            0xf05368c0.toInt() to Scheme(SCHEME_V3, hasSdkRange = true),
+            0x1b93ad61 to Scheme(SCHEME_V31, hasSdkRange = true)
         )
     }
 }
