@@ -64,9 +64,7 @@ class AnalyserRepositoryImpl(
         }
 
         // Step 2: Group, Deduplicate
-        val includeSignature = rawEntities.any { entity ->
-            extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureAnalysisResult()
-        }
+        val includeSignature = shouldLoadInstalledSignatures(rawEntities, extra)
         val processedGroups = packagePreprocessor.process(rawEntities, includeSignature = includeSignature)
 
         Timber.d("AnalyserRepo: Step 2 Processed. Groups count: ${processedGroups.size}")
@@ -194,6 +192,19 @@ class AnalyserRepositoryImpl(
             if (e is AnalyseException || e is CommonsZipException || e is ZipException) throw e
             emptyList()
         }
+}
+
+internal fun shouldLoadInstalledSignatures(
+    entities: List<AppEntity>,
+    extra: AnalyseExtraEntity
+): Boolean = entities.any { entity ->
+    extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureMetadata()
+}
+
+private fun AppEntity.hasSignatureMetadata(): Boolean = when (this) {
+    is AppEntity.BaseEntity -> signatureInfo != null
+    is AppEntity.SplitEntity -> signatureInfo != null
+    else -> false
 }
 
 private fun AppEntity.hasSignatureAnalysisResult(): Boolean = when (this) {
