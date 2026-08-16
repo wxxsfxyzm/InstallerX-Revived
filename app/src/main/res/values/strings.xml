@@ -35,6 +35,12 @@
     <string name="history">History</string>
     <string name="history_empty_title">No records yet</string>
     <string name="history_empty_desc">Installation and uninstallation records will appear here after an operation finishes.</string>
+    <string name="history_search_field_all">All entries</string>
+    <string name="history_search_scope">Search in</string>
+    <string name="history_app_name">App name</string>
+    <string name="history_status">Status</string>
+    <string name="history_search_empty_title">No matching records</string>
+    <string name="history_search_empty_desc">Try a different search term or entry field.</string>
     <string name="history_clear">Clear history</string>
     <string name="history_clear_confirm_title">Clear history?</string>
     <string name="history_clear_confirm_desc">All installation and uninstallation records will be deleted. This cannot be undone.</string>

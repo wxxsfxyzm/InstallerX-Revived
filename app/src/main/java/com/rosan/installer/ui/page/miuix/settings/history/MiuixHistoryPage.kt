@@ -3,6 +3,7 @@
 package com.rosan.installer.ui.page.miuix.settings.history
 
 import android.content.ClipData
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -18,7 +20,9 @@ import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,6 +34,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboard
@@ -49,10 +54,14 @@ import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewAction
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
+import com.rosan.installer.ui.page.main.settings.history.HistorySearchField
+import com.rosan.installer.ui.page.main.settings.history.filterHistoryRecords
 import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
 import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
 import com.rosan.installer.ui.page.main.settings.history.labelRes
+import com.rosan.installer.ui.page.main.settings.history.rememberHistorySearchTexts
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.MiuixDropdown
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
@@ -64,6 +73,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
@@ -88,6 +98,16 @@ fun MiuixHistoryPage(
     val scrollBehavior = MiuixScrollBehavior()
     val layoutDirection = LocalLayoutDirection.current
     val topBarBackdrop = rememberMiuixBlurBackdrop(enableBlur)
+    val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
+    val searchTexts = rememberHistorySearchTexts(state.isSystemApp)
+    val visibleRecords = remember(
+        state.records,
+        state.searchQuery,
+        state.searchField,
+        searchTexts
+    ) {
+        filterHistoryRecords(state.records, state.searchField, state.searchQuery, searchTexts)
+    }
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -95,23 +115,61 @@ fun MiuixHistoryPage(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
-                title = title,
-                actions = {
-                    IconButton(
-                        enabled = state.records.isNotEmpty(),
-                        onClick = { showClearConfirmDialog = true }
-                    ) {
-                        Icon(
-                            imageVector = AppMiuixIcons.Delete,
-                            contentDescription = stringResource(R.string.history_clear)
-                        )
+            Column(
+                modifier = Modifier
+                    .installerMiuixBlurEffect(topBarBackdrop)
+                    .background(topBarBackdrop.getMiuixAppBarColor())
+            ) {
+                TopAppBar(
+                    color = Color.Transparent,
+                    title = title,
+                    actions = {
+                        IconButton(
+                            enabled = state.records.isNotEmpty(),
+                            onClick = { showClearConfirmDialog = true }
+                        ) {
+                            Icon(
+                                imageVector = AppMiuixIcons.Delete,
+                                contentDescription = stringResource(R.string.history_clear)
+                            )
+                        }
+                    },
+                    scrollBehavior = scrollBehavior
+                )
+
+                val searchFields = HistorySearchField.entries
+                val selectedFieldIndex = searchFields.indexOf(state.searchField).coerceAtLeast(0)
+                MiuixDropdown(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                            end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                        ),
+                    items = searchFields.map { stringResource(it.labelRes()) },
+                    selectedIndex = selectedFieldIndex,
+                    onSelectedIndexChange = { index ->
+                        searchFields.getOrNull(index)?.let {
+                            viewModel.dispatch(HistoryViewAction.SelectSearchField(it))
+                        }
                     }
-                },
-                scrollBehavior = scrollBehavior
-            )
+                )
+                InputField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 16.dp + horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                            end = 16.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                            bottom = 8.dp
+                        ),
+                    query = state.searchQuery,
+                    onQueryChange = { viewModel.dispatch(HistoryViewAction.Search(it)) },
+                    label = stringResource(R.string.search),
+                    expanded = false,
+                    onExpandedChange = {},
+                    onSearch = {}
+                )
+            }
         }
     ) { innerPadding ->
         if (state.isLoading && state.records.isEmpty()) {
@@ -154,16 +212,26 @@ fun MiuixHistoryPage(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (state.records.isEmpty()) {
+                if (visibleRecords.isEmpty()) {
                     item {
                         EmptyHistory(
+                            title = if (state.records.isNotEmpty() && state.searchQuery.isNotBlank()) {
+                                stringResource(R.string.history_search_empty_title)
+                            } else {
+                                stringResource(R.string.history_empty_title)
+                            },
+                            description = if (state.records.isNotEmpty() && state.searchQuery.isNotBlank()) {
+                                stringResource(R.string.history_search_empty_desc)
+                            } else {
+                                stringResource(R.string.history_empty_desc)
+                            },
                             modifier = Modifier
                                 .fillParentMaxSize()
                                 .padding(horizontal = 8.dp)
                         )
                     }
                 } else {
-                    items(state.records, key = { it.id }) { record ->
+                    items(visibleRecords, key = { it.id }) { record ->
                         HistoryRecordBriefCard(
                             record = record,
                             onClick = {
@@ -214,19 +282,23 @@ fun MiuixHistoryPage(
 }
 
 @Composable
-private fun EmptyHistory(modifier: Modifier = Modifier) {
+private fun EmptyHistory(
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
         Text(
-            text = stringResource(R.string.history_empty_title),
+            text = title,
             style = MiuixTheme.textStyles.title2,
             color = MiuixTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
-            text = stringResource(R.string.history_empty_desc),
+            text = description,
             style = MiuixTheme.textStyles.subtitle,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
         )

@@ -4,4 +4,6 @@ package com.rosan.installer.ui.page.main.settings.history
 
 sealed interface HistoryViewAction {
     data object ClearHistory : HistoryViewAction
+    data class Search(val query: String) : HistoryViewAction
+    data class SelectSearchField(val field: HistorySearchField) : HistoryViewAction
 }
