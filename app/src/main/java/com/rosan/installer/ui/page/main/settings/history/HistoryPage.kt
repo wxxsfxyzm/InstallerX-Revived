@@ -55,6 +55,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -120,7 +121,10 @@ fun HistoryPage(
 
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
-    var searchBarActivated by remember { mutableStateOf(false) }
+    var searchBarActivated by rememberSaveable { mutableStateOf(false) }
+    val hasSearchState =
+        state.searchQuery.isNotBlank() || state.searchField != HistorySearchField.ALL
+    val searchBarVisible = searchBarActivated || hasSearchState
     val searchFocusRequester = remember { FocusRequester() }
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
@@ -146,7 +150,7 @@ fun HistoryPage(
                         )
                     },
                     actions = {
-                        if (!searchBarActivated) {
+                        if (!searchBarVisible) {
                             IconButton(onClick = { searchBarActivated = true }) {
                                 Icon(
                                     imageVector = AppIcons.Search,
@@ -172,7 +176,7 @@ fun HistoryPage(
                     )
                 )
 
-                if (searchBarActivated) {
+                if (searchBarVisible) {
                     HistorySearchControls(
                         state = state,
                         searchFocusRequester = searchFocusRequester,
