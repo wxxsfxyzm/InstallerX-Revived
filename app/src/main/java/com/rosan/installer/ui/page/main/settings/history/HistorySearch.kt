@@ -179,7 +179,7 @@ private fun searchableValues(
         .filter { it != HistorySearchField.ALL }
         .flatMap { searchableValues(record, it, texts) }
 
-    HistorySearchField.APP_LABEL -> valuesOf(record.appLabel)
+    HistorySearchField.APP_LABEL -> valuesOf(record.appLabel ?: record.packageName)
     HistorySearchField.PACKAGE_NAME -> sequenceOf(record.packageName)
     HistorySearchField.OPERATION_TYPE -> valuesOf(
         texts.operationTypes[record.operationType],

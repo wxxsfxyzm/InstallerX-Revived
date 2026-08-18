@@ -83,6 +83,19 @@ class HistorySearchTest {
     }
 
     @Test
+    fun `app name field matches package fallback shown for records without labels`() {
+        val record = record(
+            packageName = "com.example.unresolved",
+            appLabel = null
+        )
+
+        assertEquals(
+            listOf(record),
+            filter(listOf(record), HistorySearchField.APP_LABEL, "com.example.unresolved")
+        )
+    }
+
+    @Test
     fun `blank query preserves record order`() {
         val first = record(id = 1L, packageName = "first.package")
         val second = record(id = 2L, packageName = "second.package")
@@ -210,6 +223,7 @@ class HistorySearchTest {
         id: Long = 1L,
         operationType: OperationType = OperationType.INSTALL,
         packageName: String = "com.example.app",
+        appLabel: String? = "Example App",
         installerPackageName: String? = "com.example.installer",
         status: OperationStatus = OperationStatus.SUCCESS,
         versionChange: VersionChange = VersionChange.UPDATE,
@@ -227,7 +241,7 @@ class HistorySearchTest {
         operationType = operationType,
         status = status,
         packageName = packageName,
-        appLabel = "Example App",
+        appLabel = appLabel,
         timestamp = 1_755_330_600_000L,
         versionChange = versionChange,
         oldVersionName = oldVersionName,
