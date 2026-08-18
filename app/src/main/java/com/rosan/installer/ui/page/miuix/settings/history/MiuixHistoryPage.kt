@@ -57,6 +57,7 @@ import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
 import com.rosan.installer.ui.page.main.settings.history.HistorySearchField
 import com.rosan.installer.ui.page.main.settings.history.filterHistoryRecords
 import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
+import com.rosan.installer.ui.page.main.settings.history.hasNoHistorySearchResults
 import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
 import com.rosan.installer.ui.page.main.settings.history.labelRes
 import com.rosan.installer.ui.page.main.settings.history.rememberHistorySearchTexts
@@ -108,6 +109,11 @@ fun MiuixHistoryPage(
     ) {
         filterHistoryRecords(state.records, state.searchField, state.searchQuery, searchTexts)
     }
+    val hasNoSearchResults = hasNoHistorySearchResults(
+        records = state.records,
+        query = state.searchQuery,
+        visibleRecords = visibleRecords
+    )
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -215,16 +221,17 @@ fun MiuixHistoryPage(
                 if (visibleRecords.isEmpty()) {
                     item {
                         EmptyHistory(
-                            title = if (state.records.isNotEmpty() && state.searchQuery.isNotBlank()) {
+                            title = if (hasNoSearchResults) {
                                 stringResource(R.string.history_search_empty_title)
                             } else {
                                 stringResource(R.string.history_empty_title)
                             },
-                            description = if (state.records.isNotEmpty() && state.searchQuery.isNotBlank()) {
+                            description = if (hasNoSearchResults) {
                                 stringResource(R.string.history_search_empty_desc)
                             } else {
                                 stringResource(R.string.history_empty_desc)
                             },
+                            alignTop = hasNoSearchResults,
                             modifier = Modifier
                                 .fillParentMaxSize()
                                 .padding(horizontal = 8.dp)
@@ -285,11 +292,12 @@ fun MiuixHistoryPage(
 private fun EmptyHistory(
     title: String,
     description: String,
+    alignTop: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = if (alignTop) Arrangement.Top else Arrangement.Center
     ) {
         Text(
             text = title,

@@ -11,6 +11,7 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class HistorySearchTest {
@@ -77,6 +78,16 @@ class HistorySearchTest {
             listOf(record),
             filterHistoryRecords(listOf(record), HistorySearchField.TIME, "12:30", texts)
         )
+    }
+
+    @Test
+    fun `search empty state only applies when a nonblank query has no matches`() {
+        val records = listOf(record())
+
+        assertTrue(hasNoHistorySearchResults(records, "missing", emptyList()))
+        assertFalse(hasNoHistorySearchResults(emptyList(), "missing", emptyList()))
+        assertFalse(hasNoHistorySearchResults(records, "  ", emptyList()))
+        assertFalse(hasNoHistorySearchResults(records, "example", records))
     }
 
     private fun record(

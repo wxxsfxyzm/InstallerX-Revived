@@ -111,6 +111,12 @@ fun filterHistoryRecords(
     }
 }
 
+fun hasNoHistorySearchResults(
+    records: List<OperationHistoryModel>,
+    query: String,
+    visibleRecords: List<OperationHistoryModel>
+): Boolean = records.isNotEmpty() && query.isNotBlank() && visibleRecords.isEmpty()
+
 private fun searchableValues(
     record: OperationHistoryModel,
     field: HistorySearchField,

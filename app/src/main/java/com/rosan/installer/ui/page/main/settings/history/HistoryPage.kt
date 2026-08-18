@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +22,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -118,6 +122,11 @@ fun HistoryPage(
     ) {
         filterHistoryRecords(state.records, state.searchField, state.searchQuery, searchTexts)
     }
+    val hasNoSearchResults = hasNoHistorySearchResults(
+        records = state.records,
+        query = state.searchQuery,
+        visibleRecords = visibleRecords
+    )
 
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -238,16 +247,17 @@ fun HistoryPage(
                     if (visibleRecords.isEmpty()) {
                         item {
                             EmptyHistory(
-                                title = if (state.records.isNotEmpty() && state.searchQuery.isNotBlank()) {
+                                title = if (hasNoSearchResults) {
                                     stringResource(R.string.history_search_empty_title)
                                 } else {
                                     stringResource(R.string.history_empty_title)
                                 },
-                                description = if (state.records.isNotEmpty() && state.searchQuery.isNotBlank()) {
+                                description = if (hasNoSearchResults) {
                                     stringResource(R.string.history_search_empty_desc)
                                 } else {
                                     stringResource(R.string.history_empty_desc)
                                 },
+                                alignTop = hasNoSearchResults,
                                 modifier = Modifier
                                     .fillParentMaxSize()
                                     .padding(horizontal = 8.dp)
@@ -337,6 +347,10 @@ private fun HistorySearchControls(
     var expanded by remember { mutableStateOf(false) }
     val menuScrollState = rememberScrollState()
     val fields = HistorySearchField.entries
+    val horizontalSafeInsets = WindowInsets.safeDrawing
+        .only(WindowInsetsSides.Horizontal)
+        .asPaddingValues()
+    val layoutDirection = LocalLayoutDirection.current
 
     LaunchedEffect(Unit) {
         searchFocusRequester.requestFocus()
@@ -345,7 +359,10 @@ private fun HistorySearchControls(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(
+                start = 16.dp + horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                end = 16.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection)
+            )
             .padding(bottom = 8.dp)
     ) {
         ExposedDropdownMenuBox(
@@ -414,11 +431,12 @@ private fun HistorySearchControls(
 private fun EmptyHistory(
     title: String,
     description: String,
+    alignTop: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = if (alignTop) Arrangement.Top else Arrangement.Center
     ) {
         Text(
             text = title,
