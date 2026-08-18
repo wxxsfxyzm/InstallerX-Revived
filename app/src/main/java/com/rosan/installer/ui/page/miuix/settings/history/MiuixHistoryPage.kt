@@ -55,9 +55,11 @@ import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewAction
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
 import com.rosan.installer.ui.page.main.settings.history.HistoryEmptyState
+import com.rosan.installer.ui.page.main.settings.history.HistorySearchResult
 import com.rosan.installer.ui.page.main.settings.history.HistorySearchField
 import com.rosan.installer.ui.page.main.settings.history.descriptionRes
 import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
+import com.rosan.installer.ui.page.main.settings.history.hasPackageManagerDetails
 import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
 import com.rosan.installer.ui.page.main.settings.history.labelRes
 import com.rosan.installer.ui.page.main.settings.history.rememberHistorySearchTexts
@@ -106,7 +108,6 @@ fun MiuixHistoryPage(
     val searchResult = remember(state.records, state.searchCriteria, searchTexts) {
         resolveHistorySearchResult(state.records, state.searchCriteria, searchTexts)
     }
-    val visibleRecords = searchResult.records
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -211,24 +212,28 @@ fun MiuixHistoryPage(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (visibleRecords.isEmpty()) {
-                    item {
-                        EmptyHistory(
-                            emptyState = requireNotNull(searchResult.emptyState),
-                            modifier = Modifier
-                                .fillParentMaxSize()
-                                .padding(horizontal = 8.dp)
-                        )
+                when (val result = searchResult) {
+                    is HistorySearchResult.Empty -> {
+                        item {
+                            EmptyHistory(
+                                emptyState = result.state,
+                                modifier = Modifier
+                                    .fillParentMaxSize()
+                                    .padding(horizontal = 8.dp)
+                            )
+                        }
                     }
-                } else {
-                    items(visibleRecords, key = { it.id }) { record ->
-                        HistoryRecordBriefCard(
-                            record = record,
-                            onClick = {
-                                selectedRecord = record
-                                showRecordDetailSheet = true
-                            }
-                        )
+
+                    is HistorySearchResult.Records -> {
+                        items(result.records, key = { it.id }) { record ->
+                            HistoryRecordBriefCard(
+                                record = record,
+                                onClick = {
+                                    selectedRecord = record
+                                    showRecordDetailSheet = true
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -390,7 +395,7 @@ private fun HistoryRecordDetailContent(
                 value = record.timestamp.formatHistoryTime()
             )
         }
-        if (record.installMethod != InstallMethod.SESSION) {
+        if (record.hasPackageManagerDetails()) {
             item {
                 HistoryInfoLine(
                     title = stringResource(R.string.history_version_change),
@@ -422,7 +427,7 @@ private fun HistoryRecordDetailContent(
                 value = record.installerPackageName ?: stringResource(R.string.history_unknown)
             )
         }
-        if (record.installMethod != InstallMethod.SESSION) {
+        if (record.hasPackageManagerDetails()) {
             item {
                 HistoryInfoLine(
                     title = stringResource(R.string.history_apk_path),

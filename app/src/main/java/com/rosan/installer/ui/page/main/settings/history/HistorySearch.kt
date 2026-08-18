@@ -89,10 +89,11 @@ data class HistorySearchTexts(
     val formatTime: (Long) -> String = Long::toString
 )
 
-data class HistorySearchResult(
-    val records: List<OperationHistoryModel>,
-    val emptyState: HistoryEmptyState?
-)
+sealed interface HistorySearchResult {
+    data class Records(val records: List<OperationHistoryModel>) : HistorySearchResult
+
+    data class Empty(val state: HistoryEmptyState) : HistorySearchResult
+}
 
 @Composable
 fun rememberHistorySearchTexts(isSystemApp: Boolean): HistorySearchTexts {
@@ -155,13 +156,17 @@ fun resolveHistorySearchResult(
     texts: HistorySearchTexts
 ): HistorySearchResult {
     val visibleRecords = filterHistoryRecords(records, criteria, texts)
-    val emptyState = when {
-        visibleRecords.isNotEmpty() -> null
-        records.isEmpty() -> HistoryEmptyState.NO_HISTORY
-        else -> HistoryEmptyState.NO_MATCHES
+    return if (visibleRecords.isEmpty()) {
+        HistorySearchResult.Empty(
+            state = if (records.isEmpty()) {
+                HistoryEmptyState.NO_HISTORY
+            } else {
+                HistoryEmptyState.NO_MATCHES
+            }
+        )
+    } else {
+        HistorySearchResult.Records(visibleRecords)
     }
-
-    return HistorySearchResult(records = visibleRecords, emptyState = emptyState)
 }
 
 private fun searchableValues(
@@ -191,24 +196,24 @@ private fun searchableValues(
         record.timestamp.toString()
     )
 
-    HistorySearchField.VERSION_CHANGE -> record.nonSessionValues {
+    HistorySearchField.VERSION_CHANGE -> record.packageManagerDetailValues {
         valuesOf(
             texts.versionChanges[record.versionChange],
             record.versionChange.name
         )
     }
 
-    HistorySearchField.VERSION_NAME -> record.nonSessionValues {
+    HistorySearchField.VERSION_NAME -> record.packageManagerDetailValues {
         valuesWithFallback(texts.none, record.oldVersionName, record.newVersionName)
     }
 
-    HistorySearchField.VERSION_CODE -> record.nonSessionValues {
+    HistorySearchField.VERSION_CODE -> record.packageManagerDetailValues {
         valuesWithFallback(texts.none, record.oldVersionCode?.toString(), record.newVersionCode?.toString())
     }
 
     HistorySearchField.INITIATOR -> valueOrFallback(record.initiatorPackageName, texts.unknown)
     HistorySearchField.INSTALLER_PACKAGE -> valueOrFallback(record.installerPackageName, texts.unknown)
-    HistorySearchField.APK_PATH -> record.nonSessionValues {
+    HistorySearchField.APK_PATH -> record.packageManagerDetailValues {
         if (record.sourcePaths.isEmpty()) {
             sequenceOf(texts.none)
         } else {
@@ -249,6 +254,6 @@ private fun valuesOrFallback(fallback: String, vararg values: String?): Sequence
     return if (nonBlankValues.isEmpty()) sequenceOf(fallback) else nonBlankValues.asSequence()
 }
 
-private inline fun OperationHistoryModel.nonSessionValues(
+private inline fun OperationHistoryModel.packageManagerDetailValues(
     values: () -> Sequence<String>
-): Sequence<String> = if (installMethod == InstallMethod.SESSION) emptySequence() else values()
+): Sequence<String> = if (hasPackageManagerDetails()) values() else emptySequence()

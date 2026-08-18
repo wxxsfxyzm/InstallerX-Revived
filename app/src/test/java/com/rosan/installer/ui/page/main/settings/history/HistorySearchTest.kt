@@ -169,6 +169,8 @@ class HistorySearchTest {
         assertTrue(filter(listOf(sessionRecord), HistorySearchField.VERSION_CODE, "None").isEmpty())
         assertTrue(filter(listOf(sessionRecord), HistorySearchField.APK_PATH, "None").isEmpty())
         assertTrue(filter(listOf(sessionRecord), HistorySearchField.ALL, "Unknown").isEmpty())
+        assertFalse(sessionRecord.hasPackageManagerDetails())
+        assertTrue(record().hasPackageManagerDetails())
     }
 
     @Test
@@ -176,16 +178,16 @@ class HistorySearchTest {
         val records = listOf(record())
 
         assertEquals(
-            HistoryEmptyState.NO_HISTORY,
-            resolveHistorySearchResult(emptyList(), criteria("missing"), texts).emptyState
+            HistorySearchResult.Empty(HistoryEmptyState.NO_HISTORY),
+            resolveHistorySearchResult(emptyList(), criteria("missing"), texts)
         )
         assertEquals(
-            HistoryEmptyState.NO_MATCHES,
-            resolveHistorySearchResult(records, criteria("missing"), texts).emptyState
+            HistorySearchResult.Empty(HistoryEmptyState.NO_MATCHES),
+            resolveHistorySearchResult(records, criteria("missing"), texts)
         )
         assertEquals(
-            null,
-            resolveHistorySearchResult(records, criteria("example"), texts).emptyState
+            HistorySearchResult.Records(records),
+            resolveHistorySearchResult(records, criteria("example"), texts)
         )
     }
 

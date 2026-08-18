@@ -42,6 +42,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -116,7 +117,6 @@ fun HistoryPage(
     val searchResult = remember(state.records, state.searchCriteria, searchTexts) {
         resolveHistorySearchResult(state.records, state.searchCriteria, searchTexts)
     }
-    val visibleRecords = searchResult.records
 
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -148,7 +148,15 @@ fun HistoryPage(
                         )
                     },
                     actions = {
-                        IconButton(onClick = { searchBarActivated = !searchBarActivated }) {
+                        IconToggleButton(
+                            checked = searchBarActivated,
+                            onCheckedChange = { expanded ->
+                                searchBarActivated = expanded
+                                if (!expanded) {
+                                    viewModel.dispatch(HistoryViewAction.ClearSearch)
+                                }
+                            }
+                        ) {
                             Icon(
                                 imageVector = AppIcons.Search,
                                 contentDescription = stringResource(R.string.search)
@@ -227,33 +235,37 @@ fun HistoryPage(
                     ),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    if (visibleRecords.isEmpty()) {
-                        item {
-                            EmptyHistory(
-                                emptyState = requireNotNull(searchResult.emptyState),
-                                modifier = Modifier
-                                    .fillParentMaxSize()
-                                    .padding(horizontal = 8.dp)
-                            )
-                        }
-                    } else {
-                        itemsIndexed(
-                            items = visibleRecords,
-                            key = { _, record -> record.id },
-                            contentType = { _, _ -> "history_record" }
-                        ) { index, record ->
-                            val shape = when {
-                                visibleRecords.size == 1 -> singleShape
-                                index == 0 -> topShape
-                                index == visibleRecords.lastIndex -> bottomShape
-                                else -> middleShape
+                    when (val result = searchResult) {
+                        is HistorySearchResult.Empty -> {
+                            item {
+                                EmptyHistory(
+                                    emptyState = result.state,
+                                    modifier = Modifier
+                                        .fillParentMaxSize()
+                                        .padding(horizontal = 8.dp)
+                                )
                             }
+                        }
 
-                            HistoryRecordBriefCard(
-                                record = record,
-                                shape = shape,
-                                onClick = { selectedRecord = record }
-                            )
+                        is HistorySearchResult.Records -> {
+                            itemsIndexed(
+                                items = result.records,
+                                key = { _, record -> record.id },
+                                contentType = { _, _ -> "history_record" }
+                            ) { index, record ->
+                                val shape = when {
+                                    result.records.size == 1 -> singleShape
+                                    index == 0 -> topShape
+                                    index == result.records.lastIndex -> bottomShape
+                                    else -> middleShape
+                                }
+
+                                HistoryRecordBriefCard(
+                                    record = record,
+                                    shape = shape,
+                                    onClick = { selectedRecord = record }
+                                )
+                            }
                         }
                     }
                 }
@@ -534,7 +546,7 @@ fun HistoryRecordDetailContent(
                     value = record.timestamp.formatHistoryTime()
                 )
 
-                if (record.installMethod != InstallMethod.SESSION) {
+                if (record.hasPackageManagerDetails()) {
                     HistoryInfoLine(
                         title = stringResource(R.string.history_version_change),
                         value = stringResource(record.versionChange.labelRes())
@@ -558,7 +570,7 @@ fun HistoryRecordDetailContent(
                     value = record.installerPackageName ?: stringResource(R.string.history_unknown)
                 )
 
-                if (record.installMethod != InstallMethod.SESSION) {
+                if (record.hasPackageManagerDetails()) {
                     HistoryInfoLine(
                         title = stringResource(R.string.history_apk_path),
                         value = sourcePathText(record)
