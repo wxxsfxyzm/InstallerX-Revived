@@ -3,7 +3,9 @@
 package com.rosan.installer.ui.page.main.settings.history
 
 import android.content.ClipData
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,13 +13,18 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,13 +33,20 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExposedDropdownMenu
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -40,14 +54,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
@@ -66,6 +85,8 @@ import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.settings.history.rememberHistorySearchTexts
+import com.rosan.installer.ui.page.main.settings.history.resolveHistorySearchResult
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
@@ -92,9 +113,17 @@ fun HistoryPage(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val layoutDirection = LocalLayoutDirection.current
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
+    val searchTexts = rememberHistorySearchTexts(state.isSystemApp)
+    val searchResult = remember(state.records, state.searchCriteria, searchTexts) {
+        resolveHistorySearchResult(state.records, state.searchCriteria, searchTexts)
+    }
 
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
+    var searchBarActivated by rememberSaveable {
+        mutableStateOf(state.searchCriteria.isActive)
+    }
+    val searchFocusRequester = remember { FocusRequester() }
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
@@ -106,32 +135,62 @@ fun HistoryPage(
             .fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            LargeFlexibleTopAppBar(
-                modifier = Modifier.installerMaterial3BlurEffect(backdrop),
-                title = {
-                    Text(
-                        text = title,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                },
-                actions = {
-                    IconButton(
-                        enabled = state.records.isNotEmpty(),
-                        onClick = { showClearConfirmDialog = true }
-                    ) {
-                        Icon(
-                            imageVector = AppIcons.Delete,
-                            contentDescription = stringResource(R.string.history_clear)
+            Column(
+                modifier = Modifier
+                    .installerMaterial3BlurEffect(backdrop)
+                    .background(backdrop.getMaterial3AppBarColor())
+            ) {
+                LargeFlexibleTopAppBar(
+                    title = {
+                        Text(
+                            text = title,
+                            modifier = Modifier.padding(start = 12.dp)
                         )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backdrop.getMaterial3AppBarColor(),
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
+                    },
+                    actions = {
+                        IconToggleButton(
+                            checked = searchBarActivated,
+                            onCheckedChange = { expanded ->
+                                searchBarActivated = expanded
+                                if (!expanded) {
+                                    viewModel.dispatch(HistoryViewAction.ClearSearch)
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.Search,
+                                contentDescription = stringResource(R.string.search)
+                            )
+                        }
+                        IconButton(
+                            enabled = state.records.isNotEmpty(),
+                            onClick = { showClearConfirmDialog = true }
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.Delete,
+                                contentDescription = stringResource(R.string.history_clear)
+                            )
+                        }
+                    },
+                    scrollBehavior = scrollBehavior,
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        scrolledContainerColor = Color.Transparent
+                    )
                 )
-            )
+
+                if (searchBarActivated) {
+                    HistorySearchControls(
+                        state = state,
+                        searchFocusRequester = searchFocusRequester,
+                        onClose = {
+                            viewModel.dispatch(HistoryViewAction.ClearSearch)
+                        },
+                        dispatch = viewModel::dispatch,
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
@@ -176,32 +235,37 @@ fun HistoryPage(
                     ),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    if (state.records.isEmpty()) {
-                        item {
-                            EmptyHistory(
-                                modifier = Modifier
-                                    .fillParentMaxSize()
-                                    .padding(horizontal = 8.dp)
-                            )
-                        }
-                    } else {
-                        itemsIndexed(
-                            items = state.records,
-                            key = { _, record -> record.id },
-                            contentType = { _, _ -> "history_record" }
-                        ) { index, record ->
-                            val shape = when {
-                                state.records.size == 1 -> singleShape
-                                index == 0 -> topShape
-                                index == state.records.lastIndex -> bottomShape
-                                else -> middleShape
+                    when (val result = searchResult) {
+                        is HistorySearchResult.Empty -> {
+                            item {
+                                EmptyHistory(
+                                    emptyState = result.state,
+                                    modifier = Modifier
+                                        .fillParentMaxSize()
+                                        .padding(horizontal = 8.dp)
+                                )
                             }
+                        }
 
-                            HistoryRecordBriefCard(
-                                record = record,
-                                shape = shape,
-                                onClick = { selectedRecord = record }
-                            )
+                        is HistorySearchResult.Records -> {
+                            itemsIndexed(
+                                items = result.records,
+                                key = { _, record -> record.id },
+                                contentType = { _, _ -> "history_record" }
+                            ) { index, record ->
+                                val shape = when {
+                                    result.records.size == 1 -> singleShape
+                                    index == 0 -> topShape
+                                    index == result.records.lastIndex -> bottomShape
+                                    else -> middleShape
+                                }
+
+                                HistoryRecordBriefCard(
+                                    record = record,
+                                    shape = shape,
+                                    onClick = { selectedRecord = record }
+                                )
+                            }
                         }
                     }
                 }
@@ -258,19 +322,117 @@ fun HistoryPage(
 }
 
 @Composable
-private fun EmptyHistory(modifier: Modifier = Modifier) {
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+private fun HistorySearchControls(
+    state: HistoryViewState,
+    searchFocusRequester: FocusRequester,
+    onClose: () -> Unit,
+    dispatch: (HistoryViewAction) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val menuScrollState = rememberScrollState()
+    val fields = HistorySearchField.entries
+    val horizontalSafeInsets = WindowInsets.safeDrawing
+        .only(WindowInsetsSides.Horizontal)
+        .asPaddingValues()
+    val layoutDirection = LocalLayoutDirection.current
+
+    LaunchedEffect(Unit) {
+        searchFocusRequester.requestFocus()
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = 16.dp + horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                end = 16.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection)
+            )
+            .padding(bottom = 8.dp)
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                value = stringResource(state.searchCriteria.field.labelRes()),
+                onValueChange = {},
+                readOnly = true,
+                singleLine = true,
+                label = { Text(stringResource(R.string.history_search_scope)) },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                }
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.heightIn(max = 360.dp),
+                scrollState = menuScrollState
+            ) {
+                fields.forEach { field ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(field.labelRes())) },
+                        onClick = {
+                            dispatch(HistoryViewAction.SelectSearchField(field))
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(searchFocusRequester),
+            value = state.searchCriteria.query,
+            onValueChange = { dispatch(HistoryViewAction.UpdateSearchQuery(it)) },
+            singleLine = true,
+            placeholder = { Text(stringResource(R.string.search)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = AppIcons.Search,
+                    contentDescription = stringResource(R.string.search)
+                )
+            },
+            trailingIcon = {
+                IconButton(onClick = onClose) {
+                    Icon(
+                        imageVector = AppIcons.Close,
+                        contentDescription = stringResource(R.string.close)
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun EmptyHistory(
+    emptyState: HistoryEmptyState,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = if (emptyState == HistoryEmptyState.NO_MATCHES) {
+            Arrangement.Top
+        } else {
+            Arrangement.Center
+        }
     ) {
         Text(
-            text = stringResource(R.string.history_empty_title),
+            text = stringResource(emptyState.titleRes()),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.padding(top = 8.dp))
         Text(
-            text = stringResource(R.string.history_empty_desc),
+            text = stringResource(emptyState.descriptionRes()),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -384,7 +546,7 @@ fun HistoryRecordDetailContent(
                     value = record.timestamp.formatHistoryTime()
                 )
 
-                if (record.installMethod != InstallMethod.SESSION) {
+                if (record.hasPackageManagerDetails()) {
                     HistoryInfoLine(
                         title = stringResource(R.string.history_version_change),
                         value = stringResource(record.versionChange.labelRes())
@@ -408,7 +570,7 @@ fun HistoryRecordDetailContent(
                     value = record.installerPackageName ?: stringResource(R.string.history_unknown)
                 )
 
-                if (record.installMethod != InstallMethod.SESSION) {
+                if (record.hasPackageManagerDetails()) {
                     HistoryInfoLine(
                         title = stringResource(R.string.history_apk_path),
                         value = sourcePathText(record)

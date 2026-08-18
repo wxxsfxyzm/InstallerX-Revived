@@ -5,6 +5,7 @@ package com.rosan.installer.ui.page.main.settings.history
 import androidx.annotation.StringRes
 import com.rosan.installer.R
 import com.rosan.installer.domain.history.model.InstallMethod
+import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.domain.history.model.OperationType
 import com.rosan.installer.domain.history.model.VersionChange
@@ -38,6 +39,9 @@ fun InstallMethod.labelRes(): Int = when (this) {
     InstallMethod.PACKAGE_MANAGER -> R.string.history_method_package_manager
     InstallMethod.SESSION -> R.string.history_method_session
 }
+
+fun OperationHistoryModel.hasPackageManagerDetails(): Boolean =
+    installMethod == InstallMethod.PACKAGE_MANAGER
 
 fun Long.formatHistoryTime(): String =
     DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(this))

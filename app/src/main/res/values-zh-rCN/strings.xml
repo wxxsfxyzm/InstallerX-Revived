@@ -31,6 +31,12 @@
     <string name="history">记录</string>
     <string name="history_empty_title">暂无记录</string>
     <string name="history_empty_desc">安装或卸载操作结束后，相关记录会显示在这里。</string>
+    <string name="history_search_field_all">全部条目</string>
+    <string name="history_search_scope">搜索范围</string>
+    <string name="history_app_name">应用名称</string>
+    <string name="history_status">状态</string>
+    <string name="history_search_empty_title">没有匹配的记录</string>
+    <string name="history_search_empty_desc">请尝试其他搜索关键词或条目。</string>
     <string name="history_clear">清空记录</string>
     <string name="history_clear_confirm_title">清空记录？</string>
     <string name="history_clear_confirm_desc">所有安装和卸载记录都将被删除。此操作无法撤销。</string>
