@@ -15,6 +15,7 @@ import com.rosan.installer.domain.history.model.OperationType
 import com.rosan.installer.domain.history.model.VersionChange
 import com.rosan.installer.domain.settings.model.config.Authorizer
 
+/** User-visible record fields that can be targeted by history search. */
 enum class HistorySearchField {
     ALL,
     APP_LABEL,
@@ -31,6 +32,19 @@ enum class HistorySearchField {
     METHOD,
     AUTHORIZER,
     ERROR
+}
+
+data class HistorySearchCriteria(
+    val query: String = "",
+    val field: HistorySearchField = HistorySearchField.ALL
+) {
+    val isActive: Boolean
+        get() = query.isNotBlank() || this.field != HistorySearchField.ALL
+}
+
+enum class HistoryEmptyState {
+    NO_HISTORY,
+    NO_MATCHES
 }
 
 @StringRes
@@ -52,13 +66,32 @@ fun HistorySearchField.labelRes(): Int = when (this) {
     HistorySearchField.ERROR -> R.string.history_error
 }
 
+@StringRes
+fun HistoryEmptyState.titleRes(): Int = when (this) {
+    HistoryEmptyState.NO_HISTORY -> R.string.history_empty_title
+    HistoryEmptyState.NO_MATCHES -> R.string.history_search_empty_title
+}
+
+@StringRes
+fun HistoryEmptyState.descriptionRes(): Int = when (this) {
+    HistoryEmptyState.NO_HISTORY -> R.string.history_empty_desc
+    HistoryEmptyState.NO_MATCHES -> R.string.history_search_empty_desc
+}
+
 data class HistorySearchTexts(
     val operationTypes: Map<OperationType, String> = emptyMap(),
     val statuses: Map<OperationStatus, String> = emptyMap(),
     val versionChanges: Map<VersionChange, String> = emptyMap(),
     val installMethods: Map<InstallMethod, String> = emptyMap(),
     val authorizers: Map<Authorizer, String> = emptyMap(),
+    val unknown: String = "",
+    val none: String = "",
     val formatTime: (Long) -> String = Long::toString
+)
+
+data class HistorySearchResult(
+    val records: List<OperationHistoryModel>,
+    val emptyState: HistoryEmptyState?
 )
 
 @Composable
@@ -68,6 +101,8 @@ fun rememberHistorySearchTexts(isSystemApp: Boolean): HistorySearchTexts {
     val statuses = OperationStatus.entries.associateWith { stringResource(it.labelRes()) }
     val versionChanges = VersionChange.entries.associateWith { stringResource(it.labelRes()) }
     val installMethods = InstallMethod.entries.associateWith { stringResource(it.labelRes()) }
+    val unknown = stringResource(R.string.history_unknown)
+    val none = stringResource(R.string.history_none)
     val authorizers = Authorizer.entries.associateWith { authorizer ->
         if (authorizer == Authorizer.None && isSystemApp) {
             stringResource(R.string.working_status_system_installer)
@@ -82,7 +117,9 @@ fun rememberHistorySearchTexts(isSystemApp: Boolean): HistorySearchTexts {
         statuses,
         versionChanges,
         installMethods,
-        authorizers
+        authorizers,
+        unknown,
+        none
     ) {
         HistorySearchTexts(
             operationTypes = operationTypes,
@@ -90,6 +127,8 @@ fun rememberHistorySearchTexts(isSystemApp: Boolean): HistorySearchTexts {
             versionChanges = versionChanges,
             installMethods = installMethods,
             authorizers = authorizers,
+            unknown = unknown,
+            none = none,
             formatTime = { it.formatHistoryTime() }
         )
     }
@@ -97,25 +136,33 @@ fun rememberHistorySearchTexts(isSystemApp: Boolean): HistorySearchTexts {
 
 fun filterHistoryRecords(
     records: List<OperationHistoryModel>,
-    field: HistorySearchField,
-    query: String,
+    criteria: HistorySearchCriteria,
     texts: HistorySearchTexts
 ): List<OperationHistoryModel> {
-    val normalizedQuery = query.trim()
+    val normalizedQuery = criteria.query.trim()
     if (normalizedQuery.isEmpty()) return records
 
     return records.filter { record ->
-        searchableValues(record, field, texts).any { value ->
+        searchableValues(record, criteria.field, texts).any { value ->
             value.contains(normalizedQuery, ignoreCase = true)
         }
     }
 }
 
-fun hasNoHistorySearchResults(
+fun resolveHistorySearchResult(
     records: List<OperationHistoryModel>,
-    query: String,
-    visibleRecords: List<OperationHistoryModel>
-): Boolean = records.isNotEmpty() && query.isNotBlank() && visibleRecords.isEmpty()
+    criteria: HistorySearchCriteria,
+    texts: HistorySearchTexts
+): HistorySearchResult {
+    val visibleRecords = filterHistoryRecords(records, criteria, texts)
+    val emptyState = when {
+        visibleRecords.isNotEmpty() -> null
+        records.isEmpty() -> HistoryEmptyState.NO_HISTORY
+        else -> HistoryEmptyState.NO_MATCHES
+    }
+
+    return HistorySearchResult(records = visibleRecords, emptyState = emptyState)
+}
 
 private fun searchableValues(
     record: OperationHistoryModel,
@@ -144,24 +191,30 @@ private fun searchableValues(
         record.timestamp.toString()
     )
 
-    HistorySearchField.VERSION_CHANGE -> valuesOf(
-        texts.versionChanges[record.versionChange],
-        record.versionChange.name
-    )
+    HistorySearchField.VERSION_CHANGE -> record.nonSessionValues {
+        valuesOf(
+            texts.versionChanges[record.versionChange],
+            record.versionChange.name
+        )
+    }
 
-    HistorySearchField.VERSION_NAME -> valuesOf(
-        record.oldVersionName,
-        record.newVersionName
-    )
+    HistorySearchField.VERSION_NAME -> record.nonSessionValues {
+        valuesWithFallback(texts.none, record.oldVersionName, record.newVersionName)
+    }
 
-    HistorySearchField.VERSION_CODE -> valuesOf(
-        record.oldVersionCode?.toString(),
-        record.newVersionCode?.toString()
-    )
+    HistorySearchField.VERSION_CODE -> record.nonSessionValues {
+        valuesWithFallback(texts.none, record.oldVersionCode?.toString(), record.newVersionCode?.toString())
+    }
 
-    HistorySearchField.INITIATOR -> valuesOf(record.initiatorPackageName)
-    HistorySearchField.INSTALLER_PACKAGE -> valuesOf(record.installerPackageName)
-    HistorySearchField.APK_PATH -> record.sourcePaths.asSequence()
+    HistorySearchField.INITIATOR -> valueOrFallback(record.initiatorPackageName, texts.unknown)
+    HistorySearchField.INSTALLER_PACKAGE -> valueOrFallback(record.installerPackageName, texts.unknown)
+    HistorySearchField.APK_PATH -> record.nonSessionValues {
+        if (record.sourcePaths.isEmpty()) {
+            sequenceOf(texts.none)
+        } else {
+            record.sourcePaths.asSequence()
+        }
+    }
 
     HistorySearchField.METHOD -> valuesOf(
         texts.installMethods[record.installMethod],
@@ -173,8 +226,29 @@ private fun searchableValues(
         record.authorizer.value
     )
 
-    HistorySearchField.ERROR -> valuesOf(record.errorType, record.errorSummary)
+    HistorySearchField.ERROR -> if (record.status == OperationStatus.FAILED) {
+        valuesOrFallback(texts.unknown, record.errorType, record.errorSummary)
+    } else {
+        emptySequence()
+    }
 }
 
 private fun valuesOf(vararg values: String?): Sequence<String> =
     values.asSequence().filterNotNull()
+
+private fun valuesWithFallback(fallback: String, vararg values: String?): Sequence<String> =
+    values.asSequence()
+        .map { it?.takeIf(String::isNotBlank) ?: fallback }
+        .distinct()
+
+private fun valueOrFallback(value: String?, fallback: String): Sequence<String> =
+    sequenceOf(value ?: fallback)
+
+private fun valuesOrFallback(fallback: String, vararg values: String?): Sequence<String> {
+    val nonBlankValues = values.filterNotNull().filter { it.isNotBlank() }
+    return if (nonBlankValues.isEmpty()) sequenceOf(fallback) else nonBlankValues.asSequence()
+}
+
+private inline fun OperationHistoryModel.nonSessionValues(
+    values: () -> Sequence<String>
+): Sequence<String> = if (installMethod == InstallMethod.SESSION) emptySequence() else values()

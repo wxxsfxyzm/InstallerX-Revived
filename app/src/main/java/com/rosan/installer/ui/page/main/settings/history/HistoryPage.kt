@@ -84,9 +84,8 @@ import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.settings.history.HistorySearchField
-import com.rosan.installer.ui.page.main.settings.history.filterHistoryRecords
 import com.rosan.installer.ui.page.main.settings.history.rememberHistorySearchTexts
+import com.rosan.installer.ui.page.main.settings.history.resolveHistorySearchResult
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
@@ -114,26 +113,16 @@ fun HistoryPage(
     val layoutDirection = LocalLayoutDirection.current
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
     val searchTexts = rememberHistorySearchTexts(state.isSystemApp)
-    val visibleRecords = remember(
-        state.records,
-        state.searchQuery,
-        state.searchField,
-        searchTexts
-    ) {
-        filterHistoryRecords(state.records, state.searchField, state.searchQuery, searchTexts)
+    val searchResult = remember(state.records, state.searchCriteria, searchTexts) {
+        resolveHistorySearchResult(state.records, state.searchCriteria, searchTexts)
     }
-    val hasNoSearchResults = hasNoHistorySearchResults(
-        records = state.records,
-        query = state.searchQuery,
-        visibleRecords = visibleRecords
-    )
+    val visibleRecords = searchResult.records
 
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
-    var searchBarActivated by rememberSaveable { mutableStateOf(false) }
-    val hasSearchState =
-        state.searchQuery.isNotBlank() || state.searchField != HistorySearchField.ALL
-    val searchBarVisible = searchBarActivated || hasSearchState
+    var searchBarActivated by rememberSaveable {
+        mutableStateOf(state.searchCriteria.isActive)
+    }
     val searchFocusRequester = remember { FocusRequester() }
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
@@ -159,13 +148,11 @@ fun HistoryPage(
                         )
                     },
                     actions = {
-                        if (!searchBarVisible) {
-                            IconButton(onClick = { searchBarActivated = true }) {
-                                Icon(
-                                    imageVector = AppIcons.Search,
-                                    contentDescription = stringResource(R.string.search)
-                                )
-                            }
+                        IconButton(onClick = { searchBarActivated = !searchBarActivated }) {
+                            Icon(
+                                imageVector = AppIcons.Search,
+                                contentDescription = stringResource(R.string.search)
+                            )
                         }
                         IconButton(
                             enabled = state.records.isNotEmpty(),
@@ -185,16 +172,12 @@ fun HistoryPage(
                     )
                 )
 
-                if (searchBarVisible) {
+                if (searchBarActivated) {
                     HistorySearchControls(
                         state = state,
                         searchFocusRequester = searchFocusRequester,
                         onClose = {
-                            searchBarActivated = false
-                            viewModel.dispatch(HistoryViewAction.Search(""))
-                            viewModel.dispatch(
-                                HistoryViewAction.SelectSearchField(HistorySearchField.ALL)
-                            )
+                            viewModel.dispatch(HistoryViewAction.ClearSearch)
                         },
                         dispatch = viewModel::dispatch,
                     )
@@ -247,17 +230,7 @@ fun HistoryPage(
                     if (visibleRecords.isEmpty()) {
                         item {
                             EmptyHistory(
-                                title = if (hasNoSearchResults) {
-                                    stringResource(R.string.history_search_empty_title)
-                                } else {
-                                    stringResource(R.string.history_empty_title)
-                                },
-                                description = if (hasNoSearchResults) {
-                                    stringResource(R.string.history_search_empty_desc)
-                                } else {
-                                    stringResource(R.string.history_empty_desc)
-                                },
-                                alignTop = hasNoSearchResults,
+                                emptyState = requireNotNull(searchResult.emptyState),
                                 modifier = Modifier
                                     .fillParentMaxSize()
                                     .padding(horizontal = 8.dp)
@@ -373,7 +346,7 @@ private fun HistorySearchControls(
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                value = stringResource(state.searchField.labelRes()),
+                value = stringResource(state.searchCriteria.field.labelRes()),
                 onValueChange = {},
                 readOnly = true,
                 singleLine = true,
@@ -405,8 +378,8 @@ private fun HistorySearchControls(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(searchFocusRequester),
-            value = state.searchQuery,
-            onValueChange = { dispatch(HistoryViewAction.Search(it)) },
+            value = state.searchCriteria.query,
+            onValueChange = { dispatch(HistoryViewAction.UpdateSearchQuery(it)) },
             singleLine = true,
             placeholder = { Text(stringResource(R.string.search)) },
             leadingIcon = {
@@ -429,23 +402,25 @@ private fun HistorySearchControls(
 
 @Composable
 private fun EmptyHistory(
-    title: String,
-    description: String,
-    alignTop: Boolean,
+    emptyState: HistoryEmptyState,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = if (alignTop) Arrangement.Top else Arrangement.Center
+        verticalArrangement = if (emptyState == HistoryEmptyState.NO_MATCHES) {
+            Arrangement.Top
+        } else {
+            Arrangement.Center
+        }
     ) {
         Text(
-            text = title,
+            text = stringResource(emptyState.titleRes()),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.padding(top = 8.dp))
         Text(
-            text = description,
+            text = stringResource(emptyState.descriptionRes()),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

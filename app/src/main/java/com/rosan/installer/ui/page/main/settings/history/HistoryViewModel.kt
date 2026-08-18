@@ -18,18 +18,15 @@ class HistoryViewModel(
     private val repository: OperationHistoryRepository,
     private val capabilityProvider: DeviceCapabilityProvider
 ) : ViewModel() {
-    private val searchQuery = MutableStateFlow("")
-    private val searchField = MutableStateFlow(HistorySearchField.ALL)
+    private val searchCriteria = MutableStateFlow(HistorySearchCriteria())
 
     val state: StateFlow<HistoryViewState> = combine(
         repository.flowAll(),
-        searchQuery,
-        searchField
-    ) { records, query, field ->
+        searchCriteria
+    ) { records, criteria ->
             HistoryViewState(
                 records = records,
-                searchQuery = query,
-                searchField = field,
+                searchCriteria = criteria,
                 isLoading = false,
                 isSystemApp = capabilityProvider.isSystemApp
             )
@@ -46,8 +43,15 @@ class HistoryViewModel(
                 repository.clear()
             }
 
-            is HistoryViewAction.Search -> searchQuery.update { action.query }
-            is HistoryViewAction.SelectSearchField -> searchField.update { action.field }
+            is HistoryViewAction.UpdateSearchQuery -> searchCriteria.update {
+                it.copy(query = action.query)
+            }
+
+            is HistoryViewAction.SelectSearchField -> searchCriteria.update {
+                it.copy(field = action.field)
+            }
+
+            HistoryViewAction.ClearSearch -> searchCriteria.value = HistorySearchCriteria()
         }
     }
 }

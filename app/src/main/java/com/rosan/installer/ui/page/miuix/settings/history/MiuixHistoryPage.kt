@@ -54,13 +54,15 @@ import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewAction
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
+import com.rosan.installer.ui.page.main.settings.history.HistoryEmptyState
 import com.rosan.installer.ui.page.main.settings.history.HistorySearchField
-import com.rosan.installer.ui.page.main.settings.history.filterHistoryRecords
+import com.rosan.installer.ui.page.main.settings.history.descriptionRes
 import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
-import com.rosan.installer.ui.page.main.settings.history.hasNoHistorySearchResults
 import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
 import com.rosan.installer.ui.page.main.settings.history.labelRes
 import com.rosan.installer.ui.page.main.settings.history.rememberHistorySearchTexts
+import com.rosan.installer.ui.page.main.settings.history.resolveHistorySearchResult
+import com.rosan.installer.ui.page.main.settings.history.titleRes
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDropdown
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
@@ -101,19 +103,10 @@ fun MiuixHistoryPage(
     val topBarBackdrop = rememberMiuixBlurBackdrop(enableBlur)
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
     val searchTexts = rememberHistorySearchTexts(state.isSystemApp)
-    val visibleRecords = remember(
-        state.records,
-        state.searchQuery,
-        state.searchField,
-        searchTexts
-    ) {
-        filterHistoryRecords(state.records, state.searchField, state.searchQuery, searchTexts)
+    val searchResult = remember(state.records, state.searchCriteria, searchTexts) {
+        resolveHistorySearchResult(state.records, state.searchCriteria, searchTexts)
     }
-    val hasNoSearchResults = hasNoHistorySearchResults(
-        records = state.records,
-        query = state.searchQuery,
-        visibleRecords = visibleRecords
-    )
+    val visibleRecords = searchResult.records
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -144,7 +137,7 @@ fun MiuixHistoryPage(
                 )
 
                 val searchFields = HistorySearchField.entries
-                val selectedFieldIndex = searchFields.indexOf(state.searchField).coerceAtLeast(0)
+                val selectedFieldIndex = searchFields.indexOf(state.searchCriteria.field).coerceAtLeast(0)
                 MiuixDropdown(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -168,8 +161,8 @@ fun MiuixHistoryPage(
                             end = 16.dp + horizontalSafeInsets.calculateEndPadding(layoutDirection),
                             bottom = 8.dp
                         ),
-                    query = state.searchQuery,
-                    onQueryChange = { viewModel.dispatch(HistoryViewAction.Search(it)) },
+                    query = state.searchCriteria.query,
+                    onQueryChange = { viewModel.dispatch(HistoryViewAction.UpdateSearchQuery(it)) },
                     label = stringResource(R.string.search),
                     expanded = false,
                     onExpandedChange = {},
@@ -221,17 +214,7 @@ fun MiuixHistoryPage(
                 if (visibleRecords.isEmpty()) {
                     item {
                         EmptyHistory(
-                            title = if (hasNoSearchResults) {
-                                stringResource(R.string.history_search_empty_title)
-                            } else {
-                                stringResource(R.string.history_empty_title)
-                            },
-                            description = if (hasNoSearchResults) {
-                                stringResource(R.string.history_search_empty_desc)
-                            } else {
-                                stringResource(R.string.history_empty_desc)
-                            },
-                            alignTop = hasNoSearchResults,
+                            emptyState = requireNotNull(searchResult.emptyState),
                             modifier = Modifier
                                 .fillParentMaxSize()
                                 .padding(horizontal = 8.dp)
@@ -290,23 +273,25 @@ fun MiuixHistoryPage(
 
 @Composable
 private fun EmptyHistory(
-    title: String,
-    description: String,
-    alignTop: Boolean,
+    emptyState: HistoryEmptyState,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = if (alignTop) Arrangement.Top else Arrangement.Center
+        verticalArrangement = if (emptyState == HistoryEmptyState.NO_MATCHES) {
+            Arrangement.Top
+        } else {
+            Arrangement.Center
+        }
     ) {
         Text(
-            text = title,
+            text = stringResource(emptyState.titleRes()),
             style = MiuixTheme.textStyles.title2,
             color = MiuixTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
-            text = description,
+            text = stringResource(emptyState.descriptionRes()),
             style = MiuixTheme.textStyles.subtitle,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
         )
