@@ -12,6 +12,37 @@ permissions:
   packages: read # Required if you pull dependencies from GitHub Packages
 
 jobs:
+  format_check:
+    name: Code Style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
+          build-scan-publish: false
+          cache-read-only: true
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Check code formatting
+        run: ./gradlew spotlessCheck --no-configuration-cache
+
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -50,7 +81,9 @@ jobs:
 
   build_for_pr:
     name: Build Preview Debug APK
-    needs: unit_tests
+    needs:
+      - format_check
+      - unit_tests
     runs-on: ubuntu-latest
 
     steps:

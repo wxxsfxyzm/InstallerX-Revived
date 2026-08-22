@@ -36,5 +36,6 @@ Please note:
 - Describe clearly what your changes do and the problem they solve.
 - In the pull request description, specify the device(s) and Android version(s) on which the changes were tested.
 - Follow the existing coding style and project conventions.
+- Run `./gradlew spotlessCheck` before submitting. Use `./gradlew spotlessApply` to format changed Kotlin and Gradle Kotlin files.
 - Make sure the project builds successfully before submitting the pull request. Build instructions are in [docs/README.md](docs/README.md#building).
 - Format your code using Android Studio and optimize imports before committing.
