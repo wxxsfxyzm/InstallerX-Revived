@@ -98,7 +98,7 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.Installer.Translucent">
 
-            <intent-filter android:priority="10">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.INSTALL_PACKAGE" />
 
@@ -123,7 +123,7 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
 
-            <intent-filter android:priority="10">
+            <intent-filter>
                 <action android:name="android.content.pm.action.CONFIRM_INSTALL" />
                 <action android:name="android.content.pm.action.CONFIRM_PERMISSIONS" />
                 <action android:name="android.content.pm.action.CONFIRM_PRE_APPROVAL" />
