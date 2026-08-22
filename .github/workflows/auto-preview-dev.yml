@@ -8,6 +8,11 @@ on:
       - 'renovate/**'
     paths:
       - 'app/**'
+      - 'app-process/**'
+      - 'baselineprofile/**'
+      - 'build-plugins/**'
+      - 'hidden-api/**'
+      - '.editorconfig'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
@@ -33,6 +38,64 @@ jobs:
           concurrent_skipping: 'never'
           # Optional: ignore certain paths (usually handled in on.push.paths)
           do_not_skip: '[]'
+
+  format_check:
+    name: Code Style
+    needs: pre_job
+    # Run only if should_skip is not true and commit message does not contain [skip dev]
+    if: |
+      needs.pre_job.outputs.should_skip != 'true' &&
+      !contains(github.event.head_commit.message, '[skip dev]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve formatting baseline
+        id: ratchet
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [ -n "$BEFORE_SHA" ] &&
+             [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ] &&
+             git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
+            BASE_SHA="$BEFORE_SHA"
+          else
+            git fetch --no-tags origin dev:refs/remotes/origin/dev
+            BASE_SHA="$(git merge-base HEAD origin/dev)"
+          fi
+          echo "base=$BASE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
+          build-scan-publish: false
+          cache-read-only: true
+          cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Check code formatting
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew spotlessCheck --no-configuration-cache -PspotlessRatchetFrom=${{ steps.ratchet.outputs.base }}
 
   unit_tests:
     name: Unit Tests
@@ -82,6 +145,7 @@ jobs:
     name: Build Unstable Release APK
     needs:
       - pre_job
+      - format_check
       - unit_tests
     # Build only after unit tests pass and the run is not skipped.
     if: |
