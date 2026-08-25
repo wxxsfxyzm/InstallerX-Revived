@@ -6,11 +6,15 @@ import com.rosan.installer.domain.history.model.OperationHistoryModel
 import kotlinx.coroutines.flow.Flow
 
 interface OperationHistoryRepository {
+    val isEnabled: Flow<Boolean>
+
     suspend fun all(limit: Int = DEFAULT_HISTORY_LIMIT): List<OperationHistoryModel>
 
     fun flowAll(limit: Int = DEFAULT_HISTORY_LIMIT): Flow<List<OperationHistoryModel>>
 
     suspend fun insert(model: OperationHistoryModel)
+
+    suspend fun setEnabled(enabled: Boolean, clearHistory: Boolean = false)
 
     suspend fun clear()
 

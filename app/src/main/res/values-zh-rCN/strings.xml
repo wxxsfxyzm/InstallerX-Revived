@@ -31,6 +31,14 @@
     <string name="history">记录</string>
     <string name="history_empty_title">暂无记录</string>
     <string name="history_empty_desc">安装或卸载操作结束后，相关记录会显示在这里。</string>
+    <string name="history_recording">历史记录功能</string>
+    <string name="history_enable">启用历史记录</string>
+    <string name="history_disabled_title">历史记录已禁用</string>
+    <string name="history_disabled_desc">新的安装和卸载操作将不会被记录。</string>
+    <string name="history_disable_confirm_title">禁用历史记录？</string>
+    <string name="history_disable_confirm_desc">是否清除已经记录的历史？禁用历史记录后，新的操作将不会被记录。</string>
+    <string name="history_disable_and_clear">清除并禁用</string>
+    <string name="history_disable_and_keep">保留并禁用</string>
     <string name="history_clear">清空记录</string>
     <string name="history_clear_confirm_title">清空记录？</string>
     <string name="history_clear_confirm_desc">所有安装和卸载记录都将被删除。此操作无法撤销。</string>

@@ -61,6 +61,8 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
@@ -70,6 +72,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -91,6 +94,7 @@ fun MiuixHistoryPage(
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
+    var showDisableConfirmDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -101,12 +105,36 @@ fun MiuixHistoryPage(
                 title = title,
                 actions = {
                     IconButton(
-                        enabled = state.records.isNotEmpty(),
+                        enabled = state.isHistoryEnabled && state.records.isNotEmpty(),
                         onClick = { showClearConfirmDialog = true }
                     ) {
                         Icon(
                             imageVector = AppMiuixIcons.Delete,
                             contentDescription = stringResource(R.string.history_clear)
+                        )
+                    }
+                    OverlayIconDropdownMenu(
+                        entry = DropdownEntry(
+                            items = listOf(
+                                DropdownItem(
+                                    text = stringResource(R.string.history_enable),
+                                    selected = state.isHistoryEnabled,
+                                    onClick = {
+                                        if (state.isHistoryEnabled) {
+                                            showDisableConfirmDialog = true
+                                        } else {
+                                            viewModel.dispatch(
+                                                HistoryViewAction.SetHistoryEnabled(enabled = true)
+                                            )
+                                        }
+                                    }
+                                )
+                            )
+                        )
+                    ) {
+                        Icon(
+                            imageVector = AppMiuixIcons.Tune,
+                            contentDescription = stringResource(R.string.history_recording)
                         )
                     }
                 },
@@ -154,9 +182,10 @@ fun MiuixHistoryPage(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (state.records.isEmpty()) {
+                if (!state.isHistoryEnabled || state.records.isEmpty()) {
                     item {
                         EmptyHistory(
+                            isHistoryEnabled = state.isHistoryEnabled,
                             modifier = Modifier
                                 .fillParentMaxSize()
                                 .padding(horizontal = 8.dp)
@@ -183,6 +212,24 @@ fun MiuixHistoryPage(
         onConfirm = {
             showClearConfirmDialog = false
             viewModel.dispatch(HistoryViewAction.ClearHistory)
+        }
+    )
+
+    HistoryDisableConfirmDialog(
+        show = showDisableConfirmDialog,
+        onDismiss = { showDisableConfirmDialog = false },
+        onDisableAndKeep = {
+            showDisableConfirmDialog = false
+            viewModel.dispatch(HistoryViewAction.SetHistoryEnabled(enabled = false))
+        },
+        onDisableAndClear = {
+            showDisableConfirmDialog = false
+            viewModel.dispatch(
+                HistoryViewAction.SetHistoryEnabled(
+                    enabled = false,
+                    clearHistory = true
+                )
+            )
         }
     )
 
@@ -214,19 +261,34 @@ fun MiuixHistoryPage(
 }
 
 @Composable
-private fun EmptyHistory(modifier: Modifier = Modifier) {
+private fun EmptyHistory(
+    isHistoryEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.history_empty_title),
+            text = stringResource(
+                if (isHistoryEnabled) {
+                    R.string.history_empty_title
+                } else {
+                    R.string.history_disabled_title
+                }
+            ),
             style = MiuixTheme.textStyles.title2,
             color = MiuixTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
-            text = stringResource(R.string.history_empty_desc),
+            text = stringResource(
+                if (isHistoryEnabled) {
+                    R.string.history_empty_desc
+                } else {
+                    R.string.history_disabled_desc
+                }
+            ),
             style = MiuixTheme.textStyles.subtitle,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary
         )
@@ -490,6 +552,45 @@ private fun HistoryClearConfirmDialog(
                         modifier = Modifier.weight(1f),
                         onClick = onConfirm,
                         text = stringResource(R.string.clear),
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun HistoryDisableConfirmDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onDisableAndKeep: () -> Unit,
+    onDisableAndClear: () -> Unit
+) {
+    WindowDialog(
+        show = show,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.history_disable_confirm_title),
+        content = {
+            Column {
+                Text(
+                    text = stringResource(R.string.history_disable_confirm_desc),
+                    color = MiuixTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDisableAndKeep,
+                        text = stringResource(R.string.history_disable_and_keep)
+                    )
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDisableAndClear,
+                        text = stringResource(R.string.history_disable_and_clear),
                         colors = ButtonDefaults.textButtonColorsPrimary()
                     )
                 }

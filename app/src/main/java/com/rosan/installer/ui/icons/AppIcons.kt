@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.twotone.Rule
 import androidx.compose.material.icons.automirrored.twotone.TrendingDown
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.Add
@@ -64,6 +65,7 @@ import androidx.compose.material.icons.twotone.Language
 import androidx.compose.material.icons.twotone.LibraryAddCheck
 import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material.icons.twotone.Memory
+import androidx.compose.material.icons.twotone.MoreVert
 import androidx.compose.material.icons.twotone.NoEncryption
 import androidx.compose.material.icons.twotone.Notifications
 import androidx.compose.material.icons.twotone.NotificationsActive
@@ -103,6 +105,7 @@ object AppIcons {
     // You need to add the 'androidx.compose.material:material-icons-extended' dependency to use all icons
     // Or replace them with your own icon resources
     val Android = Icons.TwoTone.Android
+    val Check = Icons.Rounded.Check
     val Active = Icons.Rounded.CheckCircleOutline
     val Info = Icons.TwoTone.Info
     val Add = Icons.TwoTone.Add
@@ -229,6 +232,7 @@ object AppIcons {
     // --- Menu icons set ---
     val Menu = Icons.Filled.Menu
     val MenuOpen = Icons.AutoMirrored.TwoTone.MenuOpen
+    val MoreVert = Icons.TwoTone.MoreVert
     val DragHandle = R.drawable.ic_navigation_rearrange
     // --- Menu icons end ---
 

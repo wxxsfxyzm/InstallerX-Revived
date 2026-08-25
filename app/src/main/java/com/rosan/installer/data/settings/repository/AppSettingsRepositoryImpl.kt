@@ -268,6 +268,7 @@ class AppSettingsRepositoryImpl(
             BooleanSetting.AlwaysUseRootInSystem -> AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM
             BooleanSetting.UninstallerRequireBiometricAuth -> AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH
             BooleanSetting.ShowLauncherIcon -> AppDataStore.SHOW_LAUNCHER_ICON
+            BooleanSetting.OperationHistoryEnabled -> AppDataStore.OPERATION_HISTORY_ENABLED
             BooleanSetting.UserSetLSPosedActive -> AppDataStore.USER_SET_LSPOSED_ACTIVE
             BooleanSetting.PreferSystemIconForInstall -> AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL
             BooleanSetting.ShowDialogWhenPressingNotification -> AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION

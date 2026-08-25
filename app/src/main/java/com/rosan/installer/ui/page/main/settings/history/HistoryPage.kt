@@ -26,12 +26,16 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.DropdownMenuGroup
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
@@ -88,6 +92,25 @@ fun HistoryPage(
     outerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    HistoryPageContent(
+        useBlur = useBlur,
+        state = state,
+        title = title,
+        outerPadding = outerPadding,
+        onAction = viewModel::dispatch
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@Composable
+private fun HistoryPageContent(
+    useBlur: Boolean,
+    state: HistoryViewState,
+    title: String,
+    outerPadding: PaddingValues,
+    onAction: (HistoryViewAction) -> Unit
+) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val layoutDirection = LocalLayoutDirection.current
@@ -95,11 +118,12 @@ fun HistoryPage(
 
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
+    var showDisableConfirmDialog by remember { mutableStateOf(false) }
+    var showHistoryMenu by remember { mutableStateOf(false) }
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
     )
-
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -116,13 +140,53 @@ fun HistoryPage(
                 },
                 actions = {
                     IconButton(
-                        enabled = state.records.isNotEmpty(),
+                        enabled = state.isHistoryEnabled && state.records.isNotEmpty(),
                         onClick = { showClearConfirmDialog = true }
                     ) {
                         Icon(
                             imageVector = AppIcons.Delete,
                             contentDescription = stringResource(R.string.history_clear)
                         )
+                    }
+                    Box {
+                        IconButton(onClick = { showHistoryMenu = true }) {
+                            Icon(
+                                imageVector = AppIcons.MoreVert,
+                                contentDescription = stringResource(R.string.history_recording)
+                            )
+                        }
+                        DropdownMenuPopup(
+                            expanded = showHistoryMenu,
+                            onDismissRequest = { showHistoryMenu = false }
+                        ) {
+                            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                                DropdownMenuItem(
+                                    checked = state.isHistoryEnabled,
+                                    onCheckedChange = { enabled ->
+                                        showHistoryMenu = false
+                                        if (enabled) {
+                                            onAction(
+                                                HistoryViewAction.SetHistoryEnabled(enabled = true)
+                                            )
+                                        } else {
+                                            showDisableConfirmDialog = true
+                                        }
+                                    },
+                                    text = { Text(stringResource(R.string.history_enable)) },
+                                    trailingContent = if (state.isHistoryEnabled) {
+                                        {
+                                            Icon(
+                                                imageVector = AppIcons.Check,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    } else {
+                                        null
+                                    },
+                                    shapes = MenuDefaults.itemShape(index = 0, count = 1)
+                                )
+                            }
+                        }
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -176,9 +240,10 @@ fun HistoryPage(
                     ),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    if (state.records.isEmpty()) {
+                    if (!state.isHistoryEnabled || state.records.isEmpty()) {
                         item {
                             EmptyHistory(
+                                isHistoryEnabled = state.isHistoryEnabled,
                                 modifier = Modifier
                                     .fillParentMaxSize()
                                     .padding(horizontal = 8.dp)
@@ -218,7 +283,7 @@ fun HistoryPage(
                 TextButton(
                     onClick = {
                         showClearConfirmDialog = false
-                        viewModel.dispatch(HistoryViewAction.ClearHistory)
+                        onAction(HistoryViewAction.ClearHistory)
                     }
                 ) {
                     Text(stringResource(R.string.clear))
@@ -227,6 +292,39 @@ fun HistoryPage(
             dismissButton = {
                 TextButton(onClick = { showClearConfirmDialog = false }) {
                     Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showDisableConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showDisableConfirmDialog = false },
+            title = { Text(stringResource(R.string.history_disable_confirm_title)) },
+            text = { Text(stringResource(R.string.history_disable_confirm_desc)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDisableConfirmDialog = false
+                        onAction(
+                            HistoryViewAction.SetHistoryEnabled(
+                                enabled = false,
+                                clearHistory = true
+                            )
+                        )
+                    }
+                ) {
+                    Text(stringResource(R.string.history_disable_and_clear))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDisableConfirmDialog = false
+                        onAction(HistoryViewAction.SetHistoryEnabled(enabled = false))
+                    }
+                ) {
+                    Text(stringResource(R.string.history_disable_and_keep))
                 }
             }
         )
@@ -258,19 +356,26 @@ fun HistoryPage(
 }
 
 @Composable
-private fun EmptyHistory(modifier: Modifier = Modifier) {
+private fun EmptyHistory(
+    isHistoryEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.history_empty_title),
+            text = stringResource(
+                if (isHistoryEnabled) R.string.history_empty_title else R.string.history_disabled_title
+            ),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.padding(top = 8.dp))
         Text(
-            text = stringResource(R.string.history_empty_desc),
+            text = stringResource(
+                if (isHistoryEnabled) R.string.history_empty_desc else R.string.history_disabled_desc
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

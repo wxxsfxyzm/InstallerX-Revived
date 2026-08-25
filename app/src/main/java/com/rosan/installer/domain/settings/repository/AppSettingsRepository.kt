@@ -50,6 +50,7 @@ enum class BooleanSetting {
     AlwaysUseRootInSystem,
     UninstallerRequireBiometricAuth,
     ShowLauncherIcon,
+    OperationHistoryEnabled,
     PreferSystemIconForInstall,
     ShowDialogWhenPressingNotification,
     UserReadScopeTips,

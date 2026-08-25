@@ -35,6 +35,14 @@
     <string name="history">History</string>
     <string name="history_empty_title">No records yet</string>
     <string name="history_empty_desc">Installation and uninstallation records will appear here after an operation finishes.</string>
+    <string name="history_recording">History recording</string>
+    <string name="history_enable">Enable history</string>
+    <string name="history_disabled_title">History is disabled</string>
+    <string name="history_disabled_desc">New installation and uninstallation operations will not be recorded.</string>
+    <string name="history_disable_confirm_title">Disable history?</string>
+    <string name="history_disable_confirm_desc">Would you like to clear the history already recorded? New operations will not be recorded while history is disabled.</string>
+    <string name="history_disable_and_clear">Clear and disable</string>
+    <string name="history_disable_and_keep">Keep and disable</string>
     <string name="history_clear">Clear history</string>
     <string name="history_clear_confirm_title">Clear history?</string>
     <string name="history_clear_confirm_desc">All installation and uninstallation records will be deleted. This cannot be undone.</string>

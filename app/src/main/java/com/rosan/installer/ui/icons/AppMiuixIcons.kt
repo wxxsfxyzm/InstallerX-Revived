@@ -16,6 +16,7 @@ import top.yukonga.miuix.kmp.icon.extended.Info
 import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.extended.Tune
 
 object AppMiuixIcons {
     // --- App Icons ---
@@ -24,6 +25,7 @@ object AppMiuixIcons {
     val Refresh = MiuixIcons.Regular.Refresh
     val Ok = MiuixIcons.Regular.Ok
     val Delete = MiuixIcons.Regular.Delete
+    val Tune = MiuixIcons.Regular.Tune
 
     // --- Navigation Icons ---
     val Back = MiuixIcons.Regular.Back

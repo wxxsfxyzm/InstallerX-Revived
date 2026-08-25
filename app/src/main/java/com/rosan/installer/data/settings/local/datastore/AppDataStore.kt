@@ -64,6 +64,10 @@ class AppDataStore(
         val PREDICTIVE_BACK_EXIT_DIRECTION =
             register(stringPreferencesKey("predictive_back_exit_direction"), PreferenceValueType.STRING)
 
+        // Operation History
+        val OPERATION_HISTORY_ENABLED =
+            register(booleanPreferencesKey("operation_history_enabled"), PreferenceValueType.BOOLEAN)
+
         // Show Live Activity
         val SHOW_LIVE_ACTIVITY = register(booleanPreferencesKey("show_live_activity"), PreferenceValueType.BOOLEAN)
 
