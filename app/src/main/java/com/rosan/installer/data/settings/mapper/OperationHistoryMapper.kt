@@ -31,7 +31,8 @@ fun OperationHistoryEntity.toDomainModel() = OperationHistoryModel(
     authorizer = Authorizer.fromValueOrDefault(authorizer),
     installMode = InstallMode.entries.find { it.value == installMode } ?: InstallMode.Dialog,
     errorSummary = errorSummary,
-    errorType = errorType
+    errorType = errorType,
+    operationSessionKey = operationSessionKey
 )
 
 fun OperationHistoryModel.toEntity() = OperationHistoryEntity(
@@ -54,7 +55,8 @@ fun OperationHistoryModel.toEntity() = OperationHistoryEntity(
     authorizer = authorizer.value,
     installMode = installMode.value,
     errorSummary = errorSummary,
-    errorType = errorType
+    errorType = errorType,
+    operationSessionKey = operationSessionKey
 )
 
 private inline fun <reified T : Enum<T>> enumValueOrDefault(value: String, default: T): T =

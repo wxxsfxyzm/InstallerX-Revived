@@ -3,14 +3,20 @@
 package com.rosan.installer.domain.packageupdate.repository
 
 import com.rosan.installer.domain.packageupdate.model.PendingSelfUpdate
+import com.rosan.installer.domain.packageupdate.model.PendingSelfUpdateHistory
 import com.rosan.installer.domain.packageupdate.model.PendingSourceDeletion
+import com.rosan.installer.domain.settings.model.config.Authorizer
 
 interface SelfUpdateRecoveryRepository {
     suspend fun arm(update: PendingSelfUpdate)
 
     suspend fun getPendingUpdate(): PendingSelfUpdate?
 
-    suspend fun updateSourceDeletion(sessionId: String, sourceDeletion: PendingSourceDeletion?)
+    suspend fun updatePostInstallState(
+        sessionId: String,
+        sourceDeletion: PendingSourceDeletion?,
+        historyAuthorizer: Authorizer
+    )
 
     suspend fun clear(sessionId: String)
 
@@ -23,4 +29,8 @@ interface SelfUpdateRecoveryRepository {
     suspend fun getCompletedSourceDeletion(): PendingSourceDeletion?
 
     suspend fun clearCompletedSourceDeletion()
+
+    suspend fun getCompletedHistory(): PendingSelfUpdateHistory?
+
+    suspend fun clearCompletedHistory()
 }

@@ -31,7 +31,8 @@ val packageUpdateModule = module {
         SelfUpdateRecoveryManager(
             context = androidContext(),
             recoveryRepository = get(),
-            postInstallTaskProvider = get()
+            postInstallTaskProvider = get(),
+            recordOperationHistory = get()
         )
     }
 }

@@ -59,7 +59,7 @@ class AppInstallerRepositoryImpl(
         onProgress: suspend (InstallWriteProgress) -> Unit,
         onPhaseChanged: suspend (InstallPhase) -> Unit
     ) = executeWithRepo(config) { repo ->
-        persistSelfUpdateSourceDeletion(config, entities, metadata)
+        persistSelfUpdatePostInstallState(config, entities, metadata)
 
         val requestedRespectPlatformInstallPolicy =
             AppConfig.isRespectPlatformInstallPolicyAvailable &&
@@ -103,7 +103,7 @@ class AppInstallerRepositoryImpl(
         )
     }
 
-    private suspend fun persistSelfUpdateSourceDeletion(
+    private suspend fun persistSelfUpdatePostInstallState(
         config: ConfigModel,
         entities: List<InstallEntity>,
         metadata: InstallMetadata
@@ -131,12 +131,16 @@ class AppInstallerRepositoryImpl(
         }
 
         try {
-            selfUpdateRecoveryRepository.updateSourceDeletion(sessionId, sourceDeletion)
+            selfUpdateRecoveryRepository.updatePostInstallState(
+                sessionId = sessionId,
+                sourceDeletion = sourceDeletion,
+                historyAuthorizer = config.authorizer
+            )
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            // Failure to persist optional cleanup must not prevent the package update itself.
-            Timber.w(error, "Failed to persist Android 17 self-update source deletion.")
+            // Failure to persist optional recovery tasks must not prevent the package update itself.
+            Timber.w(error, "Failed to persist Android 17 self-update post-install state.")
         }
     }
 

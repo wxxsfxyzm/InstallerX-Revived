@@ -26,6 +26,7 @@ import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.model.install.sourcePath
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationKey
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
@@ -36,6 +37,7 @@ import com.rosan.installer.domain.engine.usecase.GetSessionConfirmationDetailsUs
 import com.rosan.installer.domain.engine.usecase.ProcessInstallationUseCase
 import com.rosan.installer.domain.engine.usecase.ProcessUninstallUseCase
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
+import com.rosan.installer.domain.packageupdate.model.PendingSelfUpdateHistory
 import com.rosan.installer.domain.session.model.ConfirmationRequest
 import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.model.ConfirmationState
@@ -601,7 +603,10 @@ class ActionHandler(
         }
         // Android 17 may kill this process before a successful self-update call returns.
         // Persist the expected package state immediately before handing control to PackageManager.
-        val recoveryArmed = selfUpdate != null && selfUpdateRecoveryManager.arm(sessionId)
+        val recoveryArmed = selfUpdate != null && selfUpdateRecoveryManager.arm(
+            sessionId = sessionId,
+            history = selfUpdate.toPendingSelfUpdateHistory()
+        )
 
         try {
             install()
@@ -613,6 +618,36 @@ class ActionHandler(
             }
             throw error
         }
+    }
+
+    private fun PackageAnalysisResult.toPendingSelfUpdateHistory(): PendingSelfUpdateHistory? {
+        val selectedEntities = appEntities.filter { it.selected }
+        val base = selectedEntities
+            .map { it.app }
+            .filterIsInstance<AppEntity.BaseEntity>()
+            .firstOrNull()
+            ?: appEntities
+                .map { it.app }
+                .filterIsInstance<AppEntity.BaseEntity>()
+                .firstOrNull()
+            ?: return null
+        val installed = installedAppInfo?.takeUnless { it.isUninstalled }
+
+        return PendingSelfUpdateHistory(
+            packageName = packageName,
+            appLabel = base.label ?: installed?.label,
+            oldVersionName = installed?.versionName,
+            oldVersionCode = installed?.versionCode,
+            newVersionName = base.versionName,
+            newVersionCode = base.versionCode,
+            sourcePaths = selectedEntities
+                .mapNotNull { it.app.data.sourcePath() }
+                .distinct(),
+            initiatorPackageName = session.config.initiatorPackageName,
+            authorizer = session.config.authorizer,
+            installMode = session.config.installMode,
+            operationSessionKey = sessionId
+        )
     }
 
     private suspend fun resolveConfirm(

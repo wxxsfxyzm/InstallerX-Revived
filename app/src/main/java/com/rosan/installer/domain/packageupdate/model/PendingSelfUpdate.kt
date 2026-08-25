@@ -5,5 +5,6 @@ package com.rosan.installer.domain.packageupdate.model
 data class PendingSelfUpdate(
     val sessionId: String,
     val previousUpdateTime: Long,
-    val armedAtElapsed: Long
+    val armedAtElapsed: Long,
+    val history: PendingSelfUpdateHistory? = null
 )
