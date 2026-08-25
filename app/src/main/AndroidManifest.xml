@@ -140,7 +140,7 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.Installer.Translucent">
 
-            <intent-filter android:priority="10">
+            <intent-filter>
                 <action android:name="android.intent.action.DELETE" />
                 <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
 
@@ -229,10 +229,6 @@
                     android:host="46789" />
             </intent-filter>
         </receiver>
-
-        <meta-data
-            android:name="ScopedStorage"
-            android:value="true" />
 
         <meta-data
             android:name="app_description_title"
