@@ -12,7 +12,7 @@
     <string name="working_status_default_installer">Работи като изтегляч по подразбиране</string>
     <string name="working_status_not_default_installer">Не работи като изтегляч по подразбиране</string>
     <string name="working_status_not_default_installer_click_details">Натисни да видиш детайли</string>
-    <string name="setting_lsposed_module_title">LSPosed модул активиран</string>
+    <string name="setting_lsposed_module_title">Vector модул активиран</string>
     <string name="home_stat_authorizers">Налични Привилегии</string>
     <string name="home_stat_profiles">Профили</string>
     <string name="home_label_lsp_link">Търсиш модул?</string>
@@ -212,4 +212,24 @@
     <string name="staged">Поетапно</string>
     <string name="disable_verification">Деактивирай Проверка</string>
     <string name="full_app">Пълно Приложение</string>
+    <string name="history_empty_title">Все още няма записи</string>
+    <string name="history_empty_desc">Записи да инсталирани и деинстслирани приложения ще се покажат тук след като операция свърши.</string>
+    <string name="history_clear">Изчисти история</string>
+    <string name="history_clear_confirm_title">Изчисти история?</string>
+    <string name="history_operation_install">Инсталирай</string>
+    <string name="history_operation_uninstall">Деинстслиране</string>
+    <string name="history_operation_session_confirm">Сесия</string>
+    <string name="history_status_success">Готово</string>
+    <string name="history_status_failed">Не стана</string>
+    <string name="history_version_fresh_install">Нова инсталация</string>
+    <string name="history_version_update">Актуализирай</string>
+    <string name="history_version_downgrade">Деактуализирай</string>
+    <string name="history_version_same">Същата версия</string>
+    <string name="history_method_package_manager">Мениджър за пакети</string>
+    <string name="history_method_session">Потвърждаване на сесията</string>
+    <string name="history_operation_type">Тип на Операция</string>
+    <string name="history_package_name">Име на пакета</string>
+    <string name="history_time">Време</string>
+    <string name="working_status_default_installer_tip">Задай това приложение като инсталатор на пакети по подразбиране, за да поеме повечето заявки за инсталиране. Обърнu внимание, че следните случаи не могат да бъдат прехванати: \n- OEMите ограничават модифицирането на инсталатора по подразбиране \n- Инициаторът указва целеви компонент \n- Инициаторът използва Сесийна Инсталация</string>
+    <string name="setting_lsposed_module_desc">Активирай това, ако сu принудил инсталатора по подразбиране да поеме контрола чрез Vector модул от трета страна. Това деактивира вътрешната проверка на състоянието и началната страница постоянно ще се показва като Активирано</string>
 </resources>

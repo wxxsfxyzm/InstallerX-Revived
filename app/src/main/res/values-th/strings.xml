@@ -351,5 +351,5 @@
     <string name="working_status_none_authorizer_desc">จำเป็นต้องเปิดอนุญาตการติดตั้งจาก \"แหล่งที่ไม่รู้จัก\" เพื่อติดตั้งแอป</string>
     <string name="working_status_not_default_installer_click_details">แตะเพื่อดูรายละเอียด</string>
     <string name="working_status_default_installer_tip">ตั้งค่าแอปนี้เป็นตัวติดตั้งแพ็กเกจหลักเพื่อรับคำขอติดตั้งส่วนใหญ่ ทั้งนี้ ไม่สามารถแทรกแซงในกรณีต่อไปนี้ได้:\n- OEM จำกัดการแก้ไขตัวติดตั้งหลัก\n- ผู้เรียกใช้งานระบุ Component ปลายทาง\n- ผู้เรียกใช้งานใช้ Session Install</string>
-    <string name="setting_lsposed_module_title">เปิดใช้งาน Module LSPosed</string>
+    <string name="setting_lsposed_module_title">เปิดใช้งาน Module Vector</string>
 </resources>

@@ -31,9 +31,9 @@
     <string name="theme_settings_google_ui_desc">Standart Materyal Tasarım Kullanıcı Arayüzü</string>
     <string name="theme_settings_google_ui">Google Materyal 3</string>
     <string name="theme_settings_ui_engine">Arayüz Motoru</string>
-    <string name="theme_settings_hide_launcher_icon">Başlatıcı simgesini gizle</string>
+    <string name="theme_settings_hide_launcher_icon">Launcher simgesini gizle</string>
     <string name="theme_settings_hide_launcher_icon_desc">Ayarları açmak için *#*#46789#*#* tuşlayın</string>
-    <string name="theme_settings_hide_launcher_icon_warning">Lütfen başlatıcı simgesini gizlemeden önce bu sayfaya erişebildiğinizden emin olun!</string>
+    <string name="theme_settings_hide_launcher_icon_warning">Lütfen launcher simgesini gizlemeden önce bu sayfaya erişebildiğinizden emin olun!</string>
     <string name="theme_settings_hide_launcher_icon_warning_xiaomi">HyperOS için, tuşlama kodunu almak için lütfen Otomatik başlatma ve Arka planda çalışırken yeni pencereler açma özelliklerine izin verin!</string>
     <string name="installer_settings">Yükleyici Ayarları</string>
     <string name="installer_settings_desc">Yükleyicinin global ayarlarını değiştirin</string>
@@ -551,7 +551,7 @@
     <string name="installer_settings_require_biometric_auth_desc">Paket yüklemesi sırasında biyometrik kimlik doğrulama gereklidir</string>
     <string name="uninstaller_settings_require_biometric_auth">Kaldırmak için Biyometrik Kimlik Doğrulama Gerekli</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Kaldırma sırasında biyometrik kimlik doğrulaması gereklidir</string>
-    <string name="use_biometric_confirm_change_auth_settings">Bu ayarı değiştirmek istediğinizden emin misiniz</string>
+    <string name="use_biometric_confirm_change_auth_settings">Bu ayarı değiştirmek istediğinizden emin misiniz?</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">Devam etmek için lütfen cihaz kimlik doğrulamanızı kullanarak bu işlemi onaylayın</string>
     <string name="installer_settings_auto_clear_time_never_desc">Başarılı yükleme bildirimini asla temizlemeyin</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Başarılı yükleme bildirimini %d saniye sonra temizler</string>
@@ -714,7 +714,7 @@
     <string name="working_status_none_authorizer_desc">Herhangi bir ayrıcalık kullanılmaz, Bilinmeyen Kaynaklar izni uygulamaları yüklemek için gereklidir</string>
     <string name="working_status_not_default_installer_click_details">Ayrıntıları görüntülemek için tıklayın</string>
     <string name="working_status_default_installer_tip">Bu uygulamayı varsayılan paket yükleyici olarak ayarlayarak çoğu yükleme isteğini devralmasını sağlayın. Aşağıdaki durumların engellenemeyeceğini unutmayın:\n- OEM\'in varsayılan yükleyicinin değiştirilmesini kısıtlaması\n- Başlatıcının bir hedef Bileşeni belirtmesi\n- Başlatıcının bir Oturum Yüklemesi kullanması</string>
-    <string name="setting_lsposed_module_title">LSPosed Modülü Etkinleştirildi</string>
+    <string name="setting_lsposed_module_title">Vector Modülü Etkinleştirildi</string>
     <string name="home_stat_authorizers">Mevcut Ayrıcalıklar</string>
     <string name="home_stat_profiles">Profiller</string>
     <string name="home_label_lsp_link">Modül mü arıyorsunuz?</string>
@@ -731,7 +731,7 @@
     <string name="home_device_info_default_installer">Varsayılan Yükleyici Etkinliği</string>
     <string name="priv_page_notice_title">Yükleme profilinden farkı</string>
     <string name="priv_page_notice_desc">Bu ayar, uygulamanın ayrıcalıklı işlemler için kullanacağı yetkilendiriciyi kontrol eder. Yükleme profilleri, uygulamaları yüklerken kullanılan yetkilendiriciyi kontrol eder ve bu amaçla bu genel ayarı geçersiz kılabilir.</string>
-    <string name="setting_lsposed_module_desc">Üçüncü taraf bir LSPosed modülü aracılığıyla varsayılan yükleyiciyi zorladıysanız bunu etkinleştirin. Bu, dahili durum kontrolünü devre dışı bırakır ve ana sayfa sürekli Etkin olarak görünür</string>
+    <string name="setting_lsposed_module_desc">Üçüncü taraf bir Vector modülü aracılığıyla varsayılan yükleyiciyi zorladıysanız bunu etkinleştirin. Bu, dahili durum kontrolünü devre dışı bırakır ve ana sayfa sürekli Etkin olarak görünür</string>
     <string name="priv_page_what_is_this_desc">Bu bölüm, bu uygulama için mevcut tüm yetkilendirme yöntemlerini algılar ve ayrıcalıklı işlemler için kullanılacak varsayılan yöntemi seçmenize olanak tanır. Burada yalnızca kullanılabilirlik kontrol edilir; gerekli izinler, uygulama gerçekten ihtiyaç duyduğunda talep edilecektir.</string>
     <string name="exception_initiator_not_visible">Paket görünürlük kısıtlamaları nedeniyle izin reddedildi. Yüklemeyi talep eden uygulama InstallerX\'ten gizlenmiştir. \'Hide My Applist\' gibi modüller kullanıyorsanız, lütfen InstallerX\'i izin verilenler listesine ekleyin</string>
     <string name="installer_settings_xposed_detection">Xposed Tespiti</string>
@@ -927,4 +927,27 @@
     <string name="allow_internet_access">İnternet erişimine izin ver</string>
     <string name="allow_internet_access_desc">InstallerX\'in ağ bağlantılarından güncellemeleri kontrol etmesine ve APK dosyalarını indirmesine izin verin</string>
     <string name="network_access">Ağ erişimi</string>
+    <string name="network_settings">Ağ ayarları</string>
+    <string name="network_settings_internet_access_enabled_desc">Uygulama internete erişebilir</string>
+    <string name="network_settings_internet_access_disabled_desc">Uygulama internete erişemez</string>
+    <string name="config_network_source_mode">Ağ kaynak yönetimi</string>
+    <string name="network_source_mode_warning_title">İmza doğrulama sınırlamaları</string>
+    <string name="config_network_source_cache">Tam indirme</string>
+    <string name="config_network_source_cache_desc">Analizden önce kaynak kodun tamamını indirin, Maksimum Uyumluluk</string>
+    <string name="config_network_source_smart">Akıllı</string>
+    <string name="config_network_source_smart_desc">Destekleniyorsa tek bir APK dosyasını yayınlayın; diğer kaynakları indirin</string>
+    <string name="config_network_source_low_storage">Düşük depolama</string>
+    <string name="config_network_source_low_storage_desc">Tek bir APK için akış desteği sağlayın; paket arşivlerini eksiksiz olarak indirin</string>
+    <string name="installer_signature_declared_schemes">Beyan edilen imza şemaları (doğrulanmamış)</string>
+    <string name="exception_resolve_failed_range_required">Düşük depolama modu, kararlı ve erişilebilir bir HTTP aralığı kaynağı gerektirir</string>
+    <string name="exception_resolve_failed_strong_etag_required">Düşük depolama modu, sunucudan güçlü bir HTTP ETag gerektirir</string>
+    <string name="exception_resolve_failed_low_storage_unsupported">Düşük depolama alanına sahip ağ kaynakları için Android 9 veya üzeri sürümler gereklidir</string>
+    <string name="exception_resolve_failed_streaming_probe">Düşük depolama modu, HTTP aralığı istekleri aracılığıyla bu paketi inceleyemedi</string>
+    <string name="exception_analyse_failed_streaming_source_unsupported">Bu kaynak Düşük depolama modunda analiz edilemez. Akıllı veya Tam indirme seçeneğini tercih edin.</string>
+    <string name="exception_analyse_failed_source_materialization">Analiz için kaynak kodunun tamamını indirmek mümkün değil</string>
+    <string name="network_source_mode_warning_desc">Akıllı ve düşük depolama modları tek APK dosyalarını akış halinde işleyebilir. Akış sırasında InstallerX tam APK imza doğrulamasını gerçekleştiremez, bu nedenle imzaları uyuşmayan uygulamaları engelleyen profil ayarı etkili olamaz. InstallerX yine de imza sertifikalarını okur ve karşılaştırır: eşleşen sertifikalara izin verilirken, farklı sertifikalar veya doğrulanamayan uyumluluk, bilinmeyen imzaları engelleme profil ayarını takip eder. Android, kurulum sırasında son imza doğrulamasını yine de gerçekleştirir.</string>
+    <string name="installer_prepare_signature_signing_block_not_installed">Hafif HTTP analizi, doğrulanmamış bir imzalayıcı sertifika bildirimini okudu. Karşılaştırma için kurulu bir uygulama bulunmamaktadır. APK içeriği doğrulanmadı; PackageInstaller son imza doğrulamasını gerçekleştirir.</string>
+    <string name="installer_prepare_signature_signing_block_match">İmzalar eşleşiyor, ancak basit HTTP analizi karşılaştırma sonucunu doğrulayamıyor. APK içeriği doğrulanmamış durumda; PackageInstaller son imza doğrulamasını gerçekleştiriyor.</string>
+    <string name="installer_prepare_signature_signing_block_unknown">Hafif HTTP analizi, doğrulanmamış imzalayıcı sertifika bildirimini yüklü uygulamayla karşılaştıramadı. APK içeriği doğrulanmadı; PackageInstaller son imza doğrulamasını gerçekleştiriyor.</string>
+    <string name="config_allow_sig_unknown_http_lightweight_desc">Hafif HTTP analizi sırasında, herhangi bir imza anormalliği bu ayara göre değerlendirilir.</string>
 </resources>

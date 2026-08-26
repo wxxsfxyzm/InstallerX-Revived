@@ -370,7 +370,7 @@
     <string name="theme_settings_miuix_custom_colors_desc">تخصيص ألوان السمة ضمن نمط Miuix</string>
     <string name="lab">المختبر</string>
     <string name="lab_desc">الوصول إلى الميزات التجريبية والمطورة</string>
-    <string name="updating">جاري التحديث. . .</string>
+    <string name="updating">جاري التحديث…</string>
     <string name="update_available">تحديث متاح: %1$s</string>
     <string name="get_update_directly">احصل على التحديث مباشرة</string>
     <string name="get_update_directly_desc">احصل على تحديث مباشرة من GitHub وثبت، لن يبقى أي ذاكرة تخزين مؤقت</string>
@@ -422,8 +422,8 @@
     <string name="working_status_none_authorizer_desc">لا تستخدم أي امتيازات، يلزم الحصول على إذن \"مصادر غير معروفة\" لتثبيت التطبيقات</string>
     <string name="working_status_not_default_installer_click_details">انقر لعرض التفاصيل</string>
     <string name="working_status_default_installer_tip">عيّن هذا التطبيق كمثبّت الحزم الافتراضي ليتولى معظم طلبات التثبيت. يُرجى ملاحظة أنه لا يمكن اعتراض الحالات التالية:\n- يمنع مُصنِّع الجهاز تعديل المثبّت الافتراضي\n- يُحدِّد المُنشئ مُكوِّنًا مُستهدفًا\n- يستخدم المُنشئ تثبيت الجلسة</string>
-    <string name="setting_lsposed_module_title">تم تفعيل وحدة LSPosed</string>
-    <string name="setting_lsposed_module_desc">فعّل هذا الخيار إذا كنت قد فرضت استخدام المثبّت الافتراضي عبر وحدة LSPosed خارجية. سيؤدي ذلك إلى تعطيل التحقق من الحالة الداخلية، وستظهر الصفحة الرئيسية دائمًا على أنها مُفعّلة</string>
+    <string name="setting_lsposed_module_title">تم تفعيل وحدة Vector</string>
+    <string name="setting_lsposed_module_desc">فعّل هذا الخيار إذا كنت قد فرضت استخدام المثبّت الافتراضي عبر وحدة Vector خارجية. سيؤدي ذلك إلى تعطيل التحقق من الحالة الداخلية، وستظهر الصفحة الرئيسية دائمًا على أنها مُفعّلة</string>
     <string name="home_stat_authorizers">الامتيازات المتاحة</string>
     <string name="home_stat_profiles">الملفات الشخصية</string>
     <string name="home_label_lsp_link">هل تبحث عن وحدة دراسية؟</string>

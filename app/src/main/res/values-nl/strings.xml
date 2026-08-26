@@ -340,7 +340,7 @@
     <string name="installer_module_author_label">Auteur:</string>
     <string name="exception_install_failed_unknown">Onbekende fout</string>
     <string name="exception_resolve_failed">Opzoeken van de URI mislukt</string>
-    <string name="exception_resolve_failed_no_internet_access">Deze versie heeft geen toegang tot het internet, installeer de andere versie om deze functie te gebruiken</string>
+    <string name="exception_resolve_failed_no_internet_access">Internettoegang is uitgeschakeld in de app-instellingen. Schakel deze in via de netwerkinstellingen om deze functie te gebruiken.</string>
     <string name="exception_analyse_failed_all_files_unsupported">Bestand niet ondersteund</string>
     <string name="exception_install_failed_already_exists">Deze app versie is al geïnstalleerd, verwijder alsjeblieft de app en probeer het opnieuw</string>
     <string name="exception_install_failed_blacklisted_package">Je staat het installeren van deze app niet toe!</string>
@@ -574,7 +574,7 @@
     <string name="installer_settings_require_biometric_auth_desc">Biometrische authenticatie vereisen tijdens installeren van pakketten</string>
     <string name="uninstaller_settings_require_biometric_auth">Biometrische authenticatie vereisen voor verwijderen</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Biometrische authenticatie vereisen tijdens verwijderen</string>
-    <string name="use_biometric_confirm_change_auth_settings">Weet je zeker dat je deze instelling wilt veranderen</string>
+    <string name="use_biometric_confirm_change_auth_settings">Weet je zeker dat je deze instelling wilt veranderen?</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">Om door te gaan, bevestig alsjeblieft deze actie met je apparaatauthenticatie</string>
     <string name="auth_to_continue_work">Authenticeer alsjeblieft om deze actie te bevestigen</string>
     <string name="auth_summary_install">Je bent een installatieactie aan het doen. Om door te gaan, bevestig alsjeblieft deze actie met je apparaatauthenticatie</string>
@@ -714,8 +714,8 @@
     <string name="working_status_none_authorizer_desc">Geen gebruik van privileges, toestemming voor Installatie uit onbekende bronnen vereist voor installeren</string>
     <string name="working_status_not_default_installer_click_details">Klik om de details te bekijken</string>
     <string name="working_status_default_installer_tip">Stel deze app in als de standaard pakketinstallateur om de meeste installatieaanvragen over te nemen. Wees ervan bewust dat het in de volgende gevallen niet werkt:\n- OEM vermindert het aanpassen van de standaard installateur\n- De aanvrager specificeert een doelcomponent\n- De aanvrager gebruikt een sessie-installatie</string>
-    <string name="setting_lsposed_module_title">LSPosed module ingeschakeld</string>
-    <string name="setting_lsposed_module_desc">Schakel dit in als je de standaard installateur hebt geforceerd via een LPosed module. Dit schakelt het interne checken van de status uit en de startpagina zal de hele tijd getoond worden als Geactiveerd</string>
+    <string name="setting_lsposed_module_title">Vector module ingeschakeld</string>
+    <string name="setting_lsposed_module_desc">Schakel dit in als je de standaard installateur hebt geforceerd via een Vector module. Dit schakelt het interne checken van de status uit en de startpagina zal de hele tijd getoond worden als Geactiveerd</string>
     <string name="home_stat_authorizers">Beschikbare privileges</string>
     <string name="home_stat_profiles">Profielen</string>
     <string name="home_label_lsp_link">Ben je op zoek naar een module?</string>
@@ -748,7 +748,7 @@
     <string name="history_status_failed">Mislukt</string>
     <string name="history_version_fresh_install">Verse installatie</string>
     <string name="history_version_update">Update</string>
-    <string name="history_version_downgrade">Downgrade</string>
+    <string name="history_version_downgrade">Downgraden</string>
     <string name="history_version_same">Zelfde versie</string>
     <string name="history_method_package_manager">Pakketbeheerder</string>
     <string name="history_method_session">Sessiebevestiging</string>

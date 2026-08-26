@@ -20,8 +20,8 @@
     <string name="working_status_none_authorizer_desc">Do not make use of any privilege, Unknown Sources permission is required to install apps</string>
     <string name="working_status_not_default_installer_click_details">Click to view details</string>
     <string name="working_status_default_installer_tip">Set this app as the default package installer to take over most installation requests. Note that the following cases cannot be intercepted:\n- OEM restricts modifying the default installer\n- The initiator specifies a target Component\n- The initiator uses a Session Install</string>
-    <string name="setting_lsposed_module_title">LSPosed Module Enabled</string>
-    <string name="setting_lsposed_module_desc">Enable this if you have forced the default installer takeover via a third-party LSPosed module. This disables internal status checking, and the home page will constantly show as "Activated"</string>
+    <string name="setting_lsposed_module_title">Vector Module Enabled</string>
+    <string name="setting_lsposed_module_desc">Enable this if you have forced the default installer takeover via a third-party Vector module. This disables internal status checking, and the home page will constantly show as Activated</string>
     <string name="home_stat_authorizers">Available Privileges</string>
     <string name="home_stat_profiles">Profiles</string>
     <string name="home_label_lsp" translatable="false">LSPosed</string>
@@ -102,7 +102,7 @@
     <string name="internet_access_disabled">Offline</string>
     <string name="network_access">Network access</string>
     <string name="allow_internet_access">Allow Internet access</string>
-    <string name="allow_internet_access_desc">Allow InstallerX to check updates and download APKs from network links</string>
+    <string name="allow_internet_access_desc">Allow InstallerX Revived to check for updates and download APKs from network links</string>
     <string name="uninstall_title">Uninstall InstallerX Revived</string>
     <string name="uninstall_content">After uninstalling this app, you will no longer be able to use InstallerX Revived to install apps.</string>
     <string name="stable">Stable</string>
@@ -211,7 +211,7 @@
     <string name="installer_biometric_auth_mode_follow_config_desc">Follow profile settings set for each app</string>
     <string name="uninstaller_settings_require_biometric_auth">Require Biometric Auth to Uninstall</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Require biometric auth when uninstalling</string>
-    <string name="use_biometric_confirm_change_auth_settings">Are you sure you want to change this setting</string>
+    <string name="use_biometric_confirm_change_auth_settings">Are you sure you want to change this setting?</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">To continue, please confirm this action using your device authentication</string>
     <string name="installer_settings_dialog_mode_options">Options for Dialog</string>
     <string name="installer_settings_auto_clear_success_notification">Auto-clear notification</string>
@@ -262,11 +262,11 @@
     <string name="ignore_battery_optimizations_desc_disabled">Already Ignored</string>
     <string name="default_installer">Default Installer</string>
     <string name="lock_default_installer">Set as default installer</string>
-    <string name="lock_default_installer_desc">Set InstallerX as the default app to install apks</string>
+    <string name="lock_default_installer_desc">Set InstallerX Revived as the default app to install APKs</string>
     <string name="lock_default_installer_success">Successfully set as default installer</string>
     <string name="lock_default_installer_failed">Couldn\'t set as default installer</string>
     <string name="unlock_default_installer">Unset as default installer</string>
-    <string name="unlock_default_installer_desc">Unset InstallerX as the default installer to install apks</string>
+    <string name="unlock_default_installer_desc">Unset InstallerX Revived as the default installer to install APKs</string>
     <string name="unlock_default_installer_success">Successfully unset as default installer</string>
     <string name="unlock_default_installer_failed">Couldn\'t unset as default installer</string>
     <string name="locking_default_installer">Setting as default installer…</string>
@@ -375,7 +375,7 @@
     <string name="config_auto_delete_zip_desc">In addition to deleting the installation package, also delete the compressed file containing the installation package.</string>
     <string name="config_network_source_mode">Network source handling</string>
     <string name="network_source_mode_warning_title">Signature verification limitations</string>
-    <string name="network_source_mode_warning_desc">Smart and Low storage modes may stream single APKs. While streaming, InstallerX cannot perform full APK signature verification, so the profile setting that blocks apps with mismatched signatures cannot take effect. InstallerX still reads and compares signing certificates: matching certificates are allowed, while different certificates or compatibility that cannot be confirmed follow the profile setting for blocking unknown signatures. Android still performs final signature verification during installation.</string>
+    <string name="network_source_mode_warning_desc">Smart and Low storage modes may stream single APKs. While streaming, InstallerX Revived cannot perform full APK signature verification, so the profile setting that blocks apps with mismatched signatures cannot take effect. InstallerX Revived still reads and compares signing certificates: matching certificates are allowed, while different certificates or compatibility that cannot be confirmed follow the profile setting for blocking unknown signatures. Android still performs final signature verification during installation.</string>
     <string name="config_network_source_cache">Full download</string>
     <string name="config_network_source_cache_desc">Download the complete source before analysis, Maximum Compatibility</string>
     <string name="config_network_source_smart">Smart</string>
@@ -547,7 +547,7 @@
     <string name="installer_installing_module">Installing Module</string>
     <string name="installer_install_failed">Install failed</string>
     <string name="installer_install_success">Install success</string>
-    <string name="self_update_install_success">InstallerX was updated successfully</string>
+    <string name="self_update_install_success">InstallerX Revived was updated successfully</string>
     <string name="installer_install_complete">Install complete</string>
     <string name="batch_install_result_message">Batch installation: %1$d/%2$d successful</string>
     <string name="installer_move_to_background">Run in background</string>
@@ -651,7 +651,7 @@
     <string name="permission_access_mock_location">Access mock location</string>
     <string name="permission_dhizuku">Use Dhizuku</string>
     <string name="permission_unknown">Unknown permission</string>
-    <string name="installer_running">InstallerX running</string>
+    <string name="installer_running">InstallerX Revived is running</string>
     <string name="installer_version_short">Ver. %1$s (%2$s)</string>
     <string name="version_with_prefix_format">%1$s %2$s</string>
     <string name="installer_version_name_label">Version Name:</string>
@@ -679,8 +679,8 @@
     <string name="exception_resolve_failed_strong_etag_required">Low storage mode requires a strong HTTP ETag from the server</string>
     <string name="exception_resolve_failed_low_storage_unsupported">Low storage network sources require Android 9 or newer</string>
     <string name="exception_resolve_failed_streaming_probe">Low storage mode could not inspect this package through HTTP range requests</string>
-    <string name="exception_initiator_not_visible">Permission denied due to package visibility restrictions. The app requesting the installation is hidden from InstallerX. If you are using modules like \'Hide My Applist\', please allowlist InstallerX</string>
-    <string name="exception_resolve_failed_no_internet_access">Internet access is disabled in app settings. Enable it in Network settings to use this feature.</string>
+    <string name="exception_initiator_not_visible">Permission denied due to package visibility restrictions. The app requesting the installation is hidden from InstallerX Revived. If you are using modules like \'Hide My Applist\', please allowlist InstallerX Revived</string>
+    <string name="exception_resolve_failed_no_internet_access">Internet access is disabled in the app\'s settings. Enable it in Network settings to use this feature.</string>
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
     <string name="exception_analyse_failed_streaming_source_unsupported">This source cannot be analyzed in Low storage mode. Choose Smart or Full download.</string>
     <string name="exception_analyse_failed_source_materialization">Unable to download the complete source for analysis</string>
@@ -924,7 +924,7 @@
     <string name="lab_module_flashing">Enable module flashing</string>
     <string name="lab_module_flashing_desc">Always check twice before flashing any modules!</string>
     <string name="lab_module_flashing_show_art">Display ASCII art</string>
-    <string name="lab_module_flashing_show_art_desc">Display InstallerX ASCII art when installation starts"</string>
+    <string name="lab_module_flashing_show_art_desc">Display InstallerX Revived ASCII art when installation starts</string>
     <string name="lab_module_select_root_impl">Choose root implementation</string>
     <string name="lab_http_profile">HTTP Security Policy</string>
     <string name="lab_http_profile_secure">Secure connections only (HTTPS)</string>

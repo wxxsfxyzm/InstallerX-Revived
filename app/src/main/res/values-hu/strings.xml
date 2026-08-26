@@ -14,7 +14,7 @@
     <string name="lab">Kísérleti részleg</string>
     <string name="lab_desc">Hozzáférés kísérleti és fejlesztői funkciókhoz</string>
     <string name="about_detail">Az InstallerX Revived-ról</string>
-    <string name="updating">Frissítés...</string>
+    <string name="updating">Frissítés…</string>
     <string name="get_update">Frissítések lekérése</string>
     <string name="get_update_detail">Szoftverfrissítések keresése</string>
     <string name="update_available">Elérhető frissítés: %1$s</string>
@@ -89,7 +89,7 @@
     <string name="installer_settings_require_biometric_auth_desc">Biometrikus hitelesítés kérése telepítéskor</string>
     <string name="uninstaller_settings_require_biometric_auth">Biometrikus hitelesítés kérése az eltávolításhoz</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Biometrikus hitelesítés kérése eltávolításkor</string>
-    <string name="use_biometric_confirm_change_auth_settings">Biztos módosítani szeretnéd ezt a beállítást</string>
+    <string name="use_biometric_confirm_change_auth_settings">Biztos módosítani szeretnéd ezt a beállítást?</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">A folytatáshoz kérjük, erősítsd meg ezt a műveletet eszközhitelesítéssel</string>
     <string name="installer_settings_dialog_mode_options">Párbeszédpanel beállításai</string>
     <string name="installer_settings_auto_clear_success_notification">Értesítések automatikus törlése</string>
@@ -384,7 +384,7 @@
     <string name="installer_module_author_label">Szerző:</string>
     <string name="exception_install_failed_unknown">Ismeretlen hiba</string>
     <string name="exception_resolve_failed">URI feloldása sikertelen</string>
-    <string name="exception_resolve_failed_no_internet_access">Ez a verzió nem fér hozzá az internethez, a funkció használatához telepíts egy másik verziót</string>
+    <string name="exception_resolve_failed_no_internet_access">Az internet-hozzáférés le van tiltva az alkalmazás beállításaiban. A funkció használatához engedélyezze a hálózati beállításokban.</string>
     <string name="exception_analyse_failed_all_files_unsupported">A fájl nem támogatott</string>
     <string name="exception_authentication_failed">Felhasználói hitelesítés sikertelen</string>
     <string name="exception_install_failed_already_exists">Ez az alkalmazásverzió már telepítve van, kérjük, távolítsd el, majd próbáld újra</string>

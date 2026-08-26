@@ -96,7 +96,7 @@
     <string name="installer_settings_require_biometric_auth_desc">نیاز به احراز هویت بیومتریک هنگام نصب</string>
     <string name="uninstaller_settings_require_biometric_auth">نیاز به احراز هویت بیومتریک برای حذف نصب</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">نیاز به احراز هویت بیومتریک هنگام حذف نصب</string>
-    <string name="use_biometric_confirm_change_auth_settings">آیا مطمئن هستید که می‌خواهید این تنظیمات را تغییر دهید</string>
+    <string name="use_biometric_confirm_change_auth_settings">آیا مطمئن هستید که می‌خواهید این تنظیمات را تغییر دهید?</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">برای ادامه، لطفاً این اقدام را با احراز هویت دستگاه خود تأیید کنید</string>
     <string name="installer_settings_dialog_mode_options">گزینه‌های دیالوگ</string>
     <string name="installer_settings_auto_clear_success_notification">پاک‌سازی خودکار اعلان</string>
@@ -304,5 +304,5 @@
     <string name="history_status_failed">شکست</string>
     <string name="history_version_fresh_install">نصب تمیز (حذف و سپس نصب)</string>
     <string name="history_version_update">بروزرسانی</string>
-    <string name="setting_lsposed_module_title">ماژول LSPosee فعال است</string>
+    <string name="setting_lsposed_module_title">ماژول Vector فعال است</string>
 </resources>

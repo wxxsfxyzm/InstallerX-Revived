@@ -137,8 +137,8 @@
     <string name="working_status_none_authorizer_desc">권한 상승을 사용하지 않습니다. 앱을 설치하려면 알 수 없는 출처 권한이 필요합니다</string>
     <string name="working_status_not_default_installer_click_details">탭하여 세부정보 보기</string>
     <string name="working_status_default_installer_tip">대부분의 설치 요청을 처리하려면 이 앱을 기본 패키지 설치 프로그램으로 설정하세요. 단, 다음 경우는 가로챌 수 없습니다:\n- OEM이 기본 설치 프로그램 변경을 제한한 경우\n- 설치 시작 앱이 대상 Component를 지정한 경우\n- 설치 시작 앱이 Session Install을 사용하는 경우</string>
-    <string name="setting_lsposed_module_title">LSPosed 모듈 활성화됨</string>
-    <string name="setting_lsposed_module_desc">서드파티 LSPosed 모듈을 통해 기본 설치 프로그램 전환을 강제로 적용한 경우 활성화하세요. 내부 상태 확인을 비활성화하며 홈 화면에는 항상 \"활성화됨\"으로 표시됩니다</string>
+    <string name="setting_lsposed_module_title">Vector 모듈 활성화됨</string>
+    <string name="setting_lsposed_module_desc">서드파티 Vector 모듈을 통해 기본 설치 프로그램 전환을 강제로 적용한 경우 활성화하세요. 내부 상태 확인을 비활성화하며 홈 화면에는 항상 \"활성화됨\"으로 표시됩니다</string>
     <string name="home_stat_authorizers">사용 가능한 권한 방식</string>
     <string name="home_stat_profiles">프로필</string>
     <string name="home_label_lsp_link">모듈을 찾고 있나요?</string>
@@ -501,7 +501,7 @@
     <string name="exception_resolve_failed">URI 확인 실패</string>
     <string name="exception_resolve_failed_link_not_valid">이 링크에는 유효한 파일이 없습니다</string>
     <string name="exception_initiator_not_visible">패키지 가시성 제한으로 권한이 거부되었습니다. 설치를 요청한 앱이 InstallerX에 보이지 않습니다. \'Hide My Applist\' 같은 모듈을 사용 중이라면 InstallerX를 허용 목록에 추가하세요</string>
-    <string name="exception_resolve_failed_no_internet_access">이 버전은 인터넷에 접근할 수 없습니다. 이 기능을 사용하려면 인터넷 지원 버전을 다시 설치하세요</string>
+    <string name="exception_resolve_failed_no_internet_access">앱 설정에서 인터넷 접속이 비활성화되어 있습니다. 이 기능을 사용하려면 네트워크 설정에서 인터넷 접속을 활성화하세요.</string>
     <string name="exception_analyse_failed_all_files_unsupported">지원되지 않는 파일입니다</string>
     <string name="exception_authentication_failed">사용자 인증 실패</string>
     <string name="exception_install_failed_already_exists">이 앱 버전이 이미 설치되어 있습니다. 제거한 뒤 다시 시도하세요</string>

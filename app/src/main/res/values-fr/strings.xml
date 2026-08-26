@@ -203,7 +203,7 @@
     <string name="installer_package_name">Package : %1$s</string>
     <string name="exception_install_failed_unknown">Erreur inconnue</string>
     <string name="exception_resolve_failed">Résolution de l\'URI échouée</string>
-    <string name="exception_resolve_failed_no_internet_access">Cette version ne peut pas accéder à Internet, pour utiliser cette fonctionnalité, réinstallez l\'autre version</string>
+    <string name="exception_resolve_failed_no_internet_access">L\'accès à Internet est désactivé dans les paramètres de l\'application. Activez-le dans les paramètres réseau pour utiliser cette fonctionnalité.</string>
     <string name="exception_analyse_failed_all_files_unsupported">Fichier non pris en charge</string>
     <string name="exception_install_failed_already_exists">Cette version de l\'appli est déjà installée, veuillez la désinstaller et réessayer</string>
     <string name="exception_install_failed_blacklisted_package">Vous n\'autorisez pas l\'installation de cette appli !</string>
@@ -505,7 +505,7 @@
     <string name="installer_settings_require_biometric_auth_desc">Demander une vérification biométrique avant d\'installer</string>
     <string name="uninstaller_settings_require_biometric_auth">Vérification biométrique pour désinstaller</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">Demander une vérification biométrique avant de désinstaller</string>
-    <string name="use_biometric_confirm_change_auth_settings">Êtes-vous sûr de vouloir modifier ce paramètre</string>
+    <string name="use_biometric_confirm_change_auth_settings">Êtes-vous sûr de vouloir modifier ce paramètre?</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">Pour continuer, veuillez confirmer cette action à l\'aide de l\'authentification de votre appareil</string>
     <string name="installer_settings_auto_clear_success_notification">Effacer automatique les notifications</string>
     <string name="installer_settings_auto_clear_success_notification_desc">Effacer automatique les notifications une fois l\'installation terminée</string>
