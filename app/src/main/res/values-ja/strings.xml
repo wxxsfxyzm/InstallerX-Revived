@@ -302,7 +302,7 @@
     <string name="installer_settings_require_biometric_auth_desc">パッケージをインストールする際に生体認証を要求します</string>
     <string name="uninstaller_settings_require_biometric_auth">アンインストールに生体認証を要求する</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">アンインストールする際に生体認証を要求します</string>
-    <string name="use_biometric_confirm_change_auth_settings">この設定を変更してもよろしいですか</string>
+    <string name="use_biometric_confirm_change_auth_settings">この設定を変更してもよろしいですか?</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">続行するには、デバイス認証をしてこの操作を確認してください</string>
     <string name="sort_by_show_system_app">システムアプリを表示する</string>
     <string name="sort_by_show_package_name">パッケージ名を表示する</string>
@@ -674,8 +674,8 @@
     <string name="working_status_system_installer_desc">アプリはシステムパッケージインストーラーとして実行されています</string>
     <string name="working_status_not_default_installer_click_details">詳細を表示するにはクリックしてください</string>
     <string name="working_status_default_installer_tip">このアプリをデフォルトのパッケージインストーラーとして設定すると、ほとんどのインストール要求が処理されます。ただし、以下のケースは処理できませんのでご注意ください：\n- OEM がデフォルトのインストーラーの変更を制限している場合\n- イニシエーターがターゲットコンポーネントを指定している場合\n- イニシエーターがセッションインストールを使用する場合</string>
-    <string name="setting_lsposed_module_title">LSPosed モジュールを有効にする</string>
-    <string name="setting_lsposed_module_desc">サードパーティ製の LSPosed モジュールを使用してデフォルトのインストーラーの制御を強制的に切り替えた場合は、これを有効にしてください。これにより、内部ステータスチェックが無効になり、ホームページには常に「有効」と表示されます</string>
+    <string name="setting_lsposed_module_title">Vector モジュールを有効にする</string>
+    <string name="setting_lsposed_module_desc">サードパーティ製の Vector モジュールを使用してデフォルトのインストーラーの制御を強制的に切り替えた場合は、これを有効にしてください。これにより、内部ステータスチェックが無効になり、ホームページには常に「有効」と表示されます</string>
     <string name="inactivate">無効</string>
     <string name="activate">有効</string>
     <string name="home_stat_authorizers">利用可能な権限</string>

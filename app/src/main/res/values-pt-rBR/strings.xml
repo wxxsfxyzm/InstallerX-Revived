@@ -714,8 +714,8 @@
     <string name="working_status_none_authorizer_desc">Não utilizar nenhum privilégio; é necessária a permissão “Fontes desconhecidas” para instalar apps</string>
     <string name="working_status_not_default_installer_click_details">Clique para ver os detalhes</string>
     <string name="working_status_default_installer_tip">Defina este app como o instalador de pacotes padrão para assumir a maioria das solicitações de instalação. Observe que os seguintes casos não podem ser interceptados:\n- O OEM restringe a modificação do instalador padrão\n- O iniciador especifica um componente de destino\n- O iniciador utiliza uma Instalação por Sessão</string>
-    <string name="setting_lsposed_module_title">Módulo LSPosed ativado</string>
-    <string name="setting_lsposed_module_desc">Ative esta opção se você tiver forçado a substituição do instalador padrão por meio de um módulo LSPosed de terceiros. Isso desativa a verificação interna de status, e a página inicial permanecerá constantemente como “Ativado”</string>
+    <string name="setting_lsposed_module_title">Módulo Vector ativado</string>
+    <string name="setting_lsposed_module_desc">Ative esta opção se você tiver forçado a substituição do instalador padrão por meio de um módulo Vector de terceiros. Isso desativa a verificação interna de status, e a página inicial permanecerá constantemente como “Ativado”</string>
     <string name="home_stat_authorizers">Privilégios Disponíveis</string>
     <string name="home_stat_profiles">Perfis</string>
     <string name="home_label_lsp_link">Procurando um módulo?</string>
@@ -927,4 +927,11 @@
     <string name="network_access">Acesso à rede</string>
     <string name="allow_internet_access">Permitir acesso à internet</string>
     <string name="allow_internet_access_desc">Permita que o InstallerX verifique se há atualizações e baixe APKs a partir de links na internet</string>
+    <string name="network_settings">Configurações de rede</string>
+    <string name="network_settings_internet_access_enabled_desc">O app pode acessar a internet</string>
+    <string name="network_settings_internet_access_disabled_desc">O app não pode acessar a internet</string>
+    <string name="config_network_source_mode">Tratamento de fontes de rede</string>
+    <string name="network_source_mode_warning_title">Limitações da verificação de assinatura</string>
+    <string name="network_source_mode_warning_desc">Os modos “Smart” e “Low” de armazenamento podem fazer streaming de APKs individuais. Durante o streaming, o InstallerX não consegue realizar a verificação completa da assinatura do APK; portanto, a configuração do perfil que bloqueia apps com assinaturas incompatíveis não pode ser aplicada. O InstallerX ainda lê e compara os certificados de assinatura: certificados compatíveis são permitidos, enquanto certificados diferentes ou cuja compatibilidade não possa ser confirmada seguem a configuração do perfil para bloquear assinaturas desconhecidas. O Android ainda realiza a verificação final da assinatura durante a instalação.</string>
+    <string name="config_network_source_cache">Download completo</string>
 </resources>

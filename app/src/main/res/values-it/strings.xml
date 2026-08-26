@@ -65,7 +65,7 @@
     <string name="home_stat_profiles">Profili</string>
     <string name="history_clear_confirm_desc">Tutti i dati di installazione e disinstallazione verranno eliminati. Non è possibile annullare l\'operazione.</string>
     <string name="history_operation_uninstall">Disinstalla</string>
-    <string name="setting_lsposed_module_title">Modulo LSPosed Abilitato</string>
+    <string name="setting_lsposed_module_title">Modulo Vector Abilitato</string>
     <string name="history">Cronologia</string>
     <string name="history_status_failed">Fallito</string>
     <string name="available">Disponibile</string>

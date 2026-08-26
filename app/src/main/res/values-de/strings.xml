@@ -234,7 +234,7 @@
     <string name="installer_package_name">Paket: %1$s</string>
     <string name="exception_install_failed_unknown">Unbekannter Fehler</string>
     <string name="exception_resolve_failed">Auflösen der URI fehlgeschlagen</string>
-    <string name="exception_resolve_failed_no_internet_access">Diese Version hat keinen Zugriff auf das Internet. Um dieses Feature zu benutzen, installieren sie bitte die andere Version</string>
+    <string name="exception_resolve_failed_no_internet_access">Der Internetzugriff ist in den App-Einstellungen deaktiviert. Aktivieren Sie ihn in den Netzwerkeinstellungen, um diese Funktion zu nutzen.</string>
     <string name="exception_analyse_failed_all_files_unsupported">Datei wird nicht unterstützt</string>
     <string name="exception_install_failed_already_exists">Diese App-Version ist bereits installiert, Bitte deinstallieren und erneut versuchen</string>
     <string name="exception_install_failed_blacklisted_package">Sie haben die Installation dieser App verboten!</string>
@@ -411,7 +411,7 @@
     <string name="color_yellow">Gelb</string>
     <string name="color_lime">Limettengrün</string>
     <string name="color_green">Grün</string>
-    <string name="color_cyan">Cyan</string>
+    <string name="color_cyan">Cyaan</string>
     <string name="color_teal">Türkis</string>
     <string name="color_light_blue">Hellblau</string>
     <string name="color_blue">Blau</string>
