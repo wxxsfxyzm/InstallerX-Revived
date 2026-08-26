@@ -18,13 +18,15 @@ class HistoryViewModel(
 ) : ViewModel() {
     val state: StateFlow<HistoryViewState> = combine(
         repository.flowAll(),
-        repository.isEnabled
-    ) { records, isHistoryEnabled ->
+        repository.isEnabled,
+        repository.areIndicatorsEnabled
+    ) { records, isHistoryEnabled, areIndicatorsEnabled ->
         HistoryViewState(
             records = records,
             isLoading = false,
             isSystemApp = capabilityProvider.isSystemApp,
-            isHistoryEnabled = isHistoryEnabled
+            isHistoryEnabled = isHistoryEnabled,
+            areIndicatorsEnabled = areIndicatorsEnabled
         )
     }
         .stateIn(
@@ -44,6 +46,10 @@ class HistoryViewModel(
                     enabled = action.enabled,
                     clearHistory = action.clearHistory
                 )
+            }
+
+            is HistoryViewAction.SetIndicatorsEnabled -> viewModelScope.launch {
+                repository.setIndicatorsEnabled(action.enabled)
             }
         }
     }

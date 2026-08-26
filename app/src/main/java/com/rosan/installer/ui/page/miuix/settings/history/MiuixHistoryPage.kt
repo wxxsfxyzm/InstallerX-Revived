@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -49,10 +50,13 @@ import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewAction
 import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
+import com.rosan.installer.ui.page.main.settings.history.HistoryBadgeType
 import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
 import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
+import com.rosan.installer.ui.page.main.settings.history.historyBadgeType
 import com.rosan.installer.ui.page.main.settings.history.labelRes
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
@@ -95,6 +99,47 @@ fun MiuixHistoryPage(
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
     var showDisableConfirmDialog by remember { mutableStateOf(false) }
+    val historyEnableText = stringResource(R.string.history_enable)
+    val historyShowIndicatorsText = stringResource(R.string.history_show_indicators)
+    val historyMenuEntries = remember(
+        state.isHistoryEnabled,
+        state.areIndicatorsEnabled,
+        historyEnableText,
+        historyShowIndicatorsText,
+    ) {
+        listOf(
+            DropdownEntry(
+                items = listOf(
+                    DropdownItem(
+                        text = historyEnableText,
+                        selected = state.isHistoryEnabled,
+                        onClick = {
+                            if (state.isHistoryEnabled) {
+                                showDisableConfirmDialog = true
+                            } else {
+                                viewModel.dispatch(HistoryViewAction.SetHistoryEnabled(enabled = true))
+                            }
+                        },
+                    )
+                )
+            ),
+            DropdownEntry(
+                items = listOf(
+                    DropdownItem(
+                        text = historyShowIndicatorsText,
+                        selected = state.areIndicatorsEnabled,
+                        onClick = {
+                            viewModel.dispatch(
+                                HistoryViewAction.SetIndicatorsEnabled(
+                                    enabled = !state.areIndicatorsEnabled
+                                )
+                            )
+                        },
+                    )
+                )
+            ),
+        )
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -114,23 +159,10 @@ fun MiuixHistoryPage(
                         )
                     }
                     OverlayIconDropdownMenu(
-                        entry = DropdownEntry(
-                            items = listOf(
-                                DropdownItem(
-                                    text = stringResource(R.string.history_enable),
-                                    selected = state.isHistoryEnabled,
-                                    onClick = {
-                                        if (state.isHistoryEnabled) {
-                                            showDisableConfirmDialog = true
-                                        } else {
-                                            viewModel.dispatch(
-                                                HistoryViewAction.SetHistoryEnabled(enabled = true)
-                                            )
-                                        }
-                                    }
-                                )
-                            )
-                        )
+                        entries = historyMenuEntries,
+                        // Keep the grouped toggle menu open, as in the Miuix example's
+                        // grouped and multi-select menus, so both states can be adjusted together.
+                        collapseOnSelection = false,
                     ) {
                         Icon(
                             imageVector = AppMiuixIcons.Tune,
@@ -195,6 +227,7 @@ fun MiuixHistoryPage(
                     items(state.records, key = { it.id }) { record ->
                         HistoryRecordBriefCard(
                             record = record,
+                            showIndicator = state.areIndicatorsEnabled,
                             onClick = {
                                 selectedRecord = record
                                 showRecordDetailSheet = true
@@ -298,12 +331,19 @@ private fun EmptyHistory(
 @Composable
 private fun HistoryRecordBriefCard(
     record: OperationHistoryModel,
+    showIndicator: Boolean,
     onClick: () -> Unit
 ) {
     val statusColor = if (record.status == OperationStatus.SUCCESS) {
         MiuixTheme.colorScheme.primary
     } else {
         MiuixTheme.colorScheme.error
+    }
+    val badgeType = record.historyBadgeType(LocalContext.current.packageName)
+    val badgeColor = if (badgeType == HistoryBadgeType.DOWNGRADE) {
+        MiuixTheme.colorScheme.error
+    } else {
+        MiuixTheme.colorScheme.primary
     }
 
     Card(
@@ -314,17 +354,29 @@ private fun HistoryRecordBriefCard(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = record.appLabel ?: record.packageName,
-                fontSize = MiuixTheme.textStyles.headline1.fontSize,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = record.appLabel ?: record.packageName,
+                    fontSize = MiuixTheme.textStyles.headline1.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                if (showIndicator && badgeType != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    MiuixBadge(
+                        text = stringResource(badgeType.labelRes()),
+                        textColor = badgeColor,
+                        containerColor = badgeColor.copy(alpha = 0.2f)
+                    )
+                }
+            }
             Text(
                 text = stringResource(record.status.labelRes()),
                 style = MiuixTheme.textStyles.subtitle,

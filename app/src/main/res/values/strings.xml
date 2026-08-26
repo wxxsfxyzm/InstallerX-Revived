@@ -37,6 +37,7 @@
     <string name="history_empty_desc">Installation and uninstallation records will appear here after an operation finishes.</string>
     <string name="history_recording">History recording</string>
     <string name="history_enable">Enable history</string>
+    <string name="history_show_indicators">Show indicators</string>
     <string name="history_disabled_title">History is disabled</string>
     <string name="history_disabled_desc">New installation and uninstallation operations will not be recorded.</string>
     <string name="history_disable_confirm_title">Disable history?</string>
@@ -54,6 +55,7 @@
     <string name="history_version_fresh_install">Fresh install</string>
     <string name="history_version_update">Update</string>
     <string name="history_version_downgrade">Downgrade</string>
+    <string name="history_version_self_update">Self-update</string>
     <string name="history_version_same">Same version</string>
     <string name="history_method_package_manager">Package manager</string>
     <string name="history_method_session">Session confirmation</string>

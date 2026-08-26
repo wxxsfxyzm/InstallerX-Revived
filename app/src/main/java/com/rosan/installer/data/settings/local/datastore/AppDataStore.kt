@@ -67,6 +67,8 @@ class AppDataStore(
         // Operation History
         val OPERATION_HISTORY_ENABLED =
             register(booleanPreferencesKey("operation_history_enabled"), PreferenceValueType.BOOLEAN)
+        val OPERATION_HISTORY_INDICATORS_ENABLED =
+            register(booleanPreferencesKey("operation_history_indicators_enabled"), PreferenceValueType.BOOLEAN)
 
         // Show Live Activity
         val SHOW_LIVE_ACTIVITY = register(booleanPreferencesKey("show_live_activity"), PreferenceValueType.BOOLEAN)

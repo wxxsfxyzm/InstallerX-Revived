@@ -3,11 +3,8 @@
 package com.rosan.installer.ui.page.main.widget.setting
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.rosan.installer.ui.page.main.widget.menu.GroupedDropdownMenuPopup
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -43,34 +41,21 @@ fun DropDownMenuWidget(
             Box(
                 modifier = Modifier.align(Alignment.CenterStart)
             ) {
-                // Use DropdownMenuPopup to provide the foundation for building a custom menu
-                DropdownMenuPopup(
+                GroupedDropdownMenuPopup(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                ) {
-                    // Use DropdownMenuGroup to create a visually distinct group
-                    DropdownMenuGroup(
-                        shapes = MenuDefaults.groupShapes()
-                    ) {
-                        data.forEachIndexed { index, item ->
-                            val isSelected = index == choice
-
-                            // Utilize the selectable variation of DropdownMenuItem
-                            // MenuDefaults.itemShape(index, count) automatically handles the shapes
-                            DropdownMenuItem(
-                                selected = isSelected,
-                                onClick = {
-                                    onChoiceChange(index)
-                                    expanded = false
-                                },
-                                text = { Text(text = item) },
-                                shapes = MenuDefaults.itemShape(
-                                    index = index,
-                                    count = data.size
-                                )
-                            )
-                        }
-                    }
+                    groupSizes = listOf(data.size)
+                ) { _, index, shape ->
+                    val isSelected = index == choice
+                    DropdownMenuItem(
+                        selected = isSelected,
+                        onClick = {
+                            onChoiceChange(index)
+                            expanded = false
+                        },
+                        text = { Text(text = data[index]) },
+                        shapes = shape
+                    )
                 }
             }
         }

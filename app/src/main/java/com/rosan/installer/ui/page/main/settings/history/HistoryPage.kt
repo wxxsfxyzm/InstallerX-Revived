@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -26,16 +27,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
-import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
@@ -70,6 +68,8 @@ import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.page.main.widget.chip.CapsuleTag
+import com.rosan.installer.ui.page.main.widget.menu.GroupedDropdownMenuPopup
 import com.rosan.installer.ui.theme.bottomShape
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
@@ -155,37 +155,51 @@ private fun HistoryPageContent(
                                 contentDescription = stringResource(R.string.history_recording)
                             )
                         }
-                        DropdownMenuPopup(
+                        GroupedDropdownMenuPopup(
                             expanded = showHistoryMenu,
-                            onDismissRequest = { showHistoryMenu = false }
-                        ) {
-                            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                                DropdownMenuItem(
-                                    checked = state.isHistoryEnabled,
-                                    onCheckedChange = { enabled ->
-                                        showHistoryMenu = false
+                            onDismissRequest = { showHistoryMenu = false },
+                            groupSizes = listOf(1, 1)
+                        ) { groupIndex, _, shape ->
+                            val checked = if (groupIndex == 0) {
+                                state.isHistoryEnabled
+                            } else {
+                                state.areIndicatorsEnabled
+                            }
+                            DropdownMenuItem(
+                                checked = checked,
+                                onCheckedChange = { enabled ->
+                                    showHistoryMenu = false
+                                    if (groupIndex == 0) {
                                         if (enabled) {
-                                            onAction(
-                                                HistoryViewAction.SetHistoryEnabled(enabled = true)
-                                            )
+                                            onAction(HistoryViewAction.SetHistoryEnabled(enabled = true))
                                         } else {
                                             showDisableConfirmDialog = true
                                         }
-                                    },
-                                    text = { Text(stringResource(R.string.history_enable)) },
-                                    trailingContent = if (state.isHistoryEnabled) {
-                                        {
-                                            Icon(
-                                                imageVector = AppIcons.Check,
-                                                contentDescription = null
-                                            )
-                                        }
                                     } else {
-                                        null
-                                    },
-                                    shapes = MenuDefaults.itemShape(index = 0, count = 1)
-                                )
-                            }
+                                        onAction(HistoryViewAction.SetIndicatorsEnabled(enabled))
+                                    }
+                                },
+                                text = {
+                                    Text(
+                                        stringResource(
+                                            if (groupIndex == 0) {
+                                                R.string.history_enable
+                                            } else {
+                                                R.string.history_show_indicators
+                                            }
+                                        )
+                                    )
+                                },
+                                trailingContent = if (checked) {
+                                    {
+                                        Icon(imageVector = AppIcons.Check, contentDescription = null)
+                                    }
+                                } else {
+                                    null
+                                },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                shapes = shape
+                            )
                         }
                     }
                 },
@@ -265,6 +279,7 @@ private fun HistoryPageContent(
                             HistoryRecordBriefCard(
                                 record = record,
                                 shape = shape,
+                                showIndicator = state.areIndicatorsEnabled,
                                 onClick = { selectedRecord = record }
                             )
                         }
@@ -387,12 +402,19 @@ private fun EmptyHistory(
 private fun HistoryRecordBriefCard(
     record: OperationHistoryModel,
     shape: Shape,
+    showIndicator: Boolean,
     onClick: () -> Unit
 ) {
     val statusColor = if (record.status == OperationStatus.SUCCESS) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.error
+    }
+    val badgeType = record.historyBadgeType(LocalContext.current.packageName)
+    val badgeColor = if (badgeType == HistoryBadgeType.DOWNGRADE) {
+        MaterialTheme.colorScheme.error
+    } else {
+        MaterialTheme.colorScheme.primary
     }
 
     Card(
@@ -407,16 +429,28 @@ private fun HistoryRecordBriefCard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = record.appLabel ?: record.packageName,
-                    style = MaterialTheme.typography.titleMediumEmphasized,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = record.appLabel ?: record.packageName,
+                        style = MaterialTheme.typography.titleMediumEmphasized,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    if (showIndicator && badgeType != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        CapsuleTag(
+                            text = stringResource(badgeType.labelRes()),
+                            containerColor = badgeColor.copy(alpha = 0.1f),
+                            contentColor = badgeColor
+                        )
+                    }
+                }
                 Text(
                     text = stringResource(record.status.labelRes()),
                     style = MaterialTheme.typography.labelLarge,

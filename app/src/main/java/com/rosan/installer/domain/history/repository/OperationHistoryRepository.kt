@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface OperationHistoryRepository {
     val isEnabled: Flow<Boolean>
+    val areIndicatorsEnabled: Flow<Boolean>
 
     suspend fun all(limit: Int = DEFAULT_HISTORY_LIMIT): List<OperationHistoryModel>
 
@@ -15,6 +16,8 @@ interface OperationHistoryRepository {
     suspend fun insert(model: OperationHistoryModel)
 
     suspend fun setEnabled(enabled: Boolean, clearHistory: Boolean = false)
+
+    suspend fun setIndicatorsEnabled(enabled: Boolean)
 
     suspend fun clear()
 

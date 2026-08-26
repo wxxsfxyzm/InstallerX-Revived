@@ -9,4 +9,6 @@ sealed interface HistoryViewAction {
         val enabled: Boolean,
         val clearHistory: Boolean = false
     ) : HistoryViewAction
+
+    data class SetIndicatorsEnabled(val enabled: Boolean) : HistoryViewAction
 }

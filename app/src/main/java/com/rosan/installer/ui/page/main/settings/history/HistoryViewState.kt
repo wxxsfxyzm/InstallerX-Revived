@@ -8,5 +8,6 @@ data class HistoryViewState(
     val records: List<OperationHistoryModel> = emptyList(),
     val isLoading: Boolean = true,
     val isSystemApp: Boolean = false,
-    val isHistoryEnabled: Boolean = true
+    val isHistoryEnabled: Boolean = true,
+    val areIndicatorsEnabled: Boolean = true
 )

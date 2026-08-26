@@ -33,6 +33,7 @@
     <string name="history_empty_desc">安装或卸载操作结束后，相关记录会显示在这里。</string>
     <string name="history_recording">历史记录功能</string>
     <string name="history_enable">启用历史记录</string>
+    <string name="history_show_indicators">显示指示器</string>
     <string name="history_disabled_title">历史记录已禁用</string>
     <string name="history_disabled_desc">新的安装和卸载操作将不会被记录。</string>
     <string name="history_disable_confirm_title">禁用历史记录？</string>
@@ -50,6 +51,7 @@
     <string name="history_version_fresh_install">全新安装</string>
     <string name="history_version_update">升级</string>
     <string name="history_version_downgrade">降级</string>
+    <string name="history_version_self_update">自更新</string>
     <string name="history_version_same">相同版本</string>
     <string name="history_method_package_manager">包管理器</string>
     <string name="history_method_session">会话确认</string>

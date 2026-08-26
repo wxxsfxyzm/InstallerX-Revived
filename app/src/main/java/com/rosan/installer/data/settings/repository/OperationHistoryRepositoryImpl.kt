@@ -27,6 +27,9 @@ class OperationHistoryRepositoryImpl(
     override val isEnabled: Flow<Boolean> =
         appSettingsRepository.getBoolean(BooleanSetting.OperationHistoryEnabled, default = true)
 
+    override val areIndicatorsEnabled: Flow<Boolean> =
+        appSettingsRepository.getBoolean(BooleanSetting.OperationHistoryIndicatorsEnabled, default = true)
+
     override suspend fun all(limit: Int): List<OperationHistoryModel> =
         dao.all(limit).map { it.toDomainModel() }
 
@@ -58,6 +61,10 @@ class OperationHistoryRepositoryImpl(
                 latestSessionHistoryIds.clear()
             }
         }
+
+    override suspend fun setIndicatorsEnabled(enabled: Boolean) {
+        appSettingsRepository.putBoolean(BooleanSetting.OperationHistoryIndicatorsEnabled, enabled)
+    }
 
     override suspend fun clear() = sessionHistoryMutex.withLock {
         dao.clear()
