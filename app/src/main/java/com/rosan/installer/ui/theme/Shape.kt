@@ -13,13 +13,13 @@ val topShape = RoundedCornerShape(
     topStart = CornerRadius,
     topEnd = CornerRadius,
     bottomStart = ConnectionRadius,
-    bottomEnd = ConnectionRadius
+    bottomEnd = ConnectionRadius,
 )
 val middleShape = RoundedCornerShape(ConnectionRadius)
 val bottomShape = RoundedCornerShape(
     topStart = ConnectionRadius,
     topEnd = ConnectionRadius,
     bottomStart = CornerRadius,
-    bottomEnd = CornerRadius
+    bottomEnd = CornerRadius,
 )
 val singleShape = RoundedCornerShape(CornerRadius)

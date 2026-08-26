@@ -7,10 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 可回收资源的句柄
  * 线程安全，保证 recycle 只执行一次
  */
-class Recyclable<T>(
-    val entity: T,
-    private val onRecycle: () -> Unit,
-) : Closeable {
+class Recyclable<T>(val entity: T, private val onRecycle: () -> Unit) : Closeable {
 
     private val recycled = AtomicBoolean(false)
 

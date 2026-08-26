@@ -14,24 +14,21 @@ enum class Density(val dpi: Int, val key: String) {
     XHDPI(DisplayMetrics.DENSITY_XHIGH, "xhdpi"),
     XXHDPI(DisplayMetrics.DENSITY_XXHIGH, "xxhdpi"),
     XXXHDPI(DisplayMetrics.DENSITY_XXXHIGH, "xxxhdpi"),
-    UNKNOWN(0, "unknown"); // Add unknown for safety
+    UNKNOWN(0, "unknown"), // Add unknown for safety
+    ;
 
     companion object {
         private val map = entries.associateBy(Density::dpi)
         private val keyMap = entries.associateBy { it.key }
 
-        fun from(dpiValue: Int): Density? {
-            return map[dpiValue]
-        }
+        fun from(dpiValue: Int): Density? = map[dpiValue]
 
         /**
          * Finds a Density enum constant that matches the given density key string.
          * @param keyString The density key (e.g., "xhdpi").
          * @return The corresponding Density enum, or UNKNOWN if no match is found.
          */
-        fun fromDensityString(keyString: String?): Density {
-            return keyMap[keyString?.lowercase()] ?: UNKNOWN
-        }
+        fun fromDensityString(keyString: String?): Density = keyMap[keyString?.lowercase()] ?: UNKNOWN
 
         /**
          * Generates a prioritized list of densities for the current device.

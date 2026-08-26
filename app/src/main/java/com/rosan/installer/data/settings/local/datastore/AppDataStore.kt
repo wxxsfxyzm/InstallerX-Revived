@@ -15,23 +15,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 
-class AppDataStore(
-    private val dataStore: DataStore<Preferences>,
-    private val json: Json
-) {
+class AppDataStore(private val dataStore: DataStore<Preferences>, private val json: Json) {
     // Expose the raw data flow for synchronous mapping in the repository layer
     val data: Flow<Preferences> = dataStore.data
 
     enum class PreferenceValueType {
         STRING,
         INT,
-        BOOLEAN
+        BOOLEAN,
     }
 
-    data class SupportedPreferenceKey<T>(
-        val key: Preferences.Key<T>,
-        val type: PreferenceValueType
-    )
+    data class SupportedPreferenceKey<T>(val key: Preferences.Key<T>, val type: PreferenceValueType)
 
     companion object {
         private val mutableSupportedKeys = linkedMapOf<String, SupportedPreferenceKey<*>>()
@@ -39,10 +33,7 @@ class AppDataStore(
         val supportedKeys: Map<String, SupportedPreferenceKey<*>>
             get() = mutableSupportedKeys
 
-        private fun <T> register(
-            key: Preferences.Key<T>,
-            type: PreferenceValueType
-        ): Preferences.Key<T> {
+        private fun <T> register(key: Preferences.Key<T>, type: PreferenceValueType): Preferences.Key<T> {
             mutableSupportedKeys[key.name] = SupportedPreferenceKey(key, type)
             return key
         }
@@ -57,7 +48,8 @@ class AppDataStore(
         val UI_USE_MIUIX = register(booleanPreferencesKey("ui_use_miui_x"), PreferenceValueType.BOOLEAN)
         val UI_USE_MIUIX_MONET = register(booleanPreferencesKey("ui_use_miui_x_monet"), PreferenceValueType.BOOLEAN)
         val UI_USE_APPLE_FLOATING_BAR = register(booleanPreferencesKey("ui_use_apple_floating_bar"), PreferenceValueType.BOOLEAN)
-        val UI_DYN_COLOR_FOLLOW_PKG_ICON = register(booleanPreferencesKey("ui_dyn_color_follow_pkg_icon"), PreferenceValueType.BOOLEAN)
+        val UI_DYN_COLOR_FOLLOW_PKG_ICON =
+            register(booleanPreferencesKey("ui_dyn_color_follow_pkg_icon"), PreferenceValueType.BOOLEAN)
         val LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON =
             register(booleanPreferencesKey("live_activity_dyn_color_follow_pkg_icon"), PreferenceValueType.BOOLEAN)
         val PREDICTIVE_BACK_ANIMATION = register(stringPreferencesKey("predictive_back_animation"), PreferenceValueType.STRING)
@@ -163,7 +155,7 @@ class AppDataStore(
             register(stringPreferencesKey("managed_packages_list"), PreferenceValueType.STRING)
         val DEFAULT_MANAGED_INSTALLER_PACKAGES = listOf(
             NamedPackage("Google Play Store", "com.android.vending"),
-            NamedPackage("Shell", "com.android.shell")
+            NamedPackage("Shell", "com.android.shell"),
         )
         val MANAGED_BLACKLIST_PACKAGES_LIST =
             register(stringPreferencesKey("managed_blacklist_packages_list"), PreferenceValueType.STRING)
@@ -183,7 +175,8 @@ class AppDataStore(
         val LAB_SET_INSTALL_REQUESTER = register(booleanPreferencesKey("lab_set_install_requester"), PreferenceValueType.BOOLEAN)
         val LAB_TAP_ICON_TO_SHARE = register(booleanPreferencesKey("lab_tap_icon_to_share"), PreferenceValueType.BOOLEAN)
         val LAB_SHOW_FILE_PATH = register(booleanPreferencesKey("lab_show_file_path"), PreferenceValueType.BOOLEAN)
-        val LAB_SHOW_INSTALL_INITIATOR = register(booleanPreferencesKey("lab_show_install_initiator"), PreferenceValueType.BOOLEAN)
+        val LAB_SHOW_INSTALL_INITIATOR =
+            register(booleanPreferencesKey("lab_show_install_initiator"), PreferenceValueType.BOOLEAN)
         val LAB_INSTALL_WITHOUT_USER_ACTION =
             register(booleanPreferencesKey("lab_install_without_user_action"), PreferenceValueType.BOOLEAN)
         val LAB_RESPECT_PLATFORM_INSTALL_POLICY =
@@ -207,50 +200,42 @@ class AppDataStore(
         dataStore.edit { it[key] = value }
     }
 
-    fun getString(key: Preferences.Key<String>, default: String = ""): Flow<String> =
-        dataStore.data.map { it[key] ?: default }
+    fun getString(key: Preferences.Key<String>, default: String = ""): Flow<String> = dataStore.data.map { it[key] ?: default }
 
     suspend fun putInt(key: Preferences.Key<Int>, value: Int) {
         dataStore.edit { it[key] = value }
     }
 
-    fun getInt(key: Preferences.Key<Int>, default: Int = 0): Flow<Int> =
-        dataStore.data.map { it[key] ?: default }
+    fun getInt(key: Preferences.Key<Int>, default: Int = 0): Flow<Int> = dataStore.data.map { it[key] ?: default }
 
     suspend fun putBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
         dataStore.edit { it[key] = value }
     }
 
-    fun getBoolean(key: Preferences.Key<Boolean>, default: Boolean = false): Flow<Boolean> =
-        dataStore.data.map { it[key] ?: default }
+    fun getBoolean(key: Preferences.Key<Boolean>, default: Boolean = false): Flow<Boolean> = dataStore.data.map { it[key] ?: default }
 
     /**
      * Saves a list of NamedPackage objects to DataStore after converting it to a JSON string.
      * @param key The Preferences.Key<String> to save the list under.
      * @param packages The list of packages to save.
      */
-    suspend fun putNamedPackageList(key: Preferences.Key<String>, packages: List<NamedPackage>) =
-        putString(key, json.encodeToString(packages))
+    suspend fun putNamedPackageList(key: Preferences.Key<String>, packages: List<NamedPackage>) = putString(key, json.encodeToString(packages))
 
     /**
      * Retrieves a Flow of a list of NamedPackage objects from DataStore.
      * It reads the JSON string and deserializes it.
      */
-    fun getNamedPackageList(
-        key: Preferences.Key<String>,
-        default: List<NamedPackage> = emptyList()
-    ): Flow<List<NamedPackage>> =
-        getString(key, json.encodeToString(default)).map { jsonString ->
-            try {
-                json.decodeFromString<List<NamedPackage>>(jsonString)
-            } catch (e: Exception) {
-                Timber.e(
-                    e,
-                    "Failed to decode NamedPackage list from DataStore. Returning empty list."
-                )
-                emptyList()
-            }
+    fun getNamedPackageList(key: Preferences.Key<String>, default: List<NamedPackage> = emptyList()): Flow<List<NamedPackage>> = getString(key, json.encodeToString(default)).map { jsonString ->
+        try {
+            json.decodeFromString<List<NamedPackage>>(jsonString)
+        } catch (e: Exception) {
+            Timber.e(
+                e,
+                "Failed to decode NamedPackage list from DataStore. Returning empty list.",
+            )
+            emptyList()
         }
+    }
 
     /**
      * Synchronously parses a list of NamedPackage objects from a given Preferences snapshot.
@@ -263,7 +248,7 @@ class AppDataStore(
     fun parseNamedPackageList(
         prefs: Preferences,
         key: Preferences.Key<String>,
-        default: List<NamedPackage> = emptyList()
+        default: List<NamedPackage> = emptyList(),
     ): List<NamedPackage> {
         val jsonString = prefs[key] ?: return default
         return try {
@@ -271,7 +256,7 @@ class AppDataStore(
         } catch (e: Exception) {
             Timber.e(
                 e,
-                "Failed to synchronously decode NamedPackage list. Returning default list."
+                "Failed to synchronously decode NamedPackage list. Returning default list.",
             )
             default
         }
@@ -280,24 +265,19 @@ class AppDataStore(
     /**
      * Saves a list of SharedUid objects to DataStore after converting it to a JSON string.
      */
-    suspend fun putSharedUidList(key: Preferences.Key<String>, uids: List<SharedUid>) =
-        putString(key, json.encodeToString(uids))
+    suspend fun putSharedUidList(key: Preferences.Key<String>, uids: List<SharedUid>) = putString(key, json.encodeToString(uids))
 
     /**
      * Retrieves a Flow of a list of SharedUid objects from DataStore.
      */
-    fun getSharedUidList(
-        key: Preferences.Key<String>,
-        default: List<SharedUid> = emptyList()
-    ): Flow<List<SharedUid>> =
-        getString(key, json.encodeToString(default)).map { jsonString ->
-            try {
-                json.decodeFromString<List<SharedUid>>(jsonString)
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to decode SharedUid list from DataStore. Returning empty list.")
-                emptyList()
-            }
+    fun getSharedUidList(key: Preferences.Key<String>, default: List<SharedUid> = emptyList()): Flow<List<SharedUid>> = getString(key, json.encodeToString(default)).map { jsonString ->
+        try {
+            json.decodeFromString<List<SharedUid>>(jsonString)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to decode SharedUid list from DataStore. Returning empty list.")
+            emptyList()
         }
+    }
 
     /**
      * Synchronously parses a list of SharedUid objects from a given Preferences snapshot.
@@ -309,7 +289,7 @@ class AppDataStore(
     fun parseSharedUidList(
         prefs: Preferences,
         key: Preferences.Key<String>,
-        default: List<SharedUid> = emptyList()
+        default: List<SharedUid> = emptyList(),
     ): List<SharedUid> {
         val jsonString = prefs[key] ?: return default
         return try {

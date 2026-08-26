@@ -7,7 +7,4 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 /**
  * Wrapper class to return both stringified URIs and resolved data
  */
-data class ResolveResult(
-    val uris: List<String>,
-    val data: List<DataEntity>
-)
+data class ResolveResult(val uris: List<String>, val data: List<DataEntity>)

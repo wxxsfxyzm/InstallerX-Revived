@@ -12,7 +12,7 @@ class SmartAuthorizerPreferencesTest {
     fun `default candidates include no privilege when session install is supported`() {
         assertTrue(
             SmartAuthorizerPreferences.defaultCandidates(isSessionInstallSupported = true)
-                .any { it.authorizer == Authorizer.None && it.enabled }
+                .any { it.authorizer == Authorizer.None && it.enabled },
         )
     }
 
@@ -20,7 +20,7 @@ class SmartAuthorizerPreferencesTest {
     fun `default candidates exclude no privilege when session install is unsupported`() {
         assertTrue(
             SmartAuthorizerPreferences.defaultCandidates(isSessionInstallSupported = false)
-                .none { it.authorizer == Authorizer.None }
+                .none { it.authorizer == Authorizer.None },
         )
     }
 
@@ -28,7 +28,7 @@ class SmartAuthorizerPreferencesTest {
     fun `decode adds no privilege to legacy candidate list when supported`() {
         val candidates = SmartAuthorizerPreferences.decode(
             value = "root:1,shizuku:1,dhizuku:1",
-            isSessionInstallSupported = true
+            isSessionInstallSupported = true,
         )
 
         assertEquals(Authorizer.None, candidates.last().authorizer)
@@ -39,7 +39,7 @@ class SmartAuthorizerPreferencesTest {
     fun `decode preserves configured no privilege candidate`() {
         val candidates = SmartAuthorizerPreferences.decode(
             value = "none:0,root:1",
-            isSessionInstallSupported = true
+            isSessionInstallSupported = true,
         )
 
         assertEquals(Authorizer.None, candidates.first().authorizer)
@@ -50,7 +50,7 @@ class SmartAuthorizerPreferencesTest {
     fun `decode removes configured no privilege candidate when unsupported`() {
         val candidates = SmartAuthorizerPreferences.decode(
             value = "none:1,root:1",
-            isSessionInstallSupported = false
+            isSessionInstallSupported = false,
         )
 
         assertTrue(candidates.none { it.authorizer == Authorizer.None })

@@ -5,8 +5,6 @@ package com.rosan.installer.data.engine.parser
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -22,6 +20,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 
 class CommonsZipFileProviderTest {
     private lateinit var tempDirectory: File
@@ -50,22 +50,22 @@ class CommonsZipFileProviderTest {
         provider.openMetadata(archiveFile).use { archive ->
             assertEquals(
                 listOf("base.apk", "split_config.en.apk"),
-                archive.entries.asSequence().map { it.name }.toList()
+                archive.entries.asSequence().map { it.name }.toList(),
             )
             val baseEntry = requireNotNull(archive.getEntry("base.apk"))
             assertContentEquals(
                 basePayload,
-                provider.openEntry(archive, baseEntry).use { it.readBytes() }
+                provider.openEntry(archive, baseEntry).use { it.readBytes() },
             )
         }
 
         val entity = DataEntity.ZipFileEntity(
             name = "split_config.en.apk",
-            parent = DataEntity.FileEntity(archiveFile.path)
+            parent = DataEntity.FileEntity(archiveFile.path),
         )
         assertContentEquals(
             splitPayload,
-            requireNotNull(entity.getInputStream()).use { it.readBytes() }
+            requireNotNull(entity.getInputStream()).use { it.readBytes() },
         )
         assertEquals(splitPayload.size.toLong(), entity.getSize())
     }
@@ -137,7 +137,7 @@ class CommonsZipFileProviderTest {
         val recovered = SeekableZipReader().read(archiveFile)
         assertEquals(
             listOf("base.apk", "split_config.en.apk"),
-            recovered.entries.map { it.name }
+            recovered.entries.map { it.name },
         )
         assertFalse(recovered.hasCentralDirectory)
     }

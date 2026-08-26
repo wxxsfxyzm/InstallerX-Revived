@@ -12,6 +12,7 @@ import com.rosan.installer.R
 import com.rosan.installer.core.bitmask.addFlag
 import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.core.bitmask.removeFlag
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.domain.engine.model.install.sourcePath
@@ -20,14 +21,13 @@ import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureMatch
 import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureSelection
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppLabelUseCase
 import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
-import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.ConfirmationState
+import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.config.Authorizer
@@ -36,6 +36,7 @@ import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
@@ -52,7 +53,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.time.Duration.Companion.milliseconds
 
 class InstallerViewModel(
     private var session: InstallerSessionRepository,
@@ -62,14 +62,14 @@ class InstallerViewModel(
     private val getAppIconColor: GetAppIconColorUseCase,
     private val getAppLabel: GetAppLabelUseCase,
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
-    private val installedPackageSignatureProvider: InstalledPackageSignatureProvider
+    private val installedPackageSignatureProvider: InstalledPackageSignatureProvider,
 ) : ViewModel() {
 
     // Event channel for one-off side effects (e.g. Toasts)
     private val _uiEvents = MutableSharedFlow<InstallerViewEvent>(
         replay = 0,
         extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     val uiEvents: SharedFlow<InstallerViewEvent> = _uiEvents.asSharedFlow()
 
@@ -81,15 +81,15 @@ class InstallerViewModel(
         InstallerState(
             // Use the aggregated ConfigModel
             config = session.config,
-            error = session.error
-        )
+            error = session.error,
+        ),
     )
 
     // The single source of truth for the UI.
     // Combines dynamic local state with reactive global app settings.
     val uiState: StateFlow<InstallerState> = combine(
         _localState,
-        appSettingsRepo.preferencesFlow
+        appSettingsRepo.preferencesFlow,
     ) { local, prefs ->
         local.copy(
             viewSettings = local.viewSettings.copy(
@@ -112,7 +112,7 @@ class InstallerViewModel(
                 longClickBackgroundInstall = prefs.longClickBackgroundInstall,
                 labTapIconToShare = prefs.labTapIconToShare,
                 labShowFilePath = local.tempLabShowFilePath ?: prefs.labShowFilePath,
-                labShowInstallInitiator = local.tempLabShowInstallInitiator ?: prefs.labShowInstallInitiator
+                labShowInstallInitiator = local.tempLabShowInstallInitiator ?: prefs.labShowInstallInitiator,
             ),
             rootMode = prefs.labRootMode,
             managedInstallerPackages = prefs.managedInstallerPackages,
@@ -120,7 +120,7 @@ class InstallerViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = _localState.value
+        initialValue = _localState.value,
     )
 
     val isInstallingModule: Boolean
@@ -152,8 +152,8 @@ class InstallerViewModel(
                 viewSettings = state.viewSettings.copy(
                     preferSystemIconForUpdates = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
                     enableModuleInstall = appSettingsRepo.getBoolean(BooleanSetting.LabEnableModuleFlash, false).first(),
-                    useDynColorFollowPkgIcon = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()
-                )
+                    useDynColorFollowPkgIcon = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first(),
+                ),
             )
         }
     }
@@ -172,45 +172,76 @@ class InstallerViewModel(
     fun dispatch(action: InstallerViewAction) {
         when (action) {
             is InstallerViewAction.CollectSession -> collectRepo(action.session)
+
             is InstallerViewAction.PrepareClose -> session.prepareClose()
+
             is InstallerViewAction.Close -> close()
+
             is InstallerViewAction.Cancel -> cancel()
+
             is InstallerViewAction.Analyse -> analyse()
+
             is InstallerViewAction.InstallChoice -> {
                 _localState.update { it.copy(navigatedFromPrepareToChoice = uiState.value.stage is InstallerStage.InstallPrepare) }
                 installChoice()
             }
+
             is InstallerViewAction.SelectMixedModuleType -> selectMixedModuleType(action.installAsModule)
 
             is InstallerViewAction.InstallPrepare -> installPrepare()
+
             is InstallerViewAction.InstallExtendedMenu -> installExtendedMenu()
+
             is InstallerViewAction.InstallExtendedSubMenu -> installExtendedSubMenu()
+
             is InstallerViewAction.InstallMultiple -> installMultiple()
+
             is InstallerViewAction.Install -> install()
+
             is InstallerViewAction.RequestUnknownSourcePermission -> requestUnknownSourcePermission()
+
             is InstallerViewAction.Background -> background()
+
             is InstallerViewAction.Reboot -> session.reboot(action.reason)
+
             is InstallerViewAction.UninstallAndRetryInstall -> uninstallAndRetryInstall(action.keepData, action.conflictingPackage)
+
             is InstallerViewAction.Uninstall -> session.uninstallInfo.value?.packageName?.let { session.uninstall(it) }
+
             is InstallerViewAction.StartUnarchive -> session.startUnarchive()
+
             is InstallerViewAction.OpenUnarchiveErrorAction -> session.openUnarchiveErrorAction()
 
             is InstallerViewAction.ShowMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = true) }
+
             is InstallerViewAction.HideMiuixSheetRightActionSettings -> _localState.update { it.copy(showMiuixSheetRightActionSettings = false) }
+
             is InstallerViewAction.ShowMiuixPermissionList -> _localState.update { it.copy(showMiuixPermissionList = true) }
+
             is InstallerViewAction.HideMiuixPermissionList -> _localState.update { it.copy(showMiuixPermissionList = false) }
 
             is InstallerViewAction.SetTempShowOPPOSpecial -> _localState.update { it.copy(tempShowOPPOSpecial = action.show) }
+
             is InstallerViewAction.SetTempLabShowFilePath -> _localState.update { it.copy(tempLabShowFilePath = action.show) }
+
             is InstallerViewAction.SetTempLabShowInstallInitiator -> _localState.update { it.copy(tempLabShowInstallInitiator = action.show) }
+
             is InstallerViewAction.ToggleSelection -> toggleSelection(action.packageName, action.entity, action.isMultiSelect)
+
             is InstallerViewAction.ToggleUninstallFlag -> toggleUninstallFlag(action.flag, action.enable)
+
             is InstallerViewAction.SetInstallerMode -> selectInstallerMode(action.mode)
+
             is InstallerViewAction.SetInstaller -> selectInstaller(action.installer)
+
             is InstallerViewAction.SetTargetUser -> selectTargetUser(action.userId)
+
             is InstallerViewAction.ApproveSession -> session.approveConfirmation(action.sessionId, action.granted)
+
             is InstallerViewAction.ShareApp -> shareApp(action.appEntity)
+
             is InstallerViewAction.ShowToast -> toast(action.message)
+
             is InstallerViewAction.ShowToastRes -> toast(action.messageResId)
         }
     }
@@ -218,17 +249,19 @@ class InstallerViewModel(
     private fun mapProgressToStage(
         progress: ProgressEntity,
         currentAnalysisResults: List<PackageAnalysisResult>,
-        isRetrying: Boolean
+        isRetrying: Boolean,
     ) = when (progress) {
         ProgressEntity.Ready -> InstallerStage.Ready
+
         ProgressEntity.UninstallResolveFailed,
-        ProgressEntity.InstallResolvedFailed -> InstallerStage.ResolveFailed
+        ProgressEntity.InstallResolvedFailed,
+        -> InstallerStage.ResolveFailed
 
         ProgressEntity.InstallAnalysedFailed -> InstallerStage.AnalyseFailed
 
         ProgressEntity.InstallAnalysedSuccess -> {
             val isBatchMode = currentAnalysisResults.size > 1 ||
-                    currentAnalysisResults.any { it.sessionMode == SessionMode.Batch }
+                currentAnalysisResults.any { it.sessionMode == SessionMode.Batch }
 
             if (isBatchMode) InstallerStage.InstallChoice else InstallerStage.InstallPrepare
         }
@@ -245,7 +278,7 @@ class InstallerViewModel(
                 current = progress.current,
                 total = progress.total,
                 appLabel = progress.appLabel,
-                phase = progress.phase
+                phase = progress.phase,
             )
         }
 
@@ -261,12 +294,17 @@ class InstallerViewModel(
                     if (currentOutput.lastOrNull() != errorLine) currentOutput.add(errorLine)
                 }
                 InstallerStage.InstallingModule(output = currentOutput, isFinished = true)
-            } else InstallerStage.InstallFailed
+            } else {
+                InstallerStage.InstallFailed
+            }
         }
 
         ProgressEntity.InstallSuccess -> {
-            if (isInstallingModule) InstallerStage.InstallingModule(output = session.moduleLog, isFinished = true)
-            else InstallerStage.InstallSuccess
+            if (isInstallingModule) {
+                InstallerStage.InstallingModule(output = session.moduleLog, isFinished = true)
+            } else {
+                InstallerStage.InstallSuccess
+            }
         }
 
         is ProgressEntity.InstallingModule -> InstallerStage.InstallingModule(progress.output)
@@ -282,7 +320,7 @@ class InstallerViewModel(
                     isSelfSession = details.isSelfSession,
                     isOwnershipConflict = details.isOwnershipConflict,
                     sourceAppLabel = details.sourceAppLabel,
-                    requestType = details.requestType
+                    requestType = details.requestType,
                 )
             } else {
                 InstallerStage.ResolveFailed
@@ -290,16 +328,20 @@ class InstallerViewModel(
         }
 
         ProgressEntity.Uninstalling -> if (isRetrying) InstallerStage.InstallRetryDowngradeUsingUninstall else InstallerStage.Uninstalling
+
         ProgressEntity.UninstallFailed -> if (isRetrying) InstallerStage.InstallFailed else InstallerStage.UninstallFailed
+
         ProgressEntity.UninstallSuccess -> if (isRetrying) InstallerStage.InstallRetryDowngradeUsingUninstall else InstallerStage.UninstallSuccess
+
         ProgressEntity.UninstallReady -> InstallerStage.UninstallReady
+
         ProgressEntity.UnarchiveReady -> {
             val info = session.unarchiveInfo.value
             if (info != null) {
                 InstallerStage.UnarchiveReady(
                     packageName = info.packageName,
                     appLabel = info.appLabel,
-                    installerLabel = info.installerLabel
+                    installerLabel = info.installerLabel,
                 )
             } else {
                 InstallerStage.UnarchiveFailed
@@ -307,13 +349,14 @@ class InstallerViewModel(
         }
 
         ProgressEntity.Unarchiving -> InstallerStage.Unarchiving
+
         ProgressEntity.UnarchiveErrorReady -> {
             val info = session.unarchiveErrorInfo.value
             if (info != null) {
                 InstallerStage.UnarchiveError(
                     status = info.status,
                     requiredBytes = info.requiredBytes,
-                    installerLabel = info.installerLabel
+                    installerLabel = info.installerLabel,
                 )
             } else {
                 InstallerStage.UnarchiveFailed
@@ -321,7 +364,9 @@ class InstallerViewModel(
         }
 
         ProgressEntity.UnarchiveFailed -> InstallerStage.UnarchiveFailed
+
         ProgressEntity.InstallResolving, ProgressEntity.InstallAnalysing, is ProgressEntity.InstallPreparing -> _localState.value.stage
+
         else -> InstallerStage.Ready
     }
 
@@ -335,13 +380,13 @@ class InstallerViewModel(
             val validPackages = session.analysisResults.map { res -> res.packageName }.toSet()
             val analysedIcons = session.analysisResults.toDisplayIconMap()
             it.copy(
-                config = session.config,   // Synchronize the entire ConfigModel to UI state
+                config = session.config, // Synchronize the entire ConfigModel to UI state
                 currentPackageName = null,
-                initiatorAppLabel = null,  // Reset label on new session
+                initiatorAppLabel = null, // Reset label on new session
                 unknownSourcePermissionAppLabel = null,
                 analysisResults = session.analysisResults,
                 displayIcons = it.displayIcons.filterKeys { key -> key in validPackages } + analysedIcons,
-                error = session.error
+                error = session.error,
             )
         }
 
@@ -358,7 +403,7 @@ class InstallerViewModel(
             combine(
                 session.progress,
                 session.uninstallInfo,
-                session.confirmationState
+                session.confirmationState,
             ) { progress, uninstallInfo, confirmationState ->
                 Triple(progress, uninstallInfo, confirmationState)
             }.collect { (progress, uninstallInfo, confirmationState) ->
@@ -393,7 +438,7 @@ class InstallerViewModel(
                     _localState.update {
                         it.copy(
                             analysisResults = session.analysisResults,
-                            displayIcons = it.displayIcons + analysedIcons
+                            displayIcons = it.displayIcons + analysedIcons,
                         )
                     }
                 }
@@ -434,7 +479,8 @@ class InstallerViewModel(
                     is InstallerStage.InstallPrepare,
                     is InstallerStage.InstallWaitingUnknownSource,
                     is InstallerStage.InstallFailed,
-                    is InstallerStage.InstallSuccess -> {
+                    is InstallerStage.InstallSuccess,
+                    -> {
                         _localState.value.currentPackageName ?: _localState.value.analysisResults.firstOrNull()?.packageName
                     }
 
@@ -446,7 +492,8 @@ class InstallerViewModel(
                     is InstallerStage.UninstallReady,
                     is InstallerStage.Uninstalling,
                     is InstallerStage.UninstallSuccess,
-                    is InstallerStage.UninstallFailed -> uninstallInfo?.packageName
+                    is InstallerStage.UninstallFailed,
+                    -> uninstallInfo?.packageName
 
                     is InstallerStage.UnarchiveReady -> newStage.packageName
 
@@ -472,12 +519,11 @@ class InstallerViewModel(
                             confirmationState is ConfirmationState.Submitting,
                         currentPackageName = newPackageName,
                         uiUninstallInfo = mergedUninstallInfo,
-                        error = session.error
+                        error = session.error,
                     )
                 }
 
                 if (newPackageName != oldPackageName) {
-
                     if (newPackageName != null) {
                         if (newStage is InstallerStage.InstallConfirm && newStage.appIcon != null) {
                             _localState.update { it.copy(displayIcons = it.displayIcons + (newPackageName to newStage.appIcon.asImageBitmap())) }
@@ -495,7 +541,7 @@ class InstallerViewModel(
                                     defaultFallbackSeedColor = getAppIconColor(
                                         sessionId = session.id,
                                         packageName = "",
-                                        preferSystemIcon = _localState.value.viewSettings.preferSystemIconForUpdates
+                                        preferSystemIcon = _localState.value.viewSettings.preferSystemIconForUpdates,
                                     )
                                     _localState.update { it.copy(seedColor = defaultFallbackSeedColor?.let { c -> Color(c) }) }
                                 }
@@ -522,7 +568,7 @@ class InstallerViewModel(
                                         sessionId = session.id,
                                         packageName = newPackageName,
                                         entityToInstall = entityToInstall,
-                                        preferSystemIcon = _localState.value.viewSettings.preferSystemIconForUpdates
+                                        preferSystemIcon = _localState.value.viewSettings.preferSystemIconForUpdates,
                                     )
                                 }
                                 _localState.update { it.copy(seedColor = colorInt?.let { c -> Color(c) }) }
@@ -613,7 +659,7 @@ class InstallerViewModel(
                 sessionId = session.id,
                 packageName = packageName,
                 entityToInstall = entityToInstall,
-                preferSystemIcon = uiState.value.viewSettings.preferSystemIconForUpdates
+                preferSystemIcon = uiState.value.viewSettings.preferSystemIconForUpdates,
             )
 
             val finalImageBitmap = loadedIconBitmap?.asImageBitmap()
@@ -665,12 +711,16 @@ class InstallerViewModel(
                     signatureMatchStatus = if (result.signatureCheckPerformed) {
                         clearedEntities.analyzePackageSignatureMatch(
                             installedInfo = result.installedAppInfo,
-                            hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+                            hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
                         )
-                    } else result.signatureMatchStatus,
+                    } else {
+                        result.signatureMatchStatus
+                    },
                     signatureAnalysis = if (result.signatureCheckPerformed) {
                         clearedEntities.analyzePackageSignatureSelection(result.installedAppInfo)
-                    } else result.signatureAnalysis
+                    } else {
+                        result.signatureAnalysis
+                    },
                 )
             }
             // Sync the updated list back to the underlying session
@@ -682,7 +732,7 @@ class InstallerViewModel(
             it.copy(
                 currentPackageName = null,
                 stage = InstallerStage.InstallChoice,
-                analysisResults = currentResults // Ensure the UI receives the latest list
+                analysisResults = currentResults, // Ensure the UI receives the latest list
             )
         }
     }
@@ -692,8 +742,11 @@ class InstallerViewModel(
         val targetEntity = currentResults
             .flatMap { it.appEntities }
             .firstOrNull { entity ->
-                if (installAsModule) entity.app is AppEntity.ModuleEntity
-                else entity.app is AppEntity.BaseEntity
+                if (installAsModule) {
+                    entity.app is AppEntity.ModuleEntity
+                } else {
+                    entity.app is AppEntity.BaseEntity
+                }
             } ?: return
 
         val updatedResults = currentResults.map { result ->
@@ -705,12 +758,16 @@ class InstallerViewModel(
                 signatureMatchStatus = if (result.signatureCheckPerformed) {
                     updatedEntities.analyzePackageSignatureMatch(
                         installedInfo = result.installedAppInfo,
-                        hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+                        hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
                     )
-                } else result.signatureMatchStatus,
+                } else {
+                    result.signatureMatchStatus
+                },
                 signatureAnalysis = if (result.signatureCheckPerformed) {
                     updatedEntities.analyzePackageSignatureSelection(result.installedAppInfo)
-                } else result.signatureAnalysis
+                } else {
+                    result.signatureAnalysis
+                },
             )
         }
 
@@ -730,9 +787,11 @@ class InstallerViewModel(
                 it.copy(
                     currentPackageName = targetPackageName,
                     stage = InstallerStage.InstallPrepare,
-                    seedColor = if (it.viewSettings.useDynColorFollowPkgIcon)
+                    seedColor = if (it.viewSettings.useDynColorFollowPkgIcon) {
                         _localState.value.analysisResults.find { res -> res.packageName == targetPackageName }?.seedColor?.let { c -> Color(c) }
-                    else null
+                    } else {
+                        null
+                    },
                 )
             }
         } else {
@@ -744,17 +803,21 @@ class InstallerViewModel(
         if (_localState.value.stage in listOf(
                 InstallerStage.InstallPrepare,
                 InstallerStage.InstallExtendedSubMenu,
-                InstallerStage.InstallFailed
+                InstallerStage.InstallFailed,
             )
         ) {
             _localState.update { it.copy(stage = InstallerStage.InstallExtendedMenu) }
-        } else toast(R.string.error_dialog_install_menu_not_available)
+        } else {
+            toast(R.string.error_dialog_install_menu_not_available)
+        }
     }
 
     private fun installExtendedSubMenu() {
         if (_localState.value.stage is InstallerStage.InstallExtendedMenu) {
             _localState.update { it.copy(stage = InstallerStage.InstallExtendedSubMenu) }
-        } else toast(R.string.error_dialog_install_menu_not_available)
+        } else {
+            toast(R.string.error_dialog_install_menu_not_available)
+        }
     }
 
     private fun install() {
@@ -776,9 +839,13 @@ class InstallerViewModel(
         if (packageIndex != -1) {
             val packageToUpdate = currentResults[packageIndex]
             val updatedEntities = packageToUpdate.appEntities.map { currentEntity ->
-                if (currentEntity === entityToToggle) currentEntity.copy(selected = !currentEntity.selected)
-                else if (!isMultiSelect) currentEntity.copy(selected = false)
-                else currentEntity
+                if (currentEntity === entityToToggle) {
+                    currentEntity.copy(selected = !currentEntity.selected)
+                } else if (!isMultiSelect) {
+                    currentEntity.copy(selected = false)
+                } else {
+                    currentEntity
+                }
             }.toMutableList()
 
             if (!isMultiSelect && entityToToggle.selected) {
@@ -787,18 +854,22 @@ class InstallerViewModel(
 
             val newSignatureAnalysis = if (packageToUpdate.signatureCheckPerformed) {
                 updatedEntities.analyzePackageSignatureSelection(packageToUpdate.installedAppInfo)
-            } else packageToUpdate.signatureAnalysis
+            } else {
+                packageToUpdate.signatureAnalysis
+            }
             val newSignatureMatchStatus = if (packageToUpdate.signatureCheckPerformed) {
                 updatedEntities.analyzePackageSignatureMatch(
                     installedInfo = packageToUpdate.installedAppInfo,
-                    hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate
+                    hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
                 )
-            } else packageToUpdate.signatureMatchStatus
+            } else {
+                packageToUpdate.signatureMatchStatus
+            }
 
             val newPackageAnalysisResult = packageToUpdate.copy(
                 appEntities = updatedEntities,
                 signatureMatchStatus = newSignatureMatchStatus,
-                signatureAnalysis = newSignatureAnalysis
+                signatureAnalysis = newSignatureAnalysis,
             )
             currentResults[packageIndex] = newPackageAnalysisResult
 
@@ -863,9 +934,10 @@ class InstallerViewModel(
         val filePath = entity.data.sourcePath()
         val mimeType = when {
             entity is AppEntity.ModuleEntity -> "application/zip"
+
             filePath?.endsWith(".apkm", true) == true ||
-                    filePath?.endsWith(".apks", true) == true ||
-                    filePath?.endsWith(".xapk", true) == true -> "application/zip"
+                filePath?.endsWith(".apks", true) == true ||
+                filePath?.endsWith(".xapk", true) == true -> "application/zip"
 
             else -> "application/vnd.android.package-archive"
         }

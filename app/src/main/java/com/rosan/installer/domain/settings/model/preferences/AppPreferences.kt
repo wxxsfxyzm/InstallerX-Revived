@@ -87,5 +87,5 @@ data class AppPreferences(
     val useBlur: Boolean,
     // Predictive Back Settings
     val predictiveBackAnimation: PredictiveBackAnimation,
-    val predictiveBackExitDirection: PredictiveBackExitDirection
+    val predictiveBackExitDirection: PredictiveBackExitDirection,
 )

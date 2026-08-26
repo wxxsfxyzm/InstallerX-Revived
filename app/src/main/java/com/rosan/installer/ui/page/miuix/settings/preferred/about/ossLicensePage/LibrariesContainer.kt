@@ -49,11 +49,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
-fun LibrariesContainer(
-    modifier: Modifier = Modifier,
-    contentPadding: PaddingValues,
-    libraries: Libs?
-) {
+fun LibrariesContainer(modifier: Modifier = Modifier, contentPadding: PaddingValues, libraries: Libs?) {
     val uriHandler = LocalUriHandler.current
     var selectedLibrary by remember { mutableStateOf<Library?>(null) }
     var showLicenseDialog by remember { mutableStateOf(false) }
@@ -61,7 +57,7 @@ fun LibrariesContainer(
     LazyColumn(
         modifier = modifier,
         contentPadding = contentPadding,
-        overscrollEffect = null
+        overscrollEffect = null,
     ) {
         item { Spacer(modifier = Modifier.size(16.dp)) }
         items(libraries?.libraries ?: listOf()) { library ->
@@ -70,7 +66,7 @@ fun LibrariesContainer(
                 onClick = {
                     selectedLibrary = library
                     showLicenseDialog = true
-                }
+                },
             )
         }
         item { Spacer(Modifier.navigationBarsPadding()) }
@@ -79,7 +75,7 @@ fun LibrariesContainer(
     selectedLibrary?.let { library ->
         val licenseSummary = stringResource(
             R.string.license,
-            library.licenses.joinToString(", ") { it.name }
+            library.licenses.joinToString(", ") { it.name },
         )
 
         WindowDialog(
@@ -93,7 +89,7 @@ fun LibrariesContainer(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 420.dp)
+                        .heightIn(max = 420.dp),
                 ) {
                     LazyColumn(
                         modifier = Modifier
@@ -103,15 +99,15 @@ fun LibrariesContainer(
                             .overScrollVertical(),
                         contentPadding = PaddingValues(bottom = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        overscrollEffect = null
+                        overscrollEffect = null,
                     ) {
                         items(library.licenses.toList()) { license ->
                             CompositionLocalProvider(LocalSquircleEnabled provides false) {
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = CardDefaults.defaultColors(
-                                        color = MiuixTheme.colorScheme.surfaceContainerHighest
-                                    )
+                                        color = MiuixTheme.colorScheme.surfaceContainerHighest,
+                                    ),
                                 ) {
                                     Column(modifier = Modifier.padding(16.dp)) {
                                         Text(
@@ -120,14 +116,14 @@ fun LibrariesContainer(
                                             color = MiuixTheme.colorScheme.primary,
                                             modifier = Modifier.clickable {
                                                 license.url?.let { uriHandler.openUri(it) }
-                                            }
+                                            },
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
                                             text = license.licenseContent
                                                 ?: stringResource(R.string.no_license_text),
                                             style = MiuixTheme.textStyles.body2,
-                                            color = MiuixTheme.colorScheme.onSurfaceContainer
+                                            color = MiuixTheme.colorScheme.onSurfaceContainer,
                                         )
                                     }
                                 }
@@ -139,13 +135,13 @@ fun LibrariesContainer(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         if (!library.website.isNullOrBlank()) {
                             TextButton(
                                 modifier = Modifier.weight(1f),
                                 onClick = { uriHandler.openUri(library.website!!) },
-                                text = stringResource(R.string.visit_home_page)
+                                text = stringResource(R.string.visit_home_page),
                             )
                         }
 
@@ -153,35 +149,31 @@ fun LibrariesContainer(
                             modifier = Modifier.weight(1f),
                             onClick = { dismissState?.invoke() },
                             text = stringResource(R.string.close),
-                            colors = ButtonDefaults.textButtonColorsPrimary()
+                            colors = ButtonDefaults.textButtonColorsPrimary(),
                         )
                     }
                 }
-            }
+            },
         )
     }
 }
 
 @Composable
-fun LibraryCard(
-    library: Library,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
+fun LibraryCard(library: Library, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Card(
         modifier = modifier
             .padding(horizontal = 12.dp)
             .padding(bottom = 12.dp),
         onClick = onClick,
-        pressFeedbackType = PressFeedbackType.Sink
+        pressFeedbackType = PressFeedbackType.Sink,
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = library.name,
@@ -190,13 +182,13 @@ fun LibraryCard(
                     maxLines = 1,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 5.dp)
+                        .padding(end = 5.dp),
                 )
                 library.artifactVersion?.let {
                     Text(
                         text = it,
                         style = MiuixTheme.textStyles.headline1,
-                        color = MiuixTheme.colorScheme.secondary
+                        color = MiuixTheme.colorScheme.secondary,
                     )
                 }
             }
@@ -206,7 +198,7 @@ fun LibraryCard(
             Text(
                 text = library.author,
                 style = MiuixTheme.textStyles.body1,
-                color = MiuixTheme.colorScheme.onSurface
+                color = MiuixTheme.colorScheme.onSurface,
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -215,15 +207,15 @@ fun LibraryCard(
                 Card(
                     colors = CardDefaults.defaultColors(
                         color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                        contentColor = MiuixTheme.colorScheme.onSurface
-                    )
+                        contentColor = MiuixTheme.colorScheme.onSurface,
+                    ),
                 ) {
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         Text(
                             text = license.name,
                             color = MiuixTheme.colorScheme.primary,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
                         )
                     }
                 }

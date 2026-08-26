@@ -3,8 +3,4 @@
 package com.rosan.installer.domain.engine.model.packageinfo
 
 // Data class representing Xposed module information
-data class XposedModuleInfo(
-    val minApi: String?,
-    val targetApi: String?,
-    val description: String?
-)
+data class XposedModuleInfo(val minApi: String?, val targetApi: String?, val description: String?)

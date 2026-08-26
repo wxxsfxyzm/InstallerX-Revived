@@ -50,7 +50,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun MiuixAuthorizerCustPage(
     useBlur: Boolean,
-    viewModel: AuthorizerCustViewModel = koinViewModel()
+    viewModel: AuthorizerCustViewModel = koinViewModel(),
 ) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -73,9 +73,9 @@ fun MiuixAuthorizerCustPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -87,30 +87,33 @@ fun MiuixAuthorizerCustPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
 
             item {
                 SmallTitle(
-                    text = if (isSystemApp) stringResource(R.string.working_status_system_installer)
-                    else stringResource(R.string.config_authorizer_none)
+                    text = if (isSystemApp) {
+                        stringResource(R.string.working_status_system_installer)
+                    } else {
+                        stringResource(R.string.config_authorizer_none)
+                    },
                 )
             }
             item {
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     if (isSystemApp) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.config_always_use_root_in_system),
                             description = stringResource(R.string.config_always_use_root_in_system_desc),
                             checked = uiState.alwaysUseRootInSystem,
-                            onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAlwaysUseRootInSystem(it)) }
+                            onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAlwaysUseRootInSystem(it)) },
                         )
                     }
                     if (!isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -118,7 +121,7 @@ fun MiuixAuthorizerCustPage(
                             title = stringResource(R.string.lab_install_without_user_action),
                             description = stringResource(R.string.lab_install_without_user_action_desc),
                             checked = uiState.allowInstallWithoutUserAction,
-                            onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAllowInstallWithoutUserAction(it)) }
+                            onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAllowInstallWithoutUserAction(it)) },
                         )
                     }
                 }
@@ -130,7 +133,7 @@ fun MiuixAuthorizerCustPage(
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 12.dp),
                     ) {
                         MiuixIntNumberPickerWidget(
                             title = stringResource(R.string.close_session_countdown),
@@ -140,7 +143,7 @@ fun MiuixAuthorizerCustPage(
                             endInt = 10,
                             onValueChange = {
                                 viewModel.dispatch(AuthorizerCustAction.ChangeCloseSessionCountDown(it))
-                            }
+                            },
                         )
                     }
                 }

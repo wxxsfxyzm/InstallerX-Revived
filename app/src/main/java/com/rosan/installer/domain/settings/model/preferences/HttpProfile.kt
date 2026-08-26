@@ -3,7 +3,8 @@ package com.rosan.installer.domain.settings.model.preferences
 enum class HttpProfile {
     ALLOW_ALL,
     ALLOW_LOCAL,
-    ALLOW_SECURE;
+    ALLOW_SECURE,
+    ;
 
     companion object {
         /**

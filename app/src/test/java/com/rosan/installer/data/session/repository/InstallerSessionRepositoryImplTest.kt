@@ -2,12 +2,12 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.repository
 
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 
 class InstallerSessionRepositoryImplTest {
     @Test

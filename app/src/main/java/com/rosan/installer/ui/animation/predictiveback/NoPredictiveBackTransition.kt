@@ -56,6 +56,7 @@ private fun noPredictiveVisualProgress(scope: NavTransitionScope): Float {
     val gesture = scope.gesture ?: return 0f
     val topDepth = when (scope.role) {
         NavRole.Covered -> scope.relativeDepth - 1f
+
         NavRole.Top if scope.settle?.phase == NavSettlePhase.Commit ->
             scope.relativeDepth - 1f
 
@@ -65,6 +66,7 @@ private fun noPredictiveVisualProgress(scope: NavTransitionScope): Float {
     val settle = scope.settle
     return when (settle?.phase) {
         null -> (totalProgress - gesture.progress).coerceIn(0f, 1f)
+
         NavSettlePhase.Commit -> {
             val settleProgress = noPredictiveSettleProgress(settle)
             val remaining = 1f - settleProgress
@@ -99,10 +101,7 @@ private fun noPredictiveSettleProgress(settle: NavSettle): Float {
     return NavProgrammaticEasing.transform(fraction).coerceIn(0f, 1f)
 }
 
-private fun GraphicsLayerScope.applyNoPredictiveTransform(
-    scope: NavTransitionScope,
-    progress: Float,
-) {
+private fun GraphicsLayerScope.applyNoPredictiveTransform(scope: NavTransitionScope, progress: Float) {
     val widthPx = scope.layoutSize.width.toFloat()
     val direction = if (scope.layoutDirection == LayoutDirection.Rtl) -1f else 1f
     val isLowerEntry = scope.role == NavRole.Covered ||

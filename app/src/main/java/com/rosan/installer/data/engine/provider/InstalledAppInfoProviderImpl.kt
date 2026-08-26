@@ -16,7 +16,7 @@ import java.io.File
 
 class InstalledAppInfoProviderImpl(
     private val context: Context,
-    private val installedPackageSignatureReader: InstalledPackageSignatureReader
+    private val installedPackageSignatureReader: InstalledPackageSignatureReader,
 ) : InstalledAppInfoProvider {
     override fun getByPackageName(packageName: String, includeSignature: Boolean): InstalledAppInfo? {
         val packageManager = context.packageManager
@@ -26,7 +26,7 @@ class InstalledAppInfoProviderImpl(
             val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 packageManager.getPackageInfo(
                     packageName,
-                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong())
+                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong()),
                 )
             } else {
                 @Suppress("DEPRECATION")
@@ -65,7 +65,7 @@ class InstalledAppInfoProviderImpl(
                 isUninstalled = isUninstalled,
                 isArchived = packageManager.isPackageArchivedCompat(packageName),
                 packageSize = packageSize,
-                sourceDir = applicationInfo?.sourceDir
+                sourceDir = applicationInfo?.sourceDir,
             )
         } catch (_: PackageManager.NameNotFoundException) {
             null

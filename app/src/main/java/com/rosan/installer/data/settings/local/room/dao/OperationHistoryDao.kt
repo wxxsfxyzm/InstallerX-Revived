@@ -34,7 +34,7 @@ interface OperationHistoryDao {
             order by timestamp desc, id desc
             limit :limit
         )
-        """
+        """,
     )
     suspend fun trimToLimit(limit: Int)
 

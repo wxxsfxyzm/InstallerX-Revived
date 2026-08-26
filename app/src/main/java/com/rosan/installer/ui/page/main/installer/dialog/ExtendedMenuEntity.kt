@@ -9,7 +9,7 @@ data class ExtendedMenuEntity(
     val selected: Boolean = false,
     val action: InstallExtendedMenuAction,
     val menuItem: ExtendedMenuItemEntity,
-    val subMenuId: InstallExtendedSubMenuId? = null
+    val subMenuId: InstallExtendedSubMenuId? = null,
 )
 
 data class ExtendedMenuItemEntity(

@@ -9,5 +9,5 @@ data class HistoryViewState(
     val isLoading: Boolean = true,
     val isSystemApp: Boolean = false,
     val isHistoryEnabled: Boolean = true,
-    val areIndicatorsEnabled: Boolean = true
+    val areIndicatorsEnabled: Boolean = true,
 )

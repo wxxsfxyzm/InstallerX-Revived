@@ -32,7 +32,7 @@ val packageUpdateModule = module {
             context = androidContext(),
             recoveryRepository = get(),
             postInstallTaskProvider = get(),
-            recordOperationHistory = get()
+            recordOperationHistory = get(),
         )
     }
 }

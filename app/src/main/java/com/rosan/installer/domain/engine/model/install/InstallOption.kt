@@ -73,7 +73,7 @@ enum class InstallOption(
 
     AllowDowngrade(
         value = PackageManagerHidden.INSTALL_REQUEST_DOWNGRADE or
-                PackageManagerHidden.INSTALL_ALLOW_DOWNGRADE,
+            PackageManagerHidden.INSTALL_ALLOW_DOWNGRADE,
         labelResource = R.string.config_allow_downgrade,
         descResource = R.string.config_allow_downgrade_desc,
     ),
@@ -175,5 +175,5 @@ enum class InstallOption(
         minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
         labelResource = R.string.config_request_update_ownership,
         descResource = R.string.config_request_update_ownership_desc,
-    )
+    ),
 }

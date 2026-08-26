@@ -48,7 +48,7 @@ fun SwitchWidget(
     onClick: (() -> Unit)? = null,
     trailingDivider: Boolean = false,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -95,7 +95,7 @@ fun SwitchWidget(
         trailingDivider = trailingDivider,
         onClick = leftClickAction,
         clickHaptic = null,
-        description = description
+        description = description,
     ) { interactionSource ->
         Switch(
             modifier = Modifier.clearAndSetSemantics {},
@@ -104,17 +104,17 @@ fun SwitchWidget(
             interactionSource = interactionSource,
             colors = SwitchDefaults.colors(
                 checkedIconColor = MaterialTheme.colorScheme.primary,
-                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             ),
             thumbContent = {
                 Icon(
                     imageVector = if (checked) Icons.Filled.Check else Icons.Filled.Close,
                     contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
                 )
             },
             // Use the switch's own touch handling when the left and trailing areas are separate.
-            onCheckedChange = if (separateClickAreas) handleCheckedChange else null
+            onCheckedChange = if (separateClickAreas) handleCheckedChange else null,
         )
     }
 }

@@ -17,6 +17,7 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.domain.settings.usecase.config.ToggleAppTargetConfigUseCase
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,7 +30,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import kotlin.time.Duration.Companion.seconds
 
 class ApplyViewModel(
     private val id: Long,
@@ -39,15 +39,16 @@ class ApplyViewModel(
     private val toggleAppTargetConfig: ToggleAppTargetConfigUseCase,
     private val updateSetting: UpdateSettingUseCase,
     private val getAppIcon: GetAppIconUseCase,
-    private val clearAppIconCache: ClearAppIconCacheUseCase
-) : ViewModel(), KoinComponent {
+    private val clearAppIconCache: ClearAppIconCacheUseCase,
+) : ViewModel(),
+    KoinComponent {
 
     // Internal mutable flows for data that are not saved in the settings repository
     private val _apps = MutableStateFlow<ViewContent<List<ApplyViewApp>>>(
-        ViewContent(data = emptyList(), progress = ViewContent.Progress.Loading)
+        ViewContent(data = emptyList(), progress = ViewContent.Progress.Loading),
     )
     private val _appEntities = MutableStateFlow<ViewContent<List<AppModel>>>(
-        ViewContent(data = emptyList(), progress = ViewContent.Progress.Loading)
+        ViewContent(data = emptyList(), progress = ViewContent.Progress.Loading),
     )
     private val _search = MutableStateFlow("")
 
@@ -61,7 +62,7 @@ class ApplyViewModel(
         val orderInReverse: Boolean,
         val selectedFirst: Boolean,
         val showSystemApp: Boolean,
-        val showPackageName: Boolean
+        val showPackageName: Boolean,
     )
 
     // Combine individual setting flows into a single flow for this page
@@ -70,14 +71,17 @@ class ApplyViewModel(
         appSettingsRepo.getBoolean(BooleanSetting.ApplyOrderInReverse),
         appSettingsRepo.getBoolean(BooleanSetting.ApplySelectedFirst, default = true),
         appSettingsRepo.getBoolean(BooleanSetting.ApplyShowSystemApp),
-        appSettingsRepo.getBoolean(BooleanSetting.ApplyShowPackageName, default = false)
+        appSettingsRepo.getBoolean(BooleanSetting.ApplyShowPackageName, default = false),
     ) { orderTypeStr, orderInReverse, selectedFirst, showSystemApp, showPackageName ->
         ApplyPrefs(orderTypeStr, orderInReverse, selectedFirst, showSystemApp, showPackageName)
     }
 
     // Heavy lifting: filter and sort apps on a background thread to prevent UI stuttering
     private val processedAppsFlow = combine(
-        _apps, _appEntities, _search, applyPrefsFlow
+        _apps,
+        _appEntities,
+        _search,
+        applyPrefsFlow,
     ) { appsState, entitiesState, searchQuery, prefs ->
         val rawApps = appsState.data
         if (rawApps.isEmpty()) return@combine emptyList<ApplyViewApp>()
@@ -91,8 +95,8 @@ class ApplyViewModel(
         val filtered = rawApps.filter { app ->
             val matchSystem = prefs.showSystemApp || !app.isSystemApp
             val matchSearch = searchQuery.isEmpty() ||
-                    app.packageName.contains(searchQuery, ignoreCase = true) ||
-                    (app.label?.contains(searchQuery, ignoreCase = true) == true)
+                app.packageName.contains(searchQuery, ignoreCase = true) ||
+                (app.label?.contains(searchQuery, ignoreCase = true) == true)
             matchSystem && matchSearch
         }
 
@@ -130,16 +134,12 @@ class ApplyViewModel(
     }.flowOn(Dispatchers.Default)
 
     // Intermediate state to avoid exceeding combine's argument limit
-    private data class UiStateData(
-        val applyPrefs: ApplyPrefs,
-        val search: String,
-        val icons: Map<String, ImageBitmap?>
-    )
+    private data class UiStateData(val applyPrefs: ApplyPrefs, val search: String, val icons: Map<String, ImageBitmap?>)
 
     private val uiStateFlow = combine(
         applyPrefsFlow,
         _search,
-        _displayIcons
+        _displayIcons,
     ) { prefs, search, icons ->
         UiStateData(prefs, search, icons)
     }
@@ -149,7 +149,7 @@ class ApplyViewModel(
         uiStateFlow,
         _apps,
         _appEntities,
-        processedAppsFlow
+        processedAppsFlow,
     ) { uiData, apps, appEntities, checkedApps ->
         val orderType = runCatching { ApplyViewState.OrderType.valueOf(uiData.applyPrefs.orderTypeStr) }
             .getOrDefault(ApplyViewState.OrderType.Label)
@@ -164,12 +164,12 @@ class ApplyViewModel(
             selectedFirst = uiData.applyPrefs.selectedFirst,
             showSystemApp = uiData.applyPrefs.showSystemApp,
             showPackageName = uiData.applyPrefs.showPackageName,
-            search = uiData.search
+            search = uiData.search,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = ApplyViewState()
+        initialValue = ApplyViewState(),
     )
 
     init {
@@ -180,14 +180,31 @@ class ApplyViewModel(
     fun dispatch(action: ApplyViewAction) {
         when (action) {
             ApplyViewAction.LoadApps -> loadApps()
+
             ApplyViewAction.LoadAppEntities -> collectAppEntities()
+
             is ApplyViewAction.LoadIcon -> loadAppIcon(action.packageName)
+
             is ApplyViewAction.ApplyPackageName -> applyPackageName(action.packageName, action.applied)
+
             is ApplyViewAction.Order -> viewModelScope.launch { updateSetting(StringSetting.ApplyOrderType, action.type.name) }
-            is ApplyViewAction.OrderInReverse -> viewModelScope.launch { updateSetting(BooleanSetting.ApplyOrderInReverse, action.enabled) }
-            is ApplyViewAction.SelectedFirst -> viewModelScope.launch { updateSetting(BooleanSetting.ApplySelectedFirst, action.enabled) }
-            is ApplyViewAction.ShowSystemApp -> viewModelScope.launch { updateSetting(BooleanSetting.ApplyShowSystemApp, action.enabled) }
-            is ApplyViewAction.ShowPackageName -> viewModelScope.launch { updateSetting(BooleanSetting.ApplyShowPackageName, action.enabled) }
+
+            is ApplyViewAction.OrderInReverse -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ApplyOrderInReverse, action.enabled)
+            }
+
+            is ApplyViewAction.SelectedFirst -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ApplySelectedFirst, action.enabled)
+            }
+
+            is ApplyViewAction.ShowSystemApp -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ApplyShowSystemApp, action.enabled)
+            }
+
+            is ApplyViewAction.ShowPackageName -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ApplyShowPackageName, action.enabled)
+            }
+
             is ApplyViewAction.Search -> _search.value = action.text
         }
     }
@@ -214,7 +231,7 @@ class ApplyViewModel(
             appRepo.flowAll().collect { models ->
                 _appEntities.value = _appEntities.value.copy(
                     data = models.filter { it.configId == id },
-                    progress = ViewContent.Progress.Loaded
+                    progress = ViewContent.Progress.Loaded,
                 )
             }
         }
@@ -238,7 +255,7 @@ class ApplyViewModel(
                 sessionId = SETTINGS_APP_LIST,
                 packageName = packageName,
                 iconSizePx = 144,
-                preferSystemIcon = true
+                preferSystemIcon = true,
             )
 
             val finalImageBitmap = iconBitmap?.asImageBitmap()

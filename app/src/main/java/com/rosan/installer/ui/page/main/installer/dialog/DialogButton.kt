@@ -7,5 +7,5 @@ data class DialogButton(
     val weight: Float = 1f,
     val enabled: Boolean = true,
     val onLongClick: (() -> Unit)? = null,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )

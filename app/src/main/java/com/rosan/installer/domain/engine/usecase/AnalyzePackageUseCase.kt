@@ -4,8 +4,8 @@ package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
-import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.provider.InstalledModuleInfoProvider
 import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.repository.AppIconRepository
@@ -30,7 +30,7 @@ class AnalyzePackageUseCase(
     private val analyserRepository: AnalyserRepository,
     private val appIconRepository: AppIconRepository,
     private val installedModuleInfoProvider: InstalledModuleInfoProvider,
-    private val appSettingsRepo: AppSettingsRepository
+    private val appSettingsRepo: AppSettingsRepository,
 ) {
     /**
      * Executes the analysis flow.
@@ -44,7 +44,7 @@ class AnalyzePackageUseCase(
         sessionId: String,
         config: ConfigModel,
         data: List<DataEntity>,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<PackageAnalysisResult> = coroutineScope {
         if (data.isEmpty()) return@coroutineScope emptyList()
 
@@ -58,7 +58,10 @@ class AnalyzePackageUseCase(
 
         // 2. Fetch user preferences regarding dynamic colors
         val useDynamicColor = appSettingsRepo.getBoolean(BooleanSetting.UiDynColorFollowPkgIcon, false).first()
-        val useDynamicColorForLiveActivity = appSettingsRepo.getBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, false).first()
+        val useDynamicColorForLiveActivity = appSettingsRepo.getBoolean(
+            BooleanSetting.LiveActivityDynColorFollowPkgIcon,
+            false,
+        ).first()
         val preferSystemIcon = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first()
 
         // 3. Prepare display icons during analysis so UI stages can consume stable visual data.
@@ -80,7 +83,7 @@ class AnalyzePackageUseCase(
                     entityToInstall = entityForIcon,
                     userId = 0,
                     iconSizePx = DISPLAY_ICON_SIZE_PX,
-                    preferSystemIcon = preferSystemIcon
+                    preferSystemIcon = preferSystemIcon,
                 )
 
                 val color = if (useDynamicColor || useDynamicColorForLiveActivity) {
@@ -97,7 +100,7 @@ class AnalyzePackageUseCase(
     private suspend fun enrichInstalledModuleInfo(
         config: ConfigModel,
         results: List<PackageAnalysisResult>,
-        rootMode: RootMode
+        rootMode: RootMode,
     ): List<PackageAnalysisResult> {
         val hasModule = results.any { result ->
             result.appEntities.any { it.app is AppEntity.ModuleEntity }

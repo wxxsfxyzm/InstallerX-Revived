@@ -9,8 +9,8 @@ import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.Re
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.core.infrastructure.process.AppProcessTerminal
-import org.koin.core.component.KoinComponent
 import java.io.Closeable
+import org.koin.core.component.KoinComponent
 
 /**
  * Manages an AppProcess used only for binder wrapping in root/custom hook mode.
@@ -19,14 +19,13 @@ import java.io.Closeable
 class ProcessHookRecycler(
     private val terminal: AppProcessTerminal,
     private val context: Context,
-    private val appProcessRecyclerManager: RecyclerManager<AppProcessTerminal, AppProcessRecycler>
-) : Recycler<ProcessHookRecycler.HookedUserService>(), KoinComponent {
+    private val appProcessRecyclerManager: RecyclerManager<AppProcessTerminal, AppProcessRecycler>,
+) : Recycler<ProcessHookRecycler.HookedUserService>(),
+    KoinComponent {
 
     override val delayDuration: Long = 5_000L
 
-    class HookedUserService(
-        private val appProcessHandle: Recyclable<AppProcess>
-    ) : Closeable {
+    class HookedUserService(private val appProcessHandle: Recyclable<AppProcess>) : Closeable {
         fun binderWrapper(binder: IBinder): IBinder = appProcessHandle.entity.binderWrapper(binder)
 
         override fun close() {

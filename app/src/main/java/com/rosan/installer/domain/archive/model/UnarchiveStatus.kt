@@ -9,48 +9,48 @@ sealed class UnarchiveStatus(
     val primaryAction: UnarchiveErrorAction,
     @param:StringRes val titleResId: Int,
     @param:StringRes val messageResId: Int,
-    @param:StringRes val actionLabelResId: Int
+    @param:StringRes val actionLabelResId: Int,
 ) {
     data object UserActionNeeded : UnarchiveStatus(
         primaryAction = UnarchiveErrorAction.CONTINUE,
         titleResId = R.string.unarchive_error_action_required_title,
         messageResId = R.string.unarchive_error_action_required_message,
-        actionLabelResId = R.string.unarchive_action_continue
+        actionLabelResId = R.string.unarchive_action_continue,
     )
 
     data object InsufficientStorage : UnarchiveStatus(
         primaryAction = UnarchiveErrorAction.CLEAR_STORAGE,
         titleResId = R.string.unarchive_error_storage_title,
         messageResId = R.string.unarchive_error_storage_message,
-        actionLabelResId = R.string.unarchive_action_clear_storage
+        actionLabelResId = R.string.unarchive_action_clear_storage,
     )
 
     data object NoConnectivity : UnarchiveStatus(
         primaryAction = UnarchiveErrorAction.CLOSE,
         titleResId = R.string.unarchive_error_offline_title,
         messageResId = R.string.unarchive_error_offline_message,
-        actionLabelResId = R.string.close
+        actionLabelResId = R.string.close,
     )
 
     data object InstallerDisabled : UnarchiveStatus(
         primaryAction = UnarchiveErrorAction.OPEN_INSTALLER_SETTINGS,
         titleResId = R.string.unarchive_error_installer_disabled_title,
         messageResId = R.string.unarchive_error_installer_disabled_message,
-        actionLabelResId = R.string.unarchive_action_app_settings
+        actionLabelResId = R.string.unarchive_action_app_settings,
     )
 
     data object InstallerUninstalled : UnarchiveStatus(
         primaryAction = UnarchiveErrorAction.CLOSE,
         titleResId = R.string.unarchive_error_installer_uninstalled_title,
         messageResId = R.string.unarchive_error_installer_uninstalled_message,
-        actionLabelResId = R.string.close
+        actionLabelResId = R.string.close,
     )
 
     data object GenericError : UnarchiveStatus(
         primaryAction = UnarchiveErrorAction.CLOSE,
         titleResId = R.string.unarchive_error_generic_title,
         messageResId = R.string.unarchive_error_generic_message,
-        actionLabelResId = R.string.close
+        actionLabelResId = R.string.close,
     )
 
     companion object {

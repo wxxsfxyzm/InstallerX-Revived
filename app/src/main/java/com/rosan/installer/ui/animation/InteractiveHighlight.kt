@@ -31,7 +31,7 @@ import org.intellij.lang.annotations.Language
 @SuppressLint("NewApi")
 class InteractiveHighlight(
     val animationScope: CoroutineScope,
-    val position: (size: Size, offset: Offset) -> Offset = { _, offset -> offset }
+    val position: (size: Size, offset: Offset) -> Offset = { _, offset -> offset },
 ) {
 
     private val pressProgressAnimationSpec =
@@ -60,7 +60,7 @@ class InteractiveHighlight(
         float dist = distance(coord, position);
         float intensity = smoothstep(radius, radius * 0.5, dist);
         return color * intensity;
-    }"""
+    }""",
         )
 
     val modifier: Modifier =
@@ -69,7 +69,7 @@ class InteractiveHighlight(
             if (progress > 0f) {
                 drawRect(
                     Color.White.copy(0.06f * progress),
-                    blendMode = BlendMode.Plus
+                    blendMode = BlendMode.Plus,
                 )
                 shader.apply {
                     val position = position(size, positionAnimation.value)
@@ -79,12 +79,12 @@ class InteractiveHighlight(
                     setFloatUniform(
                         "position",
                         position.x.fastCoerceIn(0f, size.width),
-                        position.y.fastCoerceIn(0f, size.height)
+                        position.y.fastCoerceIn(0f, size.height),
                     )
                 }
                 drawRect(
                     ShaderBrush(shader),
-                    blendMode = BlendMode.Plus
+                    blendMode = BlendMode.Plus,
                 )
             }
 
@@ -112,7 +112,7 @@ class InteractiveHighlight(
                         launch { pressProgressAnimation.animateTo(0f, pressProgressAnimationSpec) }
                         launch { positionAnimation.animateTo(startPosition, positionAnimationSpec) }
                     }
-                }
+                },
             ) { change, _ ->
                 animationScope.launch { positionAnimation.snapTo(change.position) }
             }

@@ -11,7 +11,8 @@ enum class Architecture(val arch: String, val displayName: String) {
     MIPS("mips", "MIPS (32-bit)"),
     MIPS64("mips64", "MIPS (64-bit)"),
     UNKNOWN("unknown", "Unknown"),
-    NONE("none", "None");
+    NONE("none", "None"),
+    ;
 
     companion object {
         /**

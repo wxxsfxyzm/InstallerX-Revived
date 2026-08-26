@@ -49,10 +49,10 @@ fun <T> MiuixDraggableList(
         Icon(
             imageVector = ImageVector.vectorResource(AppIcons.DragHandle),
             contentDescription = null,
-            tint = MiuixTheme.colorScheme.onSurfaceVariantActions
+            tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
         )
     },
-    trailingContent: @Composable RowScope.(item: T) -> Unit
+    trailingContent: @Composable RowScope.(item: T) -> Unit,
 ) {
     val resolvedCardColors = cardColors ?: miuixSheetCardColors()
     var isWaitingForUpdate by remember { mutableStateOf(false) }
@@ -79,8 +79,9 @@ fun <T> MiuixDraggableList(
 
     val targetIndex by remember(itemStepPx, localItems.size) {
         derivedStateOf {
-            if (draggedIndex == null || itemStepPx <= 0f) null
-            else {
+            if (draggedIndex == null || itemStepPx <= 0f) {
+                null
+            } else {
                 val shift = (dragOffsetY / itemStepPx + if (dragOffsetY > 0) 0.5f else -0.5f).toInt()
                 (draggedIndex!! + shift).coerceIn(0, localItems.lastIndex)
             }
@@ -120,16 +121,17 @@ fun <T> MiuixDraggableList(
                     onDragCancel = {
                         draggedIndex = null
                         dragOffsetY = 0f
-                    }
+                    },
                 )
             },
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         localItems.forEachIndexed { index, item ->
             key(itemKey(item)) {
                 val isDragged = index == draggedIndex
-                val translationY = if (isDragged) dragOffsetY
-                else if (draggedIndex != null && targetIndex != null) {
+                val translationY = if (isDragged) {
+                    dragOffsetY
+                } else if (draggedIndex != null && targetIndex != null) {
                     if (draggedIndex!! < targetIndex!! && index in (draggedIndex!! + 1)..targetIndex!!) {
                         -itemStepPx
                     } else if (draggedIndex!! > targetIndex!! && index in targetIndex!!..<draggedIndex!!) {
@@ -143,11 +145,15 @@ fun <T> MiuixDraggableList(
 
                 val animatedTranslationY by animateFloatAsState(
                     targetValue = translationY,
-                    label = "miuix_drag_anim"
+                    label = "miuix_drag_anim",
                 )
-                val finalTranslationY = if (isDragged) dragOffsetY
-                else if (draggedIndex == null) 0f
-                else animatedTranslationY
+                val finalTranslationY = if (isDragged) {
+                    dragOffsetY
+                } else if (draggedIndex == null) {
+                    0f
+                } else {
+                    animatedTranslationY
+                }
 
                 Card(
                     modifier = Modifier
@@ -157,7 +163,7 @@ fun <T> MiuixDraggableList(
                         }
                         .zIndex(if (isDragged || finalTranslationY != 0f) 10f else 0f)
                         .graphicsLayer { this.translationY = finalTranslationY },
-                    colors = resolvedCardColors
+                    colors = resolvedCardColors,
                 ) {
                     BasicComponent(
                         title = itemName(item),
@@ -165,7 +171,7 @@ fun <T> MiuixDraggableList(
                         startAction = startAction,
                         endActions = { trailingContent(item) },
                         holdDownState = isDragged,
-                        onClick = { onItemClick?.invoke(item) }
+                        onClick = { onItemClick?.invoke(item) },
                     )
                 }
             }

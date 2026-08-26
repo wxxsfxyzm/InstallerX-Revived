@@ -30,7 +30,7 @@ fun MiuixSwitchWidget(
     description: String? = null,
     enabled: Boolean = true,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val toggleAction = {
         if (enabled) {
@@ -47,9 +47,9 @@ fun MiuixSwitchWidget(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
-                enabled = enabled
+                enabled = enabled,
             )
-        }
+        },
     )
 }
 
@@ -86,11 +86,15 @@ fun MiuixCheckboxWidget(
         onClick = toggleAction,
         endActions = {
             Checkbox(
-                state = ToggleableState(value = checked), onClick = run {
+                state = ToggleableState(value = checked),
+                onClick = run {
                     { onCheckedChange(!checked) }
-                }, modifier = Modifier, colors = CheckboxDefaults.checkboxColors(), enabled = enabled
+                },
+                modifier = Modifier,
+                colors = CheckboxDefaults.checkboxColors(),
+                enabled = enabled,
             )
-        }
+        },
     )
 }
 
@@ -123,26 +127,26 @@ fun MiuixMultiApkCheckboxWidget(
             .clickable(
                 enabled = enabled,
                 onClick = toggleAction,
-                role = Role.Checkbox
+                role = Role.Checkbox,
             )
             .padding(
                 start = horizontalPadding,
                 end = horizontalPadding,
                 top = verticalPadding,
-                bottom = verticalPadding
+                bottom = verticalPadding,
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(textSpacing)
+            verticalArrangement = Arrangement.spacedBy(textSpacing),
         ) {
             Text(
                 text = title,
                 style = MiuixTheme.textStyles.subtitle,
                 color = MiuixTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             summary?.let {
                 Text(
@@ -150,20 +154,20 @@ fun MiuixMultiApkCheckboxWidget(
                     style = MiuixTheme.textStyles.subtitle,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
 
         Box(
-            modifier = Modifier.padding(start = textToCheckboxPadding)
+            modifier = Modifier.padding(start = textToCheckboxPadding),
         ) {
             Checkbox(
                 state = ToggleableState(value = checked),
                 onClick = run { { onCheckedChange(!checked) } },
                 modifier = Modifier,
                 colors = CheckboxDefaults.checkboxColors(),
-                enabled = enabled
+                enabled = enabled,
             )
         }
     }

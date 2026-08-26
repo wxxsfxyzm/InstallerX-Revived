@@ -13,11 +13,11 @@ import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
-import com.rosan.installer.framework.privileged.core.infrastructure.recycler.ProcessHookRecycler
+import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
 import com.rosan.installer.framework.privileged.core.infrastructure.process.AppProcessTerminal
 import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_SH
 import com.rosan.installer.framework.privileged.core.infrastructure.process.ShellCommand
-import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
+import com.rosan.installer.framework.privileged.core.infrastructure.recycler.ProcessHookRecycler
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.parametersOf
 
@@ -38,7 +38,7 @@ class ProcessAppInstallerRepoImpl(
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>,
         onProgress: suspend (InstallWriteProgress) -> Unit,
-        onPhaseChanged: suspend (InstallPhase) -> Unit
+        onPhaseChanged: suspend (InstallPhase) -> Unit,
     ) = runWithProcess(config) {
         super.doInstallWork(
             config,
@@ -49,22 +49,15 @@ class ProcessAppInstallerRepoImpl(
             sharedUserIdBlacklist,
             sharedUserIdExemption,
             onProgress,
-            onPhaseChanged
+            onPhaseChanged,
         )
     }
 
-    override suspend fun doUninstallWork(
-        config: ConfigModel,
-        packageName: String
-    ) = runWithProcess(config) {
+    override suspend fun doUninstallWork(config: ConfigModel, packageName: String) = runWithProcess(config) {
         super.doUninstallWork(config, packageName)
     }
 
-    override suspend fun approveSession(
-        config: ConfigModel,
-        sessionId: Int,
-        granted: Boolean
-    ) = runWithProcess(config) {
+    override suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean) = runWithProcess(config) {
         super.approveSession(config, sessionId, granted)
     }
 
@@ -72,29 +65,26 @@ class ProcessAppInstallerRepoImpl(
         val service = localService
             ?: throw IllegalStateException(
                 "Service is null in iBinderWrapper. " +
-                        "Make sure doInstallWork/doUninstallWork calls are properly scoped."
+                    "Make sure doInstallWork/doUninstallWork calls are properly scoped.",
             )
 
         return service.binderWrapper(iBinder)
     }
 
-    override suspend fun doFinishWork(
-        config: ConfigModel,
-        entities: List<InstallEntity>,
-        result: Result<Unit>
-    ) {
+    override suspend fun doFinishWork(config: ConfigModel, entities: List<InstallEntity>, result: Result<Unit>) {
         super.doFinishWork(config, entities, result)
     }
 
     private suspend fun <T> runWithProcess(
         config: ConfigModel,
         rootTerminal: AppProcessTerminal = AppProcessTerminal.Root,
-        block: suspend () -> T
+        block: suspend () -> T,
     ): T {
         val terminal = when (config.authorizer) {
             Authorizer.Root -> rootTerminal
+
             Authorizer.Customize -> AppProcessTerminal.Customize(
-                ShellCommand.parse(requireCustomizeAuthorizer(config.customizeAuthorizer))
+                ShellCommand.parse(requireCustomizeAuthorizer(config.customizeAuthorizer)),
             )
 
             else -> AppProcessTerminal.Customize(ShellCommand.of(SHELL_SH))

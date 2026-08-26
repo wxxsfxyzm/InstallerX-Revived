@@ -9,7 +9,7 @@ data class NotificationSettingsState(
     val miIslandOuterGlow: Boolean = true,
     val successAutoClearSeconds: Int = 10,
     val showDialogOnPress: Boolean = false,
-    val miIslandBlockingInterval: Int = 100
+    val miIslandBlockingInterval: Int = 100,
 ) {
     val currentStyle: NotificationStyle
         get() = when {

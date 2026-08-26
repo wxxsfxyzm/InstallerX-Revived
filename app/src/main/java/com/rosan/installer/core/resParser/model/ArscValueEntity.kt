@@ -2,10 +2,7 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.core.resParser.model
 
-data class ArscValueEntity(
-    val type: Type,
-    val data: Int
-) : ArscEntry {
+data class ArscValueEntity(val type: Type, val data: Int) : ArscEntry {
     enum class Type(val value: UByte) {
         NULL(0x00u),
         REFERENCE(0x01u),
@@ -20,7 +17,8 @@ data class ArscValueEntity(
         INT_COLOR_ARGB8(0x1cu),
         INT_COLOR_RGB8(0x1du),
         INT_COLOR_ARGB4(0x1eu),
-        INT_COLOR_RGB4(0x1fu);
+        INT_COLOR_RGB4(0x1fu),
+        ;
 
         companion object {
             const val FIRST_INT: UByte = 0x10u
@@ -31,9 +29,7 @@ data class ArscValueEntity(
 
             const val LAST_INT: UByte = 0x1fu
 
-            fun build(value: UByte): Type {
-                return entries.find { it.value == value } ?: NULL
-            }
+            fun build(value: UByte): Type = entries.find { it.value == value } ?: NULL
         }
     }
 }

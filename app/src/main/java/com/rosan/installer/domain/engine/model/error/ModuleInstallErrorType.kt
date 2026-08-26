@@ -9,5 +9,5 @@ enum class ModuleInstallErrorType(@param:StringRes val stringResId: Int) {
     GENERIC_FAILED(R.string.exception_module_install_failed),
     INCOMPATIBLE_AUTHORIZER(R.string.exception_module_install_failed_incompatible_authorizer),
     CMD_INIT_FAILED(R.string.exception_module_cmd_init_failed),
-    EXIT_CODE_NON_ZERO(R.string.exception_module_install_exit_code_non_zero)
+    EXIT_CODE_NON_ZERO(R.string.exception_module_install_exit_code_non_zero),
 }

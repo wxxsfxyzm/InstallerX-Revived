@@ -45,17 +45,17 @@ fun ExpressiveBackButton(
         modifier = modifier,
         // Consistent shapes for the button.
         shapes = IconButtonDefaults.shapes(
-            shape = CircleShape
+            shape = CircleShape,
         ),
         // Consistent colors for the button.
         colors = IconButtonDefaults.iconButtonColors(
             containerColor = containerColor,
-            contentColor = contentColor
-        )
+            contentColor = contentColor,
+        ),
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = contentDescription
+            contentDescription = contentDescription,
         )
     }
 }

@@ -13,5 +13,5 @@ data class GithubRelease(
     val isPrerelease: Boolean = false,
     @SerialName("html_url")
     val htmlUrl: String? = null,
-    val assets: List<GithubAsset> = emptyList()
+    val assets: List<GithubAsset> = emptyList(),
 )

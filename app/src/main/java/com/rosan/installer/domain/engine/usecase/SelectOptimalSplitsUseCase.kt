@@ -3,10 +3,10 @@
 package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.domain.engine.model.source.FilterType
+import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.domain.engine.model.install.SessionMode
+import com.rosan.installer.domain.engine.model.source.FilterType
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.util.convertLegacyLanguageCode
 import timber.log.Timber
@@ -22,16 +22,17 @@ class SelectOptimalSplitsUseCase {
         apkChooseAll: Boolean,
         entities: List<AppEntity>,
         sessionType: DataType,
-        sessionMode: SessionMode // Added to correctly identify single-app contexts
+        sessionMode: SessionMode, // Added to correctly identify single-app contexts
     ): List<SelectInstallEntity> {
-
         // Demote batch session types to single-app types if only one app package is present.
         // This prevents incorrect selection logic where the only app gets deselected.
         val effectiveSessionType = if (sessionMode == SessionMode.Single &&
-            (sessionType == DataType.MULTI_APK_ZIP ||
+            (
+                sessionType == DataType.MULTI_APK_ZIP ||
                     sessionType == DataType.MULTI_APK ||
                     sessionType == DataType.MIXED_MODULE_APK ||
-                    sessionType == DataType.MIXED_MODULE_ZIP)
+                    sessionType == DataType.MIXED_MODULE_ZIP
+                )
         ) {
             val hasSplits = entities.any { it is AppEntity.SplitEntity }
             if (hasSplits) DataType.APKS else DataType.APK
@@ -39,7 +40,9 @@ class SelectOptimalSplitsUseCase {
             sessionType
         }
 
-        Timber.d("SelectionStrategy: Starting selection for ${entities.size} entities. Original Type: $sessionType, Effective Type: $effectiveSessionType, SessionMode: $sessionMode")
+        Timber.d(
+            "SelectionStrategy: Starting selection for ${entities.size} entities. Original Type: $sessionType, Effective Type: $effectiveSessionType, SessionMode: $sessionMode",
+        )
 
         // Use the authoritative session mode passed from the repository instead of guessing by container type
         val isBatchMode = sessionMode == SessionMode.Batch
@@ -66,7 +69,9 @@ class SelectOptimalSplitsUseCase {
             return entities.map { entity ->
                 val isSelected = if (entity is AppEntity.BaseEntity) {
                     if (effectiveApkChooseAll) true else (entity == bestBase)
-                } else false
+                } else {
+                    false
+                }
                 SelectInstallEntity(entity, selected = isSelected)
             }
         }
@@ -89,8 +94,11 @@ class SelectOptimalSplitsUseCase {
             val isSelected = when (entity) {
                 // Apply the corrected effective choice flag here as well
                 is AppEntity.BaseEntity -> if (isBatchMode) effectiveApkChooseAll else true
+
                 is AppEntity.DexMetadataEntity -> true
+
                 is AppEntity.SplitEntity -> entity in selectedSplits
+
                 is AppEntity.ModuleEntity -> true
             }
             SelectInstallEntity(entity, selected = isSelected)
@@ -121,8 +129,8 @@ class SelectOptimalSplitsUseCase {
         }.toSet()
     }
 
-    private fun findBestDeviceMatch(candidates: Set<String>, devicePreferences: List<String>): String? {
-        return devicePreferences.firstOrNull { it in candidates }
+    private fun findBestDeviceMatch(candidates: Set<String>, devicePreferences: List<String>): String? = devicePreferences.firstOrNull {
+        it in candidates
     }
 
     private fun findBestLanguageMatches(candidates: Set<String>): Set<String> {
@@ -153,7 +161,7 @@ class SelectOptimalSplitsUseCase {
                 if (abiIndex == -1) Int.MAX_VALUE else abiIndex
             }
                 .thenByDescending { it.versionCode }
-                .thenByDescending { it.versionName }
+                .thenByDescending { it.versionName },
         )
         return sorted.firstOrNull()
     }

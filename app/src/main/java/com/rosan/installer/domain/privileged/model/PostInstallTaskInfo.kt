@@ -8,7 +8,7 @@ data class PostInstallTaskInfo(
     val dexoptMode: String = "speed-profile",
     val forceDexopt: Boolean = false,
     val enableAutoDelete: Boolean = false,
-    val deletePaths: List<String> = emptyList()
+    val deletePaths: List<String> = emptyList(),
 ) {
     val hasTasks: Boolean get() = enableDexopt || (enableAutoDelete && deletePaths.isNotEmpty())
 }

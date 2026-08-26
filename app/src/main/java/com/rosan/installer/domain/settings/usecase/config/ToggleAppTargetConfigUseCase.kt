@@ -5,9 +5,7 @@ package com.rosan.installer.domain.settings.usecase.config
 import com.rosan.installer.domain.settings.model.app.AppModel
 import com.rosan.installer.domain.settings.repository.AppRepository
 
-class ToggleAppTargetConfigUseCase(
-    private val appRepo: AppRepository
-) {
+class ToggleAppTargetConfigUseCase(private val appRepo: AppRepository) {
     suspend operator fun invoke(packageName: String, configId: Long, applied: Boolean) {
         val model = appRepo.findByPackageName(packageName)
 
@@ -21,8 +19,8 @@ class ToggleAppTargetConfigUseCase(
                         packageName = packageName,
                         configId = configId,
                         createdAt = System.currentTimeMillis(),
-                        modifiedAt = System.currentTimeMillis()
-                    )
+                        modifiedAt = System.currentTimeMillis(),
+                    ),
                 )
             }
         } else {

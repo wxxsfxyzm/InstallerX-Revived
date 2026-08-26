@@ -5,5 +5,5 @@ package com.rosan.installer.domain.engine.model.source
 enum class AnalysisMaterializationPolicy {
     TEMPORARY_CACHE,
     RETAINED_SOURCE_REPLACEMENT,
-    DISALLOW
+    DISALLOW,
 }

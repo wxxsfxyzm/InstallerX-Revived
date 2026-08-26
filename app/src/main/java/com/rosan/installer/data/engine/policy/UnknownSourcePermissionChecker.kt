@@ -11,10 +11,7 @@ import com.rosan.installer.domain.privileged.provider.AppOpsProvider
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import timber.log.Timber
 
-class UnknownSourcePermissionChecker(
-    private val context: Context,
-    private val appOpsProvider: AppOpsProvider
-) {
+class UnknownSourcePermissionChecker(private val context: Context, private val appOpsProvider: AppOpsProvider) {
     fun isAllowed(packageName: String): Boolean {
         if (packageName == context.packageName) {
             val allowed = context.packageManager.canRequestPackageInstalls()
@@ -57,24 +54,20 @@ class UnknownSourcePermissionChecker(
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
-    private suspend fun prepareRequestInstallPackagesOp(
-        config: ConfigModel,
-        uid: Int,
-        packageName: String
-    ): Int? = if (packageName == context.packageName) {
+    private suspend fun prepareRequestInstallPackagesOp(config: ConfigModel, uid: Int, packageName: String): Int? = if (packageName == context.packageName) {
         val mode = context.requestInstallPackagesMode(uid, packageName)
         Timber.tag(TAG).d("Read self request-install AppOps mode for $packageName/$uid: mode=$mode")
         mode
     } else {
         Timber.tag(TAG).d(
             "Preparing request-install AppOps via authorizer=${config.authorizer} " +
-                    "for $packageName/$uid"
+                "for $packageName/$uid",
         )
         val mode = appOpsProvider.prepareUnknownSourceAppOp(
             authorizer = config.authorizer,
             customizeAuthorizer = config.customizeAuthorizer,
             uid = uid,
-            packageName = packageName
+            packageName = packageName,
         )
         Timber.tag(TAG).d("Privileged AppOps preparation result for $packageName/$uid: mode=$mode")
         mode
@@ -93,17 +86,16 @@ class UnknownSourcePermissionChecker(
     }
 
     @Suppress("DEPRECATION")
-    private fun Context.packageUid(packageName: String): Int? =
-        runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packageManager.getPackageUid(
-                    packageName,
-                    PackageManager.PackageInfoFlags.of(0)
-                )
-            } else {
-                packageManager.getPackageUid(packageName, 0)
-            }
-        }.getOrNull()
+    private fun Context.packageUid(packageName: String): Int? = runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageUid(
+                packageName,
+                PackageManager.PackageInfoFlags.of(0),
+            )
+        } else {
+            packageManager.getPackageUid(packageName, 0)
+        }
+    }.getOrNull()
 
     private companion object {
         const val TAG = "UnknownSourcePermission"

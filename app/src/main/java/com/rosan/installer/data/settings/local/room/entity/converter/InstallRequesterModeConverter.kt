@@ -10,6 +10,5 @@ object InstallRequesterModeConverter {
     fun fromInstallRequesterMode(mode: InstallRequesterMode): Int = mode.value
 
     @ColumnTypeConverter
-    fun toInstallRequesterMode(value: Int): InstallRequesterMode =
-        InstallRequesterMode.entries.find { it.value == value } ?: InstallRequesterMode.Disable
+    fun toInstallRequesterMode(value: Int): InstallRequesterMode = InstallRequesterMode.entries.find { it.value == value } ?: InstallRequesterMode.Disable
 }

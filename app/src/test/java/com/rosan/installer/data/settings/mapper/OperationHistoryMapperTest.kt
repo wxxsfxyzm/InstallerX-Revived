@@ -21,7 +21,7 @@ class OperationHistoryMapperTest {
             installMethod = InstallMethod.PACKAGE_MANAGER,
             authorizer = Authorizer.Root,
             installMode = InstallMode.Dialog,
-            operationSessionKey = "self-update-session"
+            operationSessionKey = "self-update-session",
         )
 
         assertEquals("self-update-session", model.toEntity().toDomainModel().operationSessionKey)

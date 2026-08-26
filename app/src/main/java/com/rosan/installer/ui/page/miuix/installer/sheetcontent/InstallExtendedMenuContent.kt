@@ -25,9 +25,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.InstallerMode
-import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction.SetInstaller
@@ -49,9 +49,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun InstallExtendedMenuContent(
-    viewModel: InstallerViewModel
-) {
+fun InstallExtendedMenuContent(viewModel: InstallerViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Read state from aggregated config model
@@ -73,7 +71,15 @@ fun InstallExtendedMenuContent(
     }
 
     val menuEntities =
-        remember(installOptions, selectedInstaller, installerMode, customizeUserEnabled, selectedUserId, availableUsers, authorizer) {
+        remember(
+            installOptions,
+            selectedInstaller,
+            installerMode,
+            customizeUserEnabled,
+            selectedUserId,
+            availableUsers,
+            authorizer,
+        ) {
             buildList {
                 // Installer Mode selection (Always shown for Root/Shizuku)
                 if (authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku) {
@@ -83,9 +89,9 @@ fun InstallExtendedMenuContent(
                             menuItem = ExtendedMenuItemEntity(
                                 nameResourceId = R.string.config_declare_installer,
                                 icon = AppIcons.InstallSource,
-                                action = null
-                            )
-                        )
+                                action = null,
+                            ),
+                        ),
                     )
                 }
 
@@ -97,9 +103,9 @@ fun InstallExtendedMenuContent(
                             menuItem = ExtendedMenuItemEntity(
                                 nameResourceId = R.string.config_target_user,
                                 icon = AppIcons.InstallUser,
-                                action = null
-                            )
-                        )
+                                action = null,
+                            ),
+                        ),
                     )
                 }
 
@@ -113,9 +119,9 @@ fun InstallExtendedMenuContent(
                                     nameResourceId = option.labelResource,
                                     descriptionResourceId = option.descResource,
                                     icon = null,
-                                    action = option
-                                )
-                            )
+                                    action = option,
+                                ),
+                            ),
                         )
                     }
                 }
@@ -128,7 +134,7 @@ fun InstallExtendedMenuContent(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(modifier = Modifier.weight(1f, fill = false)) {
             ExtendedMenuLazyList(
@@ -140,7 +146,7 @@ fun InstallExtendedMenuContent(
                 installerMode = installerMode,
                 defaultInstallerFromSettings = defaultInstallerFromSettings,
                 availableUsers = availableUsers,
-                selectedUserId = selectedUserId
+                selectedUserId = selectedUserId,
             )
         }
 
@@ -150,13 +156,13 @@ fun InstallExtendedMenuContent(
                 .navigationBarsPadding()
                 .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
                 onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) },
                 text = stringResource(R.string.back),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
         }
     }
@@ -172,11 +178,11 @@ private fun ExtendedMenuLazyList(
     installerMode: InstallerMode,
     defaultInstallerFromSettings: String?,
     availableUsers: Map<Int, String>,
-    selectedUserId: Int
+    selectedUserId: Int,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = miuixSheetCardColors()
+        colors = miuixSheetCardColors(),
     ) {
         LazyColumn(
             modifier = Modifier
@@ -200,7 +206,7 @@ private fun ExtendedMenuLazyList(
                                 option?.let { opt ->
                                     viewModel.toggleInstallFlag(opt.value, checked)
                                 }
-                            }
+                            },
                         )
                     }
 
@@ -213,7 +219,7 @@ private fun ExtendedMenuLazyList(
                             val list = mutableListOf(
                                 DropdownItem(title = modeSelf),
                                 DropdownItem(title = modeInitiator),
-                                DropdownItem(title = installerFollowSettingsText)
+                                DropdownItem(title = installerFollowSettingsText),
                             )
                             managedPackages.forEach { pkg ->
                                 list.add(DropdownItem(title = pkg.name))
@@ -225,12 +231,19 @@ private fun ExtendedMenuLazyList(
                             remember(installerMode, selectedInstallerPackageName, defaultInstallerFromSettings, managedPackages) {
                                 when (installerMode) {
                                     InstallerMode.Self -> 0
+
                                     InstallerMode.Initiator -> 1
+
                                     InstallerMode.Custom -> {
-                                        if (selectedInstallerPackageName == defaultInstallerFromSettings || selectedInstallerPackageName == null) {
+                                        if (selectedInstallerPackageName == defaultInstallerFromSettings ||
+                                            selectedInstallerPackageName == null
+                                        ) {
                                             2 // Follow Profile
                                         } else {
-                                            val pkgIndex = managedPackages.indexOfFirst { it.packageName == selectedInstallerPackageName }
+                                            val pkgIndex = managedPackages.indexOfFirst {
+                                                it.packageName ==
+                                                    selectedInstallerPackageName
+                                            }
                                             if (pkgIndex != -1) 3 + pkgIndex else 2
                                         }
                                     }
@@ -244,7 +257,9 @@ private fun ExtendedMenuLazyList(
                             onSelectedIndexChange = { newIndex ->
                                 when (newIndex) {
                                     0 -> viewModel.dispatch(InstallerViewAction.SetInstallerMode(InstallerMode.Self))
+
                                     1 -> viewModel.dispatch(InstallerViewAction.SetInstallerMode(InstallerMode.Initiator))
+
                                     2 -> {
                                         viewModel.dispatch(InstallerViewAction.SetInstallerMode(InstallerMode.Custom))
                                         viewModel.dispatch(SetInstaller(defaultInstallerFromSettings))
@@ -257,7 +272,7 @@ private fun ExtendedMenuLazyList(
                                         }
                                     }
                                 }
-                            }
+                            },
                         )
                     }
 
@@ -283,7 +298,7 @@ private fun ExtendedMenuLazyList(
                                 userKeysSorted.getOrNull(newIndex)?.let { userId ->
                                     viewModel.dispatch(SetTargetUser(userId))
                                 }
-                            }
+                            },
                         )
                     }
 

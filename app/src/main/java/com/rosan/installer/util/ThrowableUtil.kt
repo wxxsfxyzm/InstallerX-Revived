@@ -29,13 +29,12 @@ import java.util.zip.ZipException
  * @return The string resource ID defined in `R.string`.
  */
 @StringRes
-private fun Throwable.getStringRes() =
-    when (this) {
-        is InstallerException -> this.getStringResId()
-        is ZipException -> R.string.exception_zip_exception
-        is PackageManager.NameNotFoundException -> R.string.exception_package_manager_name_not_found
-        else -> R.string.exception_install_failed_unknown
-    }
+private fun Throwable.getStringRes() = when (this) {
+    is InstallerException -> this.getStringResId()
+    is ZipException -> R.string.exception_zip_exception
+    is PackageManager.NameNotFoundException -> R.string.exception_package_manager_name_not_found
+    else -> R.string.exception_install_failed_unknown
+}
 
 /**
  * Returns a user-friendly error message for this [Throwable]
@@ -73,8 +72,7 @@ fun Throwable.getErrorMessage(context: Context) = context.getString(this.getStri
  * @param types The [InstallErrorType] to check for.
  * @return `true` if the [InstallErrorType] is found, `false` otherwise.
  */
-fun Throwable.hasErrorType(vararg types: InstallErrorType): Boolean =
-    this is InstallException && this.errorType in types
+fun Throwable.hasErrorType(vararg types: InstallErrorType): Boolean = this is InstallException && this.errorType in types
 
 /**
  * Returns a [Boolean] indicating whether this [Throwable]
@@ -83,8 +81,7 @@ fun Throwable.hasErrorType(vararg types: InstallErrorType): Boolean =
  * @param types The [ModuleInstallErrorType] to check for.
  * @return `true` if the [ModuleInstallErrorType] is found, `false` otherwise.
  */
-fun Throwable.hasErrorType(vararg types: ModuleInstallErrorType): Boolean =
-    this is ModuleInstallException && this.errorType in types
+fun Throwable.hasErrorType(vararg types: ModuleInstallErrorType): Boolean = this is ModuleInstallException && this.errorType in types
 
 /**
  * Returns a [Boolean] indicating whether this [Throwable]
@@ -93,8 +90,7 @@ fun Throwable.hasErrorType(vararg types: ModuleInstallErrorType): Boolean =
  * @param types The [AnalyseErrorType] to check for.
  * @return `true` if the [AnalyseErrorType] is found, `false` otherwise.
  */
-fun Throwable.hasErrorType(vararg types: AnalyseErrorType): Boolean =
-    this is AnalyseException && this.errorType in types
+fun Throwable.hasErrorType(vararg types: AnalyseErrorType): Boolean = this is AnalyseException && this.errorType in types
 
 /**
  * Returns a [Boolean] indicating whether this [Throwable]
@@ -103,5 +99,4 @@ fun Throwable.hasErrorType(vararg types: AnalyseErrorType): Boolean =
  * @param types The [PrivilegedErrorType] to check for.
  * @return `true` if the [PrivilegedErrorType] is found, `false` otherwise.
  */
-fun Throwable.hasErrorType(vararg types: PrivilegedErrorType): Boolean =
-    this is PrivilegedException && this.errorType in types
+fun Throwable.hasErrorType(vararg types: PrivilegedErrorType): Boolean = this is PrivilegedException && this.errorType in types

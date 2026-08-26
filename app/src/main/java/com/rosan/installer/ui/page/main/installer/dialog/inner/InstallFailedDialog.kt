@@ -37,9 +37,7 @@ import com.rosan.installer.ui.util.rememberErrorSuggestions
 import kotlinx.coroutines.delay
 
 @Composable
-fun installFailedDialog(
-    viewModel: InstallerViewModel
-): DialogParams {
+fun installFailedDialog(viewModel: InstallerViewModel): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val viewSettings = uiState.viewSettings
     val currentError = uiState.error
@@ -47,7 +45,7 @@ fun installFailedDialog(
     // Call InstallInfoDialog for base structure
     val baseParams = installInfoDialog(
         viewModel = viewModel,
-        onTitleExtraClick = {}
+        onTitleExtraClick = {},
     )
 
     // Override text and buttons
@@ -58,32 +56,30 @@ fun installFailedDialog(
                 ErrorTextBlock(
                     currentError,
                     suggestions = {
-                        if (viewSettings.showSmartSuggestion)
+                        if (viewSettings.showSmartSuggestion) {
                             ErrorSuggestions(
                                 error = currentError,
-                                viewModel = viewModel
+                                viewModel = viewModel,
                             )
-                    }
+                        }
+                    },
                 )
-            }
+            },
         ),
         buttons = dialogButtons(
-            DialogParamsType.InstallerInstallFailed.id
+            DialogParamsType.InstallerInstallFailed.id,
         ) {
             listOf(
                 DialogButton(stringResource(R.string.close)) {
                     viewModel.dispatch(InstallerViewAction.Close)
-                }
+                },
             )
-        }
+        },
     )
 }
 
 @Composable
-private fun ErrorSuggestions(
-    error: Throwable,
-    viewModel: InstallerViewModel
-) {
+private fun ErrorSuggestions(error: Throwable, viewModel: InstallerViewModel) {
     var showUninstallConfirmDialog by remember { mutableStateOf(false) }
     var confirmKeepData by remember { mutableStateOf(false) }
     var pendingConflictingPackage by remember { mutableStateOf<String?>(null) }
@@ -95,14 +91,14 @@ private fun ErrorSuggestions(
             confirmKeepData = keepData
             pendingConflictingPackage = conflictingPkg
             showUninstallConfirmDialog = true
-        }
+        },
     )
 
     if (visibleSuggestions.isNotEmpty()) {
         FlowRow(
             modifier = Modifier.padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             visibleSuggestions.forEachIndexed { index, suggestion ->
                 var animatedVisibility by remember { mutableStateOf(false) }
@@ -115,7 +111,7 @@ private fun ErrorSuggestions(
                 AnimatedVisibility(
                     visible = animatedVisibility,
                     enter = fadeIn(animationSpec = tween(durationMillis = 200)) + slideInVertically { it / 2 },
-                    exit = fadeOut(animationSpec = tween(durationMillis = 150))
+                    exit = fadeOut(animationSpec = tween(durationMillis = 150)),
                 ) {
                     Chip(
                         modifier = Modifier.height(32.dp),
@@ -123,7 +119,7 @@ private fun ErrorSuggestions(
                         onClick = suggestion.onClick,
                         useHaptic = true,
                         label = stringResource(id = suggestion.labelRes),
-                        icon = suggestion.icon ?: AppIcons.BugReport // Fallback if needed
+                        icon = suggestion.icon ?: AppIcons.BugReport, // Fallback if needed
                     )
                 }
             }
@@ -135,11 +131,11 @@ private fun ErrorSuggestions(
                 viewModel.dispatch(
                     InstallerViewAction.UninstallAndRetryInstall(
                         keepData = confirmKeepData,
-                        conflictingPackage = pendingConflictingPackage
-                    )
+                        conflictingPackage = pendingConflictingPackage,
+                    ),
                 )
             },
-            keepData = confirmKeepData
+            keepData = confirmKeepData,
         )
     }
 }

@@ -11,7 +11,10 @@ import com.rosan.installer.framework.privileged.core.execution.authorization.req
 import rikka.shizuku.ShizukuBinderWrapper
 
 class ShizukuAppInstallerRepoImpl(
-    context: Context, reflect: ReflectionProvider, capabilityProvider: DeviceCapabilityProvider, postInstallTaskProvider: PostInstallTaskProvider
+    context: Context,
+    reflect: ReflectionProvider,
+    capabilityProvider: DeviceCapabilityProvider,
+    postInstallTaskProvider: PostInstallTaskProvider,
 ) : IBinderAppInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder = requireShizukuPermissionGranted { ShizukuBinderWrapper(iBinder) }
 }

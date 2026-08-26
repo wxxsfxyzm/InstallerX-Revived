@@ -6,15 +6,13 @@ package com.rosan.installer.ui.library.effect
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Brush
-import top.yukonga.miuix.kmp.blur.RuntimeShader
-import top.yukonga.miuix.kmp.blur.asBrush
 import kotlin.math.cos
 import kotlin.math.sin
+import top.yukonga.miuix.kmp.blur.RuntimeShader
+import top.yukonga.miuix.kmp.blur.asBrush
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-class BgEffectPainter(
-    private val isOs3: Boolean = true,
-) {
+class BgEffectPainter(private val isOs3: Boolean = true) {
 
     val runtimeShader by lazy {
         val shaderCode = if (isOs3) OS3_BG_FRAG else OS2_BG_FRAG
@@ -116,11 +114,7 @@ class BgEffectPainter(
         else -> preset.colors2
     }
 
-    fun updateBoundIfNeeded(
-        logoHeight: Float,
-        totalHeight: Float,
-        totalWidth: Float,
-    ) {
+    fun updateBoundIfNeeded(logoHeight: Float, totalHeight: Float, totalWidth: Float) {
         if (cachedLogoHeight == logoHeight &&
             cachedTotalHeight == totalHeight &&
             cachedTotalWidth == totalWidth
@@ -154,11 +148,7 @@ class BgEffectPainter(
         runtimeShader.setFloatUniform("uSaturateOffset", preset.saturateOffset)
     }
 
-    private fun updateBound(
-        logoHeight: Float,
-        totalHeight: Float,
-        totalWidth: Float,
-    ) {
+    private fun updateBound(logoHeight: Float, totalHeight: Float, totalWidth: Float) {
         val heightRatio = logoHeight / totalHeight
         if (totalWidth <= totalHeight) {
             bound[0] = 0f

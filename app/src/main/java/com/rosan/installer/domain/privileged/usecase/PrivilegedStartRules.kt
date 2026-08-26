@@ -7,13 +7,13 @@ import com.rosan.installer.domain.settings.model.config.ConfigModel
 
 internal const val DEFAULT_PRIVILEGED_START_TIMEOUT_MS = 2500L
 
-internal fun ConfigModel.shouldAttemptPrivilegedStart(isSystemApp: Boolean): Boolean =
-    when (authorizer) {
-        Authorizer.Root,
-        Authorizer.Shizuku,
-        Authorizer.Customize -> true
+internal fun ConfigModel.shouldAttemptPrivilegedStart(isSystemApp: Boolean): Boolean = when (authorizer) {
+    Authorizer.Root,
+    Authorizer.Shizuku,
+    Authorizer.Customize,
+    -> true
 
-        Authorizer.None -> isSystemApp
+    Authorizer.None -> isSystemApp
 
-        else -> false
-    }
+    else -> false
+}

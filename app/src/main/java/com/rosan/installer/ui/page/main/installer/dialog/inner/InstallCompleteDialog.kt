@@ -40,10 +40,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 
 @Composable
-fun installCompletedDialog(
-    viewModel: InstallerViewModel,
-    results: List<InstallResult>
-): DialogParams {
+fun installCompletedDialog(viewModel: InstallerViewModel, results: List<InstallResult>): DialogParams {
     val successCount = results.count { it.success }
     val failureCount = results.size - successCount
 
@@ -55,22 +52,22 @@ fun installCompletedDialog(
                     imageVector = if (failureCount == 0) Icons.TwoTone.DoneAll*//*AppIcons.Success*//* else Icons.TwoTone.SmsFailed*//*AppIcons.Error*//*,
                     contentDescription = null
                 )*/
-            }
+            },
         ),
         title = DialogInnerParams(
-            DialogParamsType.InstallerInstallCompleted.id
+            DialogParamsType.InstallerInstallCompleted.id,
         ) {
             Text(stringResource(R.string.installer_install_complete))
         },
         subtitle = DialogInnerParams(
-            DialogParamsType.InstallerInstallCompleted.id
+            DialogParamsType.InstallerInstallCompleted.id,
         ) {
             Text(stringResource(R.string.installer_completed_subtitle, successCount, failureCount))
         },
         content = DialogInnerParams(DialogParamsType.InstallerInstallCompleted.id) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 item { Spacer(modifier = Modifier.size(1.dp)) }
                 items(results, key = { result ->
@@ -86,23 +83,21 @@ fun installCompletedDialog(
             listOf(
                 DialogButton(stringResource(R.string.finish)) {
                     viewModel.dispatch(InstallerViewAction.Close)
-                }
+                },
             )
-        }
+        },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ResultItemCard(
-    result: InstallResult
-) {
+private fun ResultItemCard(result: InstallResult) {
     val app = result.entity.app
     val appLabel = (app as? AppEntity.BaseEntity)?.label ?: app.packageName
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // App Info
@@ -126,23 +121,23 @@ private fun ResultItemCard(
 private fun SuccessCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Icon(
                 imageVector = Icons.TwoTone.DoneAll,
                 contentDescription = "Success",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             Text(
                 text = stringResource(R.string.installer_install_success),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
     }

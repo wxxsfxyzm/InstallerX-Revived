@@ -12,11 +12,7 @@ interface SelfUpdateRecoveryRepository {
 
     suspend fun getPendingUpdate(): PendingSelfUpdate?
 
-    suspend fun updatePostInstallState(
-        sessionId: String,
-        sourceDeletion: PendingSourceDeletion?,
-        historyAuthorizer: Authorizer
-    )
+    suspend fun updatePostInstallState(sessionId: String, sourceDeletion: PendingSourceDeletion?, historyAuthorizer: Authorizer)
 
     suspend fun clear(sessionId: String)
 

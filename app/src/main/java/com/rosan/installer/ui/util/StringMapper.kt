@@ -10,26 +10,29 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.ui.theme.material.RawColor
 
 @Composable
-fun DataType.getSupportTitle() =
-    when (this) {
-        DataType.MIXED_MODULE_APK -> stringResource(R.string.installer_select_from_mixed_module_apk)
-        DataType.MULTI_APK_ZIP -> stringResource(R.string.installer_select_from_zip)
-        DataType.MULTI_APK -> stringResource(R.string.installer_select_multi_apk)
-        else -> stringResource(R.string.installer_select_install)
-    }
+fun DataType.getSupportTitle() = when (this) {
+    DataType.MIXED_MODULE_APK -> stringResource(R.string.installer_select_from_mixed_module_apk)
+    DataType.MULTI_APK_ZIP -> stringResource(R.string.installer_select_from_zip)
+    DataType.MULTI_APK -> stringResource(R.string.installer_select_multi_apk)
+    else -> stringResource(R.string.installer_select_install)
+}
 
 @Composable
-fun DataType.getSupportSubtitle(selectionMode: MmzSelectionMode) =
-    when (this) {
-        DataType.MIXED_MODULE_APK -> stringResource(R.string.installer_mixed_module_apk_description)
-        DataType.MULTI_APK_ZIP -> stringResource(R.string.installer_multi_apk_zip_description)
-        DataType.MULTI_APK -> stringResource(R.string.installer_multi_apk_description)
-        DataType.MIXED_MODULE_ZIP -> if (selectionMode == MmzSelectionMode.INITIAL_CHOICE)
-            stringResource(R.string.installer_mixed_module_zip_description)
-        else stringResource(R.string.installer_multi_apk_zip_description)
+fun DataType.getSupportSubtitle(selectionMode: MmzSelectionMode) = when (this) {
+    DataType.MIXED_MODULE_APK -> stringResource(R.string.installer_mixed_module_apk_description)
 
-        else -> null
+    DataType.MULTI_APK_ZIP -> stringResource(R.string.installer_multi_apk_zip_description)
+
+    DataType.MULTI_APK -> stringResource(R.string.installer_multi_apk_description)
+
+    DataType.MIXED_MODULE_ZIP -> if (selectionMode == MmzSelectionMode.INITIAL_CHOICE) {
+        stringResource(R.string.installer_mixed_module_zip_description)
+    } else {
+        stringResource(R.string.installer_multi_apk_zip_description)
     }
+
+    else -> null
+}
 
 @Composable
 fun RawColor.getDisplayName() = when (key) {
@@ -74,43 +77,95 @@ fun String.toAndroidVersionName(): String {
     return when (apiLevel) {
         // --- Pre-Marshmallow versions ---
         1 -> "1.0"
+
         2 -> "1.1"
+
         3 -> "1.5"
+
         4 -> "1.6"
+
         5 -> "2.0"
+
         6 -> "2.0.1"
+
         7 -> "2.1"
+
         8 -> "2.2"
+
         9 -> "2.3"
+
         10 -> "2.3.3"
+
         11 -> "3.0"
+
         12 -> "3.1"
+
         13 -> "3.2"
+
         14 -> "4.0"
+
         15 -> "4.0.3"
+
         16 -> "4.1"
+
         17 -> "4.2"
+
         18 -> "4.3"
+
         19 -> "4.4"
+
         20 -> "4.4W"
+
         21 -> "5.0"
+
         22 -> "5.1"
+
         // --- Versions from minSDK ---
-        23 -> "6"     // Android 6.0 Marshmallow
-        24 -> "7"     // Android 7.0 Nougat
-        25 -> "7.1"   // Android 7.1 Nougat
-        26 -> "8"     // Android 8.0 Oreo
-        27 -> "8.1"   // Android 8.1 Oreo
-        28 -> "9"     // Android 9 Pie
-        29 -> "10"    // Android 10
-        30 -> "11"    // Android 11
-        31 -> "12"    // Android 12
-        32 -> "12.1"  // Android 12L (or 12.1)
-        33 -> "13"    // Android 13 Tiramisu
-        34 -> "14"    // Android 14 Upside Down Cake
-        35 -> "15"    // Android 15 Vanilla Ice Cream
-        36 -> "16"    // Android 16 Baklava
-        37 -> "17"    // Android 17
+        23 -> "6"
+
+        // Android 6.0 Marshmallow
+        24 -> "7"
+
+        // Android 7.0 Nougat
+        25 -> "7.1"
+
+        // Android 7.1 Nougat
+        26 -> "8"
+
+        // Android 8.0 Oreo
+        27 -> "8.1"
+
+        // Android 8.1 Oreo
+        28 -> "9"
+
+        // Android 9 Pie
+        29 -> "10"
+
+        // Android 10
+        30 -> "11"
+
+        // Android 11
+        31 -> "12"
+
+        // Android 12
+        32 -> "12.1"
+
+        // Android 12L (or 12.1)
+        33 -> "13"
+
+        // Android 13 Tiramisu
+        34 -> "14"
+
+        // Android 14 Upside Down Cake
+        35 -> "15"
+
+        // Android 15 Vanilla Ice Cream
+        36 -> "16"
+
+        // Android 16 Baklava
+        37 -> "17"
+
+        // Android 17
         // Add more future versions here as they are announced
 
         // If the API level doesn't match any of the above cases,

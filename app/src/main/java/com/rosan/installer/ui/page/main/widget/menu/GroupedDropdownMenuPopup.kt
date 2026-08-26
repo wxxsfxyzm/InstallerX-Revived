@@ -27,12 +27,12 @@ fun GroupedDropdownMenuPopup(
     onDismissRequest: () -> Unit,
     groupSizes: List<Int>,
     modifier: Modifier = Modifier,
-    itemContent: @Composable (groupIndex: Int, itemIndex: Int, shapes: MenuItemShapes) -> Unit
+    itemContent: @Composable (groupIndex: Int, itemIndex: Int, shapes: MenuItemShapes) -> Unit,
 ) {
     DropdownMenuPopup(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        modifier = modifier
+        modifier = modifier,
     ) {
         val nonEmptyGroups = groupSizes.mapIndexedNotNull { groupIndex, itemCount ->
             itemCount.takeIf { it > 0 }?.let { groupIndex to it }
@@ -47,14 +47,14 @@ fun GroupedDropdownMenuPopup(
                 // leading/trailing corners when multiple groups are present.
                 shapes = MenuDefaults.groupShape(
                     index = renderedGroupIndex,
-                    count = nonEmptyGroups.size
-                )
+                    count = nonEmptyGroups.size,
+                ),
             ) {
                 repeat(itemCount) { itemIndex ->
                     itemContent(
                         groupIndex,
                         itemIndex,
-                        MenuDefaults.itemShape(index = itemIndex, count = itemCount)
+                        MenuDefaults.itemShape(index = itemIndex, count = itemCount),
                     )
                 }
             }

@@ -10,5 +10,5 @@ data class DialogParams(
     val subtitle: DialogInnerParams = emptyInnerParams,
     val text: DialogInnerParams = emptyInnerParams,
     val content: DialogInnerParams = emptyInnerParams,
-    val buttons: DialogInnerParams = emptyInnerParams
+    val buttons: DialogInnerParams = emptyInnerParams,
 )

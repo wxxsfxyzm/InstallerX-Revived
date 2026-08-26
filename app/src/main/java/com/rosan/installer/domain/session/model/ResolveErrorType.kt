@@ -16,5 +16,5 @@ enum class ResolveErrorType(@param:StringRes val stringResId: Int) {
     STREAMING_PROBE_FAILED(R.string.exception_resolve_failed_streaming_probe),
 
     HTTP_RESTRICTED_FOR_LOCALHOST(R.string.exception_http_restricted_for_localhost),
-    HTTP_NOT_ALLOWED(R.string.exception_http_not_allowed)
+    HTTP_NOT_ALLOWED(R.string.exception_http_not_allowed),
 }

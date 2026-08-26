@@ -34,10 +34,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 // Centralized complex layout logic to keep provider clean and readable
 @Composable
-fun MiuixMainPageWrapper(
-    uiState: ThemeState,
-    sharedViewModel: SettingsSharedViewModel
-) {
+fun MiuixMainPageWrapper(uiState: ThemeState, sharedViewModel: SettingsSharedViewModel) {
     val layoutInfo = LocalWindowLayoutInfo.current
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
@@ -61,26 +58,26 @@ fun MiuixMainPageWrapper(
         listOf(
             NavigationItem(
                 label = homeLabel,
-                icon = homeIcon
+                icon = homeIcon,
             ),
             NavigationItem(
                 label = configLabel,
-                icon = Icons.Rounded.RoomPreferences
+                icon = Icons.Rounded.RoomPreferences,
             ),
             NavigationItem(
                 label = historyLabel,
-                icon = AppIcons.History
+                icon = AppIcons.History,
             ),
             NavigationItem(
                 label = preferredLabel,
-                icon = Icons.Rounded.Settings
-            )
+                icon = Icons.Rounded.Settings,
+            ),
         )
     }
 
     val pagerState = rememberPagerState(
         initialPage = sharedState.lastMainPageIndex,
-        pageCount = { navigationItems.size }
+        pageCount = { navigationItems.size },
     )
     val mainPagerState = rememberMainPagerState(pagerState)
     val currentPage = mainPagerState.pagerState.currentPage
@@ -114,7 +111,7 @@ fun MiuixMainPageWrapper(
             useFloatingBottomBar = useFloatingBottomBar,
             floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
-            miuixBackdrop = miuixBackdrop
+            miuixBackdrop = miuixBackdrop,
         )
     } else {
         SettingsCompactLayout(
@@ -125,7 +122,7 @@ fun MiuixMainPageWrapper(
             useFloatingBottomBar = useFloatingBottomBar,
             floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
-            miuixBackdrop = miuixBackdrop
+            miuixBackdrop = miuixBackdrop,
         )
     }
 }

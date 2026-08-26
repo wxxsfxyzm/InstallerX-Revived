@@ -2,7 +2,4 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.core.resParser.model
 
-data class ArscMapEntryEntity(
-    val parent: Int,
-    val valueMap: Map<Int, ArscValueEntity>
-) : ArscEntry
+data class ArscMapEntryEntity(val parent: Int, val valueMap: Map<Int, ArscValueEntity>) : ArscEntry

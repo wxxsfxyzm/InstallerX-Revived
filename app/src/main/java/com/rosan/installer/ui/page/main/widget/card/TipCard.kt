@@ -55,19 +55,19 @@ private fun TipCard(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
+            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f),
         ),
-        shape = cardShape
+        shape = cardShape,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 0.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 0.dp),
         ) {
             tipContent()
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                content = actionContent
+                content = actionContent,
             )
         }
     }
@@ -86,20 +86,20 @@ fun ScopeTipCard(
         tipContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Icon(
                     imageVector = AppIcons.Tip,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onTertiary
+                    tint = MaterialTheme.colorScheme.onTertiary,
                 )
                 Text(
                     text = stringResource(R.string.scope_tips),
                     style = MaterialTheme.typography.bodyMediumEmphasized,
-                    color = MaterialTheme.colorScheme.onTertiary
+                    color = MaterialTheme.colorScheme.onTertiary,
                 )
             }
-        }
+        },
     ) {
         TextButton(
             onClick = { viewModel.dispatch(AllViewAction.UserReadScopeTips) },
@@ -107,8 +107,8 @@ fun ScopeTipCard(
                 .align(Alignment.End)
                 .padding(bottom = 2.dp),
             colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            )
+                contentColor = MaterialTheme.colorScheme.onTertiary,
+            ),
         ) {
             Text(stringResource(R.string.got_it))
         }
@@ -116,34 +116,29 @@ fun ScopeTipCard(
 }
 
 @Composable
-fun InfoTipCard(
-    text: String,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = AppIcons.Tip,
-    noPadding: Boolean = false
-) {
+fun InfoTipCard(text: String, modifier: Modifier = Modifier, icon: ImageVector? = AppIcons.Tip, noPadding: Boolean = false) {
     TipCard(
         modifier = modifier,
         noPadding = noPadding,
         tipContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 icon?.let {
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onTertiary
+                        tint = MaterialTheme.colorScheme.onTertiary,
                     )
                 }
                 Text(
                     text = text,
                     style = MaterialTheme.typography.bodyMediumEmphasized,
-                    color = MaterialTheme.colorScheme.onTertiary
+                    color = MaterialTheme.colorScheme.onTertiary,
                 )
             }
-        }
+        },
     ) {
         Spacer(modifier = Modifier.size(16.dp))
     }
@@ -155,7 +150,7 @@ fun TitleTipCard(
     text: String,
     modifier: Modifier = Modifier,
     icon: ImageVector? = AppIcons.Tip,
-    noPadding: Boolean = false
+    noPadding: Boolean = false,
 ) {
     TipCard(
         modifier = modifier,
@@ -164,28 +159,28 @@ fun TitleTipCard(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     icon?.let {
                         Icon(
                             imageVector = it,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onTertiary
+                            tint = MaterialTheme.colorScheme.onTertiary,
                         )
                     }
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onTertiary
+                        color = MaterialTheme.colorScheme.onTertiary,
                     )
                 }
                 Text(
                     text = text,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onTertiary
+                    color = MaterialTheme.colorScheme.onTertiary,
                 )
             }
-        }
+        },
     ) {
         Spacer(modifier = Modifier.size(16.dp))
     }

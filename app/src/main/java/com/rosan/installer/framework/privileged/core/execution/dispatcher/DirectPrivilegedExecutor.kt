@@ -33,22 +33,27 @@ fun useDirectPrivileged(
     authorizer: Authorizer,
     customizeAuthorizer: String = "",
     special: (() -> AppProcessTerminal?)? = null,
-    action: (PrivilegedOperations) -> Unit
+    action: (PrivilegedOperations) -> Unit,
 ) {
     val koin = GlobalContext.get()
     when (authorizer) {
         Authorizer.None -> {
-            if (isSystemApp) action(DefaultPrivilegedService.system())
-            else Timber.tag(DIRECT_TAG).w("Authorizer.None without system app privileges; direct privileged action skipped.")
+            if (isSystemApp) {
+                action(DefaultPrivilegedService.system())
+            } else {
+                Timber.tag(DIRECT_TAG).w("Authorizer.None without system app privileges; direct privileged action skipped.")
+            }
         }
 
         Authorizer.Root -> {
             val terminal = special?.invoke() ?: AppProcessTerminal.Root
             val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
             handle.use {
-                action(DefaultPrivilegedService.binderWrapped(name = "Root", useAppCallerPackage = isSystemApp) { binder ->
-                    it.entity.binderWrapper(binder)
-                })
+                action(
+                    DefaultPrivilegedService.binderWrapped(name = "Root", useAppCallerPackage = isSystemApp) { binder ->
+                        it.entity.binderWrapper(binder)
+                    },
+                )
             }
         }
 
@@ -61,22 +66,26 @@ fun useDirectPrivileged(
         Authorizer.Dhizuku -> {
             runBlocking {
                 requireDhizukuPermissionGranted {
-                    action(DhizukuPrivilegedService { binder ->
-                        Dhizuku.binderWrapper(binder)
-                    })
+                    action(
+                        DhizukuPrivilegedService { binder ->
+                            Dhizuku.binderWrapper(binder)
+                        },
+                    )
                 }
             }
         }
 
         Authorizer.Customize -> {
             val terminal = AppProcessTerminal.Customize(
-                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer))
+                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer)),
             )
             val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
             handle.use {
-                action(DefaultPrivilegedService.binderWrapped(name = "Customize", useAppCallerPackage = isSystemApp) { binder ->
-                    it.entity.binderWrapper(binder)
-                })
+                action(
+                    DefaultPrivilegedService.binderWrapped(name = "Customize", useAppCallerPackage = isSystemApp) { binder ->
+                        it.entity.binderWrapper(binder)
+                    },
+                )
             }
         }
 
@@ -84,9 +93,11 @@ fun useDirectPrivileged(
             special?.invoke()?.let { terminal ->
                 val handle = koin.get<ProcessHookRecycler> { parametersOf(terminal) }.make()
                 handle.use {
-                    action(DefaultPrivilegedService.binderWrapped(name = "Special", useAppCallerPackage = isSystemApp) { binder ->
-                        it.entity.binderWrapper(binder)
-                    })
+                    action(
+                        DefaultPrivilegedService.binderWrapped(name = "Special", useAppCallerPackage = isSystemApp) { binder ->
+                            it.entity.binderWrapper(binder)
+                        },
+                    )
                 }
             }
         }

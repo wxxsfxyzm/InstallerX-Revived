@@ -19,17 +19,17 @@ import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.Re
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.UserService
 import com.rosan.installer.framework.privileged.core.infrastructure.process.AppProcessTerminal
+import kotlin.system.exitProcess
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
-import kotlin.system.exitProcess
 
 class ProcessUserServiceRecycler(
     private val terminal: AppProcessTerminal,
     private val context: Context,
     private val appProcessRecyclerManager: RecyclerManager<AppProcessTerminal, AppProcessRecycler>,
-    private val serviceClass: Class<out IAppProcessService> = AppProcessService::class.java
+    private val serviceClass: Class<out IAppProcessService> = AppProcessService::class.java,
 ) : Recycler<ProcessUserServiceRecycler.UserServiceProxy>() {
 
     override val delayDuration: Long = 5_000L
@@ -38,7 +38,7 @@ class ProcessUserServiceRecycler(
         val service: IAppProcessService,
         private val appProcessHandle: Recyclable<AppProcess>,
         private val binder: IBinder,
-        private val deathRecipient: IBinder.DeathRecipient
+        private val deathRecipient: IBinder.DeathRecipient,
     ) : UserService {
         override val privileged: IPrivilegedService = service.privilegedService
 
@@ -56,9 +56,7 @@ class ProcessUserServiceRecycler(
         }
     }
 
-    abstract class BaseAppProcessService(
-        context: Context
-    ) : IAppProcessService.Stub() {
+    abstract class BaseAppProcessService(context: Context) : IAppProcessService.Stub() {
         init {
             if (AppConfig.isDebug && Timber.treeCount == 0) Timber.plant(Timber.DebugTree())
             if (GlobalContext.getOrNull() == null) {
@@ -92,9 +90,10 @@ class ProcessUserServiceRecycler(
         }
     }
 
-    class AppProcessService @Keep constructor(context: Context) : BaseAppProcessService(
-        context = context
-    )
+    class AppProcessService @Keep constructor(context: Context) :
+        BaseAppProcessService(
+            context = context,
+        )
 
     override fun onMake(): UserServiceProxy {
         val appProcessRecycler = appProcessRecyclerManager.get(terminal)
@@ -107,7 +106,7 @@ class ProcessUserServiceRecycler(
 
         val binder = try {
             appProcessHandle.entity.isolatedServiceBinder(
-                ComponentName(context, serviceClass)
+                ComponentName(context, serviceClass),
             )
         } catch (e: Exception) {
             appProcessHandle.recycle()

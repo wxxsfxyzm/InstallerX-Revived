@@ -4,5 +4,5 @@ package com.rosan.installer.domain.settings.util
 
 enum class OrderType {
     Ascending,
-    Descending
+    Descending,
 }

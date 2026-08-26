@@ -16,9 +16,7 @@ import timber.log.Timber
  * UseCase to retrieve details (label and icon) for a specific installation session.
  * Utilizes IPC services depending on the application's current authorization level.
  */
-class GetSessionConfirmationDetailsUseCase(
-    private val sessionDetailsProvider: SessionDetailsProvider
-) {
+class GetSessionConfirmationDetailsUseCase(private val sessionDetailsProvider: SessionDetailsProvider) {
     /**
      * Retrieves session details based on the provided configuration.
      */
@@ -28,7 +26,7 @@ class GetSessionConfirmationDetailsUseCase(
         requestType: ConfirmationRequestType,
         isSelfSession: Boolean = false,
         currentProgress: Int = 1,
-        totalProgress: Int = 1
+        totalProgress: Int = 1,
     ): ConfirmationDetails {
         var label: CharSequence? = null
         var icon: Bitmap? = null
@@ -87,7 +85,7 @@ class GetSessionConfirmationDetailsUseCase(
             isPreApprovalRequested = isPreApprovalRequested,
             isSelfSession = isSelfSession,
             currentProgress = currentProgress,
-            totalProgress = totalProgress
+            totalProgress = totalProgress,
         )
     }
 }

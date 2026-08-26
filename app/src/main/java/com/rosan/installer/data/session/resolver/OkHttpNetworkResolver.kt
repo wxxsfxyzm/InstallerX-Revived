@@ -24,20 +24,6 @@ import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.util.isZipMagicNumber
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import okhttp3.ConnectionSpec
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.apache.commons.compress.archivers.zip.ZipFile
-import timber.log.Timber
 import java.io.File
 import java.io.FilterInputStream
 import java.io.IOException
@@ -52,24 +38,38 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import okhttp3.ConnectionSpec
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.apache.commons.compress.archivers.zip.ZipFile
+import timber.log.Timber
 
 class OkHttpNetworkResolver(
     private val context: Context,
     private val okHttpClient: OkHttpClient,
-    private val appSettingsRepo: AppSettingsRepository
+    private val appSettingsRepo: AppSettingsRepository,
 ) : NetworkResolver {
     // Mutex to ensure thread-safe progress emission
     private val progressMutex = Mutex()
 
     private companion object {
-        const val SIZE_THRESHOLD_SMALL = 5 * 1024 * 1024L        // 5MB
-        const val SIZE_THRESHOLD_MEDIUM = 20 * 1024 * 1024L      // 20MB
-        const val SIZE_THRESHOLD_LARGE = 50 * 1024 * 1024L       // 50MB
-        const val SIZE_THRESHOLD_XLARGE = 100 * 1024 * 1024L     // 100MB
+        const val SIZE_THRESHOLD_SMALL = 5 * 1024 * 1024L // 5MB
+        const val SIZE_THRESHOLD_MEDIUM = 20 * 1024 * 1024L // 20MB
+        const val SIZE_THRESHOLD_LARGE = 50 * 1024 * 1024L // 50MB
+        const val SIZE_THRESHOLD_XLARGE = 100 * 1024 * 1024L // 100MB
 
-        const val MIN_CHUNK_SIZE = 2 * 1024 * 1024L              // 2MB
-        const val DOWNLOAD_BUFFER_SIZE = 1024 * 1024             // 1MB
-        const val RANGE_CACHE_BLOCK_SIZE = 1024 * 1024           // 1MB
+        const val MIN_CHUNK_SIZE = 2 * 1024 * 1024L // 2MB
+        const val DOWNLOAD_BUFFER_SIZE = 1024 * 1024 // 1MB
+        const val RANGE_CACHE_BLOCK_SIZE = 1024 * 1024 // 1MB
         const val RANGE_CACHE_MAX_BYTES = 8 * 1024 * 1024
     }
 
@@ -80,7 +80,7 @@ class OkHttpNetworkResolver(
         val contentLength: Long,
         val supportsRange: Boolean,
         val isArchive: Boolean,
-        val remoteIdentity: RemoteSourceIdentity? = null
+        val remoteIdentity: RemoteSourceIdentity? = null,
     )
 
     private class RangeNotSupportedException(message: String) : IOException(message)
@@ -89,13 +89,13 @@ class OkHttpNetworkResolver(
         uri: Uri,
         cacheDirectory: String,
         mode: NetworkSourceMode,
-        progressFlow: MutableSharedFlow<ProgressEntity>
+        progressFlow: MutableSharedFlow<ProgressEntity>,
     ): List<DataEntity> = withContext(Dispatchers.IO) {
         val preferences = appSettingsRepo.preferencesFlow.first()
         if (!preferences.allowInternetAccess) {
             throw ResolveException(
                 errorType = ResolveErrorType.NO_INTERNET_ACCESS,
-                message = "Internet access is disabled in app settings."
+                message = "Internet access is disabled in app settings.",
             )
         }
 
@@ -116,7 +116,7 @@ class OkHttpNetworkResolver(
         if (!preFlight.isArchive) {
             throw ResolveException(
                 errorType = ResolveErrorType.LINK_NOT_VALID,
-                message = "The target file is not a valid ZIP/APK archive."
+                message = "The target file is not a valid ZIP/APK archive.",
             )
         }
 
@@ -124,15 +124,15 @@ class OkHttpNetworkResolver(
             var remoteEntity: DataEntity.FileDescriptorEntity? = null
             val probeResult = when {
                 !platformSupported -> RemotePackageProbeResult.StreamingUnsupported(
-                    StreamingUnsupportedReason.Platform
+                    StreamingUnsupportedReason.Platform,
                 )
 
                 !supportsRange || contentLength <= 0L -> RemotePackageProbeResult.StreamingUnsupported(
-                    StreamingUnsupportedReason.RangeSource
+                    StreamingUnsupportedReason.RangeSource,
                 )
 
                 preFlight.remoteIdentity == null -> RemotePackageProbeResult.StreamingUnsupported(
-                    StreamingUnsupportedReason.StableIdentity
+                    StreamingUnsupportedReason.StableIdentity,
                 )
 
                 else -> {
@@ -144,10 +144,10 @@ class OkHttpNetworkResolver(
                             maximumBytes = RANGE_CACHE_MAX_BYTES,
                             maxHeapBytes = Runtime.getRuntime().maxMemory(),
                             allocatedHeapBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
-                            blockSize = RANGE_CACHE_BLOCK_SIZE
+                            blockSize = RANGE_CACHE_BLOCK_SIZE,
                         ),
                         inspectSigningBlock = true,
-                        analysisMaterializationPolicy = mode.streamingAnalysisMaterializationPolicy()
+                        analysisMaterializationPolicy = mode.streamingAnalysisMaterializationPolicy(),
                     )
                     probeRemotePackage(remoteEntity)
                 }
@@ -195,9 +195,8 @@ class OkHttpNetworkResolver(
             return@withContext listOf(
                 DataEntity.FileEntity(tempFile.absolutePath).apply {
                     source = DataEntity.FileEntity(uri.toString())
-                }
+                },
             )
-
         } catch (e: Exception) {
             if (tempFile.exists()) tempFile.delete()
             throw e
@@ -210,20 +209,20 @@ class OkHttpNetworkResolver(
         identity: RemoteSourceIdentity,
         rangeCacheMaxBytes: Int,
         inspectSigningBlock: Boolean,
-        analysisMaterializationPolicy: AnalysisMaterializationPolicy
+        analysisMaterializationPolicy: AnalysisMaterializationPolicy,
     ): DataEntity.FileDescriptorEntity {
         val contentLength = identity.contentLength
         val analysisRangeCache = SeekableBlockCache(
             contentLength = contentLength,
             blockSize = RANGE_CACHE_BLOCK_SIZE,
-            maxCachedBytes = rangeCacheMaxBytes
+            maxCachedBytes = rangeCacheMaxBytes,
         ) { offset, size ->
             loadRangeBlock(client, identity, offset, size)
         }
         Timber.d(
             "Remote range source configured: size=$contentLength, " +
-                    "cacheMaxBytes=$rangeCacheMaxBytes, analysisBlockSize=$RANGE_CACHE_BLOCK_SIZE, " +
-                    "signatureVerification=PackageInstaller"
+                "cacheMaxBytes=$rangeCacheMaxBytes, analysisBlockSize=$RANGE_CACHE_BLOCK_SIZE, " +
+                "signatureVerification=PackageInstaller",
         )
         return DataEntity.FileDescriptorEntity(
             path = identity.url.toString(),
@@ -246,61 +245,58 @@ class OkHttpNetworkResolver(
                 AnalysisMaterializationKey()
             } else {
                 null
-            }
+            },
         ).apply {
             source = DataEntity.FileEntity(originalUrl)
         }
     }
 
-    private fun probeRemotePackage(entity: DataEntity.FileDescriptorEntity): RemotePackageProbeResult =
-        try {
-            ZipFile.builder()
-                .setSeekableByteChannel(entity.openChannel())
-                .setIgnoreLocalFileHeader(true)
-                .get().use { archive ->
-                    if (archive.getEntry("AndroidManifest.xml") != null) {
-                        RemotePackageProbeResult.SingleApk
-                    } else {
-                        RemotePackageProbeResult.PackageArchive
-                    }
+    private fun probeRemotePackage(entity: DataEntity.FileDescriptorEntity): RemotePackageProbeResult = try {
+        ZipFile.builder()
+            .setSeekableByteChannel(entity.openChannel())
+            .setIgnoreLocalFileHeader(true)
+            .get().use { archive ->
+                if (archive.getEntry("AndroidManifest.xml") != null) {
+                    RemotePackageProbeResult.SingleApk
+                } else {
+                    RemotePackageProbeResult.PackageArchive
                 }
-        } catch (error: Exception) {
-            Timber.w(error, "Unable to inspect remote package as a seekable APK.")
-            RemotePackageProbeResult.ProbeFailed(error)
-        }
+            }
+    } catch (error: Exception) {
+        Timber.w(error, "Unable to inspect remote package as a seekable APK.")
+        RemotePackageProbeResult.ProbeFailed(error)
+    }
 
     private fun RemotePackageProbeResult.toLowStorageException(): ResolveException = when (this) {
         is RemotePackageProbeResult.StreamingUnsupported -> when (reason) {
             StreamingUnsupportedReason.Platform -> ResolveException(
                 errorType = ResolveErrorType.LOW_STORAGE_UNSUPPORTED,
-                message = "Descriptor-backed network APK parsing requires Android 9 or newer."
+                message = "Descriptor-backed network APK parsing requires Android 9 or newer.",
             )
 
             StreamingUnsupportedReason.RangeSource -> ResolveException(
                 errorType = ResolveErrorType.RANGE_REQUIRED,
-                message = "The server does not expose a seekable HTTP range source."
+                message = "The server does not expose a seekable HTTP range source.",
             )
 
             StreamingUnsupportedReason.StableIdentity -> ResolveException(
                 errorType = ResolveErrorType.STRONG_ETAG_REQUIRED,
-                message = "The server does not expose a strong ETag validator."
+                message = "The server does not expose a strong ETag validator.",
             )
         }
 
         is RemotePackageProbeResult.ProbeFailed -> ResolveException(
             errorType = ResolveErrorType.STREAMING_PROBE_FAILED,
             message = "Unable to inspect the remote package through HTTP range requests.",
-            cause = cause
+            cause = cause,
         )
 
         RemotePackageProbeResult.SingleApk,
-        RemotePackageProbeResult.PackageArchive -> error("A successful probe cannot be rejected")
+        RemotePackageProbeResult.PackageArchive,
+        -> error("A successful probe cannot be rejected")
     }
 
-    private fun createProxyDescriptor(
-        rangeCache: SeekableBlockCache,
-        contentLength: Long
-    ): DataEntity.OwnedFileDescriptor {
+    private fun createProxyDescriptor(rangeCache: SeekableBlockCache, contentLength: Long): DataEntity.OwnedFileDescriptor {
         val storageManager = context.getSystemService(StorageManager::class.java)
         val thread = HandlerThread("InstallerX-HTTP-range").apply { start() }
         val callback = HttpRangeProxyCallback(rangeCache, contentLength) {
@@ -310,7 +306,7 @@ class OkHttpNetworkResolver(
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.MODE_READ_ONLY,
                 callback,
-                Handler(thread.looper)
+                Handler(thread.looper),
             )
         } catch (error: Exception) {
             thread.quitSafely()
@@ -335,7 +331,7 @@ class OkHttpNetworkResolver(
             if (responseLength >= 0L && responseLength != identity.contentLength) {
                 throw IOException(
                     "Remote source length changed after preflight: " +
-                            "expected=${identity.contentLength}, actual=$responseLength"
+                        "expected=${identity.contentLength}, actual=$responseLength",
                 )
             }
         } catch (error: Exception) {
@@ -343,7 +339,7 @@ class OkHttpNetworkResolver(
             throw error
         }
         return object : FilterInputStream(
-            ExpectedLengthInputStream(response.body.byteStream(), identity.contentLength)
+            ExpectedLengthInputStream(response.body.byteStream(), identity.contentLength),
         ) {
             override fun close() {
                 response.use { _ ->
@@ -356,19 +352,18 @@ class OkHttpNetworkResolver(
     private inner class HttpRangeProxyCallback(
         private val rangeCache: SeekableBlockCache,
         private val contentLength: Long,
-        private val release: () -> Unit
+        private val release: () -> Unit,
     ) : ProxyFileDescriptorCallback() {
         override fun onGetSize(): Long = contentLength
 
-        override fun onRead(offset: Long, size: Int, data: ByteArray): Int =
-            rangeCache.read(offset, size, data)
+        override fun onRead(offset: Long, size: Int, data: ByteArray): Int = rangeCache.read(offset, size, data)
 
         override fun onRelease() = release()
     }
 
     private inner class HttpRangeSeekableByteChannel(
         private val rangeCache: SeekableBlockCache,
-        private val contentLength: Long
+        private val contentLength: Long,
     ) : SeekableByteChannel {
         private var position = 0L
         private var open = true
@@ -419,7 +414,7 @@ class OkHttpNetworkResolver(
         client: OkHttpClient,
         identity: RemoteSourceIdentity,
         offset: Long,
-        requestedSize: Int
+        requestedSize: Int,
     ): ByteArray {
         val contentLength = identity.contentLength
         if (offset >= contentLength) return ByteArray(0)
@@ -496,7 +491,7 @@ class OkHttpNetworkResolver(
         destFile: File,
         totalSize: Long,
         threadCount: Int,
-        progressFlow: MutableSharedFlow<ProgressEntity>
+        progressFlow: MutableSharedFlow<ProgressEntity>,
     ) = coroutineScope {
         RandomAccessFile(destFile, "rw").use { it.setLength(totalSize) }
 
@@ -523,7 +518,7 @@ class OkHttpNetworkResolver(
         totalSize: Long,
         downloadedTotal: AtomicLong,
         lastEmittedPercent: AtomicInteger,
-        progressFlow: MutableSharedFlow<ProgressEntity>
+        progressFlow: MutableSharedFlow<ProgressEntity>,
     ) {
         val request = Request.Builder()
             .url(url)
@@ -587,7 +582,7 @@ class OkHttpNetworkResolver(
         client: OkHttpClient,
         url: String,
         destFile: File,
-        progressFlow: MutableSharedFlow<ProgressEntity>
+        progressFlow: MutableSharedFlow<ProgressEntity>,
     ) {
         val request = Request.Builder()
             .url(url)
@@ -608,18 +603,16 @@ class OkHttpNetworkResolver(
 
     // --- Helper Methods ---
 
-    private fun Request.Builder.addDefaultHeaders(): Request.Builder {
-        return this.header(
-            "User-Agent",
-            "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
-        ).header(
-            "Accept",
-            "application/vnd.android.package-archive, application/octet-stream, */*"
-        ).header(
-            "Accept-Encoding",
-            "identity"
-        )
-    }
+    private fun Request.Builder.addDefaultHeaders(): Request.Builder = this.header(
+        "User-Agent",
+        "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+    ).header(
+        "Accept",
+        "application/vnd.android.package-archive, application/octet-stream, */*",
+    ).header(
+        "Accept-Encoding",
+        "identity",
+    )
 
     private fun performPreFlightCheck(client: OkHttpClient, url: String): PreFlightResult {
         val rangeProbe = Request.Builder()
@@ -653,7 +646,7 @@ class OkHttpNetworkResolver(
                         RemoteSourceIdentity.fromResponse(response, length)
                     } else {
                         null
-                    }
+                    },
                 )
             }
         } catch (e: Exception) {
@@ -678,7 +671,7 @@ class OkHttpNetworkResolver(
                     contentLength = length,
                     supportsRange = false,
                     isArchive = true,
-                    remoteIdentity = null
+                    remoteIdentity = null,
                 )
             }
         } catch (e: Exception) {
@@ -734,14 +727,14 @@ class OkHttpNetworkResolver(
             when (profile) {
                 HttpProfile.ALLOW_SECURE -> throw ResolveException(
                     errorType = ResolveErrorType.HTTP_NOT_ALLOWED,
-                    message = "Cleartext HTTP not allowed."
+                    message = "Cleartext HTTP not allowed.",
                 )
 
                 HttpProfile.ALLOW_LOCAL -> {
                     if (host != "localhost" && host != "127.0.0.1" && host != "::1") {
                         throw ResolveException(
                             errorType = ResolveErrorType.HTTP_RESTRICTED_FOR_LOCALHOST,
-                            message = "Cleartext HTTP allowed only for localhost."
+                            message = "Cleartext HTTP allowed only for localhost.",
                         )
                     }
                 }

@@ -12,12 +12,12 @@ class ConfirmationStateTest {
         val request = ConfirmationRequest(
             sessionId = 37,
             requestType = ConfirmationRequestType.INSTALL,
-            callerUid = 10001
+            callerUid = 10001,
         )
         val details = ConfirmationDetails(
             sessionId = 37,
             appLabel = "Example",
-            appIcon = null
+            appIcon = null,
         )
 
         assertNull(ConfirmationState.Idle.sessionIdOrNull())

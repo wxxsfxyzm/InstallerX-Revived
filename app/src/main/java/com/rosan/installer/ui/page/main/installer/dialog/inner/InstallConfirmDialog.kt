@@ -29,16 +29,14 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 
 @Composable
-fun installConfirmDialog(
-    viewModel: InstallerViewModel
-): DialogParams {
+fun installConfirmDialog(viewModel: InstallerViewModel): DialogParams {
     val sessionInfo = viewModel.uiState.value.stage as? InstallerStage.InstallConfirm ?: return DialogParams()
 
     return DialogParams(
         icon = DialogInnerParams(DialogParamsType.InstallerConfirm.id) {
             Box(
                 modifier = Modifier.size(64.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 if (sessionInfo.appIcon != null) {
                     Image(
@@ -46,7 +44,7 @@ fun installConfirmDialog(
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(12.dp)),
                     )
                 }
             }
@@ -54,7 +52,7 @@ fun installConfirmDialog(
         title = DialogInnerParams(DialogParamsType.InstallerConfirm.id) {
             Text(
                 text = sessionInfo.appLabel.toString(),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         },
         text = DialogInnerParams(DialogParamsType.InstallerConfirm.id) {
@@ -85,7 +83,7 @@ fun installConfirmDialog(
             Text(
                 text = tipMessage,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         },
         buttons = dialogButtons(DialogParamsType.InstallerConfirm.id) {
@@ -101,17 +99,17 @@ fun installConfirmDialog(
             listOf(
                 DialogButton(
                     text = confirmText,
-                    enabled = !viewModel.uiState.value.isConfirmationSubmitting
+                    enabled = !viewModel.uiState.value.isConfirmationSubmitting,
                 ) {
                     viewModel.dispatch(InstallerViewAction.ApproveSession(sessionInfo.sessionId, true))
                 },
                 DialogButton(
                     text = stringResource(R.string.cancel),
-                    enabled = !viewModel.uiState.value.isConfirmationSubmitting
+                    enabled = !viewModel.uiState.value.isConfirmationSubmitting,
                 ) {
                     viewModel.dispatch(InstallerViewAction.ApproveSession(sessionInfo.sessionId, false))
-                }
+                },
             )
-        }
+        },
     )
 }

@@ -3,8 +3,8 @@
 package com.rosan.installer.data.engine.executor
 
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
-import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import java.io.File
@@ -26,7 +26,7 @@ object ModuleInstallerUtils {
         return localFile?.absolutePath
             ?: throw ModuleInstallException(
                 errorType = ModuleInstallErrorType.GENERIC_FAILED,
-                message = "Could not resolve a local module file for ${module.name}"
+                message = "Could not resolve a local module file for ${module.name}",
             )
     }
 
@@ -34,13 +34,12 @@ object ModuleInstallerUtils {
      * Returns the raw command arguments for installing a module.
      * @return An array of strings representing the command and its arguments.
      */
-    fun getInstallCommandArgs(rootMode: RootMode, modulePath: String): Array<String> =
-        when (rootMode) {
-            RootMode.Magisk -> arrayOf("magisk", "--install-module", modulePath)
-            RootMode.KernelSU -> arrayOf("ksud", "module", "install", modulePath)
-            RootMode.APatch -> arrayOf("apd", "module", "install", modulePath)
-            RootMode.None -> throw IllegalStateException("Cannot install module in None mode")
-        }
+    fun getInstallCommandArgs(rootMode: RootMode, modulePath: String): Array<String> = when (rootMode) {
+        RootMode.Magisk -> arrayOf("magisk", "--install-module", modulePath)
+        RootMode.KernelSU -> arrayOf("ksud", "module", "install", modulePath)
+        RootMode.APatch -> arrayOf("apd", "module", "install", modulePath)
+        RootMode.None -> throw IllegalStateException("Cannot install module in None mode")
+    }
 
     /**
      * Converts raw arguments into a shell-safe command string.

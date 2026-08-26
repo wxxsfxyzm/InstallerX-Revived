@@ -24,13 +24,13 @@ class UninstallerSettingsViewModel(
     appSettingsRepo: AppSettingsRepository,
     private val systemEnvProvider: SystemEnvProvider,
     private val updateSetting: UpdateSettingUseCase,
-    private val toggleUninstallFlagUseCase: ToggleUninstallFlagUseCase
+    private val toggleUninstallFlagUseCase: ToggleUninstallFlagUseCase,
 ) : ViewModel() {
 
     private val _uiEvents = MutableSharedFlow<UninstallerSettingsEvent>(
         replay = 0,
         extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     val uiEvents = _uiEvents.asSharedFlow()
 
@@ -38,12 +38,12 @@ class UninstallerSettingsViewModel(
         UninstallerSettingsState(
             authorizer = prefs.authorizer,
             uninstallFlags = prefs.uninstallFlags,
-            uninstallerRequireBiometricAuth = prefs.uninstallerRequireBiometricAuth
+            uninstallerRequireBiometricAuth = prefs.uninstallerRequireBiometricAuth,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = UninstallerSettingsState()
+        initialValue = UninstallerSettingsState(),
     )
 
     fun dispatch(action: UninstallerSettingsAction) {
@@ -62,10 +62,11 @@ class UninstallerSettingsViewModel(
     private fun toggleGlobalUninstallFlag(flag: Int, enable: Boolean) = viewModelScope.launch {
         val disabledFlag = toggleUninstallFlagUseCase(flag, enable)
         if (disabledFlag != null) {
-            val resId = if (disabledFlag == UninstallFlags.DELETE_SYSTEM_APP)
+            val resId = if (disabledFlag == UninstallFlags.DELETE_SYSTEM_APP) {
                 R.string.uninstall_system_app_disabled
-            else
+            } else {
                 R.string.uninstall_all_users_disabled
+            }
             _uiEvents.tryEmit(UninstallerSettingsEvent.ShowMessage(resId))
         }
     }

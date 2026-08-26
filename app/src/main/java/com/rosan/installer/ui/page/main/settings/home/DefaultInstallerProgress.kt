@@ -3,8 +3,8 @@
 package com.rosan.installer.ui.page.main.settings.home
 
 import android.os.SystemClock
-import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 
 private const val DEFAULT_INSTALLER_PROGRESS_MIN_MILLIS = 500L
 

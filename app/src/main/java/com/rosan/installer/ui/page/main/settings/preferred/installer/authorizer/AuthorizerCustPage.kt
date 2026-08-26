@@ -46,10 +46,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AuthorizerCustPage(
-    useBlur: Boolean,
-    viewModel: AuthorizerCustViewModel = koinViewModel()
-) {
+fun AuthorizerCustPage(useBlur: Boolean, viewModel: AuthorizerCustViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -86,36 +83,41 @@ fun AuthorizerCustPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
         ) {
             item {
                 SegmentedColumn(
-                    title = if (isSystemApp) stringResource(R.string.working_status_system_installer)
-                    else stringResource(R.string.config_authorizer_none)
+                    title = if (isSystemApp) {
+                        stringResource(R.string.working_status_system_installer)
+                    } else {
+                        stringResource(R.string.config_authorizer_none)
+                    },
                 ) {
-                    if (isSystemApp) item {
-                        SwitchWidget(
-                            icon = AppIcons.FlashPreferRoot,
-                            title = stringResource(R.string.config_always_use_root_in_system),
-                            description = stringResource(R.string.config_always_use_root_in_system_desc),
-                            checked = uiState.alwaysUseRootInSystem,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    AuthorizerCustAction.ChangeAlwaysUseRootInSystem(
-                                        it
+                    if (isSystemApp) {
+                        item {
+                            SwitchWidget(
+                                icon = AppIcons.FlashPreferRoot,
+                                title = stringResource(R.string.config_always_use_root_in_system),
+                                description = stringResource(R.string.config_always_use_root_in_system_desc),
+                                checked = uiState.alwaysUseRootInSystem,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        AuthorizerCustAction.ChangeAlwaysUseRootInSystem(
+                                            it,
+                                        ),
                                     )
-                                )
-                            }
-                        )
+                                },
+                            )
+                        }
                     }
 
                     if (!isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -128,10 +130,10 @@ fun AuthorizerCustPage(
                                 onCheckedChange = {
                                     viewModel.dispatch(
                                         AuthorizerCustAction.ChangeAllowInstallWithoutUserAction(
-                                            it
-                                        )
+                                            it,
+                                        ),
                                     )
-                                }
+                                },
                             )
                         }
                     }
@@ -140,31 +142,32 @@ fun AuthorizerCustPage(
 
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.extras)
+                    title = stringResource(R.string.extras),
                 ) {
-                    if (!isSystemApp) item {
-                        BaseItemContainer {
-                            IntNumberPickerWidget(
-                                icon = AppIcons.Working,
-                                title = stringResource(R.string.close_session_countdown),
-                                description = stringResource(R.string.close_session_countdown_desc),
-                                value = uiState.closeSessionCountDown,
-                                startInt = 1,
-                                endInt = 10,
-                                stepSize = 1,
-                                onValueChange = {
-                                    viewModel.dispatch(
-                                        AuthorizerCustAction.ChangeCloseSessionCountDown(
-                                            it
+                    if (!isSystemApp) {
+                        item {
+                            BaseItemContainer {
+                                IntNumberPickerWidget(
+                                    icon = AppIcons.Working,
+                                    title = stringResource(R.string.close_session_countdown),
+                                    description = stringResource(R.string.close_session_countdown_desc),
+                                    value = uiState.closeSessionCountDown,
+                                    startInt = 1,
+                                    endInt = 10,
+                                    stepSize = 1,
+                                    onValueChange = {
+                                        viewModel.dispatch(
+                                            AuthorizerCustAction.ChangeCloseSessionCountDown(
+                                                it,
+                                            ),
                                         )
-                                    )
-                                }
-                            )
+                                    },
+                                )
+                            }
                         }
                     }
                 }
             }
-
         }
     }
 }

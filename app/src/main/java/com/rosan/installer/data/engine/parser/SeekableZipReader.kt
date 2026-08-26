@@ -66,11 +66,11 @@ internal class SeekableZipReader {
                     val entry = readLocalEntry(input, offset, fileSize)
                     metadataBytes = checkedAdd(
                         metadataBytes,
-                        entry.dataOffset - offset - LOCAL_FILE_HEADER_SIZE
+                        entry.dataOffset - offset - LOCAL_FILE_HEADER_SIZE,
                     )
                     if (metadataBytes > MAX_METADATA_BYTES) {
                         throw SeekableZipException(
-                            "ZIP local-header metadata exceeds $MAX_METADATA_BYTES bytes"
+                            "ZIP local-header metadata exceeds $MAX_METADATA_BYTES bytes",
                         )
                     }
                     entries += entry
@@ -80,7 +80,8 @@ internal class SeekableZipReader {
                 CENTRAL_DIRECTORY_SIGNATURE,
                 END_OF_CENTRAL_DIRECTORY_SIGNATURE,
                 ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE,
-                ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE -> {
+                ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE,
+                -> {
                     return SeekableZipArchive(entries, hasCentralDirectory = true)
                 }
 
@@ -89,7 +90,7 @@ internal class SeekableZipReader {
                         return SeekableZipArchive(entries, hasCentralDirectory = true)
                     }
                     throw SeekableZipException(
-                        "Unexpected ZIP signature 0x${signature.toString(16)} at offset $offset"
+                        "Unexpected ZIP signature 0x${signature.toString(16)} at offset $offset",
                     )
                 }
             }
@@ -101,11 +102,7 @@ internal class SeekableZipReader {
      * the central directory. Its leading bytes are a size field rather than a ZIP signature, so
      * local-header traversal must recognize the complete outer envelope before stopping there.
      */
-    private fun isApkSigningBlock(
-        input: ChannelRandomAccessReader,
-        blockOffset: Long,
-        fileSize: Long
-    ): Boolean {
+    private fun isApkSigningBlock(input: ChannelRandomAccessReader, blockOffset: Long, fileSize: Long): Boolean {
         val remainingSize = fileSize - blockOffset
         if (remainingSize < APK_SIGNING_BLOCK_MIN_TOTAL_SIZE + SIGNATURE_SIZE) return false
 
@@ -125,11 +122,7 @@ internal class SeekableZipReader {
         return input.readUnsignedIntLittleEndian() == CENTRAL_DIRECTORY_SIGNATURE
     }
 
-    private fun readLocalEntry(
-        input: ChannelRandomAccessReader,
-        localHeaderOffset: Long,
-        fileSize: Long
-    ): SeekableZipEntry {
+    private fun readLocalEntry(input: ChannelRandomAccessReader, localHeaderOffset: Long, fileSize: Long): SeekableZipEntry {
         // One bulk read per header: byte-at-a-time channel reads cost ~30 syscalls per entry.
         val header = input.readBytes(LOCAL_HEADER_REMAINING_SIZE)
         val flags = header.readUnsignedShortLittleEndian(2)
@@ -168,7 +161,7 @@ internal class SeekableZipReader {
                 extraBytes = extraBytes,
                 needsUncompressedSize = uncompressedSize == UINT32_MAX,
                 needsCompressedSize = compressedSize == UINT32_MAX,
-                localHeaderOffset = localHeaderOffset
+                localHeaderOffset = localHeaderOffset,
             )
             if (uncompressedSize == UINT32_MAX) uncompressedSize = zip64Sizes.uncompressedSize
             if (compressedSize == UINT32_MAX) compressedSize = zip64Sizes.compressedSize
@@ -181,7 +174,7 @@ internal class SeekableZipReader {
         val dataEnd = checkedAdd(metadataEnd, compressedSize)
         if (dataEnd > fileSize) {
             throw SeekableZipException(
-                "ZIP entry payload exceeds file size: $name, end=$dataEnd, fileSize=$fileSize"
+                "ZIP entry payload exceeds file size: $name, end=$dataEnd, fileSize=$fileSize",
             )
         }
 
@@ -193,7 +186,7 @@ internal class SeekableZipReader {
             uncompressedSize = uncompressedSize,
             crc = crc,
             compressionMethod = compressionMethod,
-            flags = flags
+            flags = flags,
         )
     }
 
@@ -201,7 +194,7 @@ internal class SeekableZipReader {
         extraBytes: ByteArray,
         needsUncompressedSize: Boolean,
         needsCompressedSize: Boolean,
-        localHeaderOffset: Long
+        localHeaderOffset: Long,
     ): Zip64Sizes {
         var offset = 0
         while (offset + EXTRA_FIELD_HEADER_SIZE <= extraBytes.size) {
@@ -229,6 +222,7 @@ internal class SeekableZipReader {
                 }
                 val compressedSize = when {
                     !needsCompressedSize -> 0L
+
                     dataSize >= 2 * LONG_SIZE ->
                         extraBytes.readSignedLongLittleEndian(dataOffset + LONG_SIZE)
 
@@ -249,7 +243,7 @@ internal class SeekableZipReader {
             throw SeekableZipException("Truncated ZIP extra field")
         }
         return (this[offset].toInt() and 0xFF) or
-                ((this[offset + 1].toInt() and 0xFF) shl Byte.SIZE_BITS)
+            ((this[offset + 1].toInt() and 0xFF) shl Byte.SIZE_BITS)
     }
 
     private fun ByteArray.readUnsignedIntLittleEndian(offset: Int): Long {
@@ -274,14 +268,11 @@ internal class SeekableZipReader {
         return result
     }
 
-    private fun ChannelRandomAccessReader.readBytes(count: Int): ByteArray =
-        ByteArray(count).also(::readFully)
+    private fun ChannelRandomAccessReader.readBytes(count: Int): ByteArray = ByteArray(count).also(::readFully)
 
-    private fun ChannelRandomAccessReader.readUnsignedIntLittleEndian(): Long =
-        readBytes(INT_SIZE).readUnsignedIntLittleEndian(0)
+    private fun ChannelRandomAccessReader.readUnsignedIntLittleEndian(): Long = readBytes(INT_SIZE).readUnsignedIntLittleEndian(0)
 
-    private fun ChannelRandomAccessReader.readSignedLongLittleEndian(): Long =
-        readBytes(LONG_SIZE).readSignedLongLittleEndian(0)
+    private fun ChannelRandomAccessReader.readSignedLongLittleEndian(): Long = readBytes(LONG_SIZE).readSignedLongLittleEndian(0)
 
     private fun checkedAdd(vararg values: Long): Long {
         var result = 0L
@@ -294,14 +285,9 @@ internal class SeekableZipReader {
         return result
     }
 
-    private data class Zip64Sizes(
-        val uncompressedSize: Long,
-        val compressedSize: Long
-    )
+    private data class Zip64Sizes(val uncompressedSize: Long, val compressedSize: Long)
 
-    private class ChannelRandomAccessReader(
-        private val channel: SeekableByteChannel
-    ) : Closeable {
+    private class ChannelRandomAccessReader(private val channel: SeekableByteChannel) : Closeable {
         val length: Long
             get() = channel.size()
 

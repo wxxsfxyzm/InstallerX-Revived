@@ -15,26 +15,20 @@ internal object OnlineUpdatePolicy {
         isDebug: Boolean,
         level: Level,
         packageName: String,
-        officialPackageName: String
+        officialPackageName: String,
     ): Boolean = allowInternetAccess &&
-            !isDebug &&
-            level != Level.UNSTABLE &&
-            packageName == officialPackageName
+        !isDebug &&
+        level != Level.UNSTABLE &&
+        packageName == officialPackageName
 
-    fun selectPreviewRelease(releases: List<GithubRelease>): GithubRelease? =
-        releases.firstOrNull(GithubRelease::isPrerelease)
+    fun selectPreviewRelease(releases: List<GithubRelease>): GithubRelease? = releases.firstOrNull(GithubRelease::isPrerelease)
 
-    fun selectOnlineApkAsset(release: GithubRelease): GithubAsset? =
-        release.assets.firstOrNull { asset ->
-            asset.name.contains("online", ignoreCase = true) &&
-                    asset.name.endsWith(".apk", ignoreCase = true)
-        }
+    fun selectOnlineApkAsset(release: GithubRelease): GithubAsset? = release.assets.firstOrNull { asset ->
+        asset.name.contains("online", ignoreCase = true) &&
+            asset.name.endsWith(".apk", ignoreCase = true)
+    }
 
-    fun resolveDownloadUrl(
-        asset: GithubAsset?,
-        channel: GithubUpdateChannel,
-        customProxyUrl: String
-    ): String {
+    fun resolveDownloadUrl(asset: GithubAsset?, channel: GithubUpdateChannel, customProxyUrl: String): String {
         val browserDownloadUrl = asset?.browserDownloadUrl.orEmpty()
         if (browserDownloadUrl.isEmpty()) return ""
 

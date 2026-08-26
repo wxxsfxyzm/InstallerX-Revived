@@ -14,16 +14,12 @@ class SaveConfigUseCase(private val configRepo: ConfigRepository) {
         NAME_EMPTY,
         CUSTOM_AUTHORIZER_EMPTY,
         INSTALLER_EMPTY,
-        REQUESTER_NOT_FOUND
+        REQUESTER_NOT_FOUND,
     }
 
     class SaveConfigException(val error: Error) : Exception("Save config failed: ${error.name}")
 
-    suspend operator fun invoke(
-        model: ConfigModel,
-        hasRequesterUid: Boolean,
-        installerRequired: Boolean = true
-    ): Result<Unit> {
+    suspend operator fun invoke(model: ConfigModel, hasRequesterUid: Boolean, installerRequired: Boolean = true): Result<Unit> {
         // Business rule validations
         if (model.name.isEmpty()) {
             return Result.failure(SaveConfigException(Error.NAME_EMPTY))

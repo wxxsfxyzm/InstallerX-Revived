@@ -45,7 +45,7 @@ class ModuleSourceMaterializerTest {
             channelFactory = {
                 FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
             },
-            descriptorFactory = { error("Materialization must use the seekable stream") }
+            descriptorFactory = { error("Materialization must use the seekable stream") },
         ).apply {
             source = sourceIdentity
         }
@@ -68,7 +68,7 @@ class ModuleSourceMaterializerTest {
 
         val result = materializer.materializeForInstall(
             data = data,
-            cacheDirectory = File(tempDirectory, "unused-cache").path
+            cacheDirectory = File(tempDirectory, "unused-cache").path,
         )
 
         assertSame(data, result)

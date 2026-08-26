@@ -16,15 +16,13 @@ import com.rosan.installer.framework.privileged.core.infrastructure.process.AppP
 import com.rosan.installer.framework.privileged.core.infrastructure.process.ShellCommand
 import com.rosan.installer.framework.privileged.core.infrastructure.recycler.ProcessUserServiceRecycler
 import com.rosan.installer.framework.privileged.core.infrastructure.recycler.ShizukuUserServiceRecycler
+import java.lang.reflect.InvocationTargetException
 import org.koin.core.context.GlobalContext
 import timber.log.Timber
-import java.lang.reflect.InvocationTargetException
 
 private const val TAG = "PrivilegedService"
 
-private class DefaultUserService(
-    override val privileged: IPrivilegedService
-) : UserService {
+private class DefaultUserService(override val privileged: IPrivilegedService) : UserService {
     override fun close() {}
 }
 
@@ -33,7 +31,7 @@ fun useUserService(
     authorizer: Authorizer,
     customizeAuthorizer: String = "",
     special: (() -> AppProcessTerminal?)? = null,
-    action: (UserService) -> Unit
+    action: (UserService) -> Unit,
 ) {
     val fallbackPrivileged = if (isSystemApp) {
         DefaultPrivilegedService.system()
@@ -64,7 +62,7 @@ private fun processRecycler(
     authorizer: Authorizer,
     recycler: Recyclable<out UserService>?,
     fallbackPrivileged: IPrivilegedService,
-    action: (UserService) -> Unit
+    action: (UserService) -> Unit,
 ) {
     try {
         if (recycler != null) {
@@ -84,7 +82,7 @@ private fun processRecycler(
                 throw PrivilegedException(
                     errorType = PrivilegedErrorType.SHIZUKU_NOT_WORK,
                     message = "Shizuku service connection lost during privileged action (Reflected).",
-                    cause = target
+                    cause = target,
                 )
             }
             throw e
@@ -95,7 +93,7 @@ private fun processRecycler(
                 throw PrivilegedException(
                     errorType = PrivilegedErrorType.SHIZUKU_NOT_WORK,
                     message = "Shizuku service connection lost during privileged action.",
-                    cause = e
+                    cause = e,
                 )
             }
         }
@@ -107,7 +105,7 @@ private fun processRecycler(
 private fun getRecyclableInstance(
     authorizer: Authorizer,
     customizeAuthorizer: String,
-    special: (() -> AppProcessTerminal?)?
+    special: (() -> AppProcessTerminal?)?,
 ): Recyclable<out UserService>? {
     val specialTerminal = special?.invoke()
 
@@ -121,7 +119,9 @@ private fun getRecyclableInstance(
             val targetTerminal = specialTerminal ?: AppProcessTerminal.Root
 
             Timber.tag(TAG).d("Using ProcessUserServiceRecycler with terminal: $targetTerminal")
-            koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetTerminal).make()
+            koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(
+                RecyclerNames.USER_SERVICE,
+            ).get(targetTerminal).make()
         }
 
         Authorizer.Shizuku -> {
@@ -133,10 +133,12 @@ private fun getRecyclableInstance(
 
         Authorizer.Customize -> {
             val targetTerminal = AppProcessTerminal.Customize(
-                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer))
+                ShellCommand.parse(requireCustomizeAuthorizer(customizeAuthorizer)),
             )
             Timber.tag(TAG).d("Using ProcessUserServiceRecycler with terminal: $targetTerminal")
-            koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(RecyclerNames.USER_SERVICE).get(targetTerminal).make()
+            koin.get<RecyclerManager<AppProcessTerminal, ProcessUserServiceRecycler>>(
+                RecyclerNames.USER_SERVICE,
+            ).get(targetTerminal).make()
         }
 
         else -> specialTerminal?.let {

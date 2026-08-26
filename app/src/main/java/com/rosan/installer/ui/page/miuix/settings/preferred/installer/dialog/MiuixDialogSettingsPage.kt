@@ -35,21 +35,18 @@ import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun MiuixDialogSettingsPage(
-    useBlur: Boolean,
-    viewModel: DialogSettingsViewModel = koinViewModel()
-) {
+fun MiuixDialogSettingsPage(useBlur: Boolean, viewModel: DialogSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
@@ -68,9 +65,9 @@ fun MiuixDialogSettingsPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -82,9 +79,9 @@ fun MiuixDialogSettingsPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
             item { SmallTitle(stringResource(id = R.string.installer_settings_dialog_mode_options)) }
@@ -92,11 +89,11 @@ fun MiuixDialogSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     val comparisonOptions = listOf(
                         stringResource(R.string.install_comparison_show_all),
-                        stringResource(R.string.install_comparison_show_differences_only)
+                        stringResource(R.string.install_comparison_show_differences_only),
                     )
                     WindowSpinnerPreference(
                         title = stringResource(id = R.string.install_comparison_display_behavior),
@@ -105,15 +102,15 @@ fun MiuixDialogSettingsPage(
                                 R.string.install_comparison_show_differences_only_desc
                             } else {
                                 R.string.install_comparison_show_all_desc
-                            }
+                            },
                         ),
                         items = comparisonOptions.map { DropdownItem(title = it) },
                         selectedIndex = if (uiState.hideIdenticalComparisons) 1 else 0,
                         onSelectedIndexChange = { index ->
                             viewModel.dispatch(
-                                DialogSettingsAction.ChangeHideIdenticalComparisons(index == 1)
+                                DialogSettingsAction.ChangeHideIdenticalComparisons(index == 1),
                             )
-                        }
+                        },
                     )
 
                     /* MiuixSwitchWidget(
@@ -140,7 +137,7 @@ fun MiuixDialogSettingsPage(
                         checked = uiState.showDialogInstallExtendedMenu,
                         onCheckedChange = {
                             viewModel.dispatch(DialogSettingsAction.ChangeShowDialogInstallExtendedMenu(it))
-                        }
+                        },
                     )
 
                     MiuixSwitchWidget(
@@ -149,7 +146,7 @@ fun MiuixDialogSettingsPage(
                         checked = uiState.showSmartSuggestion,
                         onCheckedChange = {
                             viewModel.dispatch(DialogSettingsAction.ChangeShowSuggestion(it))
-                        }
+                        },
                     )
 
                     MiuixSwitchWidget(
@@ -158,7 +155,7 @@ fun MiuixDialogSettingsPage(
                         checked = uiState.disableNotificationForDialogInstall,
                         onCheckedChange = {
                             viewModel.dispatch(DialogSettingsAction.ChangeShowDisableNotification(it))
-                        }
+                        },
                     )
                 }
             }
@@ -168,7 +165,7 @@ fun MiuixDialogSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.auto_background_install),
@@ -176,7 +173,7 @@ fun MiuixDialogSettingsPage(
                         checked = uiState.autoSilentInstall,
                         onCheckedChange = {
                             viewModel.dispatch(DialogSettingsAction.ChangeAutoSilentInstall(it))
-                        }
+                        },
                     )
 
                     MiuixSwitchWidget(
@@ -185,7 +182,7 @@ fun MiuixDialogSettingsPage(
                         checked = uiState.longClickBackgroundInstall,
                         onCheckedChange = {
                             viewModel.dispatch(DialogSettingsAction.ChangeLongClickBackgroundInstall(it))
-                        }
+                        },
                     )
                 }
             }
@@ -195,25 +192,25 @@ fun MiuixDialogSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(R.string.lab_tap_icon_to_share),
                         description = stringResource(R.string.lab_tap_icon_to_share_desc),
                         checked = uiState.tapIconToShare,
-                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeTapIconToShare(it)) }
+                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeTapIconToShare(it)) },
                     )
                     MiuixSwitchWidget(
                         title = stringResource(R.string.lab_show_apk_path),
                         description = stringResource(R.string.lab_show_apk_path_desc),
                         checked = uiState.showFilePath,
-                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeShowFilePath(it)) }
+                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeShowFilePath(it)) },
                     )
                     MiuixSwitchWidget(
                         title = stringResource(R.string.lab_show_install_initiator),
                         description = stringResource(R.string.lab_show_install_initiator_desc),
                         checked = uiState.showInstallInitiator,
-                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeShowInstallInitiator(it)) }
+                        onCheckedChange = { viewModel.dispatch(DialogSettingsAction.ChangeShowInstallInitiator(it)) },
                     )
                 }
             }

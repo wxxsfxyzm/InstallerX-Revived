@@ -33,9 +33,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun preparingDialog(
-    viewModel: InstallerViewModel
-): DialogParams {
+fun preparingDialog(viewModel: InstallerViewModel): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
 
@@ -49,7 +47,7 @@ fun preparingDialog(
     return DialogParams(
         icon = DialogInnerParams(
             DialogParamsType.IconWorking.id,
-            workingIcon
+            workingIcon,
         ),
         title = DialogInnerParams(
             DialogParamsType.InstallerPreparing.id,
@@ -60,7 +58,7 @@ fun preparingDialog(
             DialogParamsType.InstallerPreparing.id,
         ) {
             Column(
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(bottom = 4.dp),
             ) {
                 Text(
                     text = stringResource(R.string.installer_preparing_desc),
@@ -68,7 +66,7 @@ fun preparingDialog(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 8.dp),
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -77,14 +75,14 @@ fun preparingDialog(
                     // Indeterminate progress
                     LinearWavyProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        amplitude = 0f // not wavy
+                        amplitude = 0f, // not wavy
                     )
                 } else {
                     // Determinate progress with smooth animation
                     val animatedProgress by animateFloatAsState(
                         targetValue = progress,
                         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-                        label = "PreparingProgressAnimation"
+                        label = "PreparingProgressAnimation",
                     )
 
                     LinearWavyProgressIndicator(
@@ -97,7 +95,7 @@ fun preparingDialog(
             }
         },
         buttons = dialogButtons(
-            DialogParamsType.ButtonsCancel.id
+            DialogParamsType.ButtonsCancel.id,
         ) {
             listOf(
                 DialogButton(stringResource(R.string.installer_move_to_background)) {
@@ -105,8 +103,8 @@ fun preparingDialog(
                 },
                 DialogButton(stringResource(R.string.cancel)) {
                     viewModel.dispatch(InstallerViewAction.Cancel)
-                }
+                },
             )
-        }
+        },
     )
 }

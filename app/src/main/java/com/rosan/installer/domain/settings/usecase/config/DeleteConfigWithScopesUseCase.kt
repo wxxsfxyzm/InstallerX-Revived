@@ -6,9 +6,6 @@ import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.DeletedConfigSnapshot
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 
-class DeleteConfigWithScopesUseCase(
-    private val configRepo: ConfigRepository
-) {
-    suspend operator fun invoke(model: ConfigModel): DeletedConfigSnapshot =
-        configRepo.deleteWithScopes(model)
+class DeleteConfigWithScopesUseCase(private val configRepo: ConfigRepository) {
+    suspend operator fun invoke(model: ConfigModel): DeletedConfigSnapshot = configRepo.deleteWithScopes(model)
 }

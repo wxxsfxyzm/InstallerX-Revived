@@ -13,7 +13,7 @@ fun PendingSelfUpdateHistory.toSuccessfulOperationHistory(
     actualNewVersionName: String? = newVersionName,
     actualNewVersionCode: Long? = newVersionCode,
     installerPackageName: String? = null,
-    timestamp: Long = System.currentTimeMillis()
+    timestamp: Long = System.currentTimeMillis(),
 ) = OperationHistoryModel(
     operationType = OperationType.INSTALL,
     status = OperationStatus.SUCCESS,
@@ -32,5 +32,5 @@ fun PendingSelfUpdateHistory.toSuccessfulOperationHistory(
     installMethod = InstallMethod.PACKAGE_MANAGER,
     authorizer = authorizer,
     installMode = installMode,
-    operationSessionKey = operationSessionKey
+    operationSessionKey = operationSessionKey,
 )

@@ -11,24 +11,18 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.util.isZipMagicNumber
 import dalvik.system.ZipPathValidator
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import timber.log.Timber
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import timber.log.Timber
 
-internal class DetectedFileType(
-    val type: DataType,
-    val archive: UnifiedZipFile?
-) : Closeable {
+internal class DetectedFileType(val type: DataType, val archive: UnifiedZipFile?) : Closeable {
     override fun close() = archive?.close() ?: Unit
 }
 
-class FileTypeDetector(
-    private val json: Json,
-    private val unifiedZipFileProvider: UnifiedZipFileProvider
-) {
+class FileTypeDetector(private val json: Json, private val unifiedZipFileProvider: UnifiedZipFileProvider) {
 
     private companion object {
         const val ENTRY_LOG_LIMIT = 20
@@ -52,15 +46,14 @@ class FileTypeDetector(
         }
     }
 
-    fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType =
-        detectWithArchive(data, extra).use { it.type }
+    fun detect(data: DataEntity, extra: AnalyseExtraEntity): DataType = detectWithArchive(data, extra).use { it.type }
 
     internal fun detectWithArchive(data: DataEntity, extra: AnalyseExtraEntity): DetectedFileType {
         val fileEntity = data as? DataEntity.FileEntity
         if (fileEntity == null) {
             Timber.d(
                 "File type detection skipped: entity=${data::class.java.simpleName}, " +
-                        "source=${data.source}"
+                    "source=${data.source}",
             )
             return DetectedFileType(DataType.NONE, null)
         }
@@ -70,18 +63,18 @@ class FileTypeDetector(
         val sourcePath = (fileEntity.getSourceTop() as? DataEntity.FileEntity)?.path
         val sourceExtension = sourcePath?.let { File(it).extension }.orEmpty()
         val isApkSource = sourceExtension.equals("apk", ignoreCase = true) ||
-                file.extension.equals("apk", ignoreCase = true)
+            file.extension.equals("apk", ignoreCase = true)
         val isZip = fileEntity.hasZipMagic()
 
         Timber.d(
             "File type detection started: workingPath=${fileEntity.path}, sourcePath=$sourcePath, " +
-                    "workingExtension=${file.extension.ifBlank { "<none>" }}, " +
-                    "sourceExtension=${sourceExtension.ifBlank { "<none>" }}, " +
-                    "descriptorBacked=$descriptorBacked, " +
-                    "exists=${descriptorBacked || file.exists()}, isFile=${descriptorBacked || file.isFile}, " +
-                    "canRead=${descriptorBacked || file.canRead()}, size=${fileEntity.getSize()}, " +
-                    "header=${fileEntity.readHeaderForLog()}, zipMagic=$isZip, " +
-                    "moduleDetection=${extra.isModuleFlashEnabled}"
+                "workingExtension=${file.extension.ifBlank { "<none>" }}, " +
+                "sourceExtension=${sourceExtension.ifBlank { "<none>" }}, " +
+                "descriptorBacked=$descriptorBacked, " +
+                "exists=${descriptorBacked || file.exists()}, isFile=${descriptorBacked || file.isFile}, " +
+                "canRead=${descriptorBacked || file.canRead()}, size=${fileEntity.getSize()}, " +
+                "header=${fileEntity.readHeaderForLog()}, zipMagic=$isZip, " +
+                "moduleDetection=${extra.isModuleFlashEnabled}",
         )
 
         return try {
@@ -90,12 +83,12 @@ class FileTypeDetector(
 
             Timber.d(
                 "File type detection finished: workingPath=${fileEntity.path}, " +
-                        "sourcePath=$sourcePath, result=$detectedType"
+                    "sourcePath=$sourcePath, result=$detectedType",
             )
             if (sourceExtension.equals("apks", ignoreCase = true) && detectedType != DataType.APKS) {
                 Timber.w(
                     "File type/extension mismatch: source extension is .apks but content detector " +
-                            "selected $detectedType. See archive diagnostics and selected-rule logs above."
+                        "selected $detectedType. See archive diagnostics and selected-rule logs above.",
                 )
             }
             detected
@@ -117,7 +110,7 @@ class FileTypeDetector(
                     throw AnalyseException(
                         errorType = AnalyseErrorType.CORRUPTED_ARCHIVE,
                         message = "Archive is corrupted or truncated",
-                        cause = e
+                        cause = e,
                     )
                 }
 
@@ -137,7 +130,7 @@ class FileTypeDetector(
     private fun detectArchiveType(
         file: DataEntity.FileEntity,
         sourceExtension: String,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): DetectedFileType {
         val zipFile = unifiedZipFileProvider.open(file, allowLocalHeaderFallback = true)
         return try {
@@ -181,11 +174,13 @@ class FileTypeDetector(
                 Timber.d("Detected MIXED_MODULE_APK")
                 DataType.MIXED_MODULE_APK
             }
+
             // Module containing APKs
             hasApksInside -> {
                 Timber.d("Detected MIXED_MODULE_ZIP")
                 DataType.MIXED_MODULE_ZIP
             }
+
             // Pure module
             else -> {
                 Timber.d("Detected MODULE_ZIP")
@@ -218,7 +213,9 @@ class FileTypeDetector(
                 if (hasBaseInfo && (hasSplitApks || hasExpansions)) {
                     return DataType.XAPK
                 } else {
-                    Timber.d("manifest.json found, but missing payload definitions (split_apks or expansions). Skipping XAPK detection.")
+                    Timber.d(
+                        "manifest.json found, but missing payload definitions (split_apks or expansions). Skipping XAPK detection.",
+                    )
                 }
             } catch (e: AnalyseException) {
                 throw e
@@ -260,9 +257,9 @@ class FileTypeDetector(
             val apkEntries = entries.filter { it.isApkFile() }
             Timber.d(
                 "File type selected: APK (rule=root AndroidManifest.xml; " +
-                        "lower-priority APKS markers: toc.pb=${tocEntry != null}, " +
-                        "baseApk=${baseApkEntries.summarizeNamesForLog()}, " +
-                        "nestedApkCount=${apkEntries.size})."
+                    "lower-priority APKS markers: toc.pb=${tocEntry != null}, " +
+                    "baseApk=${baseApkEntries.summarizeNamesForLog()}, " +
+                    "nestedApkCount=${apkEntries.size}).",
             )
             return DataType.APK
         }
@@ -281,29 +278,29 @@ class FileTypeDetector(
         return DataType.NONE
     }
 
-    private fun handleNonZipFallback(fileEntity: DataEntity.FileEntity, e: Exception): DataType =
-        if (fileEntity.path.endsWith(".apk", ignoreCase = true)) {
-            // Fallback: assume APK if path ends with .apk and zip open failed
-            Timber.w(e, "File type selected: APK (rule=non-ZIP .apk path fallback): ${fileEntity.path}")
-            DataType.APK
-        } else {
-            Timber.e(e, "File is not a valid ZIP archive: ${fileEntity.path}")
-            DataType.NONE
-        }
+    private fun handleNonZipFallback(fileEntity: DataEntity.FileEntity, e: Exception): DataType = if (fileEntity.path.endsWith(".apk", ignoreCase = true)) {
+        // Fallback: assume APK if path ends with .apk and zip open failed
+        Timber.w(e, "File type selected: APK (rule=non-ZIP .apk path fallback): ${fileEntity.path}")
+        DataType.APK
+    } else {
+        Timber.e(e, "File is not a valid ZIP archive: ${fileEntity.path}")
+        DataType.NONE
+    }
 
     private fun shouldLogArchiveDiagnostics(
         sourceExtension: String,
         detectedType: DataType,
-        entries: List<UnifiedZipEntry>
-    ): Boolean = if (AppConfig.isDebug) true else sourceExtension.equals("apks", ignoreCase = true) ||
+        entries: List<UnifiedZipEntry>,
+    ): Boolean = if (AppConfig.isDebug) {
+        true
+    } else {
+        sourceExtension.equals("apks", ignoreCase = true) ||
             detectedType == DataType.APK && entries.any {
-        it.isApkFile() || it.isBaseApkCandidate() || File(it.name).name.equals("toc.pb", ignoreCase = true)
+                it.isApkFile() || it.isBaseApkCandidate() || File(it.name).name.equals("toc.pb", ignoreCase = true)
+            }
     }
 
-    private fun logArchiveDiagnostics(
-        path: String,
-        zipFile: UnifiedZipFile
-    ) {
+    private fun logArchiveDiagnostics(path: String, zipFile: UnifiedZipFile) {
         val entries = zipFile.entries
         val files = entries.filterNot { it.isDirectory }
         val androidManifestCandidates = entries.filter {
@@ -317,22 +314,21 @@ class FileTypeDetector(
 
         Timber.d(
             "Archive diagnostics: backend=${zipFile.backend}, path=$path, " +
-                    "entries=${entries.size}, files=${files.size}, " +
-                    "directories=${entries.size - files.size}, nestedApkCount=${apkEntries.size}"
+                "entries=${entries.size}, files=${files.size}, " +
+                "directories=${entries.size - files.size}, nestedApkCount=${apkEntries.size}",
         )
         Timber.d(
             "Archive diagnostics markers: rootAndroidManifest=${zipFile.getEntry("AndroidManifest.xml") != null}, " +
-                    "rootTocPb=${zipFile.getEntry("toc.pb") != null}, " +
-                    "AndroidManifest.xml(any depth/case)=${androidManifestCandidates.summarizeNamesForLog()}, " +
-                    "toc.pb(any depth/case)=${tocCandidates.summarizeNamesForLog()}, " +
-                    "baseApk(any depth/case)=${baseApkCandidates.summarizeNamesForLog()}"
+                "rootTocPb=${zipFile.getEntry("toc.pb") != null}, " +
+                "AndroidManifest.xml(any depth/case)=${androidManifestCandidates.summarizeNamesForLog()}, " +
+                "toc.pb(any depth/case)=${tocCandidates.summarizeNamesForLog()}, " +
+                "baseApk(any depth/case)=${baseApkCandidates.summarizeNamesForLog()}",
         )
         Timber.d("Archive diagnostics nested APKs: ${apkEntries.summarizeNamesForLog()}")
         Timber.d("Archive diagnostics entry sample: ${entries.summarizeNamesForLog()}")
     }
 
-    private fun UnifiedZipEntry.isApkFile(): Boolean =
-        !isDirectory && name.endsWith(".apk", ignoreCase = true)
+    private fun UnifiedZipEntry.isApkFile(): Boolean = !isDirectory && name.endsWith(".apk", ignoreCase = true)
 
     private fun UnifiedZipEntry.isBaseApkMarker(): Boolean {
         val leafName = File(name).name
@@ -342,7 +338,7 @@ class FileTypeDetector(
     private fun UnifiedZipEntry.isBaseApkCandidate(): Boolean {
         val leafName = File(name).name
         return leafName.equals("base.apk", ignoreCase = true) ||
-                leafName.startsWith("base-master", ignoreCase = true)
+            leafName.startsWith("base-master", ignoreCase = true)
     }
 
     private fun List<UnifiedZipEntry>.summarizeNamesForLog(): String {

@@ -30,8 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
+import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
@@ -42,10 +42,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DialogSettingsPage(
-    useBlur: Boolean,
-    viewModel: DialogSettingsViewModel = koinViewModel()
-) {
+fun DialogSettingsPage(useBlur: Boolean, viewModel: DialogSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
@@ -80,20 +77,20 @@ fun DialogSettingsPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
         ) {
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.installer_settings_dialog_mode_options)
+                    title = stringResource(R.string.installer_settings_dialog_mode_options),
                 ) {
                     // 1. Comparison Display Behavior
                     item {
@@ -105,18 +102,18 @@ fun DialogSettingsPage(
                                     R.string.install_comparison_show_differences_only_desc
                                 } else {
                                     R.string.install_comparison_show_all_desc
-                                }
+                                },
                             ),
                             choice = if (uiState.hideIdenticalComparisons) 1 else 0,
                             data = listOf(
                                 stringResource(R.string.install_comparison_show_all),
-                                stringResource(R.string.install_comparison_show_differences_only)
+                                stringResource(R.string.install_comparison_show_differences_only),
                             ),
                             onChoiceChange = { choice ->
                                 viewModel.dispatch(
-                                    DialogSettingsAction.ChangeHideIdenticalComparisons(choice == 1)
+                                    DialogSettingsAction.ChangeHideIdenticalComparisons(choice == 1),
                                 )
-                            }
+                            },
                         )
                     }
 
@@ -130,10 +127,10 @@ fun DialogSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     DialogSettingsAction.ChangeVersionCompareInSingleLine(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
 
@@ -147,10 +144,10 @@ fun DialogSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     DialogSettingsAction.ChangeSdkCompareInMultiLine(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
 
@@ -164,10 +161,10 @@ fun DialogSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     DialogSettingsAction.ChangeShowDialogInstallExtendedMenu(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
 
@@ -180,7 +177,7 @@ fun DialogSettingsPage(
                             checked = uiState.showSmartSuggestion,
                             onCheckedChange = {
                                 viewModel.dispatch(DialogSettingsAction.ChangeShowSuggestion(it))
-                            }
+                            },
                         )
                     }
 
@@ -193,9 +190,9 @@ fun DialogSettingsPage(
                             checked = uiState.expandTemporarySettingsByDefault,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    DialogSettingsAction.ChangeExpandTemporarySettingsByDefault(it)
+                                    DialogSettingsAction.ChangeExpandTemporarySettingsByDefault(it),
                                 )
-                            }
+                            },
                         )
                     }
 
@@ -209,10 +206,10 @@ fun DialogSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     DialogSettingsAction.ChangeShowDisableNotification(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -220,7 +217,7 @@ fun DialogSettingsPage(
 
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.installer_settings_dialog_automation_options)
+                    title = stringResource(R.string.installer_settings_dialog_automation_options),
                 ) {
                     // 1. Auto Silent Install
                     item {
@@ -231,7 +228,7 @@ fun DialogSettingsPage(
                             checked = uiState.autoSilentInstall,
                             onCheckedChange = {
                                 viewModel.dispatch(DialogSettingsAction.ChangeAutoSilentInstall(it))
-                            }
+                            },
                         )
                     }
 
@@ -245,10 +242,10 @@ fun DialogSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     DialogSettingsAction.ChangeLongClickBackgroundInstall(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -256,7 +253,7 @@ fun DialogSettingsPage(
 
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.extras)
+                    title = stringResource(R.string.extras),
                 ) {
                     item {
                         SwitchWidget(
@@ -266,12 +263,11 @@ fun DialogSettingsPage(
                             checked = uiState.tapIconToShare,
                             onCheckedChange = {
                                 viewModel.dispatch(DialogSettingsAction.ChangeTapIconToShare(it))
-                            }
+                            },
                         )
                     }
                 }
             }
-
         }
     }
 }

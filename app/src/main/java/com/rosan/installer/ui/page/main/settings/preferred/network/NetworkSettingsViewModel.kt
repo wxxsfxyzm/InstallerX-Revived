@@ -15,10 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class NetworkSettingsViewModel(
-    appSettingsRepo: AppSettingsRepository,
-    private val updateSetting: UpdateSettingUseCase
-) : ViewModel() {
+class NetworkSettingsViewModel(appSettingsRepo: AppSettingsRepository, private val updateSetting: UpdateSettingUseCase) : ViewModel() {
 
     val state: StateFlow<NetworkSettingsState> = appSettingsRepo.preferencesFlow.map { prefs ->
         NetworkSettingsState(
@@ -27,12 +24,12 @@ class NetworkSettingsViewModel(
             networkSourceModeWarningAcknowledged = prefs.networkSourceModeWarningAcknowledged,
             httpProfile = prefs.labHttpProfile,
             githubUpdateChannel = prefs.githubUpdateChannel,
-            customGithubProxyUrl = prefs.customGithubProxyUrl
+            customGithubProxyUrl = prefs.customGithubProxyUrl,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = NetworkSettingsState()
+        initialValue = NetworkSettingsState(),
     )
 
     fun dispatch(action: NetworkSettingsAction) {
@@ -44,7 +41,7 @@ class NetworkSettingsViewModel(
             is NetworkSettingsAction.ChangeNetworkSourceMode -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.NetworkSourceMode,
-                    action.mode.value
+                    action.mode.value,
                 )
             }
 
@@ -56,21 +53,21 @@ class NetworkSettingsViewModel(
             is NetworkSettingsAction.ChangeHttpProfile -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.LabHttpProfile,
-                    action.profile.name
+                    action.profile.name,
                 )
             }
 
             is NetworkSettingsAction.ChangeGithubUpdateChannel -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.GithubUpdateChannel,
-                    action.channel.name
+                    action.channel.name,
                 )
             }
 
             is NetworkSettingsAction.ChangeCustomGithubProxyUrl -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.CustomGithubProxyUrl,
-                    action.url
+                    action.url,
                 )
             }
         }

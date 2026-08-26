@@ -25,7 +25,8 @@ private const val DHIZUKU_TAG = "DhizukuPrivilegedService"
 private val DhizukuInstallIntentFilter = IntentFilter().apply {
     addAction(Intent.ACTION_MAIN)
     addAction(Intent.ACTION_VIEW)
-    @Suppress("Deprecation") addAction(Intent.ACTION_INSTALL_PACKAGE)
+    @Suppress("Deprecation")
+    addAction(Intent.ACTION_INSTALL_PACKAGE)
     addCategory(Intent.CATEGORY_DEFAULT)
     addDataScheme(ContentResolver.SCHEME_CONTENT)
     addDataScheme(ContentResolver.SCHEME_FILE)
@@ -33,9 +34,9 @@ private val DhizukuInstallIntentFilter = IntentFilter().apply {
 }
 
 @SuppressLint("PrivateApi")
-class DhizukuPrivilegedService(
-    private val binderWrapper: (IBinder) -> IBinder
-) : BasePrivilegedService(), PrivilegedOperations {
+class DhizukuPrivilegedService(private val binderWrapper: (IBinder) -> IBinder) :
+    BasePrivilegedService(),
+    PrivilegedOperations {
     private val reflect by inject<ReflectionProvider>()
 
     private val devicePolicyManager: DevicePolicyManager by lazy {
@@ -51,7 +52,7 @@ class DhizukuPrivilegedService(
                 name = "asInterface",
                 clazz = stubClass,
                 parameterTypes = arrayOf(IBinder::class.java),
-                wrapped
+                wrapped,
             )
             reflect.setFieldValue(this, "mService", DevicePolicyManager::class.java, service)
             reflect.setFieldValue(this, "mContext", DevicePolicyManager::class.java, ownerContext)
@@ -67,13 +68,13 @@ class DhizukuPrivilegedService(
 
             devicePolicyManager.clearPackagePersistentPreferredActivities(
                 ownerComponent,
-                component.packageName
+                component.packageName,
             )
             if (!enable) return
             devicePolicyManager.addPersistentPreferredActivity(
                 ownerComponent,
                 DhizukuInstallIntentFilter,
-                component
+                component,
             )
         } catch (t: Throwable) {
             Timber.tag(DHIZUKU_TAG).e(t, "Failed to set default installer due to a throwable")
@@ -81,8 +82,7 @@ class DhizukuPrivilegedService(
         }
     }
 
-    override fun performDexOpt(packageName: String, compilerFilter: String, force: Boolean): Boolean =
-        unsupported()
+    override fun performDexOpt(packageName: String, compilerFilter: String, force: Boolean): Boolean = unsupported()
 
     override fun startActivityPrivileged(intent: Intent): Boolean = false
 
@@ -102,8 +102,7 @@ class DhizukuPrivilegedService(
         unsupported<Unit>()
     }
 
-    override fun isPermissionGranted(packageName: String, permission: String): Boolean =
-        unsupported()
+    override fun isPermissionGranted(packageName: String, permission: String): Boolean = unsupported()
 
     override fun getUsers(): Map<Int, String> = unsupported()
 
@@ -117,6 +116,5 @@ class DhizukuPrivilegedService(
 
     override fun prepareUnknownSourceAppOp(uid: Int, packageName: String): Int = unsupported()
 
-    private fun <T> unsupported(): T =
-        throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
+    private fun <T> unsupported(): T = throw UnsupportedOperationException("Not supported in DhizukuPrivilegedService")
 }

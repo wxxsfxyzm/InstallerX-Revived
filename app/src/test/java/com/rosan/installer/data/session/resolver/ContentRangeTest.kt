@@ -49,8 +49,8 @@ class ContentRangeTest {
                 "bytes 3-0/100",
                 "bytes 0-100/100",
                 "bytes 0-3/*",
-                "bytes */100"
-            ).all { ContentRange.parse(it) == null }
+                "bytes */100",
+            ).all { ContentRange.parse(it) == null },
         )
     }
 }

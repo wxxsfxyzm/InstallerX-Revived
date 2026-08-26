@@ -12,16 +12,16 @@ import androidx.room3.PrimaryKey
     tableName = "app",
     indices = [
         Index(value = ["package_name"], unique = true),
-        Index(value = ["config_id"])
+        Index(value = ["config_id"]),
     ],
     foreignKeys = [
         ForeignKey(
             entity = ConfigEntity::class,
             parentColumns = ["id"],
             childColumns = ["config_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
 )
 data class AppEntity(
     @PrimaryKey(autoGenerate = true)

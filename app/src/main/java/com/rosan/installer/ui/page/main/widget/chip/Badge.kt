@@ -42,7 +42,7 @@ fun CapsuleTag(
     text: String,
     containerColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
     contentColor: Color = MaterialTheme.colorScheme.primary,
-    style: TextStyle = MaterialTheme.typography.labelMediumEmphasized
+    style: TextStyle = MaterialTheme.typography.labelMediumEmphasized,
 ) {
     Box(
         modifier = modifier
@@ -50,32 +50,29 @@ fun CapsuleTag(
             .clip(CircleShape)
             .background(containerColor)
             .padding(horizontal = 8.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
             color = contentColor,
             style = style.copy(
                 platformStyle = PlatformTextStyle(
-                    includeFontPadding = false
-                )
-            )
+                    includeFontPadding = false,
+                ),
+            ),
         )
     }
 }
 
 // Data model to hold both short tag and full description
 data class NoticeModel(
-    val shortLabel: String,      // Displayed on the chip
+    val shortLabel: String, // Displayed on the chip
     val fullDescription: String, // Displayed in the dialog
-    val color: Color             // Color of the chip
+    val color: Color, // Color of the chip
 )
 
 @Composable
-fun InstallInfoChipGroup(
-    modifier: Modifier = Modifier,
-    notices: List<NoticeModel>
-) {
+fun InstallInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeModel>) {
     // State to track which notice is currently being viewed
     var selectedNotice by remember { mutableStateOf<NoticeModel?>(null) }
 
@@ -84,7 +81,7 @@ fun InstallInfoChipGroup(
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
         notices.forEach { item ->
             CapsuleTag(
@@ -94,7 +91,7 @@ fun InstallInfoChipGroup(
                 containerColor = item.color.copy(alpha = 0.2f),
                 modifier = Modifier
                     .clip(CircleShape) // Ensure ripple is circular
-                    .clickable { selectedNotice = item }
+                    .clickable { selectedNotice = item },
             )
         }
     }
@@ -112,22 +109,22 @@ fun InstallInfoChipGroup(
                 Text(
                     text = notice.shortLabel,
                     color = notice.color,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
             },
             text = {
                 SelectionContainer(
                     modifier = Modifier
                         .heightIn(max = 360.dp)
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(rememberScrollState()),
                 ) {
                     Text(
                         text = notice.fullDescription,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         )
     }
 }

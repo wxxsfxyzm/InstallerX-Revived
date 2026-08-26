@@ -22,10 +22,7 @@ import com.rosan.installer.ui.util.requestPortraitOrientationOnPhoneSafely
 import org.koin.compose.koinInject
 
 @Composable
-fun InstallerActivityContent(
-    session: InstallerSessionRepository,
-    themeStateProvider: ThemeStateProvider = koinInject()
-) {
+fun InstallerActivityContent(session: InstallerSessionRepository, themeStateProvider: ThemeStateProvider = koinInject()) {
     val uiState by themeStateProvider.themeStateFlow.collectAsState(initial = ThemeState())
     if (!uiState.isLoaded) return
 
@@ -42,7 +39,7 @@ fun InstallerActivityContent(
         colorSpec = uiState.colorSpec,
         useDynamicColor = uiState.useDynamicColor,
         useMiuixMonet = uiState.useMiuixMonet,
-        seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor)
+        seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.useMiuix) {

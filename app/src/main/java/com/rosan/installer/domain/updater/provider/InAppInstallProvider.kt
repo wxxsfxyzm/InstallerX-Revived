@@ -12,10 +12,5 @@ interface InAppInstallProvider {
     /**
      * Executes the installation of an update package from a stream.
      */
-    suspend fun executeInstall(
-        fileName: String,
-        inputStream: InputStream,
-        contentLength: Long,
-        config: ConfigModel
-    )
+    suspend fun executeInstall(fileName: String, inputStream: InputStream, contentLength: Long, config: ConfigModel)
 }

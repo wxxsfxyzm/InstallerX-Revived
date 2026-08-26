@@ -55,7 +55,7 @@ fun ConfigEntity.toDomainModel(scopeCount: Int = 0): ConfigModel {
         bypassBlacklistInstallSetByUser = this.bypassBlacklistInstallSetByUser,
         bypassProfileRestriction = this.bypassProfileRestriction,
         uninstallFlags = this.uninstallFlags,
-        callingFromUid = this.callingFromUid
+        callingFromUid = this.callingFromUid,
     )
 
     return model
@@ -106,7 +106,7 @@ fun ConfigModel.toEntity(): ConfigEntity {
         apkChooseAll = this.apkChooseAll,
         requireBiometricAuth = this.requireBiometricAuth,
         createdAt = this.createdAt,
-        modifiedAt = this.modifiedAt
+        modifiedAt = this.modifiedAt,
     )
 
     // Transfer runtime flags

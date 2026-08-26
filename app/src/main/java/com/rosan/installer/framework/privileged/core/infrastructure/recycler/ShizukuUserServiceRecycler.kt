@@ -20,6 +20,7 @@ import com.rosan.installer.framework.privileged.core.execution.authorization.req
 import com.rosan.installer.framework.privileged.core.execution.runtime.DefaultPrivilegedService
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.Recycler
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.UserService
+import kotlin.system.exitProcess
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
@@ -28,12 +29,11 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import rikka.shizuku.Shizuku
 import timber.log.Timber
-import kotlin.system.exitProcess
 
 class ShizukuUserServiceRecycler(
     private val context: Context,
     private val serviceClass: Class<out IShizukuUserService> = ShizukuUserService::class.java,
-    private val processNameSuffix: String = "shizuku_privileged"
+    private val processNameSuffix: String = "shizuku_privileged",
 ) : Recycler<ShizukuUserServiceRecycler.UserServiceProxy>() {
 
     class UserServiceProxy(val service: IShizukuUserService) : UserService {
@@ -41,9 +41,7 @@ class ShizukuUserServiceRecycler(
         override fun close() = service.destroy()
     }
 
-    abstract class BaseShizukuUserService(
-        context: Context
-    ) : IShizukuUserService.Stub() {
+    abstract class BaseShizukuUserService(context: Context) : IShizukuUserService.Stub() {
         init {
             if (AppConfig.isDebug && Timber.treeCount == 0) Timber.plant(Timber.DebugTree())
             startKoin {
@@ -62,7 +60,7 @@ class ShizukuUserServiceRecycler(
 
         private fun createSystemContext(
             fallbackContext: Context,
-            reflection: ReflectionProvider = ReflectionProviderImpl()
+            reflection: ReflectionProvider = ReflectionProviderImpl(),
         ): Context = try {
             val packageName = "com.android.shell"
 
@@ -82,8 +80,9 @@ class ShizukuUserServiceRecycler(
                 Process.myUid() / 100000
             }
 
-            val userHandleConstructor = reflection.getConstructor(userHandleClass, Int::class.javaPrimitiveType ?: Int::class.java)
-                ?: throw NoSuchMethodException("UserHandle(int) constructor not found")
+            val userHandleConstructor =
+                reflection.getConstructor(userHandleClass, Int::class.javaPrimitiveType ?: Int::class.java)
+                    ?: throw NoSuchMethodException("UserHandle(int) constructor not found")
             val userHandleInstance = userHandleConstructor.newInstance(userId)
 
             val contextAsUser = reflection.invoke<Context>(
@@ -93,20 +92,19 @@ class ShizukuUserServiceRecycler(
                 parameterTypes = arrayOf(
                     String::class.java,
                     Int::class.javaPrimitiveType ?: Int::class.java,
-                    userHandleClass
+                    userHandleClass,
                 ),
                 args = arrayOf(
                     packageName,
                     Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY,
-                    userHandleInstance
-                )
+                    userHandleInstance,
+                ),
             ) ?: throw IllegalStateException("createPackageContextAsUser returned null")
 
             val finalContext = contextAsUser.createPackageContext(packageName, 0)
 
             Timber.tag("ShizukuUserService").d("Created system context: ${finalContext.packageName}, UID: ${Process.myUid()}")
             finalContext
-
         } catch (e: Exception) {
             Timber.tag("ShizukuUserService").e(e, "Failed to create system context: ${e.message}")
             fallbackContext
@@ -117,9 +115,10 @@ class ShizukuUserServiceRecycler(
         }
     }
 
-    class ShizukuUserService @Keep constructor(context: Context) : BaseShizukuUserService(
-        context = context
-    )
+    class ShizukuUserService @Keep constructor(context: Context) :
+        BaseShizukuUserService(
+            context = context,
+        )
 
     override fun onMake(): UserServiceProxy = runBlocking {
         requireShizukuPermissionGranted {
@@ -131,9 +130,11 @@ class ShizukuUserServiceRecycler(
         Shizuku.bindUserService(
             Shizuku.UserServiceArgs(
                 ComponentName(
-                    context, serviceClass
-                )
-            ).processNameSuffix(processNameSuffix), object : ServiceConnection {
+                    context,
+                    serviceClass,
+                ),
+            ).processNameSuffix(processNameSuffix),
+            object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     trySend(UserServiceProxy(IShizukuUserService.Stub.asInterface(service)))
                     service?.linkToDeath({
@@ -144,7 +145,8 @@ class ShizukuUserServiceRecycler(
                 override fun onServiceDisconnected(name: ComponentName?) {
                     close()
                 }
-            })
+            },
+        )
         awaitClose { }
     }.first()
 }

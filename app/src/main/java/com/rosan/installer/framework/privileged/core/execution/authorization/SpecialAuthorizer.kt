@@ -11,8 +11,9 @@ import com.rosan.installer.framework.privileged.core.infrastructure.process.AppP
  */
 fun getSpecialAuth(
     authorizer: Authorizer,
-    specialAuth: AppProcessTerminal = AppProcessTerminal.RootSystem
-): (() -> AppProcessTerminal?)? =
-    if (authorizer == Authorizer.Root) {
-        { specialAuth }
-    } else null
+    specialAuth: AppProcessTerminal = AppProcessTerminal.RootSystem,
+): (() -> AppProcessTerminal?)? = if (authorizer == Authorizer.Root) {
+    { specialAuth }
+} else {
+    null
+}

@@ -31,7 +31,7 @@ class SelfUpdateRecoveryManager(
     context: Context,
     private val recoveryRepository: SelfUpdateRecoveryRepository,
     private val postInstallTaskProvider: PostInstallTaskProvider,
-    private val recordOperationHistory: RecordOperationHistoryUseCase
+    private val recordOperationHistory: RecordOperationHistoryUseCase,
 ) {
     private val appContext = context.applicationContext
     private val sourceDeletionMutex = Mutex()
@@ -54,8 +54,8 @@ class SelfUpdateRecoveryManager(
             history = history?.copy(
                 packageName = appContext.packageName,
                 oldVersionName = packageInfo.versionName,
-                oldVersionCode = packageInfo.longVersionCode
-            )
+                oldVersionCode = packageInfo.longVersionCode,
+            ),
         )
         return try {
             // DataStore edit returns only after the transaction is durably persisted.
@@ -93,11 +93,7 @@ class SelfUpdateRecoveryManager(
         }
     }
 
-    suspend fun consumeSystemUiRecovery(
-        launchedFromUid: Int,
-        platformReferrerPackage: String?,
-        intentFlags: Int
-    ): Boolean {
+    suspend fun consumeSystemUiRecovery(launchedFromUid: Int, platformReferrerPackage: String?, intentFlags: Int): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) return false
         if (intentFlags and Intent.FLAG_ACTIVITY_CLEAR_TASK == 0) {
             Timber.d("Ignoring Android 17 self-update recovery without FLAG_ACTIVITY_CLEAR_TASK.")
@@ -117,13 +113,13 @@ class SelfUpdateRecoveryManager(
         if (!launchedFromSystemUi && !referredBySystemUi) {
             Timber.w(
                 "Ignoring Android 17 self-update recovery from uid=$launchedFromUid, " +
-                        "packages=$launchedFromPackages, platformReferrer=$platformReferrerPackage."
+                    "packages=$launchedFromPackages, platformReferrer=$platformReferrerPackage.",
             )
             return false
         }
         Timber.d(
             "Accepted Android 17 self-update recovery source: uid=$launchedFromUid, " +
-                    "packages=$launchedFromPackages, platformReferrer=$platformReferrerPackage."
+                "packages=$launchedFromPackages, platformReferrer=$platformReferrerPackage.",
         )
 
         val pendingUpdate = readPendingUpdate()
@@ -135,7 +131,7 @@ class SelfUpdateRecoveryManager(
             clearPendingUpdate()
             Timber.w(
                 "Discarded expired Android 17 self-update recovery for session " +
-                        "${pendingUpdate.sessionId}."
+                    "${pendingUpdate.sessionId}.",
             )
             return consumeRecentPackageUpdateExit()
         }
@@ -153,7 +149,7 @@ class SelfUpdateRecoveryManager(
         }
         if (packageInfo.lastUpdateTime == pendingUpdate.previousUpdateTime) {
             Timber.w(
-                "Ignoring Android 17 self-update recovery because package lastUpdateTime did not change."
+                "Ignoring Android 17 self-update recovery because package lastUpdateTime did not change.",
             )
             return false
         }
@@ -181,8 +177,8 @@ class SelfUpdateRecoveryManager(
                     info = PostInstallTaskInfo(
                         packageName = appContext.packageName,
                         enableAutoDelete = true,
-                        deletePaths = deletion.paths
-                    )
+                        deletePaths = deletion.paths,
+                    ),
                 )
             }
             Timber.i("Requested deletion of persisted self-update source paths: ${deletion.paths}")
@@ -230,8 +226,8 @@ class SelfUpdateRecoveryManager(
                 history.toSuccessfulOperationHistory(
                     actualNewVersionName = packageInfo?.versionName ?: history.newVersionName,
                     actualNewVersionCode = packageInfo?.longVersionCode ?: history.newVersionCode,
-                    installerPackageName = installerPackageName
-                )
+                    installerPackageName = installerPackageName,
+                ),
             )
             recoveryRepository.clearCompletedHistory()
             Timber.i("Recorded recovered Android 17 self-update history.")
@@ -274,8 +270,8 @@ class SelfUpdateRecoveryManager(
 
         val packageUpdateExit = exitReasons.any { exitInfo ->
             exitInfo.reason == ApplicationExitInfo.REASON_PACKAGE_UPDATED &&
-                    packageUpdateTime >= exitInfo.timestamp &&
-                    packageUpdateTime - exitInfo.timestamp <= RECOVERY_TIMEOUT_MILLIS
+                packageUpdateTime >= exitInfo.timestamp &&
+                packageUpdateTime - exitInfo.timestamp <= RECOVERY_TIMEOUT_MILLIS
         }
         if (packageUpdateExit) {
             markRecoveryCompleted()

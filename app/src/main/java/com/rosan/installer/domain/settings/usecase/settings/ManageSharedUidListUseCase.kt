@@ -7,9 +7,7 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import kotlinx.coroutines.flow.firstOrNull
 
-class ManageSharedUidListUseCase(
-    private val appSettingsRepo: AppSettingsRepository
-) {
+class ManageSharedUidListUseCase(private val appSettingsRepo: AppSettingsRepository) {
     /**
      * Adds a SharedUid item to the specified list setting.
      */

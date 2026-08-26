@@ -7,10 +7,7 @@ import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 
 @Composable
-fun readyDialog(
-    viewModel: InstallerViewModel
-): DialogParams {
-    return DialogParams(
+fun readyDialog(viewModel: InstallerViewModel): DialogParams = DialogParams(
         /*        icon = DialogInnerParams(
                     DialogParamsType.IconWorking.id, workingIcon
                 ), title = DialogInnerParams(
@@ -26,5 +23,4 @@ fun readyDialog(
                         }
                     )
                 }*/
-    )
-}
+)

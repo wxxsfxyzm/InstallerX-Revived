@@ -23,16 +23,16 @@ import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.IOException
 
 class NoneAppInstallerRepoImpl(
     private val context: Context,
     private val reflect: ReflectionProvider,
-    private val postInstallTaskProvider: PostInstallTaskProvider
+    private val postInstallTaskProvider: PostInstallTaskProvider,
 ) : AppInstallerRepository {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -48,7 +48,7 @@ class NoneAppInstallerRepoImpl(
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>,
         onProgress: suspend (InstallWriteProgress) -> Unit,
-        onPhaseChanged: suspend (InstallPhase) -> Unit
+        onPhaseChanged: suspend (InstallPhase) -> Unit,
     ) {
         onPhaseChanged(InstallPhase.WRITING)
         val allowInstallWithoutUserAction = config.allowInstallWithoutUserAction
@@ -61,7 +61,7 @@ class NoneAppInstallerRepoImpl(
             if (!context.packageManager.canRequestPackageInstalls()) {
                 throw InstallException(
                     InstallErrorType.MISSING_INSTALL_PERMISSION,
-                    "Please make sure you have granted \"Install unknown apps\" permission!"
+                    "Please make sure you have granted \"Install unknown apps\" permission!",
                 )
             }
 
@@ -92,7 +92,7 @@ class NoneAppInstallerRepoImpl(
                     session.openWrite(
                         entity.name,
                         0,
-                        entitySize.takeIf { it > 0L } ?: -1L
+                        entitySize.takeIf { it > 0L } ?: -1L,
                     ).use { outputStream ->
                         entity.data.getInstallInputStreamWhileNotEmpty()?.use { inputStream ->
                             if (progressWriter != null) {
@@ -100,7 +100,7 @@ class NoneAppInstallerRepoImpl(
                                 progressWriter.copy(
                                     input = inputStream,
                                     output = outputStream,
-                                    expectedBytes = entitySize
+                                    expectedBytes = entitySize,
                                 ) { entityBytes ->
                                     val sessionProgress =
                                         (completedBytes + entityBytes).toDouble() / knownTotalBytes.toDouble()
@@ -123,7 +123,6 @@ class NoneAppInstallerRepoImpl(
                 session.commit(receiver.getIntentSender())
 
                 PackageManagerUtil.installResultVerify(context, receiver)
-
             } catch (e: Exception) {
                 session?.abandon()
                 throw e
@@ -142,10 +141,7 @@ class NoneAppInstallerRepoImpl(
         }
     }
 
-    private fun updateStagingProgress(
-        session: PackageInstaller.Session,
-        progress: Float
-    ): Boolean = try {
+    private fun updateStagingProgress(session: PackageInstaller.Session, progress: Float): Boolean = try {
         session.setStagingProgress(progress.coerceIn(0f, 1f))
         true
     } catch (error: Exception) {
@@ -153,11 +149,7 @@ class NoneAppInstallerRepoImpl(
         false
     }
 
-    private fun doFinishWork(
-        config: ConfigModel,
-        entities: List<InstallEntity>,
-        result: Result<Unit>
-    ) {
+    private fun doFinishWork(config: ConfigModel, entities: List<InstallEntity>, result: Result<Unit>) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
         if (result.isSuccess) {
             val packageName = entities.firstOrNull()?.packageName ?: return
@@ -177,8 +169,8 @@ class NoneAppInstallerRepoImpl(
                             dexoptMode = config.dexoptMode.value,
                             forceDexopt = config.forceDexopt,
                             enableAutoDelete = shouldDelete,
-                            deletePaths = pathsToDelete
-                        )
+                            deletePaths = pathsToDelete,
+                        ),
                     )
                 }.onFailure { e ->
                     Timber.e(e, "Async post-install tasks failed")
@@ -187,10 +179,7 @@ class NoneAppInstallerRepoImpl(
         }
     }
 
-    override suspend fun doUninstallWork(
-        config: ConfigModel,
-        packageName: String
-    ) {
+    override suspend fun doUninstallWork(config: ConfigModel, packageName: String) {
         val result = runCatching {
             // Get the standard PackageInstaller
             val packageInstaller = context.packageManager.packageInstaller
@@ -202,7 +191,7 @@ class NoneAppInstallerRepoImpl(
                 packageInstaller.uninstall(
                     VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
                     config.uninstallFlags,
-                    receiver.getIntentSender()
+                    receiver.getIntentSender(),
                 )
             } else {
                 // This will trigger a system dialog asking the user to confirm uninstallation.
@@ -219,7 +208,5 @@ class NoneAppInstallerRepoImpl(
         }
     }
 
-    override suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean) {
-        throw UnsupportedOperationException("Session Approve is not supported in None authorizer")
-    }
+    override suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean): Unit = throw UnsupportedOperationException("Session Approve is not supported in None authorizer")
 }

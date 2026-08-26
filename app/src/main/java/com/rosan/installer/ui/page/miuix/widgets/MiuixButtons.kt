@@ -30,12 +30,12 @@ fun MiuixBackButton(
 ) {
     IconButton(
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = iconTint
+            tint = iconTint,
         )
     }
 }

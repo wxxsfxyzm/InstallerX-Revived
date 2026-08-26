@@ -7,9 +7,13 @@ import com.rosan.installer.domain.settings.model.config.InstallMode
 
 object InstallModeConverter {
     @ColumnTypeConverter
-    fun revert(value: String?): InstallMode =
-        (if (value != null) InstallMode.entries.find { it.value == value }
-        else null) ?: InstallMode.Dialog
+    fun revert(value: String?): InstallMode = (
+        if (value != null) {
+            InstallMode.entries.find { it.value == value }
+        } else {
+            null
+        }
+        ) ?: InstallMode.Dialog
 
     @ColumnTypeConverter
     fun convert(value: InstallMode): String = value.value

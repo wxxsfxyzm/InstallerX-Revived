@@ -7,9 +7,7 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import kotlinx.coroutines.flow.first
 
-class ManagePackageListUseCase(
-    private val appSettingsRepo: AppSettingsRepository
-) {
+class ManagePackageListUseCase(private val appSettingsRepo: AppSettingsRepository) {
     /**
      * Adds a NamedPackage item to the specified list setting.
      */

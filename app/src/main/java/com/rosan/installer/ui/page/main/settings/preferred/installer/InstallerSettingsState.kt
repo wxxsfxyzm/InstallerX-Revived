@@ -2,11 +2,11 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.installer
 
+import com.rosan.installer.domain.settings.model.app.NamedPackage
+import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
-import com.rosan.installer.domain.settings.model.app.NamedPackage
-import com.rosan.installer.domain.settings.model.app.SharedUid
 
 data class InstallerSettingsState(
     val authorizer: Authorizer = Authorizer.Shizuku,
@@ -23,5 +23,5 @@ data class InstallerSettingsState(
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
     val managedBlacklistPackages: List<NamedPackage> = emptyList(),
     val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
-    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList()
+    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
 )

@@ -9,5 +9,5 @@ data class InstalledAppTarget(
     val firstInstallTime: Long,
     val lastUpdateTime: Long,
     val isSystemApp: Boolean,
-    val label: String?
+    val label: String?,
 )

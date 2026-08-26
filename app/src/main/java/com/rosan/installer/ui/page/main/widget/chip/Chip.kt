@@ -21,7 +21,7 @@ fun Chip(
     useHaptic: Boolean = true,
     onClick: () -> Unit,
     label: String,
-    icon: ImageVector
+    icon: ImageVector,
 ) {
     val haptic = LocalHapticFeedback.current
     FilterChip(
@@ -36,12 +36,12 @@ fun Chip(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                modifier = Modifier.size(FilterChipDefaults.IconSize),
             )
         },
         colors = FilterChipDefaults.filterChipColors(
             iconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.primary
-        )
+            selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+        ),
     )
 }

@@ -10,6 +10,5 @@ object InstallerModeConverter {
     fun fromInstallerMode(mode: InstallerMode): Int = mode.value
 
     @ColumnTypeConverter
-    fun toInstallerMode(value: Int): InstallerMode =
-        InstallerMode.entries.find { it.value == value } ?: InstallerMode.Self
+    fun toInstallerMode(value: Int): InstallerMode = InstallerMode.entries.find { it.value == value } ?: InstallerMode.Self
 }

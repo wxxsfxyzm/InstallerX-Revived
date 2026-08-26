@@ -13,5 +13,5 @@ enum class PackageIdentityStatus {
     NOT_APPLICABLE,
 
     // Error occurred during calculation.
-    ERROR
+    ERROR,
 }

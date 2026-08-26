@@ -57,11 +57,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.device.model.Manufacturer
-import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
+import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
@@ -97,10 +97,7 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
-fun MiuixInstallerGlobalSettingsPage(
-    useBlur: Boolean,
-    viewModel: InstallerSettingsViewModel = koinViewModel(),
-) {
+fun MiuixInstallerGlobalSettingsPage(useBlur: Boolean, viewModel: InstallerSettingsViewModel = koinViewModel()) {
     val context = LocalContext.current
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -120,9 +117,9 @@ fun MiuixInstallerGlobalSettingsPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -134,9 +131,9 @@ fun MiuixInstallerGlobalSettingsPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
             item { SmallTitle(stringResource(R.string.installer_settings_global_installer)) }
@@ -144,33 +141,34 @@ fun MiuixInstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.dialog_settings),
                         description = stringResource(R.string.dialog_settings_desc),
-                        onClick = { navigator.push(Route.DialogSettings) }
+                        onClick = { navigator.push(Route.DialogSettings) },
                     )
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.notification_settings),
                         description = stringResource(R.string.notification_settings_desc),
-                        onClick = { navigator.push(Route.NotificationSettings) }
+                        onClick = { navigator.push(Route.NotificationSettings) },
                     )
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.authorizer_customization),
                         description = stringResource(R.string.authorizer_customization_desc),
-                        onClick = { navigator.push(Route.AuthorizerCust) }
+                        onClick = { navigator.push(Route.AuthorizerCust) },
                     )
 
                     if (BiometricManager
                             .from(context)
-                            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
+                            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
+                        BiometricManager.BIOMETRIC_SUCCESS
                     ) {
                         val biometricModes = remember {
                             listOf(
                                 BiometricAuthMode.Disable,
                                 BiometricAuthMode.Enable,
-                                BiometricAuthMode.FollowConfig
+                                BiometricAuthMode.FollowConfig,
                             )
                         }
 
@@ -178,8 +176,12 @@ fun MiuixInstallerGlobalSettingsPage(
                             biometricModes.map { mode ->
                                 val text = when (mode) {
                                     BiometricAuthMode.Disable -> context.getString(R.string.installer_biometric_auth_mode_disable)
+
                                     BiometricAuthMode.Enable -> context.getString(R.string.installer_biometric_auth_mode_enable)
-                                    BiometricAuthMode.FollowConfig -> context.getString(R.string.installer_biometric_auth_mode_follow_config)
+
+                                    BiometricAuthMode.FollowConfig -> context.getString(
+                                        R.string.installer_biometric_auth_mode_follow_config,
+                                    )
                                 }
                                 DropdownItem(title = text)
                             }
@@ -191,8 +193,12 @@ fun MiuixInstallerGlobalSettingsPage(
 
                         val dynamicSummary = when (biometricModes[selectedIndex]) {
                             BiometricAuthMode.Disable -> stringResource(R.string.installer_biometric_auth_mode_disable_desc)
+
                             BiometricAuthMode.Enable -> stringResource(R.string.installer_biometric_auth_mode_enable_desc)
-                            BiometricAuthMode.FollowConfig -> stringResource(R.string.installer_biometric_auth_mode_follow_config_desc)
+
+                            BiometricAuthMode.FollowConfig -> stringResource(
+                                R.string.installer_biometric_auth_mode_follow_config_desc,
+                            )
                         }
 
                         WindowSpinnerPreference(
@@ -202,9 +208,9 @@ fun MiuixInstallerGlobalSettingsPage(
                             selectedIndex = selectedIndex,
                             onSelectedIndexChange = { index ->
                                 viewModel.dispatch(
-                                    InstallerSettingsAction.ChangeBiometricAuth(biometricModes[index])
+                                    InstallerSettingsAction.ChangeBiometricAuth(biometricModes[index]),
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -215,19 +221,19 @@ fun MiuixInstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(R.string.config_check_app_signature),
                         description = stringResource(R.string.config_check_app_signature_desc),
                         checked = uiState.checkAppSignature,
-                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeCheckAppSignature(it)) }
+                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeCheckAppSignature(it)) },
                     )
 
                     AnimatedVisibility(
                         visible = uiState.checkAppSignature,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.config_check_split_package_signatures),
@@ -235,14 +241,14 @@ fun MiuixInstallerGlobalSettingsPage(
                             checked = uiState.checkSplitPackageSignatures,
                             onCheckedChange = {
                                 viewModel.dispatch(InstallerSettingsAction.ChangeCheckSplitPackageSignatures(it))
-                            }
+                            },
                         )
                     }
 
                     AnimatedVisibility(
                         visible = uiState.checkAppSignature,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.config_show_signature_info_on_match),
@@ -250,14 +256,14 @@ fun MiuixInstallerGlobalSettingsPage(
                             checked = uiState.showSignatureInfoOnMatch,
                             onCheckedChange = {
                                 viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureInfoOnMatch(it))
-                            }
+                            },
                         )
                     }
 
                     AnimatedVisibility(
                         visible = uiState.checkAppSignature,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.config_show_signature_details),
@@ -265,7 +271,7 @@ fun MiuixInstallerGlobalSettingsPage(
                             checked = uiState.showSignatureDetails,
                             onCheckedChange = {
                                 viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureDetails(it))
-                            }
+                            },
                         )
                     }
                 }
@@ -276,43 +282,45 @@ fun MiuixInstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(R.string.config_detect_xposed_module),
                         description = stringResource(R.string.config_detect_xposed_module_desc),
                         checked = uiState.detectXposedModule,
-                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeDetectXposedModule(it)) }
+                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeDetectXposedModule(it)) },
                     )
 
                     AnimatedVisibility(
                         visible = uiState.detectXposedModule,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.config_quick_open_lsposed),
                             description = stringResource(R.string.config_quick_open_lsposed_desc),
                             checked = uiState.quickOpenLSPosed,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeQuickOpenLSPosed(it)) }
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeQuickOpenLSPosed(it)) },
                         )
                     }
                 }
             }
 
-            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
+                DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+            ) {
                 item { SmallTitle(stringResource(R.string.installer_oppo_related)) }
                 item {
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 12.dp),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.installer_show_oem_special),
                             description = stringResource(id = R.string.installer_show_oem_special_desc),
                             checked = uiState.showOPPOSpecial,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) }
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) },
                         )
                     }
                 }
@@ -323,7 +331,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixManagedPackagesWidget(
                         noContentTitle = stringResource(R.string.config_no_preset_install_sources),
@@ -331,9 +339,9 @@ fun MiuixInstallerGlobalSettingsPage(
                         onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
                         onRemovePackage = {
                             viewModel.dispatch(
-                                InstallerSettingsAction.RemoveManagedInstallerPackage(it)
+                                InstallerSettingsAction.RemoveManagedInstallerPackage(it),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -343,7 +351,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixManagedPackagesWidget(
                         noContentTitle = stringResource(R.string.config_no_managed_blacklist),
@@ -351,9 +359,9 @@ fun MiuixInstallerGlobalSettingsPage(
                         onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
                         onRemovePackage = {
                             viewModel.dispatch(
-                                InstallerSettingsAction.RemoveManagedBlacklistPackage(it)
+                                InstallerSettingsAction.RemoveManagedBlacklistPackage(it),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -363,7 +371,7 @@ fun MiuixInstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 16.dp),
                 ) {
                     MiuixManagedUidsWidget(
                         noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
@@ -373,18 +381,18 @@ fun MiuixInstallerGlobalSettingsPage(
                         },
                         onRemoveUid = {
                             viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it))
-                        }
+                        },
                     )
                     AnimatedVisibility(
                         visible = uiState.managedSharedUserIdBlacklist.isNotEmpty(),
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         HorizontalDivider(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outline
+                            color = MaterialTheme.colorScheme.outline,
                         )
                         MiuixManagedPackagesWidget(
                             noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
@@ -394,14 +402,14 @@ fun MiuixInstallerGlobalSettingsPage(
                             isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
                             onAddPackage = {
                                 viewModel.dispatch(
-                                    InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(it)
+                                    InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(it),
                                 )
                             },
                             onRemovePackage = {
                                 viewModel.dispatch(
-                                    InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(it)
+                                    InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(it),
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -430,7 +438,7 @@ private fun MiuixManagedPackagesWidget(
         if (packages.isEmpty()) {
             BasicComponent(
                 title = noContentTitle,
-                summary = noContentDescription
+                summary = noContentDescription,
             )
         } else {
             packages.forEach { item ->
@@ -443,21 +451,21 @@ private fun MiuixManagedPackagesWidget(
                                 .clip(RoundedCornerShape(50))
                                 .background(
                                     MiuixTheme.colorScheme.primaryContainer.copy(
-                                        alpha = 0.2f
-                                    )
+                                        alpha = 0.2f,
+                                    ),
                                 )
                                 .clickable { showDeleteConfirmation = item }
                                 .padding(horizontal = 20.dp, vertical = 10.dp),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = stringResource(R.string.delete),
                                 color = MiuixTheme.colorScheme.primary,
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                         }
-                    }
+                    },
                 )
             }
         }
@@ -467,24 +475,24 @@ private fun MiuixManagedPackagesWidget(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.End,
         ) {
             AnimatedVisibility(
                 visible = isInfoVisible && !infoText.isNullOrBlank(),
                 enter = fadeIn(),
-                exit = fadeOut()
+                exit = fadeOut(),
             ) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .background(infoColor.copy(alpha = 0.1f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
                     Text(
                         text = infoText!!,
                         color = infoColor,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
             }
@@ -494,17 +502,17 @@ private fun MiuixManagedPackagesWidget(
             Button(
                 modifier = Modifier.padding(bottom = 8.dp),
                 onClick = { showAddDialog = true },
-                colors = ButtonDefaults.buttonColors(color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.25f))
+                colors = ButtonDefaults.buttonColors(color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)),
             ) {
                 Icon(
                     imageVector = AppIcons.Add,
                     contentDescription = null,
-                    tint = MiuixTheme.colorScheme.primary
+                    tint = MiuixTheme.colorScheme.primary,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.add),
-                    color = MiuixTheme.colorScheme.primary
+                    color = MiuixTheme.colorScheme.primary,
                 )
             }
         }
@@ -516,7 +524,7 @@ private fun MiuixManagedPackagesWidget(
             onConfirm = { newItem ->
                 onAddPackage(newItem)
                 showAddDialog = false
-            }
+            },
         )
     }
 
@@ -527,7 +535,7 @@ private fun MiuixManagedPackagesWidget(
             onConfirm = {
                 onRemovePackage(itemToDelete)
                 showDeleteConfirmation = null
-            }
+            },
         )
     }
 }
@@ -539,10 +547,7 @@ private fun MiuixManagedPackagesWidget(
  * @param onConfirm Callback invoked with the new NamedPackage when confirmed.
  */
 @Composable
-private fun MiuixAddPackageDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (NamedPackage) -> Unit
-) {
+private fun MiuixAddPackageDialog(onDismiss: () -> Unit, onConfirm: (NamedPackage) -> Unit) {
     var name by remember { mutableStateOf("") }
     var packageName by remember { mutableStateOf("") }
     val isConfirmEnabled = name.isNotBlank() && packageName.isNotBlank()
@@ -560,7 +565,7 @@ private fun MiuixAddPackageDialog(
                     onValueChange = { name = it },
                     label = stringResource(R.string.config_name),
                     useLabelAsPlaceholder = true,
-                    singleLine = true
+                    singleLine = true,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 TextField(
@@ -568,17 +573,17 @@ private fun MiuixAddPackageDialog(
                     onValueChange = { packageName = it },
                     label = stringResource(R.string.config_package_name),
                     useLabelAsPlaceholder = true,
-                    singleLine = true
+                    singleLine = true,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
                     TextButton(
                         modifier = Modifier.weight(1f),
                         text = stringResource(R.string.cancel),
-                        onClick = onDismiss
+                        onClick = onDismiss,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
@@ -586,11 +591,11 @@ private fun MiuixAddPackageDialog(
                         text = stringResource(R.string.confirm),
                         onClick = { onConfirm(NamedPackage(name, packageName)) },
                         enabled = isConfirmEnabled,
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -602,11 +607,7 @@ private fun MiuixAddPackageDialog(
  * @param onConfirm Callback invoked when the deletion is confirmed.
  */
 @Composable
-private fun MiuixDeleteNamedPackageConfirmationDialog(
-    item: NamedPackage,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
+private fun MiuixDeleteNamedPackageConfirmationDialog(item: NamedPackage, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     val showState = remember { mutableStateOf(true) }
 
     WindowDialog(
@@ -619,25 +620,25 @@ private fun MiuixDeleteNamedPackageConfirmationDialog(
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TextButton(
                         modifier = Modifier.weight(1f),
                         text = stringResource(R.string.cancel),
-                        onClick = onDismiss
+                        onClick = onDismiss,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         modifier = Modifier.weight(1f),
                         text = stringResource(R.string.delete),
                         colors = ButtonDefaults.textButtonColors(
-                            textColor = MaterialTheme.colorScheme.error
+                            textColor = MaterialTheme.colorScheme.error,
                         ),
-                        onClick = onConfirm
+                        onClick = onConfirm,
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -668,7 +669,7 @@ private fun MiuixManagedUidsWidget(
         if (uids.isEmpty()) {
             BasicComponent(
                 title = noContentTitle,
-                summary = stringResource(R.string.config_add_one_to_get_started)
+                summary = stringResource(R.string.config_add_one_to_get_started),
             )
         } else {
             uids.forEach { item ->
@@ -681,19 +682,19 @@ private fun MiuixManagedUidsWidget(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50)) // Pill shape
                                 .background(
-                                    MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
+                                    MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
                                 )
                                 .clickable { showDeleteConfirmation = item }
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = stringResource(R.string.delete),
                                 color = MiuixTheme.colorScheme.primary,
-                                style = MiuixTheme.textStyles.button
+                                style = MiuixTheme.textStyles.button,
                             )
                         }
-                    }
+                    },
                 )
             }
         }
@@ -702,22 +703,22 @@ private fun MiuixManagedUidsWidget(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.End,
         ) {
             Button(
                 modifier = Modifier.padding(bottom = 8.dp),
                 onClick = { showAddDialog = true },
-                colors = ButtonDefaults.buttonColors(color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.25f))
+                colors = ButtonDefaults.buttonColors(color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)),
             ) {
                 Icon(
                     imageVector = AppIcons.Add,
                     contentDescription = null,
-                    tint = MiuixTheme.colorScheme.primary
+                    tint = MiuixTheme.colorScheme.primary,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.add),
-                    color = MiuixTheme.colorScheme.primary
+                    color = MiuixTheme.colorScheme.primary,
                 )
             }
         }
@@ -732,7 +733,7 @@ private fun MiuixManagedUidsWidget(
             onConfirm = { newUID ->
                 onAddUid(newUID)
                 showAddDialog = false
-            }
+            },
         )
     }
 
@@ -744,7 +745,7 @@ private fun MiuixManagedUidsWidget(
             onConfirm = {
                 onRemoveUid(uidToDelete)
                 showDeleteConfirmation = null
-            }
+            },
         )
     }
 }
@@ -756,10 +757,7 @@ private fun MiuixManagedUidsWidget(
  * @param onConfirm Callback invoked with the new SharedUid when confirmed.
  */
 @Composable
-private fun MiuixAddUidDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (SharedUid) -> Unit
-) {
+private fun MiuixAddUidDialog(onDismiss: () -> Unit, onConfirm: (SharedUid) -> Unit) {
     var uidName by remember { mutableStateOf("") }
     var uidValueString by remember { mutableStateOf("") }
     val showState = remember { mutableStateOf(true) }
@@ -779,7 +777,7 @@ private fun MiuixAddUidDialog(
                     onValueChange = { uidName = it },
                     label = stringResource(R.string.config_shared_uid_name),
                     useLabelAsPlaceholder = true,
-                    singleLine = true
+                    singleLine = true,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 TextField(
@@ -788,17 +786,17 @@ private fun MiuixAddUidDialog(
                     label = stringResource(R.string.config_shared_uid_value),
                     useLabelAsPlaceholder = true,
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
                     TextButton(
                         modifier = Modifier.weight(1f),
                         text = stringResource(R.string.cancel),
-                        onClick = onDismiss
+                        onClick = onDismiss,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
@@ -809,11 +807,11 @@ private fun MiuixAddUidDialog(
                             onConfirm(SharedUid(uidName, uidValue))
                         },
                         enabled = isConfirmEnabled,
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -825,11 +823,7 @@ private fun MiuixAddUidDialog(
  * @param onConfirm Callback invoked when the deletion is confirmed.
  */
 @Composable
-private fun MiuixDeleteSharedUidConfirmationDialog(
-    item: SharedUid,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
+private fun MiuixDeleteSharedUidConfirmationDialog(item: SharedUid, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     val showState = remember { mutableStateOf(true) }
 
     WindowDialog(
@@ -841,21 +835,21 @@ private fun MiuixDeleteSharedUidConfirmationDialog(
             Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             ) {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = stringResource(R.string.cancel),
-                    onClick = onDismiss
+                    onClick = onDismiss,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 TextButton(
                     modifier = Modifier.weight(1f),
                     text = stringResource(R.string.delete),
                     colors = ButtonDefaults.textButtonColors(
-                        textColor = MaterialTheme.colorScheme.error
+                        textColor = MaterialTheme.colorScheme.error,
                     ),
-                    onClick = onConfirm
+                    onClick = onConfirm,
                 )
             }
         }

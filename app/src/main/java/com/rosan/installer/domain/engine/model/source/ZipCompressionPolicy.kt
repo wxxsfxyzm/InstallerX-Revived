@@ -15,6 +15,6 @@ fun requireSupportedZipCompressionMethod(compressionMethod: Int, entryName: Stri
     throw AnalyseException(
         errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
         message = "Unsupported ZIP compression method $compressionMethod for entry '$entryName'; " +
-                "only STORE (0) and DEFLATE (8) are supported"
+            "only STORE (0) and DEFLATE (8) are supported",
     )
 }

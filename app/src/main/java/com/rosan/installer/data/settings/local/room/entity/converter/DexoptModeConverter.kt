@@ -8,8 +8,7 @@ import com.rosan.installer.domain.settings.model.config.DexoptMode
 object DexoptModeConverter {
     @ColumnTypeConverter
     @JvmStatic
-    fun revert(value: String): DexoptMode =
-        DexoptMode.entries.firstOrNull { it.value == value } ?: DexoptMode.SpeedProfile
+    fun revert(value: String): DexoptMode = DexoptMode.entries.firstOrNull { it.value == value } ?: DexoptMode.SpeedProfile
 
     @ColumnTypeConverter
     @JvmStatic

@@ -22,7 +22,7 @@ fun DropdownItem(
     optionSize: Int,
     index: Int,
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
-    onSelectedIndexChange: (Int) -> Unit
+    onSelectedIndexChange: (Int) -> Unit,
 ) {
     val currentOnSelectedIndexChange = rememberUpdatedState(onSelectedIndexChange)
     val additionalTopPadding = if (index == 0) 20f.dp else 12f.dp
@@ -35,9 +35,9 @@ fun DropdownItem(
             .padding(horizontal = 20.dp)
             .padding(
                 top = additionalTopPadding,
-                bottom = additionalBottomPadding
+                bottom = additionalBottomPadding,
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,

@@ -13,6 +13,6 @@ interface AnalysisStrategy {
         config: ConfigModel,
         data: DataEntity,
         zipFile: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity>
 }

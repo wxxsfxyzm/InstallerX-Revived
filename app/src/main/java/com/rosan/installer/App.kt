@@ -17,8 +17,9 @@ class App : Application() {
         CrashHandler.init()
         super.onCreate()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             HiddenApiBypass.addHiddenApiExemptions("")
+        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             MonetCompat.setup(this)
@@ -26,12 +27,13 @@ class App : Application() {
             MonetCompat.getInstance().updateMonetColors()
         }
 
-        if (AppConfig.isLogEnabled) Timber.plant(object : Timber.DebugTree() {
-            override fun createStackElementTag(element: StackTraceElement) =
-                super.createStackElementTag(element)
+        if (AppConfig.isLogEnabled) {
+            Timber.plant(object : Timber.DebugTree() {
+                override fun createStackElementTag(element: StackTraceElement) = super.createStackElementTag(element)
                     ?.substringBefore('$')
                     ?.take(23)
-        })
+            })
+        }
 
         startKoin {
             // Koin Android Logger

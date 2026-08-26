@@ -22,7 +22,7 @@ fun LoadingContent(statusText: String) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.5f),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             InfiniteProgressIndicator()
@@ -30,7 +30,7 @@ fun LoadingContent(statusText: String) {
             Text(
                 text = statusText,
                 color = MiuixTheme.colorScheme.onSurface,
-                style = MiuixTheme.textStyles.body1
+                style = MiuixTheme.textStyles.body1,
             )
         }
     }

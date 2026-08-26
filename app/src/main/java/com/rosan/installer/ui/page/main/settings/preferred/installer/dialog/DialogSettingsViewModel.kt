@@ -13,10 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class DialogSettingsViewModel(
-    appSettingsRepo: AppSettingsRepository,
-    private val updateSetting: UpdateSettingUseCase
-) : ViewModel() {
+class DialogSettingsViewModel(appSettingsRepo: AppSettingsRepository, private val updateSetting: UpdateSettingUseCase) : ViewModel() {
 
     val state: StateFlow<DialogSettingsState> = appSettingsRepo.preferencesFlow.map { prefs ->
         DialogSettingsState(
@@ -31,12 +28,12 @@ class DialogSettingsViewModel(
             disableNotificationForDialogInstall = prefs.disableNotificationForDialogInstall,
             tapIconToShare = prefs.labTapIconToShare,
             showFilePath = prefs.labShowFilePath,
-            showInstallInitiator = prefs.labShowInstallInitiator
+            showInstallInitiator = prefs.labShowInstallInitiator,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = DialogSettingsState()
+        initialValue = DialogSettingsState(),
     )
 
     fun dispatch(action: DialogSettingsAction) {

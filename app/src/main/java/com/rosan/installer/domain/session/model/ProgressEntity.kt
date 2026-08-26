@@ -35,7 +35,7 @@ sealed interface ProgressEntity {
         val total: Int = 1,
         val appLabel: String? = null,
         val writeProgress: Float? = null,
-        val phase: InstallPhase = InstallPhase.WRITING
+        val phase: InstallPhase = InstallPhase.WRITING,
     ) : ProgressEntity {
         init {
             require(writeProgress == null || writeProgress in 0f..1f) {

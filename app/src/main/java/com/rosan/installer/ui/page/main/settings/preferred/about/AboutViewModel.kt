@@ -33,13 +33,13 @@ class AboutViewModel(
     private val systemEnvProvider: SystemEnvProvider,
     private val updateSetting: UpdateSettingUseCase,
     private val performAppUpdate: PerformAppUpdateUseCase,
-    private val getAppIcon: GetAppIconUseCase
+    private val getAppIcon: GetAppIconUseCase,
 ) : ViewModel() {
 
     private val _uiEvents = MutableSharedFlow<AboutEvent>(
         replay = 0,
         extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     val uiEvents = _uiEvents.asSharedFlow()
 
@@ -48,19 +48,19 @@ class AboutViewModel(
     val state: StateFlow<AboutState> = combine(
         appSettingsRepo.preferencesFlow,
         updateRepo.updateInfoFlow,
-        _appIcon
+        _appIcon,
     ) { prefs, updateInfo, appIcon ->
         AboutState(
             authorizer = prefs.authorizer,
             hasUpdate = prefs.allowInternetAccess && (updateInfo?.hasUpdate ?: false),
             remoteVersion = if (prefs.allowInternetAccess) updateInfo?.remoteVersion.orEmpty() else "",
             enableFileLogging = prefs.enableFileLogging,
-            appIcon = appIcon
+            appIcon = appIcon,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = AboutState()
+        initialValue = AboutState(),
     )
 
     init {
@@ -85,7 +85,7 @@ class AboutViewModel(
             sessionId = SETTINGS_APP_LIST,
             packageName = systemEnvProvider.packageName,
             iconSizePx = 512,
-            preferSystemIcon = true
+            preferSystemIcon = true,
         )
         _appIcon.value = bitmap?.asImageBitmap()
     }

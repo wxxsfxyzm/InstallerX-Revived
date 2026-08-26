@@ -8,10 +8,10 @@ enum class InstallSourceConfidence {
     TRUSTED_PROXY_ORIGINATING_UID,
     PROVIDER_OWNER,
     REFERRER_HEURISTIC,
-    UNKNOWN;
+    UNKNOWN,
+    ;
 
-    fun isTrustedForPlatformPolicy(): Boolean =
-        this == EXACT_CALLER ||
-                this == LAUNCHED_FROM_UID ||
-                this == TRUSTED_PROXY_ORIGINATING_UID
+    fun isTrustedForPlatformPolicy(): Boolean = this == EXACT_CALLER ||
+        this == LAUNCHED_FROM_UID ||
+        this == TRUSTED_PROXY_ORIGINATING_UID
 }

@@ -31,12 +31,7 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BlockingLoadingIndicator(
-    visible: Boolean,
-    text: String,
-    backdrop: LayerBackdrop?,
-    modifier: Modifier = Modifier
-) {
+fun BlockingLoadingIndicator(visible: Boolean, text: String, backdrop: LayerBackdrop?, modifier: Modifier = Modifier) {
     BackHandler(enabled = visible) {
         // Block input while the operation is running.
     }
@@ -44,40 +39,40 @@ fun BlockingLoadingIndicator(
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(animationSpec = tween(durationMillis = 300)),
-        exit = fadeOut(animationSpec = tween(durationMillis = 300))
+        exit = fadeOut(animationSpec = tween(durationMillis = 300)),
     ) {
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .installerMaterial3BlurEffect(
                     backdrop = backdrop,
-                    blurRadius = 25f
+                    blurRadius = 25f,
                 )
                 .background(Color.Black.copy(alpha = 0.3f))
                 .clickable(
                     indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
+                    interactionSource = remember { MutableInteractionSource() },
                 ) { },
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Surface(
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 tonalElevation = 8.dp,
-                shadowElevation = 8.dp
+                shadowElevation = 8.dp,
             ) {
                 Row(
                     modifier = Modifier.padding(24.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     ContainedLoadingIndicator(
                         indicatorColor = MaterialTheme.colorScheme.primary,
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     )
                     Text(
                         text = text,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
             }

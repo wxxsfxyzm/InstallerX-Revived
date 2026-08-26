@@ -9,10 +9,10 @@ import android.content.IntentSender
 import android.os.Bundle
 import android.os.IBinder
 import com.rosan.installer.core.reflection.ReflectionProvider
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withTimeout
 import timber.log.Timber
-import kotlin.time.Duration.Companion.milliseconds
 
 class LocalIntentReceiver(private val reflect: ReflectionProvider) {
     private companion object {
@@ -29,7 +29,7 @@ class LocalIntentReceiver(private val reflect: ReflectionProvider) {
             whitelistToken: IBinder?,
             finishedReceiver: IIntentReceiver?,
             requiredPermission: String?,
-            options: Bundle?
+            options: Bundle?,
         ) {
             if (intent == null) {
                 Timber.w("LocalIntentReceiver received a null intent")
@@ -43,10 +43,10 @@ class LocalIntentReceiver(private val reflect: ReflectionProvider) {
         }
     }
 
-    fun getIntentSender() =
-        reflect.getDeclaredConstructor(
-            IntentSender::class.java, IIntentSender::class.java
-        )!!.newInstance(localSender) as IntentSender
+    fun getIntentSender() = reflect.getDeclaredConstructor(
+        IntentSender::class.java,
+        IIntentSender::class.java,
+    )!!.newInstance(localSender) as IntentSender
 
     suspend fun getResult(): Intent = withTimeout(RESULT_TIMEOUT_MS.milliseconds) {
         channel.receive()

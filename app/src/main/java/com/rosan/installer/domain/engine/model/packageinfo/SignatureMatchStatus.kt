@@ -21,5 +21,5 @@ enum class SignatureMatchStatus {
     MISMATCH,
 
     /** Could not determine the signature for either the APK or the installed app. */
-    UNKNOWN_ERROR
+    UNKNOWN_ERROR,
 }

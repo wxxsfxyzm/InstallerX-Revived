@@ -45,7 +45,7 @@ data class AppInfoState(
     val label: String,
     val packageName: String,
     // Helper to access the underlying entity if specific logic needs it (e.g. version comparison)
-    val primaryEntity: AppEntity? = null
+    val primaryEntity: AppEntity? = null,
 )
 
 /**
@@ -56,7 +56,7 @@ data class AppInfoState(
 fun rememberAppInfoState(
     analysisResults: List<PackageAnalysisResult>,
     currentPackageName: String?,
-    displayIcons: Map<String, ImageBitmap?>
+    displayIcons: Map<String, ImageBitmap?>,
 ): AppInfoState = remember(analysisResults, currentPackageName, displayIcons) {
     val currentPackage = if (currentPackageName != null) {
         analysisResults.find { it.packageName == currentPackageName }
@@ -77,8 +77,8 @@ fun rememberAppInfoState(
         // Prioritize BaseEntity -> ModuleEntity -> SplitEntity -> Best Guess
         primaryEntity = allApps.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
             ?: allApps.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
-                    ?: allApps.filterIsInstance<AppEntity.SplitEntity>().firstOrNull()
-                    ?: allApps.sortedBest().firstOrNull()
+            ?: allApps.filterIsInstance<AppEntity.SplitEntity>().firstOrNull()
+            ?: allApps.sortedBest().firstOrNull()
 
         primaryEntity?.let { entity ->
             packageName = entity.packageName
@@ -99,7 +99,7 @@ fun rememberAppInfoState(
         icon = icon,
         label = label,
         packageName = packageName,
-        primaryEntity = primaryEntity
+        primaryEntity = primaryEntity,
     )
 }
 
@@ -108,7 +108,7 @@ fun AppInfoSlot(
     modifier: Modifier = Modifier,
     appInfo: AppInfoState,
     // Callback for icon click events. Null means not clickable.
-    onIconClick: (() -> Unit)? = null
+    onIconClick: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
@@ -117,22 +117,22 @@ fun AppInfoSlot(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(
             modifier = Modifier
                 .size(72.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .then(
-                    if (onIconClick != null) Modifier.clickable { onIconClick() } else Modifier
+                    if (onIconClick != null) Modifier.clickable { onIconClick() } else Modifier,
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             if (appInfo.icon != null) {
                 Image(
                     bitmap = appInfo.icon,
                     contentDescription = "App Icon",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
         }
@@ -148,12 +148,12 @@ fun AppInfoSlot(
                                 clipboard.setClipEntry(clipData.toClipEntry())
                                 context.toast(R.string.copied_format, appInfo.label)
                             }
-                        }
+                        },
                     )
                 },
             text = appInfo.label,
             style = MiuixTheme.textStyles.title2,
-            color = MiuixTheme.colorScheme.onSurface
+            color = MiuixTheme.colorScheme.onSurface,
         )
         Text(
             modifier = Modifier
@@ -167,12 +167,12 @@ fun AppInfoSlot(
                                 clipboard.setClipEntry(clipData.toClipEntry())
                                 context.toast(R.string.copied_format, appInfo.packageName)
                             }
-                        }
+                        },
                     )
                 },
             text = appInfo.packageName,
             style = MiuixTheme.textStyles.subtitle,
-            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         )
     }
 }

@@ -2,10 +2,11 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.miuix.settings.preferred.network
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,8 +25,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -59,17 +59,14 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
-fun MiuixNetworkPage(
-    useBlur: Boolean,
-    viewModel: NetworkSettingsViewModel = koinViewModel()
-) {
+fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
@@ -95,7 +92,7 @@ fun MiuixNetworkPage(
         onConfirm = { mode ->
             pendingNetworkSourceMode = null
             viewModel.dispatch(NetworkSettingsAction.ConfirmNetworkSourceMode(mode))
-        }
+        },
     )
 
     if (showChannelDialog.value) {
@@ -109,7 +106,7 @@ fun MiuixNetworkPage(
                 if (channel == GithubUpdateChannel.CUSTOM) {
                     showCustomProxyDialog.value = true
                 }
-            }
+            },
         )
     }
 
@@ -122,8 +119,8 @@ fun MiuixNetworkPage(
                 if (uiState.customGithubProxyUrl.isEmpty()) {
                     viewModel.dispatch(
                         NetworkSettingsAction.ChangeGithubUpdateChannel(
-                            GithubUpdateChannel.OFFICIAL
-                        )
+                            GithubUpdateChannel.OFFICIAL,
+                        ),
                     )
                 }
             },
@@ -133,11 +130,11 @@ fun MiuixNetworkPage(
                 if (url.isEmpty()) {
                     viewModel.dispatch(
                         NetworkSettingsAction.ChangeGithubUpdateChannel(
-                            GithubUpdateChannel.OFFICIAL
-                        )
+                            GithubUpdateChannel.OFFICIAL,
+                        ),
                     )
                 }
-            }
+            },
         )
     }
 
@@ -150,9 +147,9 @@ fun MiuixNetworkPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -164,16 +161,16 @@ fun MiuixNetworkPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
             item {
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     SwitchPreference(
                         checked = uiState.allowInternetAccess,
@@ -182,10 +179,10 @@ fun MiuixNetworkPage(
                                 exitAfterInternetDisable = true
                             }
                             viewModel.dispatch(
-                                NetworkSettingsAction.ChangeInternetAccess(enabled)
+                                NetworkSettingsAction.ChangeInternetAccess(enabled),
                             )
                         },
-                        title = stringResource(R.string.network_access)
+                        title = stringResource(R.string.network_access),
                     )
                 }
             }
@@ -196,7 +193,7 @@ fun MiuixNetworkPage(
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 12.dp),
                     ) {
                         MiuixNetworkSourceModePreference(
                             currentMode = uiState.networkSourceMode,
@@ -207,10 +204,10 @@ fun MiuixNetworkPage(
                                     pendingNetworkSourceMode = mode
                                 } else {
                                     viewModel.dispatch(
-                                        NetworkSettingsAction.ChangeNetworkSourceMode(mode)
+                                        NetworkSettingsAction.ChangeNetworkSourceMode(mode),
                                     )
                                 }
-                            }
+                            },
                         )
                         val allowSecureString = stringResource(R.string.lab_http_profile_secure)
                         val allowLocalString = stringResource(R.string.lab_http_profile_local)
@@ -218,12 +215,12 @@ fun MiuixNetworkPage(
                         val profileData = remember(
                             allowSecureString,
                             allowLocalString,
-                            allowAllString
+                            allowAllString,
                         ) {
                             linkedMapOf(
                                 HttpProfile.ALLOW_SECURE to allowSecureString,
                                 HttpProfile.ALLOW_LOCAL to allowLocalString,
-                                HttpProfile.ALLOW_ALL to allowAllString
+                                HttpProfile.ALLOW_ALL to allowAllString,
                             )
                         }
                         val profileEntries = remember(profileData) {
@@ -241,16 +238,16 @@ fun MiuixNetworkPage(
                                 profileData.keys.elementAtOrNull(newIndex)?.let { profile ->
                                     viewModel.dispatch(NetworkSettingsAction.ChangeHttpProfile(profile))
                                 }
-                            }
+                            },
                         )
 
                         val channelSummary = when (uiState.githubUpdateChannel) {
                             GithubUpdateChannel.OFFICIAL -> stringResource(
-                                R.string.lab_update_github_proxy_official
+                                R.string.lab_update_github_proxy_official,
                             )
 
                             GithubUpdateChannel.PROXY_7ED -> stringResource(
-                                R.string.lab_update_github_proxy_7ed
+                                R.string.lab_update_github_proxy_7ed,
                             )
 
                             GithubUpdateChannel.CUSTOM -> uiState.customGithubProxyUrl.ifBlank {
@@ -260,7 +257,7 @@ fun MiuixNetworkPage(
                         BasicComponent(
                             title = stringResource(R.string.lab_update_github_proxy),
                             summary = channelSummary,
-                            onClick = { showChannelDialog.value = true }
+                            onClick = { showChannelDialog.value = true },
                         )
                     }
                 }
@@ -274,7 +271,7 @@ fun MiuixNetworkPage(
 private fun NetworkSourceModeWarningDialog(
     mode: NetworkSourceMode?,
     onDismiss: () -> Unit,
-    onConfirm: (NetworkSourceMode) -> Unit
+    onConfirm: (NetworkSourceMode) -> Unit,
 ) {
     WindowDialog(
         show = mode != null,
@@ -287,39 +284,36 @@ private fun NetworkSourceModeWarningDialog(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TextButton(
                         modifier = Modifier.weight(1f),
                         onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
+                        text = stringResource(R.string.cancel),
                     )
                     TextButton(
                         modifier = Modifier.weight(1f),
                         onClick = { mode?.let(onConfirm) },
                         text = stringResource(R.string.confirm),
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
-private fun MiuixNetworkSourceModePreference(
-    currentMode: NetworkSourceMode,
-    onModeChange: (NetworkSourceMode) -> Unit
-) {
+private fun MiuixNetworkSourceModePreference(currentMode: NetworkSourceMode, onModeChange: (NetworkSourceMode) -> Unit) {
     val modes = linkedMapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache),
         NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage)
+        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage),
     )
     val descriptions = mapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache_desc),
         NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart_desc),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc)
+        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc),
     )
     val entries = modes.values.map { DropdownItem(title = it) }
 
@@ -330,6 +324,6 @@ private fun MiuixNetworkSourceModePreference(
         selectedIndex = modes.keys.indexOf(currentMode).coerceAtLeast(0),
         onSelectedIndexChange = { index ->
             modes.keys.elementAtOrNull(index)?.let(onModeChange)
-        }
+        },
     )
 }

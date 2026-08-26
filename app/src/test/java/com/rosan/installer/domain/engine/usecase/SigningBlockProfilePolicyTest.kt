@@ -12,8 +12,8 @@ class SigningBlockProfilePolicyTest {
     fun `matching lightweight certificates bypass unknown policy`() {
         assertFalse(
             SigningBlockCertificateStatus.MATCH.isBlockedByUnknownPolicy(
-                allowSigUnknown = false
-            )
+                allowSigUnknown = false,
+            ),
         )
     }
 
@@ -21,13 +21,13 @@ class SigningBlockProfilePolicyTest {
     fun `uncomparable lightweight certificates follow unknown policy`() {
         assertTrue(
             SigningBlockCertificateStatus.UNKNOWN.isBlockedByUnknownPolicy(
-                allowSigUnknown = false
-            )
+                allowSigUnknown = false,
+            ),
         )
         assertFalse(
             SigningBlockCertificateStatus.UNKNOWN.isBlockedByUnknownPolicy(
-                allowSigUnknown = true
-            )
+                allowSigUnknown = true,
+            ),
         )
     }
 }

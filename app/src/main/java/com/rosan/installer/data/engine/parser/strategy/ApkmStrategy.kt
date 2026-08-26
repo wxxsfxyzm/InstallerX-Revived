@@ -10,6 +10,7 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -17,19 +18,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import java.io.File
 
-class ApkmStrategy(
-    private val json: Json,
-    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
-) : AnalysisStrategy {
+class ApkmStrategy(private val json: Json, private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer) : AnalysisStrategy {
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
         zipFile: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> {
         val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
@@ -81,7 +78,7 @@ class ApkmStrategy(
                                     pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                                 } else {
                                     null
-                                }
+                                },
                             )
                         } else {
                             val signatureInfo = if (checkSignatures) {
@@ -101,7 +98,7 @@ class ApkmStrategy(
                                 minSdk = manifest.minApi,
                                 sourceType = extra.dataType,
                                 signatureHash = signatureInfo?.primarySha256,
-                                signatureInfo = signatureInfo
+                                signatureInfo = signatureInfo,
                             )
                         }
                         sequenceOf(entity)
@@ -117,10 +114,12 @@ class ApkmStrategy(
                                     dmName = dmName,
                                     targetSdk = null,
                                     minSdk = manifest.minApi,
-                                    sourceType = extra.dataType
-                                )
+                                    sourceType = extra.dataType,
+                                ),
                             )
-                        } else emptySequence()
+                        } else {
+                            emptySequence()
+                        }
                     }
 
                     else -> emptySequence()

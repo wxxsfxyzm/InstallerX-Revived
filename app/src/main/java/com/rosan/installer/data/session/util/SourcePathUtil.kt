@@ -3,22 +3,24 @@
 package com.rosan.installer.data.session.util
 
 import android.net.Uri
-import timber.log.Timber
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import timber.log.Timber
 
-fun String.pathUnify(): String =
-// Handle paths starting with /mnt/user/0
+fun String.pathUnify(): String = // Handle paths starting with /mnt/user/0
 // This is necessary for compatibility with Android 14+ where /storage is used instead of
 // /mnt/user/0 for the primary shared storage directory. Particularly, Samsung devices
     // shell id 2000 only has access to /storage/emulated/0
-    if (this.startsWith("/mnt/user/0"))
+    if (this.startsWith("/mnt/user/0")) {
         this.replace("/mnt/user/0", "/storage")
-    else this
+    } else {
+        this
+    }
 
 fun String.getRealPathFromUri(uri: Uri): String {
-    if (!this.startsWith("/mnt/appfuse"))
+    if (!this.startsWith("/mnt/appfuse")) {
         return this
+    }
 
     val providerPath = uri.path
 
@@ -38,7 +40,7 @@ internal fun String.decodeSmbProviderPath(): String {
         // equivalent to a single URI percent-decoding pass.
         URLDecoder.decode(
             replace("+", "%2B"),
-            StandardCharsets.UTF_8.name()
+            StandardCharsets.UTF_8.name(),
         )
     }.getOrDefault(this)
 

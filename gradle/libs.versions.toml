@@ -28,7 +28,7 @@ aboutLibraries = "15.1.1"
 appiconloader = "1.5.0"
 androidx-annotation = "1.10.0"
 timber = "5.0.1"
-miuix = "0.9.3-1f3f05d6-SNAPSHOT"
+miuix = "0.9.4-103b737b-SNAPSHOT"
 okhttp = "5.5.0"
 monetcompat = "0.4.1"
 materialKolor = "5.0.0"
@@ -40,11 +40,15 @@ benchmarkMacroJunit4 = "1.4.1"
 baselineprofile = "1.5.0-rc01"
 profileinstaller = "1.4.1"
 commonsCompress = "1.28.0"
+spotless = "8.10.0"
+ktlint = "1.8.0"
+composeKtlintRules = "0.6.4"
 
 [plugins]
 installerx-application = { id = "installerx.android.application" }
 installerx-library = { id = "installerx.android.library" }
 installerx-test = { id = "installerx.android.test" }
+installerx-spotless = { id = "installerx.spotless" }
 
 agp-lib = { id = "com.android.library", version.ref = "agp" }
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -60,6 +64,9 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 android-tools-apksig = { module = "com.android.tools.build:apksig", version.ref = "apksig" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
+compose-ktlint-rules = { module = "io.nlopez.compose.rules:ktlint", version.ref = "composeKtlintRules" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }

@@ -1,5 +1,6 @@
 package com.rosan.installer.ui.page.miuix.installer.sheetcontent
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -14,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,7 +36,7 @@ fun InstallPreparingContent(
     @StringRes descriptionRes: Int = R.string.installer_preparing_desc,
     descriptionText: String? = null,
     @StringRes buttonTextRes: Int = R.string.loading,
-    showButton: Boolean = true
+    showButton: Boolean = true,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
@@ -50,19 +50,19 @@ fun InstallPreparingContent(
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(durationMillis = 300),
-        label = "ProgressAnimation"
+        label = "ProgressAnimation",
     )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.5f)
+            .fillMaxHeight(0.5f),
     ) {
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(bottom = 100.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             InfiniteProgressIndicator()
 
@@ -71,14 +71,15 @@ fun InstallPreparingContent(
             Text(
                 text = descriptionText ?: stringResource(descriptionRes),
                 color = MiuixTheme.colorScheme.onSurface,
-                style = MiuixTheme.textStyles.body1
+                style = MiuixTheme.textStyles.body1,
             )
         }
 
-        val contentColor = if (animatedProgress < 0.45f)
+        val contentColor = if (animatedProgress < 0.45f) {
             if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
-        else
+        } else {
             MiuixTheme.colorScheme.onPrimary
+        }
 
         if (showButton) {
             ProgressButton(
@@ -92,12 +93,12 @@ fun InstallPreparingContent(
                 colors = ProgressButtonDefaults.progressButtonColors(
                     trackColor = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
                     progressColor = MiuixTheme.colorScheme.primary,
-                    contentColor = contentColor
-                )
+                    contentColor = contentColor,
+                ),
             ) {
                 Text(
                     color = contentColor,
-                    text = stringResource(buttonTextRes)
+                    text = stringResource(buttonTextRes),
                 )
             }
         }

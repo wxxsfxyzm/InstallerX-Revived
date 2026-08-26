@@ -42,7 +42,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 private fun TipCard(
     modifier: Modifier = Modifier,
     tipContent: @Composable () -> Unit,
-    actionContent: @Composable (() -> Unit)? = null
+    actionContent: @Composable (() -> Unit)? = null,
 ) {
     val endPadding = if (actionContent == null) 16.dp else 12.dp
 
@@ -50,14 +50,14 @@ private fun TipCard(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(
             color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
-            contentColor = MiuixTheme.colorScheme.onSurface
+            contentColor = MiuixTheme.colorScheme.onSurface,
         ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = endPadding, top = 16.dp, bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 tipContent()
@@ -72,10 +72,7 @@ private fun TipCard(
 }
 
 @Composable
-fun WarningCard(
-    isDark: Boolean,
-    message: String
-) {
+fun WarningCard(isDark: Boolean, message: String) {
     Card(
         modifier = Modifier
             .padding(horizontal = 0.dp, vertical = 8.dp)
@@ -85,8 +82,8 @@ fun WarningCard(
                 isDynamicColor -> MiuixTheme.colorScheme.errorContainer
                 isDark -> Color(0XFF310808)
                 else -> Color(0xFFF8E2E2)
-            }
-        )
+            },
+        ),
     ) {
         Row(
             modifier = Modifier
@@ -97,7 +94,7 @@ fun WarningCard(
                 text = message,
                 style = MiuixTheme.textStyles.body2,
                 color = if (isDynamicColor) MiuixTheme.colorScheme.onErrorContainer else Color(0xFFF72727),
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
         }
     }
@@ -112,9 +109,9 @@ fun MiuixScopeTipCard(viewModel: AllViewModel) {
                 text = stringResource(R.string.scope_tips),
                 style = MiuixTheme.textStyles.body2,
                 color = MiuixTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
-        }
+        },
     ) {
         IconButton(
             modifier = Modifier
@@ -125,7 +122,7 @@ fun MiuixScopeTipCard(viewModel: AllViewModel) {
             Icon(
                 imageVector = MiuixIcons.Regular.Close,
                 contentDescription = null,
-                tint = MiuixTheme.colorScheme.primary
+                tint = MiuixTheme.colorScheme.primary,
             )
         }
     }
@@ -140,9 +137,9 @@ fun MiuixSettingsTipCard(text: String) {
                 text = text,
                 style = MiuixTheme.textStyles.body2,
                 color = MiuixTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
-        }
+        },
     )
 }
 
@@ -155,9 +152,9 @@ fun MiuixInstallerTipCard(text: String) {
                 text = text,
                 style = MiuixTheme.textStyles.body2,
                 color = MiuixTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
-        }
+        },
     )
 }
 
@@ -173,17 +170,15 @@ fun MiuixInstallerTipCard(text: String) {
  * @param modifier Modifier for the root Card.
  */
 @Composable
-fun MiuixErrorTextBlock(
-    error: Throwable,
-    modifier: Modifier = Modifier
-) {
-    val scheme = if (InstallerTheme.useMiuixMonet)
+fun MiuixErrorTextBlock(error: Throwable, modifier: Modifier = Modifier) {
+    val scheme = if (InstallerTheme.useMiuixMonet) {
         InstallerTheme.colorScheme
-    else
+    } else {
         InstallerTheme.colorScheme.copy(
             errorContainer = MiuixTheme.colorScheme.errorContainer,
-            onErrorContainer = MiuixTheme.colorScheme.onErrorContainer
+            onErrorContainer = MiuixTheme.colorScheme.onErrorContainer,
         )
+    }
     val cardBackgroundColor = scheme.errorContainer
     val contentColor = scheme.onErrorContainer
 
@@ -191,8 +186,8 @@ fun MiuixErrorTextBlock(
         modifier = modifier,
         colors = CardColors(
             color = cardBackgroundColor,
-            contentColor = contentColor
-        )
+            contentColor = contentColor,
+        ),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -202,14 +197,14 @@ fun MiuixErrorTextBlock(
                 style = MiuixTheme.textStyles.body1,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp, 16.dp, 16.dp, 8.dp)
+                    .padding(16.dp, 16.dp, 16.dp, 8.dp),
             )
 
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
             )
 
             val textToShow = if (AppConfig.isDebug) {
@@ -221,7 +216,7 @@ fun MiuixErrorTextBlock(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp, 8.dp, 16.dp, 16.dp)
+                    .padding(16.dp, 8.dp, 16.dp, 16.dp),
             ) {
                 BasicTextField(
                     value = textToShow,
@@ -231,7 +226,7 @@ fun MiuixErrorTextBlock(
                     modifier = Modifier
                         .fillMaxWidth()
                         // Allow vertical scrolling for long stack traces
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(rememberScrollState()),
                 )
             }
         }

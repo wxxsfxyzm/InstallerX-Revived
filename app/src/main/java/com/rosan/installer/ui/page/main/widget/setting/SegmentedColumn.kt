@@ -75,7 +75,7 @@ data class SegmentedItemData(
     val customTopPadding: Dp? = null,
     val forceFlatTop: Boolean = false,
     val forceFlatBottom: Boolean = false,
-    val content: @Composable (Shape) -> Unit
+    val content: @Composable (Shape) -> Unit,
 )
 
 /**
@@ -104,7 +104,7 @@ class SegmentedColumnScope {
         topPadding: Dp? = null,
         forceFlatTop: Boolean = false,
         forceFlatBottom: Boolean = false,
-        content: @Composable (Shape) -> Unit
+        content: @Composable (Shape) -> Unit,
     ) {
         items.add(SegmentedItemData(key ?: items.size, animatedVisibility, topPadding, forceFlatTop, forceFlatBottom, content))
     }
@@ -131,7 +131,7 @@ class SegmentedColumnScope {
         topPadding: Dp? = null,
         bottomPadding: Dp = 1.dp,
         topContent: @Composable (Shape) -> Unit,
-        bottomContent: @Composable (Shape) -> Unit
+        bottomContent: @Composable (Shape) -> Unit,
     ) {
         // Header component: When expanded, forcefully flatten the bottom corner
         // to establish a seamless connection with the expanding body below.
@@ -139,7 +139,7 @@ class SegmentedColumnScope {
             animatedVisibility = animatedVisibility,
             topPadding = topPadding,
             forceFlatBottom = expanded,
-            content = topContent
+            content = topContent,
         )
 
         // Body component: Regardless of its visibility trigger, forcefully flatten
@@ -148,7 +148,7 @@ class SegmentedColumnScope {
             animatedVisibility = animatedVisibility && expanded,
             topPadding = bottomPadding,
             forceFlatTop = true,
-            content = bottomContent
+            content = bottomContent,
         )
     }
 }
@@ -171,7 +171,7 @@ fun SegmentedColumn(
     modifier: Modifier = Modifier,
     title: String = "",
     contentPadding: PaddingValues = PaddingValues(horizontal = PADDING_HORIZONTAL.dp, vertical = PADDING_VERTICAL.dp),
-    content: SegmentedColumnScope.() -> Unit
+    content: SegmentedColumnScope.() -> Unit,
 ) {
     val scope = SegmentedColumnScope().apply(content)
     val allItems = scope.items
@@ -184,7 +184,7 @@ fun SegmentedColumn(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = PADDING_HORIZONTAL.dp, top = PADDING_VERTICAL.dp, bottom = 16.dp)
+                modifier = Modifier.padding(start = PADDING_HORIZONTAL.dp, top = PADDING_VERTICAL.dp, bottom = 16.dp),
             )
         }
 
@@ -196,7 +196,7 @@ fun SegmentedColumn(
                 animateFloatAsState(
                     targetValue = if (item.visible) 1f else 0f,
                     animationSpec = floatSpring,
-                    label = "progress"
+                    label = "progress",
                 )
             }
         }
@@ -226,31 +226,37 @@ fun SegmentedColumn(
 
                         // 3. Drive the corner transition animations. Provides a fluid shift between
                         // rounded and flat states during expand/collapse interactions.
-                        val currentTopRadius = (if (isDynamicDpSupported) {
-                            animateDpAsState(targetTopRadius, dpSpring, label = "TopRadius").value
-                        } else {
-                            targetTopRadius
-                        }).coerceAtLeast(0.dp)
+                        val currentTopRadius = (
+                            if (isDynamicDpSupported) {
+                                animateDpAsState(targetTopRadius, dpSpring, label = "TopRadius").value
+                            } else {
+                                targetTopRadius
+                            }
+                            ).coerceAtLeast(0.dp)
 
-                        val currentBottomRadius = (if (isDynamicDpSupported) {
-                            animateDpAsState(targetBottomRadius, dpSpring, label = "BottomRadius").value
-                        } else {
-                            targetBottomRadius
-                        }).coerceAtLeast(0.dp)
+                        val currentBottomRadius = (
+                            if (isDynamicDpSupported) {
+                                animateDpAsState(targetBottomRadius, dpSpring, label = "BottomRadius").value
+                            } else {
+                                targetBottomRadius
+                            }
+                            ).coerceAtLeast(0.dp)
 
                         val shape = RoundedCornerShape(
                             topStart = currentTopRadius,
                             topEnd = currentTopRadius,
                             bottomStart = currentBottomRadius,
-                            bottomEnd = currentBottomRadius
+                            bottomEnd = currentBottomRadius,
                         )
 
                         val targetTopPadding = itemData.customTopPadding ?: (if (isFirst) 0.dp else ListItemDefaults.SegmentedGap)
-                        val currentTopPadding = (if (isDynamicDpSupported) {
-                            animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding").value
-                        } else {
-                            targetTopPadding
-                        }).coerceAtLeast(0.dp)
+                        val currentTopPadding = (
+                            if (isDynamicDpSupported) {
+                                animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding").value
+                            } else {
+                                targetTopPadding
+                            }
+                            ).coerceAtLeast(0.dp)
 
                         var hasFocus by remember { mutableStateOf(false) }
 
@@ -277,11 +283,14 @@ fun SegmentedColumn(
 
                                     clip = true
                                     this.shape = object : Shape {
-                                        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density) =
-                                            Outline.Rectangle(Rect(0f, 0f, size.width, size.height * safeProgress))
+                                        override fun createOutline(
+                                            size: Size,
+                                            layoutDirection: LayoutDirection,
+                                            density: Density,
+                                        ) = Outline.Rectangle(Rect(0f, 0f, size.width, size.height * safeProgress))
                                     }
                                     alpha = (currentProgress * 1.5f).coerceIn(0f, 1f)
-                                }
+                                },
                         ) {
                             CompositionLocalProvider(LocalSegmentedItemShape provides shape) {
                                 Column(modifier = Modifier.padding(top = currentTopPadding)) {
@@ -291,13 +300,13 @@ fun SegmentedColumn(
                         }
                     }
                 }
-            }
+            },
         ) { measurables, constraints ->
             val placeables = measurables.map { it.measure(constraints) }
             var currentY = 0f
             val positions = mutableListOf<Int>()
 
-            // Calculate exact placement coordinates dynamically corresponding to the 
+            // Calculate exact placement coordinates dynamically corresponding to the
             // current phase of the visibility animations.
             placeables.forEachIndexed { index, placeable ->
                 positions.add(currentY.roundToInt())

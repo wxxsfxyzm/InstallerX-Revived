@@ -25,12 +25,12 @@ import kotlinx.coroutines.launch
 class ThemeSettingsViewModel(
     appSettingsRepo: AppSettingsRepository,
     systemEnvProvider: SystemEnvProvider,
-    private val updateSetting: UpdateSettingUseCase
+    private val updateSetting: UpdateSettingUseCase,
 ) : ViewModel() {
 
     val state: StateFlow<ThemeSettingsState> = combine(
         appSettingsRepo.preferencesFlow,
-        systemEnvProvider.getWallpaperColorsFlow().onStart { emit(emptyList()) }
+        systemEnvProvider.getWallpaperColorsFlow().onStart { emit(emptyList()) },
     ) { prefs, wallpaperColors ->
         val manualSeedColor = Color(prefs.seedColorInt)
 
@@ -39,11 +39,17 @@ class ThemeSettingsViewModel(
                 if (!wallpaperColors.isNullOrEmpty()) {
                     if (wallpaperColors.contains(manualSeedColor.toArgb())) {
                         manualSeedColor
-                    } else Color(wallpaperColors[0])
-                } else manualSeedColor
+                    } else {
+                        Color(wallpaperColors[0])
+                    }
+                } else {
+                    manualSeedColor
+                }
             } else if (PresetColors.any { it.color == manualSeedColor }) {
                 manualSeedColor
-            } else PresetColors[0].color
+            } else {
+                PresetColors[0].color
+            }
 
         val availableColors: List<RawColor> =
             if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -51,8 +57,12 @@ class ThemeSettingsViewModel(
                     wallpaperColors.map { colorInt ->
                         RawColor(key = colorInt.toHexString(), color = Color(colorInt))
                     }
-                } else PresetColors
-            } else PresetColors
+                } else {
+                    PresetColors
+                }
+            } else {
+                PresetColors
+            }
 
         ThemeSettingsState(
             showMiuixUI = prefs.showMiuixUI,
@@ -70,68 +80,86 @@ class ThemeSettingsViewModel(
             preferSystemIcon = prefs.preferSystemIcon,
             showLiveActivity = prefs.showLiveActivity,
             predictiveBackAnimation = prefs.predictiveBackAnimation,
-            predictiveBackExitDirection = prefs.predictiveBackExitDirection
+            predictiveBackExitDirection = prefs.predictiveBackExitDirection,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = ThemeSettingsState()
+        initialValue = ThemeSettingsState(),
     )
 
     fun dispatch(action: ThemeSettingsAction) {
         when (action) {
-            is ThemeSettingsAction.ChangeUseMiuix -> viewModelScope.launch { updateSetting(BooleanSetting.UiUseMiuix, action.useMiuix) }
+            is ThemeSettingsAction.ChangeUseMiuix -> viewModelScope.launch {
+                updateSetting(BooleanSetting.UiUseMiuix, action.useMiuix)
+            }
+
             is ThemeSettingsAction.SetUseBlur -> viewModelScope.launch { updateSetting(BooleanSetting.UiUseBlur, action.enable) }
-            is ThemeSettingsAction.SetThemeMode -> viewModelScope.launch { updateSetting(StringSetting.ThemeMode, action.mode.name) }
-            is ThemeSettingsAction.SetPaletteStyle -> viewModelScope.launch { updateSetting(StringSetting.ThemePaletteStyle, action.style.name) }
-            is ThemeSettingsAction.SetColorSpec -> viewModelScope.launch { updateSetting(StringSetting.ThemeColorSpec, action.spec.name) }
+
+            is ThemeSettingsAction.SetThemeMode -> viewModelScope.launch {
+                updateSetting(StringSetting.ThemeMode, action.mode.name)
+            }
+
+            is ThemeSettingsAction.SetPaletteStyle -> viewModelScope.launch {
+                updateSetting(StringSetting.ThemePaletteStyle, action.style.name)
+            }
+
+            is ThemeSettingsAction.SetColorSpec -> viewModelScope.launch {
+                updateSetting(StringSetting.ThemeColorSpec, action.spec.name)
+            }
 
             is ThemeSettingsAction.SetUseDynamicColor -> viewModelScope.launch {
                 updateSetting(BooleanSetting.ThemeUseDynamicColor, action.use)
                 updateSetting(IntSetting.ThemeSeedColor, Int.MIN_VALUE)
             }
 
-            is ThemeSettingsAction.SetUseMiuixMonet -> viewModelScope.launch { updateSetting(BooleanSetting.UiUseMiuixMonet, action.use) }
+            is ThemeSettingsAction.SetUseMiuixMonet -> viewModelScope.launch {
+                updateSetting(BooleanSetting.UiUseMiuixMonet, action.use)
+            }
+
             is ThemeSettingsAction.SetUseAppleFloatingBar -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.UiUseAppleFloatingBar,
-                    action.use
+                    action.use,
                 )
             }
 
             is ThemeSettingsAction.SetDynColorFollowPkgIcon -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.UiDynColorFollowPkgIcon,
-                    action.follow
+                    action.follow,
                 )
             }
 
             is ThemeSettingsAction.SetDynColorFollowPkgIconForLiveActivity -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.LiveActivityDynColorFollowPkgIcon,
-                    action.follow
+                    action.follow,
                 )
             }
 
-            is ThemeSettingsAction.SetSeedColor -> viewModelScope.launch { updateSetting(IntSetting.ThemeSeedColor, action.color.toArgb()) }
+            is ThemeSettingsAction.SetSeedColor -> viewModelScope.launch {
+                updateSetting(IntSetting.ThemeSeedColor, action.color.toArgb())
+            }
+
             is ThemeSettingsAction.ChangePreferSystemIcon -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.PreferSystemIconForInstall,
-                    action.preferSystemIcon
+                    action.preferSystemIcon,
                 )
             }
 
             is ThemeSettingsAction.SetPredictiveBackAnimation -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.PredictiveBackAnimation,
-                    action.animation.value
+                    action.animation.value,
                 )
             }
 
             is ThemeSettingsAction.SetPredictiveBackExitDirection -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.PredictiveBackExitDirection,
-                    action.direction.value
+                    action.direction.value,
                 )
             }
         }

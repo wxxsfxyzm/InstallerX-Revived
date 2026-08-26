@@ -8,11 +8,11 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
-import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
-import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
+import com.materialkolor.PaletteStyle as MaterialKolorPaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
-import com.materialkolor.PaletteStyle as MaterialKolorPaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 
 @Stable
 fun dynamicColorScheme(
@@ -20,7 +20,7 @@ fun dynamicColorScheme(
     isDark: Boolean,
     style: PaletteStyle = PaletteStyle.TonalSpot,
     contrastLevel: Double = 0.0,
-    colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025
+    colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,
 ): ColorScheme {
     // Map local domain PaletteStyle to materialkolor's PaletteStyle
     val mkStyle = when (style) {
@@ -47,7 +47,7 @@ fun dynamicColorScheme(
         isDark = isDark,
         style = mkStyle,
         contrastLevel = contrastLevel,
-        specVersion = specVersion
+        specVersion = specVersion,
     )
 }
 
@@ -62,7 +62,7 @@ fun ColorScheme.animateAsState(): ColorScheme {
     fun animateColor(color: Color): Color = animateColorAsState(
         targetValue = color,
         animationSpec = spring(),
-        label = "theme_color_animation"
+        label = "theme_color_animation",
     ).value
 
     return ColorScheme(
@@ -115,6 +115,6 @@ fun ColorScheme.animateAsState(): ColorScheme {
         tertiaryFixed = animateColor(tertiaryFixed),
         tertiaryFixedDim = animateColor(tertiaryFixedDim),
         onTertiaryFixed = animateColor(onTertiaryFixed),
-        onTertiaryFixedVariant = animateColor(onTertiaryFixedVariant)
+        onTertiaryFixedVariant = animateColor(onTertiaryFixedVariant),
     )
 }

@@ -15,5 +15,5 @@ data class InstalledModuleInfo(
     val web: Boolean? = null,
     val action: Boolean? = null,
     val mount: Boolean? = null,
-    val updateJson: String? = null
+    val updateJson: String? = null,
 )

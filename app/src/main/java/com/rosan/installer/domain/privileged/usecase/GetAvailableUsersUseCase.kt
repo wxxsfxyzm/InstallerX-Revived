@@ -7,9 +7,7 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class GetAvailableUsersUseCase(
-    private val systemInfoProvider: SystemInfoProvider
-) {
+class GetAvailableUsersUseCase(private val systemInfoProvider: SystemInfoProvider) {
     /**
      * Retrieves the list of system users supported by the current environment.
      * @param authorizer The current authorization method.

@@ -21,6 +21,7 @@ import com.rosan.installer.core.reflection.invokeStatic
 import com.rosan.installer.domain.device.model.ShizukuMode
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,12 +33,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import timber.log.Timber
-import java.io.File
 
-class DeviceCapabilityProviderImpl(
-    private val context: Context,
-    private val reflect: ReflectionProvider
-) : DeviceCapabilityProvider {
+class DeviceCapabilityProviderImpl(private val context: Context, private val reflect: ReflectionProvider) : DeviceCapabilityProvider {
     companion object {
         private const val MIUI_PACKAGE_INSTALLER = "com.miui.packageinstaller"
         private const val MIN_SUPPORTED_MIUI_VERSION_CODE = 54100L
@@ -57,14 +54,14 @@ class DeviceCapabilityProviderImpl(
             "/system/etc/floating_feature.xml",
             "/system/system/etc/floating_feature.xml",
             "/product/etc/floating_feature.xml",
-            "/odm/etc/floating_feature.xml"
+            "/odm/etc/floating_feature.xml",
         )
 
         private val OEM_MARKET_NAME_PROPERTY_KEYS = listOf(
-            "ro.product.marketname",        // Xiaomi
-            "ro.vendor.oplus.market.name",  // Oppo
-            "ro.vivo.market.name",          // Vivo
-            "ro.config.marketing_name"      // Huawei/Honor
+            "ro.product.marketname", // Xiaomi
+            "ro.vendor.oplus.market.name", // Oppo
+            "ro.vivo.market.name", // Vivo
+            "ro.config.marketing_name", // Huawei/Honor
         )
 
         private const val ROOT_DETECTION_EXTRA_PATH =
@@ -86,11 +83,11 @@ class DeviceCapabilityProviderImpl(
                 .addCategory(Intent.CATEGORY_DEFAULT)
                 .setDataAndType(
                     "content://storage/emulated/0/test.apk".toUri(),
-                    "application/vnd.android.package-archive"
+                    "application/vnd.android.package-archive",
                 )
             val resolveInfo = context.packageManager.resolveActivity(
                 intent,
-                PackageManager.MATCH_DEFAULT_ONLY
+                PackageManager.MATCH_DEFAULT_ONLY,
             )
             Timber.d("ResolveInfo: $resolveInfo")
             return resolveInfo?.activityInfo?.packageName == context.packageName
@@ -119,7 +116,7 @@ class DeviceCapabilityProviderImpl(
             val focusProtocolVersion = Settings.System.getInt(
                 context.contentResolver,
                 "notification_focus_protocol",
-                0
+                0,
             )
             focusProtocolVersion == 3
         } catch (_: Exception) {
@@ -197,7 +194,7 @@ class DeviceCapabilityProviderImpl(
             .addCategory(Intent.CATEGORY_DEFAULT)
             .setDataAndType(
                 "content://storage/emulated/0/test.apk".toUri(),
-                "application/vnd.android.package-archive"
+                "application/vnd.android.package-archive",
             )
         val resolveInfo =
             context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
@@ -254,30 +251,29 @@ class DeviceCapabilityProviderImpl(
         RootMode.None
     }
 
-    private fun checkBinaryViaSu(command: String) =
-        try {
-            val shellCommand = $$"export PATH=$PATH:$$ROOT_DETECTION_EXTRA_PATH && $$command"
-            // Execute the specific binary check within the su environment
-            val process = ProcessBuilder("su", "-c", shellCommand)
-                .redirectErrorStream(true)
-                .start()
+    private fun checkBinaryViaSu(command: String) = try {
+        val shellCommand = $$"export PATH=$PATH:$$ROOT_DETECTION_EXTRA_PATH && $$command"
+        // Execute the specific binary check within the su environment
+        val process = ProcessBuilder("su", "-c", shellCommand)
+            .redirectErrorStream(true)
+            .start()
 
-            val exitCode = process.waitFor()
-            if (exitCode == 0) {
-                Timber.d("RootDetection: Successfully executed -> su -c '$shellCommand'")
-                true
-            } else {
-                Timber.d("RootDetection: Command 'su -c '$shellCommand'' failed with exit code: $exitCode")
-                false
-            }
-        } catch (e: CancellationException) {
-            // Rethrow to maintain structured concurrency
-            throw e
-        } catch (e: Exception) {
-            // Catch IOExceptions or other runtime errors
-            Timber.d("RootDetection: Execution failed for 'su -c '$command'': ${e.message}")
+        val exitCode = process.waitFor()
+        if (exitCode == 0) {
+            Timber.d("RootDetection: Successfully executed -> su -c '$shellCommand'")
+            true
+        } else {
+            Timber.d("RootDetection: Command 'su -c '$shellCommand'' failed with exit code: $exitCode")
             false
         }
+    } catch (e: CancellationException) {
+        // Rethrow to maintain structured concurrency
+        throw e
+    } catch (e: Exception) {
+        // Catch IOExceptions or other runtime errors
+        Timber.d("RootDetection: Execution failed for 'su -c '$command'': ${e.message}")
+        false
+    }
 
     private fun calculateSessionInstallSupport(): Boolean {
         val isMi = DeviceConfig.currentManufacturer == Manufacturer.XIAOMI
@@ -291,23 +287,22 @@ class DeviceCapabilityProviderImpl(
         }
     }
 
-    private fun getMiuiPackageInstallerVersion(): Pair<String, Long>? =
-        try {
-            val info = context.packageManager.getPackageInfo(MIUI_PACKAGE_INSTALLER, 0)
-            val versionName = info.versionName ?: ""
-            val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                info.longVersionCode
-            } else {
-                @Suppress("DEPRECATION")
-                info.versionCode.toLong()
-            }
-            versionName to versionCode
-        } catch (_: PackageManager.NameNotFoundException) {
-            null
-        } catch (e: Throwable) {
-            Timber.e(e, "Failed to retrieve MIUI package installer version")
-            null
+    private fun getMiuiPackageInstallerVersion(): Pair<String, Long>? = try {
+        val info = context.packageManager.getPackageInfo(MIUI_PACKAGE_INSTALLER, 0)
+        val versionName = info.versionName ?: ""
+        val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            info.longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            info.versionCode.toLong()
         }
+        versionName to versionCode
+    } catch (_: PackageManager.NameNotFoundException) {
+        null
+    } catch (e: Throwable) {
+        Timber.e(e, "Failed to retrieve MIUI package installer version")
+        null
+    }
 
     private fun getSamsungProductName(): String? {
         if (DeviceConfig.currentManufacturer != Manufacturer.SAMSUNG) return null
@@ -318,28 +313,27 @@ class DeviceCapabilityProviderImpl(
         return productName.withManufacturerPrefix(Manufacturer.SAMSUNG)
     }
 
-    private fun getSamsungProductNameFromFloatingFeature(): String? =
-        try {
-            val clazz = Class.forName(SAMSUNG_FLOATING_FEATURE_CLASS)
-            val instance = reflect.invokeStatic<Any>("getInstance", clazz) ?: return null
-            val value = reflect.invoke<String>(
-                instance,
-                "getString",
-                clazz,
-                arrayOf(String::class.java),
-                KEY_SAMSUNG_PRODUCT_NAME
-            )
+    private fun getSamsungProductNameFromFloatingFeature(): String? = try {
+        val clazz = Class.forName(SAMSUNG_FLOATING_FEATURE_CLASS)
+        val instance = reflect.invokeStatic<Any>("getInstance", clazz) ?: return null
+        val value = reflect.invoke<String>(
+            instance,
+            "getString",
+            clazz,
+            arrayOf(String::class.java),
+            KEY_SAMSUNG_PRODUCT_NAME,
+        )
 
-            value.takeIfValidDeviceName()
-        } catch (e: Throwable) {
-            Timber.d(e, "Failed to read Samsung product name from SemFloatingFeature")
-            null
-        }
+        value.takeIfValidDeviceName()
+    } catch (e: Throwable) {
+        Timber.d(e, "Failed to read Samsung product name from SemFloatingFeature")
+        null
+    }
 
     private fun getSamsungProductNameFromFloatingFeatureFile(): String? {
         val pattern = Regex(
             "<$KEY_SAMSUNG_PRODUCT_NAME>\\s*(.*?)\\s*</$KEY_SAMSUNG_PRODUCT_NAME>",
-            RegexOption.DOT_MATCHES_ALL
+            RegexOption.DOT_MATCHES_ALL,
         )
 
         return SAMSUNG_FLOATING_FEATURE_PATHS.firstNotNullOfOrNull { path ->
@@ -354,14 +348,13 @@ class DeviceCapabilityProviderImpl(
         }
     }
 
-    private fun String?.takeIfValidDeviceName(): String? =
-        this?.trim()
-            ?.takeIf {
-                it.isNotEmpty() &&
-                        !TextUtils.equals(it, Build.UNKNOWN) &&
-                        !TextUtils.equals(it, "unknown") &&
-                        !TextUtils.equals(it, "null")
-            }
+    private fun String?.takeIfValidDeviceName(): String? = this?.trim()
+        ?.takeIf {
+            it.isNotEmpty() &&
+                !TextUtils.equals(it, Build.UNKNOWN) &&
+                !TextUtils.equals(it, "unknown") &&
+                !TextUtils.equals(it, "null")
+        }
 
     private fun String?.withManufacturerPrefix(manufacturer: Manufacturer): String? {
         val name = this.takeIfValidDeviceName() ?: return null
@@ -376,12 +369,11 @@ class DeviceCapabilityProviderImpl(
         }
     }
 
-    private fun getSystemProperty(key: String, defaultValue: String = ""): String? =
-        try {
-            SystemProperties.get(key, defaultValue)
-                .takeIf { it.isNotEmpty() }
-        } catch (e: Throwable) {
-            Timber.d(e, "Failed to read system property: $key")
-            defaultValue.takeIf { it.isNotEmpty() }
-        }
+    private fun getSystemProperty(key: String, defaultValue: String = ""): String? = try {
+        SystemProperties.get(key, defaultValue)
+            .takeIf { it.isNotEmpty() }
+    } catch (e: Throwable) {
+        Timber.d(e, "Failed to read system property: $key")
+        defaultValue.takeIf { it.isNotEmpty() }
+    }
 }

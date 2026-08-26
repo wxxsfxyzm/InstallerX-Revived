@@ -78,6 +78,6 @@ rootProject.name = "InstallerX-Revived"
 include(
     ":app",
     ":app-process",
-    ":hidden-api"
+    ":hidden-api",
 )
 include(":baselineprofile")

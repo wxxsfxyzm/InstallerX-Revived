@@ -51,7 +51,7 @@ fun MiuixOpenSourceLicensePage(useBlur: Boolean) {
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
-                }
+                },
             )
         },
     ) { paddingValues ->
@@ -65,9 +65,9 @@ fun MiuixOpenSourceLicensePage(useBlur: Boolean) {
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            libraries = libraries
+            libraries = libraries,
         )
     }
 }

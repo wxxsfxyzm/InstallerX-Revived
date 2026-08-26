@@ -22,9 +22,7 @@ import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
  * This implementation is modeled after InstallSuccessDialog.
  */
 @Composable
-fun uninstallSuccessDialog(
-    viewModel: InstallerViewModel
-): DialogParams {
+fun uninstallSuccessDialog(viewModel: InstallerViewModel): DialogParams {
     // Use the shared uninstallInfoDialog to get the base layout with the app's icon, title, and subtitle.
     // Since the app has been uninstalled, there's no target for onTitleExtraClick, so we leave it empty.
     val baseParams = uninstallInfoDialog(
@@ -32,7 +30,7 @@ fun uninstallSuccessDialog(
         onTitleExtraClick = {
             // The app is uninstalled, so opening its settings page is not possible.
             // This action is intentionally left blank.
-        }
+        },
     )
 
     // Override the text and buttons sections to provide a success message and a finish button.
@@ -43,18 +41,18 @@ fun uninstallSuccessDialog(
             // Display a clear success message to the user.
             Text(
                 text = stringResource(R.string.uninstall_success_message),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         },
         buttons = dialogButtons(
-            DialogParamsType.InstallerUninstallSuccess.id
+            DialogParamsType.InstallerUninstallSuccess.id,
         ) {
             // The button list contains only a "Finish" button to close the dialog.
             listOf(
                 DialogButton(stringResource(R.string.finish)) {
                     viewModel.dispatch(InstallerViewAction.Close)
-                }
+                },
             )
-        }
+        },
     )
 }

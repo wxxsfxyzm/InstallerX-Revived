@@ -67,7 +67,7 @@ interface AppIconRepository {
         entityToInstall: AppEntity?,
         userId: Int,
         iconSizePx: Int = 256,
-        preferSystemIcon: Boolean
+        preferSystemIcon: Boolean,
     ): Bitmap?
 
     /**
@@ -89,7 +89,7 @@ interface AppIconRepository {
         packageName: String,
         entityToInstall: AppEntity?,
         preferSystemIcon: Boolean,
-        userId: Int? = null
+        userId: Int? = null,
     ): Int?
 
     /**

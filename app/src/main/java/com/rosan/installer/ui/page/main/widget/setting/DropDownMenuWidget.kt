@@ -26,7 +26,7 @@ fun DropDownMenuWidget(
     isError: Boolean = false,
     choice: Int,
     data: List<String>,
-    onChoiceChange: (Int) -> Unit
+    onChoiceChange: (Int) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -39,12 +39,12 @@ fun DropDownMenuWidget(
         onClick = { expanded = !expanded },
         foreContent = {
             Box(
-                modifier = Modifier.align(Alignment.CenterStart)
+                modifier = Modifier.align(Alignment.CenterStart),
             ) {
                 GroupedDropdownMenuPopup(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    groupSizes = listOf(data.size)
+                    groupSizes = listOf(data.size),
                 ) { _, index, shape ->
                     val isSelected = index == choice
                     DropdownMenuItem(
@@ -54,10 +54,10 @@ fun DropDownMenuWidget(
                             expanded = false
                         },
                         text = { Text(text = data[index]) },
-                        shapes = shape
+                        shapes = shape,
                     )
                 }
             }
-        }
+        },
     )
 }

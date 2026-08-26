@@ -8,11 +8,6 @@ import com.rosan.installer.domain.engine.model.error.UninstallErrorType
 /**
  * Unified exception for all uninstallation failures.
  */
-class UninstallException(
-    val errorType: UninstallErrorType,
-    message: String
-) : InstallerException(message) {
-    override fun getStringResId(): Int {
-        return errorType.stringResId
-    }
+class UninstallException(val errorType: UninstallErrorType, message: String) : InstallerException(message) {
+    override fun getStringResId(): Int = errorType.stringResId
 }

@@ -14,15 +14,13 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 
-class MultiApkZipStrategy(
-    private val apkParser: ApkParser
-) : AnalysisStrategy {
+class MultiApkZipStrategy(private val apkParser: ApkParser) : AnalysisStrategy {
 
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
         zipFile: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> = coroutineScope {
         val archive = requireNotNull(zipFile) { "MultiApkZipStrategy requires a unified ZIP file" }
         require(data is DataEntity.FileEntity) { "DataEntity must be FileEntity" }
@@ -42,7 +40,7 @@ class MultiApkZipStrategy(
                     archive,
                     entry,
                     data,
-                    extra
+                    extra,
                 ).map { entity ->
                     // Enhance label if missing, using the filename inside zip
                     if (entity is AppEntity.BaseEntity && entity.label == null) {

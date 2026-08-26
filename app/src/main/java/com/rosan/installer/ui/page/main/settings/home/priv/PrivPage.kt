@@ -40,8 +40,8 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
-import com.rosan.installer.ui.page.main.widget.dialog.CustomAuthorizerDialog
 import com.rosan.installer.ui.page.main.widget.card.TitleTipCard
+import com.rosan.installer.ui.page.main.widget.dialog.CustomAuthorizerDialog
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.RadioButtonWidget
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
@@ -54,10 +54,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PrivPage(
-    useBlur: Boolean,
-    viewModel: HomePageViewModel = koinViewModel()
-) {
+fun PrivPage(useBlur: Boolean, viewModel: HomePageViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
@@ -87,7 +84,7 @@ fun PrivPage(
                     viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(customizeAuthorizer))
                 }
                 selectCustomizeOnConfirm = false
-            }
+            },
         )
     }
 
@@ -115,16 +112,16 @@ fun PrivPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
         ) {
             item {
                 SegmentedColumn {
@@ -132,9 +129,13 @@ fun PrivPage(
                         val selected = uiState.globalAuthorizer == Authorizer.None
                         RadioButtonWidget(
                             icon = AppIcons.None,
-                            title = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer) else stringResource(
-                                R.string.config_authorizer_none
-                            ),
+                            title = if (uiState.isSystemApp) {
+                                stringResource(R.string.working_status_system_installer)
+                            } else {
+                                stringResource(
+                                    R.string.config_authorizer_none,
+                                )
+                            },
                             description = when {
                                 !uiState.isSessionInstallSupported -> stringResource(R.string.unavailable)
                                 uiState.isSystemApp -> stringResource(R.string.working_status_system_installer_desc)
@@ -145,10 +146,10 @@ fun PrivPage(
                             onClick = {
                                 viewModel.dispatch(
                                     HomePageViewAction.ChangeAuthorizer(
-                                        Authorizer.None
-                                    )
+                                        Authorizer.None,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item {
@@ -157,16 +158,19 @@ fun PrivPage(
                         RadioButtonWidget(
                             icon = AppIcons.Root,
                             title = stringResource(R.string.config_authorizer_root),
-                            description = if (isAvailable) stringResource(R.string.available) + " (${uiState.rootMode.name})"
-                            else stringResource(R.string.unavailable),
+                            description = if (isAvailable) {
+                                stringResource(R.string.available) + " (${uiState.rootMode.name})"
+                            } else {
+                                stringResource(R.string.unavailable)
+                            },
                             selected = selected,
                             onClick = {
                                 viewModel.dispatch(
                                     HomePageViewAction.ChangeAuthorizer(
-                                        Authorizer.Root
-                                    )
+                                        Authorizer.Root,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item {
@@ -183,10 +187,10 @@ fun PrivPage(
                             onClick = {
                                 viewModel.dispatch(
                                     HomePageViewAction.ChangeAuthorizer(
-                                        Authorizer.Shizuku
-                                    )
+                                        Authorizer.Shizuku,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item {
@@ -203,10 +207,10 @@ fun PrivPage(
                             onClick = {
                                 viewModel.dispatch(
                                     HomePageViewAction.ChangeAuthorizer(
-                                        Authorizer.Dhizuku
-                                    )
+                                        Authorizer.Dhizuku,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item {
@@ -223,7 +227,7 @@ fun PrivPage(
                                     null
                                 } else {
                                     FontFamily.Monospace
-                                }
+                                },
                             ),
                             selected = selected,
                             onClick = {
@@ -236,11 +240,11 @@ fun PrivPage(
                                 } else {
                                     viewModel.dispatch(
                                         HomePageViewAction.ChangeAuthorizer(
-                                            Authorizer.Customize
-                                        )
+                                            Authorizer.Customize,
+                                        ),
                                     )
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -248,13 +252,13 @@ fun PrivPage(
             item {
                 TitleTipCard(
                     title = stringResource(R.string.priv_page_what_is_this_title),
-                    text = stringResource(R.string.priv_page_what_is_this_desc)
+                    text = stringResource(R.string.priv_page_what_is_this_desc),
                 )
             }
             item {
                 TitleTipCard(
                     title = stringResource(R.string.priv_page_notice_title),
-                    text = stringResource(R.string.priv_page_notice_desc)
+                    text = stringResource(R.string.priv_page_notice_desc),
                 )
             }
         }

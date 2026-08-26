@@ -3,8 +3,8 @@
 package com.rosan.installer.core.crash
 
 import android.os.Process
-import timber.log.Timber
 import kotlin.system.exitProcess
+import timber.log.Timber
 
 object CrashHandler : Thread.UncaughtExceptionHandler {
     private var defaultHandler: Thread.UncaughtExceptionHandler? = null

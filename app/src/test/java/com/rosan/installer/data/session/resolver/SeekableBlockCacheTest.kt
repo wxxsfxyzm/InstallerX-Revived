@@ -62,8 +62,8 @@ class SeekableBlockCacheTest {
                 maximumBytes = 128 * 1024 * 1024,
                 maxHeapBytes = 256 * 1024 * 1024L,
                 allocatedHeapBytes = 64 * 1024 * 1024L,
-                blockSize = 1024 * 1024
-            )
+                blockSize = 1024 * 1024,
+            ),
         )
     }
 
@@ -75,8 +75,8 @@ class SeekableBlockCacheTest {
                 maximumBytes = 1024 * 1024,
                 maxHeapBytes = 256 * 1024 * 1024L,
                 allocatedHeapBytes = 64 * 1024 * 1024L,
-                blockSize = 1024 * 1024
-            )
+                blockSize = 1024 * 1024,
+            ),
         )
         assertEquals(
             1024 * 1024,
@@ -84,18 +84,15 @@ class SeekableBlockCacheTest {
                 maximumBytes = 128 * 1024 * 1024,
                 maxHeapBytes = 256 * 1024 * 1024L,
                 allocatedHeapBytes = 255 * 1024 * 1024L,
-                blockSize = 1024 * 1024
-            )
+                blockSize = 1024 * 1024,
+            ),
         )
     }
 
-    private fun createCache(
-        loads: MutableList<Pair<Long, Int>>,
-        maxCachedBytes: Int = 32
-    ) = SeekableBlockCache(
+    private fun createCache(loads: MutableList<Pair<Long, Int>>, maxCachedBytes: Int = 32) = SeekableBlockCache(
         contentLength = source.size.toLong(),
         blockSize = 8,
-        maxCachedBytes = maxCachedBytes
+        maxCachedBytes = maxCachedBytes,
     ) { offset, size ->
         loads += offset to size
         source.copyOfRange(offset.toInt(), offset.toInt() + size)

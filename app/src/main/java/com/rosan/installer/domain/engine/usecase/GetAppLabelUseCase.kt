@@ -4,9 +4,7 @@ package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.domain.device.provider.AppInfoProvider
 
-class GetAppLabelUseCase(
-    private val appInfoProvider: AppInfoProvider
-) {
+class GetAppLabelUseCase(private val appInfoProvider: AppInfoProvider) {
     /**
      * Resolves and formats the application label.
      * Formats the result as "AppLabel (packageName)" for better context.

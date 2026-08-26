@@ -70,10 +70,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DefaultInstallerPage(
-    useBlur: Boolean,
-    viewModel: HomePageViewModel = koinViewModel()
-) {
+fun DefaultInstallerPage(useBlur: Boolean, viewModel: HomePageViewModel = koinViewModel()) {
     val context = LocalContext.current
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -106,7 +103,8 @@ fun DefaultInstallerPage(
         }
     }
 
-    @SuppressLint("LocalContextGetResourceValueCall") LaunchedEffect(Unit) {
+    @SuppressLint("LocalContextGetResourceValueCall")
+    LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { event ->
             when (event) {
                 is HomePageViewEvent.ShowDefaultInstallerResult -> {
@@ -114,7 +112,7 @@ fun DefaultInstallerPage(
                     Toast.makeText(
                         context,
                         context.getString(event.messageResId),
-                        Toast.LENGTH_SHORT
+                        Toast.LENGTH_SHORT,
                     ).show()
                 }
 
@@ -148,8 +146,8 @@ fun DefaultInstallerPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
         },
     ) { paddingValues ->
@@ -157,21 +155,25 @@ fun DefaultInstallerPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
         ) {
             when {
                 uiState.isSystemApp -> item { InfoTipCard(stringResource(R.string.config_authorizer_none_system_app_tips)) }
-                uiState.globalAuthorizer == Authorizer.None -> item { InfoTipCard(stringResource(R.string.config_authorizer_none_tips)) }
+
+                uiState.globalAuthorizer == Authorizer.None -> item {
+                    InfoTipCard(stringResource(R.string.config_authorizer_none_tips))
+                }
+
                 else -> item {
                     TitleTipCard(
                         title = stringResource(R.string.priv_page_what_is_this_title),
-                        text = stringResource(R.string.working_status_default_installer_tip)
+                        text = stringResource(R.string.working_status_default_installer_tip),
                     )
                 }
             }
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.basic)
+                    title = stringResource(R.string.basic),
                 ) {
                     val defaultInstallerActionsEnabled =
                         uiState.globalAuthorizer != Authorizer.None && !uiState.userSetLSPosedActive
@@ -181,7 +183,7 @@ fun DefaultInstallerPage(
                             title = stringResource(R.string.lock_default_installer),
                             description = stringResource(R.string.lock_default_installer_desc),
                             enabled = defaultInstallerActionsEnabled,
-                            onClick = { dispatchSetDefaultInstaller(true) }
+                            onClick = { dispatchSetDefaultInstaller(true) },
                         )
                     }
                     item {
@@ -192,7 +194,7 @@ fun DefaultInstallerPage(
                             description =
                                 stringResource(R.string.unlock_default_installer_desc),
                             enabled = defaultInstallerActionsEnabled,
-                            onClick = { dispatchSetDefaultInstaller(false) }
+                            onClick = { dispatchSetDefaultInstaller(false) },
                         )
                     }
                 }
@@ -201,7 +203,7 @@ fun DefaultInstallerPage(
             if (!uiState.isSystemApp) {
                 item {
                     SegmentedColumn(
-                        title = stringResource(R.string.home_label_lsp)
+                        title = stringResource(R.string.home_label_lsp),
                     ) {
                         item {
                             SwitchWidget(
@@ -212,10 +214,10 @@ fun DefaultInstallerPage(
                                 onCheckedChange = {
                                     viewModel.dispatch(
                                         HomePageViewAction.ChangeUserSetLSPosedActive(
-                                            it
-                                        )
+                                            it,
+                                        ),
                                     )
-                                }
+                                },
                             )
                         }
                     }
@@ -228,21 +230,21 @@ fun DefaultInstallerPage(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 6.dp),
                         shape = MaterialTheme.shapes.large,
-                        color = Color.Transparent
+                        color = Color.Transparent,
                     ) {
                         Column(
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(16.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Info,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = stringResource(R.string.home_label_lsp_link),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
@@ -252,13 +254,12 @@ fun DefaultInstallerPage(
                                 textDecoration = TextDecoration.Underline,
                                 modifier = Modifier.clickable {
                                     uriHandler.openUri("https://github.com/Chimioo/InxLocker")
-                                }
+                                },
                             )
                         }
                     }
                 }
             }
-
         }
     }
 
@@ -275,13 +276,13 @@ fun DefaultInstallerPage(
                     viewModel.dispatch(action)
                 }
             },
-            title = stringResource(dialogInfo.titleResId)
+            title = stringResource(dialogInfo.titleResId),
         )
     }
 
     BlockingLoadingIndicator(
         visible = showDefaultInstallerProgress,
         text = stringResource(defaultInstallerProgressTextResId),
-        backdrop = backdrop
+        backdrop = backdrop,
     )
 }

@@ -41,20 +41,20 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 fun InstallConfirmContent(
     viewModel: InstallerViewModel,
     onCancel: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val sessionInfo = uiState.stage as? InstallerStage.InstallConfirm ?: return
 
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         item {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(top = 16.dp, bottom = 24.dp)
+                modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
             ) {
                 if (sessionInfo.appIcon != null) {
                     Image(
@@ -62,7 +62,7 @@ fun InstallConfirmContent(
                         contentDescription = null,
                         modifier = Modifier
                             .size(86.dp)
-                            .clip(RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(20.dp)),
                     )
                 } else {
                     // Placeholder if icon is missing
@@ -77,7 +77,7 @@ fun InstallConfirmContent(
                     color = MiuixTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp),
                 )
             }
         }
@@ -117,7 +117,7 @@ fun InstallConfirmContent(
                     .navigationBarsPadding()
                     .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(
                     onClick = onCancel,
@@ -125,7 +125,7 @@ fun InstallConfirmContent(
                     text = stringResource(R.string.cancel),
                     colors = ButtonDefaults.textButtonColors(
                         color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                        textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                        textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
                     ),
                     modifier = Modifier.weight(1f),
                 )
@@ -143,7 +143,7 @@ fun InstallConfirmContent(
                     enabled = !uiState.isConfirmationSubmitting,
                     text = confirmText,
                     colors = ButtonDefaults.textButtonColorsPrimary(),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }

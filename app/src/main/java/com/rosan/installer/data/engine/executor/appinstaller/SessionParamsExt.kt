@@ -21,18 +21,18 @@ internal fun PackageInstaller.SessionParams.applySessionContext(
     metadata: InstallMetadata,
     entities: List<InstallEntity>,
     installerPackageName: String?,
-    respectPlatformInstallPolicy: Boolean
+    respectPlatformInstallPolicy: Boolean,
 ) {
     applyMetadata(
         metadata = metadata,
         entities = entities,
         installerPackageName = installerPackageName,
-        respectPlatformInstallPolicy = respectPlatformInstallPolicy
+        respectPlatformInstallPolicy = respectPlatformInstallPolicy,
     )
     applyInstallReasonAndPackageSource(
         config = config,
         metadata = metadata,
-        respectPlatformInstallPolicy = respectPlatformInstallPolicy
+        respectPlatformInstallPolicy = respectPlatformInstallPolicy,
     )
 }
 
@@ -40,7 +40,7 @@ private fun PackageInstaller.SessionParams.applyMetadata(
     metadata: InstallMetadata,
     entities: List<InstallEntity>,
     installerPackageName: String?,
-    respectPlatformInstallPolicy: Boolean
+    respectPlatformInstallPolicy: Boolean,
 ) {
     installerPackageName
         ?.takeIf { it.isNotBlank() }
@@ -68,7 +68,7 @@ private fun PackageInstaller.SessionParams.applyMetadata(
     ) {
         setPermissionState(
             Manifest.permission.USE_FULL_SCREEN_INTENT,
-            PackageInstaller.SessionParams.PERMISSION_STATE_DENIED
+            PackageInstaller.SessionParams.PERMISSION_STATE_DENIED,
         )
     }
 }
@@ -76,13 +76,18 @@ private fun PackageInstaller.SessionParams.applyMetadata(
 private fun PackageInstaller.SessionParams.applyInstallReasonAndPackageSource(
     config: ConfigModel,
     metadata: InstallMetadata,
-    respectPlatformInstallPolicy: Boolean
+    respectPlatformInstallPolicy: Boolean,
 ) {
     val installReason = when {
         respectPlatformInstallPolicy -> InstallReason.fromInt(PackageManager.INSTALL_REASON_USER)
+
         config.enableCustomizeInstallReason -> config.installReason
-        else -> if (config.authorizer == Authorizer.Dhizuku) InstallReason.fromInt(PackageManager.INSTALL_REASON_POLICY)
-        else InstallReason.fromInt(PackageManager.INSTALL_REASON_UNKNOWN)
+
+        else -> if (config.authorizer == Authorizer.Dhizuku) {
+            InstallReason.fromInt(PackageManager.INSTALL_REASON_POLICY)
+        } else {
+            InstallReason.fromInt(PackageManager.INSTALL_REASON_UNKNOWN)
+        }
     }
     Timber.d("Setting installReason to ${installReason.name} (${installReason.value})")
     setInstallReason(installReason.value)
@@ -99,13 +104,12 @@ private fun PackageInstaller.SessionParams.applyInstallReasonAndPackageSource(
     }
 }
 
-private fun String.toUriOrNull(): Uri? =
-    runCatching { toUri() }
-        .getOrElse { error ->
-            Timber.w(error, "Failed to parse install metadata URI: $this")
-            null
-        }
-        ?.takeIf { !it.scheme.isNullOrBlank() }
+private fun String.toUriOrNull(): Uri? = runCatching { toUri() }
+    .getOrElse { error ->
+        Timber.w(error, "Failed to parse install metadata URI: $this")
+        null
+    }
+    ?.takeIf { !it.scheme.isNullOrBlank() }
 
 private fun List<InstallEntity>.totalInstallSize(): Long? {
     if (isEmpty()) return null
@@ -114,5 +118,4 @@ private fun List<InstallEntity>.totalInstallSize(): Long? {
     return sizes.sum()
 }
 
-private fun InstallMetadata.defaultPackageSource(): PackageSource =
-    if (referrerUri.isNullOrBlank()) PackageSource.LOCAL_FILE else PackageSource.DOWNLOADED_FILE
+private fun InstallMetadata.defaultPackageSource(): PackageSource = if (referrerUri.isNullOrBlank()) PackageSource.LOCAL_FILE else PackageSource.DOWNLOADED_FILE

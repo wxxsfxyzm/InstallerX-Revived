@@ -41,7 +41,7 @@ sealed interface AppEntity {
         val signatureHash: String? = null,
         val signatureInfo: AppSignatureInfo? = null,
         val fileHash: String? = null,
-        val installLocation: Int? = null
+        val installLocation: Int? = null,
     ) : AppEntity {
         val isXposedModule: Boolean
             get() = xposedInfo != null
@@ -64,7 +64,7 @@ sealed interface AppEntity {
         val filterType: FilterType = FilterType.NONE,
         // Extracted config value ("zh", "xhdpi", "arm64-v8a")
         val configValue: String? = null,
-        val signatureInfo: AppSignatureInfo? = null
+        val signatureInfo: AppSignatureInfo? = null,
     ) : AppEntity {
         override val name = "$splitName.apk"
     }
@@ -92,7 +92,7 @@ sealed interface AppEntity {
         override val data: DataEntity,
         val icon: Drawable? = null,
         override val size: Long = data.getSize(),
-        override val sourceType: DataType? = null
+        override val sourceType: DataType? = null,
     ) : AppEntity {
         override val packageName: String
             get() = id

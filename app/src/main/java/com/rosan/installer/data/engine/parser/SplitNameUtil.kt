@@ -89,8 +89,11 @@ fun getSplitDisplayName(type: SplitType, configValue: String?, fallbackName: Str
 
         SplitType.DENSITY -> {
             val dpiResId = getDpiStringResourceId(qualifier)
-            if (dpiResId != null) stringResource(R.string.split_name_density, stringResource(dpiResId))
-            else stringResource(R.string.split_name_density, qualifier)
+            if (dpiResId != null) {
+                stringResource(R.string.split_name_density, stringResource(dpiResId))
+            } else {
+                stringResource(R.string.split_name_density, qualifier)
+            }
         }
 
         SplitType.LANGUAGE -> {
@@ -113,32 +116,32 @@ private fun getLanguageDisplayName(code: String): String? {
         // Check if the locale is valid and recognized
         if (locale.language.isNotEmpty() && locale.displayLanguage.lowercase() != code.lowercase()) {
             locale.getDisplayName(Locale.getDefault())
-        } else null
+        } else {
+            null
+        }
     } catch (_: Exception) {
         null
     }
 }
 
 @StringRes
-private fun getDpiStringResourceId(name: String) =
-    when (name) {
-        "ldpi" -> R.string.split_dpi_ldpi
-        "mdpi" -> R.string.split_dpi_mdpi
-        "hdpi" -> R.string.split_dpi_hdpi
-        "xhdpi" -> R.string.split_dpi_xhdpi
-        "xxhdpi" -> R.string.split_dpi_xxhdpi
-        "xxxhdpi" -> R.string.split_dpi_xxxhdpi
-        "tvdpi" -> R.string.split_dpi_tvdpi
-        "nodpi" -> R.string.split_dpi_nodpi
-        "anydpi" -> R.string.split_dpi_anydpi
-        else -> null
-    }
+private fun getDpiStringResourceId(name: String) = when (name) {
+    "ldpi" -> R.string.split_dpi_ldpi
+    "mdpi" -> R.string.split_dpi_mdpi
+    "hdpi" -> R.string.split_dpi_hdpi
+    "xhdpi" -> R.string.split_dpi_xhdpi
+    "xxhdpi" -> R.string.split_dpi_xxhdpi
+    "xxxhdpi" -> R.string.split_dpi_xxxhdpi
+    "tvdpi" -> R.string.split_dpi_tvdpi
+    "nodpi" -> R.string.split_dpi_nodpi
+    "anydpi" -> R.string.split_dpi_anydpi
+    else -> null
+}
 
 @Composable
-fun SplitType.getDisplayName() =
-    when (this) {
-        SplitType.ARCHITECTURE -> stringResource(R.string.split_name_architecture_group_title)
-        SplitType.LANGUAGE -> stringResource(R.string.split_name_language_group_title)
-        SplitType.DENSITY -> stringResource(R.string.split_name_density_group_title)
-        SplitType.FEATURE -> stringResource(R.string.split_name_feature_group_title)
-    }
+fun SplitType.getDisplayName() = when (this) {
+    SplitType.ARCHITECTURE -> stringResource(R.string.split_name_architecture_group_title)
+    SplitType.LANGUAGE -> stringResource(R.string.split_name_language_group_title)
+    SplitType.DENSITY -> stringResource(R.string.split_name_density_group_title)
+    SplitType.FEATURE -> stringResource(R.string.split_name_feature_group_title)
+}

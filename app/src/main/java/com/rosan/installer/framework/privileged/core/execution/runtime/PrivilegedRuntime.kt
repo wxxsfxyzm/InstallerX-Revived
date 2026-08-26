@@ -13,10 +13,10 @@ import android.os.IBinder
 import android.os.IUserManager
 import android.os.ServiceManager
 import com.rosan.installer.core.reflection.ReflectionProvider
-import com.rosan.installer.framework.privileged.core.context.wrapper.ShizukuContext
 import com.rosan.installer.framework.privileged.core.context.hook.ShizukuHook
-import com.rosan.installer.framework.privileged.core.context.wrapper.SystemContext
 import com.rosan.installer.framework.privileged.core.context.hook.resolveSettingsBinder
+import com.rosan.installer.framework.privileged.core.context.wrapper.ShizukuContext
+import com.rosan.installer.framework.privileged.core.context.wrapper.SystemContext
 import timber.log.Timber
 
 private const val TAG = "PrivilegedRuntime"
@@ -109,7 +109,7 @@ internal sealed interface PrivilegedRuntime {
     class BinderWrapped(
         override val name: String,
         private val useAppCallerPackage: Boolean,
-        private val binderWrapper: (IBinder) -> IBinder
+        private val binderWrapper: (IBinder) -> IBinder,
     ) : PrivilegedRuntime {
         override val canCallSystemRestrictedPreferredApis = true
 
@@ -118,9 +118,7 @@ internal sealed interface PrivilegedRuntime {
             return SystemContext(context)
         }
 
-        override fun activityCallerPackage(context: Context): String {
-            return if (useAppCallerPackage) context.packageName else "com.android.shell"
-        }
+        override fun activityCallerPackage(context: Context): String = if (useAppCallerPackage) context.packageName else "com.android.shell"
 
         override fun packageManager(): IPackageManager {
             Timber.tag(TAG).d("Getting IPackageManager in $name mode.")
@@ -165,20 +163,15 @@ internal sealed interface PrivilegedRuntime {
         }
     }
 
-    sealed class Direct(
-        override val name: String,
-        override val canCallSystemRestrictedPreferredApis: Boolean
-    ) : PrivilegedRuntime {
+    sealed class Direct(override val name: String, override val canCallSystemRestrictedPreferredApis: Boolean) : PrivilegedRuntime {
         override fun settingsResolverContext(context: Context): Context {
             Timber.tag(TAG).d("Using ShellContextResolver for $name.")
             return ShizukuContext(context)
         }
 
-        override fun activityCallerPackage(context: Context): String {
-            return when (this) {
-                SystemApp -> context.packageName
-                UserService -> "com.android.shell"
-            }
+        override fun activityCallerPackage(context: Context): String = when (this) {
+            SystemApp -> context.packageName
+            UserService -> "com.android.shell"
         }
 
         override fun packageManager(): IPackageManager {

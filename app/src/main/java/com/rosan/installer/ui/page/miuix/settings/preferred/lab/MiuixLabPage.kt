@@ -79,10 +79,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 
 @Composable
-fun MiuixLabPage(
-    useBlur: Boolean,
-    viewModel: LabSettingsViewModel = koinViewModel()
-) {
+fun MiuixLabPage(useBlur: Boolean, viewModel: LabSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -106,7 +103,7 @@ fun MiuixLabPage(
             // Dispatch actions to update the root implementation AND enable the flashing feature.
             viewModel.dispatch(LabSettingsAction.LabChangeRootImplementation(selectedImplementation))
             viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(true))
-        }
+        },
     )
 
     val layoutDirection = LocalLayoutDirection.current
@@ -128,9 +125,9 @@ fun MiuixLabPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -142,9 +139,9 @@ fun MiuixLabPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item { MiuixSettingsTipCard(stringResource(R.string.lab_tip)) }
             item { Spacer(modifier = Modifier.size(12.dp)) }
@@ -153,7 +150,7 @@ fun MiuixLabPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(R.string.config_try_multiple_authorizers_on_install),
@@ -161,25 +158,25 @@ fun MiuixLabPage(
                         checked = uiState.tryMultipleAuthorizersOnInstall,
                         onCheckedChange = {
                             viewModel.dispatch(
-                                LabSettingsAction.LabChangeTryMultipleAuthorizersOnInstall(it)
+                                LabSettingsAction.LabChangeTryMultipleAuthorizersOnInstall(it),
                             )
-                        }
+                        },
                     )
                     AnimatedVisibility(
                         visible = uiState.tryMultipleAuthorizersOnInstall,
                         enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
+                        exit = shrinkVertically() + fadeOut(),
                     ) {
                         BasicComponent(
                             title = stringResource(R.string.config_smart_authorizer_fallback_list),
                             summary = stringResource(
                                 R.string.config_smart_authorizer_fallback_list_desc,
-                                smartAuthorizerSummary
+                                smartAuthorizerSummary,
                             ),
                             onClick = {
                                 capabilityProvider.refreshPrivilegeStatus()
                                 showSmartAuthorizerSheet.value = true
-                            }
+                            },
                         )
                     }
                 }
@@ -189,7 +186,7 @@ fun MiuixLabPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(R.string.lab_module_flashing),
@@ -201,19 +198,19 @@ fun MiuixLabPage(
                             } else {
                                 viewModel.dispatch(LabSettingsAction.LabChangeRootModuleFlash(false))
                             }
-                        }
+                        },
                     )
                     AnimatedVisibility(
                         visible = uiState.labRootEnableModuleFlash,
                         enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
+                        exit = shrinkVertically() + fadeOut(),
                     ) {
                         val currentRootImpl = uiState.labRootMode
                         val data = remember {
                             mapOf(
                                 RootMode.Magisk to "Magisk",
                                 RootMode.KernelSU to "KernelSU",
-                                RootMode.APatch to "APatch"
+                                RootMode.APatch to "APatch",
                             )
                         }
 
@@ -236,13 +233,13 @@ fun MiuixLabPage(
                                     data.keys.elementAtOrNull(newIndex)?.let { impl ->
                                         viewModel.dispatch(LabSettingsAction.LabChangeRootImplementation(impl))
                                     }
-                                }
+                                },
                             )
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.lab_module_flashing_show_art),
                                 description = stringResource(R.string.lab_module_flashing_show_art_desc),
                                 checked = uiState.labRootShowModuleArt,
-                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it)) }
+                                onCheckedChange = { viewModel.dispatch(LabSettingsAction.LabChangeRootShowModuleArt(it)) },
                             )
                         }
                     }
@@ -255,7 +252,7 @@ fun MiuixLabPage(
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 12.dp),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.lab_respect_platform_install_policy),
@@ -263,9 +260,9 @@ fun MiuixLabPage(
                             checked = uiState.labRespectPlatformInstallPolicy,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it)
+                                    LabSettingsAction.LabChangeRespectPlatformInstallPolicy(it),
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -278,7 +275,7 @@ fun MiuixLabPage(
         show = showSmartAuthorizerSheet.value,
         title = stringResource(R.string.config_try_multiple_authorizers_on_install),
         insideMargin = DpSize(16.dp, 0.dp),
-        onDismissRequest = { showSmartAuthorizerSheet.value = false }
+        onDismissRequest = { showSmartAuthorizerSheet.value = false },
     ) {
         MiuixSmartAuthorizerBottomSheet(
             candidates = uiState.smartAuthorizerCandidates,
@@ -290,7 +287,7 @@ fun MiuixLabPage(
             isSystemApp = isSystemApp,
             onCandidatesChange = {
                 viewModel.dispatch(LabSettingsAction.LabChangeSmartAuthorizerCandidates(it))
-            }
+            },
         )
     }
 }
@@ -304,7 +301,7 @@ private fun MiuixSmartAuthorizerBottomSheet(
     dhizukuAvailable: Boolean,
     dhizukuAuthorized: Boolean,
     isSystemApp: Boolean,
-    onCandidatesChange: (List<SmartAuthorizerCandidate>) -> Unit
+    onCandidatesChange: (List<SmartAuthorizerCandidate>) -> Unit,
 ) {
     val context = LocalContext.current
     var sheetCandidates by remember { mutableStateOf(candidates) }
@@ -325,7 +322,7 @@ private fun MiuixSmartAuthorizerBottomSheet(
             Toast.makeText(
                 context,
                 context.getString(R.string.config_smart_authorizer_must_choose_one),
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_SHORT,
             ).show()
             return
         }
@@ -336,7 +333,7 @@ private fun MiuixSmartAuthorizerBottomSheet(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         MiuixInstallerTipCard(stringResource(R.string.config_smart_authorizer_fallback_list_tip))
         MiuixDraggableList(
@@ -354,7 +351,7 @@ private fun MiuixSmartAuthorizerBottomSheet(
                     dhizukuAvailable = dhizukuAvailable,
                     dhizukuAuthorized = dhizukuAuthorized,
                     isSystemApp = isSystemApp,
-                    getString = context::getString
+                    getString = context::getString,
                 )
             },
             onMove = { from, to ->
@@ -364,33 +361,31 @@ private fun MiuixSmartAuthorizerBottomSheet(
                 toggleCandidate(candidate, !candidate.enabled)
             },
             cardColors = CardDefaults.defaultColors(
-                color = MiuixTheme.colorScheme.secondaryContainer
+                color = MiuixTheme.colorScheme.secondaryContainer,
             ),
             trailingContent = { candidate ->
                 Checkbox(
                     state = ToggleableState(value = candidate.enabled),
                     onClick = { toggleCandidate(candidate, !candidate.enabled) },
-                    colors = CheckboxDefaults.checkboxColors()
+                    colors = CheckboxDefaults.checkboxColors(),
                 )
-            }
+            },
         )
         Spacer(Modifier.navigationBarsPadding())
     }
 }
 
-private fun miuixSmartAuthorizerDisplayName(
-    authorizer: Authorizer,
-    isSystemApp: Boolean,
-    getString: (Int) -> String
-): String =
-    if (authorizer == Authorizer.None) {
-        getString(
-            if (isSystemApp) R.string.working_status_system_installer
-            else R.string.config_authorizer_none
-        )
-    } else {
-        getString(authorizer.displayNameRes)
-    }
+private fun miuixSmartAuthorizerDisplayName(authorizer: Authorizer, isSystemApp: Boolean, getString: (Int) -> String): String = if (authorizer == Authorizer.None) {
+    getString(
+        if (isSystemApp) {
+            R.string.working_status_system_installer
+        } else {
+            R.string.config_authorizer_none
+        },
+    )
+} else {
+    getString(authorizer.displayNameRes)
+}
 
 private fun miuixSmartAuthorizerAvailabilityDescription(
     authorizer: Authorizer,
@@ -400,38 +395,38 @@ private fun miuixSmartAuthorizerAvailabilityDescription(
     dhizukuAvailable: Boolean,
     dhizukuAuthorized: Boolean,
     isSystemApp: Boolean,
-    getString: (Int) -> String
-): String =
-    when (authorizer) {
-        Authorizer.Root -> if (rootMode != RootMode.None) {
-            "${getString(R.string.available)} (${rootMode.name})"
-        } else {
-            getString(R.string.unavailable)
-        }
-
-        Authorizer.Shizuku -> when {
-            shizukuAuthorized -> "${getString(R.string.activate)} (${shizukuMode.desc})"
-            shizukuMode != ShizukuMode.NONE -> getString(R.string.shizuku_not_authorized)
-            else -> getString(R.string.shizuku_not_available)
-        }
-
-        Authorizer.Dhizuku -> when {
-            dhizukuAuthorized -> getString(R.string.activate)
-            dhizukuAvailable -> getString(R.string.dhizuku_not_authorized)
-            else -> getString(R.string.dhizuku_not_available)
-        }
-
-        Authorizer.None -> getString(
-            if (isSystemApp) R.string.working_status_system_installer_desc
-            else R.string.working_status_none_authorizer_desc
-        )
-        else -> authorizer.value
+    getString: (Int) -> String,
+): String = when (authorizer) {
+    Authorizer.Root -> if (rootMode != RootMode.None) {
+        "${getString(R.string.available)} (${rootMode.name})"
+    } else {
+        getString(R.string.unavailable)
     }
 
-private fun List<SmartAuthorizerCandidate>.move(
-    from: Int,
-    to: Int
-): List<SmartAuthorizerCandidate> {
+    Authorizer.Shizuku -> when {
+        shizukuAuthorized -> "${getString(R.string.activate)} (${shizukuMode.desc})"
+        shizukuMode != ShizukuMode.NONE -> getString(R.string.shizuku_not_authorized)
+        else -> getString(R.string.shizuku_not_available)
+    }
+
+    Authorizer.Dhizuku -> when {
+        dhizukuAuthorized -> getString(R.string.activate)
+        dhizukuAvailable -> getString(R.string.dhizuku_not_authorized)
+        else -> getString(R.string.dhizuku_not_available)
+    }
+
+    Authorizer.None -> getString(
+        if (isSystemApp) {
+            R.string.working_status_system_installer_desc
+        } else {
+            R.string.working_status_none_authorizer_desc
+        },
+    )
+
+    else -> authorizer.value
+}
+
+private fun List<SmartAuthorizerCandidate>.move(from: Int, to: Int): List<SmartAuthorizerCandidate> {
     if (from !in indices || to !in indices || from == to) return this
     return toMutableList().apply {
         val item = removeAt(from)
@@ -439,14 +434,10 @@ private fun List<SmartAuthorizerCandidate>.move(
     }
 }
 
-private fun List<SmartAuthorizerCandidate>.toggle(
-    authorizer: Authorizer,
-    enabled: Boolean
-): List<SmartAuthorizerCandidate> =
-    map { candidate ->
-        if (candidate.authorizer == authorizer) {
-            candidate.copy(enabled = enabled)
-        } else {
-            candidate
-        }
+private fun List<SmartAuthorizerCandidate>.toggle(authorizer: Authorizer, enabled: Boolean): List<SmartAuthorizerCandidate> = map { candidate ->
+    if (candidate.authorizer == authorizer) {
+        candidate.copy(enabled = enabled)
+    } else {
+        candidate
     }
+}

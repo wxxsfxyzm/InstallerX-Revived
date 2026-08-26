@@ -40,7 +40,7 @@ interface AppInstallerRepository {
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>,
         onProgress: suspend (InstallWriteProgress) -> Unit = {},
-        onPhaseChanged: suspend (InstallPhase) -> Unit = {}
+        onPhaseChanged: suspend (InstallPhase) -> Unit = {},
     )
 
     /**
@@ -49,10 +49,7 @@ interface AppInstallerRepository {
      * @param config The configuration model.
      * @param packageName The name of the package to uninstall.
      */
-    suspend fun doUninstallWork(
-        config: ConfigModel,
-        packageName: String,
-    )
+    suspend fun doUninstallWork(config: ConfigModel, packageName: String)
 
     /**
      * Approve or deny a session.
@@ -61,9 +58,5 @@ interface AppInstallerRepository {
      * @param sessionId The ID of the session to approve or deny.
      * @param granted Whether the session should be granted or denied.
      */
-    suspend fun approveSession(
-        config: ConfigModel,
-        sessionId: Int,
-        granted: Boolean
-    )
+    suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean)
 }

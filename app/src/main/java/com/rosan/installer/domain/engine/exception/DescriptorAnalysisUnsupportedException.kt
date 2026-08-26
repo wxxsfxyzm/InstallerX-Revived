@@ -5,11 +5,9 @@ package com.rosan.installer.domain.engine.exception
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
 
-class DescriptorAnalysisUnsupportedException(
-    val source: DataEntity.FileDescriptorEntity,
-    cause: Throwable
-) : AnalyseException(
-    errorType = AnalyseErrorType.STREAMING_SOURCE_UNSUPPORTED,
-    message = "The descriptor-backed APK source cannot be analysed directly",
-    cause = cause
-)
+class DescriptorAnalysisUnsupportedException(val source: DataEntity.FileDescriptorEntity, cause: Throwable) :
+    AnalyseException(
+        errorType = AnalyseErrorType.STREAMING_SOURCE_UNSUPPORTED,
+        message = "The descriptor-backed APK source cannot be analysed directly",
+        cause = cause,
+    )

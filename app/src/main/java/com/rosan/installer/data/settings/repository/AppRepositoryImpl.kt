@@ -13,9 +13,7 @@ import com.rosan.installer.domain.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class AppRepositoryImpl(
-    private val dao: AppDao
-) : AppRepository {
+class AppRepositoryImpl(private val dao: AppDao) : AppRepository {
 
     // Helper method to build dynamic SQL queries for sorting
     private fun buildOrderQuery(order: AppOrder): RoomRawQuery {
@@ -45,23 +43,25 @@ class AppRepositoryImpl(
         }
     }
 
-    override suspend fun find(id: Long): AppModel? {
-        return dao.find(id)?.toDomainModel()
-    }
+    override suspend fun find(id: Long): AppModel? = dao.find(id)?.toDomainModel()
 
-    override fun flowFind(id: Long): Flow<AppModel?> {
-        return dao.flowFind(id).map { it?.toDomainModel() }
-    }
+    override fun flowFind(id: Long): Flow<AppModel?> = dao.flowFind(id).map { it?.toDomainModel() }
 
     override suspend fun findByPackageName(packageName: String?): AppModel? {
-        val entity = if (packageName == null) dao.findByNullPackageName()
-        else dao.findByPackageName(packageName)
+        val entity = if (packageName == null) {
+            dao.findByNullPackageName()
+        } else {
+            dao.findByPackageName(packageName)
+        }
         return entity?.toDomainModel()
     }
 
     override fun flowFindByPackageName(packageName: String?): Flow<AppModel?> {
-        val flow = if (packageName == null) dao.flowFindByNullPackageName()
-        else dao.flowFindByPackageName(packageName)
+        val flow = if (packageName == null) {
+            dao.flowFindByNullPackageName()
+        } else {
+            dao.flowFindByPackageName(packageName)
+        }
         return flow.map { it?.toDomainModel() }
     }
 

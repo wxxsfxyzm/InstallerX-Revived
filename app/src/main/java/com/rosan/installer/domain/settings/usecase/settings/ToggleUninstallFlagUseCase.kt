@@ -1,13 +1,11 @@
 package com.rosan.installer.domain.settings.usecase.settings
 
-import com.rosan.installer.domain.engine.model.install.UninstallFlags
-import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.core.bitmask.addFlag
 import com.rosan.installer.core.bitmask.removeFlag
+import com.rosan.installer.domain.engine.model.install.UninstallFlags
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 
-class ToggleUninstallFlagUseCase(
-    private val appSettingsRepo: AppSettingsRepository
-) {
+class ToggleUninstallFlagUseCase(private val appSettingsRepo: AppSettingsRepository) {
     suspend operator fun invoke(flag: Int, enable: Boolean): Int? {
         var disabledMutualExclusionFlag: Int? = null
 

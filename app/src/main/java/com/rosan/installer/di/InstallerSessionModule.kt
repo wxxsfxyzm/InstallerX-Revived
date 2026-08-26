@@ -25,7 +25,7 @@ val installerModule = module {
     factory<InstallerSessionRepository> { (id: String, onClose: () -> Unit) ->
         InstallerSessionRepositoryImpl(
             id = id,
-            onClose = onClose
+            onClose = onClose,
         )
     }
     factoryOf(::ConfigResolver)

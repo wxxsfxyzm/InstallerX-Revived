@@ -26,18 +26,18 @@ data class OperationHistoryModel(
     val installMode: InstallMode,
     val errorSummary: String? = null,
     val errorType: String? = null,
-    val operationSessionKey: String? = null
+    val operationSessionKey: String? = null,
 )
 
 enum class OperationType {
     INSTALL,
     UNINSTALL,
-    SESSION_CONFIRM
+    SESSION_CONFIRM,
 }
 
 enum class OperationStatus {
     SUCCESS,
-    FAILED
+    FAILED,
 }
 
 enum class VersionChange {
@@ -45,10 +45,10 @@ enum class VersionChange {
     UPDATE,
     DOWNGRADE,
     SAME_VERSION,
-    UNKNOWN
+    UNKNOWN,
 }
 
 enum class InstallMethod {
     PACKAGE_MANAGER,
-    SESSION
+    SESSION,
 }

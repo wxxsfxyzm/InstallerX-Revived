@@ -12,7 +12,7 @@ internal enum class HistoryBadgeType {
     FRESH_INSTALL,
     UPDATE,
     DOWNGRADE,
-    SELF_UPDATE
+    SELF_UPDATE,
 }
 
 @StringRes
@@ -23,12 +23,11 @@ internal fun HistoryBadgeType.labelRes(): Int = when (this) {
     HistoryBadgeType.SELF_UPDATE -> R.string.history_version_self_update
 }
 
-internal fun OperationHistoryModel.historyBadgeType(selfPackageName: String): HistoryBadgeType? =
-    when {
-        operationType != OperationType.INSTALL -> null
-        packageName == selfPackageName -> HistoryBadgeType.SELF_UPDATE
-        versionChange == VersionChange.FRESH_INSTALL -> HistoryBadgeType.FRESH_INSTALL
-        versionChange == VersionChange.UPDATE -> HistoryBadgeType.UPDATE
-        versionChange == VersionChange.DOWNGRADE -> HistoryBadgeType.DOWNGRADE
-        else -> null
-    }
+internal fun OperationHistoryModel.historyBadgeType(selfPackageName: String): HistoryBadgeType? = when {
+    operationType != OperationType.INSTALL -> null
+    packageName == selfPackageName -> HistoryBadgeType.SELF_UPDATE
+    versionChange == VersionChange.FRESH_INSTALL -> HistoryBadgeType.FRESH_INSTALL
+    versionChange == VersionChange.UPDATE -> HistoryBadgeType.UPDATE
+    versionChange == VersionChange.DOWNGRADE -> HistoryBadgeType.DOWNGRADE
+    else -> null
+}

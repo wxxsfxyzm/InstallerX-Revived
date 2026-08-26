@@ -64,7 +64,7 @@ data class ConfigModel(
     val installSourcePackageCandidates: List<String> = emptyList(),
     val installSourceConfidence: InstallSourceConfidence = InstallSourceConfidence.UNKNOWN,
     val notUnknownSource: Boolean = false,
-    val allowInstallWithoutUserAction: Boolean = false
+    val allowInstallWithoutUserAction: Boolean = false,
 ) {
     companion object {
         var default = ConfigModel(
@@ -99,7 +99,7 @@ data class ConfigModel(
             splitChooseAll = false,
             apkChooseAll = false,
             allowSigMismatch = true,
-            allowSigUnknown = true
+            allowSigUnknown = true,
         )
 
         val XiaomiDefault = ConfigModel(
@@ -134,13 +134,12 @@ data class ConfigModel(
             splitChooseAll = false,
             apkChooseAll = false,
             allowSigMismatch = true,
-            allowSigUnknown = true
+            allowSigUnknown = true,
         )
 
-        fun generateOptimalDefault(): ConfigModel =
-            when (DeviceConfig.currentManufacturer) {
-                Manufacturer.XIAOMI -> XiaomiDefault
-                else -> default
-            }
+        fun generateOptimalDefault(): ConfigModel = when (DeviceConfig.currentManufacturer) {
+            Manufacturer.XIAOMI -> XiaomiDefault
+            else -> default
+        }
     }
 }

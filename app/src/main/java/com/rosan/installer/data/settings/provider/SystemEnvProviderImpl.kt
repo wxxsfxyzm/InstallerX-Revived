@@ -18,22 +18,20 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.framework.auth.safeBiometricAuth
 import com.rosan.installer.util.timber.FileLoggingTree
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
     override val packageName: String = context.packageName
 
-    override suspend fun getPackageUid(packageName: String): Int? {
-        return runCatching {
-            context.packageManager.getApplicationInfo(packageName, 0).uid
-        }.getOrNull()
-    }
+    override suspend fun getPackageUid(packageName: String): Int? = runCatching {
+        context.packageManager.getApplicationInfo(packageName, 0).uid
+    }.getOrNull()
 
     override fun isIgnoringBatteryOptimizationsFlow(): Flow<Boolean> = flow {
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -47,7 +45,7 @@ class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
         val enabled = Settings.Global.getInt(
             context.contentResolver,
             "verifier_verify_adb_installs",
-            1
+            1,
         ) != 0
         emit(enabled)
     }.flowOn(Dispatchers.IO)
@@ -61,12 +59,10 @@ class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
         context.startActivity(intent)
     }
 
-    override suspend fun authenticateBiometric(isInstaller: Boolean): Boolean {
-        return context.safeBiometricAuth(
-            title = context.getString(R.string.use_biometric_confirm_change_auth_settings),
-            subTitle = context.getString(R.string.use_biometric_confirm_change_auth_settings_desc)
-        )
-    }
+    override suspend fun authenticateBiometric(isInstaller: Boolean): Boolean = context.safeBiometricAuth(
+        title = context.getString(R.string.use_biometric_confirm_change_auth_settings),
+        subTitle = context.getString(R.string.use_biometric_confirm_change_auth_settings_desc),
+    )
 
     override fun setLauncherAliasEnabled(enabled: Boolean) {
         val componentName = ComponentName(context, "com.rosan.installer.ui.activity.LauncherAlias")
@@ -96,6 +92,8 @@ class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
                 null
             }
             emit(colors)
-        } else emit(null)
+        } else {
+            emit(null)
+        }
     }.flowOn(Dispatchers.IO)
 }

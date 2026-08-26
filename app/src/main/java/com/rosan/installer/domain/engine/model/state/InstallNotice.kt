@@ -11,7 +11,7 @@ import com.rosan.installer.domain.engine.model.packageinfo.SigningBlockCertifica
 data class SignatureNoticeDetails(
     val pendingSignatureInfo: AppSignatureInfo?,
     val installedSignatureInfo: AppSignatureInfo?,
-    val packageSignatureAnalysis: PackageSignatureAnalysis = PackageSignatureAnalysis()
+    val packageSignatureAnalysis: PackageSignatureAnalysis = PackageSignatureAnalysis(),
 )
 
 /**
@@ -24,21 +24,15 @@ sealed interface InstallNotice {
     data class SignatureSummary(
         val status: SignatureMatchStatus,
         val details: SignatureNoticeDetails? = null,
-        val hasPackageSignatureIssues: Boolean = false
+        val hasPackageSignatureIssues: Boolean = false,
     ) : InstallNotice
 
-    data class SignatureMismatch(
-        val details: SignatureNoticeDetails? = null,
-        val hasPackageSignatureIssues: Boolean = false
-    ) : InstallNotice
+    data class SignatureMismatch(val details: SignatureNoticeDetails? = null, val hasPackageSignatureIssues: Boolean = false) : InstallNotice
 
-    data class SignatureUnknown(
-        val details: SignatureNoticeDetails? = null,
-        val hasPackageSignatureIssues: Boolean = false
-    ) : InstallNotice
+    data class SignatureUnknown(val details: SignatureNoticeDetails? = null, val hasPackageSignatureIssues: Boolean = false) : InstallNotice
     data class SigningBlockOnly(
         val certificateStatus: SigningBlockCertificateStatus,
-        val details: SignatureNoticeDetails? = null
+        val details: SignatureNoticeDetails? = null,
     ) : InstallNotice
     data object SdkIncompatible : InstallNotice
     data object Arch32On64 : InstallNotice

@@ -11,5 +11,5 @@ data class InstallEntity(
     val arch: Architecture? = null,
     val data: DataEntity,
     val sourceType: DataType,
-    val installLocation: Int? = null
+    val installLocation: Int? = null,
 )

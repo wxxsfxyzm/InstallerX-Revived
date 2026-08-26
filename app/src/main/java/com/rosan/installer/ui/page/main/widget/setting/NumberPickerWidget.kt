@@ -55,7 +55,7 @@ fun IntNumberPickerWidget(
     valueSuffix: String = "",
     subduedValue: Boolean = false,
     onValueClick: (() -> Unit)? = null,
-    onValueChange: (Int) -> Unit
+    onValueChange: (Int) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
     var lastIntValue by remember(value) { mutableIntStateOf(value) }
@@ -76,7 +76,7 @@ fun IntNumberPickerWidget(
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (icon != null) {
                 Icon(
@@ -92,13 +92,13 @@ fun IntNumberPickerWidget(
                 Text(
                     text = title,
                     color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 if (description != null) {
                     Text(
                         text = description,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
@@ -106,15 +106,18 @@ fun IntNumberPickerWidget(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 56.dp, end = 36.dp)
+            modifier = Modifier.padding(start = 56.dp, end = 36.dp),
         ) {
             Slider(
                 value = value.toFloat(),
                 onValueChange = {
                     val intValue = it.roundToInt()
                     if (intValue != lastIntValue) {
-                        if (stepSize == 0) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        else haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        if (stepSize == 0) {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        } else {
+                            haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        }
                         lastIntValue = intValue
                         onValueChange(intValue)
                     }
@@ -131,16 +134,19 @@ fun IntNumberPickerWidget(
                         enabled = enabled,
                         showTooltip = showTooltip,
                         isDragged = isDragged,
-                        currentValue = lastIntValue
+                        currentValue = lastIntValue,
                     )
-                }
+                },
             )
             Spacer(modifier = Modifier.width(16.dp))
             val valueModifier = Modifier
                 .defaultMinSize(minWidth = 36.dp)
                 .then(
-                    if (onValueClick != null) Modifier.clickable(onClick = onValueClick)
-                    else Modifier
+                    if (onValueClick != null) {
+                        Modifier.clickable(onClick = onValueClick)
+                    } else {
+                        Modifier
+                    },
                 )
                 .padding(horizontal = 4.dp, vertical = 8.dp)
             if (subduedValue) {
@@ -149,13 +155,13 @@ fun IntNumberPickerWidget(
                     modifier = valueModifier,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
                 )
             } else {
                 Text(
                     text = "$value$valueSuffix",
                     modifier = valueModifier,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
                 )
             }
         }
@@ -169,12 +175,12 @@ private fun TooltipSliderThumbDefinitive(
     enabled: Boolean,
     showTooltip: Boolean,
     isDragged: Boolean,
-    currentValue: Int
+    currentValue: Int,
 ) {
     Box(contentAlignment = Alignment.Center) {
         SliderDefaults.Thumb(
             interactionSource = interactionSource,
-            enabled = enabled
+            enabled = enabled,
         )
 
         if (showTooltip) {
@@ -185,28 +191,28 @@ private fun TooltipSliderThumbDefinitive(
                     layout(width = 0, height = 0) {
                         placeable.placeRelative(
                             x = -placeable.width / 2,
-                            y = -placeable.height - 16.dp.roundToPx()
+                            y = -placeable.height - 16.dp.roundToPx(),
                         )
                     }
-                }
+                },
             ) {
                 AnimatedVisibility(
                     visible = isDragged,
                     enter = fadeIn(animationSpec = tween(150)),
-                    exit = fadeOut(animationSpec = tween(150))
+                    exit = fadeOut(animationSpec = tween(150)),
                 ) {
                     Box(
                         modifier = Modifier
                             .background(
                                 color = MaterialTheme.colorScheme.inverseSurface,
-                                shape = RoundedCornerShape(4.dp)
+                                shape = RoundedCornerShape(4.dp),
                             )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                     ) {
                         Text(
                             text = currentValue.toString(),
                             color = MaterialTheme.colorScheme.inverseOnSurface,
-                            style = MaterialTheme.typography.labelMedium
+                            style = MaterialTheme.typography.labelMedium,
                         )
                     }
                 }

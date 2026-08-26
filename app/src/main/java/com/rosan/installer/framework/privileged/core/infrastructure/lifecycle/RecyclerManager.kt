@@ -12,9 +12,7 @@ import kotlin.concurrent.write
  * Recycler Manager
  * Supports clearing unused Recyclers
  */
-class RecyclerManager<K, V : Closeable>(
-    private val factory: (K) -> V
-) : Closeable {
+class RecyclerManager<K, V : Closeable>(private val factory: (K) -> V) : Closeable {
 
     private val map = ConcurrentHashMap<K, V>()
     private val lock = ReentrantReadWriteLock()

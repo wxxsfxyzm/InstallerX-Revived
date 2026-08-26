@@ -12,21 +12,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class AppOpsProviderImpl(
-    private val capabilityProvider: DeviceCapabilityProvider
-) : AppOpsProvider {
+class AppOpsProviderImpl(private val capabilityProvider: DeviceCapabilityProvider) : AppOpsProvider {
     override suspend fun setDefaultInstaller(
         authorizer: Authorizer,
         customizeAuthorizer: String,
         component: ComponentName,
-        lock: Boolean
+        lock: Boolean,
     ) {
         withContext(Dispatchers.IO) {
             useDirectPrivileged(
                 isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = authorizer,
                 customizeAuthorizer = customizeAuthorizer,
-                special = getSpecialAuth(authorizer)
+                special = getSpecialAuth(authorizer),
             ) { privileged ->
                 privileged.setDefaultInstaller(component, lock)
             }
@@ -38,7 +36,7 @@ class AppOpsProviderImpl(
             useDirectPrivileged(
                 isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = authorizer,
-                customizeAuthorizer = customizeAuthorizer
+                customizeAuthorizer = customizeAuthorizer,
             ) { privileged ->
                 try {
                     privileged.setAdbVerify(enabled)
@@ -56,7 +54,7 @@ class AppOpsProviderImpl(
         withContext(Dispatchers.IO) {
             useDirectPrivileged(
                 isSystemApp = capabilityProvider.isSystemApp,
-                authorizer = authorizer
+                authorizer = authorizer,
             ) { privileged ->
                 try {
                     privileged.setPackageNetworkingEnabled(uid, enabled)
@@ -73,14 +71,14 @@ class AppOpsProviderImpl(
         authorizer: Authorizer,
         customizeAuthorizer: String,
         uid: Int,
-        packageName: String
+        packageName: String,
     ): Int? = withContext(Dispatchers.IO) {
         var mode: Int? = null
         useDirectPrivileged(
             isSystemApp = capabilityProvider.isSystemApp,
             authorizer = authorizer,
             customizeAuthorizer = customizeAuthorizer,
-            special = getSpecialAuth(authorizer)
+            special = getSpecialAuth(authorizer),
         ) { privileged ->
             mode = privileged.prepareUnknownSourceAppOp(uid, packageName)
         }

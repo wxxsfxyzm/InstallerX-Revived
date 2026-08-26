@@ -31,7 +31,7 @@ data class BackupEnvelope(
     val profiles: List<BackupProfile> = emptyList(),
     val scopes: List<BackupProfileScope> = emptyList(),
     val settings: List<BackupSettingEntry> = emptyList(),
-    val history: List<BackupHistoryEntry> = emptyList()
+    val history: List<BackupHistoryEntry> = emptyList(),
 )
 
 @Serializable
@@ -54,7 +54,7 @@ data class BackupHistoryEntry(
     val authorizer: String,
     val installMode: String,
     val errorSummary: String? = null,
-    val errorType: String? = null
+    val errorType: String? = null,
 )
 
 @Serializable
@@ -96,7 +96,7 @@ data class BackupProfile(
     val apkChooseAll: Boolean = false,
     val requireBiometricAuth: Boolean = false,
     val createdAt: Long = 0L,
-    val modifiedAt: Long = 0L
+    val modifiedAt: Long = 0L,
 )
 
 @Serializable
@@ -104,15 +104,11 @@ data class BackupProfileScope(
     val backupId: Long,
     val packageName: String? = null,
     val createdAt: Long = 0L,
-    val modifiedAt: Long = 0L
+    val modifiedAt: Long = 0L,
 )
 
 @Serializable
-data class BackupSettingEntry(
-    val key: String,
-    val type: BackupSettingType,
-    val value: String
-)
+data class BackupSettingEntry(val key: String, val type: BackupSettingType, val value: String)
 
 @Serializable
 enum class BackupSettingType {
@@ -123,7 +119,7 @@ enum class BackupSettingType {
     INT,
 
     @SerialName("boolean")
-    BOOLEAN
+    BOOLEAN,
 }
 
 data class RestoreResult(
@@ -132,7 +128,7 @@ data class RestoreResult(
     val restoredSettings: Int,
     val restoredHistory: Int = 0,
     val ignoredSettings: Int,
-    val rolledBack: Boolean = false
+    val rolledBack: Boolean = false,
 )
 
 data class BackupRestorePreview(
@@ -142,7 +138,7 @@ data class BackupRestorePreview(
     val settingCount: Int,
     val historyCount: Int,
     val ignoredSettingCount: Int,
-    val issues: List<BackupValidationIssue>
+    val issues: List<BackupValidationIssue>,
 ) {
     val warnings: List<BackupValidationIssue>
         get() = issues.filter { it.severity == BackupValidationSeverity.WARNING }
@@ -152,26 +148,25 @@ data class BackupValidationIssue(
     val severity: BackupValidationSeverity,
     val code: String,
     @param:StringRes val messageResId: Int,
-    val args: List<String> = emptyList()
+    val args: List<String> = emptyList(),
 )
 
 enum class BackupValidationSeverity {
     ERROR,
-    WARNING
+    WARNING,
 }
 
-class BackupValidationException(
-    val issues: List<BackupValidationIssue>
-) : IllegalArgumentException(
-    issues.firstOrNull()?.code ?: "backup_validation_failed"
-) {
+class BackupValidationException(val issues: List<BackupValidationIssue>) :
+    IllegalArgumentException(
+        issues.firstOrNull()?.code ?: "backup_validation_failed",
+    ) {
     constructor(@StringRes messageResId: Int, code: String = "backup_validation_failed") : this(
         listOf(
             BackupValidationIssue(
                 severity = BackupValidationSeverity.ERROR,
                 code = code,
-                messageResId = messageResId
-            )
-        )
+                messageResId = messageResId,
+            ),
+        ),
     )
 }

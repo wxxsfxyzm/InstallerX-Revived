@@ -7,10 +7,7 @@ import com.rosan.installer.domain.settings.repository.ConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class DatabaseInitializer(
-    private val configRepository: ConfigRepository,
-    appScope: CoroutineScope
-) {
+class DatabaseInitializer(private val configRepository: ConfigRepository, appScope: CoroutineScope) {
     init {
         appScope.launch {
             configRepository.findDefault() ?: configRepository.insert(ConfigModel.generateOptimalDefault())

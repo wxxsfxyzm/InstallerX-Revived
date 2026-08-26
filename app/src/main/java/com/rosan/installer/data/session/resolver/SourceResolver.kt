@@ -27,14 +27,6 @@ import com.rosan.installer.domain.session.model.ResolveResult
 import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
@@ -45,13 +37,21 @@ import java.nio.channels.SeekableByteChannel
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.min
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class SourceResolver(
     private val context: Context,
     private val networkResolver: NetworkResolver,
     private val appSettingsRepository: AppSettingsRepository,
     private val cacheDirectory: String,
-    private val progressFlow: MutableSharedFlow<ProgressEntity>
+    private val progressFlow: MutableSharedFlow<ProgressEntity>,
 ) {
     private val closeables = mutableListOf<Closeable>()
 
@@ -69,15 +69,15 @@ class SourceResolver(
             data.addAll(
                 resolveSingleUri(
                     uri,
-                    networkSettings.networkSourceMode
-                )
+                    networkSettings.networkSourceMode,
+                ),
             )
         }
 
         // Return the packaged result
         return ResolveResult(
             uris = uris.map { it.toString() },
-            data = data
+            data = data,
         )
     }
 
@@ -88,22 +88,22 @@ class SourceResolver(
      */
     suspend fun materializeForAnalysis(
         data: List<DataEntity>,
-        requestedSource: DataEntity.FileDescriptorEntity
+        requestedSource: DataEntity.FileDescriptorEntity,
     ): List<DataEntity> {
         if (!appSettingsRepository.preferencesFlow.first().allowInternetAccess) {
             throw ResolveException(
                 errorType = ResolveErrorType.NO_INTERNET_ACCESS,
-                message = "Internet access was disabled before source materialization."
+                message = "Internet access was disabled before source materialization.",
             )
         }
         return materializeAnalysisSource(
             data = data,
             requestedSource = requestedSource,
-            cacheDirectory = File(cacheDirectory)
+            cacheDirectory = File(cacheDirectory),
         ) { input, output, size ->
             Timber.i(
                 "Materializing descriptor-backed source for analysis and installation: " +
-                        "path=${requestedSource.path}, size=$size"
+                    "path=${requestedSource.path}, size=$size",
             )
             input.copyToWithProgress(output, size, progressFlow)
         }
@@ -186,17 +186,16 @@ class SourceResolver(
             }
         }
 
-        if (uris.isEmpty()) throw ResolveException(
-            errorType = ResolveErrorType.GENERIC_FAILED,
-            message = "action: $action, uri: $uris"
-        )
+        if (uris.isEmpty()) {
+            throw ResolveException(
+                errorType = ResolveErrorType.GENERIC_FAILED,
+                message = "action: $action, uri: $uris",
+            )
+        }
         return uris
     }
 
-    private suspend fun resolveSingleUri(
-        uri: Uri,
-        networkSourceMode: NetworkSourceMode
-    ): List<DataEntity> {
+    private suspend fun resolveSingleUri(uri: Uri, networkSourceMode: NetworkSourceMode): List<DataEntity> {
         Timber.d("Source URI: $uri")
 
         // Handle null scheme (unlikely but safe to handle)
@@ -216,7 +215,7 @@ class SourceResolver(
                     Timber.d("Internet access is disabled in app settings. Aborting network request.")
                     throw ResolveException(
                         errorType = ResolveErrorType.NO_INTERNET_ACCESS,
-                        message = "No internet access to download files."
+                        message = "No internet access to download files.",
                     )
                 }
 
@@ -224,13 +223,13 @@ class SourceResolver(
                     uri,
                     cacheDirectory,
                     networkSourceMode,
-                    progressFlow
+                    progressFlow,
                 )
             }
 
             else -> throw ResolveException(
                 errorType = ResolveErrorType.GENERIC_FAILED,
-                message = "Unsupported scheme: $scheme, uris: $uri"
+                message = "Unsupported scheme: $scheme, uris: $uri",
             )
         }
     }
@@ -242,14 +241,14 @@ class SourceResolver(
             val message = e.message.orEmpty()
             val isUriPermissionDenial =
                 message.contains("grantUriPermission", ignoreCase = true) ||
-                        message.contains("Permission Denial", ignoreCase = true) ||
-                        message.contains("not exported", ignoreCase = true)
+                    message.contains("Permission Denial", ignoreCase = true) ||
+                    message.contains("not exported", ignoreCase = true)
 
             if (isUriPermissionDenial) {
                 Timber.w(e, "Content URI permission denied. Installer is likely hidden from initiator.")
                 throw ResolveException(
                     errorType = ResolveErrorType.INITIATOR_NOT_VISIBLE,
-                    cause = e
+                    cause = e,
                 )
             }
 
@@ -274,7 +273,7 @@ class SourceResolver(
                     startOffset = range.offset,
                     length = range.length,
                     channelFactory = { providerAsset.openChannel(range) },
-                    descriptorFactory = providerAsset::duplicateDescriptor
+                    descriptorFactory = providerAsset::duplicateDescriptor,
                 ).apply {
                     // Keep the provider-derived display path as source identity. It may represent a
                     // virtual provider path rather than a real file, so path-only consumers must
@@ -285,7 +284,7 @@ class SourceResolver(
                 retainProviderAsset = true
                 Timber.d(
                     "Using retained content descriptor without cache or path reopen: " +
-                            "path=$displayPath, offset=${range.offset}, length=${range.length}"
+                        "path=$displayPath, offset=${range.offset}, length=${range.length}",
                 )
                 return listOf(entity)
             }
@@ -363,9 +362,7 @@ class SourceResolver(
 
     private data class ContentRange(val offset: Long, val length: Long)
 
-    private class ProviderAsset(
-        val descriptor: AssetFileDescriptor
-    ) : Closeable {
+    private class ProviderAsset(val descriptor: AssetFileDescriptor) : Closeable {
         private val closed = AtomicBoolean(false)
 
         fun openChannel(range: ContentRange): SeekableByteChannel {
@@ -399,7 +396,7 @@ class SourceResolver(
     private class PositionalFileDescriptorChannel(
         private val input: ParcelFileDescriptor.AutoCloseInputStream,
         private val startOffset: Long,
-        private val rangeLength: Long
+        private val rangeLength: Long,
     ) : SeekableByteChannel {
         private val channel = input.channel
         private var position = 0L
@@ -454,49 +451,52 @@ class SourceResolver(
         }
     }
 
-    private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> =
-        withContext(Dispatchers.IO) {
-            val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
-            val knownLength =
-                if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) afd.declaredLength else guessContentLength(
+    private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> = withContext(Dispatchers.IO) {
+        val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
+        val knownLength =
+            if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) {
+                afd.declaredLength
+            } else {
+                guessContentLength(
                     uri,
-                    afd
+                    afd,
                 )
-
-            Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $knownLength")
-
-            var nioSuccess = false
-            try {
-                val fd = afd.fileDescriptor
-                if (fd.valid() && knownLength > 0) {
-                    Timber.d("Attempting NIO FileChannel transfer...")
-                    transferWithProgress(
-                        sourceFd = fd,
-                        sourceOffset = afd.startOffset,
-                        destFile = tempFile,
-                        totalSize = knownLength,
-                        progressFlow = progressFlow
-                    )
-                    nioSuccess = true
-                    Timber.d("NIO transfer successful.")
-                }
-            } catch (e: Exception) {
-                Timber.w(e, "NIO transfer failed, falling back to legacy stream copy.")
-                if (tempFile.exists()) tempFile.delete()
-                tempFile.createNewFile()
             }
 
-            if (!nioSuccess) {
-                Timber.d("Using legacy Stream copy.")
-                afd.createInputStream().use { input ->
-                    tempFile.outputStream().use { output ->
-                        input.copyToWithProgress(output, knownLength, progressFlow)
-                    }
-                }
-            }
+        Timber.d("Caching content to: ${tempFile.absolutePath}, Size: $knownLength")
 
-            listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+        var nioSuccess = false
+        try {
+            val fd = afd.fileDescriptor
+            if (fd.valid() && knownLength > 0) {
+                Timber.d("Attempting NIO FileChannel transfer...")
+                transferWithProgress(
+                    sourceFd = fd,
+                    sourceOffset = afd.startOffset,
+                    destFile = tempFile,
+                    totalSize = knownLength,
+                    progressFlow = progressFlow,
+                )
+                nioSuccess = true
+                Timber.d("NIO transfer successful.")
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "NIO transfer failed, falling back to legacy stream copy.")
+            if (tempFile.exists()) tempFile.delete()
+            tempFile.createNewFile()
         }
+
+        if (!nioSuccess) {
+            Timber.d("Using legacy Stream copy.")
+            afd.createInputStream().use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyToWithProgress(output, knownLength, progressFlow)
+                }
+            }
+        }
+
+        listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+    }
 
     /**
      * Optimally guesses the content length.
@@ -519,7 +519,9 @@ class SourceResolver(
             context.contentResolver.query(
                 uri,
                 arrayOf(OpenableColumns.SIZE, DocumentsContract.Document.COLUMN_SIZE),
-                null, null, null
+                null,
+                null,
+                null,
             )?.use { cursor ->
                 if (cursor.moveToFirst()) {
                     // Check OpenableColumns.SIZE first

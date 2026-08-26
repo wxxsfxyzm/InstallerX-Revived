@@ -15,11 +15,18 @@ package com.rosan.installer.util
  * @see <a href="https://github.com/vvb2060/PackageInstaller/blob/master/app/src/main/java/io/github/vvb2060/packageinstaller/model/PackageUtil.kt">PackageUtil</a>
  * @see <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>
  */
-fun String.convertLegacyLanguageCode(): String =
-    when (this) {
-        "in" -> "id" // Indonesian
-        "iw" -> "he" // Hebrew
-        "ji" -> "yi" // Yiddish
-        "tl" -> "fil" // Tagalog -> Filipino
-        else -> this
-    }
+fun String.convertLegacyLanguageCode(): String = when (this) {
+    "in" -> "id"
+
+    // Indonesian
+    "iw" -> "he"
+
+    // Hebrew
+    "ji" -> "yi"
+
+    // Yiddish
+    "tl" -> "fil"
+
+    // Tagalog -> Filipino
+    else -> this
+}

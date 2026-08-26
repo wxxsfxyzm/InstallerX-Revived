@@ -48,10 +48,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NotificationSettingsPage(
-    useBlur: Boolean,
-    viewModel: NotificationSettingsViewModel = koinViewModel()
-) {
+fun NotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -112,29 +109,33 @@ fun NotificationSettingsPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
         ) {
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.notification_style)
+                    title = stringResource(R.string.notification_style),
                 ) {
                     item {
                         val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported
                         DropDownMenuWidget(
                             icon = AppIcons.Palette,
                             title = stringResource(R.string.notification_style),
-                            description = if (isStyleSelectionEnabled) styleNames[selectedIndex] else stringResource(
-                                R.string.notification_style_unsupported_desc
-                            ),
+                            description = if (isStyleSelectionEnabled) {
+                                styleNames[selectedIndex]
+                            } else {
+                                stringResource(
+                                    R.string.notification_style_unsupported_desc,
+                                )
+                            },
                             enabled = isStyleSelectionEnabled,
                             choice = selectedIndex,
                             data = styleNames,
@@ -142,10 +143,10 @@ fun NotificationSettingsPage(
                                 val selectedStyle = styleOptions[index]
                                 viewModel.dispatch(
                                     NotificationSettingsAction.ChangeStyle(
-                                        selectedStyle
-                                    )
+                                        selectedStyle,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item(animatedVisibility = activeStyle == NotificationStyle.MI_ISLAND) {
@@ -157,10 +158,10 @@ fun NotificationSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     NotificationSettingsAction.ChangeMiIslandBypassRestriction(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item(animatedVisibility = activeStyle == NotificationStyle.MI_ISLAND && uiState.miIslandBypassRestriction) {
@@ -175,10 +176,10 @@ fun NotificationSettingsPage(
                                 onValueChange = {
                                     viewModel.dispatch(
                                         NotificationSettingsAction.ChangeMiIslandBlockingInterval(
-                                            it
-                                        )
+                                            it,
+                                        ),
                                     )
-                                }
+                                },
                             )
                         }
                     }
@@ -191,17 +192,17 @@ fun NotificationSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     NotificationSettingsAction.ChangeMiIslandOuterGlow(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                 }
             }
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.config_label_preferences)
+                    title = stringResource(R.string.config_label_preferences),
                 ) {
                     item {
                         SwitchWidget(
@@ -212,10 +213,10 @@ fun NotificationSettingsPage(
                             onCheckedChange = {
                                 viewModel.dispatch(
                                     NotificationSettingsAction.ChangeShowDialogOnPress(
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
 
@@ -225,15 +226,14 @@ fun NotificationSettingsPage(
                             onValueChange = { seconds ->
                                 viewModel.dispatch(
                                     NotificationSettingsAction.ChangeAutoClearSeconds(
-                                        seconds
-                                    )
+                                        seconds,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                 }
             }
-
         }
     }
 }
@@ -242,10 +242,7 @@ fun NotificationSettingsPage(
  * A DropDownMenuWidget for selecting the auto-clear time for success notifications.
  */
 @Composable
-private fun AutoClearNotificationTimeWidget(
-    currentValue: Int,
-    onValueChange: (Int) -> Unit
-) {
+private fun AutoClearNotificationTimeWidget(currentValue: Int, onValueChange: (Int) -> Unit) {
     val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) }
 
     val selectedIndex = remember(currentValue, options) {
@@ -258,7 +255,7 @@ private fun AutoClearNotificationTimeWidget(
     } else {
         stringResource(
             R.string.installer_settings_auto_clear_time_seconds_format_desc,
-            currentOption
+            currentOption,
         )
     }
 
@@ -281,6 +278,6 @@ private fun AutoClearNotificationTimeWidget(
             if (currentValue != newValue) {
                 onValueChange(newValue)
             }
-        }
+        },
     )
 }

@@ -21,17 +21,12 @@ import timber.log.Timber
  */
 class ApproveSessionUseCase(
     private val appInstaller: AppInstallerRepository,
-    private val recordOperationHistory: RecordOperationHistoryUseCase
+    private val recordOperationHistory: RecordOperationHistoryUseCase,
 ) {
     /**
      * Submits the user's decision (granted or rejected) for the given session.
      */
-    suspend operator fun invoke(
-        sessionId: Int,
-        granted: Boolean,
-        config: ConfigModel,
-        details: ConfirmationDetails? = null
-    ) {
+    suspend operator fun invoke(sessionId: Int, granted: Boolean, config: ConfigModel, details: ConfirmationDetails? = null) {
         Timber.d("Approving session $sessionId (granted: $granted) via ${config.authorizer}")
 
         val result = try {
@@ -51,7 +46,7 @@ class ApproveSessionUseCase(
         config: ConfigModel,
         details: ConfirmationDetails?,
         granted: Boolean,
-        result: Result<Unit>
+        result: Result<Unit>,
     ) {
         val packageName = details?.packageName?.takeIf { it.isNotBlank() } ?: "unknown"
         runCatching {
@@ -77,8 +72,8 @@ class ApproveSessionUseCase(
                         result.isFailure -> result.exceptionOrNull()?.historyErrorType()
                         !granted -> "DENIED"
                         else -> null
-                    }
-                )
+                    },
+                ),
             )
         }.onFailure { e ->
             Timber.e(e, "Failed to record session confirmation history for $packageName")

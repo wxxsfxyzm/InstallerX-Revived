@@ -4,9 +4,9 @@ package com.rosan.installer.data.settings.provider
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.settings.model.app.InstalledAppTarget
 import com.rosan.installer.domain.settings.provider.SystemAppProvider
-import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.util.pm.compatVersionCode
 import com.rosan.installer.util.pm.getCompatInstalledPackages
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +23,7 @@ class SystemAppProviderImpl(private val context: Context) : SystemAppProvider {
                 firstInstallTime = it.firstInstallTime,
                 lastUpdateTime = it.lastUpdateTime,
                 isSystemApp = it.applicationInfo!!.flags.hasFlag(ApplicationInfo.FLAG_SYSTEM),
-                label = it.applicationInfo?.loadLabel(packageManager)?.toString() ?: ""
+                label = it.applicationInfo?.loadLabel(packageManager)?.toString() ?: "",
             )
         }
     }

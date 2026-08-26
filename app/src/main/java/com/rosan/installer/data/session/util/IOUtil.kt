@@ -4,18 +4,18 @@ package com.rosan.installer.data.session.util
 
 import android.os.SystemClock
 import com.rosan.installer.domain.session.model.ProgressEntity
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 
 // Buffer optimized for modern Android filesystem block sizes
 private const val COPY_BUFFER_SIZE = 1 * 1024 * 1024 // 1MB
@@ -33,8 +33,9 @@ private const val CHUNK_SIZE = 16 * 1024 * 1024L // 16MB
 suspend fun InputStream.copyToWithProgress(
     output: OutputStream,
     totalSize: Long,
-    progressFlow: MutableSharedFlow<ProgressEntity>
-) = withContext(Dispatchers.IO) { // Switch to IO dispatcher to prevent thread starvation
+    progressFlow: MutableSharedFlow<ProgressEntity>,
+) = withContext(Dispatchers.IO) {
+    // Switch to IO dispatcher to prevent thread starvation
     var bytesCopied = 0L
     val buf = ByteArray(COPY_BUFFER_SIZE)
     val step = if (totalSize > 0) (totalSize * 0.01f).toLong().coerceAtLeast(128 * 1024) else Long.MAX_VALUE
@@ -69,8 +70,9 @@ suspend fun transferWithProgress(
     sourceOffset: Long,
     destFile: File,
     totalSize: Long,
-    progressFlow: MutableSharedFlow<ProgressEntity>
-) = withContext(Dispatchers.IO) { // Ensure file operations run on IO thread pool
+    progressFlow: MutableSharedFlow<ProgressEntity>,
+) = withContext(Dispatchers.IO) {
+    // Ensure file operations run on IO thread pool
     val sourceChannel = FileInputStream(sourceFd).channel
     val destChannel = FileOutputStream(destFile).channel
 

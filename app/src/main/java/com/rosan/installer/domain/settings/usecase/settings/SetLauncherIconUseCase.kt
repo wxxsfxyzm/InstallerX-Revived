@@ -8,7 +8,7 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 
 class SetLauncherIconUseCase(
     private val appSettingsRepo: AppSettingsRepository,
-    private val systemEnvProvider: SystemEnvProvider
+    private val systemEnvProvider: SystemEnvProvider,
 ) {
     suspend operator fun invoke(show: Boolean) {
         appSettingsRepo.putBoolean(BooleanSetting.ShowLauncherIcon, show)

@@ -13,10 +13,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class LogController(
-    private val context: Context,
-    private val appSettingsRepo: AppSettingsRepository
-) {
+class LogController(private val context: Context, private val appSettingsRepo: AppSettingsRepository) {
     private var fileLoggingTree: FileLoggingTree? = null
 
     // Use Main scope for collecting flow, file IO is handled internally by the Tree on IO dispatcher

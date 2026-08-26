@@ -21,39 +21,33 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-class BroadcastHandler(
-    override val scope: CoroutineScope,
-    override val session: InstallerSessionRepository
-) : Handler, KoinComponent {
+class BroadcastHandler(override val scope: CoroutineScope, override val session: InstallerSessionRepository) :
+    Handler,
+    KoinComponent {
     companion object {
         private const val ACTION = "installer.broadcast.action"
         private const val KEY_NAME = "name"
 
-        private fun getRequestCode(installer: InstallerSessionRepository, name: Name) =
-            "${installer.id}/$name".hashCode()
+        private fun getRequestCode(installer: InstallerSessionRepository, name: Name) = "${installer.id}/$name".hashCode()
 
-        fun openIntent(context: Context, installer: InstallerSessionRepository) =
-            Intent()
-                .setClassName(context.packageName, ActivityContracts.INSTALLER_ACTIVITY)
-                .putExtra(ActivityContracts.KEY_INSTALLER_ID, installer.id)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .pendingActivity(context, getRequestCode(installer, Name.Open))
+        fun openIntent(context: Context, installer: InstallerSessionRepository) = Intent()
+            .setClassName(context.packageName, ActivityContracts.INSTALLER_ACTIVITY)
+            .putExtra(ActivityContracts.KEY_INSTALLER_ID, installer.id)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .pendingActivity(context, getRequestCode(installer, Name.Open))
 
-        fun launchIntent(context: Context, installer: InstallerSessionRepository, intent: Intent) =
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .pendingActivity(context, getRequestCode(installer, Name.Launch))
+        fun launchIntent(context: Context, installer: InstallerSessionRepository, intent: Intent) = intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .pendingActivity(context, getRequestCode(installer, Name.Launch))
 
-        fun namedIntent(context: Context, installer: InstallerSessionRepository, name: Name) =
-            Intent(ACTION).setPackage(context.packageName)
-                .putExtra(KEY_INSTALLER_ID, installer.id)
-                .putExtra(KEY_NAME, name.value)
-                .pendingBroadcast(context, getRequestCode(installer, name))
+        fun namedIntent(context: Context, installer: InstallerSessionRepository, name: Name) = Intent(ACTION).setPackage(context.packageName)
+            .putExtra(KEY_INSTALLER_ID, installer.id)
+            .putExtra(KEY_NAME, name.value)
+            .pendingBroadcast(context, getRequestCode(installer, name))
 
-        fun privilegedLaunchAndFinishIntent(context: Context, installer: InstallerSessionRepository) =
-            Intent(ACTION).setPackage(context.packageName)
-                .putExtra(KEY_INSTALLER_ID, installer.id)
-                .putExtra(KEY_NAME, Name.PrivilegedLaunchAndFinish.value)
-                .pendingBroadcast(context, getRequestCode(installer, Name.PrivilegedLaunchAndFinish))
+        fun privilegedLaunchAndFinishIntent(context: Context, installer: InstallerSessionRepository) = Intent(ACTION).setPackage(context.packageName)
+            .putExtra(KEY_INSTALLER_ID, installer.id)
+            .putExtra(KEY_NAME, Name.PrivilegedLaunchAndFinish.value)
+            .pendingBroadcast(context, getRequestCode(installer, Name.PrivilegedLaunchAndFinish))
     }
 
     private val context by inject<Context>()
@@ -71,7 +65,7 @@ class BroadcastHandler(
             context,
             receiver,
             IntentFilter(ACTION),
-            ContextCompat.RECEIVER_NOT_EXPORTED
+            ContextCompat.RECEIVER_NOT_EXPORTED,
         )
     }
 
@@ -112,10 +106,15 @@ class BroadcastHandler(
         private suspend fun doWork(context: Context, name: Name) {
             when (name) {
                 Name.Analyse -> session.analyse()
+
                 Name.Install -> session.install(true)
+
                 Name.Finish -> session.close()
+
                 Name.Cancel -> session.cancel()
+
                 Name.PrivilegedLaunchAndFinish -> handlePrivilegedLaunchAndFinish(context)
+
                 else -> {
                     Timber.d("[id=${session.id}] Receiver: No action for broadcast name: $name")
                 }
@@ -148,7 +147,8 @@ class BroadcastHandler(
         Finish("finish"),
         Cancel("cancel"),
         Launch("launch"),
-        PrivilegedLaunchAndFinish("privileged_launch_and_finish");
+        PrivilegedLaunchAndFinish("privileged_launch_and_finish"),
+        ;
 
         companion object {
             fun revert(value: String): Name = entries.first { it.value == value }

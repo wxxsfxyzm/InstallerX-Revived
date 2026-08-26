@@ -1,0 +1,40 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{java,kt,kts,xml}]
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+ij_kotlin_imports_layout = *
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+ktlint_code_style = android_studio
+max_line_length = 130
+ktlint_standard_max-line-length = disabled
+
+# Keep Spotless focused on formatting without forcing unrelated API, file
+# naming, or documentation refactors.
+ktlint_standard_backing-property-naming = disabled
+ktlint_standard_comment-wrapping = disabled
+ktlint_standard_filename = disabled
+ktlint_standard_kdoc = disabled
+ktlint_standard_kdoc-wrapping = disabled
+ktlint_standard_mixed-condition-operators = disabled
+ktlint_standard_property-naming = disabled
+ktlint_standard_value-parameter-comment = disabled
+
+# These Compose checks conflict with established component signatures and
+# state-holder wiring. Other Compose rules remain enabled.
+ktlint_compose_lambda-param-event-trailing = disabled
+ktlint_compose_lambda-param-in-effect = disabled
+ktlint_compose_multiple-emitters-check = disabled
+ktlint_compose_mutable-state-autoboxing = disabled
+ktlint_compose_param-order-check = disabled
+ktlint_compose_vm-forwarding-check = disabled
+ktlint_compose_modifier-not-used-at-root = disabled

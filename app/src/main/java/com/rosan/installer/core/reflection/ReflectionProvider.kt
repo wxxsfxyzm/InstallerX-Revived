@@ -42,15 +42,10 @@ interface ReflectionProvider {
         name: String,
         clazz: Class<*>,
         parameterTypes: Array<Class<*>> = emptyArray(),
-        vararg args: Any?
+        vararg args: Any?,
     ): Any?
 
-    fun invokeStaticMethod(
-        name: String,
-        clazz: Class<*>,
-        parameterTypes: Array<Class<*>> = emptyArray(),
-        vararg args: Any?
-    ): Any?
+    fun invokeStaticMethod(name: String, clazz: Class<*>, parameterTypes: Array<Class<*>> = emptyArray(), vararg args: Any?): Any?
 
     // --- Legacy / Bulk Accessors ---
 

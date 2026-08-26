@@ -15,10 +15,9 @@ data class AnalyseExtraEntity(
     val dataType: DataType? = null,
     val isModuleFlashEnabled: Boolean = false,
     val checkAppSignature: Boolean = true,
-    val checkSplitPackageSignatures: Boolean = false
+    val checkSplitPackageSignatures: Boolean = false,
 ) {
-    fun shouldCheckAppSignatures(type: DataType? = dataType): Boolean =
-        checkAppSignature && (checkSplitPackageSignatures || type !in SPLIT_PACKAGE_TYPES)
+    fun shouldCheckAppSignatures(type: DataType? = dataType): Boolean = checkAppSignature && (checkSplitPackageSignatures || type !in SPLIT_PACKAGE_TYPES)
 
     private companion object {
         val SPLIT_PACKAGE_TYPES = setOf(DataType.APKS, DataType.APKM, DataType.XAPK)

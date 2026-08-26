@@ -6,9 +6,7 @@ import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class GetPackageUidUseCase(
-    private val systemEnvProvider: SystemEnvProvider
-) {
+class GetPackageUidUseCase(private val systemEnvProvider: SystemEnvProvider) {
     suspend operator fun invoke(packageName: String): Int? {
         if (packageName.isBlank()) return null
 

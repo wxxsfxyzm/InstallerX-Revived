@@ -16,5 +16,5 @@ data class PendingSelfUpdateHistory(
     val initiatorPackageName: String?,
     val authorizer: Authorizer,
     val installMode: InstallMode,
-    val operationSessionKey: String
+    val operationSessionKey: String,
 )

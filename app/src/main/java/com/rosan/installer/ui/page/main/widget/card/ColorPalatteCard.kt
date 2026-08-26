@@ -32,13 +32,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
-import com.rosan.installer.ui.theme.material.RawColor
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
+import com.rosan.installer.ui.theme.material.RawColor
 import com.rosan.installer.ui.theme.material.dynamicColorScheme
 import com.rosan.installer.ui.util.getDisplayName
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
 
 // Global cache to prevent UI thread blocking and ensuring instant load on revisit
 private val colorSchemeCache = ConcurrentHashMap<String, ColorScheme>()
@@ -51,7 +51,7 @@ fun ColorSwatchPreview(
     isSelected: Boolean,
     textStyle: TextStyle,
     textColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val isDarkForPreview = false
 
@@ -63,7 +63,7 @@ fun ColorSwatchPreview(
     // Asynchronous calculation with instant update logic
     val scheme by produceState<ColorScheme?>(
         initialValue = colorSchemeCache[cacheKey], // Attempt cache hit for initial value
-        key1 = cacheKey
+        key1 = cacheKey,
     ) {
         val cachedScheme = colorSchemeCache[cacheKey]
         if (cachedScheme != null) {
@@ -77,7 +77,7 @@ fun ColorSwatchPreview(
                     keyColor = rawColor.color,
                     isDark = isDarkForPreview,
                     style = currentStyle,
-                    colorSpec = colorSpec
+                    colorSpec = colorSpec,
                 )
                 colorSchemeCache[cacheKey] = newScheme
                 // Update value instantly once calculated. Compose will recompose.
@@ -91,7 +91,7 @@ fun ColorSwatchPreview(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
-            .padding(vertical = 8.dp)
+            .padding(vertical = 8.dp),
     ) {
         // Direct rendering based on available state. Crossfade removed.
         val currentScheme = scheme
@@ -110,7 +110,7 @@ fun ColorSwatchPreview(
                 style = textStyle,
                 color = textColor,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -128,13 +128,13 @@ private fun FullSwatchContent(scheme: ColorScheme, isSelected: Boolean) {
         modifier = Modifier
             .size(64.dp)
             .background(color = squircleBackgroundColor, shape = RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawArc(color = primaryForSwatch, startAngle = 180f, sweepAngle = 180f, useCenter = true)
@@ -147,14 +147,14 @@ private fun FullSwatchContent(scheme: ColorScheme, isSelected: Boolean) {
                     .size(26.dp)
                     .clip(CircleShape)
                     .background(scheme.primary),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = scheme.inversePrimary,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                 }
             }
@@ -169,28 +169,28 @@ private fun FallbackSwatchContent(baseColor: Color, isSelected: Boolean) {
         modifier = Modifier
             .size(64.dp)
             .background(color = baseColor.copy(alpha = 0.1f), shape = RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(baseColor.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Box(
                 modifier = Modifier
                     .size(26.dp)
                     .clip(CircleShape)
                     .background(baseColor),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                 }
             }

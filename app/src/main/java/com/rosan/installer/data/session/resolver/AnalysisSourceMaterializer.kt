@@ -6,24 +6,24 @@ import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.engine.model.source.DataEntity
-import kotlinx.coroutines.CancellationException
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import kotlinx.coroutines.CancellationException
 
 internal suspend fun materializeAnalysisSource(
     data: List<DataEntity>,
     requestedSource: DataEntity.FileDescriptorEntity,
     cacheDirectory: File,
-    copySource: suspend (InputStream, OutputStream, Long) -> Unit
+    copySource: suspend (InputStream, OutputStream, Long) -> Unit,
 ): List<DataEntity> {
     if (
         requestedSource.analysisMaterializationPolicy !=
         AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
     ) {
         throw materializationFailure(
-            "Analysis requested materialization for a source that does not allow it"
+            "Analysis requested materialization for a source that does not allow it",
         )
     }
 
@@ -31,11 +31,11 @@ internal suspend fun materializeAnalysisSource(
         ?: throw materializationFailure("Analysis materialization source has no identity key")
     val sourceIndex = data.indexOfFirst { entity ->
         entity is DataEntity.FileDescriptorEntity &&
-                entity.analysisMaterializationKey === key
+            entity.analysisMaterializationKey === key
     }
     val source = data.getOrNull(sourceIndex) as? DataEntity.FileDescriptorEntity
         ?: throw materializationFailure(
-            "The requested analysis source is no longer part of the session"
+            "The requested analysis source is no longer part of the session",
         )
 
     cacheDirectory.mkdirs()
@@ -49,7 +49,7 @@ internal suspend fun materializeAnalysisSource(
         if (retainedFile.length() != source.length) {
             throw IOException(
                 "Materialized source length mismatch: " +
-                        "expected=${source.length}, actual=${retainedFile.length()}"
+                    "expected=${source.length}, actual=${retainedFile.length()}",
             )
         }
 
@@ -66,16 +66,13 @@ internal suspend fun materializeAnalysisSource(
         retainedFile.delete()
         throw materializationFailure(
             message = "Failed to retain the complete source for analysis",
-            cause = error
+            cause = error,
         )
     }
 }
 
-private fun materializationFailure(
-    message: String,
-    cause: Throwable? = null
-) = AnalyseException(
+private fun materializationFailure(message: String, cause: Throwable? = null) = AnalyseException(
     errorType = AnalyseErrorType.SOURCE_MATERIALIZATION_FAILED,
     message = message,
-    cause = cause
+    cause = cause,
 )

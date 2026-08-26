@@ -5,5 +5,5 @@ package com.rosan.installer.ui.page.main.settings.preferred.installer.notificati
 enum class NotificationStyle {
     STANDARD,
     LIVE_ACTIVITY,
-    MI_ISLAND
+    MI_ISLAND,
 }

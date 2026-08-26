@@ -18,22 +18,15 @@ import com.rosan.installer.domain.session.model.UnarchiveErrorInfo
 import com.rosan.installer.domain.session.model.UnarchiveInfo
 import timber.log.Timber
 
-class UnarchiveResolver(
-    private val context: Context
-) {
+class UnarchiveResolver(private val context: Context) {
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    fun resolve(
-        activity: Activity,
-        sessionId: String,
-        packageName: String,
-        intentSender: IntentSender
-    ): UnarchiveInfo {
+    fun resolve(activity: Activity, sessionId: String, packageName: String, intentSender: IntentSender): UnarchiveInfo {
         validateCaller(activity)
 
         val pm = activity.packageManager
         val appInfo = pm.getApplicationInfo(
             packageName,
-            PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES)
+            PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES),
         )
         val installSource = pm.getInstallSourceInfo(packageName)
         val responsibleInstaller = installSource.updateOwnerPackageName
@@ -51,7 +44,7 @@ class UnarchiveResolver(
             packageName = packageName,
             appLabel = appInfo.loadLabel(pm),
             installerLabel = installerLabel,
-            intentSender = intentSender
+            intentSender = intentSender,
         )
     }
 
@@ -63,7 +56,8 @@ class UnarchiveResolver(
     fun openErrorAction(info: UnarchiveErrorInfo) {
         when (info.status.primaryAction) {
             UnarchiveErrorAction.CONTINUE,
-            UnarchiveErrorAction.CLEAR_STORAGE -> {
+            UnarchiveErrorAction.CLEAR_STORAGE,
+            -> {
                 val sender = info.pendingIntent?.intentSender
                 if (sender != null) {
                     context.startIntentSender(
@@ -71,12 +65,12 @@ class UnarchiveResolver(
                         null,
                         0,
                         Intent.FLAG_ACTIVITY_NEW_TASK,
-                        0
+                        0,
                     )
                 } else if (info.status.primaryAction == UnarchiveErrorAction.CLEAR_STORAGE) {
                     context.startActivity(
                         Intent("android.intent.action.MANAGE_PACKAGE_STORAGE")
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     )
                 }
             }
@@ -86,7 +80,7 @@ class UnarchiveResolver(
                 context.startActivity(
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         .setData(Uri.fromParts("package", packageName, null))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 )
             }
 
@@ -111,7 +105,7 @@ class UnarchiveResolver(
             @Suppress("DEPRECATION")
             activity.packageManager.getPackageInfo(
                 callingPackage,
-                PackageManager.GET_PERMISSIONS
+                PackageManager.GET_PERMISSIONS,
             ).requestedPermissions.orEmpty()
         }.getOrElse { emptyArray() }
 
@@ -119,12 +113,12 @@ class UnarchiveResolver(
         val hasInstallPermission = activity.checkPermission(
             Manifest.permission.INSTALL_PACKAGES,
             0,
-            callingUid
+            callingUid,
         ) == PackageManager.PERMISSION_GRANTED
 
         if (!hasRequestInstallPermission && !hasInstallPermission) {
             throw SecurityException(
-                "Uid $callingUid does not have ${Manifest.permission.REQUEST_INSTALL_PACKAGES} or ${Manifest.permission.INSTALL_PACKAGES}"
+                "Uid $callingUid does not have ${Manifest.permission.REQUEST_INSTALL_PACKAGES} or ${Manifest.permission.INSTALL_PACKAGES}",
             )
         }
     }

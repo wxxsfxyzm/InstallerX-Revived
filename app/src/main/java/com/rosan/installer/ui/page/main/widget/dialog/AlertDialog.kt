@@ -36,9 +36,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.ui.icons.AppIcons
@@ -53,12 +53,7 @@ import com.rosan.installer.util.help
  * @param errorMessages A list of specific error messages to display. If empty, a generic message is shown.
  */
 @Composable
-fun UnsavedChangesDialog(
-    show: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    errorMessages: List<String>
-) {
+fun UnsavedChangesDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit, errorMessages: List<String>) {
     if (show) {
         val hasSpecificErrors = errorMessages.isNotEmpty()
 
@@ -94,18 +89,13 @@ fun UnsavedChangesDialog(
                 TextButton(onClick = onDismiss) {
                     Text(text = stringResource(R.string.back))
                 }
-            }
+            },
         )
     }
 }
 
 @Composable
-fun UninstallConfirmationDialog(
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    keepData: Boolean
-) {
+fun UninstallConfirmationDialog(showDialog: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit, keepData: Boolean) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -116,10 +106,11 @@ fun UninstallConfirmationDialog(
             text = {
                 // Placeholder text as requested.
                 // In a real app, you would provide a more detailed message.
-                val message = if (keepData)
+                val message = if (keepData) {
                     stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message)
-                else
+                } else {
                     stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message)
+                }
 
                 Text(message)
             },
@@ -128,18 +119,18 @@ fun UninstallConfirmationDialog(
                     onClick = {
                         onConfirm() // Execute the confirmation action
                         onDismiss() // Close the dialog
-                    }
+                    },
                 ) {
                     Text(stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = onDismiss // Just close the dialog
+                    onClick = onDismiss, // Just close the dialog
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 }
@@ -153,12 +144,7 @@ fun UninstallConfirmationDialog(
  * @param title The title of the dialog.
  */
 @Composable
-fun ErrorDisplayDialog(
-    exception: Throwable,
-    onDismissRequest: () -> Unit,
-    onRetry: (() -> Unit)? = null,
-    title: String
-) {
+fun ErrorDisplayDialog(exception: Throwable, onDismissRequest: () -> Unit, onRetry: (() -> Unit)? = null, title: String) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(title) },
@@ -170,7 +156,7 @@ fun ErrorDisplayDialog(
                         .background(MaterialTheme.colorScheme.errorContainer)
                         .fillMaxWidth()
                         .padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     item {
                         Text(exception.help(), fontWeight = FontWeight.Bold)
@@ -182,7 +168,7 @@ fun ErrorDisplayDialog(
                                     exception.stackTraceToString()
                                 } else {
                                     exception.message ?: "An unknown error occurred."
-                                }.trim()
+                                }.trim(),
                             )
                         }
                     }
@@ -200,16 +186,12 @@ fun ErrorDisplayDialog(
             TextButton(onClick = onDismissRequest) {
                 Text(stringResource(/*if (onRetry != null)*/ R.string.cancel/* else R.string.ok)*/))
             }
-        }
+        },
     )
 }
 
 @Composable
-fun HideLauncherIconWarningDialog(
-    show: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+fun HideLauncherIconWarningDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     if (show) {
         val dialogTitle = stringResource(R.string.warning)
 
@@ -219,8 +201,9 @@ fun HideLauncherIconWarningDialog(
             text = {
                 Column {
                     Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning))
-                    if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI)
+                    if (DeviceConfig.currentManufacturer == Manufacturer.XIAOMI) {
                         Text(stringResource(R.string.theme_settings_hide_launcher_icon_warning_xiaomi))
+                    }
                 }
             },
             confirmButton = {
@@ -232,7 +215,7 @@ fun HideLauncherIconWarningDialog(
                 TextButton(onClick = onDismiss) {
                     Text(text = stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 }
@@ -242,18 +225,14 @@ fun HideLauncherIconWarningDialog(
  * Used when enabling the "Module Flashing" switch for the first time.
  */
 @Composable
-fun RootImplementationSelectionDialog(
-    currentSelection: RootMode,
-    onDismiss: () -> Unit,
-    onConfirm: (RootMode) -> Unit
-) {
+fun RootImplementationSelectionDialog(currentSelection: RootMode, onDismiss: () -> Unit, onConfirm: (RootMode) -> Unit) {
     // Temporary state for the dialog selection
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(currentSelection) }
 
     val options = mapOf(
         RootMode.Magisk to "Magisk",
         RootMode.KernelSU to "KernelSU",
-        RootMode.APatch to "APatch"
+        RootMode.APatch to "APatch",
     )
 
     AlertDialog(
@@ -269,19 +248,19 @@ fun RootImplementationSelectionDialog(
                             .selectable(
                                 selected = (impl == selectedOption),
                                 onClick = { onOptionSelected(impl) },
-                                role = Role.RadioButton
+                                role = Role.RadioButton,
                             )
                             .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(
                             selected = (impl == selectedOption),
-                            onClick = null // null recommended for accessibility with selectable row
+                            onClick = null, // null recommended for accessibility with selectable row
                         )
                         Text(
                             text = label,
                             style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
                 }
@@ -289,7 +268,7 @@ fun RootImplementationSelectionDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(selectedOption) }
+                onClick = { onConfirm(selectedOption) },
             ) {
                 Text(stringResource(R.string.confirm))
             }
@@ -298,7 +277,7 @@ fun RootImplementationSelectionDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
-        }
+        },
     )
 }
 
@@ -306,10 +285,7 @@ fun RootImplementationSelectionDialog(
  * An AlertDialog for adding a new NamedPackage.
  */
 @Composable
-fun UninstallPackageDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
+fun UninstallPackageDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var packageName by remember { mutableStateOf("") }
     val isConfirmEnabled = packageName.isNotBlank()
 
@@ -322,14 +298,14 @@ fun UninstallPackageDialog(
                     value = packageName,
                     onValueChange = { packageName = it },
                     label = { Text(stringResource(R.string.config_package_name)) },
-                    singleLine = true
+                    singleLine = true,
                 )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(packageName) },
-                enabled = isConfirmEnabled
+                enabled = isConfirmEnabled,
             ) {
                 Text(stringResource(R.string.confirm))
             }
@@ -338,7 +314,7 @@ fun UninstallPackageDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
-        }
+        },
     )
 }
 
@@ -346,14 +322,14 @@ fun UninstallPackageDialog(
 fun GithubUpdateChannelSelectionDialog(
     currentSelection: GithubUpdateChannel,
     onDismiss: () -> Unit,
-    onConfirm: (GithubUpdateChannel) -> Unit
+    onConfirm: (GithubUpdateChannel) -> Unit,
 ) {
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(currentSelection) }
 
     val options = mapOf(
         GithubUpdateChannel.OFFICIAL to stringResource(R.string.lab_update_github_proxy_official),
         GithubUpdateChannel.PROXY_7ED to stringResource(R.string.lab_update_github_proxy_7ed),
-        GithubUpdateChannel.CUSTOM to stringResource(R.string.lab_update_github_proxy_custom)
+        GithubUpdateChannel.CUSTOM to stringResource(R.string.lab_update_github_proxy_custom),
     )
 
     AlertDialog(
@@ -369,19 +345,19 @@ fun GithubUpdateChannelSelectionDialog(
                             .selectable(
                                 selected = (channel == selectedOption),
                                 onClick = { onOptionSelected(channel) },
-                                role = Role.RadioButton
+                                role = Role.RadioButton,
                             )
                             .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(
                             selected = (channel == selectedOption),
-                            onClick = null
+                            onClick = null,
                         )
                         Text(
                             text = label,
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
                 }
@@ -389,7 +365,7 @@ fun GithubUpdateChannelSelectionDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(selectedOption) }
+                onClick = { onConfirm(selectedOption) },
             ) {
                 Text(stringResource(R.string.confirm))
             }
@@ -398,16 +374,12 @@ fun GithubUpdateChannelSelectionDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
-        }
+        },
     )
 }
 
 @Composable
-fun CustomGithubProxyUrlDialog(
-    initialUrl: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
+fun CustomGithubProxyUrlDialog(initialUrl: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var url by remember { mutableStateOf(initialUrl) }
 
     AlertDialog(
@@ -419,13 +391,13 @@ fun CustomGithubProxyUrlDialog(
                     value = url,
                     onValueChange = { url = it },
                     label = { Text(stringResource(R.string.lab_update_github_proxy_url)) },
-                    singleLine = true
+                    singleLine = true,
                 )
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(url) }
+                onClick = { onConfirm(url) },
             ) {
                 Text(stringResource(R.string.confirm))
             }
@@ -434,16 +406,12 @@ fun CustomGithubProxyUrlDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
-        }
+        },
     )
 }
 
 @Composable
-fun CustomAuthorizerDialog(
-    initialAuthorizer: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
+fun CustomAuthorizerDialog(initialAuthorizer: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var authorizer by remember(initialAuthorizer) { mutableStateOf(initialAuthorizer) }
 
     AlertDialog(
@@ -456,17 +424,17 @@ fun CustomAuthorizerDialog(
                     onValueChange = { authorizer = it },
                     label = { Text(stringResource(R.string.config_authorizer_customize)) },
                     textStyle = LocalTextStyle.current.copy(
-                        fontFamily = if (authorizer.isBlank()) null else FontFamily.Monospace
+                        fontFamily = if (authorizer.isBlank()) null else FontFamily.Monospace,
                     ),
                     singleLine = false,
-                    maxLines = 4
+                    maxLines = 4,
                 )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(authorizer) },
-                enabled = authorizer.isNotBlank()
+                enabled = authorizer.isNotBlank(),
             ) {
                 Text(stringResource(R.string.confirm))
             }
@@ -475,6 +443,6 @@ fun CustomAuthorizerDialog(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
-        }
+        },
     )
 }

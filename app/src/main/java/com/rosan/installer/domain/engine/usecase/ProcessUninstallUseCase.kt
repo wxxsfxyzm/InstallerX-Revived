@@ -21,15 +21,12 @@ import timber.log.Timber
 class ProcessUninstallUseCase(
     private val appInstaller: AppInstallerRepository,
     private val installedAppInfoProvider: InstalledAppInfoProvider,
-    private val recordOperationHistory: RecordOperationHistoryUseCase
+    private val recordOperationHistory: RecordOperationHistoryUseCase,
 ) {
     /**
      * Executes the uninstallation work.
      */
-    suspend operator fun invoke(
-        config: ConfigModel,
-        packageName: String
-    ) {
+    suspend operator fun invoke(config: ConfigModel, packageName: String) {
         val installed = installedAppInfoProvider.getByPackageName(packageName)
         val result = runCatching {
             appInstaller.doUninstallWork(config, packageName)
@@ -53,8 +50,8 @@ class ProcessUninstallUseCase(
                     authorizer = config.authorizer,
                     installMode = config.installMode,
                     errorSummary = result.exceptionOrNull()?.historyErrorSummary(),
-                    errorType = result.exceptionOrNull()?.historyErrorType()
-                )
+                    errorType = result.exceptionOrNull()?.historyErrorType(),
+                ),
             )
         }.onFailure { e ->
             Timber.e(e, "Failed to record uninstall history for $packageName")

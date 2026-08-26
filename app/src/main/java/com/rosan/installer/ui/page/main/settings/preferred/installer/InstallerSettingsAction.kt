@@ -2,10 +2,10 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.installer
 
-import com.rosan.installer.domain.settings.model.config.Authorizer
-import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 
 sealed interface InstallerSettingsAction {
     data class ChangeGlobalAuthorizer(val authorizer: Authorizer) : InstallerSettingsAction

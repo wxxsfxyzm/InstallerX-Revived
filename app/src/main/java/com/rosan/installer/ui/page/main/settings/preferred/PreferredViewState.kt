@@ -11,7 +11,7 @@ data class PreferredViewState(
     val allowInternetAccess: Boolean = true,
     val hasUpdate: Boolean = false,
     val remoteVersion: String = "",
-    val backupBusy: Boolean = false
+    val backupBusy: Boolean = false,
 ) {
     val authorizerCustomize = authorizer == Authorizer.Customize
 }

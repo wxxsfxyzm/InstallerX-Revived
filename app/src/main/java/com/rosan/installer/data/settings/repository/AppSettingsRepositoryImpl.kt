@@ -37,14 +37,14 @@ import kotlinx.coroutines.flow.shareIn
 class AppSettingsRepositoryImpl(
     private val appDataStore: AppDataStore,
     capabilityProvider: DeviceCapabilityProvider,
-    appScope: CoroutineScope
+    appScope: CoroutineScope,
 ) : AppSettingsRepository {
 
     // Replaced brittle combine(listOf(...)) with a safe mapping from the raw Preferences flow.
     override val preferencesFlow: Flow<AppPreferences> = appDataStore.data.map { prefs ->
         // Pre-compute values for Github update channel validation
         val rawGithubUpdateChannel = GithubUpdateChannel.fromValueOrDefault(
-            prefs[AppDataStore.GITHUB_UPDATE_CHANNEL] ?: GithubUpdateChannel.OFFICIAL.name
+            prefs[AppDataStore.GITHUB_UPDATE_CHANNEL] ?: GithubUpdateChannel.OFFICIAL.name,
         )
         val customGithubProxyUrl = prefs[AppDataStore.CUSTOM_GITHUB_PROXY_URL] ?: ""
         val githubUpdateChannel = if (rawGithubUpdateChannel == GithubUpdateChannel.CUSTOM && customGithubProxyUrl.isBlank()) {
@@ -56,7 +56,8 @@ class AppSettingsRepositoryImpl(
         // Map all preferences explicitly by key. Order no longer matters.
         AppPreferences(
             authorizer = Authorizer.fromValueOrDefault(
-                prefs[AppDataStore.AUTHORIZER] ?: if (capabilityProvider.isSystemApp) Authorizer.None.value else Authorizer.Shizuku.value
+                prefs[AppDataStore.AUTHORIZER]
+                    ?: if (capabilityProvider.isSystemApp) Authorizer.None.value else Authorizer.Shizuku.value,
             ),
             alwaysUseRootInSystem = prefs[AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM] ?: false,
             customizeAuthorizer = prefs[AppDataStore.CUSTOMIZE_AUTHORIZER] ?: "",
@@ -76,7 +77,7 @@ class AppSettingsRepositoryImpl(
             showSignatureInfoOnMatch = prefs[AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH] ?: false,
             showSignatureDetails = prefs[AppDataStore.SHOW_SIGNATURE_DETAILS] ?: false,
             installerRequireBiometricAuth = BiometricAuthMode.fromValueOrDefault(
-                prefs[AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH] ?: BiometricAuthMode.Disable.value
+                prefs[AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH] ?: BiometricAuthMode.Disable.value,
             ),
             uninstallerRequireBiometricAuth = prefs[AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH] ?: false,
             showLiveActivity = prefs[AppDataStore.SHOW_LIVE_ACTIVITY] ?: false,
@@ -89,7 +90,7 @@ class AppSettingsRepositoryImpl(
             tryMultipleAuthorizersOnInstall = prefs[AppDataStore.TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL] ?: false,
             smartAuthorizerCandidates = SmartAuthorizerPreferences.decode(
                 value = prefs[AppDataStore.SMART_AUTHORIZER_CANDIDATES].orEmpty(),
-                isSessionInstallSupported = capabilityProvider.isSessionInstallSupported
+                isSessionInstallSupported = capabilityProvider.isSessionInstallSupported,
             ),
             showMiuixUI = prefs[AppDataStore.UI_USE_MIUIX] ?: false,
             preferSystemIcon = prefs[AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL] ?: false,
@@ -102,28 +103,28 @@ class AppSettingsRepositoryImpl(
             managedInstallerPackages = appDataStore.parseNamedPackageList(
                 prefs,
                 AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST,
-                AppDataStore.DEFAULT_MANAGED_INSTALLER_PACKAGES
+                AppDataStore.DEFAULT_MANAGED_INSTALLER_PACKAGES,
             ),
             managedBlacklistPackages = appDataStore.parseNamedPackageList(
                 prefs,
                 AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST,
-                emptyList()
+                emptyList(),
             ),
             managedSharedUserIdBlacklist = appDataStore.parseSharedUidList(
                 prefs,
                 AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST,
-                emptyList()
+                emptyList(),
             ),
             managedSharedUserIdExemptedPackages = appDataStore.parseNamedPackageList(
                 prefs,
                 AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST,
-                emptyList()
+                emptyList(),
             ),
             // Uninstaller
             uninstallFlags = prefs[AppDataStore.UNINSTALL_FLAGS] ?: 0,
             // Network
             networkSourceMode = NetworkSourceMode.fromValue(
-                prefs[AppDataStore.NETWORK_SOURCE_MODE] ?: NetworkSourceMode.Cache.value
+                prefs[AppDataStore.NETWORK_SOURCE_MODE] ?: NetworkSourceMode.Cache.value,
             ),
             networkSourceModeWarningAcknowledged =
                 prefs[AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED] ?: false,
@@ -144,11 +145,13 @@ class AppSettingsRepositoryImpl(
             labInstallWithoutUserAction = prefs[AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION] ?: false,
             labRespectPlatformInstallPolicy =
                 AppConfig.isRespectPlatformInstallPolicyAvailable &&
-                        (prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false),
+                    (prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false),
             enableFileLogging = prefs[AppDataStore.ENABLE_FILE_LOGGING] ?: true,
             // UI State
             themeMode = ThemeMode.fromValueOrDefault(prefs[AppDataStore.THEME_MODE] ?: ThemeMode.SYSTEM.name),
-            paletteStyle = PaletteStyle.fromValueOrDefault(prefs[AppDataStore.THEME_PALETTE_STYLE] ?: PaletteStyle.TonalSpot.name),
+            paletteStyle = PaletteStyle.fromValueOrDefault(
+                prefs[AppDataStore.THEME_PALETTE_STYLE] ?: PaletteStyle.TonalSpot.name,
+            ),
             colorSpec = ThemeColorSpec.fromValueOrDefault(prefs[AppDataStore.THEME_COLOR_SPEC] ?: ThemeColorSpec.SPEC_2025.name),
             useDynamicColor = prefs[AppDataStore.THEME_USE_DYNAMIC_COLOR] ?: true,
             useMiuixMonet = prefs[AppDataStore.UI_USE_MIUIX_MONET] ?: false,
@@ -156,168 +159,204 @@ class AppSettingsRepositoryImpl(
             seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: DEFAULT_SEED_COLOR,
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useDynColorFollowPkgIconForLiveActivity = prefs[AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
-            useBlur = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) prefs[AppDataStore.UI_USE_BLUR]
-                ?: true else false,
+            useBlur = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                prefs[AppDataStore.UI_USE_BLUR]
+                    ?: true
+            } else {
+                false
+            },
             predictiveBackAnimation = PredictiveBackAnimation.fromValueOrDefault(
-                prefs[AppDataStore.PREDICTIVE_BACK_ANIMATION] ?: PredictiveBackAnimation.MIUIX.value
+                prefs[AppDataStore.PREDICTIVE_BACK_ANIMATION] ?: PredictiveBackAnimation.MIUIX.value,
             ),
             predictiveBackExitDirection = PredictiveBackExitDirection.fromValueOrDefault(
-                prefs[AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION] ?: PredictiveBackExitDirection.ALWAYS_RIGHT.value
-            )
+                prefs[AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION] ?: PredictiveBackExitDirection.ALWAYS_RIGHT.value,
+            ),
         )
     }.shareIn(
         scope = appScope,
         started = SharingStarted.Eagerly,
-        replay = 1
+        replay = 1,
     )
 
-    override suspend fun putString(setting: StringSetting, value: String) =
-        appDataStore.putString(stringKey(setting), value)
+    override suspend fun putString(setting: StringSetting, value: String) = appDataStore.putString(stringKey(setting), value)
 
-    override fun getString(setting: StringSetting, default: String): Flow<String> =
-        appDataStore.getString(stringKey(setting), default)
+    override fun getString(setting: StringSetting, default: String): Flow<String> = appDataStore.getString(stringKey(setting), default)
 
-    override suspend fun putInt(setting: IntSetting, value: Int) =
-        appDataStore.putInt(intKey(setting), value)
+    override suspend fun putInt(setting: IntSetting, value: Int) = appDataStore.putInt(intKey(setting), value)
 
-    override fun getInt(setting: IntSetting, default: Int): Flow<Int> =
-        appDataStore.getInt(intKey(setting), default)
+    override fun getInt(setting: IntSetting, default: Int): Flow<Int> = appDataStore.getInt(intKey(setting), default)
 
-    override suspend fun putBoolean(setting: BooleanSetting, value: Boolean) =
-        appDataStore.putBoolean(booleanKey(setting), value)
+    override suspend fun putBoolean(setting: BooleanSetting, value: Boolean) = appDataStore.putBoolean(booleanKey(setting), value)
 
-    override fun getBoolean(setting: BooleanSetting, default: Boolean): Flow<Boolean> =
-        appDataStore.getBoolean(booleanKey(setting), default).map { value ->
-            if (setting == BooleanSetting.LabRespectPlatformInstallPolicy) {
-                value && AppConfig.isRespectPlatformInstallPolicyAvailable
-            } else {
-                value
-            }
+    override fun getBoolean(setting: BooleanSetting, default: Boolean): Flow<Boolean> = appDataStore.getBoolean(booleanKey(setting), default).map { value ->
+        if (setting == BooleanSetting.LabRespectPlatformInstallPolicy) {
+            value && AppConfig.isRespectPlatformInstallPolicyAvailable
+        } else {
+            value
         }
+    }
 
-    override suspend fun putNamedPackageList(
-        setting: NamedPackageListSetting,
-        packages: List<NamedPackage>
-    ) = appDataStore.putNamedPackageList(namedPackageListKey(setting), packages)
+    override suspend fun putNamedPackageList(setting: NamedPackageListSetting, packages: List<NamedPackage>) = appDataStore.putNamedPackageList(namedPackageListKey(setting), packages)
 
-    override fun getNamedPackageList(
-        setting: NamedPackageListSetting,
-        default: List<NamedPackage>
-    ): Flow<List<NamedPackage>> {
+    override fun getNamedPackageList(setting: NamedPackageListSetting, default: List<NamedPackage>): Flow<List<NamedPackage>> {
         val finalDefault = if (setting == NamedPackageListSetting.ManagedInstallerPackages && default.isEmpty()) {
             AppDataStore.DEFAULT_MANAGED_INSTALLER_PACKAGES
-        } else default
+        } else {
+            default
+        }
         return appDataStore.getNamedPackageList(namedPackageListKey(setting), finalDefault)
     }
 
-    override suspend fun putSharedUidList(setting: SharedUidListSetting, uids: List<SharedUid>) =
-        appDataStore.putSharedUidList(sharedUidListKey(setting), uids)
+    override suspend fun putSharedUidList(setting: SharedUidListSetting, uids: List<SharedUid>) = appDataStore.putSharedUidList(sharedUidListKey(setting), uids)
 
-    override fun getSharedUidList(
-        setting: SharedUidListSetting,
-        default: List<SharedUid>
-    ): Flow<List<SharedUid>> = appDataStore.getSharedUidList(sharedUidListKey(setting), default)
+    override fun getSharedUidList(setting: SharedUidListSetting, default: List<SharedUid>): Flow<List<SharedUid>> = appDataStore.getSharedUidList(sharedUidListKey(setting), default)
 
-    override suspend fun updateUninstallFlags(transform: (Int) -> Int) =
-        appDataStore.updateUninstallFlags(transform)
+    override suspend fun updateUninstallFlags(transform: (Int) -> Int) = appDataStore.updateUninstallFlags(transform)
 
-    private fun stringKey(setting: StringSetting): Preferences.Key<String> =
-        when (setting) {
-            StringSetting.ThemeMode -> AppDataStore.THEME_MODE
-            StringSetting.ThemePaletteStyle -> AppDataStore.THEME_PALETTE_STYLE
-            StringSetting.ThemeColorSpec -> AppDataStore.THEME_COLOR_SPEC
-            StringSetting.Authorizer -> AppDataStore.AUTHORIZER
-            StringSetting.CustomizeAuthorizer -> AppDataStore.CUSTOMIZE_AUTHORIZER
-            StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
-            StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
-            StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
-            StringSetting.NetworkSourceMode -> AppDataStore.NETWORK_SOURCE_MODE
-            StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
-            StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION
-            StringSetting.GithubUpdateChannel -> AppDataStore.GITHUB_UPDATE_CHANNEL
-            StringSetting.CustomGithubProxyUrl -> AppDataStore.CUSTOM_GITHUB_PROXY_URL
-            StringSetting.InstallerBiometricAuthMode -> AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH
-            StringSetting.SmartAuthorizerCandidates -> AppDataStore.SMART_AUTHORIZER_CANDIDATES
-        }
+    private fun stringKey(setting: StringSetting): Preferences.Key<String> = when (setting) {
+        StringSetting.ThemeMode -> AppDataStore.THEME_MODE
+        StringSetting.ThemePaletteStyle -> AppDataStore.THEME_PALETTE_STYLE
+        StringSetting.ThemeColorSpec -> AppDataStore.THEME_COLOR_SPEC
+        StringSetting.Authorizer -> AppDataStore.AUTHORIZER
+        StringSetting.CustomizeAuthorizer -> AppDataStore.CUSTOMIZE_AUTHORIZER
+        StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
+        StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
+        StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
+        StringSetting.NetworkSourceMode -> AppDataStore.NETWORK_SOURCE_MODE
+        StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
+        StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION
+        StringSetting.GithubUpdateChannel -> AppDataStore.GITHUB_UPDATE_CHANNEL
+        StringSetting.CustomGithubProxyUrl -> AppDataStore.CUSTOM_GITHUB_PROXY_URL
+        StringSetting.InstallerBiometricAuthMode -> AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH
+        StringSetting.SmartAuthorizerCandidates -> AppDataStore.SMART_AUTHORIZER_CANDIDATES
+    }
 
-    private fun intKey(setting: IntSetting): Preferences.Key<Int> =
-        when (setting) {
-            IntSetting.ThemeSeedColor -> AppDataStore.THEME_SEED_COLOR
-            IntSetting.ShowMiIslandBlockingInterval -> AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS
-            IntSetting.NotificationSuccessAutoClearSeconds -> AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS
-            IntSetting.CloseSessionCountdown -> AppDataStore.CLOSE_SESSION_COUNTDOWN
-            IntSetting.UninstallFlags -> AppDataStore.UNINSTALL_FLAGS
-        }
+    private fun intKey(setting: IntSetting): Preferences.Key<Int> = when (setting) {
+        IntSetting.ThemeSeedColor -> AppDataStore.THEME_SEED_COLOR
+        IntSetting.ShowMiIslandBlockingInterval -> AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS
+        IntSetting.NotificationSuccessAutoClearSeconds -> AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS
+        IntSetting.CloseSessionCountdown -> AppDataStore.CLOSE_SESSION_COUNTDOWN
+        IntSetting.UninstallFlags -> AppDataStore.UNINSTALL_FLAGS
+    }
 
-    private fun booleanKey(setting: BooleanSetting): Preferences.Key<Boolean> =
-        when (setting) {
-            BooleanSetting.AllowInternetAccess -> AppDataStore.ALLOW_INTERNET_ACCESS
-            BooleanSetting.NetworkSourceModeWarningAcknowledged ->
-                AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED
-            BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
-            BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
-            BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX
-            BooleanSetting.UiUseMiuixMonet -> AppDataStore.UI_USE_MIUIX_MONET
-            BooleanSetting.UiUseAppleFloatingBar -> AppDataStore.UI_USE_APPLE_FLOATING_BAR
-            BooleanSetting.UiDynColorFollowPkgIcon -> AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON
-            BooleanSetting.LiveActivityDynColorFollowPkgIcon -> AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON
-            BooleanSetting.ShowLiveActivity -> AppDataStore.SHOW_LIVE_ACTIVITY
-            BooleanSetting.ShowMiIsland -> AppDataStore.SHOW_MI_ISLAND
-            BooleanSetting.ShowMiIslandBypassRestriction -> AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION
-            BooleanSetting.ShowMiIslandOuterGlow -> AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW
-            BooleanSetting.AlwaysUseRootInSystem -> AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM
-            BooleanSetting.UninstallerRequireBiometricAuth -> AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH
-            BooleanSetting.ShowLauncherIcon -> AppDataStore.SHOW_LAUNCHER_ICON
-            BooleanSetting.OperationHistoryEnabled -> AppDataStore.OPERATION_HISTORY_ENABLED
-            BooleanSetting.OperationHistoryIndicatorsEnabled -> AppDataStore.OPERATION_HISTORY_INDICATORS_ENABLED
-            BooleanSetting.UserSetLSPosedActive -> AppDataStore.USER_SET_LSPOSED_ACTIVE
-            BooleanSetting.PreferSystemIconForInstall -> AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL
-            BooleanSetting.ShowDialogWhenPressingNotification -> AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION
-            BooleanSetting.UserReadScopeTips -> AppDataStore.USER_READ_SCOPE_TIPS
-            BooleanSetting.ApplyOrderInReverse -> AppDataStore.APPLY_ORDER_IN_REVERSE
-            BooleanSetting.ApplySelectedFirst -> AppDataStore.APPLY_SELECTED_FIRST
-            BooleanSetting.ApplyShowSystemApp -> AppDataStore.APPLY_SHOW_SYSTEM_APP
-            BooleanSetting.ApplyShowPackageName -> AppDataStore.APPLY_SHOW_PACKAGE_NAME
-            BooleanSetting.DialogHideIdenticalComparisons -> AppDataStore.DIALOG_HIDE_IDENTICAL_COMPARISONS
-            BooleanSetting.DialogVersionCompareSingleLine -> AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE
-            BooleanSetting.DialogSdkCompareMultiLine -> AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE
-            BooleanSetting.DialogShowExtendedMenu -> AppDataStore.DIALOG_SHOW_EXTENDED_MENU
-            BooleanSetting.DialogExpandTemporarySettingsByDefault -> AppDataStore.DIALOG_EXPAND_TEMPORARY_SETTINGS_BY_DEFAULT
-            BooleanSetting.DialogShowIntelligentSuggestion -> AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION
-            BooleanSetting.DialogDisableNotificationOnDismiss -> AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS
-            BooleanSetting.DialogShowOppoSpecial -> AppDataStore.DIALOG_SHOW_OPPO_SPECIAL
-            BooleanSetting.CheckAppSignature -> AppDataStore.CHECK_APP_SIGNATURE
-            BooleanSetting.CheckSplitPackageSignatures -> AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES
-            BooleanSetting.ShowSignatureInfoOnMatch -> AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH
-            BooleanSetting.ShowSignatureDetails -> AppDataStore.SHOW_SIGNATURE_DETAILS
-            BooleanSetting.DialogAutoSilentInstall -> AppDataStore.DIALOG_AUTO_SILENT_INSTALL
-            BooleanSetting.DialogLongClickBackgroundInstall -> AppDataStore.DIALOG_LONG_CLICK_BACKGROUND_INSTALL
-            BooleanSetting.TryMultipleAuthorizersOnInstall -> AppDataStore.TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL
-            BooleanSetting.LabEnableModuleFlash -> AppDataStore.LAB_ENABLE_MODULE_FLASH
-            BooleanSetting.LabModuleFlashShowArt -> AppDataStore.LAB_MODULE_FLASH_SHOW_ART
-            BooleanSetting.LabHttpSaveFile -> AppDataStore.LAB_HTTP_SAVE_FILE
-            BooleanSetting.LabSetInstallRequester -> AppDataStore.LAB_SET_INSTALL_REQUESTER
-            BooleanSetting.LabTapIconToShare -> AppDataStore.LAB_TAP_ICON_TO_SHARE
-            BooleanSetting.LabShowFilePath -> AppDataStore.LAB_SHOW_FILE_PATH
-            BooleanSetting.LabShowInstallInitiator -> AppDataStore.LAB_SHOW_INSTALL_INITIATOR
-            BooleanSetting.LabInstallWithoutUserAction -> AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION
-            BooleanSetting.LabRespectPlatformInstallPolicy -> AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY
-            BooleanSetting.DetectXposedModule -> AppDataStore.DETECT_XPOSED_MODULE
-            BooleanSetting.QuickOpenLSPosed -> AppDataStore.QUICK_OPEN_LSPOSED
-            BooleanSetting.EnableFileLogging -> AppDataStore.ENABLE_FILE_LOGGING
-        }
+    private fun booleanKey(setting: BooleanSetting): Preferences.Key<Boolean> = when (setting) {
+        BooleanSetting.AllowInternetAccess -> AppDataStore.ALLOW_INTERNET_ACCESS
 
-    private fun namedPackageListKey(setting: NamedPackageListSetting): Preferences.Key<String> =
-        when (setting) {
-            NamedPackageListSetting.ManagedInstallerPackages -> AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST
-            NamedPackageListSetting.ManagedBlacklistPackages -> AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST
-            NamedPackageListSetting.ManagedSharedUserIdExemptedPackages -> AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST
-        }
+        BooleanSetting.NetworkSourceModeWarningAcknowledged ->
+            AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED
 
-    private fun sharedUidListKey(setting: SharedUidListSetting): Preferences.Key<String> =
-        when (setting) {
-            SharedUidListSetting.ManagedSharedUserIdBlacklist -> AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST
-        }
+        BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
+
+        BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
+
+        BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX
+
+        BooleanSetting.UiUseMiuixMonet -> AppDataStore.UI_USE_MIUIX_MONET
+
+        BooleanSetting.UiUseAppleFloatingBar -> AppDataStore.UI_USE_APPLE_FLOATING_BAR
+
+        BooleanSetting.UiDynColorFollowPkgIcon -> AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON
+
+        BooleanSetting.LiveActivityDynColorFollowPkgIcon -> AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON
+
+        BooleanSetting.ShowLiveActivity -> AppDataStore.SHOW_LIVE_ACTIVITY
+
+        BooleanSetting.ShowMiIsland -> AppDataStore.SHOW_MI_ISLAND
+
+        BooleanSetting.ShowMiIslandBypassRestriction -> AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION
+
+        BooleanSetting.ShowMiIslandOuterGlow -> AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW
+
+        BooleanSetting.AlwaysUseRootInSystem -> AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM
+
+        BooleanSetting.UninstallerRequireBiometricAuth -> AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH
+
+        BooleanSetting.ShowLauncherIcon -> AppDataStore.SHOW_LAUNCHER_ICON
+
+        BooleanSetting.OperationHistoryEnabled -> AppDataStore.OPERATION_HISTORY_ENABLED
+
+        BooleanSetting.OperationHistoryIndicatorsEnabled -> AppDataStore.OPERATION_HISTORY_INDICATORS_ENABLED
+
+        BooleanSetting.UserSetLSPosedActive -> AppDataStore.USER_SET_LSPOSED_ACTIVE
+
+        BooleanSetting.PreferSystemIconForInstall -> AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL
+
+        BooleanSetting.ShowDialogWhenPressingNotification -> AppDataStore.SHOW_DIALOG_WHEN_PRESSING_NOTIFICATION
+
+        BooleanSetting.UserReadScopeTips -> AppDataStore.USER_READ_SCOPE_TIPS
+
+        BooleanSetting.ApplyOrderInReverse -> AppDataStore.APPLY_ORDER_IN_REVERSE
+
+        BooleanSetting.ApplySelectedFirst -> AppDataStore.APPLY_SELECTED_FIRST
+
+        BooleanSetting.ApplyShowSystemApp -> AppDataStore.APPLY_SHOW_SYSTEM_APP
+
+        BooleanSetting.ApplyShowPackageName -> AppDataStore.APPLY_SHOW_PACKAGE_NAME
+
+        BooleanSetting.DialogHideIdenticalComparisons -> AppDataStore.DIALOG_HIDE_IDENTICAL_COMPARISONS
+
+        BooleanSetting.DialogVersionCompareSingleLine -> AppDataStore.DIALOG_VERSION_COMPARE_SINGLE_LINE
+
+        BooleanSetting.DialogSdkCompareMultiLine -> AppDataStore.DIALOG_SDK_COMPARE_MULTI_LINE
+
+        BooleanSetting.DialogShowExtendedMenu -> AppDataStore.DIALOG_SHOW_EXTENDED_MENU
+
+        BooleanSetting.DialogExpandTemporarySettingsByDefault -> AppDataStore.DIALOG_EXPAND_TEMPORARY_SETTINGS_BY_DEFAULT
+
+        BooleanSetting.DialogShowIntelligentSuggestion -> AppDataStore.DIALOG_SHOW_INTELLIGENT_SUGGESTION
+
+        BooleanSetting.DialogDisableNotificationOnDismiss -> AppDataStore.DIALOG_DISABLE_NOTIFICATION_ON_DISMISS
+
+        BooleanSetting.DialogShowOppoSpecial -> AppDataStore.DIALOG_SHOW_OPPO_SPECIAL
+
+        BooleanSetting.CheckAppSignature -> AppDataStore.CHECK_APP_SIGNATURE
+
+        BooleanSetting.CheckSplitPackageSignatures -> AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES
+
+        BooleanSetting.ShowSignatureInfoOnMatch -> AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH
+
+        BooleanSetting.ShowSignatureDetails -> AppDataStore.SHOW_SIGNATURE_DETAILS
+
+        BooleanSetting.DialogAutoSilentInstall -> AppDataStore.DIALOG_AUTO_SILENT_INSTALL
+
+        BooleanSetting.DialogLongClickBackgroundInstall -> AppDataStore.DIALOG_LONG_CLICK_BACKGROUND_INSTALL
+
+        BooleanSetting.TryMultipleAuthorizersOnInstall -> AppDataStore.TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL
+
+        BooleanSetting.LabEnableModuleFlash -> AppDataStore.LAB_ENABLE_MODULE_FLASH
+
+        BooleanSetting.LabModuleFlashShowArt -> AppDataStore.LAB_MODULE_FLASH_SHOW_ART
+
+        BooleanSetting.LabHttpSaveFile -> AppDataStore.LAB_HTTP_SAVE_FILE
+
+        BooleanSetting.LabSetInstallRequester -> AppDataStore.LAB_SET_INSTALL_REQUESTER
+
+        BooleanSetting.LabTapIconToShare -> AppDataStore.LAB_TAP_ICON_TO_SHARE
+
+        BooleanSetting.LabShowFilePath -> AppDataStore.LAB_SHOW_FILE_PATH
+
+        BooleanSetting.LabShowInstallInitiator -> AppDataStore.LAB_SHOW_INSTALL_INITIATOR
+
+        BooleanSetting.LabInstallWithoutUserAction -> AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION
+
+        BooleanSetting.LabRespectPlatformInstallPolicy -> AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY
+
+        BooleanSetting.DetectXposedModule -> AppDataStore.DETECT_XPOSED_MODULE
+
+        BooleanSetting.QuickOpenLSPosed -> AppDataStore.QUICK_OPEN_LSPOSED
+
+        BooleanSetting.EnableFileLogging -> AppDataStore.ENABLE_FILE_LOGGING
+    }
+
+    private fun namedPackageListKey(setting: NamedPackageListSetting): Preferences.Key<String> = when (setting) {
+        NamedPackageListSetting.ManagedInstallerPackages -> AppDataStore.MANAGED_INSTALLER_PACKAGES_LIST
+        NamedPackageListSetting.ManagedBlacklistPackages -> AppDataStore.MANAGED_BLACKLIST_PACKAGES_LIST
+        NamedPackageListSetting.ManagedSharedUserIdExemptedPackages -> AppDataStore.MANAGED_SHARED_USER_ID_EXEMPTED_PACKAGES_LIST
+    }
+
+    private fun sharedUidListKey(setting: SharedUidListSetting): Preferences.Key<String> = when (setting) {
+        SharedUidListSetting.ManagedSharedUserIdBlacklist -> AppDataStore.MANAGED_SHARED_USER_ID_BLACKLIST
+    }
 
     private companion object {
         private const val DEFAULT_SEED_COLOR = 0xFF6750A4.toInt()

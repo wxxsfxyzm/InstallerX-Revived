@@ -42,7 +42,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 fun InstallFailedContent(
     appInfo: AppInfoState,
     viewModel: InstallerViewModel,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentError = uiState.error
@@ -50,7 +50,7 @@ fun InstallFailedContent(
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         AppInfoSlot(appInfo = appInfo)
         Spacer(modifier = Modifier.height(32.dp))
@@ -58,12 +58,12 @@ fun InstallFailedContent(
             error = currentError,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f, fill = false)
+                .weight(1f, fill = false),
         )
         Spacer(modifier = Modifier.height(16.dp))
         MiuixErrorSuggestions(
             error = currentError,
-            viewModel = viewModel
+            viewModel = viewModel,
         )
         Row(
             modifier = Modifier
@@ -76,7 +76,7 @@ fun InstallFailedContent(
                 text = stringResource(R.string.close),
                 colors = ButtonDefaults.textButtonColors(
                     color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -100,27 +100,27 @@ private fun MiuixErrorSuggestions(
             confirmKeepData = keepData
             pendingConflictingPackage = conflictingPkg
             showUninstallConfirmDialogState.value = true
-        }
+        },
     )
 
     if (visibleSuggestions.isNotEmpty()) {
         Column(modifier = Modifier.fillMaxWidth()) {
             SmallTitle(
                 text = stringResource(R.string.smart_suggestions),
-                insideMargin = PaddingValues(12.dp, 8.dp)
+                insideMargin = PaddingValues(12.dp, 8.dp),
             )
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                colors = miuixSheetCardColors()
+                colors = miuixSheetCardColors(),
             ) {
                 visibleSuggestions.forEach { suggestion ->
                     MiuixNavigationItemWidget(
                         title = stringResource(id = suggestion.labelRes),
                         description = suggestion.descriptionRes?.let { stringResource(id = it) } ?: "",
                         onClick = suggestion.onClick,
-                        insideMargin = PaddingValues(12.dp)
+                        insideMargin = PaddingValues(12.dp),
                     )
                 }
             }
@@ -134,10 +134,10 @@ private fun MiuixErrorSuggestions(
             viewModel.dispatch(
                 InstallerViewAction.UninstallAndRetryInstall(
                     keepData = confirmKeepData,
-                    conflictingPackage = pendingConflictingPackage
-                )
+                    conflictingPackage = pendingConflictingPackage,
+                ),
             )
         },
-        keepData = confirmKeepData
+        keepData = confirmKeepData,
     )
 }

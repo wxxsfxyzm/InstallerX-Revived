@@ -67,11 +67,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun EditPage(
-    id: Long? = null,
-    viewModel: EditViewModel = koinViewModel { parametersOf(id) },
-    useBlur: Boolean
-) {
+fun EditPage(id: Long? = null, viewModel: EditViewModel = koinViewModel { parametersOf(id) }, useBlur: Boolean) {
     val navigator = LocalNavigator.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dispatch = viewModel::dispatch
@@ -99,7 +95,7 @@ fun EditPage(
             showUnsavedDialog = false
             navigator.pop()
         },
-        errorMessages = state.activeErrorResIds.map { stringResource(it) }
+        errorMessages = state.activeErrorResIds.map { stringResource(it) },
     )
 
     if (showAutoApproveSessionDialog) {
@@ -118,7 +114,7 @@ fun EditPage(
                     onClick = {
                         showAutoApproveSessionDialog = false
                         dispatch(EditViewAction.ChangeDataAutoApproveSession(true))
-                    }
+                    },
                 ) {
                     Text(text = stringResource(R.string.confirm))
                 }
@@ -127,11 +123,11 @@ fun EditPage(
                 TextButton(
                     onClick = {
                         showAutoApproveSessionDialog = false
-                    }
+                    },
                 ) {
                     Text(text = stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 
@@ -157,7 +153,7 @@ fun EditPage(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = null
+                indication = null,
             ) {
                 focusManager.clearFocus()
             },
@@ -177,29 +173,29 @@ fun EditPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
         },
         floatingActionButton = {
             SmallExtendedFloatingActionButton(
                 modifier = Modifier.padding(
-                    bottom = 16.dp
+                    bottom = 16.dp,
                 ),
                 icon = {
                     Icon(
                         imageVector = AppIcons.Save,
-                        contentDescription = stringResource(R.string.save)
+                        contentDescription = stringResource(R.string.save),
                     )
                 },
                 text = { Text(stringResource(R.string.save)) },
-                onClick = { dispatch(EditViewAction.SaveData) }
+                onClick = { dispatch(EditViewAction.SaveData) },
             )
         },
         snackbarHost = {
             SwipeableSnackbarHost(
                 hostState = snackBarHostState,
-                snackbar = { SnackbarHost(hostState = snackBarHostState) }
+                snackbar = { SnackbarHost(hostState = snackBarHostState) },
             )
         },
     ) { paddingValues ->
@@ -213,13 +209,14 @@ fun EditPage(
             // --- Group 1: Main Settings ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.config_label_main_settings)
+                    title = stringResource(R.string.config_label_main_settings),
                 ) {
                     item {
                         DataNameWidget(
                             state,
                             dispatch,
-                            { DataDescriptionWidget(state, dispatch) })
+                            { DataDescriptionWidget(state, dispatch) },
+                        )
                     }
                     dataAuthorizerWidget(state, dispatch)
                     item { DataInstallModeWidget(state, dispatch) }
@@ -229,11 +226,12 @@ fun EditPage(
                             dispatch = dispatch,
                             onEnableRequest = {
                                 showAutoApproveSessionDialog = true
-                            }
+                            },
                         )
                     }
-                    if (state.globalInstallerBiometricAuthMode == BiometricAuthMode.FollowConfig)
+                    if (state.globalInstallerBiometricAuthMode == BiometricAuthMode.FollowConfig) {
                         item { DataRequireBiometricAuthWidget(state, dispatch) }
+                    }
                     item { DataToastModeWidget(state, dispatch) }
                 }
             }
@@ -245,7 +243,7 @@ fun EditPage(
             // --- Group 2: Installer Settings ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.config_label_installer_settings)
+                    title = stringResource(R.string.config_label_installer_settings),
                 ) {
                     dataUserWidget(state, dispatch)
                     dataInstallReasonWidget(state, dispatch)
@@ -261,23 +259,27 @@ fun EditPage(
             // --- Group 3: Install Options ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.config_label_install_options)
+                    title = stringResource(R.string.config_label_install_options),
                 ) {
                     item { DataForAllUserWidget(state, dispatch) }
                     item { DataAllowTestOnlyWidget(state, dispatch) }
                     item { DataAllowDowngradeWidget(state, dispatch) }
-                    if (isAtLeastUpsideDownCake) item {
-                        DataBypassLowTargetSdkWidget(
-                            state,
-                            dispatch
-                        )
+                    if (isAtLeastUpsideDownCake) {
+                        item {
+                            DataBypassLowTargetSdkWidget(
+                                state,
+                                dispatch,
+                            )
+                        }
                     }
                     item { DataAllowAllRequestedPermissionsWidget(state, dispatch) }
-                    if (isAtLeastUpsideDownCake) item {
-                        DataRequestUpdateOwnershipWidget(
-                            state,
-                            dispatch
-                        )
+                    if (isAtLeastUpsideDownCake) {
+                        item {
+                            DataRequestUpdateOwnershipWidget(
+                                state,
+                                dispatch,
+                            )
+                        }
                     }
                 }
             }
@@ -285,7 +287,7 @@ fun EditPage(
             // --- Group 4: Preferences Settings ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.config_label_preferences)
+                    title = stringResource(R.string.config_label_preferences),
                 ) {
                     item { DataSplitChooseAllWidget(state, dispatch) }
                     item { DataApkChooseAllWidget(state, dispatch) }

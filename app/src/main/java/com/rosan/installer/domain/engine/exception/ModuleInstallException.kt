@@ -8,13 +8,7 @@ import com.rosan.installer.domain.engine.model.error.ModuleInstallErrorType
 /**
  * Unified exception for all module installation failures.
  */
-class ModuleInstallException(
-    val errorType: ModuleInstallErrorType,
-    message: String? = null,
-    cause: Throwable? = null
-) : InstallerException(message, cause) {
+class ModuleInstallException(val errorType: ModuleInstallErrorType, message: String? = null, cause: Throwable? = null) : InstallerException(message, cause) {
 
-    override fun getStringResId(): Int {
-        return errorType.stringResId
-    }
+    override fun getStringResId(): Int = errorType.stringResId
 }

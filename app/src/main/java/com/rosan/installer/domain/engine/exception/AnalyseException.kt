@@ -8,13 +8,7 @@ import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 /**
  * Unified exception for all package analysis failures.
  */
-open class AnalyseException(
-    val errorType: AnalyseErrorType,
-    message: String? = null,
-    cause: Throwable? = null
-) : InstallerException(message, cause) {
+open class AnalyseException(val errorType: AnalyseErrorType, message: String? = null, cause: Throwable? = null) : InstallerException(message, cause) {
 
-    override fun getStringResId(): Int {
-        return errorType.stringResId
-    }
+    override fun getStringResId(): Int = errorType.stringResId
 }

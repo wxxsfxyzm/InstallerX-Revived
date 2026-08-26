@@ -69,7 +69,6 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
-
 /**
  * Compact Screen Layout (Portrait/Phone)
  */
@@ -82,10 +81,10 @@ fun Material3SettingsCompactLayout(
     useBlur: Boolean,
     useFloatingBottomBar: Boolean,
     backdrop: LayerBackdrop?,
-    isMedium: Boolean
+    isMedium: Boolean,
 ) {
     val navigationWindowInsets = WindowInsets.safeDrawing.only(
-        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
     )
 
     Scaffold(
@@ -97,7 +96,7 @@ fun Material3SettingsCompactLayout(
                     mainPagerState = mainPagerState,
                     tabs = tabs,
                     configCount = configCount,
-                    backdrop = backdrop
+                    backdrop = backdrop,
                 )
             } else {
                 RowNavigation(
@@ -108,10 +107,10 @@ fun Material3SettingsCompactLayout(
                     onPageChanged = { mainPagerState.animateToPage(it) },
                     configCount = configCount,
                     containerColor = if (useBlur) Color.Transparent else BottomAppBarDefaults.containerColor,
-                    isMedium = isMedium
+                    isMedium = isMedium,
                 )
             }
-        }
+        },
     ) { paddingValues ->
         Material3SettingsPagerContent(
             modifier = Modifier
@@ -122,7 +121,7 @@ fun Material3SettingsCompactLayout(
             mainPagerState = mainPagerState,
             tabs = tabs,
             useBlur = useBlur,
-            outerPadding = paddingValues
+            outerPadding = paddingValues,
         )
     }
 }
@@ -137,10 +136,10 @@ fun Material3SettingsWideScreenLayout(
     tabs: List<NavigationTab>,
     useBlur: Boolean,
     useFloatingBottomBar: Boolean,
-    backdrop: LayerBackdrop?
+    backdrop: LayerBackdrop?,
 ) {
     val navigationWindowInsets = WindowInsets.safeDrawing.only(
-        WindowInsetsSides.Vertical + WindowInsetsSides.Start
+        WindowInsetsSides.Vertical + WindowInsetsSides.Start,
     )
 
     if (useFloatingBottomBar) {
@@ -152,9 +151,9 @@ fun Material3SettingsWideScreenLayout(
                     mainPagerState = mainPagerState,
                     tabs = tabs,
                     configCount = configCount,
-                    backdrop = backdrop
+                    backdrop = backdrop,
                 )
-            }
+            },
         ) { paddingValues ->
             Material3SettingsPagerContent(
                 modifier = Modifier
@@ -165,7 +164,7 @@ fun Material3SettingsWideScreenLayout(
                 mainPagerState = mainPagerState,
                 tabs = tabs,
                 useBlur = useBlur,
-                outerPadding = paddingValues
+                outerPadding = paddingValues,
             )
         }
     } else {
@@ -174,7 +173,7 @@ fun Material3SettingsWideScreenLayout(
                 windowInsets = navigationWindowInsets,
                 tabs = tabs,
                 currentPage = mainPagerState.selectedPage,
-                onPageChanged = { mainPagerState.animateToPage(it) }
+                onPageChanged = { mainPagerState.animateToPage(it) },
             )
 
             Material3SettingsPagerContent(
@@ -187,7 +186,7 @@ fun Material3SettingsWideScreenLayout(
                 mainPagerState = mainPagerState,
                 tabs = tabs,
                 useBlur = useBlur,
-                outerPadding = PaddingValues(0.dp) // Rail navigation doesn't overlay bottom content
+                outerPadding = PaddingValues(0.dp), // Rail navigation doesn't overlay bottom content
             )
         }
     }
@@ -198,13 +197,13 @@ private fun Material3FloatingBottomBar(
     mainPagerState: MainPagerState,
     tabs: List<NavigationTab>,
     configCount: Int,
-    backdrop: LayerBackdrop?
+    backdrop: LayerBackdrop?,
 ) {
     val fallbackBackdrop = rememberLayerBackdrop()
     val floatingBackdrop = backdrop ?: fallbackBackdrop
 
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         FloatingBottomBar(
             items = tabs,
@@ -221,7 +220,7 @@ private fun Material3FloatingBottomBar(
             colors = FloatingBottomBarDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 indicatorColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ),
             iconContent = { tab, index ->
                 val showBadge = index == 1 && configCount > 1
@@ -262,12 +261,12 @@ private fun Material3SettingsPagerContent(
     mainPagerState: MainPagerState,
     tabs: List<NavigationTab>,
     useBlur: Boolean,
-    outerPadding: PaddingValues
+    outerPadding: PaddingValues,
 ) {
     HorizontalPager(
         state = mainPagerState.pagerState,
         userScrollEnabled = true,
-        modifier = modifier
+        modifier = modifier,
     ) { page ->
         // Delegate page content rendering based on the current page index
         when (page) {
@@ -276,25 +275,25 @@ private fun Material3SettingsPagerContent(
                 title = tabs[page].label,
                 outerPadding = outerPadding,
                 configCount = configCount,
-                onNavigateToProfiles = { mainPagerState.animateToPage(1) }
+                onNavigateToProfiles = { mainPagerState.animateToPage(1) },
             )
 
             1 -> AllPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding
+                outerPadding = outerPadding,
             )
 
             2 -> HistoryPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding
+                outerPadding = outerPadding,
             )
 
             3 -> PreferredPage(
                 useBlur = useBlur,
                 title = tabs[page].label,
-                outerPadding = outerPadding
+                outerPadding = outerPadding,
             )
         }
     }
@@ -310,7 +309,7 @@ private fun RowNavigation(
     onPageChanged: (Int) -> Unit,
     configCount: Int,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
-    isMedium: Boolean = false
+    isMedium: Boolean = false,
 ) {
     ShortNavigationBar(
         modifier = modifier
@@ -318,7 +317,7 @@ private fun RowNavigation(
             .wrapContentSize(),
         windowInsets = windowInsets,
         containerColor = containerColor,
-        arrangement = if (isMedium) ShortNavigationBarArrangement.Centered else ShortNavigationBarArrangement.EqualWeight
+        arrangement = if (isMedium) ShortNavigationBarArrangement.Centered else ShortNavigationBarArrangement.EqualWeight,
     ) {
         tabs.forEachIndexed { index, navigationData ->
             ShortNavigationBarItem(
@@ -331,17 +330,17 @@ private fun RowNavigation(
                     BadgedBox(
                         badge = {
                             ConfigBadge(showBadge = showBadge, configCount = configCount)
-                        }
+                        },
                     ) {
                         Icon(
                             imageVector = navigationData.icon,
-                            contentDescription = navigationData.label
+                            contentDescription = navigationData.label,
                         )
                     }
                 },
                 label = {
                     Text(text = navigationData.label)
-                }
+                },
             )
         }
     }
@@ -352,7 +351,7 @@ private fun ColumnNavigation(
     windowInsets: WindowInsets,
     tabs: List<NavigationTab>,
     currentPage: Int,
-    onPageChanged: (Int) -> Unit
+    onPageChanged: (Int) -> Unit,
 ) {
     val state = rememberWideNavigationRailState()
     val scope = rememberCoroutineScope()
@@ -365,7 +364,7 @@ private fun ColumnNavigation(
             contentColor = MaterialTheme.colorScheme.onSurface,
             modalContainerColor = WideNavigationRailDefaults.colors().modalContainerColor,
             modalScrimColor = WideNavigationRailDefaults.colors().modalScrimColor,
-            modalContentColor = WideNavigationRailDefaults.colors().modalContentColor
+            modalContentColor = WideNavigationRailDefaults.colors().modalContentColor,
         ),
         header = {
             IconButton(
@@ -382,9 +381,11 @@ private fun ColumnNavigation(
                         },
                 onClick = {
                     scope.launch {
-                        if (state.targetValue == WideNavigationRailValue.Expanded)
+                        if (state.targetValue == WideNavigationRailValue.Expanded) {
                             state.collapse()
-                        else state.expand()
+                        } else {
+                            state.expand()
+                        }
                     }
                 },
             ) {
@@ -394,7 +395,7 @@ private fun ColumnNavigation(
                     Icon(AppIcons.Menu, "Expand rail")
                 }
             }
-        }
+        },
     ) {
         tabs.forEachIndexed { index, navigationTab ->
             WideNavigationRailItem(
@@ -404,12 +405,12 @@ private fun ColumnNavigation(
                 icon = {
                     Icon(
                         imageVector = navigationTab.icon,
-                        contentDescription = navigationTab.label
+                        contentDescription = navigationTab.label,
                     )
                 },
                 label = {
                     Text(text = navigationTab.label)
-                }
+                },
             )
         }
     }
@@ -421,11 +422,11 @@ private fun ConfigBadge(showBadge: Boolean, configCount: Int) {
         visible = showBadge,
         enter = scaleIn() + fadeIn(),
         exit = scaleOut() + fadeOut(),
-        label = "badge"
+        label = "badge",
     ) {
         Badge(
             containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.onSecondary
+            contentColor = MaterialTheme.colorScheme.onSecondary,
         ) {
             Text(configCount.toString())
         }

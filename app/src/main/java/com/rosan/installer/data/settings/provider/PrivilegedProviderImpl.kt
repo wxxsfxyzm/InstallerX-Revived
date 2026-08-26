@@ -11,10 +11,7 @@ import com.rosan.installer.domain.settings.provider.PrivilegedProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class PrivilegedProviderImpl(
-    private val context: Context,
-    private val appOpsProvider: AppOpsProvider
-) : PrivilegedProvider {
+class PrivilegedProviderImpl(private val context: Context, private val appOpsProvider: AppOpsProvider) : PrivilegedProvider {
     override suspend fun setAdbVerify(authorizer: Authorizer, customizeAuthorizer: String, enabled: Boolean) {
         withContext(Dispatchers.IO) {
             appOpsProvider.setAdbVerifyEnabled(authorizer, customizeAuthorizer, enabled)

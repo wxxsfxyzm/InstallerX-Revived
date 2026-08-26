@@ -51,7 +51,7 @@ const val INSTALLER_ROOM_SCHEMA_VERSION = 18
         AutoMigration(from = 15, to = 16),
         AutoMigration(from = 16, to = 17),
         AutoMigration(from = 17, to = 18),
-    ]
+    ],
 )
 @ColumnTypeConverters(
     AuthorizerConverter::class,
@@ -62,7 +62,7 @@ const val INSTALLER_ROOM_SCHEMA_VERSION = 18
     PackageSourceConverter::class,
     InstallReasonConverter::class,
     StringListConverter::class,
-    ToastModeConverter::class
+    ToastModeConverter::class,
 )
 abstract class InstallerRoom : RoomDatabase() {
     companion object : KoinComponent {
@@ -76,15 +76,13 @@ abstract class InstallerRoom : RoomDatabase() {
             }
         }
 
-        fun createInstance(): InstallerRoom =
-            Room.databaseBuilder(
-                get(),
-                InstallerRoom::class.java,
-                "installer.db",
-            )
-                .addMigrations(MIGRATION_12_13)
-                .build()
-
+        fun createInstance(): InstallerRoom = Room.databaseBuilder(
+            get(),
+            InstallerRoom::class.java,
+            "installer.db",
+        )
+            .addMigrations(MIGRATION_12_13)
+            .build()
     }
 
     abstract val appDao: AppDao

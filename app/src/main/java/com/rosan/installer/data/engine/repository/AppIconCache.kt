@@ -25,15 +25,9 @@ import me.zhanghai.android.appiconloader.AppIconLoader
  * dedicated background dispatcher to ensure the main thread remains responsive during icon decoding.
  */
 object AppIconCache {
-    private data class CacheKey(
-        val packageName: String,
-        val userId: Int,
-        val size: Int,
-        val iconSourceKey: String
-    )
+    private data class CacheKey(val packageName: String, val userId: Int, val size: Int, val iconSourceKey: String)
 
-    private class AppIconLruCache(maxSize: Int) :
-        LruCache<CacheKey, Bitmap>(maxSize) {
+    private class AppIconLruCache(maxSize: Int) : LruCache<CacheKey, Bitmap>(maxSize) {
         override fun sizeOf(key: CacheKey, value: Bitmap): Int {
             // Memory size in KB
             return value.byteCount / 1024
@@ -70,7 +64,7 @@ object AppIconCache {
             info.sourceDir.orEmpty(),
             info.publicSourceDir.orEmpty(),
             info.icon,
-            isArchived
+            isArchived,
         ).joinToString(separator = "|")
     }
 
@@ -82,12 +76,7 @@ object AppIconCache {
         }
     }
 
-    private fun getOrLoadBitmap(
-        context: Context,
-        info: ApplicationInfo,
-        userId: Int,
-        size: Int
-    ): Bitmap {
+    private fun getOrLoadBitmap(context: Context, info: ApplicationInfo, userId: Int, size: Int): Bitmap {
         val cacheKey = CacheKey(info.packageName, userId, size, iconSourceKey(info))
         get(cacheKey)?.let { return it }
 
@@ -110,19 +99,12 @@ object AppIconCache {
      * @param userId The ID of the user the application belongs to.
      * @param size The target icon size in pixels.
      */
-    suspend fun loadIconBitmap(
-        context: Context,
-        info: ApplicationInfo,
-        userId: Int,
-        size: Int
-    ): Bitmap? {
-        return try {
-            withContext(dispatcher) {
-                getOrLoadBitmap(context, info, userId, size)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+    suspend fun loadIconBitmap(context: Context, info: ApplicationInfo, userId: Int, size: Int): Bitmap? = try {
+        withContext(dispatcher) {
+            getOrLoadBitmap(context, info, userId, size)
         }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

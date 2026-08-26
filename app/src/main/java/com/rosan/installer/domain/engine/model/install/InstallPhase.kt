@@ -14,5 +14,5 @@ enum class InstallPhase {
     /**
      * All payloads have been staged and PackageInstaller is processing the committed session.
      */
-    INSTALLING
+    INSTALLING,
 }

@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 enum class WindowLayoutType {
     COMPACT,
     MEDIUM,
-    EXPANDED
+    EXPANDED,
 }
 
 // Unified layout state object
@@ -21,7 +21,7 @@ data class WindowLayoutInfo(
     val type: WindowLayoutType,
     val isLandscape: Boolean,
     val showNavigationRail: Boolean,
-    val isMediumPortrait: Boolean
+    val isMediumPortrait: Boolean,
 )
 
 // Global provider for layout state
@@ -73,6 +73,6 @@ fun rememberWindowLayoutInfo(): WindowLayoutInfo {
         type = type,
         isLandscape = isLandscape,
         showNavigationRail = showNavigationRail,
-        isMediumPortrait = isMediumPortrait
+        isMediumPortrait = isMediumPortrait,
     )
 }

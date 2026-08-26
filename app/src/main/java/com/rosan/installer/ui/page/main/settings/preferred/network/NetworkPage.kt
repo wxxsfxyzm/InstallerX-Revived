@@ -17,9 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -30,17 +34,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,10 +76,7 @@ private val AospMainSwitchBarRadius = 35.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NetworkPage(
-    useBlur: Boolean,
-    viewModel: NetworkSettingsViewModel = koinViewModel()
-) {
+fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -106,7 +103,7 @@ fun NetworkPage(
                     onClick = {
                         pendingNetworkSourceMode = null
                         viewModel.dispatch(NetworkSettingsAction.ConfirmNetworkSourceMode(mode))
-                    }
+                    },
                 ) {
                     Text(stringResource(R.string.confirm))
                 }
@@ -115,7 +112,7 @@ fun NetworkPage(
                 TextButton(onClick = { pendingNetworkSourceMode = null }) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 
@@ -129,7 +126,7 @@ fun NetworkPage(
                 if (channel == GithubUpdateChannel.CUSTOM) {
                     showCustomProxyDialog = true
                 }
-            }
+            },
         )
     }
 
@@ -141,8 +138,8 @@ fun NetworkPage(
                 if (uiState.customGithubProxyUrl.isEmpty()) {
                     viewModel.dispatch(
                         NetworkSettingsAction.ChangeGithubUpdateChannel(
-                            GithubUpdateChannel.OFFICIAL
-                        )
+                            GithubUpdateChannel.OFFICIAL,
+                        ),
                     )
                 }
             },
@@ -152,11 +149,11 @@ fun NetworkPage(
                 if (url.isEmpty()) {
                     viewModel.dispatch(
                         NetworkSettingsAction.ChangeGithubUpdateChannel(
-                            GithubUpdateChannel.OFFICIAL
-                        )
+                            GithubUpdateChannel.OFFICIAL,
+                        ),
                     )
                 }
-            }
+            },
         )
     }
 
@@ -182,16 +179,16 @@ fun NetworkPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
         ) {
             item {
                 NetworkMasterSwitch(
@@ -199,7 +196,7 @@ fun NetworkPage(
                         .fillMaxWidth()
                         .padding(
                             horizontal = AospMainSwitchBarMargin,
-                            vertical = AospMainSwitchBarMargin
+                            vertical = AospMainSwitchBarMargin,
                         ),
                     checked = uiState.allowInternetAccess,
                     onCheckedChange = { enabled ->
@@ -207,15 +204,15 @@ fun NetworkPage(
                             exitAfterInternetDisable = true
                         }
                         viewModel.dispatch(
-                            NetworkSettingsAction.ChangeInternetAccess(enabled)
+                            NetworkSettingsAction.ChangeInternetAccess(enabled),
                         )
-                    }
+                    },
                 )
             }
             if (uiState.allowInternetAccess) {
                 item {
                     SegmentedColumn(
-                        title = stringResource(R.string.internet_access_enabled)
+                        title = stringResource(R.string.internet_access_enabled),
                     ) {
                         item {
                             NetworkSourceModeWidget(
@@ -227,10 +224,10 @@ fun NetworkPage(
                                         pendingNetworkSourceMode = mode
                                     } else {
                                         viewModel.dispatch(
-                                            NetworkSettingsAction.ChangeNetworkSourceMode(mode)
+                                            NetworkSettingsAction.ChangeNetworkSourceMode(mode),
                                         )
                                     }
-                                }
+                                },
                             )
                         }
                         item {
@@ -238,9 +235,9 @@ fun NetworkPage(
                                 currentProfile = uiState.httpProfile,
                                 onProfileChange = { profile ->
                                     viewModel.dispatch(
-                                        NetworkSettingsAction.ChangeHttpProfile(profile)
+                                        NetworkSettingsAction.ChangeHttpProfile(profile),
                                     )
-                                }
+                                },
                             )
                         }
 
@@ -248,11 +245,11 @@ fun NetworkPage(
                         item {
                             val channelSummary = when (currentChannel) {
                                 GithubUpdateChannel.OFFICIAL -> stringResource(
-                                    R.string.lab_update_github_proxy_official
+                                    R.string.lab_update_github_proxy_official,
                                 )
 
                                 GithubUpdateChannel.PROXY_7ED -> stringResource(
-                                    R.string.lab_update_github_proxy_7ed
+                                    R.string.lab_update_github_proxy_7ed,
                                 )
 
                                 GithubUpdateChannel.CUSTOM -> uiState.customGithubProxyUrl.ifBlank {
@@ -263,7 +260,7 @@ fun NetworkPage(
                                 icon = AppIcons.UpdateChannel,
                                 title = stringResource(R.string.lab_update_github_proxy),
                                 description = channelSummary,
-                                onClick = { showChannelDialog = true }
+                                onClick = { showChannelDialog = true },
                             ) {}
                         }
                     }
@@ -274,19 +271,16 @@ fun NetworkPage(
 }
 
 @Composable
-private fun NetworkSourceModeWidget(
-    currentMode: NetworkSourceMode,
-    onModeChange: (NetworkSourceMode) -> Unit
-) {
+private fun NetworkSourceModeWidget(currentMode: NetworkSourceMode, onModeChange: (NetworkSourceMode) -> Unit) {
     val modes = linkedMapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache),
         NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage)
+        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage),
     )
     val descriptions = mapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache_desc),
         NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart_desc),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc)
+        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc),
     )
 
     DropDownMenuWidget(
@@ -297,20 +291,17 @@ private fun NetworkSourceModeWidget(
         data = modes.values.toList(),
         onChoiceChange = { index ->
             modes.keys.elementAtOrNull(index)?.let(onModeChange)
-        }
+        },
     )
 }
 
 @Composable
-private fun NetworkHttpProfileWidget(
-    currentProfile: HttpProfile,
-    onProfileChange: (HttpProfile) -> Unit
-) {
+private fun NetworkHttpProfileWidget(currentProfile: HttpProfile, onProfileChange: (HttpProfile) -> Unit) {
     val profiles = remember {
         listOf(
             HttpProfile.ALLOW_SECURE,
             HttpProfile.ALLOW_LOCAL,
-            HttpProfile.ALLOW_ALL
+            HttpProfile.ALLOW_ALL,
         )
     }
     val options = profiles.map { profile ->
@@ -331,16 +322,12 @@ private fun NetworkHttpProfileWidget(
         onChoiceChange = { index ->
             profiles.getOrElse(index) { HttpProfile.ALLOW_SECURE }
                 .let(onProfileChange)
-        }
+        },
     )
 }
 
 @Composable
-private fun NetworkMasterSwitch(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun NetworkMasterSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     val containerColor = if (checked) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
@@ -360,10 +347,10 @@ private fun NetworkMasterSwitch(
             .toggleable(
                 value = checked,
                 role = Role.Switch,
-                onValueChange = onCheckedChange
+                onValueChange = onCheckedChange,
             )
             .padding(horizontal = AospMainSwitchBarHorizontalPadding),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = stringResource(R.string.network_access),
@@ -371,7 +358,7 @@ private fun NetworkMasterSwitch(
             color = contentColor,
             modifier = Modifier
                 .weight(1f)
-                .padding(end = AospMainSwitchTitleMargin)
+                .padding(end = AospMainSwitchTitleMargin),
         )
         Switch(
             modifier = Modifier.clearAndSetSemantics {},
@@ -379,15 +366,15 @@ private fun NetworkMasterSwitch(
             onCheckedChange = null,
             colors = SwitchDefaults.colors(
                 checkedIconColor = MaterialTheme.colorScheme.primary,
-                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             ),
             thumbContent = {
                 Icon(
                     imageVector = if (checked) Icons.Filled.Check else Icons.Filled.Close,
                     contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
                 )
-            }
+            },
         )
     }
 }

@@ -9,7 +9,7 @@ enum class SplitType {
     ARCHITECTURE,
     LANGUAGE,
     DENSITY,
-    FEATURE
+    FEATURE,
 }
 
 /**
@@ -19,14 +19,10 @@ enum class FilterType {
     NONE,
     ABI,
     DENSITY,
-    LANGUAGE
+    LANGUAGE,
 }
 
 /**
  * Parsed split metadata shared by parser and domain selection logic.
  */
-data class SplitMetadata(
-    val type: SplitType,
-    val filterType: FilterType,
-    val configValue: String?
-)
+data class SplitMetadata(val type: SplitType, val filterType: FilterType, val configValue: String?)

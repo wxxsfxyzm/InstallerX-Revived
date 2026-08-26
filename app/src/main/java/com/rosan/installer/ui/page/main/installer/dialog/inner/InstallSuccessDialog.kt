@@ -38,9 +38,7 @@ import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 
 @Composable
-fun installSuccessDialog(
-    viewModel: InstallerViewModel
-): DialogParams {
+fun installSuccessDialog(viewModel: InstallerViewModel): DialogParams {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val config = uiState.config
@@ -62,7 +60,8 @@ fun installSuccessDialog(
         ?: selectedEntities?.filterIsInstance<AppEntity.ModuleEntity>()?.firstOrNull()
 
     val isXposedModule =
-        settings.detectXposedModule && if (effectivePrimaryEntity is AppEntity.BaseEntity) effectivePrimaryEntity.isXposedModule else false
+        settings.detectXposedModule &&
+            if (effectivePrimaryEntity is AppEntity.BaseEntity) effectivePrimaryEntity.isXposedModule else false
     val hasPrivilege = config.isPrivileged(deviceCapabilityProvider)
 
     val baseParams = installInfoDialog(
@@ -72,31 +71,33 @@ fun installSuccessDialog(
                 context.startActivity(
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         .setData(Uri.fromParts("package", packageName, null))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 )
             }
             viewModel.dispatch(InstallerViewAction.Background)
-        }
+        },
     )
 
     return baseParams.copy(
         text = DialogInnerParams(
-            DialogParamsType.InstallerInstallSuccess.id
+            DialogParamsType.InstallerInstallSuccess.id,
         ) {
             Text(
                 text = stringResource(R.string.installer_install_success),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         },
         buttons = dialogButtons(
-            DialogParamsType.InstallerInstallSuccess.id
+            DialogParamsType.InstallerInstallSuccess.id,
         ) {
             val launchIntent = remember(packageName) {
                 if (packageName.isNotEmpty()) {
                     context.packageManager.getLaunchIntentForPackage(packageName)
-                } else null
+                } else {
+                    null
+                }
             }
 
             buildList {
@@ -107,7 +108,7 @@ fun installSuccessDialog(
                             coroutineScope.launch(Dispatchers.IO) {
                                 val result = openAppUseCase(
                                     config = config,
-                                    launchIntent = launchIntent
+                                    launchIntent = launchIntent,
                                 )
 
                                 when (result) {
@@ -131,7 +132,7 @@ fun installSuccessDialog(
                                     }
                                 }
                             }
-                        }
+                        },
                     )
                 }
                 if (isXposedModule && settings.quickOpenLSPosed && hasPrivilege) {
@@ -146,15 +147,15 @@ fun installSuccessDialog(
                                     }
                                 }
                             }
-                        }
+                        },
                     )
                 }
                 add(
                     DialogButton(stringResource(R.string.finish)) {
                         viewModel.dispatch(InstallerViewAction.Close)
-                    }
+                    },
                 )
             }
-        }
+        },
     )
 }
