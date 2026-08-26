@@ -21,7 +21,7 @@ class PendingApkSignatureAnalyzerTest {
     private val certificateFormatter = CertificateFormatter()
     private val analyzer = PendingApkSignatureAnalyzer(
         certificateFormatter,
-        LightweightApkSignatureReader(certificateFormatter)
+        LightweightApkSignatureReader(certificateFormatter),
     )
 
     @BeforeTest
@@ -57,7 +57,7 @@ class PendingApkSignatureAnalyzerTest {
             descriptorFactory = {
                 rawDescriptorRequested = true
                 error("Signature verification must use the seekable channel")
-            }
+            },
         )
 
         val fileResult = analyzer.analyze(backingFile.path)
@@ -84,7 +84,7 @@ class PendingApkSignatureAnalyzerTest {
                 error("System-verified source must skip pre-install signature reads")
             },
             descriptorFactory = { error("descriptor is unused") },
-            preInstallSignatureAnalysis = false
+            preInstallSignatureAnalysis = false,
         )
 
         val result = analyzer.analyze(source, tempDirectory.path)

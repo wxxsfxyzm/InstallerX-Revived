@@ -8,5 +8,5 @@ data class AuthorizerCustState(
     val authorizer: Authorizer = Authorizer.Shizuku,
     val alwaysUseRootInSystem: Boolean = false,
     val closeSessionCountDown: Int = 5,
-    val allowInstallWithoutUserAction: Boolean = false
+    val allowInstallWithoutUserAction: Boolean = false,
 )

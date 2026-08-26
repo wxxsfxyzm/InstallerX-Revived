@@ -2,11 +2,11 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.core.reflection
 
-import timber.log.Timber
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
+import timber.log.Timber
 
 class ReflectionProviderImpl : ReflectionProvider {
     private val fieldCache = ConcurrentHashMap<String, Field>()
@@ -14,28 +14,22 @@ class ReflectionProviderImpl : ReflectionProvider {
     private val constructorCache = ConcurrentHashMap<String, Constructor<*>>()
 
     @Suppress("UNCHECKED_CAST")
-    override fun getConstructors(clazz: Class<*>): Array<Constructor<*>> =
-        clazz.constructors.onEach { it.isAccessible = true } as Array<Constructor<*>>
+    override fun getConstructors(clazz: Class<*>): Array<Constructor<*>> = clazz.constructors.onEach { it.isAccessible = true } as Array<Constructor<*>>
 
     @Suppress("UNCHECKED_CAST")
-    override fun getDeclaredConstructors(clazz: Class<*>): Array<Constructor<*>> =
-        clazz.declaredConstructors.onEach { it.isAccessible = true } as Array<Constructor<*>>
+    override fun getDeclaredConstructors(clazz: Class<*>): Array<Constructor<*>> = clazz.declaredConstructors.onEach { it.isAccessible = true } as Array<Constructor<*>>
 
     @Suppress("UNCHECKED_CAST")
-    override fun getFields(clazz: Class<*>): Array<Field> =
-        clazz.fields.onEach { it.isAccessible = true } as Array<Field>
+    override fun getFields(clazz: Class<*>): Array<Field> = clazz.fields.onEach { it.isAccessible = true } as Array<Field>
 
     @Suppress("UNCHECKED_CAST")
-    override fun getDeclaredFields(clazz: Class<*>): Array<Field> =
-        clazz.declaredFields.onEach { it.isAccessible = true } as Array<Field>
+    override fun getDeclaredFields(clazz: Class<*>): Array<Field> = clazz.declaredFields.onEach { it.isAccessible = true } as Array<Field>
 
     @Suppress("UNCHECKED_CAST")
-    override fun getMethods(clazz: Class<*>): Array<Method> =
-        clazz.methods.onEach { it.isAccessible = true } as Array<Method>
+    override fun getMethods(clazz: Class<*>): Array<Method> = clazz.methods.onEach { it.isAccessible = true } as Array<Method>
 
     @Suppress("UNCHECKED_CAST")
-    override fun getDeclaredMethods(clazz: Class<*>): Array<Method> =
-        clazz.declaredMethods.onEach { it.isAccessible = true } as Array<Method>
+    override fun getDeclaredMethods(clazz: Class<*>): Array<Method> = clazz.declaredMethods.onEach { it.isAccessible = true } as Array<Method>
 
     override fun getConstructor(clazz: Class<*>, vararg parameterTypes: Class<*>): Constructor<*>? {
         val key = clazz.name + parameterTypes.joinToString(prefix = "(", postfix = ")") { it.name }
@@ -49,10 +43,7 @@ class ReflectionProviderImpl : ReflectionProvider {
         }
     }
 
-    override fun getDeclaredConstructor(
-        clazz: Class<*>,
-        vararg parameterTypes: Class<*>
-    ): Constructor<*>? {
+    override fun getDeclaredConstructor(clazz: Class<*>, vararg parameterTypes: Class<*>): Constructor<*>? {
         val key = "decl:" + clazz.name + parameterTypes.joinToString(prefix = "(", postfix = ")") { it.name }
         return constructorCache.getOrPut(key) {
             try {
@@ -88,11 +79,7 @@ class ReflectionProviderImpl : ReflectionProvider {
         }
     }
 
-    override fun getMethod(
-        name: String,
-        clazz: Class<*>,
-        vararg parameterTypes: Class<*>
-    ): Method? {
+    override fun getMethod(name: String, clazz: Class<*>, vararg parameterTypes: Class<*>): Method? {
         val key = clazz.name + "#" + name + parameterTypes.joinToString(prefix = "(", postfix = ")") { it.name }
         return methodCache.getOrPut(key) {
             try {
@@ -104,11 +91,7 @@ class ReflectionProviderImpl : ReflectionProvider {
         }
     }
 
-    override fun getDeclaredMethod(
-        name: String,
-        clazz: Class<*>,
-        vararg parameterTypes: Class<*>
-    ): Method? {
+    override fun getDeclaredMethod(name: String, clazz: Class<*>, vararg parameterTypes: Class<*>): Method? {
         val key = "decl:" + clazz.name + "#" + name + parameterTypes.joinToString(prefix = "(", postfix = ")") { it.name }
         return methodCache.getOrPut(key) {
             try {
@@ -120,15 +103,13 @@ class ReflectionProviderImpl : ReflectionProvider {
         }
     }
 
-    override fun getFieldValue(obj: Any?, name: String, clazz: Class<*>): Any? =
-        (getDeclaredField(name, clazz) ?: getField(name, clazz))?.get(obj)
+    override fun getFieldValue(obj: Any?, name: String, clazz: Class<*>): Any? = (getDeclaredField(name, clazz) ?: getField(name, clazz))?.get(obj)
 
     override fun setFieldValue(obj: Any?, name: String, clazz: Class<*>, value: Any?) {
         (getDeclaredField(name, clazz) ?: getField(name, clazz))?.set(obj, value)
     }
 
-    override fun getStaticFieldValue(name: String, clazz: Class<*>): Any? =
-        getFieldValue(null, name, clazz)
+    override fun getStaticFieldValue(name: String, clazz: Class<*>): Any? = getFieldValue(null, name, clazz)
 
     override fun setStaticFieldValue(name: String, clazz: Class<*>, value: Any?) {
         setFieldValue(null, name, clazz, value)
@@ -139,19 +120,14 @@ class ReflectionProviderImpl : ReflectionProvider {
         name: String,
         clazz: Class<*>,
         parameterTypes: Array<Class<*>>,
-        vararg args: Any?
+        vararg args: Any?,
     ): Any? {
         val method = getDeclaredMethod(name, clazz, *parameterTypes)
             ?: getMethod(name, clazz, *parameterTypes)
         return method?.invoke(obj, *args)
     }
 
-    override fun invokeStaticMethod(
-        name: String,
-        clazz: Class<*>,
-        parameterTypes: Array<Class<*>>,
-        vararg args: Any?
-    ): Any? = invokeMethod(null, name, clazz, parameterTypes, *args)
+    override fun invokeStaticMethod(name: String, clazz: Class<*>, parameterTypes: Array<Class<*>>, vararg args: Any?): Any? = invokeMethod(null, name, clazz, parameterTypes, *args)
 
     private inline fun <K : Any, V : Any> ConcurrentHashMap<K, V>.getOrPut(key: K, defaultValue: () -> V?): V? {
         val existing = get(key)

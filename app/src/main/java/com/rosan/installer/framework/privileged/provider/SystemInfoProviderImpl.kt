@@ -11,38 +11,34 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class SystemInfoProviderImpl(
-    private val capabilityProvider: DeviceCapabilityProvider
-) : SystemInfoProvider {
-    override suspend fun getUsers(authorizer: Authorizer, customizeAuthorizer: String): Map<Int, String> =
-        withContext(Dispatchers.IO) {
-            var users: Map<Int, String> = emptyMap()
-            useDirectPrivileged(
-                isSystemApp = capabilityProvider.isSystemApp,
-                authorizer = authorizer,
-                customizeAuthorizer = customizeAuthorizer
-            ) {
-                try {
-                    @Suppress("UNCHECKED_CAST")
-                    users = it.getUsers()
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to get users")
-                }
+class SystemInfoProviderImpl(private val capabilityProvider: DeviceCapabilityProvider) : SystemInfoProvider {
+    override suspend fun getUsers(authorizer: Authorizer, customizeAuthorizer: String): Map<Int, String> = withContext(Dispatchers.IO) {
+        var users: Map<Int, String> = emptyMap()
+        useDirectPrivileged(
+            isSystemApp = capabilityProvider.isSystemApp,
+            authorizer = authorizer,
+            customizeAuthorizer = customizeAuthorizer,
+        ) {
+            try {
+                @Suppress("UNCHECKED_CAST")
+                users = it.getUsers()
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get users")
             }
-            users
         }
+        users
+    }
 
-    override suspend fun getSessionDetails(authorizer: Authorizer, sessionId: Int): Bundle? =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                resolveSessionDetails(
-                    capabilityProvider = capabilityProvider,
-                    authorizer = authorizer,
-                    customizeAuthorizer = "",
-                    sessionId = sessionId
-                )
-            }.onFailure { error ->
-                Timber.e(error, "Failed to get session details")
-            }.getOrNull()
-        }
+    override suspend fun getSessionDetails(authorizer: Authorizer, sessionId: Int): Bundle? = withContext(Dispatchers.IO) {
+        runCatching {
+            resolveSessionDetails(
+                capabilityProvider = capabilityProvider,
+                authorizer = authorizer,
+                customizeAuthorizer = "",
+                sessionId = sessionId,
+            )
+        }.onFailure { error ->
+            Timber.e(error, "Failed to get session details")
+        }.getOrNull()
+    }
 }

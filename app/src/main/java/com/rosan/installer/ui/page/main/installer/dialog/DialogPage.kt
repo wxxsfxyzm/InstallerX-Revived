@@ -31,10 +31,7 @@ import top.yukonga.miuix.kmp.nav.gesture.WindowNavigationEventBridge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DialogPage(
-    session: InstallerSessionRepository,
-    viewModel: InstallerViewModel = koinViewModel { parametersOf(session) }
-) {
+fun DialogPage(session: InstallerSessionRepository, viewModel: InstallerViewModel = koinViewModel { parametersOf(session) }) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stage = uiState.stage
     val viewSettings = uiState.viewSettings
@@ -52,7 +49,7 @@ fun DialogPage(
                 keyColor = it,
                 isDark = isDark,
                 style = paletteStyle,
-                colorSpec = colorSpec
+                colorSpec = colorSpec,
             )
         } ?: globalColorScheme
     }
@@ -64,12 +61,12 @@ fun DialogPage(
     InstallerEventCollector(viewModel)
 
     CompositionLocalProvider(
-        LocalInstallerColorScheme provides activeColorScheme
+        LocalInstallerColorScheme provides activeColorScheme,
     ) {
         InstallerMaterialExpressiveTheme(
             colorScheme = activeColorScheme,
             darkTheme = isDark,
-            compatStatusBarColor = false
+            compatStatusBarColor = false,
         ) {
             val colorScheme = InstallerTheme.colorScheme
             // Handle InstallingModule state: Show ModalBottomSheet
@@ -82,7 +79,7 @@ fun DialogPage(
                     initialValue = SheetValue.Hidden,
                     enabledValues = setOf(
                         SheetValue.Hidden,
-                        SheetValue.Expanded
+                        SheetValue.Expanded,
                     ),
                     confirmValueChange = { sheetValue ->
                         if (sheetValue == SheetValue.Hidden) {
@@ -90,7 +87,7 @@ fun DialogPage(
                         } else {
                             true
                         }
-                    }
+                    },
                 )
 
                 ModalBottomSheet(
@@ -101,7 +98,7 @@ fun DialogPage(
                     },
                     sheetState = sheetState,
                     containerColor = colorScheme.surfaceContainer,
-                    contentColor = colorScheme.onSurface
+                    contentColor = colorScheme.onSurface,
                 ) {
                     WindowNavigationEventBridge()
                     val blurRadius = if (sheetState.targetValue == SheetValue.Expanded) 30 else 0
@@ -116,7 +113,7 @@ fun DialogPage(
                         onReboot = { viewModel.dispatch(InstallerViewAction.Reboot("")) },
                         onSoftReboot = { viewModel.dispatch(InstallerViewAction.Reboot("ksud_soft_reboot")) },
                         onClose = { viewModel.dispatch(InstallerViewAction.Close) },
-                        colorScheme = colorScheme
+                        colorScheme = colorScheme,
                     )
                 }
             }
@@ -150,7 +147,7 @@ fun DialogPage(
                     centerSubtitle = dialogInnerWidget(params.subtitle),
                     centerText = dialogInnerWidget(params.text),
                     centerContent = dialogInnerWidget(params.content),
-                    centerButton = dialogInnerWidget(params.buttons)
+                    centerButton = dialogInnerWidget(params.buttons),
                 )
             }
         }

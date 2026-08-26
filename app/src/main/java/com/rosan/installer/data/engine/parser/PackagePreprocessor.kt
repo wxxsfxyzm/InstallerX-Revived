@@ -2,36 +2,28 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
+import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.source.ZipEntryMetadataSource
-import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
-import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
-import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.provider.InstalledAppInfoProvider
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import java.io.File
 
 class PackagePreprocessor(
     private val installedAppInfoProvider: InstalledAppInfoProvider,
-    private val unifiedZipFileProvider: UnifiedZipFileProvider
+    private val unifiedZipFileProvider: UnifiedZipFileProvider,
 ) {
 
-    data class ProcessedGroup(
-        val packageName: String,
-        val entities: List<AppEntity>,
-        val installedInfo: InstalledAppInfo?
-    )
+    data class ProcessedGroup(val packageName: String, val entities: List<AppEntity>, val installedInfo: InstalledAppInfo?)
 
-    data class SessionTypeInfo(
-        val isMultiAppSession: Boolean,
-        val sessionType: DataType,
-        val isFromSingleFile: Boolean
-    )
+    data class SessionTypeInfo(val isMultiAppSession: Boolean, val sessionType: DataType, val isFromSingleFile: Boolean)
 
     /**
      * Process raw data in parallel: Group -> Deduplicate -> Get installed system info.
@@ -54,10 +46,7 @@ class PackagePreprocessor(
     /**
      * Determine session type (used for UI display logic).
      */
-    fun determineSessionType(
-        groups: List<ProcessedGroup>,
-        rawEntities: List<AppEntity>
-    ): SessionTypeInfo {
+    fun determineSessionType(groups: List<ProcessedGroup>, rawEntities: List<AppEntity>): SessionTypeInfo {
         val allEntities = groups.flatMap { it.entities }
 
         // 1. Determine the number of source files
@@ -142,7 +131,7 @@ class PackagePreprocessor(
     suspend fun checkPackageIdentity(
         baseEntity: AppEntity.BaseEntity?,
         installedInfo: InstalledAppInfo?,
-        sessionType: DataType
+        sessionType: DataType,
     ): PackageIdentityStatus = coroutineScope {
         // 1. Fast applicability checks
         if (sessionType != DataType.APK) {

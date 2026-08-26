@@ -2,9 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.core.device.model
 
-enum class Manufacturer(
-    val displayName: String
-) {
+enum class Manufacturer(val displayName: String) {
     UNKNOWN("Unknown"),
     GOOGLE("Google"),
     HUAWEI("Huawei"),
@@ -24,7 +22,8 @@ enum class Manufacturer(
     LENOVO("Lenovo"),
     MEIZU("Meizu"),
     SMARTISAN("Smartisan"),
-    BLACKSHARK("Black Shark");
+    BLACKSHARK("Black Shark"),
+    ;
 
     companion object {
         /**
@@ -33,7 +32,6 @@ enum class Manufacturer(
          * @param manufacturerString The manufacturer string, typically from Build.MANUFACTURER.
          * @return The matching Manufacturer enum, or UNKNOWN if no match is found.
          */
-        fun from(manufacturerString: String): Manufacturer =
-            entries.find { it.name == manufacturerString.uppercase() } ?: UNKNOWN
+        fun from(manufacturerString: String): Manufacturer = entries.find { it.name == manufacturerString.uppercase() } ?: UNKNOWN
     }
 }

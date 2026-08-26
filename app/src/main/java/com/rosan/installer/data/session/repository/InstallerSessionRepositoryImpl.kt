@@ -7,33 +7,30 @@ import android.content.IntentSender
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.session.model.ConfirmationDetails
 import com.rosan.installer.domain.session.model.ConfirmationRequest
-import com.rosan.installer.domain.session.model.ConfirmationState
 import com.rosan.installer.domain.session.model.ConfirmationRequestType
+import com.rosan.installer.domain.session.model.ConfirmationState
 import com.rosan.installer.domain.session.model.InstallResult
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
-import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.session.model.UnarchiveErrorInfo
 import com.rosan.installer.domain.session.model.UnarchiveInfo
+import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
-import java.util.concurrent.atomic.AtomicBoolean
 
-class InstallerSessionRepositoryImpl(
-    override val id: String,
-    private val onClose: () -> Unit
-) : InstallerSessionRepository {
+class InstallerSessionRepositoryImpl(override val id: String, private val onClose: () -> Unit) : InstallerSessionRepository {
 
     private val isClosed = AtomicBoolean(false)
 
@@ -104,18 +101,15 @@ class InstallerSessionRepositoryImpl(
         sendAction(Action.Uninstall(packageName))
     }
 
-    override fun resolveConfirmInstall(
-        activity: Activity,
-        sessionId: Int,
-        requestType: ConfirmationRequestType,
-        callerUid: Int
-    ) {
-        Timber.d("[id=$id] resolveConfirmInstall() called for session $sessionId, type=$requestType. Emitting Action.ResolveConfirmInstall.")
+    override fun resolveConfirmInstall(activity: Activity, sessionId: Int, requestType: ConfirmationRequestType, callerUid: Int) {
+        Timber.d(
+            "[id=$id] resolveConfirmInstall() called for session $sessionId, type=$requestType. Emitting Action.ResolveConfirmInstall.",
+        )
         sendAction(
             Action.ResolveConfirmInstall(
                 activity = activity,
-                request = ConfirmationRequest(sessionId, requestType, callerUid)
-            )
+                request = ConfirmationRequest(sessionId, requestType, callerUid),
+            ),
         )
     }
 
@@ -192,7 +186,7 @@ class InstallerSessionRepositoryImpl(
         if (result.isFailure) {
             Timber.w(
                 result.exceptionOrNull(),
-                "[id=$id] Failed to enqueue action ${action::class.simpleName}"
+                "[id=$id] Failed to enqueue action ${action::class.simpleName}",
             )
         }
     }
@@ -222,21 +216,11 @@ class InstallerSessionRepositoryImpl(
         data class InstallMultiple(val triggerAuth: Boolean) : Action
         data class ResolveUninstall(val activity: Activity, val packageName: String) : Action
         data class Uninstall(val packageName: String) : Action
-        data class ResolveConfirmInstall(
-            val activity: Activity,
-            val request: ConfirmationRequest
-        ) : Action
+        data class ResolveConfirmInstall(val activity: Activity, val request: ConfirmationRequest) : Action
         data class ApproveSession(val sessionId: Int, val granted: Boolean) : Action
-        data class ResolveUnarchive(
-            val activity: Activity,
-            val packageName: String,
-            val intentSender: IntentSender
-        ) : Action
+        data class ResolveUnarchive(val activity: Activity, val packageName: String, val intentSender: IntentSender) : Action
         data object StartUnarchive : Action
-        data class ResolveUnarchiveError(
-            val activity: Activity,
-            val info: UnarchiveErrorInfo
-        ) : Action
+        data class ResolveUnarchiveError(val activity: Activity, val info: UnarchiveErrorInfo) : Action
         data object OpenUnarchiveErrorAction : Action
 
         /**

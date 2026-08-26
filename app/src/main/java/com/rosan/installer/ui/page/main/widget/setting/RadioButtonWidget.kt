@@ -27,7 +27,7 @@ fun RadioButtonWidget(
     iconPlaceholder: Boolean = true,
     selected: Boolean = false,
     enabled: Boolean = true,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     BaseWidget(
         // Merge semantics and define role/state for screen readers
@@ -42,8 +42,9 @@ fun RadioButtonWidget(
         descriptionStyle = descriptionStyle,
         selected = selected,
         enabled = enabled,
-        onClick = onClick
-    ) { interactionSource -> // Receive the shared interactionSource
+        onClick = onClick,
+    ) { interactionSource ->
+        // Receive the shared interactionSource
         RadioButton(
             selected = selected,
             // The click event is already handled by BaseWidget's ListItem,
@@ -54,10 +55,10 @@ fun RadioButtonWidget(
             enabled = enabled,
             // Inherit the dynamic content color provided by BaseWidget
             colors = RadioButtonDefaults.colors(
-                selectedColor = LocalContentColor.current
+                selectedColor = LocalContentColor.current,
             ),
             // Bind the shared interactionSource for synchronized visual feedback
-            interactionSource = interactionSource
+            interactionSource = interactionSource,
         )
     }
 }

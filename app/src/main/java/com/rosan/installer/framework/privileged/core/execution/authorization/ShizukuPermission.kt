@@ -23,8 +23,8 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
                 close(
                     PrivilegedException(
                         errorType = PrivilegedErrorType.SHIZUKU_NOT_WORK,
-                        message = "Shizuku service is not running (ping failed)."
-                    )
+                        message = "Shizuku service is not running (ping failed).",
+                    ),
                 )
             }
             awaitClose()
@@ -33,9 +33,11 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
             val listener =
                 Shizuku.OnRequestPermissionResultListener { _requestCode, grantResult ->
                     if (_requestCode != requestCode) return@OnRequestPermissionResultListener
-                    if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED)
+                    if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                         trySend(Unit)
-                    else close(Exception("sui/shizuku permission denied"))
+                    } else {
+                        close(Exception("sui/shizuku permission denied"))
+                    }
                 }
             Shizuku.addRequestPermissionResultListener(listener)
             Shizuku.requestPermission(requestCode)
@@ -44,7 +46,7 @@ suspend fun <T> requireShizukuPermissionGranted(action: suspend () -> T): T {
     }.catch {
         throw PrivilegedException(
             errorType = PrivilegedErrorType.SHIZUKU_NOT_WORK,
-            cause = it
+            cause = it,
         )
     }.first()
 

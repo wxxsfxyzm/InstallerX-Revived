@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
@@ -28,7 +29,6 @@ import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
-import com.rosan.installer.core.bitmask.hasFlag
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
@@ -40,7 +40,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 fun UninstallPrepareContent(
     viewModel: InstallerViewModel,
     onCancel: () -> Unit,
-    onUninstall: () -> Unit
+    onUninstall: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val info = uiState.uiUninstallInfo ?: return
@@ -53,14 +53,14 @@ fun UninstallPrepareContent(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AppInfoSlot(
             appInfo = AppInfoState(
                 icon = uiState.displayIcons[info.packageName],
                 label = info.appLabel ?: "Unknown App",
-                packageName = info.packageName
-            )
+                packageName = info.packageName,
+            ),
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -70,14 +70,14 @@ fun UninstallPrepareContent(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 textAlign = TextAlign.Center,
-                style = MiuixTheme.textStyles.body1
+                style = MiuixTheme.textStyles.body1,
             )
         } else {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                colors = miuixSheetCardColors()
+                colors = miuixSheetCardColors(),
             ) {
                 MiuixCheckboxWidget(
                     title = stringResource(id = R.string.uninstall_keep_data),
@@ -87,10 +87,10 @@ fun UninstallPrepareContent(
                         viewModel.dispatch(
                             InstallerViewAction.ToggleUninstallFlag(
                                 flag = UninstallFlags.DELETE_KEEP_DATA,
-                                enable = isChecked
-                            )
+                                enable = isChecked,
+                            ),
                         )
-                    }
+                    },
                 )
 
                 MiuixCheckboxWidget(
@@ -101,10 +101,10 @@ fun UninstallPrepareContent(
                         viewModel.dispatch(
                             InstallerViewAction.ToggleUninstallFlag(
                                 flag = UninstallFlags.DELETE_ALL_USERS,
-                                enable = isChecked
-                            )
+                                enable = isChecked,
+                            ),
                         )
-                    }
+                    },
                 )
 
                 MiuixCheckboxWidget(
@@ -115,10 +115,10 @@ fun UninstallPrepareContent(
                         viewModel.dispatch(
                             InstallerViewAction.ToggleUninstallFlag(
                                 flag = UninstallFlags.DELETE_SYSTEM_APP,
-                                enable = isChecked
-                            )
+                                enable = isChecked,
+                            ),
                         )
-                    }
+                    },
                 )
             }
         }
@@ -129,14 +129,14 @@ fun UninstallPrepareContent(
                 .navigationBarsPadding()
                 .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
                 text = stringResource(R.string.cancel),
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColors(
                     color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
                 ),
                 onClick = onCancel,
             )
@@ -145,7 +145,7 @@ fun UninstallPrepareContent(
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColors(
                     color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                    textColor = MaterialTheme.colorScheme.error
+                    textColor = MaterialTheme.colorScheme.error,
                 ),
                 onClick = onUninstall,
             )

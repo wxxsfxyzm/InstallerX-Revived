@@ -45,15 +45,9 @@ data class InnerShadow(
     }
 }
 
-fun Modifier.innerShadow(
-    shape: Shape,
-    shadow: () -> InnerShadow?,
-): Modifier = this then InnerShadowElement(shape, shadow)
+fun Modifier.innerShadow(shape: Shape, shadow: () -> InnerShadow?): Modifier = this then InnerShadowElement(shape, shadow)
 
-private class InnerShadowElement(
-    val shape: Shape,
-    val shadow: () -> InnerShadow?,
-) : ModifierNodeElement<InnerShadowNode>() {
+private class InnerShadowElement(val shape: Shape, val shadow: () -> InnerShadow?) : ModifierNodeElement<InnerShadowNode>() {
 
     override fun create(): InnerShadowNode = InnerShadowNode(shape, shadow)
 
@@ -84,10 +78,8 @@ private class InnerShadowElement(
     }
 }
 
-private class InnerShadowNode(
-    var shape: Shape,
-    var shadow: () -> InnerShadow?,
-) : Modifier.Node(),
+private class InnerShadowNode(var shape: Shape, var shadow: () -> InnerShadow?) :
+    Modifier.Node(),
     DrawModifierNode {
 
     override val shouldAutoInvalidate: Boolean = false

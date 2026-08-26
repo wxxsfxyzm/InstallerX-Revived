@@ -17,5 +17,5 @@ enum class SessionMode {
      * UI Display: App list (List Item).
      * Logic: Involves multiple independent AppEntities, requiring queued installation.
      */
-    Batch
+    Batch,
 }

@@ -5,7 +5,4 @@ package com.rosan.installer.domain.settings.model.app
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SharedUid(
-    val uidName: String,
-    val uidValue: Int
-)
+data class SharedUid(val uidName: String, val uidValue: Int)

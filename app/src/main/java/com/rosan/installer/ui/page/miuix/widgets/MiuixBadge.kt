@@ -46,18 +46,18 @@ fun MiuixBadge(
     text: String,
     modifier: Modifier = Modifier,
     textColor: Color = MiuixTheme.colorScheme.primary,
-    containerColor: Color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+    containerColor: Color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
 ) {
     Surface(
         // Set a minimum height to eliminate visual differences between languages
         modifier = modifier.defaultMinSize(minHeight = 24.dp),
         shape = CircleShape,
         color = containerColor,
-        contentColor = textColor
+        contentColor = textColor,
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 8.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = text,
@@ -66,19 +66,16 @@ fun MiuixBadge(
                 // Remove default font padding for accurate vertical centering
                 style = LocalTextStyle.current.copy(
                     platformStyle = PlatformTextStyle(
-                        includeFontPadding = false
-                    )
-                )
+                        includeFontPadding = false,
+                    ),
+                ),
             )
         }
     }
 }
 
 @Composable
-fun MiuixInfoChipGroup(
-    modifier: Modifier = Modifier,
-    notices: List<NoticeModel>
-) {
+fun MiuixInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeModel>) {
     var selectedNotice by remember { mutableStateOf<NoticeModel?>(null) }
     val showDialog = remember { mutableStateOf(false) }
 
@@ -90,7 +87,7 @@ fun MiuixInfoChipGroup(
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
         notices.forEach { item ->
             MiuixBadge(
@@ -102,7 +99,7 @@ fun MiuixInfoChipGroup(
                     .clickable {
                         selectedNotice = item
                         showDialog.value = true
-                    }
+                    },
             )
         }
     }
@@ -123,26 +120,26 @@ fun MiuixInfoChipGroup(
                     SelectionContainer(
                         modifier = Modifier
                             .heightIn(max = 360.dp)
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(rememberScrollState()),
                     ) {
                         Text(
                             text = selectedNotice!!.fullDescription,
-                            color = MiuixTheme.colorScheme.onSurface
+                            color = MiuixTheme.colorScheme.onSurface,
                         )
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         TextButton(
                             modifier = Modifier.weight(1f),
                             text = stringResource(R.string.confirm),
-                            onClick = { showDialog.value = false }
+                            onClick = { showDialog.value = false },
                         )
                     }
                 }
-            }
+            },
         )
     }
 }

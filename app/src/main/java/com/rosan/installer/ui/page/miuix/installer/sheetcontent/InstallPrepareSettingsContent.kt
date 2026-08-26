@@ -17,8 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.device.model.Manufacturer
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
@@ -28,9 +28,7 @@ import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Card
 
 @Composable
-fun PrepareSettingsContent(
-    viewModel: InstallerViewModel
-) {
+fun PrepareSettingsContent(viewModel: InstallerViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val settings = uiState.viewSettings
 
@@ -45,25 +43,25 @@ fun PrepareSettingsContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = if (isGestureNavigation()) 24.dp else 0.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         MiuixInstallerTipCard(stringResource(R.string.installer_temp_settings_tip))
         Card(
             modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-            colors = miuixSheetCardColors()
+            colors = miuixSheetCardColors(),
         ) {
             MiuixSwitchWidget(
                 title = stringResource(R.string.config_display_sdk_version),
                 description = stringResource(
                     id = R.string.combined_description_format,
                     stringResource(id = R.string.config_display_sdk_version_desc),
-                    stringResource(id = R.string.config_display_module_extra_info_desc)
+                    stringResource(id = R.string.config_display_module_extra_info_desc),
                 ),
                 checked = config.displaySdk,
                 onCheckedChange = { newValue ->
                     // Update immutable config through ViewModel
                     viewModel.updateConfig { it.copy(displaySdk = newValue) }
-                }
+                },
             )
             MiuixSwitchWidget(
                 title = stringResource(R.string.config_display_size),
@@ -71,7 +69,7 @@ fun PrepareSettingsContent(
                 checked = config.displaySize,
                 onCheckedChange = { newValue ->
                     viewModel.updateConfig { it.copy(displaySize = newValue) }
-                }
+                },
             )
             MiuixSwitchWidget(
                 title = stringResource(R.string.config_auto_delete),
@@ -79,23 +77,25 @@ fun PrepareSettingsContent(
                 checked = config.autoDelete,
                 onCheckedChange = { newValue ->
                     viewModel.updateConfig { it.copy(autoDelete = newValue) }
-                }
+                },
             )
 
-            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
+            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
+                DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+            ) {
                 MiuixSwitchWidget(
                     title = stringResource(R.string.installer_show_oem_special),
                     description = stringResource(R.string.installer_show_oem_special_desc),
                     checked = settings.showOPPOSpecial,
                     onCheckedChange = { newValue ->
                         viewModel.dispatch(InstallerViewAction.SetTempShowOPPOSpecial(newValue))
-                    }
+                    },
                 )
             }
         }
         Card(
             modifier = Modifier.padding(bottom = 6.dp),
-            colors = miuixSheetCardColors()
+            colors = miuixSheetCardColors(),
         ) {
             MiuixSwitchWidget(
                 title = stringResource(R.string.lab_show_apk_path),
@@ -103,7 +103,7 @@ fun PrepareSettingsContent(
                 checked = settings.labShowFilePath,
                 onCheckedChange = { newValue ->
                     viewModel.dispatch(InstallerViewAction.SetTempLabShowFilePath(newValue))
-                }
+                },
             )
 
             MiuixSwitchWidget(
@@ -112,13 +112,13 @@ fun PrepareSettingsContent(
                 checked = settings.labShowInstallInitiator,
                 onCheckedChange = { newValue ->
                     viewModel.dispatch(InstallerViewAction.SetTempLabShowInstallInitiator(newValue))
-                }
+                },
             )
         }
         Spacer(
             modifier = Modifier
                 .navigationBarsPadding()
-                .height(if (isGestureNavigation()) 24.dp else 0.dp)
+                .height(if (isGestureNavigation()) 24.dp else 0.dp),
         )
     }
 }

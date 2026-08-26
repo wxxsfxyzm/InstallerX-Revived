@@ -3,15 +3,15 @@
 package com.rosan.installer.ui.page.main.settings.config.edit
 
 import com.rosan.installer.R
+import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.DexoptMode
-import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
-import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
 import com.rosan.installer.ui.util.isDhizukuActive
@@ -28,7 +28,7 @@ data class EditViewState(
     val globalInstallerBiometricAuthMode: BiometricAuthMode = BiometricAuthMode.Disable,
     val checkAppSignature: Boolean = true,
     val allowInternetAccess: Boolean = true,
-    val labRespectPlatformInstallPolicy: Boolean = false
+    val labRespectPlatformInstallPolicy: Boolean = false,
 ) {
     // Computed property for unsaved changes
     val hasUnsavedChanges: Boolean
@@ -37,8 +37,7 @@ data class EditViewState(
     val isDhizukuAuthorizerActive: Boolean
         get() = isDhizukuActive(data.authorizer, globalAuthorizer)
 
-    fun dhizukuAwareDescriptionRes(defaultRes: Int): Int =
-        if (isDhizukuAuthorizerActive) R.string.dhizuku_unsupported_desc else defaultRes
+    fun dhizukuAwareDescriptionRes(defaultRes: Int): Int = if (isDhizukuAuthorizerActive) R.string.dhizuku_unsupported_desc else defaultRes
 
     // Return string resource IDs instead of resolved strings to keep State pure
     val activeErrorResIds: List<Int>
@@ -94,9 +93,9 @@ data class EditViewState(
         val requestUpdateOwnership: Boolean,
         val splitChooseAll: Boolean,
         val apkChooseAll: Boolean,
-        val requireBiometricAuth: Boolean
+        val requireBiometricAuth: Boolean,
     ) {
-        val errorName = name.isEmpty()// || name == "Default"
+        val errorName = name.isEmpty() // || name == "Default"
         val authorizerCustomize = authorizer == Authorizer.Customize
         val errorCustomizeAuthorizer = authorizerCustomize && customizeAuthorizer.isEmpty()
         val errorInstaller = installerMode == InstallerMode.Custom && installer.isEmpty()
@@ -138,7 +137,7 @@ data class EditViewState(
             requestUpdateOwnership = this.requestUpdateOwnership,
             splitChooseAll = this.splitChooseAll,
             apkChooseAll = this.apkChooseAll,
-            requireBiometricAuth = this.requireBiometricAuth
+            requireBiometricAuth = this.requireBiometricAuth,
         )
 
         companion object {
@@ -178,7 +177,7 @@ data class EditViewState(
                 requestUpdateOwnership = config.requestUpdateOwnership,
                 splitChooseAll = config.splitChooseAll,
                 apkChooseAll = config.apkChooseAll,
-                requireBiometricAuth = config.requireBiometricAuth
+                requireBiometricAuth = config.requireBiometricAuth,
             )
         }
     }

@@ -35,9 +35,7 @@ class AppProcessRecycler(private val terminal: AppProcessTerminal) : Recycler<Ap
             }
         }
 
-        private fun ShellCommand.hasCommandPlaceholder(): Boolean {
-            return parts.any { SHELL_COMMAND_PLACEHOLDER in it }
-        }
+        private fun ShellCommand.hasCommandPlaceholder(): Boolean = parts.any { SHELL_COMMAND_PLACEHOLDER in it }
 
         private fun String.shellQuote(): String {
             if (isEmpty()) return "''"
@@ -54,13 +52,13 @@ class AppProcessRecycler(private val terminal: AppProcessTerminal) : Recycler<Ap
         if (terminal == AppProcessTerminal.Root) {
             throw PrivilegedException(
                 errorType = PrivilegedErrorType.ROOT_NOT_WORK,
-                message = "Cannot access su command"
+                message = "Cannot access su command",
             )
         } else {
             // Throw the exact full command that failed initialization for accurate debugging
             throw PrivilegedException(
                 errorType = PrivilegedErrorType.APP_PROCESS_NOT_WORK,
-                message = "AppProcess init failed for shell: ${terminal.commandName()}"
+                message = "AppProcess init failed for shell: ${terminal.commandName()}",
             )
         }
     }

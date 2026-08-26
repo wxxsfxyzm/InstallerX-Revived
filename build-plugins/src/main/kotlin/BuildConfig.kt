@@ -1,6 +1,6 @@
-import org.gradle.api.Project
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import org.gradle.api.Project
 
 object BuildConfig {
     const val COMPILE_SDK = 37
@@ -13,37 +13,31 @@ object BuildConfig {
 }
 
 // Get git commit count safely, compatible with configuration cache
-fun Project.getGitCommitCount(): Int {
-    return try {
-        providers.exec {
-            commandLine("git", "rev-list", "--count", "HEAD")
-        }.standardOutput.asText.get().trim().toInt()
-    } catch (_: Exception) {
-        BuildConfig.VERSION_CODE
-    }
+fun Project.getGitCommitCount(): Int = try {
+    providers.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+    }.standardOutput.asText.get().trim().toInt()
+} catch (_: Exception) {
+    BuildConfig.VERSION_CODE
 }
 
 // Get git commit hash safely, compatible with configuration cache
-fun Project.getGitHash(): String {
-    return try {
-        providers.exec {
-            commandLine("git", "rev-parse", "--short=7", "HEAD")
-        }.standardOutput.asText.get().trim()
-    } catch (_: Exception) {
-        "unknown"
-    }
+fun Project.getGitHash(): String = try {
+    providers.exec {
+        commandLine("git", "rev-parse", "--short=7", "HEAD")
+    }.standardOutput.asText.get().trim()
+} catch (_: Exception) {
+    "unknown"
 }
 
 // Get the date of the latest commit directly formatted as yy.MM
-fun Project.getGitDate(): String {
-    return try {
-        providers.exec {
-            commandLine("git", "log", "-1", "--format=%cd", "--date=format:%y.%m")
-        }.standardOutput.asText.get().trim()
-    } catch (_: Exception) {
-        // Fallback to current date if git command fails
-        LocalDate.now().format(DateTimeFormatter.ofPattern("yy.MM"))
-    }
+fun Project.getGitDate(): String = try {
+    providers.exec {
+        commandLine("git", "log", "-1", "--format=%cd", "--date=format:%y.%m")
+    }.standardOutput.asText.get().trim()
+} catch (_: Exception) {
+    // Fallback to current date if git command fails
+    LocalDate.now().format(DateTimeFormatter.ofPattern("yy.MM"))
 }
 
 // Combine the manual version name or dynamic git date

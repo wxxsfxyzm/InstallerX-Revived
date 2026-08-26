@@ -13,6 +13,6 @@ interface NetworkResolver {
         uri: Uri,
         cacheDirectory: String,
         mode: NetworkSourceMode,
-        progressFlow: MutableSharedFlow<ProgressEntity>
+        progressFlow: MutableSharedFlow<ProgressEntity>,
     ): List<DataEntity>
 }

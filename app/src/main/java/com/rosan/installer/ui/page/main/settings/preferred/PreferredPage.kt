@@ -73,7 +73,7 @@ fun PreferredPage(
     useBlur: Boolean,
     viewModel: PreferredViewModel = koinViewModel(),
     title: String,
-    outerPadding: PaddingValues = PaddingValues(0.dp)
+    outerPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
@@ -105,7 +105,7 @@ fun PreferredPage(
     val coroutineScope = rememberCoroutineScope()
 
     val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json")
+        contract = ActivityResultContracts.CreateDocument("application/json"),
     ) { uri ->
         val content = pendingExportContent ?: return@rememberLauncherForActivityResult
         if (uri == null) {
@@ -125,7 +125,7 @@ fun PreferredPage(
     }
 
     val restoreLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
+        contract = ActivityResultContracts.OpenDocument(),
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         coroutineScope.launch {
@@ -151,7 +151,7 @@ fun PreferredPage(
                     val snackbarResult = snackBarHostState.showSnackbar(
                         message = context.getString(event.titleResId),
                         actionLabel = detailLabel,
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
                     )
                     if (snackbarResult == SnackbarResult.ActionPerformed) {
                         errorDialogInfo = event
@@ -196,21 +196,21 @@ fun PreferredPage(
                 title = {
                     Text(
                         text = title,
-                        modifier = Modifier.padding(start = 12.dp)
+                        modifier = Modifier.padding(start = 12.dp),
                     )
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
         },
         snackbarHost = {
             SwipeableSnackbarHost(
                 modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
-                hostState = snackBarHostState
+                hostState = snackBarHostState,
             )
         },
     ) { paddingValues ->
@@ -218,12 +218,12 @@ fun PreferredPage(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues + outerPadding
+            contentPadding = paddingValues + outerPadding,
         ) {
             // --- Global Settings Group ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.personalization)
+                    title = stringResource(R.string.personalization),
                 ) {
                     item {
                         NavigationItemWidget(
@@ -232,7 +232,7 @@ fun PreferredPage(
                             description = stringResource(R.string.theme_settings_desc),
                             onClick = {
                                 navigator.push(Route.Theme)
-                            }
+                            },
                         )
                     }
                     item {
@@ -242,7 +242,7 @@ fun PreferredPage(
                             description = stringResource(R.string.installer_settings_desc),
                             onClick = {
                                 navigator.push(Route.InstallerGlobal)
-                            }
+                            },
                         )
                     }
                     item {
@@ -252,7 +252,7 @@ fun PreferredPage(
                             description = stringResource(R.string.uninstaller_settings_desc),
                             onClick = {
                                 navigator.push(Route.UninstallerGlobal)
-                            }
+                            },
                         )
                     }
                 }
@@ -261,7 +261,7 @@ fun PreferredPage(
             // --- Basic Settings Group ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.basic)
+                    title = stringResource(R.string.basic),
                 ) {
                     item {
                         SwitchWidget(
@@ -272,14 +272,14 @@ fun PreferredPage(
                                     R.string.network_settings_internet_access_enabled_desc
                                 } else {
                                     R.string.network_settings_internet_access_disabled_desc
-                                }
+                                },
                             ),
                             checked = uiState.allowInternetAccess,
                             onClick = { navigator.push(Route.Network) },
                             trailingDivider = true,
                             onCheckedChange = {
                                 viewModel.dispatch(PreferredViewAction.ChangeInternetAccess(it))
-                            }
+                            },
                         )
                     }
                     item {
@@ -287,12 +287,15 @@ fun PreferredPage(
                         SwitchWidget(
                             icon = AppIcons.DisableAdbVerify,
                             title = stringResource(R.string.disable_adb_install_verify),
-                            description = if (!isError) stringResource(R.string.disable_adb_install_verify_desc)
-                            else stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc),
+                            description = if (!isError) {
+                                stringResource(R.string.disable_adb_install_verify_desc)
+                            } else {
+                                stringResource(R.string.disable_adb_install_verify_not_support_dhizuku_desc)
+                            },
                             checked = !uiState.adbVerifyEnabled,
                             isError = isError,
                             enabled = uiState.authorizer != Authorizer.Dhizuku &&
-                                    uiState.authorizer != Authorizer.None
+                                uiState.authorizer != Authorizer.None,
                         ) { viewModel.dispatch(PreferredViewAction.SetAdbVerifyEnabledState(!it)) }
                     }
                     item {
@@ -300,8 +303,11 @@ fun PreferredPage(
                         SwitchWidget(
                             icon = AppIcons.BatteryOptimization,
                             title = stringResource(R.string.ignore_battery_optimizations),
-                            description = if (enabled) stringResource(R.string.ignore_battery_optimizations_desc)
-                            else stringResource(R.string.ignore_battery_optimizations_desc_disabled),
+                            description = if (enabled) {
+                                stringResource(R.string.ignore_battery_optimizations_desc)
+                            } else {
+                                stringResource(R.string.ignore_battery_optimizations_desc_disabled)
+                            },
                             checked = uiState.isIgnoringBatteryOptimizations,
                             enabled = enabled,
                         ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
@@ -318,14 +324,14 @@ fun PreferredPage(
                                 } else {
                                     viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
                                 }
-                            }
+                            },
                         )
                     }
                 }
             }
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.backup_settings)
+                    title = stringResource(R.string.backup_settings),
                 ) {
                     item {
                         BaseWidget(
@@ -333,7 +339,7 @@ fun PreferredPage(
                             title = stringResource(R.string.backup_settings_export),
                             description = stringResource(R.string.backup_settings_export_desc),
                             enabled = !uiState.backupBusy,
-                            onClick = { viewModel.dispatch(PreferredViewAction.RequestExportBackup) }
+                            onClick = { viewModel.dispatch(PreferredViewAction.RequestExportBackup) },
                         )
                     }
                     item {
@@ -347,10 +353,10 @@ fun PreferredPage(
                                     arrayOf(
                                         "application/json",
                                         "text/json",
-                                        "*/*"
-                                    )
+                                        "*/*",
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -358,26 +364,30 @@ fun PreferredPage(
             // --- Other Settings Group ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.other)
+                    title = stringResource(R.string.other),
                 ) {
                     item {
                         BaseWidget(
                             icon = AppIcons.Lab,
                             title = stringResource(R.string.lab),
                             description = stringResource(R.string.lab_desc),
-                            onClick = { navigator.push(Route.Lab) }
+                            onClick = { navigator.push(Route.Lab) },
                         )
                     }
                     item {
                         BaseWidget(
                             icon = AppIcons.Info,
                             title = stringResource(R.string.about_detail),
-                            description = if (uiState.hasUpdate) stringResource(
-                                R.string.update_available,
-                                uiState.remoteVersion
-                            ) else "$revLevel ${AppConfig.VERSION_NAME}",
+                            description = if (uiState.hasUpdate) {
+                                stringResource(
+                                    R.string.update_available,
+                                    uiState.remoteVersion,
+                                )
+                            } else {
+                                "$revLevel ${AppConfig.VERSION_NAME}"
+                            },
                             descriptionColor = if (uiState.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            onClick = { navigator.push(Route.About) }
+                            onClick = { navigator.push(Route.About) },
                         )
                     }
                 }
@@ -393,7 +403,7 @@ fun PreferredPage(
                 errorDialogInfo = null
                 viewModel.dispatch(dialogInfo.retryAction)
             },
-            title = stringResource(dialogInfo.titleResId)
+            title = stringResource(dialogInfo.titleResId),
         )
     }
 
@@ -408,7 +418,7 @@ fun PreferredPage(
             text = {
                 Text(
                     preview?.formatBackupRestorePreview(context)
-                        ?: stringResource(R.string.backup_settings_restore_confirm_desc)
+                        ?: stringResource(R.string.backup_settings_restore_confirm_desc),
                 )
             },
             confirmButton = {
@@ -417,7 +427,7 @@ fun PreferredPage(
                         viewModel.dispatch(PreferredViewAction.ConfirmRestoreBackup)
                         pendingRestorePreview = null
                         showRestoreConfirmDialog = false
-                    }
+                    },
                 ) {
                     Text(stringResource(R.string.confirm))
                 }
@@ -427,11 +437,11 @@ fun PreferredPage(
                     onClick = {
                         showRestoreConfirmDialog = false
                         pendingRestorePreview = null
-                    }
+                    },
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 
@@ -444,7 +454,7 @@ fun PreferredPage(
                 TextButton(onClick = { backupValidationErrorText = null }) {
                     Text(stringResource(R.string.confirm))
                 }
-            }
+            },
         )
     }
 
@@ -454,41 +464,39 @@ fun PreferredPage(
         onConfirm = {
             showHideLauncherIconDialog = false
             viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(false))
-        }
+        },
     )
 }
 
-private fun BackupRestorePreview.formatBackupRestorePreview(context: Context): String =
-    buildString {
+private fun BackupRestorePreview.formatBackupRestorePreview(context: Context): String = buildString {
+    append(
+        context.getString(
+            R.string.backup_settings_restore_preview_desc,
+            profileCount,
+            scopeCount,
+            settingCount,
+            historyCount,
+        ),
+    )
+    if (ignoredSettingCount > 0) {
+        append("\n")
         append(
             context.getString(
-                R.string.backup_settings_restore_preview_desc,
-                profileCount,
-                scopeCount,
-                settingCount,
-                historyCount
-            )
+                R.string.backup_settings_restore_ignored_settings,
+                ignoredSettingCount,
+            ),
         )
-        if (ignoredSettingCount > 0) {
-            append("\n")
-            append(
-                context.getString(
-                    R.string.backup_settings_restore_ignored_settings,
-                    ignoredSettingCount
-                )
-            )
-        }
-        if (warnings.isNotEmpty()) {
-            append("\n\n")
-            append(context.getString(R.string.backup_settings_restore_warnings_title))
-            append("\n")
-            append(warnings.formatBackupValidationIssues(context))
-        }
     }
+    if (warnings.isNotEmpty()) {
+        append("\n\n")
+        append(context.getString(R.string.backup_settings_restore_warnings_title))
+        append("\n")
+        append(warnings.formatBackupValidationIssues(context))
+    }
+}
 
 private fun List<BackupValidationIssue>.formatBackupValidationIssues(
-    context: Context
-): String =
-    joinToString(separator = "\n") { issue ->
-        context.getString(issue.messageResId, *issue.args.toTypedArray())
-    }
+    context: Context,
+): String = joinToString(separator = "\n") { issue ->
+    context.getString(issue.messageResId, *issue.args.toTypedArray())
+}

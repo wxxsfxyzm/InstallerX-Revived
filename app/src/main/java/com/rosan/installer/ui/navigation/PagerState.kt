@@ -19,16 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
-class MainPagerState(
-    val pagerState: PagerState,
-    private val coroutineScope: CoroutineScope
-) {
+class MainPagerState(val pagerState: PagerState, private val coroutineScope: CoroutineScope) {
     var selectedPage by mutableIntStateOf(pagerState.currentPage)
         private set
 
@@ -61,7 +58,7 @@ class MainPagerState(
                     animate(
                         initialValue = 0f,
                         targetValue = scrollPixels,
-                        animationSpec = tween(easing = EaseInOut, durationMillis = duration)
+                        animationSpec = tween(easing = EaseInOut, durationMillis = duration),
                     ) { currentValue, _ ->
                         previousValue += scrollBy(currentValue - previousValue)
                     }
@@ -89,9 +86,6 @@ class MainPagerState(
 }
 
 @Composable
-fun rememberMainPagerState(
-    pagerState: PagerState,
-    coroutineScope: CoroutineScope = rememberCoroutineScope()
-) = remember(pagerState, coroutineScope) {
+fun rememberMainPagerState(pagerState: PagerState, coroutineScope: CoroutineScope = rememberCoroutineScope()) = remember(pagerState, coroutineScope) {
     MainPagerState(pagerState, coroutineScope)
 }

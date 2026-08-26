@@ -58,21 +58,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Resolve formatting baseline
-        id: ratchet
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-        run: |
-          if [ -n "$BEFORE_SHA" ] &&
-             [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ] &&
-             git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
-            BASE_SHA="$BEFORE_SHA"
-          else
-            git fetch --no-tags origin dev:refs/remotes/origin/dev
-            BASE_SHA="$(git merge-base HEAD origin/dev)"
-          fi
-          echo "base=$BASE_SHA" >> "$GITHUB_OUTPUT"
-
       - name: Set up JDK 25
         uses: actions/setup-java@v5
         with:
@@ -95,7 +80,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew spotlessCheck --no-configuration-cache -PspotlessRatchetFrom=${{ steps.ratchet.outputs.base }}
+        run: ./gradlew spotlessCheck --no-configuration-cache
 
   unit_tests:
     name: Unit Tests

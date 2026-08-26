@@ -8,10 +8,7 @@ import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 
-class GetConfigDraftUseCase(
-    private val configRepo: ConfigRepository,
-    private val systemEnvProvider: SystemEnvProvider
-) {
+class GetConfigDraftUseCase(private val configRepo: ConfigRepository, private val systemEnvProvider: SystemEnvProvider) {
     suspend operator fun invoke(id: Long?, globalAuthorizer: Authorizer): ConfigModel {
         // Ensure device-specific optimal presets (e.g., Xiaomi) are applied for new configs.
         var model = id?.let { configRepo.find(it) } ?: ConfigModel.generateOptimalDefault().copy(name = "")

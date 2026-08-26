@@ -19,18 +19,18 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 class NotificationHelper(
     private val context: Context,
     private val session: InstallerSessionRepository,
-    private val getAppIcon: GetAppIconUseCase
+    private val getAppIcon: GetAppIconUseCase,
 ) {
     enum class Channel(val value: String) {
         InstallerChannel("installer_channel"),
         InstallerProgressChannel("installer_progress_channel"),
-        InstallerLiveChannel("installer_live_channel")
+        InstallerLiveChannel("installer_live_channel"),
     }
 
     enum class Icon(@param:DrawableRes val resId: Int) {
         LOGO(R.drawable.ic_notification_logo),
         Working(R.drawable.round_hourglass_empty_24),
-        Pausing(R.drawable.round_hourglass_disabled_24)
+        Pausing(R.drawable.round_hourglass_disabled_24),
     }
 
     val openIntent: PendingIntent = BroadcastHandler.openIntent(context, session)
@@ -40,8 +40,7 @@ class NotificationHelper(
     val cancelIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Cancel)
     val finishIntent: PendingIntent = BroadcastHandler.namedIntent(context, session, BroadcastHandler.Name.Finish)
 
-    fun unknownSourceDescription(): String =
-        context.getString(R.string.installer_waiting_unknown_source_desc, sourceAppLabel())
+    fun unknownSourceDescription(): String = context.getString(R.string.installer_waiting_unknown_source_desc, sourceAppLabel())
 
     @Suppress("DEPRECATION")
     private fun sourceAppLabel(): CharSequence {
@@ -65,7 +64,7 @@ class NotificationHelper(
         val supportsPrivileged = session.config.authorizer in listOf(
             Authorizer.Root,
             Authorizer.Shizuku,
-            Authorizer.Customize
+            Authorizer.Customize,
         )
 
         return if (supportsPrivileged) {
@@ -86,7 +85,9 @@ class NotificationHelper(
         // Priority 2: Check if this is a multi-install batch
         val entityFromQueue = if (currentBatchIndex != null && session.multiInstallQueue.isNotEmpty()) {
             session.multiInstallQueue.getOrNull(currentBatchIndex)?.app
-        } else null
+        } else {
+            null
+        }
 
         // Priority 3: Resolve current selected entity for single install
         val entityToInstall = entityFromQueue
@@ -97,7 +98,9 @@ class NotificationHelper(
                     .map { it.app }
                 entities.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
                     ?: entities.sortedBest().firstOrNull()
-            } else null
+            } else {
+                null
+            }
 
         val iconSizePx = context.resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
 
@@ -107,7 +110,7 @@ class NotificationHelper(
             packageName = uninstallPkg ?: entityToInstall?.packageName ?: return null,
             entityToInstall = entityToInstall,
             iconSizePx = iconSizePx,
-            preferSystemIcon = preferSystemIcon
+            preferSystemIcon = preferSystemIcon,
         )
     }
 }

@@ -7,25 +7,25 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.source.SeekableZipArchive
 import com.rosan.installer.domain.engine.model.source.SeekableZipEntry
 import com.rosan.installer.domain.engine.model.source.ZipEntryMetadata
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipFile
-import timber.log.Timber
 import java.io.Closeable
 import java.io.File
 import java.io.InputStream
 import java.util.Collections
 import java.util.IdentityHashMap
 import java.util.zip.ZipEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipFile
+import timber.log.Timber
 
 enum class UnifiedZipBackend {
     COMMONS_CENTRAL_DIRECTORY,
-    LOCAL_FILE_HEADERS
+    LOCAL_FILE_HEADERS,
 }
 
 internal val DataType.allowsLocalHeaderFallback: Boolean
     get() = this != DataType.MODULE_ZIP &&
-            this != DataType.MIXED_MODULE_ZIP &&
-            this != DataType.MIXED_MODULE_APK
+        this != DataType.MIXED_MODULE_ZIP &&
+        this != DataType.MIXED_MODULE_APK
 
 class UnifiedZipEntry internal constructor(
     val name: String,
@@ -35,15 +35,12 @@ class UnifiedZipEntry internal constructor(
     val crc: Long,
     val compressionMethod: Int,
     internal val storedDataRange: StoredDataRange?,
-    internal val source: UnifiedZipEntrySource
+    internal val source: UnifiedZipEntrySource,
 ) {
     override fun toString(): String = name
 }
 
-internal data class StoredDataRange(
-    val offset: Long,
-    val length: Long
-)
+internal data class StoredDataRange(val offset: Long, val length: Long)
 
 internal sealed interface UnifiedZipEntrySource {
     data class Commons(val entry: ZipArchiveEntry) : UnifiedZipEntrySource
@@ -62,7 +59,7 @@ class UnifiedZipFile internal constructor(
     val backend: UnifiedZipBackend,
     val entries: List<UnifiedZipEntry>,
     private val commonsZipFile: ZipFile?,
-    private val commonsZipFileProvider: CommonsZipFileProvider
+    private val commonsZipFileProvider: CommonsZipFileProvider,
 ) : Closeable {
     private val entriesByName = HashMap<String, UnifiedZipEntry>().apply {
         this@UnifiedZipFile.entries.forEach { entry -> putIfAbsent(entry.name, entry) }
@@ -81,19 +78,17 @@ class UnifiedZipFile internal constructor(
         return when (val source = entry.source) {
             is UnifiedZipEntrySource.Commons -> commonsZipFileProvider.openEntry(
                 requireNotNull(commonsZipFile),
-                source.entry
+                source.entry,
             )
 
-            is UnifiedZipEntrySource.LocalHeader -> source.entry
-                .toDataEntity(file)
-                .getInputStream()
+            is UnifiedZipEntrySource.LocalHeader ->
+                source.entry
+                    .toDataEntity(file)
+                    .getInputStream()
         }
     }
 
-    fun toDataEntity(
-        entry: UnifiedZipEntry,
-        parent: DataEntity.FileEntity
-    ): DataEntity {
+    fun toDataEntity(entry: UnifiedZipEntry, parent: DataEntity.FileEntity): DataEntity {
         require(entry in ownedEntries) { "ZIP entry does not belong to ${file.path}: ${entry.name}" }
 
         val dataRange = entry.storedDataRange ?: resolveCommonsDataRange(entry)
@@ -107,17 +102,17 @@ class UnifiedZipFile internal constructor(
                     relativeOffset = dataRange.offset,
                     subrangeLength = dataRange.length,
                     zipEntryMetadata = entry.toMetadata(),
-                    archiveEntryName = entry.name
+                    archiveEntryName = entry.name,
                 )
             }.onFailure { error ->
                 Timber.d(error, "Stored ZIP entry range is outside the retained descriptor: ${entry.name}")
             }.getOrNull()?.let { descriptorEntry ->
                 Timber.d(
                     "Using stored ZIP entry descriptor range without extraction: " +
-                            "container=${parent.path}, entry=${entry.name}, backend=$backend, " +
-                            "relativeOffset=${dataRange.offset}, " +
-                            "descriptorOffset=${descriptorEntry.startOffset}, " +
-                            "length=${descriptorEntry.length}"
+                        "container=${parent.path}, entry=${entry.name}, backend=$backend, " +
+                        "relativeOffset=${dataRange.offset}, " +
+                        "descriptorOffset=${descriptorEntry.startOffset}, " +
+                        "length=${descriptorEntry.length}",
                 )
                 return descriptorEntry
             }
@@ -136,7 +131,7 @@ class UnifiedZipFile internal constructor(
                 compressedSize = entry.compressedSize,
                 uncompressedSize = entry.size,
                 compressionMethod = entry.compressionMethod,
-                crc = entry.crc
+                crc = entry.crc,
             )
         }
 
@@ -144,8 +139,9 @@ class UnifiedZipFile internal constructor(
             is UnifiedZipEntrySource.Commons -> DataEntity.ZipFileEntity(
                 name = entry.name,
                 parent = parent,
-                zipEntryMetadata = entry.toMetadata()
+                zipEntryMetadata = entry.toMetadata(),
             )
+
             is UnifiedZipEntrySource.LocalHeader -> source.entry.toDataEntity(parent)
         }
     }
@@ -164,7 +160,7 @@ class UnifiedZipFile internal constructor(
         uncompressedSize = size,
         compressedSize = compressedSize,
         crc = crc,
-        compressionMethod = compressionMethod
+        compressionMethod = compressionMethod,
     )
 
     override fun close() {
@@ -177,16 +173,15 @@ class UnifiedZipFile internal constructor(
         check(!closed) { "ZIP file is already closed: ${file.path}" }
     }
 
-    private fun SeekableZipEntry.toDataEntity(parent: DataEntity.FileEntity) =
-        DataEntity.SeekableZipEntryEntity(
-            name = name,
-            parent = parent,
-            dataOffset = dataOffset,
-            compressedSize = compressedSize,
-            uncompressedSize = uncompressedSize,
-            compressionMethod = compressionMethod,
-            crc = crc
-        )
+    private fun SeekableZipEntry.toDataEntity(parent: DataEntity.FileEntity) = DataEntity.SeekableZipEntryEntity(
+        name = name,
+        parent = parent,
+        dataOffset = dataOffset,
+        compressedSize = compressedSize,
+        uncompressedSize = uncompressedSize,
+        compressionMethod = compressionMethod,
+        crc = crc,
+    )
 }
 
 /**
@@ -198,22 +193,13 @@ class UnifiedZipFile internal constructor(
  */
 class UnifiedZipFileProvider internal constructor(
     private val commonsZipFileProvider: CommonsZipFileProvider,
-    private val seekableZipReader: SeekableZipReader
+    private val seekableZipReader: SeekableZipReader,
 ) {
-    fun open(
-        path: String,
-        allowLocalHeaderFallback: Boolean = true
-    ): UnifiedZipFile = open(File(path), allowLocalHeaderFallback)
+    fun open(path: String, allowLocalHeaderFallback: Boolean = true): UnifiedZipFile = open(File(path), allowLocalHeaderFallback)
 
-    fun open(
-        file: File,
-        allowLocalHeaderFallback: Boolean = true
-    ): UnifiedZipFile = open(DataEntity.FileEntity(file.path), allowLocalHeaderFallback)
+    fun open(file: File, allowLocalHeaderFallback: Boolean = true): UnifiedZipFile = open(DataEntity.FileEntity(file.path), allowLocalHeaderFallback)
 
-    fun open(
-        file: DataEntity.FileEntity,
-        allowLocalHeaderFallback: Boolean = true
-    ): UnifiedZipFile {
+    fun open(file: DataEntity.FileEntity, allowLocalHeaderFallback: Boolean = true): UnifiedZipFile {
         val commonsResult = runCatching { openCommonsView(file) }
         commonsResult.getOrNull()?.let { commonsView ->
             if (allowLocalHeaderFallback) {
@@ -221,7 +207,7 @@ class UnifiedZipFileProvider internal constructor(
             }
             Timber.d(
                 "Unified ZIP selected central-directory backend: ${file.archiveLogContext()}, " +
-                        "entries=${commonsView.entries.size}"
+                    "entries=${commonsView.entries.size}",
             )
             return commonsView.toUnifiedZipFile(file, commonsZipFileProvider)
         }
@@ -238,7 +224,7 @@ class UnifiedZipFileProvider internal constructor(
 
         Timber.d(
             "Unified ZIP selected local-header fallback: ${file.archiveLogContext()}, " +
-                    "reason=${commonsResult.exceptionOrNull()?.message ?: "central directory unavailable"}"
+                "reason=${commonsResult.exceptionOrNull()?.message ?: "central directory unavailable"}",
         )
         return localView.toUnifiedZipFile(file, commonsZipFileProvider)
     }
@@ -251,10 +237,7 @@ class UnifiedZipFileProvider internal constructor(
      * of local headers. A central-directory marker after that chain may be the truncated outer
      * directory, so its presence alone must not discard the recoverable entries.
      */
-    private fun recoverNestedCentralDirectoryView(
-        file: DataEntity.FileEntity,
-        commonsView: CommonsView
-    ): UnifiedZipFile? {
+    private fun recoverNestedCentralDirectoryView(file: DataEntity.FileEntity, commonsView: CommonsView): UnifiedZipFile? {
         if (!commonsView.isSuffixOnlyView()) return null
 
         val localView = runCatching { seekableZipReader.read(file) }.getOrNull() ?: return null
@@ -262,16 +245,15 @@ class UnifiedZipFileProvider internal constructor(
 
         Timber.w(
             "Unified ZIP recovered outer local headers hidden by a nested central directory: " +
-                    "${file.archiveLogContext()}, nestedEntries=${commonsView.entries.size}, " +
-                    "outerEntries=${localView.entries.size}"
+                "${file.archiveLogContext()}, nestedEntries=${commonsView.entries.size}, " +
+                "outerEntries=${localView.entries.size}",
         )
         commonsView.zipFile.close()
         return localView.toUnifiedZipFile(file, commonsZipFileProvider)
     }
 
-    private fun CommonsView.isSuffixOnlyView(): Boolean =
-        zipFile.firstLocalFileHeaderOffset > 0L ||
-                entries.isNotEmpty() && entries.minOf { it.localHeaderOffset } > 0L
+    private fun CommonsView.isSuffixOnlyView(): Boolean = zipFile.firstLocalFileHeaderOffset > 0L ||
+        entries.isNotEmpty() && entries.minOf { it.localHeaderOffset } > 0L
 
     private fun openCommonsView(file: DataEntity.FileEntity): CommonsView {
         val zipFile = commonsZipFileProvider.openMetadata(file)
@@ -283,10 +265,7 @@ class UnifiedZipFileProvider internal constructor(
         }
     }
 
-    private fun CommonsView.toUnifiedZipFile(
-        file: DataEntity.FileEntity,
-        provider: CommonsZipFileProvider
-    ): UnifiedZipFile = try {
+    private fun CommonsView.toUnifiedZipFile(file: DataEntity.FileEntity, provider: CommonsZipFileProvider): UnifiedZipFile = try {
         // Compression methods are validated when an entry is opened, not here: one exotic entry
         // (e.g. a bzip2 readme) must not make the whole container unreadable.
         val unifiedEntries = entries.map { entry ->
@@ -298,7 +277,7 @@ class UnifiedZipFileProvider internal constructor(
                 crc = entry.crc,
                 compressionMethod = entry.method,
                 storedDataRange = null,
-                source = UnifiedZipEntrySource.Commons(entry)
+                source = UnifiedZipEntrySource.Commons(entry),
             )
         }
         UnifiedZipFile(
@@ -306,7 +285,7 @@ class UnifiedZipFileProvider internal constructor(
             backend = UnifiedZipBackend.COMMONS_CENTRAL_DIRECTORY,
             entries = unifiedEntries,
             commonsZipFile = zipFile,
-            commonsZipFileProvider = provider
+            commonsZipFileProvider = provider,
         )
     } catch (error: Exception) {
         zipFile.close()
@@ -315,7 +294,7 @@ class UnifiedZipFileProvider internal constructor(
 
     private fun SeekableZipArchive.toUnifiedZipFile(
         file: DataEntity.FileEntity,
-        provider: CommonsZipFileProvider
+        provider: CommonsZipFileProvider,
     ): UnifiedZipFile {
         val unifiedEntries = entries.map { entry ->
             UnifiedZipEntry(
@@ -326,7 +305,7 @@ class UnifiedZipFileProvider internal constructor(
                 crc = entry.crc,
                 compressionMethod = entry.compressionMethod,
                 storedDataRange = entry.storedDataRange(),
-                source = UnifiedZipEntrySource.LocalHeader(entry)
+                source = UnifiedZipEntrySource.LocalHeader(entry),
             )
         }
         return UnifiedZipFile(
@@ -334,21 +313,17 @@ class UnifiedZipFileProvider internal constructor(
             backend = UnifiedZipBackend.LOCAL_FILE_HEADERS,
             entries = unifiedEntries,
             commonsZipFile = null,
-            commonsZipFileProvider = provider
+            commonsZipFileProvider = provider,
         )
     }
 
-    private fun SeekableZipEntry.storedDataRange(): StoredDataRange? =
-        if (compressionMethod == ZipEntry.STORED && compressedSize == uncompressedSize) {
-            StoredDataRange(dataOffset, compressedSize)
-        } else {
-            null
-        }
+    private fun SeekableZipEntry.storedDataRange(): StoredDataRange? = if (compressionMethod == ZipEntry.STORED && compressedSize == uncompressedSize) {
+        StoredDataRange(dataOffset, compressedSize)
+    } else {
+        null
+    }
 
-    private data class CommonsView(
-        val zipFile: ZipFile,
-        val entries: List<ZipArchiveEntry>
-    )
+    private data class CommonsView(val zipFile: ZipFile, val entries: List<ZipArchiveEntry>)
 }
 
 private fun DataEntity.FileEntity.archiveLogContext(): String = buildString {

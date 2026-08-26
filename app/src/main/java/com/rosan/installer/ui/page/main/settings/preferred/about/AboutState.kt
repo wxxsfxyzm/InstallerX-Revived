@@ -10,5 +10,5 @@ data class AboutState(
     val hasUpdate: Boolean = false,
     val remoteVersion: String = "",
     val enableFileLogging: Boolean = false,
-    val appIcon: ImageBitmap? = null
+    val appIcon: ImageBitmap? = null,
 )

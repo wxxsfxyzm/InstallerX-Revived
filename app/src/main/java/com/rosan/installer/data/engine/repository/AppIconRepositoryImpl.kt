@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Process as AndroidProcess
 import android.util.LruCache
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -32,7 +33,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import android.os.Process as AndroidProcess
 
 /**
  * Default implementation of [AppIconRepository].
@@ -67,9 +67,7 @@ import android.os.Process as AndroidProcess
  * The caller (typically a DI container) **must** call [destroy] when this
  * repository is no longer needed to cancel [repoScope] and release resources.
  */
-class AppIconRepositoryImpl(
-    private val context: Context
-) : AppIconRepository {
+class AppIconRepositoryImpl(private val context: Context) : AppIconRepository {
 
     private companion object {
         /** Google Blue (#4285F4) — fallback seed color when extraction yields no result. */
@@ -122,7 +120,7 @@ class AppIconRepositoryImpl(
         val iconSizePx: Int,
         val preferSystemIcon: Boolean,
         val systemIconSourceKey: String?,
-        val apkPath: String?
+        val apkPath: String?,
     )
 
     /**
@@ -130,12 +128,7 @@ class AppIconRepositoryImpl(
      * See class-level KDoc for the eviction rationale.
      */
     private val iconCache = object : LruCache<CacheKey, Deferred<Bitmap?>>(MAX_CACHE_ENTRIES) {
-        override fun entryRemoved(
-            evicted: Boolean,
-            key: CacheKey,
-            oldValue: Deferred<Bitmap?>,
-            newValue: Deferred<Bitmap?>?
-        ) {
+        override fun entryRemoved(evicted: Boolean, key: CacheKey, oldValue: Deferred<Bitmap?>, newValue: Deferred<Bitmap?>?) {
             // Intentional no-op — see class-level KDoc.
         }
     }
@@ -154,7 +147,7 @@ class AppIconRepositoryImpl(
         entityToInstall: AppEntity?,
         userId: Int,
         iconSizePx: Int,
-        preferSystemIcon: Boolean
+        preferSystemIcon: Boolean,
     ): Bitmap? {
         val rawEntityIconDrawable = entityToInstall.rawIconDrawable()
         val apkPath = entityToInstall.apkPath()
@@ -170,7 +163,7 @@ class AppIconRepositoryImpl(
             iconSizePx = iconSizePx,
             preferSystemIcon = preferSystemIcon,
             systemIconSourceKey = installedAppInfo?.let(AppIconCache::iconSourceKey),
-            apkPath = apkPath
+            apkPath = apkPath,
         )
 
         // Atomic get-or-create under Mutex; LAZY start avoids redundant I/O.
@@ -182,7 +175,7 @@ class AppIconRepositoryImpl(
                     installedAppInfo = installedAppInfo,
                     userId = userId,
                     iconSizePx = iconSizePx,
-                    preferSystemIcon = preferSystemIcon
+                    preferSystemIcon = preferSystemIcon,
                 )
             }.also { iconCache.put(cacheKey, it) }
         }
@@ -217,12 +210,16 @@ class AppIconRepositoryImpl(
         packageName: String,
         entityToInstall: AppEntity?,
         preferSystemIcon: Boolean,
-        userId: Int?
+        userId: Int?,
     ): Int? {
         val targetUserId = userId ?: currentUserId
         val iconBitmap = getIcon(
-            sessionId, packageName, entityToInstall,
-            targetUserId, COLOR_EXTRACT_SIZE_PX, preferSystemIcon
+            sessionId,
+            packageName,
+            entityToInstall,
+            targetUserId,
+            COLOR_EXTRACT_SIZE_PX,
+            preferSystemIcon,
         )
         return iconBitmap?.extractSeedColor()
     }
@@ -297,7 +294,7 @@ class AppIconRepositoryImpl(
         installedAppInfo: ApplicationInfo?,
         userId: Int,
         iconSizePx: Int,
-        preferSystemIcon: Boolean
+        preferSystemIcon: Boolean,
     ): Bitmap? {
         // Modules generally won't have installedAppInfo or apkPath,
         // so they will naturally fall back to rawEntityIconDrawable.
@@ -319,32 +316,24 @@ class AppIconRepositoryImpl(
      * Loads an icon from a raw APK file using the system's package-manager
      * resource loader, which applies adaptive icon masks and themed overlays.
      */
-    private suspend fun loadIconFromApkWithSystemLoader(
-        apkPath: String,
-        userId: Int,
-        iconSizePx: Int
-    ): Bitmap? {
-        return try {
-            val packageInfo = pm.getPackageArchiveInfo(apkPath, 0)
-            packageInfo?.applicationInfo?.let { appInfo ->
-                appInfo.sourceDir = apkPath
-                appInfo.publicSourceDir = apkPath
-                AppIconCache.loadIconBitmap(context, appInfo, userId, iconSizePx)
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Timber.w(e, "Could not load themed icon from APK at path: %s", apkPath)
-            null
+    private suspend fun loadIconFromApkWithSystemLoader(apkPath: String, userId: Int, iconSizePx: Int): Bitmap? = try {
+        val packageInfo = pm.getPackageArchiveInfo(apkPath, 0)
+        packageInfo?.applicationInfo?.let { appInfo ->
+            appInfo.sourceDir = apkPath
+            appInfo.publicSourceDir = apkPath
+            AppIconCache.loadIconBitmap(context, appInfo, userId, iconSizePx)
         }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Timber.w(e, "Could not load themed icon from APK at path: %s", apkPath)
+        null
     }
 
-    private fun AppEntity?.rawIconDrawable(): Drawable? {
-        return when (this) {
-            is AppEntity.BaseEntity -> icon
-            is AppEntity.ModuleEntity -> icon
-            else -> null
-        }
+    private fun AppEntity?.rawIconDrawable(): Drawable? = when (this) {
+        is AppEntity.BaseEntity -> icon
+        is AppEntity.ModuleEntity -> icon
+        else -> null
     }
 
     private fun AppEntity?.apkPath(): String? {
@@ -352,22 +341,20 @@ class AppIconRepositoryImpl(
         return data?.takeUnless { it is DataEntity.FileDescriptorEntity }?.path
     }
 
-    private fun getInstalledApplicationInfo(packageName: String): ApplicationInfo? {
-        return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                pm.getApplicationInfo(
-                    packageName,
-                    PackageManager.ApplicationInfoFlags.of(
-                        PackageManager.GET_META_DATA.toLong() or PackageManager.MATCH_ARCHIVED_PACKAGES
-                    )
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-            }
-        } catch (_: PackageManager.NameNotFoundException) {
-            null
+    private fun getInstalledApplicationInfo(packageName: String): ApplicationInfo? = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            pm.getApplicationInfo(
+                packageName,
+                PackageManager.ApplicationInfoFlags.of(
+                    PackageManager.GET_META_DATA.toLong() or PackageManager.MATCH_ARCHIVED_PACKAGES,
+                ),
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         }
+    } catch (_: PackageManager.NameNotFoundException) {
+        null
     }
 
     // ---- Bitmap utilities ----
@@ -402,7 +389,7 @@ class AppIconRepositoryImpl(
 
         return this.toBitmap(
             width = (rawWidth * scale).toInt().coerceAtLeast(1),
-            height = (rawHeight * scale).toInt().coerceAtLeast(1)
+            height = (rawHeight * scale).toInt().coerceAtLeast(1),
         )
     }
 
@@ -418,7 +405,7 @@ class AppIconRepositoryImpl(
      */
     private suspend fun Bitmap.extractSeedColor(
         maxColors: Int = DEFAULT_MAX_QUANTIZE_COLORS,
-        fallbackColorArgb: Int = FALLBACK_SEED_COLOR
+        fallbackColorArgb: Int = FALLBACK_SEED_COLOR,
     ): Int = withContext(Dispatchers.Default) {
         val needsScaling =
             width > QUANTIZE_BITMAP_MAX_SIZE || height > QUANTIZE_BITMAP_MAX_SIZE
@@ -426,7 +413,7 @@ class AppIconRepositoryImpl(
         val scaledBitmap = if (needsScaling) {
             val scale = minOf(
                 QUANTIZE_BITMAP_MAX_SIZE.toFloat() / width,
-                QUANTIZE_BITMAP_MAX_SIZE.toFloat() / height
+                QUANTIZE_BITMAP_MAX_SIZE.toFloat() / height,
             )
             this@extractSeedColor.scale((width * scale).toInt().coerceAtLeast(1), (height * scale).toInt().coerceAtLeast(1))
         } else {
@@ -436,8 +423,13 @@ class AppIconRepositoryImpl(
         try {
             val pixels = IntArray(scaledBitmap.width * scaledBitmap.height)
             scaledBitmap.getPixels(
-                pixels, 0, scaledBitmap.width,
-                0, 0, scaledBitmap.width, scaledBitmap.height
+                pixels,
+                0,
+                scaledBitmap.width,
+                0,
+                0,
+                scaledBitmap.width,
+                scaledBitmap.height,
             )
 
             val quantized: Map<Int, Int> = QuantizerCelebi.quantize(pixels, maxColors)

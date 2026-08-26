@@ -7,7 +7,5 @@ import com.rosan.installer.di.serializationModule
 
 val processModules = listOf(
     serializationModule,
-    coreModule
+    coreModule,
 )
-
-

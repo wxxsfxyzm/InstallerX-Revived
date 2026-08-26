@@ -28,7 +28,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-class UninstallerActivity : ComponentActivity(), KoinComponent {
+class UninstallerActivity :
+    ComponentActivity(),
+    KoinComponent {
     private companion object {
         const val EXTRA_PACKAGE_NAME = "package_name"
     }
@@ -146,7 +148,7 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
                 }
                 session?.close()
                 finish()
-            }
+            },
         )
     }
 
@@ -176,16 +178,14 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
     private fun Intent.uninstallPackageName(): String? {
         getStringExtra(EXTRA_PACKAGE_NAME)?.let { if (it.isNotBlank()) return it }
 
-        val isUninstallAction =
-            action == @Suppress("DEPRECATION") Intent.ACTION_UNINSTALL_PACKAGE ||
-                    action == Intent.ACTION_DELETE
+        @Suppress("DEPRECATION")
+        val isUninstallAction = action == Intent.ACTION_UNINSTALL_PACKAGE || action == Intent.ACTION_DELETE
         if (!isUninstallAction) return null
 
         return data?.schemeSpecificPart
     }
 
-    private fun shouldDeferUninstallIntent(): Boolean =
-        session != null && latestProgress.isForegroundUninstallProgress()
+    private fun shouldDeferUninstallIntent(): Boolean = session != null && latestProgress.isForegroundUninstallProgress()
 
     private fun launchNextPendingUninstall(): Boolean {
         val nextIntent = sessionManager.takeNextForegroundUninstall() ?: return false
@@ -211,13 +211,12 @@ class UninstallerActivity : ComponentActivity(), KoinComponent {
         }
     }
 
-    private fun ProgressEntity.isForegroundUninstallProgress(): Boolean =
-        this is ProgressEntity.UninstallResolving ||
-                this is ProgressEntity.UninstallReady ||
-                this is ProgressEntity.Uninstalling ||
-                this is ProgressEntity.UninstallSuccess ||
-                this is ProgressEntity.UninstallFailed ||
-                this is ProgressEntity.UninstallResolveFailed
+    private fun ProgressEntity.isForegroundUninstallProgress(): Boolean = this is ProgressEntity.UninstallResolving ||
+        this is ProgressEntity.UninstallReady ||
+        this is ProgressEntity.Uninstalling ||
+        this is ProgressEntity.UninstallSuccess ||
+        this is ProgressEntity.UninstallFailed ||
+        this is ProgressEntity.UninstallResolveFailed
 
     private fun showContent() {
         setContent {

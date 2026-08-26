@@ -27,16 +27,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.device.model.Level
+import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun StatusWidget(
-    viewModel: AboutViewModel,
-    useBlur: Boolean = false
-) {
+fun StatusWidget(viewModel: AboutViewModel, useBlur: Boolean = false) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     val containerColor = when (AppConfig.LEVEL) {
@@ -61,7 +58,7 @@ fun StatusWidget(
         id = R.string.app_version_info_format,
         level,
         AppConfig.VERSION_NAME,
-        AppConfig.VERSION_CODE
+        AppConfig.VERSION_CODE,
     )
 
     CardWidget(
@@ -73,7 +70,7 @@ fun StatusWidget(
                 Image(
                     bitmap = uiState.appIcon!!,
                     modifier = Modifier.size(56.dp),
-                    contentDescription = stringResource(id = R.string.app_name)
+                    contentDescription = stringResource(id = R.string.app_name),
                 )
             } else {
                 // Placeholder
@@ -91,20 +88,21 @@ fun StatusWidget(
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
                     text = versionInfoText,
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                if (uiState.hasUpdate)
+                if (uiState.hasUpdate) {
                     Text(
                         text = stringResource(R.string.update_available, uiState.remoteVersion),
                         style = MaterialTheme.typography.bodyMediumEmphasized,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
+                }
             }
-        }
+        },
     )
 }
 
@@ -117,7 +115,7 @@ private fun CardWidget(
     icon: (@Composable () -> Unit)? = null,
     title: (@Composable () -> Unit)? = null,
     content: (@Composable () -> Unit)? = null,
-    buttons: (@Composable () -> Unit)? = null
+    buttons: (@Composable () -> Unit)? = null,
 ) {
     ElevatedCard(
         colors = CardDefaults.elevatedCardColors(
@@ -126,7 +124,7 @@ private fun CardWidget(
             } else {
                 containerColor
             },
-            contentColor = contentColor
+            contentColor = contentColor,
         ),
         // Disable elevation when semi-transparent to prevent shadow core rendering
         elevation = if (useBlur) {
@@ -135,20 +133,20 @@ private fun CardWidget(
                 pressedElevation = 0.dp,
                 focusedElevation = 0.dp,
                 hoveredElevation = 0.dp,
-                draggedElevation = 0.dp
+                draggedElevation = 0.dp,
             )
         } else {
             CardDefaults.elevatedCardElevation()
-        }
+        },
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             // Apply fluid background in the lower layer
             AnimatedFluidBackground(
                 baseColor = containerColor,
                 enabled = useBlur,
-                modifier = Modifier.matchParentSize()
+                modifier = Modifier.matchParentSize(),
             )
 
             // Original content logic
@@ -157,7 +155,7 @@ private fun CardWidget(
                     .fillMaxWidth()
                     .clickable(enabled = onClick != null, onClick = onClick ?: {})
                     .padding(vertical = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (icon != null) {
                     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.secondary) {

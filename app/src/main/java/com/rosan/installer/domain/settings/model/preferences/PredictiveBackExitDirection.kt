@@ -13,7 +13,8 @@ enum class PredictiveBackExitDirection(val value: String) {
     ALWAYS_RIGHT("always_right"),
 
     /** Always translates to the left, regardless of swipe edge. */
-    ALWAYS_LEFT("always_left");
+    ALWAYS_LEFT("always_left"),
+    ;
 
     companion object {
         fun fromValueOrDefault(value: String) = entries.find { it.value == value } ?: ALWAYS_RIGHT

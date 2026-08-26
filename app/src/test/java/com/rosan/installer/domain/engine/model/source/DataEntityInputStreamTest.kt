@@ -28,7 +28,7 @@ class DataEntityInputStreamTest {
                     FileChannel.open(file, StandardOpenOption.READ)
                 },
                 descriptorFactory = { error("descriptor is unused") },
-                inputStreamFactory = { installData.inputStream() }
+                inputStreamFactory = { installData.inputStream() },
             )
 
             assertContentEquals(analysisData, entity.getInputStream().use { it.readBytes() })
@@ -55,7 +55,7 @@ class DataEntityInputStreamTest {
                 preInstallIdentityAnalysis = false,
                 analysisMaterializationPolicy =
                     AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
-                analysisMaterializationKey = materializationKey
+                analysisMaterializationKey = materializationKey,
             )
 
             val subrange = entity.subrange(relativeOffset = 0L, subrangeLength = 1L)
@@ -63,7 +63,7 @@ class DataEntityInputStreamTest {
             assertFalse(subrange.preInstallIdentityAnalysis)
             assertEquals(
                 AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
-                subrange.analysisMaterializationPolicy
+                subrange.analysisMaterializationPolicy,
             )
             assertSame(materializationKey, subrange.analysisMaterializationKey)
         } finally {

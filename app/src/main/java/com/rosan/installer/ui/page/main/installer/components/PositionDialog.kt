@@ -65,7 +65,7 @@ fun PositionDialog(
     rightContent: @Composable (() -> Unit)? = null,
     leftButton: @Composable (() -> Unit)? = null,
     centerButton: @Composable (() -> Unit)? = null,
-    rightButton: @Composable (() -> Unit)? = null
+    rightButton: @Composable (() -> Unit)? = null,
 ) {
     Dialog(onDismissRequest = onDismissRequest, properties = properties) {
         WindowBlurEffect(useBlur = useBlur)
@@ -76,23 +76,25 @@ fun PositionDialog(
                     detectTapGestures(onTap = {
                         onDismissRequest()
                     })
-                }) {
+                },
+        ) {
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .pointerInput(null) {
                         detectTapGestures(onTap = {})
-                    }) {
+                    },
+            ) {
                 Surface(
                     modifier = modifier,
                     shape = shape,
                     color = containerColor,
-                    tonalElevation = tonalElevation
+                    tonalElevation = tonalElevation,
                 ) {
                     Box(
                         modifier = Modifier
                             .sizeIn(minWidth = MinWidth, maxHeight = MaxHeight)
-                            .padding(DialogPadding)
+                            .padding(DialogPadding),
                     ) {
                         // set the button always in bottom
                         var buttonHeightPx by remember {
@@ -103,9 +105,9 @@ fun PositionDialog(
                             targetValue = buttonHeight,
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMediumLow
+                                stiffness = Spring.StiffnessMediumLow,
                             ),
-                            label = "button_height"
+                            label = "button_height",
                         )
 
                         Box(
@@ -113,15 +115,18 @@ fun PositionDialog(
                                 .align(Alignment.BottomCenter)
                                 .onSizeChanged {
                                     buttonHeightPx = it.height
-                                }) {
+                                },
+                        ) {
                             PositionChildWidget(
-                                leftButton, centerButton, rightButton
+                                leftButton,
+                                centerButton,
+                                rightButton,
                             ) { button ->
                                 CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
                                     val textStyle = MaterialTheme.typography.labelLarge
                                     ProvideTextStyle(value = textStyle) {
                                         Box(
-                                            modifier = Modifier.padding(ButtonPadding)
+                                            modifier = Modifier.padding(ButtonPadding),
                                         ) {
                                             button?.invoke()
                                         }
@@ -137,32 +142,36 @@ fun PositionDialog(
                                 .animateContentSize(
                                     animationSpec = spring(
                                         dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessLow
-                                    )
-                                )
+                                        stiffness = Spring.StiffnessLow,
+                                    ),
+                                ),
                         ) {
                             PositionChildWidget(
-                                leftIcon, centerIcon, rightIcon
+                                leftIcon,
+                                centerIcon,
+                                rightIcon,
                             ) { icon ->
                                 CompositionLocalProvider(LocalContentColor provides iconContentColor) {
                                     Box(
                                         modifier = Modifier
                                             .padding(IconPadding)
-                                            .align(Alignment.CenterHorizontally)
+                                            .align(Alignment.CenterHorizontally),
                                     ) {
                                         icon?.invoke()
                                     }
                                 }
                             }
                             PositionChildWidget(
-                                leftTitle, centerTitle, rightTitle
+                                leftTitle,
+                                centerTitle,
+                                rightTitle,
                             ) { title ->
                                 CompositionLocalProvider(LocalContentColor provides titleContentColor) {
                                     ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
                                         Box(
                                             modifier = Modifier
                                                 .padding(TitlePadding)
-                                                .align(Alignment.CenterHorizontally)
+                                                .align(Alignment.CenterHorizontally),
                                         ) {
                                             title?.invoke()
                                         }
@@ -170,7 +179,9 @@ fun PositionDialog(
                                 }
                             }
                             PositionChildWidget(
-                                leftSubtitle, centerSubtitle, rightSubtitle
+                                leftSubtitle,
+                                centerSubtitle,
+                                rightSubtitle,
                             ) { subtitle ->
                                 CompositionLocalProvider(LocalContentColor provides titleContentColor) {
                                     val textStyle = MaterialTheme.typography.bodyMedium
@@ -178,7 +189,7 @@ fun PositionDialog(
                                         Box(
                                             modifier = Modifier
                                                 .padding(SubtitlePadding)
-                                                .align(Alignment.CenterHorizontally)
+                                                .align(Alignment.CenterHorizontally),
                                         ) {
                                             subtitle?.invoke()
                                         }
@@ -190,7 +201,7 @@ fun PositionDialog(
                             PositionChildWidget(
                                 if (contentMode) leftContent else leftText,
                                 if (contentMode) centerContent else centerText,
-                                if (contentMode) rightContent else rightText
+                                if (contentMode) rightContent else rightText,
                             ) { text ->
                                 CompositionLocalProvider(LocalContentColor provides textContentColor) {
                                     val textStyle = MaterialTheme.typography.bodyMedium
@@ -198,7 +209,7 @@ fun PositionDialog(
                                         Box(
                                             modifier = Modifier
                                                 .weight(weight = 1f, fill = false)
-                                                .padding(if (contentMode) ContentPadding else TextPadding)
+                                                .padding(if (contentMode) ContentPadding else TextPadding),
                                         ) {
                                             text?.invoke()
                                         }
@@ -218,7 +229,7 @@ private fun PositionChildWidget(
     left: @Composable (() -> Unit)? = null,
     center: @Composable (() -> Unit)? = null,
     right: @Composable (() -> Unit)? = null,
-    parent: @Composable ((child: @Composable (() -> Unit)?) -> Unit)
+    parent: @Composable ((child: @Composable (() -> Unit)?) -> Unit),
 ) {
     if (left == null && center == null && right == null) return
     Box(modifier = Modifier.fillMaxWidth()) {

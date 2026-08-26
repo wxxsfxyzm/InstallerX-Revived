@@ -22,10 +22,7 @@ import timber.log.Timber
  * @param activity The [ComponentActivity] that is requesting the permissions.
  * @param permissionChecker The domain provider for checking permission states.
  */
-class PermissionRequester(
-    private val activity: ComponentActivity,
-    private val permissionChecker: PermissionChecker
-) {
+class PermissionRequester(private val activity: ComponentActivity, private val permissionChecker: PermissionChecker) {
     /**
      * Callback triggered before launching a system settings activity.
      */

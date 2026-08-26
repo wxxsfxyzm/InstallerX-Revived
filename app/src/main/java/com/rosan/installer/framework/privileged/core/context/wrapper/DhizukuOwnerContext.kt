@@ -7,10 +7,7 @@ import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import com.rosan.dhizuku.api.Dhizuku
 
-class DhizukuOwnerContext private constructor(
-    base: Context,
-    private val ownerPackageName: String
-) : ContextWrapper(base) {
+class DhizukuOwnerContext private constructor(base: Context, private val ownerPackageName: String) : ContextWrapper(base) {
     override fun getPackageName() = ownerPackageName
 
     override fun getOpPackageName() = ownerPackageName
@@ -28,5 +25,4 @@ class DhizukuOwnerContext private constructor(
     }
 }
 
-fun Context.createDhizukuOwnerContext(): DhizukuOwnerContext =
-    DhizukuOwnerContext.create(this)
+fun Context.createDhizukuOwnerContext(): DhizukuOwnerContext = DhizukuOwnerContext.create(this)

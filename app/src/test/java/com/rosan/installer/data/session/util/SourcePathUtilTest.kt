@@ -13,7 +13,7 @@ class SourcePathUtilTest {
 
         assertEquals(
             "smb://Administrator@192.168.31.3/share/app-Preview-debug.apk",
-            encoded.decodeSmbProviderPath()
+            encoded.decodeSmbProviderPath(),
         )
     }
 
@@ -21,7 +21,7 @@ class SourcePathUtilTest {
     fun `literal plus signs in SMB path are preserved`() {
         assertEquals(
             "smb://server/My+Apps/app.apk",
-            "/smb%3A%2F%2Fserver%2FMy+Apps%2Fapp.apk".decodeSmbProviderPath()
+            "/smb%3A%2F%2Fserver%2FMy+Apps%2Fapp.apk".decodeSmbProviderPath(),
         )
     }
 
@@ -29,7 +29,7 @@ class SourcePathUtilTest {
     fun `non SMB provider path is not decoded`() {
         assertEquals(
             "/primary/My%20Apps/app.apk",
-            "/primary/My%20Apps/app.apk".decodeSmbProviderPath()
+            "/primary/My%20Apps/app.apk".decodeSmbProviderPath(),
         )
     }
 }

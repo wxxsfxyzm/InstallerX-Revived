@@ -9,13 +9,11 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 
-class SingleApkStrategy(
-    private val apkParser: ApkParser
-) : AnalysisStrategy {
+class SingleApkStrategy(private val apkParser: ApkParser) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
         zipFile: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> = apkParser.parseFull(data, extra, zipFile)
 }

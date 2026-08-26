@@ -46,10 +46,11 @@ object DeviceConfig {
     val manufacturer: String = Build.MANUFACTURER.uppercase()
     val brand: String = Build.BRAND.uppercase()
 
-    val deviceName: String = if (!TextUtils.equals(brand, manufacturer))
+    val deviceName: String = if (!TextUtils.equals(brand, manufacturer)) {
         "$manufacturer $brand ${Build.MODEL}"
-    else
+    } else {
         "$manufacturer ${Build.MODEL}"
+    }
 
     val currentManufacturer: Manufacturer by lazy {
         Manufacturer.from(Build.MANUFACTURER)

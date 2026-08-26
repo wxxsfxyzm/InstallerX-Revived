@@ -6,13 +6,13 @@ import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.data.updater.model.GithubAsset
 import com.rosan.installer.data.updater.model.GithubRelease
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlinx.serialization.json.Json
 
 class OnlineUpdatePolicyTest {
     @Test
@@ -33,7 +33,7 @@ class OnlineUpdatePolicyTest {
 
         assertSame(
             newestPreview,
-            OnlineUpdatePolicy.selectPreviewRelease(listOf(stable, newestPreview, olderPreview))
+            OnlineUpdatePolicy.selectPreviewRelease(listOf(stable, newestPreview, olderPreview)),
         )
         assertNull(OnlineUpdatePolicy.selectPreviewRelease(listOf(stable)))
     }
@@ -87,28 +87,28 @@ class OnlineUpdatePolicyTest {
     fun `download URL supports official and proxy channels`() {
         val asset = asset(
             name = "InstallerX-Revived-online-26.08.abcdef0.apk",
-            url = "https://github.com/example/release.apk"
+            url = "https://github.com/example/release.apk",
         )
 
         assertEquals(
             asset.browserDownloadUrl,
-            OnlineUpdatePolicy.resolveDownloadUrl(asset, GithubUpdateChannel.OFFICIAL, "")
+            OnlineUpdatePolicy.resolveDownloadUrl(asset, GithubUpdateChannel.OFFICIAL, ""),
         )
         assertEquals(
             "https://gh.sevencdn.com/${asset.browserDownloadUrl}",
-            OnlineUpdatePolicy.resolveDownloadUrl(asset, GithubUpdateChannel.PROXY_7ED, "")
+            OnlineUpdatePolicy.resolveDownloadUrl(asset, GithubUpdateChannel.PROXY_7ED, ""),
         )
         assertEquals(
             "https://proxy.example/${asset.browserDownloadUrl}",
             OnlineUpdatePolicy.resolveDownloadUrl(
                 asset,
                 GithubUpdateChannel.CUSTOM,
-                "https://proxy.example/"
-            )
+                "https://proxy.example/",
+            ),
         )
         assertEquals(
             "",
-            OnlineUpdatePolicy.resolveDownloadUrl(null, GithubUpdateChannel.OFFICIAL, "")
+            OnlineUpdatePolicy.resolveDownloadUrl(null, GithubUpdateChannel.OFFICIAL, ""),
         )
     }
 
@@ -126,29 +126,22 @@ class OnlineUpdatePolicyTest {
         level: Level,
         allowInternetAccess: Boolean = true,
         isDebug: Boolean = false,
-        packageName: String = OFFICIAL_PACKAGE
+        packageName: String = OFFICIAL_PACKAGE,
     ): Boolean = OnlineUpdatePolicy.canCheckUpdates(
         allowInternetAccess = allowInternetAccess,
         isDebug = isDebug,
         level = level,
         packageName = packageName,
-        officialPackageName = OFFICIAL_PACKAGE
+        officialPackageName = OFFICIAL_PACKAGE,
     )
 
-    private fun release(
-        tag: String = "26.08.abcdef0",
-        prerelease: Boolean = true,
-        assets: List<GithubAsset> = emptyList()
-    ) = GithubRelease(
+    private fun release(tag: String = "26.08.abcdef0", prerelease: Boolean = true, assets: List<GithubAsset> = emptyList()) = GithubRelease(
         tagName = tag,
         isPrerelease = prerelease,
-        assets = assets
+        assets = assets,
     )
 
-    private fun asset(
-        name: String,
-        url: String = "https://github.com/example/$name"
-    ) = GithubAsset(name = name, browserDownloadUrl = url)
+    private fun asset(name: String, url: String = "https://github.com/example/$name") = GithubAsset(name = name, browserDownloadUrl = url)
 
     private companion object {
         const val OFFICIAL_PACKAGE = "com.rosan.installer.x.revived"

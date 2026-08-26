@@ -3,6 +3,7 @@
 package com.rosan.installer.domain.engine.usecase
 
 import com.rosan.installer.core.device.model.Architecture
+import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
@@ -15,7 +16,6 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.state.InstallActionType
 import com.rosan.installer.domain.engine.model.state.InstallNotice
-import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,7 +29,7 @@ class AnalyzeInstallStateUseCaseTest {
             signerSha256Set = setOf("declared-signer"),
             certificates = emptyList(),
             declaredSchemes = listOf("V3"),
-            verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+            verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY,
         )
         val base = AppEntity.BaseEntity(
             packageName = "example.app",
@@ -42,7 +42,7 @@ class AnalyzeInstallStateUseCaseTest {
             targetSdk = "36",
             minSdk = "28",
             sourceType = DataType.APK,
-            signatureInfo = signatureInfo
+            signatureInfo = signatureInfo,
         )
         val currentPackage = PackageAnalysisResult(
             packageName = base.packageName,
@@ -51,7 +51,7 @@ class AnalyzeInstallStateUseCaseTest {
             installedAppInfo = null,
             signatureCheckPerformed = false,
             signatureMatchStatus = SignatureMatchStatus.MISMATCH,
-            identityStatus = PackageIdentityStatus.NOT_APPLICABLE
+            identityStatus = PackageIdentityStatus.NOT_APPLICABLE,
         )
 
         val result = AnalyzeInstallStateUseCase()(
@@ -63,7 +63,7 @@ class AnalyzeInstallStateUseCaseTest {
             systemArch = Architecture.ARM64,
             systemSdkInt = 36,
             checkAppSignature = true,
-            showSignatureDetails = false
+            showSignatureDetails = false,
         )
 
         assertEquals(InstallActionType.INSTALL, result.actionType)
@@ -79,7 +79,7 @@ class AnalyzeInstallStateUseCaseTest {
             verified = false,
             signerSha256Set = emptySet(),
             certificates = emptyList(),
-            verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+            verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY,
         )
         val base = AppEntity.BaseEntity(
             packageName = "example.app",
@@ -92,7 +92,7 @@ class AnalyzeInstallStateUseCaseTest {
             targetSdk = "36",
             minSdk = "28",
             sourceType = DataType.APK,
-            signatureInfo = signatureInfo
+            signatureInfo = signatureInfo,
         )
         val currentPackage = PackageAnalysisResult(
             packageName = base.packageName,
@@ -101,7 +101,7 @@ class AnalyzeInstallStateUseCaseTest {
             installedAppInfo = null,
             signatureCheckPerformed = false,
             signatureMatchStatus = SignatureMatchStatus.NOT_INSTALLED,
-            identityStatus = PackageIdentityStatus.NOT_APPLICABLE
+            identityStatus = PackageIdentityStatus.NOT_APPLICABLE,
         )
 
         val result = AnalyzeInstallStateUseCase()(
@@ -113,7 +113,7 @@ class AnalyzeInstallStateUseCaseTest {
             systemArch = Architecture.ARM64,
             systemSdkInt = 36,
             checkAppSignature = true,
-            showSignatureDetails = false
+            showSignatureDetails = false,
         )
 
         val notice = assertIs<InstallNotice.SigningBlockOnly>(result.notices.single())
@@ -125,7 +125,7 @@ class AnalyzeInstallStateUseCaseTest {
         val cases = listOf(
             setOf("declared-signer") to SigningBlockCertificateStatus.MATCH,
             setOf("installed-signer") to SigningBlockCertificateStatus.UNKNOWN,
-            emptySet<String>() to SigningBlockCertificateStatus.UNKNOWN
+            emptySet<String>() to SigningBlockCertificateStatus.UNKNOWN,
         )
 
         cases.forEach { (installedSigners, expectedStatus) ->
@@ -134,7 +134,7 @@ class AnalyzeInstallStateUseCaseTest {
                 signerSha256Set = setOf("declared-signer"),
                 certificates = emptyList(),
                 declaredSchemes = listOf("V3"),
-                verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+                verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY,
             )
             val base = AppEntity.BaseEntity(
                 packageName = "example.app",
@@ -147,12 +147,12 @@ class AnalyzeInstallStateUseCaseTest {
                 targetSdk = "36",
                 minSdk = "28",
                 sourceType = DataType.APK,
-                signatureInfo = pendingSignatureInfo
+                signatureInfo = pendingSignatureInfo,
             )
             val installedSignatureInfo = AppSignatureInfo(
                 verified = true,
                 signerSha256Set = installedSigners,
-                certificates = emptyList()
+                certificates = emptyList(),
             )
             val currentPackage = PackageAnalysisResult(
                 packageName = base.packageName,
@@ -167,11 +167,11 @@ class AnalyzeInstallStateUseCaseTest {
                     applicationInfo = null,
                     minSdk = 28,
                     targetSdk = 35,
-                    signatureInfo = installedSignatureInfo
+                    signatureInfo = installedSignatureInfo,
                 ),
                 signatureCheckPerformed = false,
                 signatureMatchStatus = SignatureMatchStatus.MISMATCH,
-                identityStatus = PackageIdentityStatus.NOT_APPLICABLE
+                identityStatus = PackageIdentityStatus.NOT_APPLICABLE,
             )
 
             val result = AnalyzeInstallStateUseCase()(
@@ -183,7 +183,7 @@ class AnalyzeInstallStateUseCaseTest {
                 systemArch = Architecture.ARM64,
                 systemSdkInt = 36,
                 checkAppSignature = true,
-                showSignatureDetails = false
+                showSignatureDetails = false,
             )
 
             assertEquals(InstallActionType.UPGRADE, result.actionType)

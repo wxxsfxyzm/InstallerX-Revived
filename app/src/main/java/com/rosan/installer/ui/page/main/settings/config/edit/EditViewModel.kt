@@ -9,9 +9,9 @@ import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.DexoptMode
-import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallReason
+import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
@@ -42,7 +42,7 @@ class EditViewModel(
     private val getConfigDraft: GetConfigDraftUseCase,
     private val saveConfig: SaveConfigUseCase,
     private val getAvailableUsers: GetAvailableUsersUseCase,
-    private val getPackageUid: GetPackageUidUseCase
+    private val getPackageUid: GetPackageUidUseCase,
 ) : ViewModel() {
 
     // Separate mutable states for editable data to combine later
@@ -58,8 +58,8 @@ class EditViewModel(
         combine(
             appSettingsRepo.preferencesFlow,
             appSettingsRepo.getNamedPackageList(NamedPackageListSetting.ManagedInstallerPackages),
-            ::Pair
-        )
+            ::Pair,
+        ),
     ) { data, originalData, availableUsers, settings ->
         val (prefs, managedInstallerPackages) = settings
         EditViewState(
@@ -72,12 +72,12 @@ class EditViewModel(
             globalInstallerBiometricAuthMode = prefs.installerRequireBiometricAuth,
             checkAppSignature = prefs.checkAppSignature,
             allowInternetAccess = prefs.allowInternetAccess,
-            labRespectPlatformInstallPolicy = prefs.labRespectPlatformInstallPolicy
+            labRespectPlatformInstallPolicy = prefs.labRespectPlatformInstallPolicy,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = EditViewState()
+        initialValue = EditViewState(),
     )
 
     private val _eventFlow = MutableSharedFlow<EditViewEvent>()
@@ -93,41 +93,81 @@ class EditViewModel(
             val errorMessage = runCatching {
                 when (action) {
                     is EditViewAction.ChangeDataName -> changeDataName(action.name)
+
                     is EditViewAction.ChangeDataDescription -> changeDataDescription(action.description)
+
                     is EditViewAction.ChangeDataAuthorizer -> changeDataAuthorizer(action.authorizer)
+
                     is EditViewAction.ChangeDataCustomizeAuthorizer -> changeDataCustomizeAuthorizer(action.customizeAuthorizer)
+
                     is EditViewAction.ChangeDataInstallMode -> changeDataInstallMode(action.installMode)
+
                     is EditViewAction.ChangeDataAutoApproveSession -> changeDataAutoApproveSession(action.autoApproveSession)
+
                     is EditViewAction.ChangeDataToastMode -> changeDataToastMode(action.toastMode)
+
                     is EditViewAction.ChangeDataEnableCustomizePackageSource -> changeDataEnableCustomPackageSource(action.enable)
+
                     is EditViewAction.ChangeDataPackageSource -> changeDataPackageSource(action.packageSource)
+
                     is EditViewAction.ChangeDataEnableCustomizeInstallReason -> changeDataEnableCustomInstallReason(action.enable)
+
                     is EditViewAction.ChangeDataInstallReason -> changeDataInstallReason(action.installReason)
+
                     is EditViewAction.ChangeDataInstallRequesterMode -> changeDataInstallRequesterMode(action.mode)
+
                     is EditViewAction.ChangeDataInstallRequester -> changeDataInstallRequester(action.packageName)
+
                     is EditViewAction.ChangeDataInstallerMode -> changeDataInstallerMode(action.installerMode)
+
                     is EditViewAction.ChangeDataInstaller -> changeDataInstaller(action.installer)
+
                     is EditViewAction.ChangeDataCustomizeUser -> changeDataCustomizeUser(action.enable)
+
                     is EditViewAction.ChangeDataTargetUserId -> changeDataTargetUserId(action.userId)
+
                     is EditViewAction.ChangeDataEnableManualDexopt -> changeDataEnableManualDexopt(action.enable)
+
                     is EditViewAction.ChangeDataForceDexopt -> changeDataForceDexopt(action.force)
+
                     is EditViewAction.ChangeDataDexoptMode -> changeDataDexoptMode(action.mode)
+
                     is EditViewAction.ChangeDataAutoDelete -> changeDataAutoDelete(action.autoDelete)
+
                     is EditViewAction.ChangeDataZipAutoDelete -> changeDataZipAutoDelete(action.autoDelete)
+
                     is EditViewAction.ChangeDisplaySdk -> changeDisplaySdk(action.displaySdk)
+
                     is EditViewAction.ChangeDisplaySize -> changeDisplaySize(action.displaySize)
+
                     is EditViewAction.ChangeDataForAllUser -> changeDataForAllUser(action.forAllUser)
+
                     is EditViewAction.ChangeDataAllowTestOnly -> changeDataAllowTestOnly(action.allowTestOnly)
+
                     is EditViewAction.ChangeDataAllowDowngrade -> changeDataAllowDowngrade(action.allowDowngrade)
+
                     is EditViewAction.ChangeDataBypassLowTargetSdk -> changeDataBypassLowTargetSdk(action.bypassLowTargetSdk)
+
                     is EditViewAction.ChangeDataAllowSigMismatch -> changeDataAllowSigMismatch(action.allowSigMismatch)
+
                     is EditViewAction.ChangeDataAllowSigUnknown -> changeDataAllowSigUnknown(action.allowSigUnknown)
-                    is EditViewAction.ChangeDataAllowAllRequestedPermissions -> changeDataAllowAllRequestedPermissions(action.allowAllRequestedPermissions)
-                    is EditViewAction.ChangeDataRequestUpdateOwnership -> changeDataRequestUpdateOwnership(action.requestUpdateOwnership)
+
+                    is EditViewAction.ChangeDataAllowAllRequestedPermissions -> changeDataAllowAllRequestedPermissions(
+                        action.allowAllRequestedPermissions,
+                    )
+
+                    is EditViewAction.ChangeDataRequestUpdateOwnership -> changeDataRequestUpdateOwnership(
+                        action.requestUpdateOwnership,
+                    )
+
                     is EditViewAction.ChangeSplitChooseAll -> changeSplitChooseAll(action.splitChooseAll)
+
                     is EditViewAction.ChangeApkChooseAll -> changeApkChooseAll(action.apkChooseAll)
+
                     is EditViewAction.ChangeRequireBiometricAuth -> changeRequireBiometricAuth(action.require)
+
                     is EditViewAction.LoadData -> loadData()
+
                     is EditViewAction.SaveData -> saveData()
                 }
             }.exceptionOrNull()?.message
@@ -200,7 +240,7 @@ class EditViewModel(
         _data.update {
             it.copy(
                 installRequesterMode = mode,
-                installRequesterUid = if (mode == InstallRequesterMode.Custom) it.installRequesterUid else null
+                installRequesterUid = if (mode == InstallRequesterMode.Custom) it.installRequesterUid else null,
             )
         }
         if (mode == InstallRequesterMode.Custom) {
@@ -226,7 +266,9 @@ class EditViewModel(
                 // Double check if the package name has changed during the delay
                 if (currentData.installRequester == packageName) {
                     currentData.copy(installRequesterUid = uid)
-                } else currentData
+                } else {
+                    currentData
+                }
             }
         }
     }
@@ -348,12 +390,11 @@ class EditViewModel(
         return if (currentData.authorizer == Authorizer.Global) state.value.globalAuthorizer else currentData.authorizer
     }
 
-    private fun effectiveCustomizeAuthorizer(data: EditViewState.Data = _data.value): String =
-        if (data.authorizer == Authorizer.Global && state.value.globalAuthorizer == Authorizer.Customize) {
-            state.value.globalCustomizeAuthorizer
-        } else {
-            data.customizeAuthorizer
-        }
+    private fun effectiveCustomizeAuthorizer(data: EditViewState.Data = _data.value): String = if (data.authorizer == Authorizer.Global && state.value.globalAuthorizer == Authorizer.Customize) {
+        state.value.globalCustomizeAuthorizer
+    } else {
+        data.customizeAuthorizer
+    }
 
     private var loadDataJob: Job? = null
 
@@ -364,7 +405,7 @@ class EditViewModel(
             val configModel = getConfigDraft(id, prefs.authorizer)
 
             val initialData = EditViewState.Data.build(configModel).copy(
-                installRequesterUid = configModel.callingFromUid
+                installRequesterUid = configModel.callingFromUid,
             )
 
             // Local state updates only. Global states are now entirely managed reactively by StateFlow combined flow.

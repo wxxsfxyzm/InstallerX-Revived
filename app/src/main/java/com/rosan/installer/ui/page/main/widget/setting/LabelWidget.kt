@@ -18,7 +18,7 @@ fun LabelWidget(label: String, horizontalPadding: Dp = 56.dp) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = horizontalPadding)
-            .padding(top = 8.dp)
+            .padding(top = 8.dp),
     ) {
         Text(
             modifier = Modifier,

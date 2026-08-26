@@ -14,10 +14,7 @@ import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.error.UninstallErrorType
 
 object PackageManagerUtil {
-    suspend fun installResultVerify(
-        context: Context,
-        receiver: LocalIntentReceiver
-    ) {
+    suspend fun installResultVerify(context: Context, receiver: LocalIntentReceiver) {
         val intent = receiver.getResult()
         val status =
             intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
@@ -34,7 +31,7 @@ object PackageManagerUtil {
 
         val legacyStatus = intent.getIntExtra(
             PackageInstallerHidden.EXTRA_LEGACY_STATUS,
-            PackageInstaller.STATUS_FAILURE
+            PackageInstaller.STATUS_FAILURE,
         )
         val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
         val ecpMsg = "Install Failure $status#$legacyStatus [$msg]"
@@ -44,10 +41,7 @@ object PackageManagerUtil {
         throw InstallException(errorType, ecpMsg)
     }
 
-    suspend fun uninstallResultVerify(
-        context: Context,
-        receiver: LocalIntentReceiver
-    ) {
+    suspend fun uninstallResultVerify(context: Context, receiver: LocalIntentReceiver) {
         val intent = receiver.getResult()
         val status =
             intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)

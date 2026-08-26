@@ -12,9 +12,7 @@ import timber.log.Timber
  * UseCase for extracting a representative seed color from an application's icon.
  * This is used for dynamic theming across the installer UI.
  */
-class GetAppIconColorUseCase(
-    private val appIconRepo: AppIconRepository
-) {
+class GetAppIconColorUseCase(private val appIconRepo: AppIconRepository) {
     /**
      * Extracts a seed color based on the app's identity or installation entity.
      * @return An ARGB color integer, or null if extraction fails.
@@ -23,13 +21,13 @@ class GetAppIconColorUseCase(
         sessionId: String,
         packageName: String,
         entityToInstall: AppEntity? = null,
-        preferSystemIcon: Boolean = true
+        preferSystemIcon: Boolean = true,
     ): Int? = try {
         appIconRepo.extractColorFromApp(
             sessionId = sessionId,
             packageName = packageName,
             entityToInstall = entityToInstall,
-            preferSystemIcon = preferSystemIcon
+            preferSystemIcon = preferSystemIcon,
         )
     } catch (e: Exception) {
         if (e is CancellationException) throw e
@@ -41,9 +39,7 @@ class GetAppIconColorUseCase(
      * Extracts a seed color directly from an icon bitmap.
      * @return An ARGB color integer, or null if extraction fails.
      */
-    suspend operator fun invoke(
-        bitmap: Bitmap?
-    ): Int? = try {
+    suspend operator fun invoke(bitmap: Bitmap?): Int? = try {
         appIconRepo.extractColorFromBitmap(bitmap)
     } catch (e: Exception) {
         if (e is CancellationException) throw e

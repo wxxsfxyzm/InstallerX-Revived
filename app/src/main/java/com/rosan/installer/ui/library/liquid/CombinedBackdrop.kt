@@ -21,10 +21,7 @@ import top.yukonga.miuix.kmp.blur.Backdrop
  * underlying app background as a single sampling source for an indicator.
  */
 @Stable
-class CombinedBackdrop(
-    val first: Backdrop,
-    val second: Backdrop,
-) : Backdrop {
+class CombinedBackdrop(val first: Backdrop, val second: Backdrop) : Backdrop {
 
     override val isCoordinatesDependent: Boolean = first.isCoordinatesDependent || second.isCoordinatesDependent
 

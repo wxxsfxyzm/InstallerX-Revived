@@ -24,27 +24,23 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
-import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import timber.log.Timber
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import java.io.File
 import java.io.IOException
 import java.util.UUID
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
+import timber.log.Timber
 
 class ApkParser(
     private val reflect: ReflectionProvider,
     private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer,
     private val unifiedZipFileProvider: UnifiedZipFileProvider,
-    private val xposedModuleParser: XposedModuleParser
+    private val xposedModuleParser: XposedModuleParser,
 ) {
     @SuppressLint("DiscouragedPrivateApi")
-    fun parseFull(
-        data: DataEntity,
-        extra: AnalyseExtraEntity,
-        zipFile: UnifiedZipFile? = null
-    ): List<AppEntity> {
+    fun parseFull(data: DataEntity, extra: AnalyseExtraEntity, zipFile: UnifiedZipFile? = null): List<AppEntity> {
         val parseStartedAt = System.nanoTime()
         val fileEntity = data as? DataEntity.FileEntity
             ?: throw IllegalArgumentException("ApkParser expects a FileEntity, got: ${data::class.simpleName}")
@@ -64,7 +60,7 @@ class ApkParser(
         if (zipFile == null) {
             Timber.d(
                 "ApkParser timing: ZIP view opened in ${archiveOpenStartedAt.elapsedMillis()} ms " +
-                        "for $sourceContext"
+                    "for $sourceContext",
             )
         }
 
@@ -75,7 +71,7 @@ class ApkParser(
             }
             Timber.d(
                 "ApkParser: Selected Arch for $sourceContext is $bestArch " +
-                        "in ${architectureStartedAt.elapsedMillis()} ms"
+                    "in ${architectureStartedAt.elapsedMillis()} ms",
             )
 
             useResources { resources ->
@@ -84,22 +80,24 @@ class ApkParser(
                     val apkResources = loadApkResources(resources, fileEntity, extra.cacheDirectory)
                     Timber.d(
                         "ApkParser: Resources loaded successfully for $sourceContext " +
-                                "in ${resourcesStartedAt.elapsedMillis()} ms"
+                            "in ${resourcesStartedAt.elapsedMillis()} ms",
                     )
 
                     val entityStartedAt = System.nanoTime()
                     val entity = try {
-                        if (apkResources.closeResourcesAfterUse) apkResources.resources.assets.use {
-                            loadAppEntity(
-                                apkResources.resources,
-                                apkResources.resources.newTheme(),
-                                apkResources.openManifestParser,
-                                archive,
-                                path,
-                                data,
-                                extra,
-                                bestArch ?: Architecture.UNKNOWN
-                            )
+                        if (apkResources.closeResourcesAfterUse) {
+                            apkResources.resources.assets.use {
+                                loadAppEntity(
+                                    apkResources.resources,
+                                    apkResources.resources.newTheme(),
+                                    apkResources.openManifestParser,
+                                    archive,
+                                    path,
+                                    data,
+                                    extra,
+                                    bestArch ?: Architecture.UNKNOWN,
+                                )
+                            }
                         } else {
                             loadAppEntity(
                                 apkResources.resources,
@@ -109,7 +107,7 @@ class ApkParser(
                                 path,
                                 data,
                                 extra,
-                                bestArch ?: Architecture.UNKNOWN
+                                bestArch ?: Architecture.UNKNOWN,
                             )
                         }
                     } finally {
@@ -117,7 +115,7 @@ class ApkParser(
                     }
                     Timber.d(
                         "ApkParser: Entity parsed successfully -> Pkg: ${entity.packageName}, " +
-                                "entityElapsedMs=${entityStartedAt.elapsedMillis()}"
+                            "entityElapsedMs=${entityStartedAt.elapsedMillis()}",
                     )
                     listOf(entity)
                 } catch (e: AnalyseException) {
@@ -137,7 +135,7 @@ class ApkParser(
         zipFile: UnifiedZipFile,
         entry: UnifiedZipEntry,
         parentData: DataEntity.FileEntity,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> {
         val entryData = zipFile.toDataEntity(entry, parentData)
 
@@ -157,8 +155,8 @@ class ApkParser(
 
         Timber.d(
             "Extracting ZIP entry for full APK analysis: name=${entry.name}, " +
-                    "compression=${entry.compressionMethod}, " +
-                    "descriptorBacked=${entryData is DataEntity.FileDescriptorEntity}"
+                "compression=${entry.compressionMethod}, " +
+                "descriptorBacked=${entryData is DataEntity.FileDescriptorEntity}",
         )
         val tempFile = File.createTempFile("anl_${UUID.randomUUID()}", ".apk", File(extra.cacheDirectory))
 
@@ -171,7 +169,7 @@ class ApkParser(
             }
             Timber.d(
                 "Extracted ZIP entry for full APK analysis: name=${entry.name}, " +
-                        "bytes=${tempFile.length()}, elapsedMs=${extractionStartedAt.elapsedMillis()}"
+                    "bytes=${tempFile.length()}, elapsedMs=${extractionStartedAt.elapsedMillis()}",
             )
 
             val tempData = DataEntity.FileEntity(tempFile.absolutePath).apply {
@@ -212,13 +210,13 @@ class ApkParser(
         val resources: Resources,
         val openManifestParser: () -> XmlResourceParser,
         val closeResourcesAfterUse: Boolean,
-        val cleanup: () -> Unit = {}
+        val cleanup: () -> Unit = {},
     )
 
     private fun loadApkResources(
         systemResources: Resources,
         file: DataEntity.FileEntity,
-        cacheDirectory: String
+        cacheDirectory: String,
     ): ApkResourceContext {
         val path = file.path
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -235,7 +233,7 @@ class ApkParser(
                                 file.startOffset,
                                 file.length,
                                 0,
-                                null
+                                null,
                             )
                         } else {
                             ApkAssets.loadFromFd(descriptor, path, false, false)
@@ -252,7 +250,7 @@ class ApkParser(
                             val cachedResources = tryLoadApkResourcesFromCache(
                                 systemResources = systemResources,
                                 file = file,
-                                cacheDirectory = cacheDirectory
+                                cacheDirectory = cacheDirectory,
                             )
                             if (cachedResources != null) {
                                 return cachedResources
@@ -260,7 +258,8 @@ class ApkParser(
                         }
 
                         AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
-                        AnalysisMaterializationPolicy.DISALLOW ->
+                        AnalysisMaterializationPolicy.DISALLOW,
+                        ->
                             throw DescriptorAnalysisUnsupportedException(file, e)
                     }
                 }
@@ -269,20 +268,20 @@ class ApkParser(
                 throw AnalyseException(
                     errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
                     message = "Failed to load APK assets.",
-                    cause = e
+                    cause = e,
                 )
             }
         } else {
             if (file is DataEntity.FileDescriptorEntity) {
                 throw AnalyseException(
                     errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
-                    message = "Descriptor-backed APK resources require Android 9 or newer"
+                    message = "Descriptor-backed APK resources require Android 9 or newer",
                 )
             }
             val constructor = reflect.getDeclaredConstructor(AssetManager::class.java)
                 ?: throw AnalyseException(
                     errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
-                    message = "Failed to find AssetManager constructor via reflection"
+                    message = "Failed to find AssetManager constructor via reflection",
                 )
 
             val assets = constructor.newInstance() as AssetManager
@@ -291,16 +290,16 @@ class ApkParser(
                 obj = assets,
                 name = "addAssetPath",
                 parameterTypes = arrayOf(String::class.java),
-                args = arrayOf(path)
+                args = arrayOf(path),
             ) ?: throw AnalyseException(
                 errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
-                message = "Failed to find or invoke addAssetPath via reflection"
+                message = "Failed to find or invoke addAssetPath via reflection",
             )
 
             if (cookie == 0) {
                 throw AnalyseException(
                     errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
-                    message = "addAssetPath returned 0 for: $path"
+                    message = "addAssetPath returned 0 for: $path",
                 )
             }
             @Suppress("DEPRECATION")
@@ -308,7 +307,7 @@ class ApkParser(
             return ApkResourceContext(
                 resources = apkResources,
                 openManifestParser = { apkResources.assets.openXmlResourceParser("AndroidManifest.xml") },
-                closeResourcesAfterUse = true
+                closeResourcesAfterUse = true,
             )
         }
     }
@@ -316,7 +315,7 @@ class ApkParser(
     private fun createApkResourceContext(
         systemResources: Resources,
         apkAssets: ApkAssets,
-        cleanup: () -> Unit = {}
+        cleanup: () -> Unit = {},
     ): ApkResourceContext {
         val assetManager = `AssetManager$Builder`()
             .addApkAssets(apkAssets)
@@ -328,14 +327,14 @@ class ApkParser(
             resources = apkResources,
             openManifestParser = { apkAssets.openXml("AndroidManifest.xml") },
             closeResourcesAfterUse = true,
-            cleanup = cleanup
+            cleanup = cleanup,
         )
     }
 
     private fun tryLoadApkResourcesFromCache(
         systemResources: Resources,
         file: DataEntity.FileDescriptorEntity,
-        cacheDirectory: String
+        cacheDirectory: String,
     ): ApkResourceContext? {
         val directory = File(cacheDirectory)
         if ((!directory.exists() && !directory.mkdirs()) || !directory.isDirectory) {
@@ -358,14 +357,14 @@ class ApkParser(
             }
             if (copiedSize != file.length) {
                 throw IOException(
-                    "Incomplete APK analysis cache: expected=${file.length}, actual=$copiedSize"
+                    "Incomplete APK analysis cache: expected=${file.length}, actual=$copiedSize",
                 )
             }
 
             val apkAssets = ApkAssets.loadFromPath(cachedFile.path)
             Timber.i(
                 "ApkParser: Loaded APK assets from analysis cache: " +
-                        "path=${cachedFile.path}, source=${file.path}, size=$copiedSize"
+                    "path=${cachedFile.path}, source=${file.path}, size=$copiedSize",
             )
             createApkResourceContext(systemResources, apkAssets) {
                 if (!cachedFile.delete() && cachedFile.exists()) {
@@ -387,7 +386,7 @@ class ApkParser(
         path: String,
         data: DataEntity,
         extra: AnalyseExtraEntity,
-        arch: Architecture
+        arch: Architecture,
     ): AppEntity {
         var packageName: String? = null
         var sharedUserId: String? = null
@@ -404,7 +403,9 @@ class ApkParser(
         val permissions = mutableListOf<String>()
         val signatureInfo = if (extra.checkAppSignature) {
             pendingApkSignatureAnalyzer.analyze(data, extra.cacheDirectory)
-        } else null
+        } else {
+            null
+        }
         val signatureHash = signatureInfo?.takeIf { it.verified }?.primarySha256
 
         // Variables for Xposed extraction
@@ -424,31 +425,35 @@ class ApkParser(
                             "manifest" -> {
                                 packageName = manifestParser.getAttributeValue(null, "package")
                                 @Suppress("DEPRECATION")
-                                sharedUserId = manifestParser.getAndroidAttributeValue("sharedUserId", android.R.attr.sharedUserId)
+                                sharedUserId =
+                                    manifestParser.getAndroidAttributeValue("sharedUserId", android.R.attr.sharedUserId)
                                 splitName = manifestParser.getAttributeValue(null, "split")
                                 val versionCodeMajor = manifestParser.getAndroidAttributeIntValue(
                                     "versionCodeMajor",
                                     // TODO Increase minSDK to 28 to get rid of this magic number
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) android.R.attr.versionCodeMajor
-                                    else 0x01010576,
-                                    0
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                        android.R.attr.versionCodeMajor
+                                    } else {
+                                        0x01010576
+                                    },
+                                    0,
                                 ).toLong()
                                 val versionCodeMinor = manifestParser.getAndroidAttributeIntValue(
                                     "versionCode",
                                     android.R.attr.versionCode,
-                                    0
+                                    0,
                                 ).toLong()
                                 versionCode = versionCodeMajor shl 32 or (versionCodeMinor and 0xffffffffL)
 
                                 versionName = resolveString(
                                     resources,
                                     manifestParser.getAndroidAttributeResourceValue("versionName", android.R.attr.versionName),
-                                    manifestParser.getAndroidAttributeValue("versionName", android.R.attr.versionName)
+                                    manifestParser.getAndroidAttributeValue("versionName", android.R.attr.versionName),
                                 ) ?: versionName
                                 installLocation = manifestParser.getAndroidAttributeIntValue(
                                     "installLocation",
                                     android.R.attr.installLocation,
-                                    Int.MIN_VALUE
+                                    Int.MIN_VALUE,
                                 ).takeIf { it != Int.MIN_VALUE }
                             }
 
@@ -457,14 +462,15 @@ class ApkParser(
                                     ?: manifestParser.getAndroidAttributeIntValue(
                                         "minSdkVersion",
                                         android.R.attr.minSdkVersion,
-                                        -1
+                                        -1,
                                     ).takeIf { it >= 0 }?.toString()
-                                targetSdk = manifestParser.getAndroidAttributeValue("targetSdkVersion", android.R.attr.targetSdkVersion)
-                                    ?: manifestParser.getAndroidAttributeIntValue(
-                                        "targetSdkVersion",
-                                        android.R.attr.targetSdkVersion,
-                                        -1
-                                    ).takeIf { it >= 0 }?.toString()
+                                targetSdk =
+                                    manifestParser.getAndroidAttributeValue("targetSdkVersion", android.R.attr.targetSdkVersion)
+                                        ?: manifestParser.getAndroidAttributeIntValue(
+                                            "targetSdkVersion",
+                                            android.R.attr.targetSdkVersion,
+                                            -1,
+                                        ).takeIf { it >= 0 }?.toString()
                             }
 
                             "application" -> {
@@ -474,37 +480,41 @@ class ApkParser(
                                 label = resolveString(
                                     resources,
                                     manifestParser.getAndroidAttributeResourceValue("label", android.R.attr.label),
-                                    manifestParser.getAndroidAttributeValue("label", android.R.attr.label)
+                                    manifestParser.getAndroidAttributeValue("label", android.R.attr.label),
                                 )
                                 icon = resolveDrawable(
                                     resources,
                                     theme,
                                     manifestParser.getAndroidAttributeResourceValue("icon", android.R.attr.icon),
-                                    "icon"
+                                    "icon",
                                 )
                                 roundIcon = resolveDrawable(
                                     resources,
                                     theme,
                                     manifestParser.getAndroidAttributeResourceValue("roundIcon", android.R.attr.roundIcon),
-                                    "roundIcon"
+                                    "roundIcon",
                                 )
 
                                 // Extract description for Xposed fallback
                                 appDescription = resolveString(
                                     resources,
                                     manifestParser.getAndroidAttributeResourceValue("description", android.R.attr.description),
-                                    manifestParser.getAndroidAttributeValue("description", android.R.attr.description)
+                                    manifestParser.getAndroidAttributeValue("description", android.R.attr.description),
                                 )
                             }
 
                             "meta-data" -> {
                                 if (insideApplication) {
-                                    if (DeviceConfig.currentManufacturer == Manufacturer.OPPO || DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS) {
-                                        if ("minOsdkVersion" == manifestParser.getAndroidAttributeValue("name", android.R.attr.name)) {
+                                    if (DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
+                                        DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+                                    ) {
+                                        if ("minOsdkVersion" ==
+                                            manifestParser.getAndroidAttributeValue("name", android.R.attr.name)
+                                        ) {
                                             minOsdkVersion = resolveString(
                                                 resources,
                                                 manifestParser.getAndroidAttributeResourceValue("value", android.R.attr.value),
-                                                manifestParser.getAndroidAttributeValue("value", android.R.attr.value)
+                                                manifestParser.getAndroidAttributeValue("value", android.R.attr.value),
                                             )
                                         }
                                     }
@@ -513,7 +523,7 @@ class ApkParser(
                                     val metaDataValue = resolveString(
                                         resources,
                                         manifestParser.getAndroidAttributeResourceValue("value", android.R.attr.value),
-                                        manifestParser.getAndroidAttributeValue("value", android.R.attr.value)
+                                        manifestParser.getAndroidAttributeValue("value", android.R.attr.value),
                                     )
 
                                     if (metaDataName != null && metaDataValue != null) {
@@ -537,7 +547,9 @@ class ApkParser(
                         }
 
                         XmlPullParser.END_TAG -> {
-                            if (insideApplication && manifestParser.depth == applicationDepth && manifestParser.name == "application") {
+                            if (insideApplication && manifestParser.depth == applicationDepth &&
+                                manifestParser.name == "application"
+                            ) {
                                 insideApplication = false
                                 applicationDepth = -1
                             }
@@ -555,8 +567,10 @@ class ApkParser(
         var xposedInfo: XposedModuleInfo? = null
         // Check modern Xposed indicators if legacy ones were not found
         if (!isPotentialXposed && zipFile != null &&
-            (zipFile.getEntry("META-INF/xposed/module.prop") != null ||
-                    zipFile.getEntry("assets/xposed_init") != null)
+            (
+                zipFile.getEntry("META-INF/xposed/module.prop") != null ||
+                    zipFile.getEntry("assets/xposed_init") != null
+                )
         ) {
             isPotentialXposed = true
         }
@@ -568,25 +582,27 @@ class ApkParser(
         Timber.d("ApkParser: Manifest parsed. Package: $packageName, Split: $splitName, IsXposed: ${xposedInfo != null}")
         if (packageName.isNullOrEmpty()) throw Exception("Invalid APK: missing package name")
 
-        return if (splitName.isNullOrEmpty()) AppEntity.BaseEntity(
-            packageName = packageName,
-            sharedUserId = sharedUserId,
-            data = data,
-            versionCode = versionCode,
-            versionName = versionName,
-            label = label,
-            icon = icon ?: roundIcon,
-            targetSdk = targetSdk,
-            minSdk = minSdk,
-            minOsdkVersion = minOsdkVersion,
-            xposedInfo = xposedInfo, // Using the extracted info object
-            arch = arch,
-            permissions = permissions,
-            sourceType = extra.dataType,
-            signatureHash = signatureHash,
-            signatureInfo = signatureInfo,
-            installLocation = installLocation
-        ) else {
+        return if (splitName.isNullOrEmpty()) {
+            AppEntity.BaseEntity(
+                packageName = packageName,
+                sharedUserId = sharedUserId,
+                data = data,
+                versionCode = versionCode,
+                versionName = versionName,
+                label = label,
+                icon = icon ?: roundIcon,
+                targetSdk = targetSdk,
+                minSdk = minSdk,
+                minOsdkVersion = minOsdkVersion,
+                xposedInfo = xposedInfo, // Using the extracted info object
+                arch = arch,
+                permissions = permissions,
+                sourceType = extra.dataType,
+                signatureHash = signatureHash,
+                signatureInfo = signatureInfo,
+                installLocation = installLocation,
+            )
+        } else {
             val metadata = splitName.parseSplitMetadata()
             AppEntity.SplitEntity(
                 packageName = packageName,
@@ -599,7 +615,7 @@ class ApkParser(
                 type = metadata.type,
                 filterType = metadata.filterType,
                 configValue = metadata.configValue,
-                signatureInfo = signatureInfo
+                signatureInfo = signatureInfo,
             )
         }
     }
@@ -665,7 +681,7 @@ class ApkParser(
 
     private fun analyseAndSelectBestArchitecture(
         zipFile: UnifiedZipFile,
-        deviceSupportedArchs: List<Architecture>
+        deviceSupportedArchs: List<Architecture>,
     ): Architecture? {
         val apkArchs = mutableSetOf<Architecture>()
         zipFile.entries.forEach { entry ->

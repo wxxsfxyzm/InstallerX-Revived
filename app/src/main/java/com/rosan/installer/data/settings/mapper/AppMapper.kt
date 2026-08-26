@@ -6,23 +6,19 @@ import com.rosan.installer.data.settings.local.room.entity.AppEntity
 import com.rosan.installer.domain.settings.model.app.AppModel
 
 // Extension function to map Entity to Domain Model
-fun AppEntity.toDomainModel(): AppModel {
-    return AppModel(
-        id = this.id,
-        packageName = this.packageName,
-        configId = this.configId,
-        createdAt = this.createdAt,
-        modifiedAt = this.modifiedAt
-    )
-}
+fun AppEntity.toDomainModel(): AppModel = AppModel(
+    id = this.id,
+    packageName = this.packageName,
+    configId = this.configId,
+    createdAt = this.createdAt,
+    modifiedAt = this.modifiedAt,
+)
 
 // Extension function to map Domain Model to Entity
-fun AppModel.toEntity(): AppEntity {
-    return AppEntity(
-        id = this.id,
-        packageName = this.packageName,
-        configId = this.configId,
-        createdAt = this.createdAt,
-        modifiedAt = this.modifiedAt
-    )
-}
+fun AppModel.toEntity(): AppEntity = AppEntity(
+    id = this.id,
+    packageName = this.packageName,
+    configId = this.configId,
+    createdAt = this.createdAt,
+    modifiedAt = this.modifiedAt,
+)

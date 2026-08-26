@@ -3,7 +3,6 @@
 package com.rosan.installer.data.engine.executor.appinstaller
 
 import com.rosan.installer.domain.session.model.ProgressEntity
-import kotlinx.coroutines.test.runTest
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.EOFException
@@ -13,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class InstallProgressWriterTest {
     @Test
@@ -27,7 +27,7 @@ class InstallProgressWriterTest {
             nanoTime = {
                 clock += 250_000_000L
                 clock
-            }
+            },
         )
 
         writer.start()
@@ -35,13 +35,13 @@ class InstallProgressWriterTest {
         writer.copy(
             input = ByteArrayInputStream(first),
             output = firstOutput,
-            expectedBytes = first.size.toLong()
+            expectedBytes = first.size.toLong(),
         )
         val secondOutput = ByteArrayOutputStream()
         writer.copy(
             input = ByteArrayInputStream(second),
             output = secondOutput,
-            expectedBytes = second.size.toLong()
+            expectedBytes = second.size.toLong(),
         )
 
         assertContentEquals(first, firstOutput.toByteArray())
@@ -61,7 +61,7 @@ class InstallProgressWriterTest {
             writer.copy(
                 input = ByteArrayInputStream(ByteArray(9)),
                 output = ByteArrayOutputStream(),
-                expectedBytes = 10L
+                expectedBytes = 10L,
             )
         }
     }
@@ -76,7 +76,7 @@ class InstallProgressWriterTest {
             writer.copy(
                 input = ByteArrayInputStream(ByteArray(11)),
                 output = output,
-                expectedBytes = 10L
+                expectedBytes = 10L,
             )
         }
 
@@ -88,7 +88,7 @@ class InstallProgressWriterTest {
         val progress = ProgressEntity.Installing(
             current = 2,
             total = 4,
-            writeProgress = 0.5f
+            writeProgress = 0.5f,
         )
 
         assertEquals(0.375f, progress.overallProgress())

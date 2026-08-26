@@ -10,5 +10,5 @@ data class UnarchiveErrorInfo(
     val requiredBytes: Long,
     val pendingIntent: PendingIntent?,
     val installerPackageName: String?,
-    val installerLabel: CharSequence?
+    val installerLabel: CharSequence?,
 )

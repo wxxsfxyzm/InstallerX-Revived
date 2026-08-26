@@ -9,6 +9,6 @@ sealed interface HomePageViewEvent {
     data class ShowDefaultInstallerErrorDetail(
         @param:StringRes val titleResId: Int,
         val exception: Throwable,
-        val retryAction: HomePageViewAction
+        val retryAction: HomePageViewAction,
     ) : HomePageViewEvent
 }

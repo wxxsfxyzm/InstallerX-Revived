@@ -3,8 +3,8 @@
 package com.rosan.installer.domain.updater.repository
 
 import com.rosan.installer.domain.updater.model.UpdateInfo
-import kotlinx.coroutines.flow.StateFlow
 import java.io.InputStream
+import kotlinx.coroutines.flow.StateFlow
 
 interface UpdateRepository {
     /**

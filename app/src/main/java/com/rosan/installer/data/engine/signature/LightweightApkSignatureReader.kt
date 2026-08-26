@@ -6,12 +6,12 @@ import android.os.Build
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
-import timber.log.Timber
 import java.io.EOFException
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.SeekableByteChannel
+import timber.log.Timber
 
 /**
  * Reads signer certificate declarations from APK Signature Scheme v2/v3 blocks.
@@ -20,16 +20,10 @@ import java.nio.channels.SeekableByteChannel
  * support certificate comparison and profile restrictions, while PackageInstaller remains the
  * authority for final signature verification.
  */
-class LightweightApkSignatureReader(
-    private val certificateFormatter: CertificateFormatter
-) {
-    fun read(data: DataEntity.FileDescriptorEntity): AppSignatureInfo =
-        read(data, Build.VERSION.SDK_INT)
+class LightweightApkSignatureReader(private val certificateFormatter: CertificateFormatter) {
+    fun read(data: DataEntity.FileDescriptorEntity): AppSignatureInfo = read(data, Build.VERSION.SDK_INT)
 
-    internal fun read(
-        data: DataEntity.FileDescriptorEntity,
-        platformSdk: Int
-    ): AppSignatureInfo {
+    internal fun read(data: DataEntity.FileDescriptorEntity, platformSdk: Int): AppSignatureInfo {
         val declarations = runCatching {
             data.openChannel().use { channel -> readDeclarations(channel, platformSdk) }
         }.onFailure { error ->
@@ -49,14 +43,11 @@ class LightweightApkSignatureReader(
             certificates = certificates,
             hasMultipleSigners = certificates.size > 1,
             declaredSchemes = declarations.schemes,
-            verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY
+            verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY,
         )
     }
 
-    private fun readDeclarations(
-        channel: SeekableByteChannel,
-        platformSdk: Int
-    ): SignatureDeclarations {
+    private fun readDeclarations(channel: SeekableByteChannel, platformSdk: Int): SignatureDeclarations {
         val fileSize = channel.size()
         if (fileSize < ZIP_EOCD_MIN_SIZE) return SignatureDeclarations()
 
@@ -68,7 +59,7 @@ class LightweightApkSignatureReader(
 
         val footer = channel.readFully(
             centralDirectoryOffset - APK_SIGNING_BLOCK_FOOTER_SIZE,
-            APK_SIGNING_BLOCK_FOOTER_SIZE
+            APK_SIGNING_BLOCK_FOOTER_SIZE,
         )
         if (!footer.matchesMagic(APK_SIGNING_BLOCK_MAGIC_OFFSET, APK_SIGNING_BLOCK_MAGIC)) {
             return SignatureDeclarations()
@@ -104,11 +95,11 @@ class LightweightApkSignatureReader(
         }
         val certificates = when {
             platformSdk >= MIN_SDK_WITH_V31_SUPPORT &&
-                    certificatesByScheme[SCHEME_V31].isNullOrEmpty().not() ->
+                certificatesByScheme[SCHEME_V31].isNullOrEmpty().not() ->
                 certificatesByScheme.getValue(SCHEME_V31)
 
             platformSdk >= MIN_SDK_WITH_V3_SUPPORT &&
-                    certificatesByScheme[SCHEME_V3].isNullOrEmpty().not() ->
+                certificatesByScheme[SCHEME_V3].isNullOrEmpty().not() ->
                 certificatesByScheme.getValue(SCHEME_V3)
 
             else -> certificatesByScheme[SCHEME_V2].orEmpty()
@@ -116,11 +107,7 @@ class LightweightApkSignatureReader(
         return SignatureDeclarations(certificates, schemes.toList())
     }
 
-    private fun parseSchemeSigners(
-        block: ByteBuffer,
-        hasSdkRange: Boolean,
-        platformSdk: Int
-    ): List<ByteArray> {
+    private fun parseSchemeSigners(block: ByteBuffer, hasSdkRange: Boolean, platformSdk: Int): List<ByteArray> {
         val signers = block.readLengthPrefixedSlice()
         val certificates = mutableListOf<ByteArray>()
         var signerCount = 0
@@ -131,7 +118,9 @@ class LightweightApkSignatureReader(
             val sdkRange = if (hasSdkRange) {
                 signer.requireRemaining(8, "signer SDK range")
                 readSdkRange(signer, "signer")
-            } else null
+            } else {
+                null
+            }
             signer.readLengthPrefixedSlice() // signatures
             signer.readLengthPrefixedBytes() // public key
             val certificate = parseSignedDataSignerCertificate(signedData, sdkRange)
@@ -142,10 +131,7 @@ class LightweightApkSignatureReader(
         return certificates
     }
 
-    private fun parseSignedDataSignerCertificate(
-        signedData: ByteBuffer,
-        expectedSdkRange: IntRange?
-    ): ByteArray? {
+    private fun parseSignedDataSignerCertificate(signedData: ByteBuffer, expectedSdkRange: IntRange?): ByteArray? {
         signedData.readLengthPrefixedSlice() // content digests; deliberately not verified
         val certificateSequence = signedData.readLengthPrefixedSlice()
         if (expectedSdkRange != null) {
@@ -154,7 +140,7 @@ class LightweightApkSignatureReader(
             if (signedDataSdkRange != expectedSdkRange) {
                 throw IOException(
                     "Signer SDK range differs from signed-data SDK range: " +
-                            "signer=$expectedSdkRange, signedData=$signedDataSdkRange"
+                        "signer=$expectedSdkRange, signedData=$signedDataSdkRange",
                 )
             }
         }
@@ -263,14 +249,13 @@ class LightweightApkSignatureReader(
 
     private fun ByteBuffer.getUnsignedShort(offset: Int): Int = getShort(offset).toInt() and 0xffff
 
-    private fun ByteBuffer.matchesMagic(offset: Int, magic: ByteArray): Boolean =
-        offset >= 0 && offset + magic.size <= limit() && magic.indices.all { index ->
-            get(offset + index) == magic[index]
-        }
+    private fun ByteBuffer.matchesMagic(offset: Int, magic: ByteArray): Boolean = offset >= 0 && offset + magic.size <= limit() && magic.indices.all { index ->
+        get(offset + index) == magic[index]
+    }
 
     private data class SignatureDeclarations(
         val certificates: List<ByteArray> = emptyList(),
-        val schemes: List<String> = emptyList()
+        val schemes: List<String> = emptyList(),
     )
 
     private data class Scheme(val label: String, val hasSdkRange: Boolean)
@@ -296,7 +281,7 @@ class LightweightApkSignatureReader(
         val SCHEMES = mapOf(
             0x7109871a to Scheme(SCHEME_V2, hasSdkRange = false),
             0xf05368c0.toInt() to Scheme(SCHEME_V3, hasSdkRange = true),
-            0x1b93ad61 to Scheme(SCHEME_V31, hasSdkRange = true)
+            0x1b93ad61 to Scheme(SCHEME_V31, hasSdkRange = true),
         )
     }
 }

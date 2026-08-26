@@ -94,7 +94,7 @@ fun BaseWidget(
     clickHaptic: HapticFeedbackType? = HapticFeedbackType.VirtualKey,
     trailingDivider: Boolean = false,
     foreContent: @Composable BoxScope.() -> Unit = {},
-    trailingContent: @Composable BoxScope.(interactionSource: MutableInteractionSource) -> Unit = {}
+    trailingContent: @Composable BoxScope.(interactionSource: MutableInteractionSource) -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val alpha = if (enabled) 1f else 0.38f
@@ -165,7 +165,7 @@ fun BaseWidget(
         disabledContentColor = baseContentColor,
         disabledLeadingContentColor = resolvedIconColor,
         disabledTrailingContentColor = resolvedIconColor,
-        disabledSupportingContentColor = finalDescriptionColor
+        disabledSupportingContentColor = finalDescriptionColor,
     )
 
     val shapes = ListItemDefaults.shapes(
@@ -173,7 +173,7 @@ fun BaseWidget(
         pressedShape = RoundedCornerShape(CornerRadius),
         selectedShape = baseShape,
         focusedShape = baseShape,
-        hoveredShape = baseShape
+        hoveredShape = baseShape,
     )
 
     val itemModifier = modifier.fillMaxWidth()
@@ -185,13 +185,13 @@ fun BaseWidget(
                     modifier = Modifier
                         .size(24.dp)
                         .alpha(alpha),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     if (icon != null) {
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = resolvedIconColor
+                            tint = resolvedIconColor,
                         )
                     } else {
                         Spacer(modifier = Modifier.size(24.dp))
@@ -210,7 +210,7 @@ fun BaseWidget(
                     style = descriptionStyle,
                     modifier = Modifier
                         .alpha(alpha)
-                        .padding(bottom = dynamicInternalPadding)
+                        .padding(bottom = dynamicInternalPadding),
                 )
             }
         }
@@ -218,7 +218,7 @@ fun BaseWidget(
     val trailing: @Composable () -> Unit = {
         Row(
             modifier = Modifier.alpha(alpha),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (trailingDivider) VerticalDivider(modifier = Modifier.height(32.dp))
 
@@ -230,14 +230,14 @@ fun BaseWidget(
                                 enabled = enabled,
                                 interactionSource = trailingInteractionSource,
                                 indication = LocalIndication.current,
-                                onClick = handleTrailingClick
+                                onClick = handleTrailingClick,
                             )
                         } else {
                             Modifier
-                        }
+                        },
                     )
                     .padding(start = if (trailingDivider) 16.dp else 0.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 trailingContent(trailingContentInteractionSource)
             }
@@ -250,12 +250,12 @@ fun BaseWidget(
                 .alpha(alpha)
                 .padding(
                     top = dynamicInternalPadding,
-                    bottom = if (description == null) dynamicInternalPadding else 0.dp
-                )
+                    bottom = if (description == null) dynamicInternalPadding else 0.dp,
+                ),
         ) {
             Text(
                 text = title,
-                style = titleStyle
+                style = titleStyle,
             )
 
             foreContent()
@@ -278,7 +278,7 @@ fun BaseWidget(
             supportingContent = supportingContent,
             trailingContent = trailing,
             interactionSource = interactionSource,
-            content = headline
+            content = headline,
         )
     } else {
         /*
@@ -296,13 +296,13 @@ fun BaseWidget(
                         Modifier.semantics { disabled() }
                     } else {
                         Modifier
-                    }
+                    },
                 ),
             colors = colors,
             leadingContent = leadingContent,
             supportingContent = supportingContent,
             trailingContent = trailing,
-            content = headline
+            content = headline,
         )
     }
 }

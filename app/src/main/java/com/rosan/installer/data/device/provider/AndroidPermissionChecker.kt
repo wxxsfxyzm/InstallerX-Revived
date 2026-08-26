@@ -14,15 +14,11 @@ import com.rosan.installer.domain.device.provider.PermissionChecker
 /**
  * Implementation of PermissionChecker using Android framework APIs.
  */
-class AndroidPermissionChecker(
-    private val context: Context
-) : PermissionChecker {
+class AndroidPermissionChecker(private val context: Context) : PermissionChecker {
 
-    override fun hasPermission(type: PermissionType): Boolean {
-        return when (type) {
-            PermissionType.NOTIFICATION -> checkNotificationPermission()
-            PermissionType.STORAGE -> checkStoragePermission()
-        }
+    override fun hasPermission(type: PermissionType): Boolean = when (type) {
+        PermissionType.NOTIFICATION -> checkNotificationPermission()
+        PermissionType.STORAGE -> checkStoragePermission()
     }
 
     private fun checkNotificationPermission(): Boolean {
@@ -32,19 +28,17 @@ class AndroidPermissionChecker(
         }
         return ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.POST_NOTIFICATIONS,
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun checkStoragePermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            // Legacy storage permission for Android 10 (Q) and below.
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        }
+    private fun checkStoragePermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        Environment.isExternalStorageManager()
+    } else {
+        // Legacy storage permission for Android 10 (Q) and below.
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }

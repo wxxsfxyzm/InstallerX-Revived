@@ -24,5 +24,5 @@ val PresetColors = listOf(
     RawColor("deep_purple", Color(0xFF7E42A4)),
     RawColor("blue_grey", Color(0xFF575D7E)),
     RawColor("brown", Color(0xFF7D524A)),
-    RawColor("grey", Color(0xFF5F6162))
+    RawColor("grey", Color(0xFF5F6162)),
 )

@@ -64,11 +64,8 @@ data class InstallNoticeResources(
     // Color
     val errorColor: Color,
     val tertiaryColor: Color,
-    val primaryColor: Color
+    val primaryColor: Color,
 )
 
 // Return type containing the list and the button ID
-data class InstallStateResult(
-    val notices: List<NoticeModel>,
-    val buttonTextId: Int
-)
+data class InstallStateResult(val notices: List<NoticeModel>, val buttonTextId: Int)

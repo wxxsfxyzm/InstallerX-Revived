@@ -28,12 +28,12 @@ fun UnarchivePrepareContent(
     appLabel: CharSequence,
     installerLabel: CharSequence,
     onCancel: () -> Unit,
-    onRestore: () -> Unit
+    onRestore: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
             text = stringResource(R.string.unarchive_title, appLabel),
@@ -41,14 +41,14 @@ fun UnarchivePrepareContent(
             color = MiuixTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
         )
         Text(
             text = stringResource(R.string.unarchive_message, installerLabel),
             style = MiuixTheme.textStyles.body1,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 24.dp)
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
         Row(
             modifier = Modifier
@@ -56,22 +56,22 @@ fun UnarchivePrepareContent(
                 .navigationBarsPadding()
                 .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
                 onClick = onCancel,
                 text = stringResource(R.string.cancel),
                 colors = ButtonDefaults.textButtonColors(
                     color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
                 ),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             TextButton(
                 onClick = onRestore,
                 text = stringResource(R.string.unarchive_restore),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
         }
     }

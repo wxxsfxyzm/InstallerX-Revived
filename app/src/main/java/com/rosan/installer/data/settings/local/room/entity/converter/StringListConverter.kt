@@ -9,10 +9,9 @@ object StringListConverter {
     private val json = Json { ignoreUnknownKeys = true }
 
     @ColumnTypeConverter
-    fun revert(value: String?): List<String> =
-        value?.takeIf { it.isNotBlank() }?.let {
-            runCatching { json.decodeFromString<List<String>>(it) }.getOrDefault(emptyList())
-        } ?: emptyList()
+    fun revert(value: String?): List<String> = value?.takeIf { it.isNotBlank() }?.let {
+        runCatching { json.decodeFromString<List<String>>(it) }.getOrDefault(emptyList())
+    } ?: emptyList()
 
     @ColumnTypeConverter
     fun convert(value: List<String>): String = json.encodeToString(value)

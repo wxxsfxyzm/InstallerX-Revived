@@ -30,6 +30,8 @@ import com.rosan.installer.framework.notification.builder.MiIslandNotificationBu
 import com.rosan.installer.framework.notification.builder.ModernNotificationBuilder
 import com.rosan.installer.framework.notification.builder.NotificationPayload
 import com.rosan.installer.framework.notification.builder.UserSettings
+import kotlin.reflect.KClass
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -47,15 +49,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import kotlin.reflect.KClass
-import kotlin.time.Duration.Companion.milliseconds
 
 class SessionNotifierImpl(
     private val context: Context,
     private val session: InstallerSessionRepository,
     private val appSettingsRepo: AppSettingsRepository,
     private val appOps: AppOpsProvider,
-    getAppIcon: GetAppIconUseCase
+    getAppIcon: GetAppIconUseCase,
 ) : SessionNotifier {
 
     private companion object {
@@ -73,7 +73,7 @@ class SessionNotifierImpl(
         val miIslandOuterGlow: Boolean,
         val showMiIslandBlockingInterval: Int,
         val preferSystemIcon: Boolean,
-        val preferDynamicColor: Boolean
+        val preferDynamicColor: Boolean,
     )
 
     private val notificationManager = NotificationManagerCompat.from(context)
@@ -139,11 +139,14 @@ class SessionNotifierImpl(
                 showDialog = appSettingsRepo.getBoolean(BooleanSetting.ShowDialogWhenPressingNotification, true).first(),
                 showLiveActivity = appSettingsRepo.getBoolean(BooleanSetting.ShowLiveActivity, false).first(),
                 showMiIsland = appSettingsRepo.getBoolean(BooleanSetting.ShowMiIsland, false).first(),
-                miIslandBypassRestriction = appSettingsRepo.getBoolean(BooleanSetting.ShowMiIslandBypassRestriction, false).first(),
+                miIslandBypassRestriction = appSettingsRepo.getBoolean(
+                    BooleanSetting.ShowMiIslandBypassRestriction,
+                    false,
+                ).first(),
                 miIslandOuterGlow = appSettingsRepo.getBoolean(BooleanSetting.ShowMiIslandOuterGlow, true).first(),
                 showMiIslandBlockingInterval = appSettingsRepo.getInt(IntSetting.ShowMiIslandBlockingInterval, 100).first(),
                 preferSystemIcon = appSettingsRepo.getBoolean(BooleanSetting.PreferSystemIconForInstall, false).first(),
-                preferDynamicColor = appSettingsRepo.getBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, false).first()
+                preferDynamicColor = appSettingsRepo.getBoolean(BooleanSetting.LiveActivityDynColorFollowPkgIcon, false).first(),
             )
 
             val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
@@ -182,8 +185,11 @@ class SessionNotifierImpl(
                             currentInstallKey = key
                             currentInstallStartTime = System.currentTimeMillis()
                         }
-                        fakeItemProgress = (1f - 1f / (1f + (System.currentTimeMillis() - currentInstallStartTime) / 3000f)).coerceAtMost(0.95f)
-                    } else currentInstallKey = null
+                        fakeItemProgress =
+                            (1f - 1f / (1f + (System.currentTimeMillis() - currentInstallStartTime) / 3000f)).coerceAtMost(0.95f)
+                    } else {
+                        currentInstallKey = null
+                    }
 
                     if (background) {
                         val isSameState = lastNotifiedEntity?.let { it::class == progress::class } == true
@@ -195,17 +201,17 @@ class SessionNotifierImpl(
                             state = InstallState(
                                 progress = progress,
                                 background = true,
-                                isSameState = isSameState
+                                isSameState = isSameState,
                             ),
                             settings = UserSettings(
                                 showDialog = settings.showDialog,
                                 preferSystemIcon = settings.preferSystemIcon,
                                 preferDynamicColor = settings.preferDynamicColor,
-                                miIslandOuterGlow = settings.miIslandOuterGlow
+                                miIslandOuterGlow = settings.miIslandOuterGlow,
                             ),
                             animation = AnimationContext(
-                                fakeItemProgress = fakeItemProgress
-                            )
+                                fakeItemProgress = fakeItemProgress,
+                            ),
                         )
 
                         // Delegate to the correct builder strategy
@@ -217,11 +223,14 @@ class SessionNotifierImpl(
                             settings.showMiIsland,
                             settings.showMiIslandBlockingInterval,
                             currentRequiresAnimation,
-                            settings.miIslandBypassRestriction
+                            settings.miIslandBypassRestriction,
                         )
 
                         val elapsedTime = System.currentTimeMillis() - sessionStartTime
-                        if (elapsedTime < MINIMUM_VISIBILITY_DURATION_MS && progress !is ProgressEntity.Finish && progress !is ProgressEntity.InstallSuccess && progress !is ProgressEntity.InstallCompleted) {
+                        if (elapsedTime < MINIMUM_VISIBILITY_DURATION_MS && progress !is ProgressEntity.Finish &&
+                            progress !is ProgressEntity.InstallSuccess &&
+                            progress !is ProgressEntity.InstallCompleted
+                        ) {
                             delay((MINIMUM_VISIBILITY_DURATION_MS - elapsedTime).milliseconds)
                         }
                     } else {
@@ -229,7 +238,7 @@ class SessionNotifierImpl(
                             notification = null,
                             progress = progress,
                             isMiIsland = false,
-                            blockInterval = settings.showMiIslandBlockingInterval
+                            blockInterval = settings.showMiIslandBlockingInterval,
                         )
                     }
                 }
@@ -238,21 +247,27 @@ class SessionNotifierImpl(
 
     private fun createNotificationChannels() {
         val channels = listOf(
-            NotificationChannelCompat.Builder(NotificationHelper.Channel.InstallerChannel.value, NotificationManagerCompat.IMPORTANCE_HIGH)
+            NotificationChannelCompat.Builder(
+                NotificationHelper.Channel.InstallerChannel.value,
+                NotificationManagerCompat.IMPORTANCE_HIGH,
+            )
                 .setName(context.getString(R.string.installer_channel_name))
                 .setDescription(context.getString(R.string.installer_channel_name_desc))
                 .build(),
             NotificationChannelCompat.Builder(
                 NotificationHelper.Channel.InstallerProgressChannel.value,
-                NotificationManagerCompat.IMPORTANCE_LOW
+                NotificationManagerCompat.IMPORTANCE_LOW,
             )
                 .setName(context.getString(R.string.installer_progress_channel_name))
                 .setDescription(context.getString(R.string.installer_progress_channel_name_desc))
                 .build(),
-            NotificationChannelCompat.Builder(NotificationHelper.Channel.InstallerLiveChannel.value, NotificationManagerCompat.IMPORTANCE_HIGH)
+            NotificationChannelCompat.Builder(
+                NotificationHelper.Channel.InstallerLiveChannel.value,
+                NotificationManagerCompat.IMPORTANCE_HIGH,
+            )
                 .setName(context.getString(R.string.installer_live_channel_name))
                 .setDescription(context.getString(R.string.installer_live_channel_name_desc))
-                .build()
+                .build(),
         )
         channels.forEach { notificationManager.createNotificationChannel(it) }
     }
@@ -264,7 +279,7 @@ class SessionNotifierImpl(
         isMiIsland: Boolean,
         blockInterval: Int,
         requiresAnimation: Boolean = false,
-        isBypassEnabled: Boolean = false
+        isBypassEnabled: Boolean = false,
     ) {
         if (notification == null) {
             setNotificationImmediate(null)
@@ -279,7 +294,12 @@ class SessionNotifierImpl(
         val currentTime = System.currentTimeMillis()
         val timeSinceLastUpdate = currentTime - lastNotificationUpdateTime
         val isCriticalState =
-            progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallCompleted || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallWaitingUnknownSource
+            progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed ||
+                progress is ProgressEntity.InstallCompleted ||
+                progress is ProgressEntity.InstallAnalysedSuccess ||
+                progress is ProgressEntity.InstallResolvedFailed ||
+                progress is ProgressEntity.InstallAnalysedFailed ||
+                progress is ProgressEntity.InstallWaitingUnknownSource
         // A stage transition must be visible immediately. The interval throttle is only for
         // repeated updates within the same stage; otherwise fast resolve -> analyse transitions
         // can leave the notification showing the stale resolving state indefinitely.
@@ -304,25 +324,36 @@ class SessionNotifierImpl(
         val previousInstalling = lastNotifiedEntity as? ProgressEntity.Installing
         val installingItemChanged =
             progress is ProgressEntity.Installing &&
-                    previousInstalling != null &&
-                    (progress.current != previousInstalling.current ||
-                            progress.total != previousInstalling.total ||
-                            progress.appLabel != previousInstalling.appLabel)
+                previousInstalling != null &&
+                (
+                    progress.current != previousInstalling.current ||
+                        progress.total != previousInstalling.total ||
+                        progress.appLabel != previousInstalling.appLabel
+                    )
 
         val shouldUpdate = when {
             isCriticalState -> isDataChanged
+
             isStageChanged -> true
+
             installingItemChanged -> true
+
             timeSinceLastUpdate < NOTIFICATION_UPDATE_INTERVAL_MS -> false
+
             progress is ProgressEntity.Installing && currentProgress >= 0f -> {
                 lastProgressValue < 0f ||
-                        currentProgress < lastProgressValue ||
-                        currentProgress - lastProgressValue >= PROGRESS_UPDATE_THRESHOLD ||
-                        currentProgress >= 0.99f
+                    currentProgress < lastProgressValue ||
+                    currentProgress - lastProgressValue >= PROGRESS_UPDATE_THRESHOLD ||
+                    currentProgress >= 0.99f
             }
+
             progress is ProgressEntity.Installing -> requiresAnimation
+
             currentProgress < 0 -> true
-            else -> currentProgress > lastProgressValue && ((currentProgress - lastProgressValue) >= PROGRESS_UPDATE_THRESHOLD || currentProgress >= 0.99f)
+
+            else ->
+                currentProgress > lastProgressValue &&
+                    ((currentProgress - lastProgressValue) >= PROGRESS_UPDATE_THRESHOLD || currentProgress >= 0.99f)
         }
 
         if (shouldUpdate) {
@@ -339,13 +370,16 @@ class SessionNotifierImpl(
         notification: Notification?,
         isMiIsland: Boolean = false,
         isBypassEnabled: Boolean = false,
-        blockInterval: Int = 100
+        blockInterval: Int = 100,
     ) {
         if (notification == null) {
             notificationManager.cancel(notificationId)
         } else {
-            if (isMiIsland) notifyWithXiaomiMagic(notificationId, notification, isBypassEnabled, blockInterval)
-            else notificationManager.notify(notificationId, notification)
+            if (isMiIsland) {
+                notifyWithXiaomiMagic(notificationId, notification, isBypassEnabled, blockInterval)
+            } else {
+                notificationManager.notify(notificationId, notification)
+            }
         }
     }
 
@@ -354,7 +388,7 @@ class SessionNotifierImpl(
         notificationId: Int,
         notification: Notification,
         isBypassEnabled: Boolean,
-        blockInterval: Int
+        blockInterval: Int,
     ) {
         val shouldExecuteMagic = isBypassEnabled && globalAuthorizer == Authorizer.Shizuku
         val targetUid = xmsfUid

@@ -58,10 +58,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun MiuixNotificationSettingsPage(
-    useBlur: Boolean,
-    viewModel: NotificationSettingsViewModel = koinViewModel()
-) {
+fun MiuixNotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val capabilityProvider = koinInject<DeviceCapabilityProvider>()
@@ -113,9 +110,9 @@ fun MiuixNotificationSettingsPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -127,9 +124,9 @@ fun MiuixNotificationSettingsPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
             item { SmallTitle(stringResource(R.string.notification_style)) }
@@ -138,7 +135,7 @@ fun MiuixNotificationSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     // 1. Notification style dropdown
                     val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported
@@ -157,13 +154,13 @@ fun MiuixNotificationSettingsPage(
                         onSelectedIndexChange = { index ->
                             val selectedStyle = styleOptions[index]
                             viewModel.dispatch(NotificationSettingsAction.ChangeStyle(selectedStyle))
-                        }
+                        },
                     )
                     // 2. Mi Island bypass restriction (animated visibility)
                     AnimatedVisibility(
                         visible = activeStyle == NotificationStyle.MI_ISLAND,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.lab_mi_island_bypass_restriction),
@@ -171,21 +168,21 @@ fun MiuixNotificationSettingsPage(
                             checked = uiState.miIslandBypassRestriction,
                             onCheckedChange = {
                                 viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBypassRestriction(it))
-                            }
+                            },
                         )
                     }
                     // 3. Mi Island network blocking duration (animated visibility)
                     AnimatedVisibility(
                         visible = activeStyle == NotificationStyle.MI_ISLAND && uiState.miIslandBypassRestriction,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixIntNumberPickerWidget(
                             title = stringResource(R.string.lab_mi_island_countdown),
                             description = stringResource(R.string.lab_mi_island_countdown_desc),
                             value = uiState.miIslandBlockingInterval,
                             startInt = 50,
-                            endInt = 350
+                            endInt = 350,
                         ) {
                             viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBlockingInterval(it))
                         }
@@ -194,7 +191,7 @@ fun MiuixNotificationSettingsPage(
                     AnimatedVisibility(
                         visible = activeStyle == NotificationStyle.MI_ISLAND,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixSwitchWidget(
                             title = stringResource(id = R.string.lab_mi_island_outer_glow),
@@ -202,7 +199,7 @@ fun MiuixNotificationSettingsPage(
                             checked = uiState.miIslandOuterGlow,
                             onCheckedChange = {
                                 viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandOuterGlow(it))
-                            }
+                            },
                         )
                     }
                 }
@@ -212,7 +209,7 @@ fun MiuixNotificationSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     // 3. Show dialog when pressing notification
                     MiuixSwitchWidget(
@@ -221,7 +218,7 @@ fun MiuixNotificationSettingsPage(
                         checked = uiState.showDialogOnPress,
                         onCheckedChange = {
                             viewModel.dispatch(NotificationSettingsAction.ChangeShowDialogOnPress(it))
-                        }
+                        },
                     )
 
                     // 4. Auto-clear success notification time
@@ -229,7 +226,7 @@ fun MiuixNotificationSettingsPage(
                         currentValue = uiState.successAutoClearSeconds,
                         onValueChange = { seconds ->
                             viewModel.dispatch(NotificationSettingsAction.ChangeAutoClearSeconds(seconds))
-                        }
+                        },
                     )
                 }
             }
@@ -243,11 +240,7 @@ fun MiuixNotificationSettingsPage(
  * Widget for selecting notification auto-clear time.
  */
 @Composable
-private fun MiuixAutoClearNotificationTimeWidget(
-    modifier: Modifier = Modifier,
-    currentValue: Int,
-    onValueChange: (Int) -> Unit
-) {
+private fun MiuixAutoClearNotificationTimeWidget(modifier: Modifier = Modifier, currentValue: Int, onValueChange: (Int) -> Unit) {
     val context = LocalContext.current
     val options = remember { listOf(0, 3, 5, 10, 15, 20, 30) } // 0 means "Never"
 
@@ -277,6 +270,6 @@ private fun MiuixAutoClearNotificationTimeWidget(
             if (currentValue != newValue) {
                 onValueChange(newValue)
             }
-        }
+        },
     )
 }

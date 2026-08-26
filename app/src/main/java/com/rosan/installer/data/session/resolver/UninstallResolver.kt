@@ -19,18 +19,11 @@ class UninstallResolver(
     private val context: Context,
     private val configResolver: ConfigResolver,
     private val appSettingsRepo: AppSettingsRepository,
-    private val getAppColor: GetAppIconColorUseCase
+    private val getAppColor: GetAppIconColorUseCase,
 ) {
-    data class Result(
-        val config: ConfigModel,
-        val uninstallInfo: UninstallInfo
-    )
+    data class Result(val config: ConfigModel, val uninstallInfo: UninstallInfo)
 
-    suspend fun resolve(
-        activity: Activity,
-        sessionId: String,
-        packageName: String
-    ): Result {
+    suspend fun resolve(activity: Activity, sessionId: String, packageName: String): Result {
         val resolvedConfig = configResolver.resolve(activity)
         val pm = context.packageManager
         var isArchived = false
@@ -38,7 +31,7 @@ class UninstallResolver(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 pm.getApplicationInfo(
                     packageName,
-                    PackageManager.ApplicationInfoFlags.of(0)
+                    PackageManager.ApplicationInfoFlags.of(0),
                 )
             } else {
                 @Suppress("DEPRECATION")
@@ -49,7 +42,7 @@ class UninstallResolver(
 
             pm.getApplicationInfo(
                 packageName,
-                PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES)
+                PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES),
             ).also { archivedInfo ->
                 if (!archivedInfo.isArchived) throw it
                 isArchived = true
@@ -59,11 +52,12 @@ class UninstallResolver(
             pm.getPackageInfo(
                 packageName,
                 PackageManager.PackageInfoFlags.of(
-                    if (isArchived && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
+                    if (isArchived && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
                         PackageManager.MATCH_ARCHIVED_PACKAGES
-                    else
+                    } else {
                         0
-                )
+                    },
+                ),
             )
         } else {
             @Suppress("DEPRECATION")
@@ -73,7 +67,7 @@ class UninstallResolver(
         val requestedUninstallFlags = resolveRequestedUninstallFlags(activity)
         val config = if (requestedUninstallFlags != 0) {
             resolvedConfig.copy(
-                uninstallFlags = resolvedConfig.uninstallFlags or requestedUninstallFlags
+                uninstallFlags = resolvedConfig.uninstallFlags or requestedUninstallFlags,
             )
         } else {
             resolvedConfig
@@ -83,7 +77,7 @@ class UninstallResolver(
             getAppColor(
                 sessionId = sessionId,
                 packageName = packageName,
-                preferSystemIcon = true
+                preferSystemIcon = true,
             )
         } else {
             null
@@ -102,8 +96,8 @@ class UninstallResolver(
                     packageInfo.versionCode.toLong()
                 },
                 isArchived = isArchived,
-                seedColor = color
-            )
+                seedColor = color,
+            ),
         )
     }
 

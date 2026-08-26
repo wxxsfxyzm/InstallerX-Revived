@@ -16,10 +16,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 
 @Composable
-fun MainScreenBackHandler(
-    mainPagerState: MainPagerState,
-    navController: Navigator,
-) {
+fun MainScreenBackHandler(mainPagerState: MainPagerState, navController: Navigator) {
     val isPagerBackHandlerEnabled by remember {
         derivedStateOf {
             navController.current() is Route.Main && navController.backStackSize() == 1 && mainPagerState.selectedPage != 0
@@ -32,6 +29,6 @@ fun MainScreenBackHandler(
     NavigationBackHandler(
         state = navEventState,
         isBackEnabled = isPagerBackHandlerEnabled,
-        onBackCompleted = onBackCompleted
+        onBackCompleted = onBackCompleted,
     )
 }

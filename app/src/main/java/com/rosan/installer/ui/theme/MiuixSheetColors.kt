@@ -9,20 +9,16 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
-fun miuixSheetCardColor(): Color =
-    if (isDynamicColor) {
-        MiuixTheme.colorScheme.surfaceContainer
-    } else if (InstallerTheme.isDark) {
-        miuixSheetCardColorDark
-    } else {
-        Color.White
-    }
+fun miuixSheetCardColor(): Color = if (isDynamicColor) {
+    MiuixTheme.colorScheme.surfaceContainer
+} else if (InstallerTheme.isDark) {
+    miuixSheetCardColorDark
+} else {
+    Color.White
+}
 
 @Composable
-fun miuixSheetCardColors(
-    contentColor: Color = MiuixTheme.colorScheme.onSurface
-): CardColors =
-    CardColors(
-        color = miuixSheetCardColor(),
-        contentColor = contentColor
-    )
+fun miuixSheetCardColors(contentColor: Color = MiuixTheme.colorScheme.onSurface): CardColors = CardColors(
+    color = miuixSheetCardColor(),
+    contentColor = contentColor,
+)

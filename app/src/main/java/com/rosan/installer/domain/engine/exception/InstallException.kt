@@ -8,11 +8,6 @@ import com.rosan.installer.domain.engine.model.error.InstallErrorType
 /**
  * Unified exception for all installation failures.
  */
-class InstallException(
-    val errorType: InstallErrorType,
-    message: String
-) : InstallerException(message) {
-    override fun getStringResId(): Int {
-        return errorType.stringResId
-    }
+class InstallException(val errorType: InstallErrorType, message: String) : InstallerException(message) {
+    override fun getStringResId(): Int = errorType.stringResId
 }

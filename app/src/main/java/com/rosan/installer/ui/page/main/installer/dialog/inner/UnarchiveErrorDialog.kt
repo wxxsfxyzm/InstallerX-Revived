@@ -43,7 +43,7 @@ fun unarchiveErrorDialog(viewModel: InstallerViewModel): DialogParams {
                 viewModel.dispatch(InstallerViewAction.Close)
             }
             buttons
-        }
+        },
     )
 }
 
@@ -62,43 +62,38 @@ fun unarchiveFailedDialog(viewModel: InstallerViewModel): DialogParams {
             listOf(
                 DialogButton(stringResource(R.string.close)) {
                     viewModel.dispatch(InstallerViewAction.Close)
-                }
+                },
             )
-        }
+        },
     )
 }
 
 @Composable
-private fun unarchiveErrorTitle(
-    status: UnarchiveStatus,
-    installerLabel: CharSequence?
-): String = when (status) {
+private fun unarchiveErrorTitle(status: UnarchiveStatus, installerLabel: CharSequence?): String = when (status) {
     UnarchiveStatus.InstallerDisabled,
-    UnarchiveStatus.InstallerUninstalled -> stringResource(
+    UnarchiveStatus.InstallerUninstalled,
+    -> stringResource(
         status.titleResId,
-        installerLabel ?: stringResource(R.string.installer_label_unknown)
+        installerLabel ?: stringResource(R.string.installer_label_unknown),
     )
 
     else -> stringResource(status.titleResId)
 }
 
 @Composable
-private fun unarchiveErrorMessage(
-    status: UnarchiveStatus,
-    requiredBytes: Long,
-    installerLabel: CharSequence?
-): String {
+private fun unarchiveErrorMessage(status: UnarchiveStatus, requiredBytes: Long, installerLabel: CharSequence?): String {
     val context = LocalContext.current
     return when (status) {
         UnarchiveStatus.InsufficientStorage -> stringResource(
             status.messageResId,
-            Formatter.formatShortFileSize(context, requiredBytes)
+            Formatter.formatShortFileSize(context, requiredBytes),
         )
 
         UnarchiveStatus.InstallerDisabled,
-        UnarchiveStatus.InstallerUninstalled -> stringResource(
+        UnarchiveStatus.InstallerUninstalled,
+        -> stringResource(
             status.messageResId,
-            installerLabel ?: stringResource(R.string.installer_label_unknown)
+            installerLabel ?: stringResource(R.string.installer_label_unknown),
         )
 
         else -> stringResource(status.messageResId)

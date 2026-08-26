@@ -16,6 +16,7 @@ import android.content.res.AssetFileDescriptor
 import android.os.Build
 import android.os.IBinder
 import android.os.IInterface
+import android.os.Process as AndroidProcess
 import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.BuildConfig
@@ -32,9 +33,9 @@ import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
+import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
-import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.engine.model.install.shouldAutoDeleteSource
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.source.DataType
@@ -50,13 +51,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import android.os.Process as AndroidProcess
 
 abstract class IBinderAppInstallerRepoImpl(
     protected val context: Context,
     protected val reflect: ReflectionProvider,
     protected val capabilityProvider: DeviceCapabilityProvider,
-    protected val postInstallTaskProvider: PostInstallTaskProvider
+    protected val postInstallTaskProvider: PostInstallTaskProvider,
 ) : AppInstallerRepository {
     private companion object {
         const val INSTALL_FLAGS_TAG = "InstallFlags"
@@ -72,26 +72,23 @@ abstract class IBinderAppInstallerRepoImpl(
         return IPackageInstaller.Stub.asInterface(iBinderWrapper(packageManager.packageInstaller.asBinder()))
     }
 
-    override suspend fun resolveInstallerPackageName(config: ConfigModel): String =
-        when (config.authorizer) {
-            Authorizer.Dhizuku -> getDhizukuComponentName()
-            Authorizer.None if (!capabilityProvider.isSystemApp) -> BuildConfig.APPLICATION_ID
-            else -> config.resolveConfiguredInstallerPackageName()
-        }
+    override suspend fun resolveInstallerPackageName(config: ConfigModel): String = when (config.authorizer) {
+        Authorizer.Dhizuku -> getDhizukuComponentName()
+        Authorizer.None if (!capabilityProvider.isSystemApp) -> BuildConfig.APPLICATION_ID
+        else -> config.resolveConfiguredInstallerPackageName()
+    }
 
-    private suspend fun resolvePackageInstallerCallerPackageName(config: ConfigModel): String =
-        when (config.authorizer) {
-            Authorizer.Dhizuku -> getDhizukuComponentName()
-            Authorizer.None -> if (capabilityProvider.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
-            else -> config.resolveConfiguredInstallerPackageName()
-        }
+    private suspend fun resolvePackageInstallerCallerPackageName(config: ConfigModel): String = when (config.authorizer) {
+        Authorizer.Dhizuku -> getDhizukuComponentName()
+        Authorizer.None -> if (capabilityProvider.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
+        else -> config.resolveConfiguredInstallerPackageName()
+    }
 
-    private fun ConfigModel.resolveConfiguredInstallerPackageName(): String =
-        when (installerMode) {
-            InstallerMode.Self -> BuildConfig.APPLICATION_ID
-            InstallerMode.Initiator -> initiatorPackageName ?: BuildConfig.APPLICATION_ID
-            InstallerMode.Custom -> installer ?: BuildConfig.APPLICATION_ID
-        }
+    private fun ConfigModel.resolveConfiguredInstallerPackageName(): String = when (installerMode) {
+        InstallerMode.Self -> BuildConfig.APPLICATION_ID
+        InstallerMode.Initiator -> initiatorPackageName ?: BuildConfig.APPLICATION_ID
+        InstallerMode.Custom -> installer ?: BuildConfig.APPLICATION_ID
+    }
 
     private suspend fun getPackageInstaller(config: ConfigModel): PackageInstaller {
         val packageInstaller = resolvePackageInstallerBinder()
@@ -101,30 +98,33 @@ abstract class IBinderAppInstallerRepoImpl(
 
         val callerPackageName = resolvePackageInstallerCallerPackageName(config)
 
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            reflect.getDeclaredConstructor(
-                PackageInstaller::class.java,
-                IPackageInstaller::class.java,
-                String::class.java,
-                String::class.java,
-                Int::class.java,
-            )!!.newInstance(packageInstaller, callerPackageName, null, finalUserId)
-        else reflect.getDeclaredConstructor(
-            PackageInstaller::class.java,
-            IPackageInstaller::class.java,
-            String::class.java,
-            Int::class.java,
-        )!!.newInstance(
-            packageInstaller,
-            callerPackageName,
-            finalUserId
-        )) as PackageInstaller
+        return (
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                reflect.getDeclaredConstructor(
+                    PackageInstaller::class.java,
+                    IPackageInstaller::class.java,
+                    String::class.java,
+                    String::class.java,
+                    Int::class.java,
+                )!!.newInstance(packageInstaller, callerPackageName, null, finalUserId)
+            } else {
+                reflect.getDeclaredConstructor(
+                    PackageInstaller::class.java,
+                    IPackageInstaller::class.java,
+                    String::class.java,
+                    Int::class.java,
+                )!!.newInstance(
+                    packageInstaller,
+                    callerPackageName,
+                    finalUserId,
+                )
+            }
+            ) as PackageInstaller
     }
 
-    private suspend fun getDhizukuComponentName(): String =
-        requireDhizukuPermissionGranted {
-            Dhizuku.getOwnerPackageName()
-        }
+    private suspend fun getDhizukuComponentName(): String = requireDhizukuPermissionGranted {
+        Dhizuku.getOwnerPackageName()
+    }
 
     private suspend fun setSessionIBinder(session: Session) {
         val iPackageInstallerSession = reflect.getValue<IInterface>(session, "mSession") ?: return
@@ -133,15 +133,11 @@ abstract class IBinderAppInstallerRepoImpl(
             session,
             "mSession",
             session::class.java,
-            IPackageInstallerSession.Stub.asInterface(iBinderWrapper(iBinder))
+            IPackageInstallerSession.Stub.asInterface(iBinderWrapper(iBinder)),
         )
     }
 
-    override suspend fun approveSession(
-        config: ConfigModel,
-        sessionId: Int,
-        granted: Boolean
-    ) {
+    override suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean) {
         val packageInstaller = resolvePackageInstallerBinder()
 
         try {
@@ -171,7 +167,7 @@ abstract class IBinderAppInstallerRepoImpl(
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>,
         onProgress: suspend (InstallWriteProgress) -> Unit,
-        onPhaseChanged: suspend (InstallPhase) -> Unit
+        onPhaseChanged: suspend (InstallPhase) -> Unit,
     ) {
         onPhaseChanged(InstallPhase.WRITING)
         val totalBytes = InstallProgressWriter.totalBytesOrNull(entities.map { it.data.getSize() })
@@ -191,7 +187,7 @@ abstract class IBinderAppInstallerRepoImpl(
                     sharedUserIdBlacklist,
                     sharedUserIdExemption,
                     progressWriter,
-                    onPhaseChanged
+                    onPhaseChanged,
                 )
             }
         }
@@ -202,10 +198,7 @@ abstract class IBinderAppInstallerRepoImpl(
     }
 
     @SuppressLint("MissingPermission")
-    override suspend fun doUninstallWork(
-        config: ConfigModel,
-        packageName: String
-    ) {
+    override suspend fun doUninstallWork(config: ConfigModel, packageName: String) {
         val packageInstaller = resolvePackageInstallerBinder()
 
         // Prepare parameters for the direct AIDL call.
@@ -229,7 +222,7 @@ abstract class IBinderAppInstallerRepoImpl(
             callerPackageName,
             flags,
             receiver.getIntentSender(),
-            currentUserId
+            currentUserId,
         )
 
         // The result verification logic remains the same.
@@ -246,7 +239,7 @@ abstract class IBinderAppInstallerRepoImpl(
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>,
         progressWriter: InstallProgressWriter?,
-        onPhaseChanged: suspend (InstallPhase) -> Unit
+        onPhaseChanged: suspend (InstallPhase) -> Unit,
     ) {
         if (!config.bypassBlacklistInstallSetByUser) {
             // Blacklisted package names
@@ -254,7 +247,7 @@ abstract class IBinderAppInstallerRepoImpl(
                 Timber.w("Installation blocked for $packageName because it is in the blacklist.")
                 throw InstallException(
                     InstallErrorType.BLACKLISTED_PACKAGE,
-                    "Installation blocked for $packageName because it is in the blacklist."
+                    "Installation blocked for $packageName because it is in the blacklist.",
                 )
             }
 
@@ -267,7 +260,7 @@ abstract class IBinderAppInstallerRepoImpl(
                     Timber.w("Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.")
                     throw InstallException(
                         InstallErrorType.BLACKLISTED_PACKAGE,
-                        "Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted."
+                        "Installation blocked for $packageName because its sharedUserId '$sharedUid' is blacklisted.",
                     )
                 }
             }
@@ -284,7 +277,7 @@ abstract class IBinderAppInstallerRepoImpl(
                 metadata,
                 respectPlatformInstallPolicy,
                 packageInstaller,
-                packageName
+                packageName,
             )
             session = createdSession.second
             platformSessionId = createdSession.first
@@ -309,23 +302,24 @@ abstract class IBinderAppInstallerRepoImpl(
         metadata: InstallMetadata,
         respectPlatformInstallPolicy: Boolean,
         packageInstaller: PackageInstaller,
-        packageName: String
+        packageName: String,
     ): Pair<Int, Session> {
         val pm = context.packageManager
         val sourceType = entities.first().sourceType
-        val params = if (sourceType == DataType.MULTI_APK_ZIP || sourceType == DataType.MULTI_APK)
+        val params = if (sourceType == DataType.MULTI_APK_ZIP || sourceType == DataType.MULTI_APK) {
             PackageInstaller.SessionParams(
                 // Always use full mode when apk is definite
-                PackageInstaller.SessionParams.MODE_FULL_INSTALL
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL,
             )
-        else
+        } else {
             PackageInstaller.SessionParams(
                 when (entities.count { it.name == "base.apk" }) {
                     1 -> PackageInstaller.SessionParams.MODE_FULL_INSTALL
                     0 -> PackageInstaller.SessionParams.MODE_INHERIT_EXISTING
                     else -> throw IllegalArgumentException("Multiple base APK entries in a single install session")
-                }
+                },
             )
+        }
         config.callingFromUid?.let { params.setOriginatingUid(it) }
         params.setAppPackageName(packageName)
         params.applySessionContext(
@@ -333,7 +327,7 @@ abstract class IBinderAppInstallerRepoImpl(
             metadata = metadata,
             entities = entities,
             installerPackageName = resolveInstallerPackageName(config),
-            respectPlatformInstallPolicy = respectPlatformInstallPolicy
+            respectPlatformInstallPolicy = respectPlatformInstallPolicy,
         )
 
         // --- InstallFlags Start ---
@@ -351,9 +345,9 @@ abstract class IBinderAppInstallerRepoImpl(
         // --- Disable not supported stuff ---
         val shouldGrantAll =
             config.allowAllRequestedPermissions &&
-                    config.authorizer != Authorizer.Dhizuku &&
-                    config.authorizer != Authorizer.None &&
-                    pm.isFreshInstallCandidate(packageName)
+                config.authorizer != Authorizer.Dhizuku &&
+                config.authorizer != Authorizer.None &&
+                pm.isFreshInstallCandidate(packageName)
 
         if (!shouldGrantAll) {
             params.installFlags = params.installFlags.removeFlag(InstallOption.GrantAllRequestedPermissions.value)
@@ -395,11 +389,7 @@ abstract class IBinderAppInstallerRepoImpl(
         return sessionId to session
     }
 
-    private suspend fun installIts(
-        entities: List<InstallEntity>,
-        session: Session,
-        progressWriter: InstallProgressWriter?
-    ) {
+    private suspend fun installIts(entities: List<InstallEntity>, session: Session, progressWriter: InstallProgressWriter?) {
         val sessionTotalBytes = progressWriter?.let {
             InstallProgressWriter.totalBytes(entities.map { entity -> entity.data.getSize() })
         }
@@ -426,7 +416,7 @@ abstract class IBinderAppInstallerRepoImpl(
         entity: InstallEntity,
         session: Session,
         progressWriter: InstallProgressWriter?,
-        onEntryProgress: (Long) -> Unit
+        onEntryProgress: (Long) -> Unit,
     ) {
         Timber.d("Installing entity: ${entity.name}, data path: ${entity.data}, top source: ${entity.data.getSourceTop()}")
         val sizeBytes = entity.data.getSize()
@@ -441,14 +431,14 @@ abstract class IBinderAppInstallerRepoImpl(
             session.openWrite(
                 entity.name,
                 0,
-                sizeBytes
+                sizeBytes,
             ).use { outputStream ->
                 if (progressWriter != null) {
                     progressWriter.copy(
                         input = input,
                         output = outputStream,
                         expectedBytes = sizeBytes,
-                        onEntryProgress = onEntryProgress
+                        onEntryProgress = onEntryProgress,
                     )
                 } else {
                     copyInstallSource(input, outputStream)
@@ -458,14 +448,13 @@ abstract class IBinderAppInstallerRepoImpl(
         }
     }
 
-    private fun updateStagingProgress(session: Session, progress: Float): Boolean =
-        try {
-            session.setStagingProgress(progress.coerceIn(0f, 1f))
-            true
-        } catch (error: Exception) {
-            Timber.d("PackageInstaller staging progress is unavailable: ${error.message}")
-            false
-        }
+    private fun updateStagingProgress(session: Session, progress: Float): Boolean = try {
+        session.setStagingProgress(progress.coerceIn(0f, 1f))
+        true
+    } catch (error: Exception) {
+        Timber.d("PackageInstaller staging progress is unavailable: ${error.message}")
+        false
+    }
 
     @SuppressLint("RequestInstallPackagesPolicy")
     private suspend fun commit(session: Session) {
@@ -474,11 +463,7 @@ abstract class IBinderAppInstallerRepoImpl(
         PackageManagerUtil.installResultVerify(context, receiver)
     }
 
-    open suspend fun doFinishWork(
-        config: ConfigModel,
-        entities: List<InstallEntity>,
-        result: Result<Unit>
-    ) {
+    open suspend fun doFinishWork(config: ConfigModel, entities: List<InstallEntity>, result: Result<Unit>) {
         Timber.tag("doFinishWork").d("isSuccess: ${result.isSuccess}")
         if (result.isSuccess) {
             val packageName = entities.firstOrNull()?.packageName ?: return
@@ -498,8 +483,8 @@ abstract class IBinderAppInstallerRepoImpl(
                             dexoptMode = config.dexoptMode.value,
                             forceDexopt = config.forceDexopt,
                             enableAutoDelete = shouldDelete,
-                            deletePaths = pathsToDelete
-                        )
+                            deletePaths = pathsToDelete,
+                        ),
                     )
                 }.onFailure { e ->
                     Timber.e(e, "Async post-install tasks failed")

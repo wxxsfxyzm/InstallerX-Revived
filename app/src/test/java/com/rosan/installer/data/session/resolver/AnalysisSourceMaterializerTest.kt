@@ -7,7 +7,6 @@ import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationKey
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.engine.model.source.DataEntity
-import kotlinx.coroutines.test.runTest
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
@@ -18,6 +17,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlinx.coroutines.test.runTest
 
 class AnalysisSourceMaterializerTest {
     @Test
@@ -34,7 +34,7 @@ class AnalysisSourceMaterializerTest {
                 analysisFile = analysisFile.toFile(),
                 installBytes = installBytes,
                 policy = AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
-                key = key
+                key = key,
             ).apply { source = DataEntity.FileEntity("https://example.com/app.apk") }
             val requestedSubrange = remote.subrange(0L, 2L)
             val unrelated = DataEntity.FileEntity("unrelated.apk")
@@ -42,7 +42,7 @@ class AnalysisSourceMaterializerTest {
             val result = materializeAnalysisSource(
                 data = listOf(unrelated, remote),
                 requestedSource = requestedSubrange,
-                cacheDirectory = cacheDirectory.toFile()
+                cacheDirectory = cacheDirectory.toFile(),
             ) { input, output, _ -> input.copyTo(output) }
 
             assertEquals(unrelated, result[0])
@@ -51,7 +51,7 @@ class AnalysisSourceMaterializerTest {
             assertEquals("https://example.com/app.apk", retained.getSourceTop().toString())
             assertContentEquals(
                 installBytes,
-                requireNotNull(retained.getInstallInputStream()).use { it.readBytes() }
+                requireNotNull(retained.getInstallInputStream()).use { it.readBytes() },
             )
         } finally {
             analysisFile.deleteIfExists()
@@ -70,14 +70,14 @@ class AnalysisSourceMaterializerTest {
                 analysisFile = sourceFile.toFile(),
                 installBytes = byteArrayOf(1),
                 policy = AnalysisMaterializationPolicy.DISALLOW,
-                key = null
+                key = null,
             )
 
             val error = assertFailsWith<AnalyseException> {
                 materializeAnalysisSource(
                     data = listOf(source),
                     requestedSource = source,
-                    cacheDirectory = cacheDirectory.toFile()
+                    cacheDirectory = cacheDirectory.toFile(),
                 ) { input, output, _ -> input.copyTo(output) }
             }
 
@@ -100,14 +100,14 @@ class AnalysisSourceMaterializerTest {
                 analysisFile = sourceFile.toFile(),
                 installBytes = byteArrayOf(1, 2),
                 policy = AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
-                key = AnalysisMaterializationKey()
+                key = AnalysisMaterializationKey(),
             )
 
             val error = assertFailsWith<AnalyseException> {
                 materializeAnalysisSource(
                     data = listOf(source),
                     requestedSource = source,
-                    cacheDirectory = cacheDirectory.toFile()
+                    cacheDirectory = cacheDirectory.toFile(),
                 ) { input, output, _ ->
                     output.write(input.read())
                     error("copy failed")
@@ -126,7 +126,7 @@ class AnalysisSourceMaterializerTest {
         analysisFile: java.io.File,
         installBytes: ByteArray,
         policy: AnalysisMaterializationPolicy,
-        key: AnalysisMaterializationKey?
+        key: AnalysisMaterializationKey?,
     ) = DataEntity.FileDescriptorEntity(
         path = "remote.apk",
         startOffset = 0L,
@@ -137,6 +137,6 @@ class AnalysisSourceMaterializerTest {
         descriptorFactory = { error("descriptor is unused") },
         inputStreamFactory = { installBytes.inputStream() },
         analysisMaterializationPolicy = policy,
-        analysisMaterializationKey = key
+        analysisMaterializationKey = key,
     )
 }

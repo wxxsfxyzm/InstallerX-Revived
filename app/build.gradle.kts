@@ -135,7 +135,7 @@ android {
             // Module-specific exclusions
             excludes += setOf(
                 "lib/*/libandroidx.graphics.path.so",
-                "lib/*/libdatastore_shared_counter.so"
+                "lib/*/libdatastore_shared_counter.so",
             )
         }
     }

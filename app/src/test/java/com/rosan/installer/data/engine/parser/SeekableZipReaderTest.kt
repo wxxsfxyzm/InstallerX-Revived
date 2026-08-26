@@ -50,9 +50,9 @@ class SeekableZipReaderTest {
             entries = listOf(
                 TestEntry("meta.sai_v2.json", "{}".toByteArray()),
                 TestEntry("base.apk", basePayload),
-                TestEntry("split_config.arm64_v8a.apk", splitPayload)
+                TestEntry("split_config.arm64_v8a.apk", splitPayload),
             ),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
 
         val archive = reader.read(file)
@@ -60,7 +60,7 @@ class SeekableZipReaderTest {
         assertFalse(archive.hasCentralDirectory)
         assertEquals(
             listOf("meta.sai_v2.json", "base.apk", "split_config.arm64_v8a.apk"),
-            archive.entries.map { it.name }
+            archive.entries.map { it.name },
         )
         assertEquals(basePayload.size.toLong(), archive.entries[1].uncompressedSize)
         assertEquals(splitPayload.size.toLong(), archive.entries[2].compressedSize)
@@ -79,7 +79,7 @@ class SeekableZipReaderTest {
     fun `stops at a central directory marker`() {
         val file = writeArchive(
             entries = listOf(TestEntry("base.apk", "base".toByteArray())),
-            includeCentralDirectoryMarker = true
+            includeCentralDirectoryMarker = true,
         )
 
         val archive = reader.read(file)
@@ -92,7 +92,7 @@ class SeekableZipReaderTest {
     fun `stops at an APK Signing Block before the central directory`() {
         val file = writeArchive(
             entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         file.appendBytes(apkSigningBlock(totalSize = 4096))
 
@@ -106,7 +106,7 @@ class SeekableZipReaderTest {
     fun `rejects an APK Signing Block with mismatched sizes`() {
         val file = writeArchive(
             entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         file.appendBytes(apkSigningBlock(totalSize = 4096, trailingSize = 4087))
 
@@ -117,13 +117,13 @@ class SeekableZipReaderTest {
     fun `rejects an APK Signing Block with the wrong magic`() {
         val file = writeArchive(
             entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         file.appendBytes(
             apkSigningBlock(
                 totalSize = 4096,
-                magic = "APK Sig Block XX".toByteArray(StandardCharsets.US_ASCII)
-            )
+                magic = "APK Sig Block XX".toByteArray(StandardCharsets.US_ASCII),
+            ),
         )
 
         assertUnexpectedSignature(file)
@@ -133,7 +133,7 @@ class SeekableZipReaderTest {
     fun `rejects an APK Signing Block whose declared size exceeds the file`() {
         val file = writeArchive(
             entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         file.appendBytes(apkSigningBlock(totalSize = 32, leadingSize = Long.MAX_VALUE))
 
@@ -144,13 +144,13 @@ class SeekableZipReaderTest {
     fun `rejects an APK Signing Block not followed by a central directory`() {
         val file = writeArchive(
             entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         file.appendBytes(
             apkSigningBlock(
                 totalSize = 4096,
-                nextSignature = END_OF_CENTRAL_DIRECTORY_SIGNATURE
-            )
+                nextSignature = END_OF_CENTRAL_DIRECTORY_SIGNATURE,
+            ),
         )
 
         assertUnexpectedSignature(file)
@@ -160,7 +160,7 @@ class SeekableZipReaderTest {
     fun `rejects entries that require a data descriptor`() {
         val file = writeArchive(
             entries = listOf(TestEntry("base.apk", "base".toByteArray(), flags = UTF8_FLAG or DATA_DESCRIPTOR_FLAG)),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
 
         val error = assertFailsWith<SeekableZipException> { reader.read(file) }
@@ -177,7 +177,7 @@ class SeekableZipReaderTest {
                 compressionMethod = ZipEntry.STORED,
                 crc = 0,
                 compressedSize = 100,
-                uncompressedSize = 100
+                uncompressedSize = 100,
             )
             write(1)
         }
@@ -193,7 +193,7 @@ class SeekableZipReaderTest {
         val payload = ByteArray(4096) { index -> (index % 251).toByte() }
         val file = writeArchive(
             entries = listOf(TestEntry("base.apk", payload)),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         val entry = reader.read(file).entries.single()
         val entity = entry.toDataEntity(file)
@@ -209,7 +209,7 @@ class SeekableZipReaderTest {
         val payload = "deflated split payload".repeat(200).toByteArray()
         val file = writeArchive(
             entries = listOf(TestEntry("split_config.en.apk", payload, compressionMethod = ZipEntry.DEFLATED)),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         val entry = reader.read(file).entries.single()
         val entity = entry.toDataEntity(file)
@@ -228,7 +228,7 @@ class SeekableZipReaderTest {
             compressedSize = 0,
             uncompressedSize = 0,
             compressionMethod = XZ_METHOD,
-            crc = 0
+            crc = 0,
         )
 
         val error = assertFailsWith<AnalyseException> {
@@ -254,7 +254,7 @@ class SeekableZipReaderTest {
         val payload = "base".toByteArray()
         val file = writeArchive(
             entries = listOf(TestEntry("base.apk", payload, crcOverride = 0)),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         val entry = reader.read(file).entries.single()
         val entity = entry.toDataEntity(file)
@@ -269,7 +269,7 @@ class SeekableZipReaderTest {
         val payload = "base".toByteArray()
         val file = writeArchive(
             entries = listOf(TestEntry("base.apk", payload, crcOverride = 0)),
-            includeCentralDirectoryMarker = false
+            includeCentralDirectoryMarker = false,
         )
         val entity = reader.read(file).entries.single().toDataEntity(file)
         val input = entity.getInputStream()
@@ -278,16 +278,15 @@ class SeekableZipReaderTest {
         assertFailsWith<ZipException> { input.close() }
     }
 
-    private fun SeekableZipEntry.toDataEntity(file: File): DataEntity.SeekableZipEntryEntity =
-        DataEntity.SeekableZipEntryEntity(
-            name = name,
-            parent = DataEntity.FileEntity(file.path),
-            dataOffset = dataOffset,
-            compressedSize = compressedSize,
-            uncompressedSize = uncompressedSize,
-            compressionMethod = compressionMethod,
-            crc = crc
-        )
+    private fun SeekableZipEntry.toDataEntity(file: File): DataEntity.SeekableZipEntryEntity = DataEntity.SeekableZipEntryEntity(
+        name = name,
+        parent = DataEntity.FileEntity(file.path),
+        dataOffset = dataOffset,
+        compressedSize = compressedSize,
+        uncompressedSize = uncompressedSize,
+        compressionMethod = compressionMethod,
+        crc = crc,
+    )
 
     private fun assertUnexpectedSignature(file: File) {
         val error = assertFailsWith<SeekableZipException> { reader.read(file) }
@@ -314,7 +313,7 @@ class SeekableZipReaderTest {
             crc = CRC32().apply { update(payload) }.value,
             compressedSize = UINT32_MAX,
             uncompressedSize = payload.size.toLong(),
-            extra = extra
+            extra = extra,
         )
         output.write(compressedPayload)
         val file = File(tempDirectory, "zip64-masked-compressed.apks").apply {
@@ -327,7 +326,7 @@ class SeekableZipReaderTest {
         assertEquals(payload.size.toLong(), entry.uncompressedSize)
         assertContentEquals(
             payload,
-            entry.toDataEntity(file).getInputStream().use { it.readBytes() }
+            entry.toDataEntity(file).getInputStream().use { it.readBytes() },
         )
     }
 
@@ -336,7 +335,7 @@ class SeekableZipReaderTest {
         leadingSize: Long = totalSize.toLong() - Long.SIZE_BYTES,
         trailingSize: Long = totalSize.toLong() - Long.SIZE_BYTES,
         magic: ByteArray = APK_SIGNING_BLOCK_MAGIC,
-        nextSignature: Long = CENTRAL_DIRECTORY_SIGNATURE
+        nextSignature: Long = CENTRAL_DIRECTORY_SIGNATURE,
     ): ByteArray {
         require(totalSize >= APK_SIGNING_BLOCK_MIN_TOTAL_SIZE)
         require(magic.size == APK_SIGNING_BLOCK_MAGIC.size)
@@ -349,10 +348,7 @@ class SeekableZipReaderTest {
         }.toByteArray()
     }
 
-    private fun writeArchive(
-        entries: List<TestEntry>,
-        includeCentralDirectoryMarker: Boolean
-    ): File {
+    private fun writeArchive(entries: List<TestEntry>, includeCentralDirectoryMarker: Boolean): File {
         val output = ByteArrayOutputStream()
         entries.forEach { entry ->
             val compressedPayload = when (entry.compressionMethod) {
@@ -367,7 +363,7 @@ class SeekableZipReaderTest {
                 compressionMethod = entry.compressionMethod,
                 crc = crc,
                 compressedSize = compressedPayload.size.toLong(),
-                uncompressedSize = entry.payload.size.toLong()
+                uncompressedSize = entry.payload.size.toLong(),
             )
             output.write(compressedPayload)
         }
@@ -385,7 +381,7 @@ class SeekableZipReaderTest {
         crc: Long,
         compressedSize: Long,
         uncompressedSize: Long,
-        extra: ByteArray = ByteArray(0)
+        extra: ByteArray = ByteArray(0),
     ) {
         val nameBytes = name.toByteArray(StandardCharsets.UTF_8)
         writeIntLittleEndian(LOCAL_FILE_HEADER_SIGNATURE)
@@ -427,7 +423,7 @@ class SeekableZipReaderTest {
         val payload: ByteArray,
         val compressionMethod: Int = ZipEntry.STORED,
         val flags: Int = UTF8_FLAG,
-        val crcOverride: Long? = null
+        val crcOverride: Long? = null,
     )
 
     private class TrackingInflater : Inflater(true) {

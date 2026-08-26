@@ -9,7 +9,6 @@ import com.android.apksig.util.DataSource
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
-import timber.log.Timber
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -18,13 +17,14 @@ import java.nio.channels.SeekableByteChannel
 import java.security.cert.X509Certificate
 import java.util.UUID
 import kotlin.math.min
+import timber.log.Timber
 
 /**
  * APK signature analyzer.
  */
 class PendingApkSignatureAnalyzer(
     private val certificateFormatter: CertificateFormatter,
-    private val lightweightApkSignatureReader: LightweightApkSignatureReader
+    private val lightweightApkSignatureReader: LightweightApkSignatureReader,
 ) {
     /**
      * apksig is the source of truth for pending APK signer certificates.
@@ -32,7 +32,9 @@ class PendingApkSignatureAnalyzer(
     fun analyze(apkPath: String): AppSignatureInfo {
         val startedAt = System.nanoTime()
         return analyze(File(apkPath), apkPath).also {
-            Timber.d("Pending APK signature analysis finished: route=file, elapsedMs=${startedAt.elapsedMillis()}, source=$apkPath")
+            Timber.d(
+                "Pending APK signature analysis finished: route=file, elapsedMs=${startedAt.elapsedMillis()}, source=$apkPath",
+            )
         }
     }
 
@@ -54,19 +56,29 @@ class PendingApkSignatureAnalyzer(
                     null
                 }
             }
+
             is DataEntity.FileEntity -> analyze(File(data.path), data.path)
+
             else -> analyzeStream(data, cacheDirectory)
         }.also {
             Timber.d(
                 "Pending APK signature analysis finished: route=$route, " +
-                        "elapsedMs=${startedAt.elapsedMillis()}, source=$data"
+                    "elapsedMs=${startedAt.elapsedMillis()}, source=$data",
             )
         }
     }
 
-    private fun analyze(file: File, displayName: String): AppSignatureInfo {
-        return verify(displayName) {
-            ApkVerifier.Builder(file)
+    private fun analyze(file: File, displayName: String): AppSignatureInfo = verify(displayName) {
+        ApkVerifier.Builder(file)
+            .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
+            .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
+            .build()
+            .verify()
+    }
+
+    private fun analyze(data: DataEntity.FileDescriptorEntity): AppSignatureInfo = data.openChannel().use { channel ->
+        verify(data.path) {
+            ApkVerifier.Builder(SeekableChannelDataSource(channel))
                 .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
                 .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
                 .build()
@@ -74,49 +86,29 @@ class PendingApkSignatureAnalyzer(
         }
     }
 
-    private fun analyze(data: DataEntity.FileDescriptorEntity): AppSignatureInfo {
-        return data.openChannel().use { channel ->
-            verify(data.path) {
-                ApkVerifier.Builder(SeekableChannelDataSource(channel))
-                    .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
-                    .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
-                    .build()
-                    .verify()
-            }
+    private fun verify(displayName: String, operation: () -> ApkVerifier.Result): AppSignatureInfo = try {
+        val result = operation()
+        val certificates = result.signerCertificates.map { certificate ->
+            certificateFormatter.format(certificate)
         }
-    }
-
-    private fun verify(
-        displayName: String,
-        operation: () -> ApkVerifier.Result
-    ): AppSignatureInfo {
-        return try {
-            val result = operation()
-            val certificates = result.signerCertificates.map { certificate ->
+        AppSignatureInfo(
+            verified = result.isVerified,
+            signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
+            certificates = certificates,
+            signingCertificateHistory = result.signingCertificateLineageCertificates().map { certificate ->
                 certificateFormatter.format(certificate)
-            }
-            AppSignatureInfo(
-                verified = result.isVerified,
-                signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
-                certificates = certificates,
-                signingCertificateHistory = result.signingCertificateLineageCertificates().map { certificate ->
-                    certificateFormatter.format(certificate)
-                },
-                hasMultipleSigners = certificates.size > 1,
-                verifiedSchemes = result.verifiedSchemes(),
-                warnings = result.warnings.map { it.toString() },
-                errors = result.errors.map { it.toString() }
-            )
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to get signature hash from APK: $displayName")
-            failedSignatureInfo(e.message ?: e::class.java.simpleName)
-        }
+            },
+            hasMultipleSigners = certificates.size > 1,
+            verifiedSchemes = result.verifiedSchemes(),
+            warnings = result.warnings.map { it.toString() },
+            errors = result.errors.map { it.toString() },
+        )
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to get signature hash from APK: $displayName")
+        failedSignatureInfo(e.message ?: e::class.java.simpleName)
     }
 
-    private fun analyzeStream(
-        data: DataEntity,
-        cacheDirectory: String
-    ): AppSignatureInfo {
+    private fun analyzeStream(data: DataEntity, cacheDirectory: String): AppSignatureInfo {
         val tempFile = createSignatureTempFile(cacheDirectory)
         return try {
             val input = data.getInputStream()
@@ -129,13 +121,13 @@ class PendingApkSignatureAnalyzer(
             }
             Timber.d(
                 "Materialized APK for signature analysis: bytes=${tempFile.length()}, " +
-                        "elapsedMs=${materializeStartedAt.elapsedMillis()}, source=$data"
+                    "elapsedMs=${materializeStartedAt.elapsedMillis()}, source=$data",
             )
             val verificationStartedAt = System.nanoTime()
             analyze(tempFile, data.toString()).also {
                 Timber.d(
                     "Verified materialized APK signature: elapsedMs=${verificationStartedAt.elapsedMillis()}, " +
-                            "source=$data"
+                        "source=$data",
                 )
             }
         } catch (e: AnalyseException) {
@@ -153,32 +145,26 @@ class PendingApkSignatureAnalyzer(
         return File.createTempFile("sig_${UUID.randomUUID()}", ".apk", cacheDir)
     }
 
-    private fun failedSignatureInfo(message: String): AppSignatureInfo {
-        return AppSignatureInfo(
-            verified = false,
-            signerSha256Set = emptySet(),
-            certificates = emptyList(),
-            errors = listOf(message)
-        )
+    private fun failedSignatureInfo(message: String): AppSignatureInfo = AppSignatureInfo(
+        verified = false,
+        signerSha256Set = emptySet(),
+        certificates = emptyList(),
+        errors = listOf(message),
+    )
+
+    private fun ApkVerifier.Result.verifiedSchemes(): List<String> = buildList {
+        if (isVerifiedUsingV1Scheme) add("V1")
+        if (isVerifiedUsingV2Scheme) add("V2")
+        if (isVerifiedUsingV3Scheme) add("V3")
+        if (isVerifiedUsingV31Scheme) add("V3.1")
+        if (isVerifiedUsingV4Scheme) add("V4")
     }
 
-    private fun ApkVerifier.Result.verifiedSchemes(): List<String> {
-        return buildList {
-            if (isVerifiedUsingV1Scheme) add("V1")
-            if (isVerifiedUsingV2Scheme) add("V2")
-            if (isVerifiedUsingV3Scheme) add("V3")
-            if (isVerifiedUsingV31Scheme) add("V3.1")
-            if (isVerifiedUsingV4Scheme) add("V4")
-        }
-    }
-
-    private fun ApkVerifier.Result.signingCertificateLineageCertificates(): List<X509Certificate> {
-        return runCatching {
-            signingCertificateLineage?.certificatesInLineage.orEmpty()
-        }.getOrElse { error ->
-            Timber.w(error, "Failed to read APK signing certificate lineage")
-            emptyList()
-        }
+    private fun ApkVerifier.Result.signingCertificateLineageCertificates(): List<X509Certificate> = runCatching {
+        signingCertificateLineage?.certificatesInLineage.orEmpty()
+    }.getOrElse { error ->
+        Timber.w(error, "Failed to read APK signing certificate lineage")
+        emptyList()
     }
 
     private fun Long.elapsedMillis(): Long = (System.nanoTime() - this) / 1_000_000L
@@ -187,7 +173,7 @@ class PendingApkSignatureAnalyzer(
         private val channel: SeekableByteChannel,
         private val baseOffset: Long = 0L,
         private val dataSize: Long = channel.size(),
-        private val lock: Any = Any()
+        private val lock: Any = Any(),
     ) : DataSource {
         init {
             require(baseOffset >= 0L) { "baseOffset must be non-negative" }

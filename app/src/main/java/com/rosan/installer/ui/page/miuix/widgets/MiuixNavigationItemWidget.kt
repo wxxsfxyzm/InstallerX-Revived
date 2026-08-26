@@ -23,13 +23,13 @@ fun MiuixNavigationItemWidget(
     title: String,
     description: String,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     // Call the BaseWidget and pass the parameters accordingly.
     ArrowPreference(
         title = title,
         summary = description,
         insideMargin = insideMargin,
-        onClick = onClick
+        onClick = onClick,
     )
 }

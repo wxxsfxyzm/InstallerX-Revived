@@ -35,10 +35,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.TextButton
 
 @Composable
-fun InstallPreparePermissionContent(
-    viewModel: InstallerViewModel,
-    onBack: () -> Unit
-) {
+fun InstallPreparePermissionContent(viewModel: InstallerViewModel, onBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPackageName = uiState.currentPackageName
     val currentPackage = uiState.analysisResults.find { it.packageName == currentPackageName }
@@ -59,14 +56,14 @@ fun InstallPreparePermissionContent(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, fill = false)
                 .padding(vertical = 6.dp),
-            colors = miuixSheetCardColors()
+            colors = miuixSheetCardColors(),
         ) {
             LazyColumn {
                 items(permissionList) { permission ->
@@ -77,7 +74,7 @@ fun InstallPreparePermissionContent(
 
                     BasicComponent(
                         title = permissionLabel,
-                        summary = permission
+                        summary = permission,
                     )
                 }
             }
@@ -89,13 +86,13 @@ fun InstallPreparePermissionContent(
                 .navigationBarsPadding()
                 .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
                 onClick = onBack,
                 text = stringResource(R.string.back),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

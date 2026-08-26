@@ -15,36 +15,40 @@ internal sealed interface RemotePackageProbeResult {
 internal enum class StreamingUnsupportedReason {
     Platform,
     RangeSource,
-    StableIdentity
+    StableIdentity,
 }
 
 internal enum class RemotePackageAction {
     Stream,
     FullDownload,
-    Reject
+    Reject,
 }
 
-internal fun NetworkSourceMode.streamingAnalysisMaterializationPolicy(): AnalysisMaterializationPolicy =
-    when (this) {
-        NetworkSourceMode.Smart -> AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
-        NetworkSourceMode.LowStorage -> AnalysisMaterializationPolicy.DISALLOW
-        NetworkSourceMode.Cache -> error("Cache mode does not create remote sources")
+internal fun NetworkSourceMode.streamingAnalysisMaterializationPolicy(): AnalysisMaterializationPolicy = when (this) {
+    NetworkSourceMode.Smart -> AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
+    NetworkSourceMode.LowStorage -> AnalysisMaterializationPolicy.DISALLOW
+    NetworkSourceMode.Cache -> error("Cache mode does not create remote sources")
+}
+
+internal fun NetworkSourceMode.actionFor(result: RemotePackageProbeResult): RemotePackageAction = when (this) {
+    NetworkSourceMode.Cache -> RemotePackageAction.FullDownload
+
+    NetworkSourceMode.Smart -> when (result) {
+        RemotePackageProbeResult.SingleApk -> RemotePackageAction.Stream
+
+        RemotePackageProbeResult.PackageArchive,
+        is RemotePackageProbeResult.StreamingUnsupported,
+        is RemotePackageProbeResult.ProbeFailed,
+        -> RemotePackageAction.FullDownload
     }
 
-internal fun NetworkSourceMode.actionFor(result: RemotePackageProbeResult): RemotePackageAction =
-    when (this) {
-        NetworkSourceMode.Cache -> RemotePackageAction.FullDownload
-        NetworkSourceMode.Smart -> when (result) {
-            RemotePackageProbeResult.SingleApk -> RemotePackageAction.Stream
-            RemotePackageProbeResult.PackageArchive,
-            is RemotePackageProbeResult.StreamingUnsupported,
-            is RemotePackageProbeResult.ProbeFailed -> RemotePackageAction.FullDownload
-        }
+    NetworkSourceMode.LowStorage -> when (result) {
+        RemotePackageProbeResult.SingleApk -> RemotePackageAction.Stream
 
-        NetworkSourceMode.LowStorage -> when (result) {
-            RemotePackageProbeResult.SingleApk -> RemotePackageAction.Stream
-            RemotePackageProbeResult.PackageArchive -> RemotePackageAction.FullDownload
-            is RemotePackageProbeResult.StreamingUnsupported,
-            is RemotePackageProbeResult.ProbeFailed -> RemotePackageAction.Reject
-        }
+        RemotePackageProbeResult.PackageArchive -> RemotePackageAction.FullDownload
+
+        is RemotePackageProbeResult.StreamingUnsupported,
+        is RemotePackageProbeResult.ProbeFailed,
+        -> RemotePackageAction.Reject
     }
+}

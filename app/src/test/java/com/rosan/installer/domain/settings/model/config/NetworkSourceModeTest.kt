@@ -14,15 +14,15 @@ class NetworkSourceModeTest {
             NetworkSourceMode.Cache.shouldTryRemoteSource(
                 supportsRange = true,
                 contentLength = 100L,
-                platformSupported = true
-            )
+                platformSupported = true,
+            ),
         )
         assertFalse(
             NetworkSourceMode.Cache.requiresRemoteSource(
                 supportsRange = false,
                 contentLength = -1L,
-                platformSupported = true
-            )
+                platformSupported = true,
+            ),
         )
     }
 

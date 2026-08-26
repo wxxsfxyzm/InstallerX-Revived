@@ -11,14 +11,8 @@ val ktlintVersion = versions.findLibrary("ktlint-cli").get().get().versionConstr
 val composeKtlintRules = versions.findLibrary("compose-ktlint-rules").get().get().let {
     "${it.module.group}:${it.module.name}:${it.versionConstraint.requiredVersion}"
 }
-val ratchetBase =
-    providers.gradleProperty("spotlessRatchetFrom")
-        .orElse(providers.environmentVariable("GITHUB_BASE_REF").map { "origin/$it" })
-        .orElse("origin/dev")
-
 spotless {
     lineEndings = LineEnding.UNIX
-    ratchetFrom(ratchetBase.get())
 
     kotlin {
         target("**/src/**/*.kt")

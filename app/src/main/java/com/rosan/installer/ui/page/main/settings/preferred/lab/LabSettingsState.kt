@@ -12,5 +12,5 @@ data class LabSettingsState(
     val labAllowInstallWithoutUserAction: Boolean = false,
     val labRespectPlatformInstallPolicy: Boolean = false,
     val tryMultipleAuthorizersOnInstall: Boolean = false,
-    val smartAuthorizerCandidates: List<SmartAuthorizerCandidate> = emptyList()
+    val smartAuthorizerCandidates: List<SmartAuthorizerCandidate> = emptyList(),
 )

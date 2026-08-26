@@ -27,5 +27,5 @@ val appModules = listOf(
     updateModule,
     deviceModule,
     initModule,
-    privilegedModule
+    privilegedModule,
 )

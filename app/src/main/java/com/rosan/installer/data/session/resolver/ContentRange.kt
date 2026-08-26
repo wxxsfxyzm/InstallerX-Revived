@@ -4,19 +4,14 @@ package com.rosan.installer.data.session.resolver
 
 import java.io.IOException
 
-internal data class ContentRange(
-    val start: Long,
-    val end: Long,
-    val total: Long
-) {
-    fun matches(start: Long, end: Long, total: Long = this.total): Boolean =
-        this.start == start && this.end == end && this.total == total
+internal data class ContentRange(val start: Long, val end: Long, val total: Long) {
+    fun matches(start: Long, end: Long, total: Long = this.total): Boolean = this.start == start && this.end == end && this.total == total
 
     fun requireMatches(start: Long, end: Long, total: Long) {
         if (!matches(start, end, total)) {
             throw IOException(
                 "Unexpected Content-Range: expected bytes $start-$end/$total, " +
-                        "actual=bytes ${this.start}-${this.end}/${this.total}"
+                    "actual=bytes ${this.start}-${this.end}/${this.total}",
             )
         }
     }

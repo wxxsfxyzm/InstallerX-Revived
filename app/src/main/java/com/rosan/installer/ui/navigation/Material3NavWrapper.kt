@@ -25,16 +25,10 @@ import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
 
 @Immutable
-data class NavigationTab(
-    val icon: ImageVector,
-    val label: String
-)
+data class NavigationTab(val icon: ImageVector, val label: String)
 
 @Composable
-fun Material3MainPageWrapper(
-    uiState: ThemeState,
-    sharedViewModel: SettingsSharedViewModel
-) {
+fun Material3MainPageWrapper(uiState: ThemeState, sharedViewModel: SettingsSharedViewModel) {
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
     val useFloatingBottomBar = uiState.useAppleFloatingBar
@@ -53,26 +47,26 @@ fun Material3MainPageWrapper(
         listOf(
             NavigationTab(
                 icon = homeIcon,
-                label = homeLabel
+                label = homeLabel,
             ),
             NavigationTab(
                 icon = AppIcons.RoomPreferences,
-                label = configLabel
+                label = configLabel,
             ),
             NavigationTab(
                 icon = AppIcons.History,
-                label = historyLabel
+                label = historyLabel,
             ),
             NavigationTab(
                 icon = AppIcons.SettingsSuggest,
-                label = preferredLabel
-            )
+                label = preferredLabel,
+            ),
         )
     }
 
     val pagerState = rememberPagerState(
         initialPage = sharedState.lastMainPageIndex,
-        pageCount = { tabs.size }
+        pageCount = { tabs.size },
     )
     val mainPagerState = rememberMainPagerState(pagerState)
     val currentPage = mainPagerState.pagerState.currentPage
@@ -102,7 +96,7 @@ fun Material3MainPageWrapper(
             tabs = tabs,
             useBlur = useBlur,
             useFloatingBottomBar = useFloatingBottomBar,
-            backdrop = backdrop
+            backdrop = backdrop,
         )
     } else {
         Material3SettingsCompactLayout(
@@ -112,7 +106,7 @@ fun Material3MainPageWrapper(
             useBlur = useBlur,
             useFloatingBottomBar = useFloatingBottomBar,
             backdrop = backdrop,
-            isMedium = isMedium
+            isMedium = isMedium,
         )
     }
 }

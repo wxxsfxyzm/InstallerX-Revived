@@ -7,35 +7,21 @@ import com.rosan.installer.domain.settings.model.backup.BackupRestorePreview
 import com.rosan.installer.domain.settings.model.backup.BackupValidationIssue
 
 sealed interface PreferredViewEvent {
-    data class ShowDefaultInstallerResult(
-        @param:StringRes val messageResId: Int
-    ) : PreferredViewEvent
+    data class ShowDefaultInstallerResult(@param:StringRes val messageResId: Int) : PreferredViewEvent
 
     data class ShowDefaultInstallerErrorDetail(
         @param:StringRes val titleResId: Int,
         val exception: Throwable,
-        val retryAction: PreferredViewAction
+        val retryAction: PreferredViewAction,
     ) : PreferredViewEvent
 
-    data class LaunchBackupExport(
-        val fileName: String,
-        val content: String
-    ) : PreferredViewEvent
+    data class LaunchBackupExport(val fileName: String, val content: String) : PreferredViewEvent
 
-    data class ShowBackupMessage(
-        @param:StringRes val messageResId: Int
-    ) : PreferredViewEvent
+    data class ShowBackupMessage(@param:StringRes val messageResId: Int) : PreferredViewEvent
 
-    data class ShowBackupError(
-        @param:StringRes val titleResId: Int,
-        val exception: Throwable
-    ) : PreferredViewEvent
+    data class ShowBackupError(@param:StringRes val titleResId: Int, val exception: Throwable) : PreferredViewEvent
 
-    data class ShowBackupRestorePreview(
-        val preview: BackupRestorePreview
-    ) : PreferredViewEvent
+    data class ShowBackupRestorePreview(val preview: BackupRestorePreview) : PreferredViewEvent
 
-    data class ShowBackupValidationError(
-        val issues: List<BackupValidationIssue>
-    ) : PreferredViewEvent
+    data class ShowBackupValidationError(val issues: List<BackupValidationIssue>) : PreferredViewEvent
 }

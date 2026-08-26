@@ -14,25 +14,25 @@ import kotlinx.coroutines.launch
 
 class HistoryViewModel(
     private val repository: OperationHistoryRepository,
-    private val capabilityProvider: DeviceCapabilityProvider
+    private val capabilityProvider: DeviceCapabilityProvider,
 ) : ViewModel() {
     val state: StateFlow<HistoryViewState> = combine(
         repository.flowAll(),
         repository.isEnabled,
-        repository.areIndicatorsEnabled
+        repository.areIndicatorsEnabled,
     ) { records, isHistoryEnabled, areIndicatorsEnabled ->
         HistoryViewState(
             records = records,
             isLoading = false,
             isSystemApp = capabilityProvider.isSystemApp,
             isHistoryEnabled = isHistoryEnabled,
-            areIndicatorsEnabled = areIndicatorsEnabled
+            areIndicatorsEnabled = areIndicatorsEnabled,
         )
     }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = HistoryViewState(isLoading = true)
+            initialValue = HistoryViewState(isLoading = true),
         )
 
     fun dispatch(action: HistoryViewAction) {
@@ -44,7 +44,7 @@ class HistoryViewModel(
             is HistoryViewAction.SetHistoryEnabled -> viewModelScope.launch {
                 repository.setEnabled(
                     enabled = action.enabled,
-                    clearHistory = action.clearHistory
+                    clearHistory = action.clearHistory,
                 )
             }
 

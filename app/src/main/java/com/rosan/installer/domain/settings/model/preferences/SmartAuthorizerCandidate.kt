@@ -4,28 +4,21 @@ package com.rosan.installer.domain.settings.model.preferences
 
 import com.rosan.installer.domain.settings.model.config.Authorizer
 
-data class SmartAuthorizerCandidate(
-    val authorizer: Authorizer,
-    val enabled: Boolean
-)
+data class SmartAuthorizerCandidate(val authorizer: Authorizer, val enabled: Boolean)
 
 object SmartAuthorizerPreferences {
     private val supportedAuthorizers = listOf(
         Authorizer.Root,
         Authorizer.Shizuku,
         Authorizer.Dhizuku,
-        Authorizer.None
+        Authorizer.None,
     )
 
-    fun defaultCandidates(isSessionInstallSupported: Boolean): List<SmartAuthorizerCandidate> =
-        supportedAuthorizers
-            .filter { it != Authorizer.None || isSessionInstallSupported }
-            .map { SmartAuthorizerCandidate(authorizer = it, enabled = true) }
+    fun defaultCandidates(isSessionInstallSupported: Boolean): List<SmartAuthorizerCandidate> = supportedAuthorizers
+        .filter { it != Authorizer.None || isSessionInstallSupported }
+        .map { SmartAuthorizerCandidate(authorizer = it, enabled = true) }
 
-    fun decode(
-        value: String,
-        isSessionInstallSupported: Boolean
-    ): List<SmartAuthorizerCandidate> {
+    fun decode(value: String, isSessionInstallSupported: Boolean): List<SmartAuthorizerCandidate> {
         if (value.isBlank()) return defaultCandidates(isSessionInstallSupported)
 
         val parsed = value
@@ -37,7 +30,7 @@ object SmartAuthorizerPreferences {
 
                 SmartAuthorizerCandidate(
                     authorizer = authorizer,
-                    enabled = parts.getOrNull(1) != "0"
+                    enabled = parts.getOrNull(1) != "0",
                 )
             }
             .distinctBy { it.authorizer }
@@ -51,11 +44,10 @@ object SmartAuthorizerPreferences {
         return parsed + missing
     }
 
-    fun encode(candidates: List<SmartAuthorizerCandidate>): String =
-        candidates
-            .filter { it.authorizer in supportedAuthorizers }
-            .distinctBy { it.authorizer }
-            .joinToString(",") { candidate ->
-                "${candidate.authorizer.value}:${if (candidate.enabled) "1" else "0"}"
-            }
+    fun encode(candidates: List<SmartAuthorizerCandidate>): String = candidates
+        .filter { it.authorizer in supportedAuthorizers }
+        .distinctBy { it.authorizer }
+        .joinToString(",") { candidate ->
+            "${candidate.authorizer.value}:${if (candidate.enabled) "1" else "0"}"
+        }
 }

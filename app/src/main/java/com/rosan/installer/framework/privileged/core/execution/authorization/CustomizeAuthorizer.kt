@@ -9,7 +9,7 @@ fun requireCustomizeAuthorizer(customizeAuthorizer: String): String {
     if (customizeAuthorizer.isBlank()) {
         throw PrivilegedException(
             errorType = PrivilegedErrorType.CUSTOM_AUTHORIZER_EMPTY,
-            message = "Custom authorizer is empty."
+            message = "Custom authorizer is empty.",
         )
     }
     return customizeAuthorizer

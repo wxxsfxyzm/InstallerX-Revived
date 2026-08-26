@@ -10,20 +10,20 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import java.util.Properties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
-import java.util.Properties
 
 class ModuleStrategy internal constructor(
     private val singleApkStrategy: SingleApkStrategy,
-    private val multiApkZipStrategy: MultiApkZipStrategy
+    private val multiApkZipStrategy: MultiApkZipStrategy,
 ) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
         zipFile: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> = coroutineScope {
         require(data is DataEntity.FileEntity)
         val archive = requireNotNull(zipFile) { "Module analysis requires a unified ZIP file" }
@@ -57,7 +57,7 @@ class ModuleStrategy internal constructor(
     private fun parseModuleProp(
         data: DataEntity.FileEntity,
         zipFile: UnifiedZipFile,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> {
         try {
             Timber.d("Module: Attempting to find module.prop")
@@ -139,8 +139,8 @@ class ModuleStrategy internal constructor(
                         description = properties.getProperty("description", ""),
                         data = installData,
                         icon = iconDrawable,
-                        sourceType = extra.dataType
-                    )
+                        sourceType = extra.dataType,
+                    ),
                 )
             }
         } catch (e: AnalyseException) {

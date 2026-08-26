@@ -7,9 +7,8 @@ import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 
 @Composable
-internal fun EditViewState.dhizukuAwareDescription(defaultDescription: String): String =
-    if (isDhizukuAuthorizerActive) {
-        stringResource(R.string.dhizuku_unsupported_desc)
-    } else {
-        defaultDescription
-    }
+internal fun EditViewState.dhizukuAwareDescription(defaultDescription: String): String = if (isDhizukuAuthorizerActive) {
+    stringResource(R.string.dhizuku_unsupported_desc)
+} else {
+    defaultDescription
+}

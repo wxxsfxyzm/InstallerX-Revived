@@ -2,19 +2,15 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.resolver
 
-import okhttp3.HttpUrl
-import okhttp3.Request
-import okhttp3.Response
 import java.io.EOFException
 import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
+import okhttp3.HttpUrl
+import okhttp3.Request
+import okhttp3.Response
 
-internal data class RemoteSourceIdentity(
-    val url: HttpUrl,
-    val contentLength: Long,
-    val validator: RemoteSourceValidator
-) {
+internal data class RemoteSourceIdentity(val url: HttpUrl, val contentLength: Long, val validator: RemoteSourceValidator) {
     fun newRequestBuilder(): Request.Builder = Request.Builder()
         .url(url)
         .header(validator.requestHeaderName, validator.value)
@@ -29,8 +25,8 @@ internal data class RemoteSourceIdentity(
         if (actualValidator != validator.value) {
             throw IOException(
                 "Remote source changed after preflight: " +
-                        "expected ${validator.responseHeaderName}=${validator.value}, " +
-                        "actual=$actualValidator"
+                    "expected ${validator.responseHeaderName}=${validator.value}, " +
+                    "actual=$actualValidator",
             )
         }
     }
@@ -44,31 +40,23 @@ internal data class RemoteSourceIdentity(
     }
 }
 
-internal sealed class RemoteSourceValidator(
-    val requestHeaderName: String,
-    val responseHeaderName: String,
-    val value: String
-) {
-    class StrongEtag(value: String) : RemoteSourceValidator(
-        requestHeaderName = "If-Match",
-        responseHeaderName = "ETag",
-        value = value
-    )
+internal sealed class RemoteSourceValidator(val requestHeaderName: String, val responseHeaderName: String, val value: String) {
+    class StrongEtag(value: String) :
+        RemoteSourceValidator(
+            requestHeaderName = "If-Match",
+            responseHeaderName = "ETag",
+            value = value,
+        )
 
     companion object {
-        fun fromResponse(response: Response): RemoteSourceValidator? {
-            return response.header("ETag")
-                ?.trim()
-                ?.takeIf { it.isNotEmpty() && !it.startsWith("W/", ignoreCase = true) }
-                ?.let(::StrongEtag)
-        }
+        fun fromResponse(response: Response): RemoteSourceValidator? = response.header("ETag")
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() && !it.startsWith("W/", ignoreCase = true) }
+            ?.let(::StrongEtag)
     }
 }
 
-internal class ExpectedLengthInputStream(
-    input: InputStream,
-    private val expectedLength: Long
-) : FilterInputStream(input) {
+internal class ExpectedLengthInputStream(input: InputStream, private val expectedLength: Long) : FilterInputStream(input) {
     private var bytesRead = 0L
     private var endVerified = false
 
@@ -107,7 +95,7 @@ internal class ExpectedLengthInputStream(
         if (endVerified) return
         if (`in`.read() >= 0) {
             throw IOException(
-                "Remote source exceeded expected length: expected=$expectedLength"
+                "Remote source exceeded expected length: expected=$expectedLength",
             )
         }
         endVerified = true
@@ -115,6 +103,6 @@ internal class ExpectedLengthInputStream(
 
     private fun incompleteSource() = EOFException(
         "Remote source ended before expected length: " +
-                "expected=$expectedLength, actual=$bytesRead"
+            "expected=$expectedLength, actual=$bytesRead",
     )
 }

@@ -10,10 +10,10 @@ import com.rosan.installer.domain.privileged.exception.PrivilegedException
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
-import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_ROOT
-import com.rosan.installer.framework.privileged.core.infrastructure.process.SU_ARGS
 import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
 import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_ROOT
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SU_ARGS
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,42 +34,41 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.longOrNull
 import timber.log.Timber
 
-class InstalledModuleInfoProviderImpl(
-    private val capabilityProvider: DeviceCapabilityProvider,
-    private val json: Json
-) : InstalledModuleInfoProvider {
-    override suspend fun list(config: ConfigModel, rootMode: RootMode): List<InstalledModuleInfo> =
-        withContext(Dispatchers.IO) {
-            val command = moduleListCommand(rootMode) ?: return@withContext emptyList()
+class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapabilityProvider, private val json: Json) : InstalledModuleInfoProvider {
+    override suspend fun list(config: ConfigModel, rootMode: RootMode): List<InstalledModuleInfo> = withContext(Dispatchers.IO) {
+        val command = moduleListCommand(rootMode) ?: return@withContext emptyList()
 
-            val output = try {
-                when (config.authorizer) {
-                    Authorizer.Root,
-                    Authorizer.Customize -> executeLocal(config, command)
+        val output = try {
+            when (config.authorizer) {
+                Authorizer.Root,
+                Authorizer.Customize,
+                -> executeLocal(config, command)
 
-                    Authorizer.Shizuku -> executeShizukuRoot(config, command)
+                Authorizer.Shizuku -> executeShizukuRoot(config, command)
 
-                    else -> null
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: PrivilegedException) {
-                throw e
-            } catch (e: Exception) {
-                Timber.d(e, "Module list query failed")
-                null
+                else -> null
             }
-
-            output?.let { parseModuleList(it) }.orEmpty()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: PrivilegedException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.d(e, "Module list query failed")
+            null
         }
 
-    private fun moduleListCommand(rootMode: RootMode): Array<String>? =
-        when (rootMode) {
-            RootMode.KernelSU -> arrayOf("ksud", "module", "list")
-            RootMode.APatch -> arrayOf("apd", "module", "list")
-            RootMode.Magisk,
-            RootMode.None -> null
-        }
+        output?.let { parseModuleList(it) }.orEmpty()
+    }
+
+    private fun moduleListCommand(rootMode: RootMode): Array<String>? = when (rootMode) {
+        RootMode.KernelSU -> arrayOf("ksud", "module", "list")
+
+        RootMode.APatch -> arrayOf("apd", "module", "list")
+
+        RootMode.Magisk,
+        RootMode.None,
+        -> null
+    }
 
     private fun executeLocal(config: ConfigModel, command: Array<String>): String? {
         val shellParts = if (config.authorizer == Authorizer.Customize) {
@@ -98,23 +97,22 @@ class InstalledModuleInfoProviderImpl(
         var result: String? = null
         useUserService(
             isSystemApp = capabilityProvider.isSystemApp,
-            authorizer = config.authorizer
+            authorizer = config.authorizer,
         ) { userService ->
             result = userService.privileged.execArr(command)
         }
         return result
     }
 
-    private fun parseModuleList(raw: String): List<InstalledModuleInfo> =
-        try {
-            json.decodeFromString<List<InstalledModuleInfoDto>>(raw)
-                .mapNotNull { it.toDomain() }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Timber.d(e, "Failed to parse module list")
-            emptyList()
-        }
+    private fun parseModuleList(raw: String): List<InstalledModuleInfo> = try {
+        json.decodeFromString<List<InstalledModuleInfoDto>>(raw)
+            .mapNotNull { it.toDomain() }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Timber.d(e, "Failed to parse module list")
+        emptyList()
+    }
 
     @Serializable
     private data class InstalledModuleInfoDto(
@@ -137,7 +135,7 @@ class InstalledModuleInfoProviderImpl(
         val action: Boolean? = null,
         @Serializable(with = NullableBooleanStringSerializer::class)
         val mount: Boolean? = null,
-        val updateJson: String? = null
+        val updateJson: String? = null,
     ) {
         fun toDomain(): InstalledModuleInfo? {
             val moduleId = id?.takeIf { it.isNotBlank() } ?: return null
@@ -154,7 +152,7 @@ class InstalledModuleInfoProviderImpl(
                 web = web,
                 action = action,
                 mount = mount,
-                updateJson = updateJson
+                updateJson = updateJson,
             )
         }
     }
@@ -192,12 +190,10 @@ class InstalledModuleInfoProviderImpl(
             if (value == null) encoder.encodeNull() else encoder.encodeBoolean(value)
         }
     }
-
 }
 
-private fun Decoder.jsonPrimitiveOrNull(): JsonPrimitive? =
-    try {
-        (this as? JsonDecoder)?.decodeJsonElement() as? JsonPrimitive
-    } catch (_: SerializationException) {
-        null
-    }
+private fun Decoder.jsonPrimitiveOrNull(): JsonPrimitive? = try {
+    (this as? JsonDecoder)?.decodeJsonElement() as? JsonPrimitive
+} catch (_: SerializationException) {
+    null
+}

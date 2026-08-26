@@ -8,9 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class AppInfoProviderImpl(
-    private val context: Context
-) : AppInfoProvider {
+class AppInfoProviderImpl(private val context: Context) : AppInfoProvider {
 
     override suspend fun getAppLabel(packageName: String): String? = withContext(Dispatchers.IO) {
         try {

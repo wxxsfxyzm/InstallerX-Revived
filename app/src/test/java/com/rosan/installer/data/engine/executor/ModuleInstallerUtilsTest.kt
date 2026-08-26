@@ -51,7 +51,7 @@ class ModuleInstallerUtilsTest {
             channelFactory = {
                 FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
             },
-            descriptorFactory = { error("The path validation test must not request an fd") }
+            descriptorFactory = { error("The path validation test must not request an fd") },
         )
 
         assertFailsWith<ModuleInstallException> {
@@ -59,14 +59,13 @@ class ModuleInstallerUtilsTest {
         }
     }
 
-    private fun module(data: DataEntity): AppEntity.ModuleEntity =
-        AppEntity.ModuleEntity(
-            id = "test",
-            name = "Test",
-            version = "1",
-            versionCode = 1,
-            author = "Tester",
-            description = "",
-            data = data
-        )
+    private fun module(data: DataEntity): AppEntity.ModuleEntity = AppEntity.ModuleEntity(
+        id = "test",
+        name = "Test",
+        version = "1",
+        versionCode = 1,
+        author = "Tester",
+        description = "",
+        data = data,
+    )
 }

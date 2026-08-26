@@ -18,18 +18,20 @@ import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 fun analysingDialog() = DialogParams(
     icon = DialogInnerParams(
         DialogParamsType.IconWorking.id,
-        workingIcon
-    ), title = DialogInnerParams(
+        workingIcon,
+    ),
+    title = DialogInnerParams(
         DialogParamsType.InstallerAnalysing.id,
     ) {
         Text(stringResource(R.string.installer_analysing))
-    }, buttons = dialogButtons(
-        DialogParamsType.ButtonsCancel.id
+    },
+    buttons = dialogButtons(
+        DialogParamsType.ButtonsCancel.id,
     ) {
         // disable the cancel button
         emptyList()
         /*listOf(DialogButton(stringResource(R.string.cancel)) {
             viewModel.dispatch(DialogViewAction.Close)
         })*/
-    }
+    },
 )

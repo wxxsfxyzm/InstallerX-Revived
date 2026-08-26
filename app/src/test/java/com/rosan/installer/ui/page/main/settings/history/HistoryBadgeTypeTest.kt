@@ -19,12 +19,12 @@ class HistoryBadgeTypeTest {
         val history = history(
             packageName = "com.rosan.installer",
             operationType = OperationType.INSTALL,
-            versionChange = VersionChange.DOWNGRADE
+            versionChange = VersionChange.DOWNGRADE,
         )
 
         assertEquals(
             HistoryBadgeType.SELF_UPDATE,
-            history.historyBadgeType(selfPackageName = "com.rosan.installer")
+            history.historyBadgeType(selfPackageName = "com.rosan.installer"),
         )
     }
 
@@ -32,15 +32,15 @@ class HistoryBadgeTypeTest {
     fun `other package update and downgrade use version change badge`() {
         assertEquals(
             HistoryBadgeType.FRESH_INSTALL,
-            history(versionChange = VersionChange.FRESH_INSTALL).historyBadgeType("com.rosan.installer")
+            history(versionChange = VersionChange.FRESH_INSTALL).historyBadgeType("com.rosan.installer"),
         )
         assertEquals(
             HistoryBadgeType.UPDATE,
-            history(versionChange = VersionChange.UPDATE).historyBadgeType("com.rosan.installer")
+            history(versionChange = VersionChange.UPDATE).historyBadgeType("com.rosan.installer"),
         )
         assertEquals(
             HistoryBadgeType.DOWNGRADE,
-            history(versionChange = VersionChange.DOWNGRADE).historyBadgeType("com.rosan.installer")
+            history(versionChange = VersionChange.DOWNGRADE).historyBadgeType("com.rosan.installer"),
         )
     }
 
@@ -50,15 +50,15 @@ class HistoryBadgeTypeTest {
             history(
                 packageName = "com.rosan.installer",
                 operationType = OperationType.UNINSTALL,
-                versionChange = VersionChange.DOWNGRADE
-            ).historyBadgeType("com.rosan.installer")
+                versionChange = VersionChange.DOWNGRADE,
+            ).historyBadgeType("com.rosan.installer"),
         )
     }
 
     private fun history(
         packageName: String = "com.example.app",
         operationType: OperationType = OperationType.INSTALL,
-        versionChange: VersionChange
+        versionChange: VersionChange,
     ) = OperationHistoryModel(
         operationType = operationType,
         status = OperationStatus.SUCCESS,
@@ -66,6 +66,6 @@ class HistoryBadgeTypeTest {
         versionChange = versionChange,
         installMethod = InstallMethod.PACKAGE_MANAGER,
         authorizer = Authorizer.Root,
-        installMode = InstallMode.Dialog
+        installMode = InstallMode.Dialog,
     )
 }

@@ -30,12 +30,12 @@ class AnalyserRepositoryImplTest {
                 verified = false,
                 signerSha256Set = setOf("declared-signer"),
                 certificates = emptyList(),
-                verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY
-            )
+                verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY,
+            ),
         )
         val enabled = AnalyseExtraEntity(
             cacheDirectory = "cache",
-            checkAppSignature = true
+            checkAppSignature = true,
         )
         val disabled = enabled.copy(checkAppSignature = false)
 

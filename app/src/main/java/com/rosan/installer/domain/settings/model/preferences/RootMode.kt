@@ -4,7 +4,8 @@ enum class RootMode {
     Magisk,
     KernelSU,
     APatch,
-    None;
+    None,
+    ;
 
     companion object {
         /**

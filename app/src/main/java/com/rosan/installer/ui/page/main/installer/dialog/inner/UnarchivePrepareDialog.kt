@@ -33,9 +33,9 @@ fun unarchiveReadyDialog(viewModel: InstallerViewModel): DialogParams {
                 },
                 DialogButton(stringResource(R.string.cancel)) {
                     viewModel.dispatch(InstallerViewAction.Close)
-                }
+                },
             )
-        }
+        },
     )
 }
 
@@ -44,5 +44,5 @@ fun unarchivingDialog(): DialogParams = DialogParams(
     icon = DialogInnerParams(DialogParamsType.IconWorking.id, workingIcon),
     title = DialogInnerParams(DialogParamsType.InstallerUnarchiving.id) {
         Text(stringResource(R.string.unarchive_restoring))
-    }
+    },
 )

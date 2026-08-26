@@ -62,7 +62,7 @@ fun ProgressButton(
     insideMargin: PaddingValues = ButtonDefaults.InsideMargin,
     interactionSource: MutableInteractionSource? = null,
     indication: Indication? = LocalIndication.current,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     // Coerce progress value to be between 0.0 and 1.0
     val progressCoerced = progress.coerceIn(0f, 1f)
@@ -91,7 +91,7 @@ fun ProgressButton(
                     if (progressCoerced > 0f) {
                         drawRect(
                             color = progressColor,
-                            size = Size(width = size.width * progressCoerced, height = size.height)
+                            size = Size(width = size.width * progressCoerced, height = size.height),
                         )
                     }
                     drawContent()
@@ -99,7 +99,7 @@ fun ProgressButton(
                 .padding(insideMargin),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            content = content
+            content = content,
         )
     }
 }
@@ -115,18 +115,23 @@ object ProgressButtonDefaults {
         contentColor: Color = MiuixTheme.colorScheme.onPrimary,
         disabledTrackColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
         disabledProgressColor: Color = MiuixTheme.colorScheme.disabledPrimaryButton,
-        disabledContentColor: Color = MiuixTheme.colorScheme.disabledOnPrimaryButton
+        disabledContentColor: Color = MiuixTheme.colorScheme.disabledOnPrimaryButton,
     ): ProgressButtonColors = remember(
-        trackColor, progressColor, contentColor,
-        disabledTrackColor, disabledProgressColor, disabledContentColor
-    ) { // Sync with the standard Button: Use remember for caching instances
+        trackColor,
+        progressColor,
+        contentColor,
+        disabledTrackColor,
+        disabledProgressColor,
+        disabledContentColor,
+    ) {
+        // Sync with the standard Button: Use remember for caching instances
         ProgressButtonColors(
             trackColor = trackColor,
             progressColor = progressColor,
             contentColor = contentColor,
             disabledTrackColor = disabledTrackColor,
             disabledProgressColor = disabledProgressColor,
-            disabledContentColor = disabledContentColor
+            disabledContentColor = disabledContentColor,
         )
     }
 }
@@ -139,5 +144,5 @@ data class ProgressButtonColors(
     val contentColor: Color,
     val disabledTrackColor: Color,
     val disabledProgressColor: Color,
-    val disabledContentColor: Color
+    val disabledContentColor: Color,
 )

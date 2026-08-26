@@ -26,18 +26,18 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @Composable
 fun NonInstallFailedContent(
     error: Throwable,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         MiuixErrorTextBlock(
             error = error,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f, fill = false)
+                .weight(1f, fill = false),
         )
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -53,8 +53,8 @@ fun NonInstallFailedContent(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.textButtonColors(
                     color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
-                )
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
+                ),
             )
         }
     }

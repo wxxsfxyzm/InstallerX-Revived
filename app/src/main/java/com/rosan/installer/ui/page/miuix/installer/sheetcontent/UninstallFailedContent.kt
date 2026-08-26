@@ -31,7 +31,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 @Composable
 fun UninstallFailedContent(
     viewModel: InstallerViewModel,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentError = uiState.error
@@ -40,21 +40,21 @@ fun UninstallFailedContent(
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         AppInfoSlot(
             appInfo = AppInfoState(
                 icon = uiState.displayIcons[info.packageName],
                 label = info.appLabel ?: "Unknown App",
-                packageName = info.packageName
-            )
+                packageName = info.packageName,
+            ),
         )
         Spacer(modifier = Modifier.height(32.dp))
         MiuixErrorTextBlock(
             error = currentError,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f, fill = false)
+                .weight(1f, fill = false),
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -68,7 +68,7 @@ fun UninstallFailedContent(
                 text = stringResource(R.string.close),
                 colors = ButtonDefaults.textButtonColors(
                     color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )

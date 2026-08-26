@@ -29,10 +29,10 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
+import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
-import java.io.File
 
 class AppInstallerRepositoryImpl(
     private val context: Context,
@@ -41,12 +41,11 @@ class AppInstallerRepositoryImpl(
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
     private val postInstallTaskProvider: PostInstallTaskProvider,
     private val platformInstallPolicyChecker: PlatformInstallPolicyChecker,
-    private val selfUpdateRecoveryRepository: SelfUpdateRecoveryRepository
+    private val selfUpdateRecoveryRepository: SelfUpdateRecoveryRepository,
 ) : AppInstallerRepository {
-    override suspend fun resolveInstallerPackageName(config: ConfigModel): String? =
-        executeWithRepo(config) { repo ->
-            repo.resolveInstallerPackageName(config)
-        }
+    override suspend fun resolveInstallerPackageName(config: ConfigModel): String? = executeWithRepo(config) { repo ->
+        repo.resolveInstallerPackageName(config)
+    }
 
     override suspend fun doInstallWork(
         config: ConfigModel,
@@ -57,14 +56,16 @@ class AppInstallerRepositoryImpl(
         sharedUserIdBlacklist: List<String>,
         sharedUserIdExemption: List<String>,
         onProgress: suspend (InstallWriteProgress) -> Unit,
-        onPhaseChanged: suspend (InstallPhase) -> Unit
+        onPhaseChanged: suspend (InstallPhase) -> Unit,
     ) = executeWithRepo(config) { repo ->
         persistSelfUpdatePostInstallState(config, entities, metadata)
 
         val requestedRespectPlatformInstallPolicy =
             AppConfig.isRespectPlatformInstallPolicyAvailable &&
-                    (respectPlatformInstallPolicy ||
-                            appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy).first())
+                (
+                    respectPlatformInstallPolicy ||
+                        appSettingsRepo.getBoolean(BooleanSetting.LabRespectPlatformInstallPolicy).first()
+                    )
         val canCheckPlatformInstallPolicy = canCheckPlatformInstallPolicy(config)
         val effectiveRespectPlatformInstallPolicy =
             requestedRespectPlatformInstallPolicy && canCheckPlatformInstallPolicy
@@ -76,7 +77,7 @@ class AppInstallerRepositoryImpl(
             config.authorizer,
             config.initiatorPackageName,
             config.installSourceUid,
-            config.installSourceConfidence
+            config.installSourceConfidence,
         )
         if (requestedRespectPlatformInstallPolicy) {
             if (canCheckPlatformInstallPolicy) {
@@ -86,7 +87,7 @@ class AppInstallerRepositoryImpl(
                 Timber.tag(TAG).d(
                     "Skipping platform policy checker: authorizer=%s, isSystemApp=%s",
                     config.authorizer,
-                    deviceCapabilityProvider.isSystemApp
+                    deviceCapabilityProvider.isSystemApp,
                 )
             }
         }
@@ -99,14 +100,14 @@ class AppInstallerRepositoryImpl(
             sharedUserIdBlacklist,
             sharedUserIdExemption,
             onProgress,
-            onPhaseChanged
+            onPhaseChanged,
         )
     }
 
     private suspend fun persistSelfUpdatePostInstallState(
         config: ConfigModel,
         entities: List<InstallEntity>,
-        metadata: InstallMetadata
+        metadata: InstallMetadata,
     ) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) return
         if (entities.firstOrNull()?.packageName != context.packageName) return
@@ -126,7 +127,7 @@ class AppInstallerRepositoryImpl(
             PendingSourceDeletion(
                 paths = paths,
                 authorizer = config.authorizer,
-                customizeAuthorizer = config.customizeAuthorizer
+                customizeAuthorizer = config.customizeAuthorizer,
             )
         }
 
@@ -134,7 +135,7 @@ class AppInstallerRepositoryImpl(
             selfUpdateRecoveryRepository.updatePostInstallState(
                 sessionId = sessionId,
                 sourceDeletion = sourceDeletion,
-                historyAuthorizer = config.authorizer
+                historyAuthorizer = config.authorizer,
             )
         } catch (error: CancellationException) {
             throw error
@@ -144,44 +145,38 @@ class AppInstallerRepositoryImpl(
         }
     }
 
-    private fun canCheckPlatformInstallPolicy(config: ConfigModel): Boolean =
-        when (config.authorizer) {
-            Authorizer.Root,
-            Authorizer.Shizuku,
-            Authorizer.Customize -> true
+    private fun canCheckPlatformInstallPolicy(config: ConfigModel): Boolean = when (config.authorizer) {
+        Authorizer.Root,
+        Authorizer.Shizuku,
+        Authorizer.Customize,
+        -> true
 
-            Authorizer.None -> deviceCapabilityProvider.isSystemApp
+        Authorizer.None -> deviceCapabilityProvider.isSystemApp
 
-            Authorizer.Dhizuku,
-            Authorizer.Global -> false
-        }
+        Authorizer.Dhizuku,
+        Authorizer.Global,
+        -> false
+    }
 
     private companion object {
         const val TAG = "AppInstallerRepository"
     }
 
-    override suspend fun doUninstallWork(
-        config: ConfigModel,
-        packageName: String
-    ) = executeWithRepo(config) { repo ->
+    override suspend fun doUninstallWork(config: ConfigModel, packageName: String) = executeWithRepo(config) { repo ->
         repo.doUninstallWork(config, packageName)
     }
 
-    override suspend fun approveSession(
-        config: ConfigModel,
-        sessionId: Int,
-        granted: Boolean
-    ) = executeWithRepo(config, resolveSessionApprovalRepo(config)) { repo ->
+    override suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean) = executeWithRepo(config, resolveSessionApprovalRepo(config)) { repo ->
         repo.approveSession(config, sessionId, granted)
     }
 
     /**
-     * Execute an action with the InstallerRepo based on the provided 
+     * Execute an action with the InstallerRepo based on the provided
      */
     private suspend fun <T> executeWithRepo(
         config: ConfigModel,
         repo: AppInstallerRepository = resolveRepo(config),
-        action: suspend (AppInstallerRepository) -> T
+        action: suspend (AppInstallerRepository) -> T,
     ): T {
         try {
             return action(repo)
@@ -191,14 +186,14 @@ class AppInstallerRepositoryImpl(
                     PrivilegedException(
                         errorType = PrivilegedErrorType.SHIZUKU_NOT_WORK,
                         message = "Shizuku service connection lost during operation.",
-                        cause = e
+                        cause = e,
                     )
 
                 is DhizukuAppInstallerRepoImpl if e.message?.contains("KoinApplication has not been started") == true ->
                     PrivilegedException(
                         errorType = PrivilegedErrorType.DHIZUKU_NOT_WORK,
                         message = "Dhizuku service connection lost during operation.",
-                        cause = e
+                        cause = e,
                     )
 
                 is ProcessAppInstallerRepoImpl if e.message?.contains("Failed to initialize AppProcess for Hook Mode") == true ->
@@ -209,7 +204,7 @@ class AppInstallerRepositoryImpl(
                             PrivilegedErrorType.APP_PROCESS_NOT_WORK
                         },
                         message = "AppProcess hook initialization failed during operation.",
-                        cause = e
+                        cause = e,
                     )
 
                 else -> e
@@ -222,7 +217,7 @@ class AppInstallerRepositoryImpl(
 
         Timber.tag(TAG).d(
             "Using the system app Binder path for session approval; configured authorizer=%s",
-            config.authorizer
+            config.authorizer,
         )
         return createSystemAppRepo()
     }
@@ -231,24 +226,25 @@ class AppInstallerRepositoryImpl(
         context,
         reflect,
         deviceCapabilityProvider,
-        postInstallTaskProvider
+        postInstallTaskProvider,
     )
 
     /**
-     * Resolve the InstallerRepo based on the provided 
+     * Resolve the InstallerRepo based on the provided
      */
-    private fun resolveRepo(config: ConfigModel) =
-        when (config.authorizer) {
-            Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
-            Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
-            Authorizer.None -> {
-                if (deviceCapabilityProvider.isSystemApp) {
-                    createSystemAppRepo()
-                } else {
-                    NoneAppInstallerRepoImpl(context, reflect, postInstallTaskProvider)
-                }
-            }
+    private fun resolveRepo(config: ConfigModel) = when (config.authorizer) {
+        Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
 
-            else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+        Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+
+        Authorizer.None -> {
+            if (deviceCapabilityProvider.isSystemApp) {
+                createSystemAppRepo()
+            } else {
+                NoneAppInstallerRepoImpl(context, reflect, postInstallTaskProvider)
+            }
         }
+
+        else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+    }
 }

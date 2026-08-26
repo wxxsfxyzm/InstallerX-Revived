@@ -4,6 +4,11 @@ package com.rosan.installer.ui.animation.predictiveback
 
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.min
+import kotlin.math.sin
+import kotlin.math.sqrt
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
 import top.yukonga.miuix.kmp.nav.transition.NavRole
@@ -14,11 +19,6 @@ import top.yukonga.miuix.kmp.nav.transition.NavSwipeEdge
 import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.navDirectionalTransition
 import top.yukonga.miuix.kmp.nav.transition.navGraphicsTransition
-import kotlin.math.abs
-import kotlin.math.exp
-import kotlin.math.min
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 private const val BOUNCE_STIFFNESS = 200f
 private const val BOUNCE_DAMPING = 0.75f
@@ -104,8 +104,10 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
                 (1f - settle.elapsedMillis / 450f).coerceIn(0f, 1f)
 
             gesture != null ->
-                (scope.relativeDepth.coerceIn(0f, 1f) /
-                    (1f - gesture.progress).coerceAtLeast(0.01f)).coerceIn(0f, 1f)
+                (
+                    scope.relativeDepth.coerceIn(0f, 1f) /
+                        (1f - gesture.progress).coerceAtLeast(0.01f)
+                    ).coerceIn(0f, 1f)
 
             else -> scope.relativeDepth.coerceIn(0f, 1f)
         }
@@ -171,6 +173,7 @@ private val CrossActivityPredictive: NavTransition = navGraphicsTransition(
                 }
 
                 gesture != null -> 1f
+
                 else -> (progress / 0.2f).coerceIn(0f, 1f)
             }
             translationY = snapTranslationToPixelEdge(
@@ -243,15 +246,9 @@ private fun bounceScale(settle: NavSettle?, gesture: NavGesture?): Float {
     return ((100f + overlay) / 100f).coerceAtMost(1f)
 }
 
-private fun shapedTopProgress(progress: Float, gesture: NavGesture?): Float =
-    if (gesture == null) progress else 1f - BackGestureEasing.transform((1f - progress).coerceIn(0f, 1f))
+private fun shapedTopProgress(progress: Float, gesture: NavGesture?): Float = if (gesture == null) progress else 1f - BackGestureEasing.transform((1f - progress).coerceIn(0f, 1f))
 
-private fun crossActivityYShift(
-    gesture: NavGesture?,
-    height: Float,
-    scale: Float,
-    density: Density,
-): Float {
+private fun crossActivityYShift(gesture: NavGesture?, height: Float, scale: Float, density: Density): Float {
     if (gesture == null || height <= 0f) return 0f
     val rawDelta = gesture.touchY - gesture.initialTouchY
     val half = height / 2f

@@ -59,7 +59,7 @@ fun MiuixUnsavedChangesDialog(
     showState: MutableState<Boolean>,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    errorMessages: List<String>
+    errorMessages: List<String>,
 ) {
     val hasSpecificErrors = errorMessages.isNotEmpty()
 
@@ -84,7 +84,7 @@ fun MiuixUnsavedChangesDialog(
                         errorMessages.forEach { message ->
                             Text(
                                 text = message,
-                                color = MiuixTheme.colorScheme.onSurface
+                                color = MiuixTheme.colorScheme.onSurface,
                             )
                         }
                     }
@@ -92,7 +92,7 @@ fun MiuixUnsavedChangesDialog(
                     // Otherwise, show the generic unsaved changes message.
                     Text(
                         text = stringResource(R.string.config_dialog_message_unsaved_changes),
-                        color = MiuixTheme.colorScheme.onSurface
+                        color = MiuixTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -101,13 +101,13 @@ fun MiuixUnsavedChangesDialog(
                 // Button Row, aligned to the end.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // Miuix TextButton for dismiss action
                     TextButton(
                         modifier = Modifier.weight(1f),
                         onClick = onDismiss,
-                        text = stringResource(R.string.back)
+                        text = stringResource(R.string.back),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
 
@@ -116,19 +116,16 @@ fun MiuixUnsavedChangesDialog(
                         modifier = Modifier.weight(1f),
                         onClick = onConfirm,
                         text = stringResource(R.string.discard), // Use text parameter directly
-                        colors = ButtonDefaults.textButtonColorsPrimary() // Apply primary color style
+                        colors = ButtonDefaults.textButtonColorsPrimary(), // Apply primary color style
                     )
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
-fun MiuixUpdateDialog(
-    showState: MutableState<Boolean>,
-    onDismiss: () -> Unit
-) {
+fun MiuixUpdateDialog(showState: MutableState<Boolean>, onDismiss: () -> Unit) {
     val uriHandler = LocalUriHandler.current
 
     WindowDialog(
@@ -141,8 +138,8 @@ fun MiuixUpdateDialog(
                     modifier = Modifier.padding(bottom = 8.dp),
                     colors = CardColors(
                         color = MiuixTheme.colorScheme.secondaryVariant,
-                        contentColor = MiuixTheme.colorScheme.onSurface
-                    )
+                        contentColor = MiuixTheme.colorScheme.onSurface,
+                    ),
                 ) {
                     BasicComponent(
                         title = "GitHub",
@@ -153,9 +150,9 @@ fun MiuixUpdateDialog(
                         endActions = {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_link_icon),
-                                contentDescription = null
+                                contentDescription = null,
                             )
-                        }
+                        },
                     )
                     BasicComponent(
                         title = "Telegram",
@@ -166,18 +163,18 @@ fun MiuixUpdateDialog(
                         endActions = {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_link_icon),
-                                contentDescription = null
+                                contentDescription = null,
                             )
-                        }
+                        },
                     )
                 }
                 TextButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onDismiss,
-                    text = stringResource(R.string.cancel)
+                    text = stringResource(R.string.cancel),
                 )
             }
-        }
+        },
     )
 }
 
@@ -194,7 +191,7 @@ fun MiuixUninstallConfirmationDialog(
     showState: MutableState<Boolean>,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    keepData: Boolean
+    keepData: Boolean,
 ) {
     WindowDialog(
         show = showState.value,
@@ -202,26 +199,27 @@ fun MiuixUninstallConfirmationDialog(
         title = stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_action),
         content = {
             Column {
-                val message = if (keepData)
+                val message = if (keepData) {
                     stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_uninstall_keep_data_message)
-                else
+                } else {
                     stringResource(R.string.suggestion_uninstall_alert_dialog_confirm_uninstall_no_data_message)
+                }
 
                 Text(
                     text = message,
-                    color = MiuixTheme.colorScheme.onSurface
+                    color = MiuixTheme.colorScheme.onSurface,
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TextButton(
                         modifier = Modifier.weight(1f),
                         onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
+                        text = stringResource(R.string.cancel),
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -232,12 +230,12 @@ fun MiuixUninstallConfirmationDialog(
                         text = stringResource(R.string.confirm),
                         colors = ButtonDefaults.textButtonColors(
                             color = MiuixTheme.colorScheme.errorContainer,
-                            textColor = MiuixTheme.colorScheme.error
-                        )
+                            textColor = MiuixTheme.colorScheme.error,
+                        ),
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -257,7 +255,7 @@ fun ErrorDisplaySheet(
     onDismissRequest: () -> Unit,
     onDismissFinished: (() -> Unit)? = null,
     onRetry: (() -> Unit)? = null,
-    title: String
+    title: String,
 ) {
     WindowBottomSheet(
         show = showState.value,
@@ -268,9 +266,9 @@ fun ErrorDisplaySheet(
             val dismissState = LocalDismissState.current
             MiuixBackButton(
                 icon = MiuixIcons.Regular.Close,
-                onClick = { dismissState?.invoke() ?: onDismissRequest() }
+                onClick = { dismissState?.invoke() ?: onDismissRequest() },
             )
-        }
+        },
     ) {
         val dismissState = LocalDismissState.current
         val dismissSheet = { dismissState?.invoke() ?: onDismissRequest() }
@@ -278,13 +276,13 @@ fun ErrorDisplaySheet(
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             MiuixErrorTextBlock(
                 error = exception,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false)
+                    .weight(1f, fill = false),
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -292,7 +290,7 @@ fun ErrorDisplaySheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, bottom = 40.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (onRetry != null) {
                     TextButton(
@@ -325,23 +323,19 @@ fun ErrorDisplaySheet(
  * @param onConfirm Callback that provides the selected RootImplementation when confirm is clicked.
  */
 @Composable
-fun MiuixRootImplementationDialog(
-    showState: MutableState<Boolean>,
-    onDismiss: () -> Unit,
-    onConfirm: (RootMode) -> Unit,
-) {
+fun MiuixRootImplementationDialog(showState: MutableState<Boolean>, onDismiss: () -> Unit, onConfirm: (RootMode) -> Unit) {
     val rootModes = remember {
         listOf(
             RootMode.Magisk,
             RootMode.KernelSU,
-            RootMode.APatch
+            RootMode.APatch,
         )
     }
     val implementationNames = remember {
         mapOf(
             RootMode.Magisk to "Magisk",
             RootMode.KernelSU to "KernelSU",
-            RootMode.APatch to "APatch"
+            RootMode.APatch to "APatch",
         )
     }
 
@@ -361,7 +355,7 @@ fun MiuixRootImplementationDialog(
                         SelectableRow(
                             text = implementationNames[impl] ?: impl.name,
                             isSelected = isSelected,
-                            onClick = { selectedImpl = impl }
+                            onClick = { selectedImpl = impl },
                         )
                     }
                 }
@@ -372,12 +366,12 @@ fun MiuixRootImplementationDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TextButton(
                         modifier = Modifier.weight(1f),
                         onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
+                        text = stringResource(R.string.cancel),
                     )
                     TextButton(
                         modifier = Modifier.weight(1f),
@@ -386,20 +380,16 @@ fun MiuixRootImplementationDialog(
                             onDismiss()
                         },
                         text = stringResource(R.string.confirm),
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
-private fun SelectableRow(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
+private fun SelectableRow(text: String, isSelected: Boolean, onClick: () -> Unit) {
     val backgroundColor = if (isSelected) MiuixTheme.colorScheme.tertiaryContainer else Color.Transparent
     val contentColor = if (isSelected) MiuixTheme.colorScheme.onTertiaryContainer else MiuixTheme.colorScheme.onSurface
     val indicatorColor = if (isSelected) MiuixTheme.colorScheme.onTertiaryContainer else Color.Transparent
@@ -411,29 +401,25 @@ private fun SelectableRow(
             .background(backgroundColor)
             .padding(horizontal = 28.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         @Suppress("DEPRECATION")
         Text(
             text = text,
-            color = contentColor
+            color = contentColor,
         )
 
         Icon(
             modifier = Modifier.size(20.dp),
             imageVector = MiuixIcons.Basic.Check,
             contentDescription = if (isSelected) "Selected" else null,
-            tint = indicatorColor
+            tint = indicatorColor,
         )
     }
 }
 
 @Composable
-fun MiuixUninstallPackageDialog(
-    showState: MutableState<Boolean>,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
+fun MiuixUninstallPackageDialog(showState: MutableState<Boolean>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var packageName by remember { mutableStateOf("") }
     val isConfirmEnabled = packageName.isNotBlank()
 
@@ -449,18 +435,18 @@ fun MiuixUninstallPackageDialog(
                     onValueChange = { packageName = it },
                     label = stringResource(R.string.config_package_name),
                     useLabelAsPlaceholder = true,
-                    singleLine = true
+                    singleLine = true,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
                     @Suppress("DEPRECATION")
                     TextButton(
                         modifier = Modifier.weight(1f),
                         text = stringResource(R.string.cancel),
-                        onClick = onDismiss
+                        onClick = onDismiss,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     @Suppress("DEPRECATION")
@@ -472,11 +458,11 @@ fun MiuixUninstallPackageDialog(
                             packageName = ""
                         },
                         enabled = isConfirmEnabled,
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -485,13 +471,13 @@ fun MiuixGithubUpdateChannelSelectionDialog(
     showState: MutableState<Boolean>,
     currentSelection: GithubUpdateChannel,
     onDismiss: () -> Unit,
-    onConfirm: (GithubUpdateChannel) -> Unit
+    onConfirm: (GithubUpdateChannel) -> Unit,
 ) {
     val channels = remember {
         listOf(
             GithubUpdateChannel.OFFICIAL,
             GithubUpdateChannel.PROXY_7ED,
-            GithubUpdateChannel.CUSTOM
+            GithubUpdateChannel.CUSTOM,
         )
     }
 
@@ -499,7 +485,7 @@ fun MiuixGithubUpdateChannelSelectionDialog(
         mapOf(
             GithubUpdateChannel.OFFICIAL to R.string.lab_update_github_proxy_official,
             GithubUpdateChannel.PROXY_7ED to R.string.lab_update_github_proxy_7ed,
-            GithubUpdateChannel.CUSTOM to R.string.lab_update_github_proxy_custom
+            GithubUpdateChannel.CUSTOM to R.string.lab_update_github_proxy_custom,
         )
     }
 
@@ -519,7 +505,7 @@ fun MiuixGithubUpdateChannelSelectionDialog(
                         SelectableRow(
                             text = stringResource(channelNames[channel]!!),
                             isSelected = isSelected,
-                            onClick = { selectedChannel = channel }
+                            onClick = { selectedChannel = channel },
                         )
                     }
                 }
@@ -530,13 +516,13 @@ fun MiuixGithubUpdateChannelSelectionDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     @Suppress("DEPRECATION")
                     TextButton(
                         modifier = Modifier.weight(1f),
                         onClick = onDismiss,
-                        text = stringResource(R.string.cancel)
+                        text = stringResource(R.string.cancel),
                     )
                     @Suppress("DEPRECATION")
                     TextButton(
@@ -546,11 +532,11 @@ fun MiuixGithubUpdateChannelSelectionDialog(
                             onDismiss()
                         },
                         text = stringResource(R.string.confirm),
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -559,7 +545,7 @@ fun MiuixCustomGithubProxyUrlDialog(
     showState: MutableState<Boolean>,
     initialUrl: String,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var url by remember { mutableStateOf(initialUrl) }
     val isConfirmEnabled = url.isNotBlank()
@@ -576,18 +562,18 @@ fun MiuixCustomGithubProxyUrlDialog(
                     onValueChange = { url = it },
                     label = "GHProxy URL",
                     useLabelAsPlaceholder = true,
-                    singleLine = true
+                    singleLine = true,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
                     @Suppress("DEPRECATION")
                     TextButton(
                         modifier = Modifier.weight(1f),
                         text = stringResource(R.string.cancel),
-                        onClick = onDismiss
+                        onClick = onDismiss,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     @Suppress("DEPRECATION")
@@ -599,11 +585,11 @@ fun MiuixCustomGithubProxyUrlDialog(
                             onDismiss()
                         },
                         enabled = isConfirmEnabled,
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -612,7 +598,7 @@ fun MiuixCustomAuthorizerDialog(
     showState: MutableState<Boolean>,
     initialAuthorizer: String,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var authorizer by remember(initialAuthorizer) { mutableStateOf(initialAuthorizer) }
 
@@ -629,17 +615,17 @@ fun MiuixCustomAuthorizerDialog(
                     label = stringResource(R.string.config_authorizer_customize),
                     useLabelAsPlaceholder = true,
                     singleLine = false,
-                    maxLines = 4
+                    maxLines = 4,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
                     TextButton(
                         modifier = Modifier.weight(1f),
                         text = stringResource(R.string.cancel),
-                        onClick = onDismiss
+                        onClick = onDismiss,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
@@ -650,10 +636,10 @@ fun MiuixCustomAuthorizerDialog(
                             onDismiss()
                         },
                         enabled = authorizer.isNotBlank(),
-                        colors = ButtonDefaults.textButtonColorsPrimary()
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
                     )
                 }
             }
-        }
+        },
     )
 }

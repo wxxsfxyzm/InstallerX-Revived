@@ -8,7 +8,7 @@ import com.rosan.installer.domain.settings.model.backup.BackupValidationExceptio
 
 class PrepareBackupRestoreUseCase(
     private val parseBackup: ParseBackupUseCase,
-    private val validateBackup: ValidateBackupUseCase
+    private val validateBackup: ValidateBackupUseCase,
 ) {
     operator fun invoke(rawJson: String): BackupRestorePreview {
         val envelope = runCatching {
@@ -16,7 +16,7 @@ class PrepareBackupRestoreUseCase(
         }.getOrElse {
             throw BackupValidationException(
                 messageResId = R.string.backup_settings_validation_invalid_file,
-                code = "invalid_backup_file"
+                code = "invalid_backup_file",
             )
         }
         return validateBackup(envelope)

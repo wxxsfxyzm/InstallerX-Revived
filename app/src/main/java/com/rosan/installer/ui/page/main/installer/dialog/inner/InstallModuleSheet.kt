@@ -48,7 +48,7 @@ fun ModuleInstallSheetContent(
     onReboot: () -> Unit,
     onSoftReboot: () -> Unit,
     onClose: () -> Unit,
-    colorScheme: ColorScheme
+    colorScheme: ColorScheme,
 ) {
     KeyEventBlocker {
         it.key == Key.VolumeDown || it.key == Key.VolumeUp
@@ -72,14 +72,17 @@ fun ModuleInstallSheetContent(
             .padding(horizontal = 16.dp)
             .padding(bottom = 24.dp), // Bottom padding for navigation bar/visual balance
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Title
         Text(
-            text = if (isFinished) stringResource(R.string.installer_install_complete)
-            else stringResource(R.string.installer_installing_module),
+            text = if (isFinished) {
+                stringResource(R.string.installer_install_complete)
+            } else {
+                stringResource(R.string.installer_installing_module)
+            },
             style = MaterialTheme.typography.titleLarge,
-            color = colorScheme.onSurface
+            color = colorScheme.onSurface,
         )
 
         // Terminal Log Container
@@ -91,15 +94,15 @@ fun ModuleInstallSheetContent(
                 .weight(1f, fill = false)
                 .heightIn(min = 300.dp), // Removed max = 500.dp so weight can fully dictate upper limits
             colors = CardDefaults.cardColors(
-                containerColor = colorScheme.surfaceContainerHigh
+                containerColor = colorScheme.surfaceContainerHigh,
             ),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
         ) {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp)
+                    .padding(12.dp),
             ) {
                 items(outputLines) { line ->
                     Text(
@@ -108,7 +111,7 @@ fun ModuleInstallSheetContent(
                         fontSize = 12.sp,
                         lineHeight = 16.sp,
                         // Highlight errors in red (error color), standard text in onSurfaceVariant
-                        color = if (line.startsWith("ERROR:")) colorScheme.error else colorScheme.onSurfaceVariant
+                        color = if (line.startsWith("ERROR:")) colorScheme.error else colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -119,7 +122,7 @@ fun ModuleInstallSheetContent(
             Column {
                 Button(
                     onClick = onReboot,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(stringResource(R.string.reboot))
                 }
@@ -132,7 +135,7 @@ fun ModuleInstallSheetContent(
                     }*/
                 Button(
                     onClick = onClose,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(stringResource(R.string.close))
                 }
@@ -141,13 +144,13 @@ fun ModuleInstallSheetContent(
             Button(
                 enabled = false, // Disabled while installing
                 onClick = {},
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(16.dp),
                         strokeWidth = 2.dp,
-                        color = colorScheme.onSurface.copy(alpha = 0.38f)
+                        color = colorScheme.onSurface.copy(alpha = 0.38f),
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(stringResource(R.string.installer_installing))

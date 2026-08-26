@@ -2,16 +2,16 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.engine.usecase
 
-import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.device.model.Architecture
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
-import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SigningBlockCertificateStatus
 import com.rosan.installer.domain.engine.model.packageinfo.selectedSigningBlockCertificateStatus
+import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.state.DomainInstallState
 import com.rosan.installer.domain.engine.model.state.InstallActionType
 import com.rosan.installer.domain.engine.model.state.InstallNotice
@@ -34,7 +34,7 @@ class AnalyzeInstallStateUseCase {
         checkAppSignature: Boolean = true,
         showSignatureInfoOnMatch: Boolean = false,
         showSignatureDetails: Boolean = false,
-        detectXposedModule: Boolean = true
+        detectXposedModule: Boolean = true,
     ): DomainInstallState {
         val oldInfo = currentPackage.installedAppInfo
         val notices = mutableListOf<InstallNotice>()
@@ -71,7 +71,7 @@ class AnalyzeInstallStateUseCase {
             val fullSignatureNoticeDetails = SignatureNoticeDetails(
                 pendingSignatureInfo = pendingSignatureInfo,
                 installedSignatureInfo = currentPackage.installedAppInfo?.signatureInfo,
-                packageSignatureAnalysis = signatureAnalysis
+                packageSignatureAnalysis = signatureAnalysis,
             )
             val signatureNoticeDetails = fullSignatureNoticeDetails.takeIf { showSignatureDetails }
 
@@ -81,8 +81,8 @@ class AnalyzeInstallStateUseCase {
                     InstallNotice.SigningBlockOnly(
                         certificateStatus = currentPackage.selectedSigningBlockCertificateStatus()
                             ?: SigningBlockCertificateStatus.UNKNOWN,
-                        details = signatureNoticeDetails
-                    )
+                        details = signatureNoticeDetails,
+                    ),
                 )
             } else if (!currentPackage.signatureCheckPerformed) {
                 // Signature analysis was unavailable or disabled for this source.
@@ -93,8 +93,8 @@ class AnalyzeInstallStateUseCase {
                         InstallNotice.SignatureSummary(
                             status = SignatureMatchStatus.UNKNOWN_ERROR,
                             details = signatureNoticeDetails,
-                            hasPackageSignatureIssues = true
-                        )
+                            hasPackageSignatureIssues = true,
+                        ),
                     )
                 }
             } else {
@@ -105,8 +105,8 @@ class AnalyzeInstallStateUseCase {
                                 InstallNotice.SignatureSummary(
                                     status = currentPackage.signatureMatchStatus,
                                     details = signatureNoticeDetails,
-                                    hasPackageSignatureIssues = hasPackageSignatureIssues
-                                )
+                                    hasPackageSignatureIssues = hasPackageSignatureIssues,
+                                ),
                             )
                         }
                     }
@@ -117,21 +117,22 @@ class AnalyzeInstallStateUseCase {
                                 InstallNotice.SignatureSummary(
                                     status = currentPackage.signatureMatchStatus,
                                     details = signatureNoticeDetails,
-                                    hasPackageSignatureIssues = hasPackageSignatureIssues
-                                )
+                                    hasPackageSignatureIssues = hasPackageSignatureIssues,
+                                ),
                             )
                         }
                     }
 
                     SignatureMatchStatus.ROTATION_COMPATIBLE,
-                    SignatureMatchStatus.CANDIDATE_ROTATION_UNCONFIRMED -> {
+                    SignatureMatchStatus.CANDIDATE_ROTATION_UNCONFIRMED,
+                    -> {
                         notices.add(
                             0,
                             InstallNotice.SignatureSummary(
                                 status = currentPackage.signatureMatchStatus,
                                 details = signatureNoticeDetails,
-                                hasPackageSignatureIssues = hasPackageSignatureIssues
-                            )
+                                hasPackageSignatureIssues = hasPackageSignatureIssues,
+                            ),
                         )
                     }
 
@@ -140,8 +141,8 @@ class AnalyzeInstallStateUseCase {
                             0,
                             InstallNotice.SignatureMismatch(
                                 details = signatureNoticeDetails,
-                                hasPackageSignatureIssues = hasPackageSignatureIssues
-                            )
+                                hasPackageSignatureIssues = hasPackageSignatureIssues,
+                            ),
                         )
                         actionType = InstallActionType.SIGNATURE_MISMATCH_INSTALL_ANYWAY
                     }
@@ -151,8 +152,8 @@ class AnalyzeInstallStateUseCase {
                             0,
                             InstallNotice.SignatureUnknown(
                                 details = signatureNoticeDetails,
-                                hasPackageSignatureIssues = hasPackageSignatureIssues
-                            )
+                                hasPackageSignatureIssues = hasPackageSignatureIssues,
+                            ),
                         )
                     }
                 }
@@ -198,8 +199,8 @@ class AnalyzeInstallStateUseCase {
                     InstallNotice.Xposed(
                         minApi = xposedInfo.minApi,
                         targetApi = xposedInfo.targetApi,
-                        description = xposedInfo.description
-                    )
+                        description = xposedInfo.description,
+                    ),
                 )
             }
         }
@@ -213,9 +214,9 @@ class AnalyzeInstallStateUseCase {
         DataType.APKM,
         DataType.XAPK,
         DataType.MULTI_APK,
-        DataType.MULTI_APK_ZIP -> true
+        DataType.MULTI_APK_ZIP,
+        -> true
 
         else -> false
     }
-
 }

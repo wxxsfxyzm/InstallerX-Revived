@@ -8,7 +8,8 @@ package com.rosan.installer.domain.settings.model.preferences
 enum class GithubUpdateChannel {
     OFFICIAL,
     PROXY_7ED,
-    CUSTOM;
+    CUSTOM,
+    ;
 
     companion object {
         fun fromValueOrDefault(value: String) = entries.find { it.name == value } ?: OFFICIAL

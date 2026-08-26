@@ -16,17 +16,14 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
-fun MiuixBlockingLoadingDialog(
-    visible: Boolean,
-    text: String
-) {
+fun MiuixBlockingLoadingDialog(visible: Boolean, text: String) {
     WindowDialog(show = visible) {
         BackHandler {
             // Block input while the operation is running.
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             InfiniteProgressIndicator()
             Spacer(modifier = Modifier.width(16.dp))

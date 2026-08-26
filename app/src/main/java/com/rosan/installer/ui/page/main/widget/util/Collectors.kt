@@ -53,6 +53,7 @@ fun LogEventCollector(viewModel: AboutViewModel) {
                 }
 
                 is AboutEvent.ShareLogFailed -> context.toast(event.error)
+
                 else -> Unit
             }
         }
@@ -63,7 +64,7 @@ fun LogEventCollector(viewModel: AboutViewModel) {
 fun AllViewEventCollector(
     viewModel: AllViewModel,
     navigator: Navigator,
-    onShowSnackbar: suspend (message: String, actionLabel: String) -> Boolean
+    onShowSnackbar: suspend (message: String, actionLabel: String) -> Boolean,
 ) {
     val deleteSuccessString = stringResource(id = R.string.delete_success)
     val restoreString = stringResource(id = R.string.restore)
@@ -76,7 +77,7 @@ fun AllViewEventCollector(
                     val actionPerformed = onShowSnackbar(deleteSuccessString, restoreString)
                     if (actionPerformed) {
                         viewModel.dispatch(
-                            AllViewAction.RestoreDataConfig(snapshot = event.snapshot)
+                            AllViewAction.RestoreDataConfig(snapshot = event.snapshot),
                         )
                     }
                 }
@@ -101,11 +102,7 @@ fun AllViewEventCollector(
  * @param onEvent The action to perform when the event occurs.
  */
 @Composable
-fun OnLifecycleEvent(
-    event: Lifecycle.Event,
-    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    onEvent: () -> Unit
-) {
+fun OnLifecycleEvent(event: Lifecycle.Event, lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current, onEvent: () -> Unit) {
     // Use rememberUpdatedState to ensure the latest lambda is captured
     // without restarting the effect if the lambda reference changes.
     val currentOnEvent by rememberUpdatedState(onEvent)
@@ -155,7 +152,6 @@ fun InstallerEventCollector(viewModel: InstallerViewModel) {
                         chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
                         context.startActivity(chooser)
-
                     } catch (e: Exception) {
                         Timber.e(e, "Failed to share file via URI")
                         context.toast("Failed to share file")
@@ -171,10 +167,7 @@ fun InstallerEventCollector(viewModel: InstallerViewModel) {
 }
 
 @Composable
-fun EditEventCollector(
-    viewModel: EditViewModel,
-    snackBarHostState: SnackbarHostState
-) {
+fun EditEventCollector(viewModel: EditViewModel, snackBarHostState: SnackbarHostState) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val unknownErrorString = stringResource(R.string.installer_unknown_error)
@@ -186,9 +179,13 @@ fun EditEventCollector(
                     // 1. Specific Resource ID
                     // 2. Explicit String message
                     // 3. Localized generic fallback
-                    val snackBarText = event.messageResId?.let { @SuppressLint("LocalContextGetResourceValueCall") context.getString(it) }
-                        ?: event.message
-                        ?: unknownErrorString
+                    val snackBarText =
+                        event.messageResId?.let {
+                            @SuppressLint("LocalContextGetResourceValueCall")
+                            context.getString(it)
+                        }
+                            ?: event.message
+                            ?: unknownErrorString
 
                     snackBarHostState.showSnackbar(
                         message = snackBarText,

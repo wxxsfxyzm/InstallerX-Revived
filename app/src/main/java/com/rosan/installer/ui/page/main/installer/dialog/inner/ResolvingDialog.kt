@@ -19,12 +19,10 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 
 @Composable
-fun resolvingDialog(
-    viewModel: InstallerViewModel
-) = DialogParams(
+fun resolvingDialog(viewModel: InstallerViewModel) = DialogParams(
     icon = DialogInnerParams(
         DialogParamsType.IconWorking.id,
-        workingIcon
+        workingIcon,
     ),
     title = DialogInnerParams(
         DialogParamsType.InstallerResolving.id,
@@ -32,12 +30,12 @@ fun resolvingDialog(
         Text(stringResource(R.string.installer_resolving))
     },
     buttons = dialogButtons(
-        DialogParamsType.ButtonsCancel.id
+        DialogParamsType.ButtonsCancel.id,
     ) {
         listOf(
             DialogButton(stringResource(R.string.cancel)) {
                 viewModel.dispatch(InstallerViewAction.Close)
-            }
+            },
         )
-    }
+    },
 )

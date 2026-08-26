@@ -20,5 +20,5 @@ data class PackageAnalysisResult(
     val signatureCheckPerformed: Boolean,
     val signatureMatchStatus: SignatureMatchStatus,
     val signatureAnalysis: PackageSignatureAnalysis = PackageSignatureAnalysis(),
-    val identityStatus: PackageIdentityStatus
+    val identityStatus: PackageIdentityStatus,
 )

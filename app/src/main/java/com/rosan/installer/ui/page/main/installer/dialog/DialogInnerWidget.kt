@@ -24,60 +24,81 @@ import com.rosan.installer.ui.page.main.installer.dialog.inner.preparingDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.readyDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.resolveFailedDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.resolvingDialog
-import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallFailedDialog
-import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallReadyDialog
-import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallSuccessDialog
-import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallingDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.unarchiveErrorDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.unarchiveFailedDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.unarchiveReadyDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.unarchivingDialog
-
+import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallFailedDialog
+import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallReadyDialog
+import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallSuccessDialog
+import com.rosan.installer.ui.page.main.installer.dialog.inner.uninstallingDialog
 
 // change the content when the id been changed
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
-fun dialogInnerWidget(
-    params: DialogInnerParams
-): @Composable (() -> Unit)? =
-    if (params.content == null) null
-    else {
-        {
-            params.content.invoke()
-        }
+fun dialogInnerWidget(params: DialogInnerParams): @Composable (() -> Unit)? = if (params.content == null) {
+    null
+} else {
+    {
+        params.content.invoke()
     }
+}
 
 @Composable
-fun dialogGenerateParams(
-    viewModel: InstallerViewModel
-): DialogParams {
+fun dialogGenerateParams(viewModel: InstallerViewModel): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     return when (val stage = uiState.stage) {
         is InstallerStage.Ready -> readyDialog(viewModel)
+
         is InstallerStage.Resolving -> resolvingDialog(viewModel)
+
         is InstallerStage.ResolveFailed -> resolveFailedDialog(viewModel)
+
         is InstallerStage.Preparing -> preparingDialog(viewModel)
+
         is InstallerStage.Analysing -> analysingDialog()
+
         is InstallerStage.AnalyseFailed -> analyseFailedDialog(viewModel)
+
         is InstallerStage.InstallChoice -> installChoiceDialog(viewModel)
+
         is InstallerStage.InstallPrepare -> installPrepareDialog(viewModel)
+
         is InstallerStage.InstallExtendedMenu -> installExtendedMenuDialog(viewModel)
+
         is InstallerStage.InstallExtendedSubMenu -> installExtendedMenuSubMenuDialog(viewModel)
+
         is InstallerStage.Installing -> installingDialog(viewModel)
+
         is InstallerStage.InstallWaitingUnknownSource -> installWaitingUnknownSourceDialog(viewModel)
+
         is InstallerStage.InstallSuccess -> installSuccessDialog(viewModel)
+
         is InstallerStage.InstallFailed -> installFailedDialog(viewModel)
+
         is InstallerStage.InstallCompleted -> installCompletedDialog(viewModel, stage.results)
+
         is InstallerStage.InstallConfirm -> installConfirmDialog(viewModel)
+
         is InstallerStage.InstallRetryDowngradeUsingUninstall -> installingDialog(viewModel)
+
         is InstallerStage.UninstallReady -> uninstallReadyDialog(viewModel)
+
         is InstallerStage.UninstallSuccess -> uninstallSuccessDialog(viewModel)
+
         is InstallerStage.UninstallFailed -> uninstallFailedDialog(viewModel)
+
         is InstallerStage.Uninstalling -> uninstallingDialog(viewModel)
+
         is InstallerStage.UninstallResolveFailed -> uninstallFailedDialog(viewModel)
+
         is InstallerStage.UnarchiveReady -> unarchiveReadyDialog(viewModel)
+
         is InstallerStage.Unarchiving -> unarchivingDialog()
+
         is InstallerStage.UnarchiveError -> unarchiveErrorDialog(viewModel)
+
         is InstallerStage.UnarchiveFailed -> unarchiveFailedDialog(viewModel)
+
         // when is exhaustive, so no need to handle the else case
         else -> readyDialog(viewModel)
     }

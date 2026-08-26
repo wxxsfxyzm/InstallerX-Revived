@@ -2,21 +2,19 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.framework.privileged.provider
 
-import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_ROOT
-import com.rosan.installer.framework.privileged.core.infrastructure.process.SU_ARGS
-import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
-import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ShellExecutionProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
+import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_ROOT
+import com.rosan.installer.framework.privileged.core.infrastructure.process.SU_ARGS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class ShellExecutionProviderImpl(
-    private val capabilityProvider: DeviceCapabilityProvider
-) : ShellExecutionProvider {
+class ShellExecutionProviderImpl(private val capabilityProvider: DeviceCapabilityProvider) : ShellExecutionProvider {
     override suspend fun executeCommandArray(config: ConfigModel, command: Array<String>): String {
         return withContext(Dispatchers.IO) {
             if (config.authorizer == Authorizer.Root || config.authorizer == Authorizer.Customize) {
@@ -45,7 +43,7 @@ class ShellExecutionProviderImpl(
             useUserService(
                 isSystemApp = capabilityProvider.isSystemApp,
                 authorizer = config.authorizer,
-                customizeAuthorizer = config.customizeAuthorizer
+                customizeAuthorizer = config.customizeAuthorizer,
             ) {
                 try {
                     result = it.privileged.execArr(command)

@@ -55,10 +55,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun UninstallerGlobalSettingsPage(
-    useBlur: Boolean,
-    viewModel: UninstallerSettingsViewModel = koinViewModel()
-) {
+fun UninstallerGlobalSettingsPage(useBlur: Boolean, viewModel: UninstallerSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -79,7 +76,7 @@ fun UninstallerGlobalSettingsPage(
         }
     }
 
-    if (showUninstallInputDialog)
+    if (showUninstallInputDialog) {
         UninstallPackageDialog(
             onDismiss = { showUninstallInputDialog = false },
             onConfirm = { packageName ->
@@ -88,8 +85,9 @@ fun UninstallerGlobalSettingsPage(
                     putExtra("package_name", packageName)
                 }
                 context.startActivity(intent)
-            }
+            },
         )
+    }
 
     val backdrop = rememberMaterial3BlurBackdrop(useBlur)
 
@@ -115,22 +113,22 @@ fun UninstallerGlobalSettingsPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
         ) {
             item { InfoTipCard(text = stringResource(R.string.uninstall_authorizer_tip)) }
             // --- Group 1: Global Settings ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.global)
+                    title = stringResource(R.string.global),
                 ) {
                     item {
                         SwitchWidget(
@@ -142,10 +140,10 @@ fun UninstallerGlobalSettingsPage(
                                 viewModel.dispatch(
                                     UninstallerSettingsAction.ToggleGlobalUninstallFlag(
                                         UninstallFlags.DELETE_KEEP_DATA,
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item {
@@ -158,10 +156,10 @@ fun UninstallerGlobalSettingsPage(
                                 viewModel.dispatch(
                                     UninstallerSettingsAction.ToggleGlobalUninstallFlag(
                                         UninstallFlags.DELETE_ALL_USERS,
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     item {
@@ -174,25 +172,28 @@ fun UninstallerGlobalSettingsPage(
                                 viewModel.dispatch(
                                     UninstallerSettingsAction.ToggleGlobalUninstallFlag(
                                         UninstallFlags.DELETE_SYSTEM_APP,
-                                        it
-                                    )
+                                        it,
+                                    ),
                                 )
-                            }
+                            },
                         )
                     }
                     if (BiometricManager
                             .from(context)
-                            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
-                    ) item {
-                        SwitchWidget(
-                            icon = AppIcons.BiometricAuth,
-                            title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
-                            description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
-                            checked = uiState.uninstallerRequireBiometricAuth,
-                            onCheckedChange = {
-                                viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(it))
-                            }
-                        )
+                            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
+                        BiometricManager.BIOMETRIC_SUCCESS
+                    ) {
+                        item {
+                            SwitchWidget(
+                                icon = AppIcons.BiometricAuth,
+                                title = stringResource(R.string.uninstaller_settings_require_biometric_auth),
+                                description = stringResource(R.string.uninstaller_settings_require_biometric_auth_desc),
+                                checked = uiState.uninstallerRequireBiometricAuth,
+                                onCheckedChange = {
+                                    viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(it))
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -200,20 +201,19 @@ fun UninstallerGlobalSettingsPage(
             // --- Group 2: Manual Uninstaller Call ---
             item {
                 SegmentedColumn(
-                    title = stringResource(R.string.uninstall_call_uninstaller)
+                    title = stringResource(R.string.uninstall_call_uninstaller),
                 ) {
                     item {
                         NavigationItemWidget(
                             icon = AppIcons.Delete,
                             title = stringResource(R.string.uninstall_call_uninstaller_manually),
-                            description = stringResource(R.string.uninstall_call_uninstaller_manually_desc)
+                            description = stringResource(R.string.uninstall_call_uninstaller_manually_desc),
                         ) {
                             showUninstallInputDialog = true
                         }
                     }
                 }
             }
-
         }
     }
 }

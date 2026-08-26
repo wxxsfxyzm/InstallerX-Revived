@@ -13,10 +13,10 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.IOException
 
 /**
  * A unified entry point for analyzing any package format.
@@ -29,7 +29,7 @@ class UnifiedContainerAnalyser(
     xapkStrategy: XApkStrategy,
     multiApkZipStrategy: MultiApkZipStrategy,
     moduleStrategy: ModuleStrategy,
-    private val unifiedZipFileProvider: UnifiedZipFileProvider
+    private val unifiedZipFileProvider: UnifiedZipFileProvider,
 ) {
 
     private val strategies = mapOf(
@@ -40,15 +40,10 @@ class UnifiedContainerAnalyser(
         DataType.MULTI_APK_ZIP to multiApkZipStrategy,
         DataType.MODULE_ZIP to moduleStrategy,
         DataType.MIXED_MODULE_ZIP to moduleStrategy,
-        DataType.MIXED_MODULE_APK to moduleStrategy
+        DataType.MIXED_MODULE_APK to moduleStrategy,
     )
 
-    suspend fun analyze(
-        config: ConfigModel,
-        data: DataEntity,
-        type: DataType,
-        extra: AnalyseExtraEntity
-    ): List<AppEntity> = withContext(Dispatchers.IO) {
+    suspend fun analyze(config: ConfigModel, data: DataEntity, type: DataType, extra: AnalyseExtraEntity): List<AppEntity> = withContext(Dispatchers.IO) {
         val strategy = strategies[type] ?: return@withContext emptyList()
 
         if (data is DataEntity.FileEntity) {
@@ -75,7 +70,7 @@ class UnifiedContainerAnalyser(
         data: DataEntity,
         type: DataType,
         archive: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> = withContext(Dispatchers.IO) {
         val strategy = strategies[type] ?: return@withContext emptyList()
         strategy.analyze(config, data, archive, extra)

@@ -6,8 +6,8 @@ import android.app.Notification
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import com.rosan.installer.R
-import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.packageinfo.getInfo
+import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.config.InstallMode
@@ -17,13 +17,15 @@ import com.rosan.installer.util.getErrorMessage
 class LegacyNotificationBuilder(
     private val context: Context,
     private val session: InstallerSessionRepository,
-    private val helper: NotificationHelper
+    private val helper: NotificationHelper,
 ) : InstallerNotificationBuilder {
 
     override suspend fun build(payload: NotificationPayload): Notification? {
         val progress = payload.state.progress
 
-        if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error || progress is ProgressEntity.InstallAnalysedUnsupported) {
+        if (progress is ProgressEntity.Finish || progress is ProgressEntity.Error ||
+            progress is ProgressEntity.InstallAnalysedUnsupported
+        ) {
             return null
         }
 
@@ -49,30 +51,62 @@ class LegacyNotificationBuilder(
         }
     }
 
-    private fun createBaseBuilder(progress: ProgressEntity, background: Boolean, showDialog: Boolean): NotificationCompat.Builder {
+    private fun createBaseBuilder(
+        progress: ProgressEntity,
+        background: Boolean,
+        showDialog: Boolean,
+    ): NotificationCompat.Builder {
         val isWorking =
-            progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving || progress is ProgressEntity.InstallResolveSuccess || progress is ProgressEntity.InstallAnalysing || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.Installing || progress is ProgressEntity.InstallingModule || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
+            progress is ProgressEntity.Ready || progress is ProgressEntity.InstallResolving ||
+                progress is ProgressEntity.InstallResolveSuccess ||
+                progress is ProgressEntity.InstallAnalysing ||
+                progress is ProgressEntity.InstallAnalysedSuccess ||
+                progress is ProgressEntity.Installing ||
+                progress is ProgressEntity.InstallingModule ||
+                progress is ProgressEntity.InstallSuccess ||
+                progress is ProgressEntity.InstallCompleted
         val isImportance =
-            progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed || progress is ProgressEntity.InstallAnalysedSuccess || progress is ProgressEntity.InstallWaitingUnknownSource || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallCompleted
+            progress is ProgressEntity.InstallResolvedFailed || progress is ProgressEntity.InstallAnalysedFailed ||
+                progress is ProgressEntity.InstallAnalysedSuccess ||
+                progress is ProgressEntity.InstallWaitingUnknownSource ||
+                progress is ProgressEntity.InstallFailed ||
+                progress is ProgressEntity.InstallSuccess ||
+                progress is ProgressEntity.InstallCompleted
 
         val channelEnum =
-            if (isImportance && background) NotificationHelper.Channel.InstallerChannel else NotificationHelper.Channel.InstallerProgressChannel
+            if (isImportance &&
+                background
+            ) {
+                NotificationHelper.Channel.InstallerChannel
+            } else {
+                NotificationHelper.Channel.InstallerProgressChannel
+            }
         val icon = (if (isWorking) NotificationHelper.Icon.Working else NotificationHelper.Icon.Pausing).resId
         val contentIntent =
-            if (session.config.installMode == InstallMode.Notification || session.config.installMode == InstallMode.AutoNotification) {
+            if (session.config.installMode == InstallMode.Notification ||
+                session.config.installMode == InstallMode.AutoNotification
+            ) {
                 if (showDialog) helper.openIntent else null
-            } else helper.openIntent
+            } else {
+                helper.openIntent
+            }
 
         val builder = NotificationCompat.Builder(context, channelEnum.value)
-            .setSmallIcon(icon).setContentIntent(contentIntent).setDeleteIntent(helper.finishIntent).setOnlyAlertOnce(true).setOngoing(true)
+            .setSmallIcon(
+                icon,
+            ).setContentIntent(contentIntent).setDeleteIntent(helper.finishIntent).setOnlyAlertOnce(true).setOngoing(true)
 
-        if (progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed || progress is ProgressEntity.InstallCompleted) {
+        if (progress is ProgressEntity.InstallSuccess || progress is ProgressEntity.InstallFailed ||
+            progress is ProgressEntity.InstallCompleted
+        ) {
             builder.setOngoing(false).setOnlyAlertOnce(false)
         }
 
         val legacyProgressValue = when (progress) {
             is ProgressEntity.InstallResolving -> 0
+
             is ProgressEntity.InstallAnalysing -> 40
+
             is ProgressEntity.Installing -> {
                 val installProgress = progress.overallProgress()
                     ?: if (progress.total > 0) {
@@ -82,7 +116,9 @@ class LegacyNotificationBuilder(
                     }
                 50 + (40 * installProgress).toInt()
             }
+
             is ProgressEntity.InstallingModule -> 70
+
             else -> null
         }
         legacyProgressValue?.let { builder.setProgress(100, it, false) }
@@ -92,83 +128,108 @@ class LegacyNotificationBuilder(
     private fun onReady(builder: NotificationCompat.Builder) = builder.setContentTitle(context.getString(R.string.installer_ready))
         .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
 
-    private fun onResolving(builder: NotificationCompat.Builder) =
-        builder.setContentTitle(context.getString(R.string.installer_resolving))
-            .setContentText(context.getString(R.string.installer_resolving_desc))
-            .build()
+    private fun onResolving(builder: NotificationCompat.Builder) = builder.setContentTitle(context.getString(R.string.installer_resolving))
+        .setContentText(context.getString(R.string.installer_resolving_desc))
+        .build()
 
-    private fun onPreparing(builder: NotificationCompat.Builder, progress: ProgressEntity.InstallPreparing) =
-        builder.setContentTitle(context.getString(R.string.installer_preparing))
-            .setContentText(context.getString(R.string.installer_preparing_desc))
-            .setProgress(100, (progress.progress * 100).toInt(), progress.progress < 0)
-            .addAction(0, context.getString(R.string.cancel), helper.cancelIntent).build()
+    private fun onPreparing(builder: NotificationCompat.Builder, progress: ProgressEntity.InstallPreparing) = builder.setContentTitle(context.getString(R.string.installer_preparing))
+        .setContentText(context.getString(R.string.installer_preparing_desc))
+        .setProgress(100, (progress.progress * 100).toInt(), progress.progress < 0)
+        .addAction(0, context.getString(R.string.cancel), helper.cancelIntent).build()
 
-    private fun onResolvedFailed(builder: NotificationCompat.Builder) =
-        builder.setContentTitle(context.getString(R.string.installer_resolve_failed))
-            .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
+    private fun onResolvedFailed(builder: NotificationCompat.Builder) = builder.setContentTitle(context.getString(R.string.installer_resolve_failed))
+        .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
 
-    private fun onResolveSuccess(builder: NotificationCompat.Builder) =
-        builder.setContentTitle(context.getString(R.string.installer_resolve_success))
-            .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
+    private fun onResolveSuccess(builder: NotificationCompat.Builder) = builder.setContentTitle(context.getString(R.string.installer_resolve_success))
+        .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
 
-    private fun onAnalysing(builder: NotificationCompat.Builder) =
-        builder.setContentTitle(context.getString(R.string.installer_analysing)).build()
+    private fun onAnalysing(builder: NotificationCompat.Builder) = builder.setContentTitle(context.getString(R.string.installer_analysing)).build()
 
-    private fun onAnalysedFailed(builder: NotificationCompat.Builder) =
-        builder.setContentTitle(context.getString(R.string.installer_analyse_failed))
-            .addAction(0, context.getString(R.string.retry), helper.analyseIntent)
-            .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
+    private fun onAnalysedFailed(builder: NotificationCompat.Builder) = builder.setContentTitle(context.getString(R.string.installer_analyse_failed))
+        .addAction(0, context.getString(R.string.retry), helper.analyseIntent)
+        .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
 
     private suspend fun onAnalysedSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): Notification {
         val allEntities = session.analysisResults.flatMap { it.appEntities }
         val selectedApps = allEntities.map { it.app }
-        val hasComplexType = allEntities.any { it.app.sourceType == DataType.MIXED_MODULE_APK || it.app.sourceType == DataType.MIXED_MODULE_ZIP }
+        val hasComplexType = allEntities.any {
+            it.app.sourceType == DataType.MIXED_MODULE_APK ||
+                it.app.sourceType == DataType.MIXED_MODULE_ZIP
+        }
         val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
 
-        if (hasComplexType) return builder.setContentTitle(context.getString(R.string.installer_prepare_install))
-            .setContentText(context.getString(R.string.installer_mixed_module_apk_description_notification))
-            .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon)).addAction(0, context.getString(R.string.cancel), helper.finishIntent)
-            .build()
-        return if (isMultiPackage) builder.setContentTitle(context.getString(R.string.installer_prepare_install))
-            .setContentText(context.getString(R.string.installer_multi_apk_description_notification))
-            .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
-        else builder.setContentTitle(selectedApps.getInfo(context).title)
-            .setContentText(context.getString(R.string.installer_prepare_type_unknown_confirm))
-            .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon)).addAction(0, context.getString(R.string.install), helper.installIntent)
-            .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
+        if (hasComplexType) {
+            return builder.setContentTitle(context.getString(R.string.installer_prepare_install))
+                .setContentText(context.getString(R.string.installer_mixed_module_apk_description_notification))
+                .setLargeIcon(
+                    helper.getLargeIconBitmap(preferSystemIcon),
+                ).addAction(0, context.getString(R.string.cancel), helper.finishIntent)
+                .build()
+        }
+        return if (isMultiPackage) {
+            builder.setContentTitle(context.getString(R.string.installer_prepare_install))
+                .setContentText(context.getString(R.string.installer_multi_apk_description_notification))
+                .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
+        } else {
+            builder.setContentTitle(selectedApps.getInfo(context).title)
+                .setContentText(context.getString(R.string.installer_prepare_type_unknown_confirm))
+                .setLargeIcon(
+                    helper.getLargeIconBitmap(preferSystemIcon),
+                ).addAction(0, context.getString(R.string.install), helper.installIntent)
+                .addAction(0, context.getString(R.string.cancel), helper.finishIntent).build()
+        }
     }
 
     private suspend fun onInstalling(
         builder: NotificationCompat.Builder,
         progress: ProgressEntity.Installing,
-        preferSystemIcon: Boolean
+        preferSystemIcon: Boolean,
     ): Notification {
         val appLabel = progress.appLabel ?: context.getString(R.string.installer_installing)
         val title =
-            if (progress.total > 1) "${context.getString(R.string.installer_installing)} (${progress.current}/${progress.total})" else appLabel
+            if (progress.total >
+                1
+            ) {
+                "${context.getString(R.string.installer_installing)} (${progress.current}/${progress.total})"
+            } else {
+                appLabel
+            }
         val content = if (progress.total > 1) appLabel else context.getString(R.string.installer_installing)
         return builder.setContentTitle(title).setContentText(content)
-            .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon, if (progress.total > 1) progress.current - 1 else null)).build()
+            .setLargeIcon(
+                helper.getLargeIconBitmap(
+                    preferSystemIcon,
+                    if (progress.total >
+                        1
+                    ) {
+                        progress.current - 1
+                    } else {
+                        null
+                    },
+                ),
+            ).build()
     }
 
     private suspend fun onInstallingModule(
         builder: NotificationCompat.Builder,
         progress: ProgressEntity.InstallingModule,
-        preferSystemIcon: Boolean
+        preferSystemIcon: Boolean,
     ): Notification = builder.setContentTitle(context.getString(R.string.installer_installing))
-        .setContentText(progress.output.lastOrNull() ?: context.getString(R.string.installer_installing)).setProgress(100, 50, true)
+        .setContentText(
+            progress.output.lastOrNull() ?: context.getString(R.string.installer_installing),
+        ).setProgress(100, 50, true)
         .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon)).build()
 
     private suspend fun onWaitingUnknownSource(
         builder: NotificationCompat.Builder,
-        preferSystemIcon: Boolean
+        preferSystemIcon: Boolean,
     ): NotificationCompat.Builder {
         val description = helper.unknownSourceDescription()
         return builder.setContentTitle(context.getString(R.string.installer_waiting_unknown_source))
             .setContentText(description)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(description)
+                    .bigText(description),
             )
             .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
             .setOnlyAlertOnce(false)
@@ -176,30 +237,53 @@ class LegacyNotificationBuilder(
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
     }
 
-    private suspend fun onInstallFailed(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
+    private suspend fun onInstallFailed(
+        builder: NotificationCompat.Builder,
+        preferSystemIcon: Boolean,
+    ): NotificationCompat.Builder {
         val info = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }.getInfo(context)
         val contentText = context.getString(R.string.installer_install_failed)
         return builder.setContentTitle(info.title).setContentText(contentText).setStyle(
-            NotificationCompat.BigTextStyle().setBigContentTitle(info.title).bigText("$contentText\n${session.error.getErrorMessage(context)}")
-        ).setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon)).addAction(0, context.getString(R.string.retry), helper.installIntent)
+            NotificationCompat.BigTextStyle().setBigContentTitle(
+                info.title,
+            ).bigText("$contentText\n${session.error.getErrorMessage(context)}"),
+        ).setLargeIcon(
+            helper.getLargeIconBitmap(preferSystemIcon),
+        ).addAction(0, context.getString(R.string.retry), helper.installIntent)
             .addAction(0, context.getString(R.string.cancel), helper.finishIntent)
     }
 
-    private suspend fun onInstallSuccess(builder: NotificationCompat.Builder, preferSystemIcon: Boolean): NotificationCompat.Builder {
+    private suspend fun onInstallSuccess(
+        builder: NotificationCompat.Builder,
+        preferSystemIcon: Boolean,
+    ): NotificationCompat.Builder {
         val entities = session.analysisResults.flatMap { it.appEntities }.filter { it.selected }.map { it.app }
         var newBuilder =
-            builder.setContentTitle(entities.getInfo(context).title).setContentText(context.getString(R.string.installer_install_success))
+            builder.setContentTitle(
+                entities.getInfo(context).title,
+            ).setContentText(context.getString(R.string.installer_install_success))
                 .setLargeIcon(helper.getLargeIconBitmap(preferSystemIcon))
         val openPendingIntent = helper.getLaunchPendingIntent(entities.firstOrNull()?.packageName)
         if (openPendingIntent != null) newBuilder = newBuilder.addAction(0, context.getString(R.string.open), openPendingIntent)
         return newBuilder.addAction(0, context.getString(R.string.finish), helper.finishIntent)
     }
 
-    private fun onInstallCompleted(builder: NotificationCompat.Builder, progress: ProgressEntity.InstallCompleted): NotificationCompat.Builder {
+    private fun onInstallCompleted(
+        builder: NotificationCompat.Builder,
+        progress: ProgressEntity.InstallCompleted,
+    ): NotificationCompat.Builder {
         val successCount = progress.results.count { it.success }
         val title =
-            if (successCount == progress.results.size) context.getString(R.string.installer_install_success) else "${context.getString(R.string.installer_install_success)}: $successCount/${progress.results.size}"
-        return builder.setContentTitle(title).setContentText(context.getString(R.string.installer_live_channel_short_text_success))
+            if (successCount ==
+                progress.results.size
+            ) {
+                context.getString(R.string.installer_install_success)
+            } else {
+                "${context.getString(R.string.installer_install_success)}: $successCount/${progress.results.size}"
+            }
+        return builder.setContentTitle(
+            title,
+        ).setContentText(context.getString(R.string.installer_live_channel_short_text_success))
             .addAction(0, context.getString(R.string.finish), helper.finishIntent)
     }
 }

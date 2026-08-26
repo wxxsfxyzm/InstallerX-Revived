@@ -2,9 +2,9 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.repository
 
-import com.rosan.installer.domain.settings.model.preferences.AppPreferences
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
+import com.rosan.installer.domain.settings.model.preferences.AppPreferences
 import kotlinx.coroutines.flow.Flow
 
 enum class StringSetting {
@@ -22,7 +22,7 @@ enum class StringSetting {
     GithubUpdateChannel,
     CustomGithubProxyUrl,
     InstallerBiometricAuthMode,
-    SmartAuthorizerCandidates
+    SmartAuthorizerCandidates,
 }
 
 enum class IntSetting {
@@ -30,7 +30,7 @@ enum class IntSetting {
     ShowMiIslandBlockingInterval,
     NotificationSuccessAutoClearSeconds,
     CloseSessionCountdown,
-    UninstallFlags
+    UninstallFlags,
 }
 
 enum class BooleanSetting {
@@ -86,17 +86,17 @@ enum class BooleanSetting {
     DetectXposedModule,
     QuickOpenLSPosed,
     EnableFileLogging,
-    UserSetLSPosedActive
+    UserSetLSPosedActive,
 }
 
 enum class NamedPackageListSetting {
     ManagedInstallerPackages,
     ManagedBlacklistPackages,
-    ManagedSharedUserIdExemptedPackages
+    ManagedSharedUserIdExemptedPackages,
 }
 
 enum class SharedUidListSetting {
-    ManagedSharedUserIdBlacklist
+    ManagedSharedUserIdBlacklist,
 }
 
 interface AppSettingsRepository {
@@ -112,16 +112,10 @@ interface AppSettingsRepository {
     fun getBoolean(setting: BooleanSetting, default: Boolean = false): Flow<Boolean>
 
     suspend fun putNamedPackageList(setting: NamedPackageListSetting, packages: List<NamedPackage>)
-    fun getNamedPackageList(
-        setting: NamedPackageListSetting,
-        default: List<NamedPackage> = emptyList()
-    ): Flow<List<NamedPackage>>
+    fun getNamedPackageList(setting: NamedPackageListSetting, default: List<NamedPackage> = emptyList()): Flow<List<NamedPackage>>
 
     suspend fun putSharedUidList(setting: SharedUidListSetting, uids: List<SharedUid>)
-    fun getSharedUidList(
-        setting: SharedUidListSetting,
-        default: List<SharedUid> = emptyList()
-    ): Flow<List<SharedUid>>
+    fun getSharedUidList(setting: SharedUidListSetting, default: List<SharedUid> = emptyList()): Flow<List<SharedUid>>
 
     suspend fun updateUninstallFlags(transform: (Int) -> Int)
 }

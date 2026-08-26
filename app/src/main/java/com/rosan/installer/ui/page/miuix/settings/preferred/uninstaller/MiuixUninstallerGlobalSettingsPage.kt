@@ -34,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.ui.activity.UninstallerActivity
 import com.rosan.installer.ui.icons.AppIcons
@@ -49,7 +50,6 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixUninstallPackageDialog
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
-import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
@@ -62,10 +62,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun MiuixUninstallerGlobalSettingsPage(
-    useBlur: Boolean,
-    viewModel: UninstallerSettingsViewModel = koinViewModel()
-) {
+fun MiuixUninstallerGlobalSettingsPage(useBlur: Boolean, viewModel: UninstallerSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -89,7 +86,7 @@ fun MiuixUninstallerGlobalSettingsPage(
                 putExtra("package_name", packageName)
             }
             context.startActivity(intent)
-        }
+        },
     )
 
     val layoutDirection = LocalLayoutDirection.current
@@ -106,9 +103,9 @@ fun MiuixUninstallerGlobalSettingsPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -120,9 +117,9 @@ fun MiuixUninstallerGlobalSettingsPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item { Spacer(modifier = Modifier.size(12.dp)) }
             item { MiuixSettingsTipCard(stringResource(R.string.uninstall_authorizer_tip)) }
@@ -131,35 +128,42 @@ fun MiuixUninstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 16.dp),
                 ) {
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.uninstall_keep_data),
                         description = stringResource(id = R.string.uninstall_keep_data_desc),
                         checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_KEEP_DATA),
                         onCheckedChange = {
-                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_KEEP_DATA, it))
-                        }
+                            viewModel.dispatch(
+                                UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_KEEP_DATA, it),
+                            )
+                        },
                     )
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.uninstall_all_users),
                         description = stringResource(id = R.string.uninstall_all_users_desc),
                         checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_ALL_USERS),
                         onCheckedChange = {
-                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_ALL_USERS, it))
-                        }
+                            viewModel.dispatch(
+                                UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_ALL_USERS, it),
+                            )
+                        },
                     )
                     MiuixSwitchWidget(
                         title = stringResource(id = R.string.uninstall_delete_system_app),
                         description = stringResource(id = R.string.uninstall_delete_system_app_desc),
                         checked = uiState.uninstallFlags.hasFlag(UninstallFlags.DELETE_SYSTEM_APP),
                         onCheckedChange = {
-                            viewModel.dispatch(UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_SYSTEM_APP, it))
-                        }
+                            viewModel.dispatch(
+                                UninstallerSettingsAction.ToggleGlobalUninstallFlag(UninstallFlags.DELETE_SYSTEM_APP, it),
+                            )
+                        },
                     )
                     if (BiometricManager
                             .from(LocalContext.current)
-                            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
+                            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
+                        BiometricManager.BIOMETRIC_SUCCESS
                     ) {
                         MiuixSwitchWidget(
                             icon = AppIcons.BiometricAuth,
@@ -168,7 +172,7 @@ fun MiuixUninstallerGlobalSettingsPage(
                             checked = uiState.uninstallerRequireBiometricAuth,
                             onCheckedChange = {
                                 viewModel.dispatch(UninstallerSettingsAction.ChangeBiometricAuth(it))
-                            }
+                            },
                         )
                     }
                 }
@@ -178,11 +182,11 @@ fun MiuixUninstallerGlobalSettingsPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 16.dp),
                 ) {
                     MiuixNavigationItemWidget(
                         title = stringResource(R.string.uninstall_call_uninstaller_manually),
-                        description = stringResource(R.string.uninstall_call_uninstaller_manually_desc)
+                        description = stringResource(R.string.uninstall_call_uninstaller_manually_desc),
                     ) {
                         showUninstallInputDialog.value = true
                     }

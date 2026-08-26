@@ -33,12 +33,12 @@ fun UnarchiveErrorContent(
     requiredBytes: Long,
     installerLabel: CharSequence?,
     onClose: () -> Unit,
-    onPrimaryAction: () -> Unit
+    onPrimaryAction: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
             text = unarchiveErrorTitle(status, installerLabel),
@@ -46,14 +46,14 @@ fun UnarchiveErrorContent(
             color = MiuixTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
         )
         Text(
             text = unarchiveErrorMessage(status, requiredBytes, installerLabel),
             style = MiuixTheme.textStyles.body1,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 24.dp)
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
         Row(
             modifier = Modifier
@@ -61,23 +61,23 @@ fun UnarchiveErrorContent(
                 .navigationBarsPadding()
                 .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
                 onClick = onClose,
                 text = stringResource(R.string.close),
                 colors = ButtonDefaults.textButtonColors(
                     color = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                    textColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
                 ),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             if (status.primaryAction != UnarchiveErrorAction.CLOSE) {
                 TextButton(
                     onClick = onPrimaryAction,
                     text = stringResource(status.actionLabelResId),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
@@ -87,12 +87,13 @@ fun UnarchiveErrorContent(
 @Composable
 fun unarchiveErrorTitle(
     status: UnarchiveStatus,
-    installerLabel: CharSequence?
+    installerLabel: CharSequence?,
 ): String = when (status) {
     UnarchiveStatus.InstallerDisabled,
-    UnarchiveStatus.InstallerUninstalled -> stringResource(
+    UnarchiveStatus.InstallerUninstalled,
+    -> stringResource(
         status.titleResId,
-        installerLabel ?: stringResource(R.string.installer_label_unknown)
+        installerLabel ?: stringResource(R.string.installer_label_unknown),
     )
 
     else -> stringResource(status.titleResId)
@@ -102,19 +103,20 @@ fun unarchiveErrorTitle(
 private fun unarchiveErrorMessage(
     status: UnarchiveStatus,
     requiredBytes: Long,
-    installerLabel: CharSequence?
+    installerLabel: CharSequence?,
 ): String {
     val context = LocalContext.current
     return when (status) {
         UnarchiveStatus.InsufficientStorage -> stringResource(
             status.messageResId,
-            Formatter.formatShortFileSize(context, requiredBytes)
+            Formatter.formatShortFileSize(context, requiredBytes),
         )
 
         UnarchiveStatus.InstallerDisabled,
-        UnarchiveStatus.InstallerUninstalled -> stringResource(
+        UnarchiveStatus.InstallerUninstalled,
+        -> stringResource(
             status.messageResId,
-            installerLabel ?: stringResource(R.string.installer_label_unknown)
+            installerLabel ?: stringResource(R.string.installer_label_unknown),
         )
 
         else -> stringResource(status.messageResId)

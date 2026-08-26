@@ -5,7 +5,8 @@ package com.rosan.installer.domain.settings.model.preferences.theme
 enum class ThemeMode {
     LIGHT,
     DARK,
-    SYSTEM;
+    SYSTEM,
+    ;
 
     companion object {
         fun fromValueOrDefault(value: String) = entries.find { it.name == value } ?: SYSTEM

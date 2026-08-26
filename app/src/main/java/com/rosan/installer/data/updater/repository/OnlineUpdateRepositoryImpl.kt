@@ -10,6 +10,7 @@ import com.rosan.installer.data.updater.model.GithubRelease
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.updater.model.UpdateInfo
 import com.rosan.installer.domain.updater.repository.UpdateRepository
+import java.io.InputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,13 +24,12 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
-import java.io.InputStream
 
 class OnlineUpdateRepositoryImpl(
     private val context: Context,
     private val client: OkHttpClient,
     private val json: Json,
-    private val appSettingsRepository: AppSettingsRepository
+    private val appSettingsRepository: AppSettingsRepository,
 ) : UpdateRepository {
     companion object {
         private const val REPO_OWNER = "wxxsfxyzm"
@@ -63,13 +63,13 @@ class OnlineUpdateRepositoryImpl(
                         isDebug = AppConfig.isDebug,
                         level = AppConfig.LEVEL,
                         packageName = context.packageName,
-                        officialPackageName = OFFICIAL_PACKAGE_NAME
+                        officialPackageName = OFFICIAL_PACKAGE_NAME,
                     )
                 ) {
                     Timber.d(
                         "checkUpdate: Skipped. allowInternetAccess=${prefs.allowInternetAccess}, " +
-                                "isDebug=${AppConfig.isDebug}, LEVEL=${AppConfig.LEVEL}, " +
-                                "package=${context.packageName}"
+                            "isDebug=${AppConfig.isDebug}, LEVEL=${AppConfig.LEVEL}, " +
+                            "package=${context.packageName}",
                     )
                     _updateInfoFlow.value = null
                     hasChecked = false
@@ -98,7 +98,7 @@ class OnlineUpdateRepositoryImpl(
                 val downloadUrl = OnlineUpdatePolicy.resolveDownloadUrl(
                     asset = apkAsset,
                     channel = prefs.githubUpdateChannel,
-                    customProxyUrl = prefs.customGithubProxyUrl
+                    customProxyUrl = prefs.customGithubProxyUrl,
                 )
                 val remoteVersion = OnlineUpdatePolicy.resolveRemoteVersion(remoteRelease, apkAsset)
 
@@ -115,7 +115,7 @@ class OnlineUpdateRepositoryImpl(
                     hasUpdate = hasUpdate,
                     remoteVersion = remoteVersion,
                     releaseUrl = remoteRelease.htmlUrl ?: "",
-                    downloadUrl = downloadUrl
+                    downloadUrl = downloadUrl,
                 )
 
                 // Cache result and mark as checked

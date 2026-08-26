@@ -9,11 +9,7 @@ import com.rosan.installer.core.reflection.getStaticValue
 import com.rosan.installer.core.reflection.getValue
 import java.lang.reflect.Field
 
-data class SettingsReflectionInfo(
-    val provider: Any,
-    val remoteField: Field,
-    val originalBinder: IBinder
-)
+data class SettingsReflectionInfo(val provider: Any, val remoteField: Field, val originalBinder: IBinder)
 
 fun ReflectionProvider.resolveSettingsBinder(): SettingsReflectionInfo? {
     val holder = this.getStaticValue<Any>("sProviderHolder", Settings.Global::class.java) ?: return null

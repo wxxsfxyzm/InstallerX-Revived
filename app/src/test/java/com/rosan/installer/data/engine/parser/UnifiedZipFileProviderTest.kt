@@ -7,7 +7,6 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.source.ZipEntryMetadataSource
-import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.channels.FileChannel
@@ -26,6 +25,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlinx.serialization.json.Json
 
 class UnifiedZipFileProviderTest {
     private lateinit var tempDirectory: File
@@ -50,8 +50,8 @@ class UnifiedZipFileProviderTest {
             "broken.apks",
             listOf(
                 TestEntry("base.apk", basePayload),
-                TestEntry("split_config.en.apk", splitPayload)
-            )
+                TestEntry("split_config.en.apk", splitPayload),
+            ),
         )
 
         provider.open(file).use { archive ->
@@ -61,7 +61,7 @@ class UnifiedZipFileProviderTest {
             val baseEntry = requireNotNull(archive.getEntry("base.apk"))
             assertContentEquals(basePayload, archive.openEntry(baseEntry).use { it.readBytes() })
             assertIs<DataEntity.SeekableZipEntryEntity>(
-                archive.toDataEntity(baseEntry, DataEntity.FileEntity(file.path))
+                archive.toDataEntity(baseEntry, DataEntity.FileEntity(file.path)),
             )
         }
     }
@@ -96,7 +96,7 @@ class UnifiedZipFileProviderTest {
             channelFactory = {
                 FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
             },
-            descriptorFactory = { error("ZIP parsing must not request a raw descriptor") }
+            descriptorFactory = { error("ZIP parsing must not request a raw descriptor") },
         ).apply {
             this.source = DataEntity.FileEntity(displayPath)
         }
@@ -117,9 +117,9 @@ class UnifiedZipFileProviderTest {
                 AnalyseExtraEntity(
                     cacheDirectory = tempDirectory.path,
                     isModuleFlashEnabled = false,
-                    checkAppSignature = false
-                )
-            )
+                    checkAppSignature = false,
+                ),
+            ),
         )
     }
 
@@ -143,7 +143,7 @@ class UnifiedZipFileProviderTest {
             channelFactory = {
                 FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
             },
-            descriptorFactory = { error("The bounded entry test must not request a raw descriptor") }
+            descriptorFactory = { error("The bounded entry test must not request a raw descriptor") },
         )
 
         lateinit var storedEntity: DataEntity
@@ -152,18 +152,18 @@ class UnifiedZipFileProviderTest {
             storedEntity = archive.toDataEntity(requireNotNull(archive.getEntry("base.apk")), source)
             compressedEntity = archive.toDataEntity(
                 requireNotNull(archive.getEntry("split_config.en.apk")),
-                source
+                source,
             )
             assertIs<DataEntity.FileDescriptorEntity>(storedEntity)
             assertEquals("base.apk", assertIs<DataEntity.FileDescriptorEntity>(storedEntity).archiveEntryName)
             assertIs<DataEntity.SeekableZipEntryEntity>(compressedEntity)
             assertEquals(
                 storedPayload.size.toLong(),
-                assertIs<ZipEntryMetadataSource>(storedEntity).zipEntryMetadata?.uncompressedSize
+                assertIs<ZipEntryMetadataSource>(storedEntity).zipEntryMetadata?.uncompressedSize,
             )
             assertEquals(
                 compressedPayload.size.toLong(),
-                assertIs<ZipEntryMetadataSource>(compressedEntity).zipEntryMetadata?.uncompressedSize
+                assertIs<ZipEntryMetadataSource>(compressedEntity).zipEntryMetadata?.uncompressedSize,
             )
         }
 
@@ -179,42 +179,42 @@ class UnifiedZipFileProviderTest {
                 fileName = "splits.apks",
                 entries = listOf(
                     TestEntry("base.apk", "apks-base".toByteArray()),
-                    TestEntry("split_config.en.apk", "apks-split".toByteArray())
+                    TestEntry("split_config.en.apk", "apks-split".toByteArray()),
                 ),
-                expectedType = DataType.APKS
+                expectedType = DataType.APKS,
             ),
             DetectionCase(
                 fileName = "bundle.apkm",
                 entries = listOf(
                     TestEntry("info.json", "{\"pname\":\"pkg\",\"versioncode\":\"1\"}".toByteArray()),
-                    TestEntry("base.apk", "apkm-base".toByteArray())
+                    TestEntry("base.apk", "apkm-base".toByteArray()),
                 ),
-                expectedType = DataType.APKM
+                expectedType = DataType.APKM,
             ),
             DetectionCase(
                 fileName = "bundle.xapk",
                 entries = listOf(
                     TestEntry(
                         "manifest.json",
-                        "{\"package_name\":\"pkg\",\"version_code\":1,\"split_apks\":[]}".toByteArray()
+                        "{\"package_name\":\"pkg\",\"version_code\":1,\"split_apks\":[]}".toByteArray(),
                     ),
-                    TestEntry("base.apk", "xapk-base".toByteArray())
+                    TestEntry("base.apk", "xapk-base".toByteArray()),
                 ),
-                expectedType = DataType.XAPK
+                expectedType = DataType.XAPK,
             ),
             DetectionCase(
                 fileName = "multiple.zip",
                 entries = listOf(
                     TestEntry("first.apk", "multi-first".toByteArray()),
-                    TestEntry("second.apk", "multi-second".toByteArray())
+                    TestEntry("second.apk", "multi-second".toByteArray()),
                 ),
-                expectedType = DataType.MULTI_APK_ZIP
-            )
+                expectedType = DataType.MULTI_APK_ZIP,
+            ),
         )
         val extra = AnalyseExtraEntity(
             cacheDirectory = tempDirectory.path,
             isModuleFlashEnabled = false,
-            checkAppSignature = false
+            checkAppSignature = false,
         )
 
         cases.forEach { case ->
@@ -230,7 +230,7 @@ class UnifiedZipFileProviderTest {
                 channelFactory = {
                     FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
                 },
-                descriptorFactory = { error("Container mapping must not request a raw descriptor") }
+                descriptorFactory = { error("Container mapping must not request a raw descriptor") },
             ).apply {
                 this.source = DataEntity.FileEntity(displayPath)
             }
@@ -240,14 +240,14 @@ class UnifiedZipFileProviderTest {
                 case.entries.filter { it.name.endsWith(".apk") }.forEach { expectedEntry ->
                     val data = archive.toDataEntity(
                         requireNotNull(archive.getEntry(expectedEntry.name)),
-                        source
+                        source,
                     )
                     val descriptorData = assertIs<DataEntity.FileDescriptorEntity>(data, case.fileName)
                     assertEquals(expectedEntry.name, descriptorData.archiveEntryName, case.fileName)
                     assertContentEquals(
                         expectedEntry.payload,
                         descriptorData.getInputStream().use { it.readBytes() },
-                        "${case.fileName}!${expectedEntry.name}"
+                        "${case.fileName}!${expectedEntry.name}",
                     )
                 }
             }
@@ -260,8 +260,8 @@ class UnifiedZipFileProviderTest {
             "nested.apks",
             listOf(
                 TestEntry("base.apk", validInnerApk("base")),
-                TestEntry("split_config.en.apk", validInnerApk("split"))
-            )
+                TestEntry("split_config.en.apk", validInnerApk("split")),
+            ),
         )
 
         provider.open(file).use { archive ->
@@ -277,9 +277,9 @@ class UnifiedZipFileProviderTest {
                 AnalyseExtraEntity(
                     cacheDirectory = tempDirectory.path,
                     isModuleFlashEnabled = false,
-                    checkAppSignature = false
-                )
-            )
+                    checkAppSignature = false,
+                ),
+            ),
         )
     }
 
@@ -289,14 +289,14 @@ class UnifiedZipFileProviderTest {
             "truncated-central.apks",
             listOf(
                 TestEntry("base.apk", validInnerApk("base")),
-                TestEntry("split_config.en.apk", validInnerApk("split"))
-            )
+                TestEntry("split_config.en.apk", validInnerApk("split")),
+            ),
         ).apply {
             appendBytes(
                 ByteArrayOutputStream().apply {
                     writeIntLittleEndian(CENTRAL_DIRECTORY_SIGNATURE)
                     write(ByteArray(12))
-                }.toByteArray()
+                }.toByteArray(),
             )
         }
 
@@ -330,7 +330,7 @@ class UnifiedZipFileProviderTest {
     fun `can disable local fallback for module archives`() {
         val file = writeLocalOnlyArchive(
             "module-view.zip",
-            listOf(TestEntry("base.apk", validInnerApk("base")))
+            listOf(TestEntry("base.apk", validInnerApk("base"))),
         )
 
         provider.open(file, allowLocalHeaderFallback = false).use { archive ->
@@ -347,43 +347,43 @@ class UnifiedZipFileProviderTest {
             DetectionCase(
                 fileName = "single.apk",
                 entries = listOf(TestEntry("AndroidManifest.xml", "manifest".toByteArray())),
-                expectedType = DataType.APK
+                expectedType = DataType.APK,
             ),
             DetectionCase(
                 fileName = "splits.apks",
                 entries = listOf(
                     TestEntry("base.apk", "base".toByteArray()),
-                    TestEntry("split_config.en.apk", "split".toByteArray())
+                    TestEntry("split_config.en.apk", "split".toByteArray()),
                 ),
-                expectedType = DataType.APKS
+                expectedType = DataType.APKS,
             ),
             DetectionCase(
                 fileName = "bundle.apkm",
                 entries = listOf(
                     TestEntry("info.json", "{\"pname\":\"pkg\",\"versioncode\":\"1\"}".toByteArray()),
-                    TestEntry("base.apk", "base".toByteArray())
+                    TestEntry("base.apk", "base".toByteArray()),
                 ),
-                expectedType = DataType.APKM
+                expectedType = DataType.APKM,
             ),
             DetectionCase(
                 fileName = "bundle.xapk",
                 entries = listOf(
                     TestEntry(
                         "manifest.json",
-                        "{\"package_name\":\"pkg\",\"version_code\":1,\"split_apks\":[]}".toByteArray()
+                        "{\"package_name\":\"pkg\",\"version_code\":1,\"split_apks\":[]}".toByteArray(),
                     ),
-                    TestEntry("base.apk", "base".toByteArray())
+                    TestEntry("base.apk", "base".toByteArray()),
                 ),
-                expectedType = DataType.XAPK
+                expectedType = DataType.XAPK,
             ),
             DetectionCase(
                 fileName = "multiple.zip",
                 entries = listOf(
                     TestEntry("first.apk", "first".toByteArray()),
-                    TestEntry("second.apk", "second".toByteArray())
+                    TestEntry("second.apk", "second".toByteArray()),
                 ),
-                expectedType = DataType.MULTI_APK_ZIP
-            )
+                expectedType = DataType.MULTI_APK_ZIP,
+            ),
         )
 
         cases.forEach { case ->
@@ -393,8 +393,8 @@ class UnifiedZipFileProviderTest {
                 AnalyseExtraEntity(
                     cacheDirectory = tempDirectory.path,
                     isModuleFlashEnabled = false,
-                    checkAppSignature = false
-                )
+                    checkAppSignature = false,
+                ),
             )
 
             assertEquals(case.expectedType, result, case.fileName)
@@ -408,7 +408,7 @@ class UnifiedZipFileProviderTest {
                 ByteArrayOutputStream().apply {
                     writeIntLittleEndian(LOCAL_FILE_HEADER_SIGNATURE)
                     write(ByteArray(5))
-                }.toByteArray()
+                }.toByteArray(),
             )
         }
         val detector = FileTypeDetector(Json.Default, provider)
@@ -420,9 +420,9 @@ class UnifiedZipFileProviderTest {
                 AnalyseExtraEntity(
                     cacheDirectory = tempDirectory.path,
                     isModuleFlashEnabled = false,
-                    checkAppSignature = false
-                )
-            )
+                    checkAppSignature = false,
+                ),
+            ),
         )
     }
 
@@ -432,7 +432,7 @@ class UnifiedZipFileProviderTest {
         val extra = AnalyseExtraEntity(
             cacheDirectory = tempDirectory.path,
             isModuleFlashEnabled = true,
-            checkAppSignature = false
+            checkAppSignature = false,
         )
         val moduleProperties = "id=test\nname=Test".toByteArray()
         val normalModule = File(tempDirectory, "normal-module.zip")
@@ -441,16 +441,16 @@ class UnifiedZipFileProviderTest {
         }
         val localOnlyModule = writeLocalOnlyArchive(
             "local-only-module.zip",
-            listOf(TestEntry("module.prop", moduleProperties))
+            listOf(TestEntry("module.prop", moduleProperties)),
         )
 
         assertEquals(
             DataType.MODULE_ZIP,
-            detector.detect(DataEntity.FileEntity(normalModule.path), extra)
+            detector.detect(DataEntity.FileEntity(normalModule.path), extra),
         )
         assertEquals(
             DataType.NONE,
-            detector.detect(DataEntity.FileEntity(localOnlyModule.path), extra)
+            detector.detect(DataEntity.FileEntity(localOnlyModule.path), extra),
         )
     }
 
@@ -471,7 +471,7 @@ class UnifiedZipFileProviderTest {
     private fun ByteArrayOutputStream.writeStoredLocalEntry(
         name: String,
         payload: ByteArray,
-        compressionMethod: Int = ZipEntry.STORED
+        compressionMethod: Int = ZipEntry.STORED,
     ) {
         val nameBytes = name.toByteArray(StandardCharsets.UTF_8)
         val crc = CRC32().apply { update(payload) }.value
@@ -498,7 +498,7 @@ class UnifiedZipFileProviderTest {
                 size = payload.size.toLong()
                 compressedSize = payload.size.toLong()
                 this.crc = crc
-            }
+            },
         )
         write(payload)
         closeEntry()
@@ -514,11 +514,7 @@ class UnifiedZipFileProviderTest {
 
     private data class TestEntry(val name: String, val payload: ByteArray)
 
-    private data class DetectionCase(
-        val fileName: String,
-        val entries: List<TestEntry>,
-        val expectedType: DataType
-    )
+    private data class DetectionCase(val fileName: String, val entries: List<TestEntry>, val expectedType: DataType)
 
     private companion object {
         const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034B50L

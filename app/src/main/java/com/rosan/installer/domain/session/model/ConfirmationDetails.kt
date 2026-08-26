@@ -24,5 +24,5 @@ data class ConfirmationDetails(
     val isSelfSession: Boolean = false,
     // Preserve installing progress for multi install interruption
     val currentProgress: Int = 1,
-    val totalProgress: Int = 1
+    val totalProgress: Int = 1,
 )

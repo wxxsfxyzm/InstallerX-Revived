@@ -3,13 +3,13 @@
 package com.rosan.installer.data.engine.executor.appinstaller
 
 import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import java.io.EOFException
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 /**
  * Copies selected APK payloads while reporting aggregate bytes written.
@@ -20,7 +20,7 @@ import kotlin.math.min
 internal class InstallProgressWriter(
     private val totalBytes: Long,
     private val onProgress: suspend (InstallWriteProgress) -> Unit,
-    private val nanoTime: () -> Long = System::nanoTime
+    private val nanoTime: () -> Long = System::nanoTime,
 ) {
     private val reportStep = max(totalBytes / 100L, MIN_REPORT_STEP)
     private var completedBytes = 0L
@@ -39,7 +39,7 @@ internal class InstallProgressWriter(
         input: InputStream,
         output: OutputStream,
         expectedBytes: Long,
-        onEntryProgress: (bytesWritten: Long) -> Unit = {}
+        onEntryProgress: (bytesWritten: Long) -> Unit = {},
     ) {
         require(expectedBytes > 0L) { "expectedBytes must be positive" }
         require(expectedBytes <= totalBytes - completedBytes) {
@@ -64,7 +64,7 @@ internal class InstallProgressWriter(
             entryBytes += count
             if (entryBytes > expectedBytes) {
                 throw EOFException(
-                    "Install source exceeds expected size: expected=$expectedBytes, actual>$entryBytes"
+                    "Install source exceeds expected size: expected=$expectedBytes, actual>$entryBytes",
                 )
             }
 
@@ -78,7 +78,7 @@ internal class InstallProgressWriter(
 
         if (entryBytes != expectedBytes) {
             throw EOFException(
-                "Incomplete install source: expected=$expectedBytes, actual=$entryBytes"
+                "Incomplete install source: expected=$expectedBytes, actual=$entryBytes",
             )
         }
 

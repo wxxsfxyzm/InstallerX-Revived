@@ -16,13 +16,15 @@ ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
 ktlint_code_style = android_studio
 max_line_length = 130
+ktlint_standard_max-line-length = disabled
 
-# Keep Spotless focused on formatting without forcing unrelated API, file, or
-# documentation refactors when an existing source file is touched.
+# Keep Spotless focused on formatting without forcing unrelated API, file
+# naming, or documentation refactors.
 ktlint_standard_backing-property-naming = disabled
 ktlint_standard_comment-wrapping = disabled
 ktlint_standard_filename = disabled
 ktlint_standard_kdoc = disabled
+ktlint_standard_kdoc-wrapping = disabled
 ktlint_standard_mixed-condition-operators = disabled
 ktlint_standard_property-naming = disabled
 ktlint_standard_value-parameter-comment = disabled
@@ -35,3 +37,4 @@ ktlint_compose_multiple-emitters-check = disabled
 ktlint_compose_mutable-state-autoboxing = disabled
 ktlint_compose_param-order-check = disabled
 ktlint_compose_vm-forwarding-check = disabled
+ktlint_compose_modifier-not-used-at-root = disabled

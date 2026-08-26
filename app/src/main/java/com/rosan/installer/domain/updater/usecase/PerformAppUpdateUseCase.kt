@@ -6,13 +6,13 @@ import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.updater.model.UpdateInfo
 import com.rosan.installer.domain.updater.provider.InAppInstallProvider
 import com.rosan.installer.domain.updater.repository.UpdateRepository
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.IOException
 
 class PerformAppUpdateUseCase(
     private val updateRepository: UpdateRepository,
-    private val inAppInstallProvider: InAppInstallProvider
+    private val inAppInstallProvider: InAppInstallProvider,
 ) {
     /**
      * Executes the full in-app update flow.
@@ -36,7 +36,7 @@ class PerformAppUpdateUseCase(
                 fileName = "base.apk",
                 inputStream = safeStream,
                 contentLength = length,
-                config = config
+                config = config,
             )
         }
     }

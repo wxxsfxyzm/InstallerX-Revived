@@ -4,8 +4,8 @@ package com.rosan.installer.util
 
 import android.content.Context
 import android.provider.MediaStore
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 private const val DELETE_TAG = "DELETE_PATH"
 
@@ -39,7 +39,7 @@ private fun removeFromMediaStore(context: Context, path: String) {
         val deletedRows = context.contentResolver.delete(
             MediaStore.Files.getContentUri("external"),
             "_data=?",
-            arrayOf(path)
+            arrayOf(path),
         )
         Timber.tag(DELETE_TAG).d("Removed $deletedRows MediaStore row(s) for: $path")
     } catch (e: SecurityException) {

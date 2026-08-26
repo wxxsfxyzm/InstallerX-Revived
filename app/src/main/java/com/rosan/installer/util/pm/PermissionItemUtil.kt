@@ -86,16 +86,20 @@ private fun String.getPermissionLabelRes(): Int = when (this) {
 fun Context.getBestPermissionLabel(permission: String): String {
     val customResId = permission.getPermissionLabelRes()
 
-    return if (customResId != R.string.permission_unknown)
+    return if (customResId != R.string.permission_unknown) {
         this.getString(customResId)
-    else try {
-        val pm = this.packageManager
-        val permissionInfo = pm.getPermissionInfo(permission, 0)
-        if (permission == permissionInfo.loadLabel(pm).toString())
+    } else {
+        try {
+            val pm = this.packageManager
+            val permissionInfo = pm.getPermissionInfo(permission, 0)
+            if (permission == permissionInfo.loadLabel(pm).toString()) {
+                this.getString(R.string.permission_unknown)
+            } else {
+                permissionInfo.loadLabel(pm).toString()
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            Timber.e(e, "Permission not found: %s", permission)
             this.getString(R.string.permission_unknown)
-        else permissionInfo.loadLabel(pm).toString()
-    } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e, "Permission not found: %s", permission)
-        this.getString(R.string.permission_unknown)
+        }
     }
 }

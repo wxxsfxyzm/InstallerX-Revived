@@ -15,10 +15,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 
 @Composable
-fun UpdateLoadingIndicator(
-    backdrop: LayerBackdrop?,
-    viewModel: AboutViewModel
-) {
+fun UpdateLoadingIndicator(backdrop: LayerBackdrop?, viewModel: AboutViewModel) {
     var showUpdateLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -35,6 +32,6 @@ fun UpdateLoadingIndicator(
     BlockingLoadingIndicator(
         visible = showUpdateLoading,
         text = stringResource(R.string.updating),
-        backdrop = backdrop
+        backdrop = backdrop,
     )
 }

@@ -26,7 +26,7 @@ fun SwipeableSnackbarHost(
         backgroundContent = {},
         onDismiss = {
             hostState.currentSnackbarData?.dismiss()
-        }
+        },
     ) {
         SnackbarHost(
             modifier = modifier,

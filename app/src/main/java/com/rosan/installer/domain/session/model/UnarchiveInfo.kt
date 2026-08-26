@@ -8,5 +8,5 @@ data class UnarchiveInfo(
     val packageName: String,
     val appLabel: CharSequence,
     val installerLabel: CharSequence,
-    val intentSender: IntentSender
+    val intentSender: IntentSender,
 )

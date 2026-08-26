@@ -58,7 +58,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun InstallerNavContainer(uiState: ThemeState) {
     val sharedViewModel: SettingsSharedViewModel = koinViewModel(
-        viewModelStoreOwner = LocalActivity.current as ComponentActivity
+        viewModelStoreOwner = LocalActivity.current as ComponentActivity,
     )
 
     val backStack = rememberNavBackStack<Route>(Route.Main)
@@ -71,8 +71,8 @@ fun InstallerNavContainer(uiState: ThemeState) {
     ) {
         val navCornerRadius = rememberDeviceCornerRadius(defaultRadius = 0.dp)
         val roundAllCorners = uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP ||
-                uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
-                uiState.predictiveBackAnimation == PredictiveBackAnimation.Classic
+            uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
+            uiState.predictiveBackAnimation == PredictiveBackAnimation.Classic
         val backdropColor = if (uiState.useMiuix) {
             MiuixTheme.colorScheme.surface
         } else {
@@ -122,12 +122,12 @@ fun InstallerNavContainer(uiState: ThemeState) {
                     if (uiState.useMiuix) {
                         MiuixEditPage(
                             id = if (id != -1L) id else null,
-                            useBlur = useBlur
+                            useBlur = useBlur,
                         )
                     } else {
                         EditPage(
                             id = if (id != -1L) id else null,
-                            useBlur = useBlur
+                            useBlur = useBlur,
                         )
                     }
                 }
@@ -255,11 +255,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
 }
 
 @Composable
-private fun InstallerNavEntry(
-    interceptPredictiveBack: Boolean,
-    onBack: () -> Unit,
-    content: @Composable () -> Unit,
-) {
+private fun InstallerNavEntry(interceptPredictiveBack: Boolean, onBack: () -> Unit, content: @Composable () -> Unit) {
     val navigationEventState = rememberNavigationEventState(NavigationEventInfo.None)
     NavigationBackHandler(
         state = navigationEventState,

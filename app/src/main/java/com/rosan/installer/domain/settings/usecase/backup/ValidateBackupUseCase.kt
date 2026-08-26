@@ -6,9 +6,6 @@ import com.rosan.installer.domain.settings.model.backup.BackupEnvelope
 import com.rosan.installer.domain.settings.model.backup.BackupRestorePreview
 import com.rosan.installer.domain.settings.repository.BackupRepository
 
-class ValidateBackupUseCase(
-    private val repository: BackupRepository
-) {
-    operator fun invoke(envelope: BackupEnvelope): BackupRestorePreview =
-        repository.validateBackup(envelope)
+class ValidateBackupUseCase(private val repository: BackupRepository) {
+    operator fun invoke(envelope: BackupEnvelope): BackupRestorePreview = repository.validateBackup(envelope)
 }

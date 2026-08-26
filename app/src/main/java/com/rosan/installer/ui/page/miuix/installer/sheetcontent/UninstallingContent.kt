@@ -32,7 +32,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 
 @Composable
 fun UninstallingContent(
-    viewModel: InstallerViewModel
+    viewModel: InstallerViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val info = uiState.uiUninstallInfo ?: return
@@ -40,14 +40,14 @@ fun UninstallingContent(
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         AppInfoSlot(
             appInfo = AppInfoState(
                 icon = uiState.displayIcons[info.packageName],
                 label = info.appLabel ?: "Unknown App",
-                packageName = info.packageName
-            )
+                packageName = info.packageName,
+            ),
         )
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -56,7 +56,7 @@ fun UninstallingContent(
             onClick = {},
             colors = ButtonDefaults.buttonColors(
                 disabledColor = if (isDynamicColor) MiuixTheme.colorScheme.secondaryContainer else MiuixTheme.colorScheme.secondaryVariant,
-                disabledContentColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant
+                disabledContentColor = if (isDynamicColor) MiuixTheme.colorScheme.onSecondaryContainer else MiuixTheme.colorScheme.onSecondaryVariant,
             ),
             modifier = Modifier
                 .fillMaxWidth()

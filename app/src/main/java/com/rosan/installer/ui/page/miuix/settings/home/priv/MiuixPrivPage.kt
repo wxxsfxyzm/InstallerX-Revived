@@ -53,10 +53,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun MiuixPrivPage(
-    useBlur: Boolean,
-    viewModel: HomePageViewModel = koinViewModel()
-) {
+fun MiuixPrivPage(useBlur: Boolean, viewModel: HomePageViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
@@ -87,7 +84,7 @@ fun MiuixPrivPage(
                 viewModel.dispatch(HomePageViewAction.ChangeCustomizeAuthorizer(customizeAuthorizer))
             }
             selectCustomizeOnConfirm = false
-        }
+        },
     )
 
     val backdrop = rememberMiuixBlurBackdrop(useBlur)
@@ -102,9 +99,9 @@ fun MiuixPrivPage(
                 navigationIcon = {
                     MiuixBackButton(onClick = { navigator.pop() })
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -116,9 +113,9 @@ fun MiuixPrivPage(
             contentPadding = PaddingValues(
                 start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection)
+                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
             ),
-            overscrollEffect = null
+            overscrollEffect = null,
         ) {
             item {
                 MiuixSettingsTipCard(text = stringResource(R.string.priv_page_what_is_this_desc))
@@ -133,12 +130,18 @@ fun MiuixPrivPage(
                 Card(
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
                 ) {
                     // None / System App
                     CheckboxPreference(
                         checkboxLocation = CheckboxLocation.End,
-                        title = if (uiState.isSystemApp) stringResource(R.string.working_status_system_installer) else stringResource(R.string.config_authorizer_none),
+                        title = if (uiState.isSystemApp) {
+                            stringResource(
+                                R.string.working_status_system_installer,
+                            )
+                        } else {
+                            stringResource(R.string.config_authorizer_none)
+                        },
                         summary = when {
                             !uiState.isSessionInstallSupported -> stringResource(R.string.unavailable)
                             uiState.isSystemApp -> stringResource(R.string.working_status_system_installer_desc)
@@ -146,7 +149,7 @@ fun MiuixPrivPage(
                         },
                         checked = uiState.globalAuthorizer == Authorizer.None,
                         enabled = uiState.isSessionInstallSupported,
-                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.None)) }
+                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.None)) },
                     )
 
                     // Root
@@ -154,10 +157,13 @@ fun MiuixPrivPage(
                     CheckboxPreference(
                         checkboxLocation = CheckboxLocation.End,
                         title = stringResource(R.string.config_authorizer_root),
-                        summary = if (isRootAvailable) stringResource(R.string.available) + " (${uiState.rootMode.name})"
-                        else stringResource(R.string.unavailable),
+                        summary = if (isRootAvailable) {
+                            stringResource(R.string.available) + " (${uiState.rootMode.name})"
+                        } else {
+                            stringResource(R.string.unavailable)
+                        },
                         checked = uiState.globalAuthorizer == Authorizer.Root,
-                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Root)) }
+                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Root)) },
                     )
 
                     // Shizuku
@@ -170,7 +176,7 @@ fun MiuixPrivPage(
                             else -> stringResource(R.string.shizuku_not_available)
                         },
                         checked = uiState.globalAuthorizer == Authorizer.Shizuku,
-                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Shizuku)) }
+                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Shizuku)) },
                     )
 
                     // Dhizuku
@@ -183,7 +189,7 @@ fun MiuixPrivPage(
                             else -> stringResource(R.string.dhizuku_not_available)
                         },
                         checked = uiState.globalAuthorizer == Authorizer.Dhizuku,
-                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Dhizuku)) }
+                        onCheckedChange = { viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Dhizuku)) },
                     )
 
                     // Custom
@@ -205,7 +211,7 @@ fun MiuixPrivPage(
                             } else {
                                 viewModel.dispatch(HomePageViewAction.ChangeAuthorizer(Authorizer.Customize))
                             }
-                        }
+                        },
                     )
                 }
             }

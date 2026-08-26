@@ -15,7 +15,7 @@ class RemotePackageProbeResultTest {
         RemotePackageProbeResult.StreamingUnsupported(StreamingUnsupportedReason.Platform),
         RemotePackageProbeResult.StreamingUnsupported(StreamingUnsupportedReason.RangeSource),
         RemotePackageProbeResult.StreamingUnsupported(StreamingUnsupportedReason.StableIdentity),
-        RemotePackageProbeResult.ProbeFailed(IOException("probe failed"))
+        RemotePackageProbeResult.ProbeFailed(IOException("probe failed")),
     )
 
     @Test
@@ -29,7 +29,7 @@ class RemotePackageProbeResultTest {
     fun `smart mode streams a single APK and downloads every other outcome`() {
         assertEquals(
             RemotePackageAction.Stream,
-            NetworkSourceMode.Smart.actionFor(RemotePackageProbeResult.SingleApk)
+            NetworkSourceMode.Smart.actionFor(RemotePackageProbeResult.SingleApk),
         )
         samples.minus(RemotePackageProbeResult.SingleApk).forEach { result ->
             assertEquals(RemotePackageAction.FullDownload, NetworkSourceMode.Smart.actionFor(result))
@@ -40,11 +40,11 @@ class RemotePackageProbeResultTest {
     fun `low storage mode downloads archives and rejects unavailable streaming`() {
         assertEquals(
             RemotePackageAction.Stream,
-            NetworkSourceMode.LowStorage.actionFor(RemotePackageProbeResult.SingleApk)
+            NetworkSourceMode.LowStorage.actionFor(RemotePackageProbeResult.SingleApk),
         )
         assertEquals(
             RemotePackageAction.FullDownload,
-            NetworkSourceMode.LowStorage.actionFor(RemotePackageProbeResult.PackageArchive)
+            NetworkSourceMode.LowStorage.actionFor(RemotePackageProbeResult.PackageArchive),
         )
         samples.filter {
             it is RemotePackageProbeResult.StreamingUnsupported || it is RemotePackageProbeResult.ProbeFailed
@@ -57,12 +57,11 @@ class RemotePackageProbeResultTest {
     fun `streaming analysis fallback follows the selected mode contract`() {
         assertEquals(
             AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
-            NetworkSourceMode.Smart.streamingAnalysisMaterializationPolicy()
+            NetworkSourceMode.Smart.streamingAnalysisMaterializationPolicy(),
         )
         assertEquals(
             AnalysisMaterializationPolicy.DISALLOW,
-            NetworkSourceMode.LowStorage.streamingAnalysisMaterializationPolicy()
+            NetworkSourceMode.LowStorage.streamingAnalysisMaterializationPolicy(),
         )
     }
-
 }

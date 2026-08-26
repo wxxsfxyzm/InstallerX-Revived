@@ -3,9 +3,9 @@
 package com.rosan.installer.data.engine.parser
 
 import com.rosan.installer.domain.engine.model.source.DataEntity
-import timber.log.Timber
 import java.io.File
 import java.io.IOException
+import timber.log.Timber
 
 /**
  * Produces a real local module file when analysis is backed by a retained content descriptor.
@@ -19,13 +19,11 @@ internal class ModuleSourceMaterializer {
             materializeForInstall(data.file, data.cacheDirectory)
 
         is DataEntity.FileEntity -> data
+
         else -> throw IOException("Module source is not file-backed: $data")
     }
 
-    fun materializeForInstall(
-        data: DataEntity.FileEntity,
-        cacheDirectory: String
-    ): DataEntity.FileEntity {
+    fun materializeForInstall(data: DataEntity.FileEntity, cacheDirectory: String): DataEntity.FileEntity {
         if (data !is DataEntity.FileDescriptorEntity) return data
 
         val directory = File(cacheDirectory)
@@ -40,13 +38,13 @@ internal class ModuleSourceMaterializer {
             }
             if (copiedSize != data.getSize()) {
                 throw IOException(
-                    "Incomplete module materialization: expected=${data.getSize()}, actual=$copiedSize"
+                    "Incomplete module materialization: expected=${data.getSize()}, actual=$copiedSize",
                 )
             }
 
             Timber.d(
                 "Materialized descriptor-backed module for path installation: " +
-                        "source=${data.getSourceTop()}, path=${localFile.absolutePath}, size=$copiedSize"
+                    "source=${data.getSourceTop()}, path=${localFile.absolutePath}, size=$copiedSize",
             )
             DataEntity.FileEntity(localFile.absolutePath).apply {
                 // Preserve source identity for grouping and cleanup. Module installation deliberately

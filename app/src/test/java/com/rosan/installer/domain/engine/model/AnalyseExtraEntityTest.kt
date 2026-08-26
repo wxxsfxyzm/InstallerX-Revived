@@ -12,7 +12,7 @@ class AnalyseExtraEntityTest {
     fun `split package signature checks are disabled by default`() {
         val extra = AnalyseExtraEntity(
             cacheDirectory = "cache",
-            checkAppSignature = true
+            checkAppSignature = true,
         )
 
         assertTrue(extra.shouldCheckAppSignatures(DataType.APK))
@@ -26,7 +26,7 @@ class AnalyseExtraEntityTest {
         val extra = AnalyseExtraEntity(
             cacheDirectory = "cache",
             checkAppSignature = true,
-            checkSplitPackageSignatures = true
+            checkSplitPackageSignatures = true,
         )
 
         assertTrue(extra.shouldCheckAppSignatures(DataType.APKS))
@@ -39,7 +39,7 @@ class AnalyseExtraEntityTest {
         val extra = AnalyseExtraEntity(
             cacheDirectory = "cache",
             checkAppSignature = false,
-            checkSplitPackageSignatures = true
+            checkSplitPackageSignatures = true,
         )
 
         assertFalse(extra.shouldCheckAppSignatures(DataType.APK))

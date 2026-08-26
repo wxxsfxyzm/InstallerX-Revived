@@ -26,12 +26,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun MiuixHintTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    labelText: String,
-    modifier: Modifier = Modifier
-) {
+fun MiuixHintTextField(value: String, onValueChange: (String) -> Unit, labelText: String, modifier: Modifier = Modifier) {
     // Setup InteractionSource to detect focus changes.
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -46,7 +41,7 @@ fun MiuixHintTextField(
 
     // Animate border color: primary when focused, transparent when not (to match 0 width).
     val animatedBorderColor by animateColorAsState(
-        targetValue = if (isFocused) focusedBorderColor else Color.Transparent
+        targetValue = if (isFocused) focusedBorderColor else Color.Transparent,
     )
 
     BasicTextField(
@@ -56,40 +51,40 @@ fun MiuixHintTextField(
             .fillMaxWidth()
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(cornerRadius)
+                shape = RoundedCornerShape(cornerRadius),
             )
             .border(
                 width = borderWidth,
                 color = animatedBorderColor,
-                shape = RoundedCornerShape(cornerRadius)
+                shape = RoundedCornerShape(cornerRadius),
             ),
         interactionSource = interactionSource,
         textStyle = TextStyle.Default.copy(
             textAlign = TextAlign.End, // Text inside innerTextField aligns right
-            color = MiuixTheme.colorScheme.onBackground
+            color = MiuixTheme.colorScheme.onBackground,
         ),
         cursorBrush = SolidColor(MiuixTheme.colorScheme.primary),
         singleLine = true,
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = labelText,
                     color = MiuixTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
 
                 // Add contentAlignment = Alignment.CenterEnd to the Box wrapper.
                 // This forces innerTextField to be placed at the end of the available space.
                 Box(
                     modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterEnd // Force alignment to the right edge
+                    contentAlignment = Alignment.CenterEnd, // Force alignment to the right edge
                 ) {
                     innerTextField()
                 }
             }
-        }
+        },
     )
 }

@@ -8,16 +8,14 @@ import com.rosan.installer.domain.engine.repository.AppIconRepository
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
-class GetAppIconUseCase(
-    private val appIconRepo: AppIconRepository
-) {
+class GetAppIconUseCase(private val appIconRepo: AppIconRepository) {
     suspend operator fun invoke(
         sessionId: String,
         packageName: String,
         entityToInstall: AppEntity? = null,
         userId: Int = 0,
         iconSizePx: Int = 512,
-        preferSystemIcon: Boolean = true
+        preferSystemIcon: Boolean = true,
     ): Bitmap? = try {
         appIconRepo.getIcon(
             sessionId = sessionId,
@@ -25,7 +23,7 @@ class GetAppIconUseCase(
             entityToInstall = entityToInstall,
             userId = userId,
             iconSizePx = iconSizePx,
-            preferSystemIcon = preferSystemIcon
+            preferSystemIcon = preferSystemIcon,
         )
     } catch (e: Exception) {
         if (e is CancellationException) throw e

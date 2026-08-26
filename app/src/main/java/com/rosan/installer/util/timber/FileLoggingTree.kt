@@ -4,6 +4,10 @@ package com.rosan.installer.util.timber
 
 import android.content.Context
 import android.util.Log
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,19 +17,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
  * A Timber Tree that logs to files asynchronously.
  * Uses a buffered Channel to prevent blocking the UI thread and OOM issues.
  */
 @Suppress("LogNotTimber")
-class FileLoggingTree(
-    private val context: Context
-) : Timber.DebugTree() {
+class FileLoggingTree(private val context: Context) : Timber.DebugTree() {
 
     companion object {
         private const val TAG = "FileLoggingTree"
@@ -45,7 +43,7 @@ class FileLoggingTree(
     // Drop oldest logs if the consumer can't keep up with the producer.
     private val logChannel = Channel<String>(
         capacity = CHANNEL_CAPACITY,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -63,11 +61,9 @@ class FileLoggingTree(
     }
 
     // Override to ensure the tag formatting matches the logic in App.kt
-    override fun createStackElementTag(element: StackTraceElement): String? {
-        return super.createStackElementTag(element)
-            ?.substringBefore('$')
-            ?.take(23)
-    }
+    override fun createStackElementTag(element: StackTraceElement): String? = super.createStackElementTag(element)
+        ?.substringBefore('$')
+        ?.take(23)
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         // Filter out low priority logs in production if needed, generally INFO/WARN/ERROR
@@ -183,10 +179,8 @@ class FileLoggingTree(
         }
     }
 
-    private fun getCurrentTimestamp(): String {
-        return synchronized(entryDateFormat) {
-            entryDateFormat.format(Date())
-        }
+    private fun getCurrentTimestamp(): String = synchronized(entryDateFormat) {
+        entryDateFormat.format(Date())
     }
 
     private fun priorityToString(priority: Int) = when (priority) {

@@ -19,10 +19,9 @@ import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
-class ForegroundInfoHandler(
-    override val scope: CoroutineScope,
-    override val session: InstallerSessionRepository
-) : Handler, KoinComponent {
+class ForegroundInfoHandler(override val scope: CoroutineScope, override val session: InstallerSessionRepository) :
+    Handler,
+    KoinComponent {
 
     private var job: Job? = null
 
@@ -44,7 +43,9 @@ class ForegroundInfoHandler(
                     return@collect
                 }
 
-                if (progress is ProgressEntity.InstallAnalysedSuccess && session.config.installMode == InstallMode.AutoNotification) {
+                if (progress is ProgressEntity.InstallAnalysedSuccess &&
+                    session.config.installMode == InstallMode.AutoNotification
+                ) {
                     return@collect
                 }
 
@@ -54,13 +55,16 @@ class ForegroundInfoHandler(
 
                 // Business logic: Auto-close session upon complete success
                 val isSuccess = progress is ProgressEntity.InstallSuccess ||
-                        (progress is ProgressEntity.InstallCompleted && progress.results.all { it.success })
+                    (progress is ProgressEntity.InstallCompleted && progress.results.all { it.success })
 
                 if (background && isSuccess) {
                     // Start the countdown in a separate coroutine to avoid blocking the collect stream
                     if (autoCloseJob?.isActive != true) {
                         autoCloseJob = launch {
-                            val autoCloseSeconds = appSettingsRepo.getInt(IntSetting.NotificationSuccessAutoClearSeconds, 0).first()
+                            val autoCloseSeconds = appSettingsRepo.getInt(
+                                IntSetting.NotificationSuccessAutoClearSeconds,
+                                0,
+                            ).first()
                             if (autoCloseSeconds > 0) {
                                 delay(autoCloseSeconds * 1000L)
                                 notifier.cancel()

@@ -14,10 +14,7 @@ import timber.log.Timber
 /**
  * Signature reader for installed packages.
  */
-class InstalledPackageSignatureReader(
-    private val context: Context,
-    private val certificateFormatter: CertificateFormatter
-) : InstalledPackageSignatureProvider {
+class InstalledPackageSignatureReader(private val context: Context, private val certificateFormatter: CertificateFormatter) : InstalledPackageSignatureProvider {
     override fun hasSigningCertificate(packageName: String, certificateSha256: String): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return false
         val certificateBytes = certificateSha256.hexToByteArrayOrNull() ?: return false
@@ -25,7 +22,7 @@ class InstalledPackageSignatureReader(
             context.packageManager.hasSigningCertificate(
                 packageName,
                 certificateBytes,
-                PackageManager.CERT_INPUT_SHA256
+                PackageManager.CERT_INPUT_SHA256,
             )
         }.getOrDefault(false)
     }
@@ -50,7 +47,7 @@ class InstalledPackageSignatureReader(
                 signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
                 certificates = certificates,
                 signingCertificateHistory = signingCertificateHistory,
-                hasMultipleSigners = signatures.hasMultipleSigners
+                hasMultipleSigners = signatures.hasMultipleSigners,
             )
         } catch (_: PackageManager.NameNotFoundException) {
             Timber.d("Package not found, can't get signature: $packageName")
@@ -82,9 +79,10 @@ class InstalledPackageSignatureReader(
             val signingInfo = packageInfo.signingInfo
             when {
                 signingInfo == null -> InstalledSignatures()
+
                 signingInfo.hasMultipleSigners() -> InstalledSignatures(
                     current = signingInfo.apkContentsSigners?.toList().orEmpty(),
-                    hasMultipleSigners = true
+                    hasMultipleSigners = true,
                 )
 
                 else -> {
@@ -94,7 +92,7 @@ class InstalledPackageSignatureReader(
                     InstalledSignatures(
                         current = current,
                         history = history,
-                        hasMultipleSigners = false
+                        hasMultipleSigners = false,
                     )
                 }
             }
@@ -103,7 +101,7 @@ class InstalledPackageSignatureReader(
             val signatures = packageInfo.signatures?.toList().orEmpty()
             InstalledSignatures(
                 current = signatures,
-                hasMultipleSigners = signatures.size > 1
+                hasMultipleSigners = signatures.size > 1,
             )
         }
     }
@@ -123,6 +121,6 @@ class InstalledPackageSignatureReader(
     private data class InstalledSignatures(
         val current: List<Signature> = emptyList(),
         val history: List<Signature> = emptyList(),
-        val hasMultipleSigners: Boolean = false
+        val hasMultipleSigners: Boolean = false,
     )
 }

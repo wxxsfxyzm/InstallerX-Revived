@@ -17,14 +17,12 @@ val PackageInfo.compatVersionCode: Long
     get() = PackageInfoCompat.getLongVersionCode(this)
 
 // Compat function to run below SDK 33
-fun PackageManager.getCompatInstalledPackages(flags: Int): List<PackageInfo> {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        // For Android 13 (API 33) and above
-        getInstalledPackages(PackageManager.PackageInfoFlags.of(flags.toLong()))
-    } else {
-        // For older versions
-        getInstalledPackages(flags)
-    }
+fun PackageManager.getCompatInstalledPackages(flags: Int): List<PackageInfo> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    // For Android 13 (API 33) and above
+    getInstalledPackages(PackageManager.PackageInfoFlags.of(flags.toLong()))
+} else {
+    // For older versions
+    getInstalledPackages(flags)
 }
 
 /**
@@ -43,8 +41,8 @@ fun PackageManager.isPackageArchivedCompat(packageName: String): Boolean {
         val appInfo: ApplicationInfo = this.getApplicationInfo(
             packageName,
             PackageManager.ApplicationInfoFlags.of(
-                PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong()
-            )
+                PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong(),
+            ),
         )
         // Perform the check directly inside this function.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {

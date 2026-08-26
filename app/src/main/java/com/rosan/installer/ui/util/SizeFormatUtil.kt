@@ -14,6 +14,6 @@ fun Long.formatSize(): String {
         Locale.getDefault(),
         "%.2f %s",
         this / 1024.0.pow(digitGroups.toDouble()),
-        units[digitGroups]
+        units[digitGroups],
     )
 }

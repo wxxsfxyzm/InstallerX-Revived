@@ -15,7 +15,7 @@ internal class SeekableBlockCache(
     private val contentLength: Long,
     private val blockSize: Int,
     maxCachedBytes: Int,
-    private val loadBlock: (offset: Long, size: Int) -> ByteArray
+    private val loadBlock: (offset: Long, size: Int) -> ByteArray,
 ) {
     private val maxCachedBlocks = (maxCachedBytes / blockSize).coerceAtLeast(1)
     private val blocks = LinkedHashMap<Long, ByteArray>(maxCachedBlocks, 0.75f, true)
@@ -58,7 +58,7 @@ internal class SeekableBlockCache(
         val data = loadBlock(offset, expectedSize)
         if (data.size != expectedSize) {
             throw IOException(
-                "Incomplete range block: offset=$offset, expected=$expectedSize, actual=${data.size}"
+                "Incomplete range block: offset=$offset, expected=$expectedSize, actual=${data.size}",
             )
         }
         return data
@@ -80,7 +80,7 @@ internal fun calculateRuntimeRangeCacheBudget(
     maximumBytes: Int,
     maxHeapBytes: Long,
     allocatedHeapBytes: Long,
-    blockSize: Int
+    blockSize: Int,
 ): Int {
     require(maximumBytes > 0) { "maximumBytes must be positive" }
     require(maxHeapBytes > 0L) { "maxHeapBytes must be positive" }

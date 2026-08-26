@@ -3,11 +3,11 @@
 package com.rosan.installer.data.engine.parser
 
 import com.rosan.installer.domain.engine.model.source.DataEntity
-import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.security.MessageDigest
+import timber.log.Timber
 
 /**
  * Calculates the SHA-256 hash of this file.

@@ -5,5 +5,5 @@ package com.rosan.installer.domain.session.model
 enum class ConfirmationRequestType {
     INSTALL,
     PERMISSIONS,
-    PRE_APPROVAL
+    PRE_APPROVAL,
 }

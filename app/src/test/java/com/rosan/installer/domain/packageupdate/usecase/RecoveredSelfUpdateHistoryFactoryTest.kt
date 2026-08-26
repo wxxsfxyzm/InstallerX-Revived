@@ -26,14 +26,14 @@ class RecoveredSelfUpdateHistoryFactoryTest {
             initiatorPackageName = "com.android.documentsui",
             authorizer = Authorizer.Shizuku,
             installMode = InstallMode.Dialog,
-            operationSessionKey = "session-42"
+            operationSessionKey = "session-42",
         )
 
         val history = pending.toSuccessfulOperationHistory(
             actualNewVersionName = "1.1",
             actualNewVersionCode = 12L,
             installerPackageName = "com.rosan.installer",
-            timestamp = 1234L
+            timestamp = 1234L,
         )
 
         assertEquals(OperationType.INSTALL, history.operationType)

@@ -6,5 +6,5 @@ enum class UnarchiveErrorAction {
     CONTINUE,
     CLEAR_STORAGE,
     OPEN_INSTALLER_SETTINGS,
-    CLOSE
+    CLOSE,
 }

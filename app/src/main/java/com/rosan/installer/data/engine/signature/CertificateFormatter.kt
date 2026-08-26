@@ -24,7 +24,7 @@ class CertificateFormatter {
             validFrom = certificate?.notBefore?.formatUtc(),
             validUntil = certificate?.notAfter?.formatUtc(),
             publicKeyAlgorithm = certificate?.publicKey?.algorithm,
-            signatureAlgorithm = certificate?.sigAlgName
+            signatureAlgorithm = certificate?.sigAlgName,
         )
     }
 
@@ -44,15 +44,14 @@ class CertificateFormatter {
             validFrom = certificate.notBefore.formatUtc(),
             validUntil = certificate.notAfter.formatUtc(),
             publicKeyAlgorithm = certificate.publicKey.algorithm,
-            signatureAlgorithm = certificate.sigAlgName
+            signatureAlgorithm = certificate.sigAlgName,
         )
     }
 
-    private fun ByteArray.toX509CertificateOrNull() =
-        runCatching {
-            CertificateFactory.getInstance("X.509")
-                .generateCertificate(ByteArrayInputStream(this)) as X509Certificate
-        }.getOrNull()
+    private fun ByteArray.toX509CertificateOrNull() = runCatching {
+        CertificateFactory.getInstance("X.509")
+            .generateCertificate(ByteArrayInputStream(this)) as X509Certificate
+    }.getOrNull()
 
     private fun ByteArray.digestHex(algorithm: String): String {
         val digest = MessageDigest.getInstance(algorithm)

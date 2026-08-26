@@ -13,20 +13,14 @@ import com.rosan.installer.domain.session.model.SelectInstallEntity
 /**
  * Signature matcher.
  */
-class SignatureMatcher(
-    private val installedPackageSignatureReader: InstalledPackageSignatureReader
-) {
-    fun match(
-        baseEntity: AppEntity.BaseEntity?,
-        installedInfo: InstalledAppInfo?
-    ): SignatureMatchStatus = baseEntity.analyzePackageSignatureMatch(
+class SignatureMatcher(private val installedPackageSignatureReader: InstalledPackageSignatureReader) {
+    fun match(baseEntity: AppEntity.BaseEntity?, installedInfo: InstalledAppInfo?): SignatureMatchStatus = baseEntity.analyzePackageSignatureMatch(
         installedInfo = installedInfo,
-        hasSigningCertificate = installedPackageSignatureReader::hasSigningCertificate
+        hasSigningCertificate = installedPackageSignatureReader::hasSigningCertificate,
     )
 
     fun analyzeSelection(
         selectableEntities: List<SelectInstallEntity>,
-        installedInfo: InstalledAppInfo?
+        installedInfo: InstalledAppInfo?,
     ): PackageSignatureAnalysis = selectableEntities.analyzePackageSignatureSelection(installedInfo)
-
 }

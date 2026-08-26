@@ -45,7 +45,8 @@ class InstallerService : Service() {
 
     enum class Action(val value: String) {
         Ready("ready"),
-        Destroy("destroy");
+        Destroy("destroy"),
+        ;
 
         companion object {
             fun from(value: String?): Action? = entries.find { it.value == value }
@@ -87,6 +88,7 @@ class InstallerService : Service() {
 
         when (Action.from(actionString)) {
             Action.Destroy -> stopServiceForcefully()
+
             Action.Ready -> {
                 if (id != null) {
                     sessionManager.get(id)?.let { session ->
@@ -97,7 +99,8 @@ class InstallerService : Service() {
                 }
             }
 
-            else -> { /* Ignore unknown actions */
+            else -> {
+                /* Ignore unknown actions */
             }
         }
 
@@ -156,7 +159,7 @@ class InstallerService : Service() {
                 ActionHandler(scope, session),
                 ProgressHandler(scope, session),
                 ForegroundInfoHandler(scope, session),
-                BroadcastHandler(scope, session)
+                BroadcastHandler(scope, session),
             )
 
             // Start observing UI effects (Toasts) on the main thread
@@ -200,8 +203,10 @@ class InstallerService : Service() {
             action = Action.Destroy.value
         }
         val pendingCancel = PendingIntent.getService(
-            this, 0, cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            this,
+            0,
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         val settingsIntent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
@@ -210,8 +215,10 @@ class InstallerService : Service() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val pendingSettings = PendingIntent.getActivity(
-            this, 1, settingsIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            this,
+            1,
+            settingsIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -237,7 +244,7 @@ class InstallerService : Service() {
             this,
             NOTIFICATION_ID,
             notification,
-            foregroundServiceType
+            foregroundServiceType,
         )
     }
 
@@ -267,7 +274,7 @@ class InstallerService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannelCompat.Builder(
             CHANNEL_ID,
-            NotificationManagerCompat.IMPORTANCE_LOW
+            NotificationManagerCompat.IMPORTANCE_LOW,
         ).setName(getString(R.string.installer_background_channel_name))
             .setDescription(getString(R.string.installer_notification_desc))
             .build()
@@ -292,57 +299,56 @@ class InstallerService : Service() {
      * Observes session progress to trigger UI effects like Toasts.
      * Kept on the service scope briefly after detach so terminal toast events can drain.
      */
-    private fun observeUiEffectsForSession(session: InstallerSessionRepository): Job =
-        serviceScope.launch {
-            launch {
-                session.toastEvents.collect { message ->
-                    if (session.shouldShowToast()) {
-                        toast(message)
-                    }
-                }
-            }
-
-            launch {
-                session.progress.collect { progress ->
-                    // Disable toast according to user preference
-                    if (!session.shouldShowToast()) return@collect
-                    when (progress) {
-                        is ProgressEntity.InstallSuccess -> {
-                            toast(R.string.installer_install_success)
-                        }
-
-                        is ProgressEntity.InstallCompleted -> {
-                            val successCount = progress.results.count { it.success }
-                            val totalCount = progress.results.size
-                            toast(R.string.batch_install_result_message, successCount, totalCount)
-                        }
-
-                        is ProgressEntity.UninstallSuccess -> {
-                            toast(R.string.uninstall_success_message)
-                        }
-
-                        is ProgressEntity.InstallFailed,
-                        is ProgressEntity.InstallAnalysedFailed,
-                        is ProgressEntity.InstallResolvedFailed -> {
-                            toast(R.string.installer_install_failed)
-                        }
-
-                        is ProgressEntity.UninstallFailed -> {
-                            toast(R.string.uninstall_failed_message)
-                        }
-
-                        else -> {
-                            // Safely ignore transitional states
-                        }
-                    }
+    private fun observeUiEffectsForSession(session: InstallerSessionRepository): Job = serviceScope.launch {
+        launch {
+            session.toastEvents.collect { message ->
+                if (session.shouldShowToast()) {
+                    toast(message)
                 }
             }
         }
 
-    private suspend fun InstallerSessionRepository.shouldShowToast() =
-        when (this.config.toastMode) {
-            ToastMode.Disable -> false
-            ToastMode.BackgroundOnly -> this.background.first()
-            ToastMode.Always -> true
+        launch {
+            session.progress.collect { progress ->
+                // Disable toast according to user preference
+                if (!session.shouldShowToast()) return@collect
+                when (progress) {
+                    is ProgressEntity.InstallSuccess -> {
+                        toast(R.string.installer_install_success)
+                    }
+
+                    is ProgressEntity.InstallCompleted -> {
+                        val successCount = progress.results.count { it.success }
+                        val totalCount = progress.results.size
+                        toast(R.string.batch_install_result_message, successCount, totalCount)
+                    }
+
+                    is ProgressEntity.UninstallSuccess -> {
+                        toast(R.string.uninstall_success_message)
+                    }
+
+                    is ProgressEntity.InstallFailed,
+                    is ProgressEntity.InstallAnalysedFailed,
+                    is ProgressEntity.InstallResolvedFailed,
+                    -> {
+                        toast(R.string.installer_install_failed)
+                    }
+
+                    is ProgressEntity.UninstallFailed -> {
+                        toast(R.string.uninstall_failed_message)
+                    }
+
+                    else -> {
+                        // Safely ignore transitional states
+                    }
+                }
+            }
         }
+    }
+
+    private suspend fun InstallerSessionRepository.shouldShowToast() = when (this.config.toastMode) {
+        ToastMode.Disable -> false
+        ToastMode.BackgroundOnly -> this.background.first()
+        ToastMode.Always -> true
+    }
 }

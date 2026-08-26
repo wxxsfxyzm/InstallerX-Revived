@@ -7,17 +7,15 @@ import com.rosan.installer.domain.session.model.SelectInstallEntity
 data class PackageSignatureAnalysis(
     val verificationFailedFiles: List<String> = emptyList(),
     val splitSignatureMismatchFiles: List<String> = emptyList(),
-    val duplicateSplitNames: List<String> = emptyList()
+    val duplicateSplitNames: List<String> = emptyList(),
 ) {
     val hasIssues: Boolean
         get() = verificationFailedFiles.isNotEmpty() ||
-                splitSignatureMismatchFiles.isNotEmpty() ||
-                duplicateSplitNames.isNotEmpty()
+            splitSignatureMismatchFiles.isNotEmpty() ||
+            duplicateSplitNames.isNotEmpty()
 }
 
-fun List<SelectInstallEntity>.analyzePackageSignatureSelection(
-    installedInfo: InstalledAppInfo?
-): PackageSignatureAnalysis {
+fun List<SelectInstallEntity>.analyzePackageSignatureSelection(installedInfo: InstalledAppInfo?): PackageSignatureAnalysis {
     val selectedApps = filter { it.selected }.map { it.app }
     val selectedApks = selectedApps.filter { it is AppEntity.BaseEntity || it is AppEntity.SplitEntity }
     if (selectedApks.isEmpty()) return PackageSignatureAnalysis()
@@ -45,8 +43,8 @@ fun List<SelectInstallEntity>.analyzePackageSignatureSelection(
             .filter { split ->
                 val splitInfo = split.signatureInfo
                 splitInfo?.verified == true &&
-                        splitInfo.signerSha256Set.isNotEmpty() &&
-                        splitInfo.signerSha256Set != referenceSignerSet
+                    splitInfo.signerSha256Set.isNotEmpty() &&
+                    splitInfo.signerSha256Set != referenceSignerSet
             }
             .map { it.signatureDisplayName() }
             .distinct()
@@ -61,13 +59,13 @@ fun List<SelectInstallEntity>.analyzePackageSignatureSelection(
     return PackageSignatureAnalysis(
         verificationFailedFiles = verificationFailedFiles,
         splitSignatureMismatchFiles = splitSignatureMismatchFiles,
-        duplicateSplitNames = duplicateSplitNames
+        duplicateSplitNames = duplicateSplitNames,
     )
 }
 
 fun List<SelectInstallEntity>.analyzePackageSignatureMatch(
     installedInfo: InstalledAppInfo?,
-    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean
+    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean,
 ): SignatureMatchStatus {
     val selectedBase = filter { it.selected }
         .map { it.app }
@@ -79,7 +77,7 @@ fun List<SelectInstallEntity>.analyzePackageSignatureMatch(
 
 fun AppEntity.BaseEntity?.analyzePackageSignatureMatch(
     installedInfo: InstalledAppInfo?,
-    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean
+    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean,
 ): SignatureMatchStatus {
     val pendingSignatureInfo = this?.signatureInfo?.takeIf { it.verified }
     val pendingSignerSet = pendingSignatureInfo?.signerSha256Set?.takeIf { it.isNotEmpty() }
@@ -88,6 +86,7 @@ fun AppEntity.BaseEntity?.analyzePackageSignatureMatch(
 
     return when {
         installedInfo == null -> SignatureMatchStatus.NOT_INSTALLED
+
         pendingSignatureInfo == null || pendingSignerSet == null || installedSignerSet == null ->
             SignatureMatchStatus.UNKNOWN_ERROR
 
@@ -107,7 +106,7 @@ fun AppEntity.BaseEntity?.analyzePackageSignatureMatch(
 private fun isRotationCompatible(
     installedInfo: InstalledAppInfo,
     pendingSignerSet: Set<String>,
-    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean
+    hasSigningCertificate: (packageName: String, certificateSha256: String) -> Boolean,
 ): Boolean {
     val installedSignatureInfo = installedInfo.signatureInfo ?: return false
     if (installedSignatureInfo.hasMultipleSigners || pendingSignerSet.size != 1) return false
@@ -124,7 +123,7 @@ private fun isRotationCompatible(
 
 private fun AppSignatureInfo.isCandidateRotationUnconfirmed(
     pendingSignerSet: Set<String>,
-    installedSignerSet: Set<String>
+    installedSignerSet: Set<String>,
 ): Boolean {
     if (hasMultipleSigners || pendingSignerSet.size != 1 || installedSignerSet.size != 1) {
         return false
@@ -132,8 +131,8 @@ private fun AppSignatureInfo.isCandidateRotationUnconfirmed(
 
     val lineage = signingCertificateHistorySha256Set
     return lineage.size > 1 &&
-            pendingSignerSet.all { it in lineage } &&
-            installedSignerSet.all { it in lineage }
+        pendingSignerSet.all { it in lineage } &&
+        installedSignerSet.all { it in lineage }
 }
 
 private fun AppEntity.signatureInfo() = when (this) {

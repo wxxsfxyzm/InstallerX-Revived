@@ -9,16 +9,8 @@ import com.rosan.installer.domain.session.model.SelectInstallEntity
 /**
  * Signature analyzer for packages.
  */
-class PackageSignatureAnalyzer(
-    private val signatureMatcher: SignatureMatcher
-) {
-    fun match(
-        baseEntity: AppEntity.BaseEntity?,
-        installedInfo: InstalledAppInfo?
-    ) = signatureMatcher.match(baseEntity, installedInfo)
+class PackageSignatureAnalyzer(private val signatureMatcher: SignatureMatcher) {
+    fun match(baseEntity: AppEntity.BaseEntity?, installedInfo: InstalledAppInfo?) = signatureMatcher.match(baseEntity, installedInfo)
 
-    fun analyzeSelection(
-        selectableEntities: List<SelectInstallEntity>,
-        installedInfo: InstalledAppInfo?
-    ) = signatureMatcher.analyzeSelection(selectableEntities, installedInfo)
+    fun analyzeSelection(selectableEntities: List<SelectInstallEntity>, installedInfo: InstalledAppInfo?) = signatureMatcher.analyzeSelection(selectableEntities, installedInfo)
 }

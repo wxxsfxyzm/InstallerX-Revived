@@ -18,8 +18,11 @@ class SecretCodeReceiver : BroadcastReceiver() {
 
         // --- Check if the received intent's action is the one we expect. ---
         val isSecretCodeAction =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) intent.action == SECRET_CODE_ACTION
-            else intent.action == SECRET_CODE_ACTION_OLD
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                intent.action == SECRET_CODE_ACTION
+            } else {
+                intent.action == SECRET_CODE_ACTION_OLD
+            }
         if (isSecretCodeAction) {
             // The action is correct, proceed to launch the activity.
             // Create an intent to launch the SettingsActivity.

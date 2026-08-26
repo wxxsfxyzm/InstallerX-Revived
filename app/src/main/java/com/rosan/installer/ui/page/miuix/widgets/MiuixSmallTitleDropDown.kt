@@ -53,7 +53,7 @@ fun MiuixDropdown(
     onSelectedIndexChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    placeholder: String = "No Selection"
+    placeholder: String = "No Selection",
 ) {
     // State to manage whether the dropdown is expanded or not.
     val isDropdownExpanded = remember { mutableStateOf(false) }
@@ -76,12 +76,12 @@ fun MiuixDropdown(
                         if (isDropdownExpanded.value) {
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
                         }
-                    }
+                    },
                 )
                 // Use the same padding as SmallTitle for consistent layout.
                 .padding(horizontal = 28.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // Display the selected item's text, styled like SmallTitle.
             val textColor = if (actualEnabled) {
@@ -93,7 +93,7 @@ fun MiuixDropdown(
                 text = if (itemsNotEmpty) items[selectedIndex] else placeholder,
                 fontSize = MiuixTheme.textStyles.subtitle.fontSize, // from SmallTitle
                 fontWeight = FontWeight.Bold, // from SmallTitle
-                color = textColor
+                color = textColor,
             )
 
             // The dropdown arrow icon.
@@ -106,7 +106,7 @@ fun MiuixDropdown(
                 modifier = Modifier.size(10.dp, 16.dp),
                 imageVector = MiuixIcons.Basic.ArrowUpDown,
                 colorFilter = ColorFilter.tint(iconColor),
-                contentDescription = "Toggle Dropdown"
+                contentDescription = "Toggle Dropdown",
             )
         }
 
@@ -115,7 +115,7 @@ fun MiuixDropdown(
             show = isDropdownExpanded.value,
             alignment = PopupPositionProvider.Align.Start,
             popupPositionProvider = DropdownWithStartMarginProvider,
-            onDismissRequest = { isDropdownExpanded.value = false }
+            onDismissRequest = { isDropdownExpanded.value = false },
         ) {
             ListPopupColumn {
                 items.forEachIndexed { index, text ->
@@ -128,7 +128,7 @@ fun MiuixDropdown(
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                             onSelectedIndexChange(newIndex)
                             isDropdownExpanded.value = false // Close dropdown after selection
-                        }
+                        },
                     )
                 }
             }
@@ -148,7 +148,7 @@ private val DropdownWithStartMarginProvider = object : PopupPositionProvider {
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize,
         popupMargin: IntRect,
-        alignment: PopupPositionProvider.Align
+        alignment: PopupPositionProvider.Align,
     ): IntOffset {
         val offsetX = if (alignment == PopupPositionProvider.Align.End) {
             anchorBounds.right - popupContentSize.width - popupMargin.right
@@ -168,17 +168,17 @@ private val DropdownWithStartMarginProvider = object : PopupPositionProvider {
         return IntOffset(
             x = offsetX.coerceIn(
                 windowBounds.left,
-                (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left)
+                (windowBounds.right - popupContentSize.width - popupMargin.right).coerceAtLeast(windowBounds.left),
             ),
             y = offsetY.coerceIn(
-                (windowBounds.top + popupMargin.top).coerceAtMost(windowBounds.bottom - popupContentSize.height - popupMargin.bottom),
-                windowBounds.bottom - popupContentSize.height - popupMargin.bottom
-            )
+                (windowBounds.top + popupMargin.top).coerceAtMost(
+                    windowBounds.bottom - popupContentSize.height - popupMargin.bottom,
+                ),
+                windowBounds.bottom - popupContentSize.height - popupMargin.bottom,
+            ),
         )
     }
 
     // Provide a 12.dp horizontal margin.
-    override fun getMargins(): PaddingValues {
-        return PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-    }
+    override fun getMargins(): PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 }

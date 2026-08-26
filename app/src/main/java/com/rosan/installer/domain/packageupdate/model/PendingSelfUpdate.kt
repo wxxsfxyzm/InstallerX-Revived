@@ -6,5 +6,5 @@ data class PendingSelfUpdate(
     val sessionId: String,
     val previousUpdateTime: Long,
     val armedAtElapsed: Long,
-    val history: PendingSelfUpdateHistory? = null
+    val history: PendingSelfUpdateHistory? = null,
 )

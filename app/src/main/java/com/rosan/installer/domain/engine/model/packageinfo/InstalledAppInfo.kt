@@ -18,5 +18,5 @@ data class InstalledAppInfo(
     val isUninstalled: Boolean = false,
     val isArchived: Boolean = false,
     val packageSize: Long = 0L,
-    val sourceDir: String? = null
+    val sourceDir: String? = null,
 )

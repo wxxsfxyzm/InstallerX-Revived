@@ -10,20 +10,17 @@ import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import java.io.File
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
-import java.io.File
 
-class ApksStrategy(
-    private val apkParser: ApkParser,
-    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
-) : AnalysisStrategy {
+class ApksStrategy(private val apkParser: ApkParser, private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer) : AnalysisStrategy {
     override suspend fun analyze(
         config: ConfigModel,
         data: DataEntity,
         zipFile: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> = coroutineScope {
         require(data is DataEntity.FileEntity) { "APKS requires a FileEntity" }
         val archive = requireNotNull(zipFile) { "APKS requires a unified ZIP file" }
@@ -37,7 +34,9 @@ class ApksStrategy(
         val baseEntry = entries.find { entry -> entry.name.isBaseApkName() }
 
         if (baseEntry == null) {
-            Timber.e("ApksStrategy: CRITICAL - Base APK not found. Checked for 'base.apk' or 'base-master.apk' in all directories.")
+            Timber.e(
+                "ApksStrategy: CRITICAL - Base APK not found. Checked for 'base.apk' or 'base-master.apk' in all directories.",
+            )
             // Log available entries to help debugging if this still fails
             entries.take(10).forEach { Timber.d("ApksStrategy: Available entry: ${it.name}") }
             return@coroutineScope emptyList()
@@ -63,8 +62,8 @@ class ApksStrategy(
                 // Condition 3: Filter out files starting with "base-master" (e.g., base-master_2.apk)
                 //              We assume only the exact "base-master.apk" (handled as baseEntry) is valid.
                 val isValidSplit = entry.name.endsWith(".apk", true) &&
-                        entry.name != baseEntry.name &&
-                        !fileName.startsWith("base-master", true)
+                    entry.name != baseEntry.name &&
+                    !fileName.startsWith("base-master", true)
 
                 if (!isValidSplit && entry.name.endsWith(".apk", true) && entry.name != baseEntry.name) {
                     Timber.d("ApksStrategy: Skipping invalid split file: ${entry.name}")
@@ -112,7 +111,7 @@ class ApksStrategy(
                     pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                 } else {
                     null
-                }
+                },
             )
         }
 
@@ -123,6 +122,6 @@ class ApksStrategy(
     private fun String.isBaseApkName(): Boolean {
         val fileName = File(this).name
         return fileName.equals("base.apk", ignoreCase = true) ||
-                fileName.equals("base-master.apk", ignoreCase = true)
+            fileName.equals("base-master.apk", ignoreCase = true)
     }
 }

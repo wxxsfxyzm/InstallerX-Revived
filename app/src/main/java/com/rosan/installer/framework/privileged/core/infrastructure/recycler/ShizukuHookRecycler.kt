@@ -4,18 +4,20 @@ package com.rosan.installer.framework.privileged.core.infrastructure.recycler
 
 import com.rosan.installer.framework.privileged.core.execution.authorization.requireShizukuPermissionGranted
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.Recycler
+import java.io.Closeable
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import rikka.shizuku.Shizuku
 import timber.log.Timber
-import java.io.Closeable
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Validates Shizuku hook readiness without exposing a fake UserService.
  */
-class ShizukuHookRecycler : Recycler<ShizukuHookRecycler.HookedUserService>(), KoinComponent {
+class ShizukuHookRecycler :
+    Recycler<ShizukuHookRecycler.HookedUserService>(),
+    KoinComponent {
 
     class HookedUserService : Closeable {
         override fun close() {

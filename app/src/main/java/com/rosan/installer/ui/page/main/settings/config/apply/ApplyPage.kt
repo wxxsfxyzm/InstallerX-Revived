@@ -109,11 +109,7 @@ import top.yukonga.miuix.kmp.nav.gesture.WindowNavigationEventBridge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ApplyPage(
-    id: Long,
-    useBlur: Boolean,
-    viewModel: ApplyViewModel = koinViewModel { parametersOf(id) }
-) {
+fun ApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinViewModel { parametersOf(id) }) {
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
@@ -143,9 +139,9 @@ fun ApplyPage(
                 scrollBehavior = scrollBehavior,
                 title = {
                     AnimatedContent(targetState = searchBarActivated) {
-                        if (!it)
+                        if (!it) {
                             Text(stringResource(R.string.config_scope))
-                        else {
+                        } else {
                             val focusRequester = remember { FocusRequester() }
                             OutlinedTextField(
                                 modifier = Modifier.focusRequester(focusRequester),
@@ -155,26 +151,27 @@ fun ApplyPage(
                                 leadingIcon = {
                                     Icon(
                                         imageVector = AppIcons.Search,
-                                        contentDescription = stringResource(R.string.search)
+                                        contentDescription = stringResource(R.string.search),
                                     )
                                 },
                                 trailingIcon = {
                                     IconButton(
                                         shapes = IconButtonShapes(
                                             shape = IconButtonDefaults.smallRoundShape,
-                                            pressedShape = IconButtonDefaults.smallPressedShape
+                                            pressedShape = IconButtonDefaults.smallPressedShape,
                                         ),
                                         onClick = {
                                             searchBarActivated = false
                                             viewModel.dispatch(ApplyViewAction.Search(""))
-                                        }) {
+                                        },
+                                    ) {
                                         Icon(
                                             imageVector = AppIcons.Close,
-                                            contentDescription = stringResource(R.string.close)
+                                            contentDescription = stringResource(R.string.close),
                                         )
                                     }
                                 },
-                                textStyle = MaterialTheme.typography.titleMedium
+                                textStyle = MaterialTheme.typography.titleMedium,
                             )
                             SideEffect {
                                 focusRequester.requestFocus()
@@ -185,7 +182,7 @@ fun ApplyPage(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
                 ),
                 navigationIcon = {
                     Row {
@@ -195,21 +192,20 @@ fun ApplyPage(
                 },
                 actions = {
                     AnimatedVisibility(visible = !searchBarActivated) {
-                        IconButton(
-                            onClick = { searchBarActivated = !searchBarActivated }) {
+                        IconButton(onClick = { searchBarActivated = !searchBarActivated }) {
                             Icon(
                                 imageVector = AppIcons.Search,
-                                contentDescription = stringResource(R.string.search)
+                                contentDescription = stringResource(R.string.search),
                             )
                         }
                     }
                     IconButton(onClick = { showBottomSheet = true }) {
                         Icon(
                             imageVector = AppIcons.Menu,
-                            contentDescription = stringResource(R.string.menu)
+                            contentDescription = stringResource(R.string.menu),
                         )
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
@@ -218,8 +214,8 @@ fun ApplyPage(
                 enter = scaleIn(),
                 exit = scaleOut(),
                 modifier = Modifier.padding(
-                    bottom = 16.dp
-                )
+                    bottom = 16.dp,
+                ),
             ) {
                 FloatingActionButton({
                     coroutineScope.launch {
@@ -229,7 +225,7 @@ fun ApplyPage(
                     Icon(imageVector = AppIcons.ArrowUp, contentDescription = null)
                 }
             }
-        }
+        },
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             when {
@@ -238,16 +234,16 @@ fun ApplyPage(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
                             ContainedLoadingIndicator()
                             Text(
                                 text = stringResource(id = R.string.loading),
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.titleLarge,
                             )
                         }
                     }
@@ -270,9 +266,9 @@ fun ApplyPage(
                                 state = pullToRefreshState,
                                 isRefreshing = refreshing,
                                 color = MaterialTheme.colorScheme.primary,
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             )
-                        }
+                        },
                     ) {
                         ItemsWidget(
                             modifier = Modifier
@@ -284,7 +280,7 @@ fun ApplyPage(
                             topPadding = paddingValues.calculateTopPadding(),
                             bottomPadding = paddingValues.calculateBottomPadding(),
                             startPadding = paddingValues.calculateStartPadding(layoutDirection),
-                            endPadding = paddingValues.calculateEndPadding(layoutDirection)
+                            endPadding = paddingValues.calculateEndPadding(layoutDirection),
                         )
                     }
                 }
@@ -292,22 +288,24 @@ fun ApplyPage(
         }
     }
 
-    if (showBottomSheet) ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-        WindowNavigationEventBridge()
-        BottomSheetContent(uiState = uiState, viewModel = viewModel)
+    if (showBottomSheet) {
+        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+            WindowNavigationEventBridge()
+            BottomSheetContent(uiState = uiState, viewModel = viewModel)
+        }
     }
 }
 
 @Composable
 private fun ItemsWidget(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     uiState: ApplyViewState,
     viewModel: ApplyViewModel,
     lazyListState: LazyListState,
     topPadding: Dp = 0.dp,
     bottomPadding: Dp = 0.dp,
     startPadding: Dp = 0.dp,
-    endPadding: Dp = 0.dp
+    endPadding: Dp = 0.dp,
 ) {
     val appliedPackageSet by remember(uiState.appEntities.data) {
         derivedStateOf {
@@ -323,14 +321,14 @@ private fun ItemsWidget(
             start = startPadding + 16.dp,
             top = topPadding + 8.dp,
             end = endPadding + 16.dp,
-            bottom = bottomPadding + 96.dp
-        )
+            bottom = bottomPadding + 96.dp,
+        ),
     ) {
         val apps = uiState.checkedApps
         itemsIndexed(
             items = apps,
             key = { _, app -> app.packageName },
-            contentType = { _, _ -> "app_item" }
+            contentType = { _, _ -> "app_item" },
         ) { index, app ->
             val shape = when {
                 apps.size == 1 -> singleShape
@@ -353,8 +351,8 @@ private fun ItemsWidget(
                 modifier = Modifier.animateItem(
                     placementSpec = spring(
                         stiffness = Spring.StiffnessMediumLow,
-                        visibilityThreshold = IntOffset.VisibilityThreshold
-                    )
+                        visibilityThreshold = IntOffset.VisibilityThreshold,
+                    ),
                 ),
                 app = app,
                 icon = iconBitmap,
@@ -369,20 +367,17 @@ private fun ItemsWidget(
                     viewModel.dispatch(
                         ApplyViewAction.ApplyPackageName(
                             app.packageName,
-                            !isApplied
-                        )
+                            !isApplied,
+                        ),
                     )
-                }
+                },
             )
         }
     }
 }
 
 @Composable
-private fun BottomSheetContent(
-    uiState: ApplyViewState,
-    viewModel: ApplyViewModel
-) {
+private fun BottomSheetContent(uiState: ApplyViewState, viewModel: ApplyViewModel) {
     Box(modifier = Modifier.fillMaxWidth()) {
         CompositionLocalProvider(LocalContentColor provides AlertDialogDefaults.titleContentColor) {
             ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
@@ -395,7 +390,7 @@ private fun BottomSheetContent(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         OrderWidget(uiState = uiState, viewModel = viewModel)
         ChipsWidget(uiState = uiState, viewModel = viewModel)
@@ -435,10 +430,7 @@ private fun OrderWidget(viewModel: ApplyViewModel) {
 }*/
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun OrderWidget(
-    uiState: ApplyViewState,
-    viewModel: ApplyViewModel
-) {
+private fun OrderWidget(uiState: ApplyViewState, viewModel: ApplyViewModel) {
     val haptic = LocalHapticFeedback.current
 
     LabelWidget(stringResource(R.string.sort), 0.dp)
@@ -448,13 +440,13 @@ private fun OrderWidget(
     val map = listOf(
         OrderData(R.string.sort_by_label, ApplyViewState.OrderType.Label),
         OrderData(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
-        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime)
+        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime),
     )
 
     val selectedIndex = map.map { it.type }.indexOf(uiState.orderType)
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
     ) {
         val modifiers = List(map.size) { Modifier.weight(1f) } // 根据需要调整权重
 
@@ -474,10 +466,10 @@ private fun OrderWidget(
                     checkedContainerColor = MaterialTheme.colorScheme.primary,
                     checkedContentColor = MaterialTheme.colorScheme.onPrimary,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 modifier = modifiers[index]
-                    .semantics { role = Role.RadioButton }
+                    .semantics { role = Role.RadioButton },
             ) {
                 Text(stringResource(value.labelResId))
             }
@@ -487,13 +479,10 @@ private fun OrderWidget(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ChipsWidget(
-    uiState: ApplyViewState,
-    viewModel: ApplyViewModel
-) {
+private fun ChipsWidget(uiState: ApplyViewState, viewModel: ApplyViewModel) {
     LabelWidget(stringResource(R.string.more), 0.dp)
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         val orderInReverse = uiState.orderInReverse
         val selectedFirst = uiState.selectedFirst
@@ -503,25 +492,25 @@ private fun ChipsWidget(
             selected = orderInReverse,
             label = stringResource(R.string.sort_by_reverse_order),
             icon = Icons.AutoMirrored.TwoTone.Sort,
-            onClick = { viewModel.dispatch(ApplyViewAction.OrderInReverse(!orderInReverse)) }
+            onClick = { viewModel.dispatch(ApplyViewAction.OrderInReverse(!orderInReverse)) },
         )
         Chip(
             selected = selectedFirst,
             label = stringResource(R.string.sort_by_selected_first),
             icon = Icons.TwoTone.LibraryAddCheck,
-            onClick = { viewModel.dispatch(ApplyViewAction.SelectedFirst(!selectedFirst)) }
+            onClick = { viewModel.dispatch(ApplyViewAction.SelectedFirst(!selectedFirst)) },
         )
         Chip(
             selected = showSystemApp,
             label = stringResource(R.string.sort_by_show_system_app),
             icon = Icons.TwoTone.Shield,
-            onClick = { viewModel.dispatch(ApplyViewAction.ShowSystemApp(!showSystemApp)) }
+            onClick = { viewModel.dispatch(ApplyViewAction.ShowSystemApp(!showSystemApp)) },
         )
         Chip(
             selected = showPackageName,
             label = stringResource(R.string.sort_by_show_package_name),
             icon = Icons.TwoTone.Visibility,
-            onClick = { viewModel.dispatch(ApplyViewAction.ShowPackageName(!showPackageName)) }
+            onClick = { viewModel.dispatch(ApplyViewAction.ShowPackageName(!showPackageName)) },
         )
     }
 }

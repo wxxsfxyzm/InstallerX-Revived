@@ -8,19 +8,17 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.rosan.installer.domain.packageupdate.model.PendingSourceDeletion
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.rosan.installer.domain.packageupdate.model.PendingSelfUpdate
 import com.rosan.installer.domain.packageupdate.model.PendingSelfUpdateHistory
+import com.rosan.installer.domain.packageupdate.model.PendingSourceDeletion
 import com.rosan.installer.domain.packageupdate.repository.SelfUpdateRecoveryRepository
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import kotlinx.coroutines.flow.first
 
-class SelfUpdateRecoveryRepositoryImpl(
-    private val dataStore: DataStore<Preferences>
-) : SelfUpdateRecoveryRepository {
+class SelfUpdateRecoveryRepositoryImpl(private val dataStore: DataStore<Preferences>) : SelfUpdateRecoveryRepository {
     override suspend fun arm(update: PendingSelfUpdate) {
         dataStore.edit { preferences ->
             preferences.clear()
@@ -38,14 +36,14 @@ class SelfUpdateRecoveryRepositoryImpl(
             sessionId = sessionId,
             previousUpdateTime = preferences[PREVIOUS_UPDATE_TIME] ?: 0L,
             armedAtElapsed = preferences[ARMED_AT_ELAPSED] ?: 0L,
-            history = preferences.pendingHistory()
+            history = preferences.pendingHistory(),
         )
     }
 
     override suspend fun updatePostInstallState(
         sessionId: String,
         sourceDeletion: PendingSourceDeletion?,
-        historyAuthorizer: Authorizer
+        historyAuthorizer: Authorizer,
     ) {
         dataStore.edit { preferences ->
             if (preferences[SESSION_ID] != sessionId) return@edit
@@ -144,7 +142,7 @@ class SelfUpdateRecoveryRepositoryImpl(
         return PendingSourceDeletion(
             paths = paths,
             authorizer = authorizer,
-            customizeAuthorizer = this[DELETE_CUSTOMIZE_AUTHORIZER].orEmpty()
+            customizeAuthorizer = this[DELETE_CUSTOMIZE_AUTHORIZER].orEmpty(),
         )
     }
 
@@ -180,7 +178,7 @@ class SelfUpdateRecoveryRepositoryImpl(
             initiatorPackageName = this[HISTORY_INITIATOR_PACKAGE_NAME],
             authorizer = authorizer,
             installMode = installMode,
-            operationSessionKey = operationSessionKey
+            operationSessionKey = operationSessionKey,
         )
     }
 

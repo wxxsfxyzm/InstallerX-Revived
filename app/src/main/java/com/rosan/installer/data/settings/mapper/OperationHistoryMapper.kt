@@ -32,7 +32,7 @@ fun OperationHistoryEntity.toDomainModel() = OperationHistoryModel(
     installMode = InstallMode.entries.find { it.value == installMode } ?: InstallMode.Dialog,
     errorSummary = errorSummary,
     errorType = errorType,
-    operationSessionKey = operationSessionKey
+    operationSessionKey = operationSessionKey,
 )
 
 fun OperationHistoryModel.toEntity() = OperationHistoryEntity(
@@ -56,8 +56,7 @@ fun OperationHistoryModel.toEntity() = OperationHistoryEntity(
     installMode = installMode.value,
     errorSummary = errorSummary,
     errorType = errorType,
-    operationSessionKey = operationSessionKey
+    operationSessionKey = operationSessionKey,
 )
 
-private inline fun <reified T : Enum<T>> enumValueOrDefault(value: String, default: T): T =
-    runCatching { enumValueOf<T>(value) }.getOrDefault(default)
+private inline fun <reified T : Enum<T>> enumValueOrDefault(value: String, default: T): T = runCatching { enumValueOf<T>(value) }.getOrDefault(default)

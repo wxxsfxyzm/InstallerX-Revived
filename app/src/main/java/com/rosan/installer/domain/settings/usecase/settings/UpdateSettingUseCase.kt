@@ -7,9 +7,7 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 
-class UpdateSettingUseCase(
-    private val appSettingsRepo: AppSettingsRepository
-) {
+class UpdateSettingUseCase(private val appSettingsRepo: AppSettingsRepository) {
     suspend operator fun invoke(setting: BooleanSetting, value: Boolean) {
         appSettingsRepo.putBoolean(setting, value)
     }

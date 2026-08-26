@@ -7,28 +7,19 @@ import android.os.Process
 data class ConfirmationRequest(
     val sessionId: Int,
     val requestType: ConfirmationRequestType,
-    val callerUid: Int = Process.INVALID_UID
+    val callerUid: Int = Process.INVALID_UID,
 )
 
 sealed interface ConfirmationState {
     data object Idle : ConfirmationState
 
-    data class Resolving(
-        val request: ConfirmationRequest
-    ) : ConfirmationState
+    data class Resolving(val request: ConfirmationRequest) : ConfirmationState
 
-    data class AwaitingDecision(
-        val details: ConfirmationDetails
-    ) : ConfirmationState
+    data class AwaitingDecision(val details: ConfirmationDetails) : ConfirmationState
 
-    data class Submitting(
-        val details: ConfirmationDetails,
-        val granted: Boolean
-    ) : ConfirmationState
+    data class Submitting(val details: ConfirmationDetails, val granted: Boolean) : ConfirmationState
 
-    data class Completed(
-        val sessionId: Int
-    ) : ConfirmationState
+    data class Completed(val sessionId: Int) : ConfirmationState
 }
 
 fun ConfirmationState.sessionIdOrNull(): Int? = when (this) {

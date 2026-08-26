@@ -54,7 +54,7 @@ val permissionIcon: @Composable () -> Unit = {
     Icon(
         imageVector = AppIcons.Permission,
         contentDescription = null,
-        modifier = Modifier.size(32.dp)
+        modifier = Modifier.size(32.dp),
     )
 }
 
@@ -62,17 +62,16 @@ val failedIcon: @Composable () -> Unit = {
     Icon(
         imageVector = Icons.Rounded.ErrorOutline,
         contentDescription = null,
-        modifier = Modifier.size(32.dp)
+        modifier = Modifier.size(32.dp),
     )
 }
 
 val workingIcon: @Composable () -> Unit = {
     ContainedLoadingIndicator(
         indicatorColor = MaterialTheme.colorScheme.primary,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     )
 }
-
 
 /**
  * A composable that displays an error message in a collapsible block.
@@ -83,11 +82,7 @@ val workingIcon: @Composable () -> Unit = {
  * @param suggestions A composable lambda for displaying suggestion chips below the error block.
  */
 @Composable
-fun ErrorTextBlock(
-    error: Throwable,
-    modifier: Modifier = Modifier,
-    suggestions: @Composable () -> Unit = {}
-) {
+fun ErrorTextBlock(error: Throwable, modifier: Modifier = Modifier, suggestions: @Composable () -> Unit = {}) {
     var expanded by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(targetValue = if (expanded) -180f else 0f, label = "errorRotation")
 
@@ -100,32 +95,32 @@ fun ErrorTextBlock(
                     .fillMaxWidth()
                     .clickable(
                         indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
+                        interactionSource = remember { MutableInteractionSource() },
                     ) {
                         expanded = !expanded
                     }
-                    .padding(12.dp)
+                    .padding(12.dp),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         imageVector = AppIcons.ArrowDropDown,
                         contentDescription = null,
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .rotate(rotation)
+                            .rotate(rotation),
                     )
                     Text(
                         text = error.help(),
                         fontWeight = FontWeight.Bold,
-                        maxLines = Int.MAX_VALUE
+                        maxLines = Int.MAX_VALUE,
                     )
                 }
                 AnimatedVisibility(
                     visible = expanded,
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
                 ) {
                     val textToShow = if (AppConfig.isDebug) {
                         error.stackTraceToString()
@@ -138,7 +133,7 @@ fun ErrorTextBlock(
                             value = textToShow,
                             onValueChange = {},
                             readOnly = true,
-                            textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                            textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
                         )
                     }
                 }
@@ -148,7 +143,7 @@ fun ErrorTextBlock(
         AnimatedVisibility(
             visible = !expanded,
             enter = fadeIn(animationSpec = tween(delayMillis = 150)) + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            exit = fadeOut() + shrinkVertically(),
         ) {
             suggestions()
         }
@@ -163,10 +158,7 @@ fun ErrorTextBlock(
  * @param modifier Modifier for the root Column.
  */
 @Composable
-fun WarningTextBlock(
-    warnings: List<Pair<String, Color>>,
-    modifier: Modifier = Modifier,
-) {
+fun WarningTextBlock(warnings: List<Pair<String, Color>>, modifier: Modifier = Modifier) {
     // Only display the block if there are warnings to show.
     if (warnings.isNotEmpty()) {
         Column(
@@ -174,7 +166,7 @@ fun WarningTextBlock(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.errorContainer)
-                .padding(12.dp)
+                .padding(12.dp),
         ) {
             CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
                 warnings.forEachIndexed { index, (text, color) ->
@@ -185,7 +177,7 @@ fun WarningTextBlock(
                         text = text,
                         color = if (color == Color.Unspecified) LocalContentColor.current else color,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

@@ -9,7 +9,7 @@ package com.rosan.installer.domain.engine.model.packageinfo
 enum class SigningBlockCertificateStatus {
     NOT_INSTALLED,
     MATCH,
-    UNKNOWN
+    UNKNOWN,
 }
 
 fun PackageAnalysisResult.selectedSigningBlockCertificateStatus(): SigningBlockCertificateStatus? {

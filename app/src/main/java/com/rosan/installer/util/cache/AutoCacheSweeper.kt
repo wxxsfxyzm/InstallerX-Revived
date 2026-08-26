@@ -4,11 +4,11 @@ package com.rosan.installer.util.cache
 
 import android.content.Context
 import com.rosan.installer.util.timber.FileLoggingTree.Companion.LOG_DIR_NAME
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
 
 class AutoCacheSweeper(private val context: Context) {
     private val processStartTime = System.currentTimeMillis()
@@ -23,7 +23,7 @@ class AutoCacheSweeper(private val context: Context) {
             try {
                 val paths = listOfNotNull(
                     context.cacheDir,
-                    context.externalCacheDir
+                    context.externalCacheDir,
                 )
 
                 val blacklistExtensions = listOf(".lck", ".lock")

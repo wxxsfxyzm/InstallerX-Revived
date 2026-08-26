@@ -9,10 +9,10 @@ import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.repository.AppRepository
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.ConfigRepository
 import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
-import com.rosan.installer.domain.settings.repository.BooleanSetting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -21,7 +21,7 @@ class GetResolvedConfigUseCase(
     private val context: Context,
     private val appSettingsRepo: AppSettingsRepository,
     private val configRepo: ConfigRepository,
-    private val appRepo: AppRepository
+    private val appRepo: AppRepository,
 ) {
     suspend operator fun invoke(packageName: String? = null): ConfigModel = withContext(Dispatchers.IO) {
         var model = getByPackageNameInner(packageName)
@@ -30,7 +30,7 @@ class GetResolvedConfigUseCase(
             val globalAuthorizer = getGlobalAuthorizer()
             model = model.copy(
                 authorizer = globalAuthorizer,
-                customizeAuthorizer = getGlobalCustomizeAuthorizer()
+                customizeAuthorizer = getGlobalCustomizeAuthorizer(),
             )
         }
 
@@ -42,9 +42,11 @@ class GetResolvedConfigUseCase(
 
         val targetUid = when (model.installRequesterMode) {
             InstallRequesterMode.Disable -> null
+
             InstallRequesterMode.Initiator -> packageName?.let { initiatorPkg ->
                 runCatching { context.packageManager.getPackageUid(initiatorPkg, 0) }.getOrNull()
             }
+
             InstallRequesterMode.Custom -> model.installRequester?.let { requesterPkg ->
                 runCatching { context.packageManager.getPackageUid(requesterPkg, 0) }.getOrNull()
             }

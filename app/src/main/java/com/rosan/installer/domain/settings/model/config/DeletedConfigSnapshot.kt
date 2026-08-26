@@ -4,7 +4,4 @@ package com.rosan.installer.domain.settings.model.config
 
 import com.rosan.installer.domain.settings.model.app.AppModel
 
-data class DeletedConfigSnapshot(
-    val configModel: ConfigModel,
-    val scopes: List<AppModel>
-)
+data class DeletedConfigSnapshot(val configModel: ConfigModel, val scopes: List<AppModel>)

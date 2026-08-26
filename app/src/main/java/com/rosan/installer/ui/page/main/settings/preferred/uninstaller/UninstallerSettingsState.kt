@@ -7,5 +7,5 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 data class UninstallerSettingsState(
     val authorizer: Authorizer = Authorizer.None,
     val uninstallFlags: Int = 0,
-    val uninstallerRequireBiometricAuth: Boolean = false
+    val uninstallerRequireBiometricAuth: Boolean = false,
 )

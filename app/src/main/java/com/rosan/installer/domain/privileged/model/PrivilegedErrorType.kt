@@ -11,5 +11,5 @@ enum class PrivilegedErrorType(@param:StringRes val stringResId: Int) {
     DHIZUKU_DEAD_SERVICE(R.string.exception_dhizuku_dead_service),
     DHIZUKU_NOT_WORK(R.string.exception_dhizuku_not_work),
     ROOT_NOT_WORK(R.string.exception_root_not_work),
-    SHIZUKU_NOT_WORK(R.string.exception_shizuku_not_work)
+    SHIZUKU_NOT_WORK(R.string.exception_shizuku_not_work),
 }

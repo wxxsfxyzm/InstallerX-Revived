@@ -19,25 +19,31 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 
 @Composable
-fun analyseFailedDialog(
-    viewModel: InstallerViewModel
-): DialogParams {
+fun analyseFailedDialog(viewModel: InstallerViewModel): DialogParams {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentError = uiState.error
     return DialogParams(
         icon = DialogInnerParams(
-            DialogParamsType.IconError.id, failedIcon
-        ), title = DialogInnerParams(
-            DialogParamsType.InstallerAnalyseFailed.id
+            DialogParamsType.IconError.id,
+            failedIcon,
+        ),
+        title = DialogInnerParams(
+            DialogParamsType.InstallerAnalyseFailed.id,
         ) {
             Text(stringResource(R.string.installer_analyse_failed))
-        }, text = DialogInnerParams(
-            DialogParamsType.InstallerAnalyseFailed.id, { ErrorTextBlock(currentError) }
-        ), buttons = dialogButtons(
-            DialogParamsType.ButtonsCancel.id
+        },
+        text = DialogInnerParams(
+            DialogParamsType.InstallerAnalyseFailed.id,
+            { ErrorTextBlock(currentError) },
+        ),
+        buttons = dialogButtons(
+            DialogParamsType.ButtonsCancel.id,
         ) {
-            listOf(DialogButton(stringResource(R.string.cancel)) {
-                viewModel.dispatch(InstallerViewAction.Close)
-            })
-        })
+            listOf(
+                DialogButton(stringResource(R.string.cancel)) {
+                    viewModel.dispatch(InstallerViewAction.Close)
+                },
+            )
+        },
+    )
 }

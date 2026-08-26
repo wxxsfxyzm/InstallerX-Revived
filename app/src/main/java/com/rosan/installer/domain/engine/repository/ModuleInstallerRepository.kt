@@ -20,6 +20,6 @@ interface ModuleInstallerRepository {
         config: ConfigModel,
         module: AppEntity.ModuleEntity,
         useRoot: Boolean,
-        rootMode: RootMode
+        rootMode: RootMode,
     ): Flow<String> // Return a Flow of strings
 }

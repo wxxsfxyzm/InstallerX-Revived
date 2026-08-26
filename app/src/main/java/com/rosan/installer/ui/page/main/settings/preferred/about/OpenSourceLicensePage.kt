@@ -96,8 +96,8 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backdrop.getMaterial3AppBarColor(),
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    scrolledContainerColor = backdrop.getMaterial3AppBarColor()
-                )
+                    scrolledContainerColor = backdrop.getMaterial3AppBarColor(),
+                ),
             )
         },
     ) { paddingValues ->
@@ -109,13 +109,13 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
             contentPadding = paddingValues + PaddingValues(horizontal = 16.dp),
             colors = LibraryDefaults.libraryColors(
                 libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-                libraryContentColor = MaterialTheme.colorScheme.onSurface
+                libraryContentColor = MaterialTheme.colorScheme.onSurface,
             ),
             variantColors = LibraryDefaults.m3VariantColors(
                 rowBackground = MaterialTheme.colorScheme.surfaceBright,
                 rowExpandedBackground = MaterialTheme.colorScheme.surfaceBright,
                 rowOnBackground = MaterialTheme.colorScheme.onSurface,
-                rowSubtleContent = MaterialTheme.colorScheme.onSurfaceVariant
+                rowSubtleContent = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
             detailMode = LibraryDetailMode.None,
             libraryRow = { _, library, expanded, toggle, style ->
@@ -126,13 +126,13 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                     style = style,
                     modifier = Modifier
                         .padding(vertical = 4.dp)
-                        .clip(RoundedCornerShape(CornerRadius))
+                        .clip(RoundedCornerShape(CornerRadius)),
                 )
             },
             onLibraryClick = { library: Library ->
                 selectedLibrary = library
                 true
-            }
+            },
         )
 
         if (selectedLibrary != null) {
@@ -158,29 +158,29 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
                     ) {
                         Text(
                             text = library.name,
-                            style = MaterialTheme.typography.headlineSmall
+                            style = MaterialTheme.typography.headlineSmall,
                         )
                     }
                 },
                 text = {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         items(library.licenses.toList()) { license ->
                             OutlinedCard(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.outlinedCardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-                                )
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                ),
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(16.dp)
+                                    modifier = Modifier.padding(16.dp),
                                 ) {
                                     Row {
                                         Text(
@@ -193,7 +193,7 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                                                     license.url?.let { url ->
                                                         uriHandler.openUri(url)
                                                     }
-                                                }
+                                                },
                                         )
                                     }
 
@@ -203,7 +203,7 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                                         text = license.licenseContent
                                             ?: stringResource(R.string.no_license_text),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
@@ -211,7 +211,7 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                     }
                 },
                 properties = DialogProperties(usePlatformDefaultWidth = false),
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier.padding(24.dp),
             )
         }
     }

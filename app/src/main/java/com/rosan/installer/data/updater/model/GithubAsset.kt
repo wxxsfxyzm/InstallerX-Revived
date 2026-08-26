@@ -11,5 +11,5 @@ data class GithubAsset(
     val name: String,
 
     @SerialName("browser_download_url")
-    val browserDownloadUrl: String
+    val browserDownloadUrl: String,
 )

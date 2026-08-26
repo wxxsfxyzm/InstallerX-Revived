@@ -21,9 +21,7 @@ import com.rosan.installer.domain.settings.usecase.config.GetResolvedConfigUseCa
 import com.rosan.installer.util.platformLaunchReferrer
 import timber.log.Timber
 
-class ConfigResolver(
-    private val getResolvedConfigUseCase: GetResolvedConfigUseCase
-) {
+class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseCase) {
     private companion object {
         const val TAG = "InstallSource"
         const val DOWNLOADS_AUTHORITY = "downloads"
@@ -46,24 +44,23 @@ class ConfigResolver(
             source.packageCandidates,
             source.confidence,
             source.viaProxyPackage,
-            trustedNotUnknownSource
+            trustedNotUnknownSource,
         )
         return getConfigForSource(source, trustedNotUnknownSource)
     }
 
-    suspend fun resolveForPackage(packageName: String?): ConfigModel =
-        getConfigForSource(
-            InstallSource(
-                packageName = packageName,
-                uid = null,
-                confidence = if (packageName == null) {
-                    InstallSourceConfidence.UNKNOWN
-                } else {
-                    InstallSourceConfidence.EXACT_CALLER
-                }
-            ),
-            trustedNotUnknownSource = false
-        )
+    suspend fun resolveForPackage(packageName: String?): ConfigModel = getConfigForSource(
+        InstallSource(
+            packageName = packageName,
+            uid = null,
+            confidence = if (packageName == null) {
+                InstallSourceConfidence.UNKNOWN
+            } else {
+                InstallSourceConfidence.EXACT_CALLER
+            },
+        ),
+        trustedNotUnknownSource = false,
+    )
 
     private fun Activity.resolveInstallSource(): InstallSource {
         val callingPackage = callingPackage
@@ -80,20 +77,20 @@ class ConfigResolver(
                 packageName = callingPackage,
                 uid = uid,
                 packageCandidates = uid?.let { packageNamesForUid(it) }.orEmpty(),
-                confidence = InstallSourceConfidence.EXACT_CALLER
+                confidence = InstallSourceConfidence.EXACT_CALLER,
             )
         }
 
         getLaunchedFromUidCompat()?.let { launchedUid ->
             val candidates = packageNamesForUid(launchedUid)
             Timber.tag(TAG).d(
-                "Using launched-from uid source: uid=$launchedUid, candidates=$candidates"
+                "Using launched-from uid source: uid=$launchedUid, candidates=$candidates",
             )
             return InstallSource(
                 packageName = selectPackageForUid(candidates),
                 uid = launchedUid,
                 packageCandidates = candidates,
-                confidence = InstallSourceConfidence.LAUNCHED_FROM_UID
+                confidence = InstallSourceConfidence.LAUNCHED_FROM_UID,
             )
         }
 
@@ -109,7 +106,7 @@ class ConfigResolver(
                 packageName = referrerHost,
                 uid = uid,
                 packageCandidates = uid?.let { packageNamesForUid(it) }.orEmpty(),
-                confidence = InstallSourceConfidence.REFERRER_HEURISTIC
+                confidence = InstallSourceConfidence.REFERRER_HEURISTIC,
             )
         } else if (referrer != null) {
             Timber.tag(TAG).w("Ignoring referrer with non-app scheme: ${referrer.scheme}")
@@ -125,13 +122,13 @@ class ConfigResolver(
             val providerPackage = packageNameFromAuthority(authority)
             val providerUid = providerPackage?.let { packageUid(it) }
             Timber.tag(TAG).d(
-                "Using provider-owner source: authority=$authority, package=$providerPackage, uid=$providerUid"
+                "Using provider-owner source: authority=$authority, package=$providerPackage, uid=$providerUid",
             )
             return InstallSource(
                 packageName = providerPackage,
                 uid = providerUid,
                 packageCandidates = providerUid?.let { packageNamesForUid(it) }.orEmpty(),
-                confidence = InstallSourceConfidence.PROVIDER_OWNER
+                confidence = InstallSourceConfidence.PROVIDER_OWNER,
             )
         }
 
@@ -145,7 +142,7 @@ class ConfigResolver(
         if (originatingUid == Process.INVALID_UID) {
             Timber.tag(TAG).d(
                 "Proxy install source $proxyPackageName did not provide a valid originating uid. " +
-                        "Using default config without source AppOps checks."
+                    "Using default config without source AppOps checks.",
             )
             return InstallSource.unknown(viaProxyPackage = proxyPackageName)
         }
@@ -154,7 +151,7 @@ class ConfigResolver(
         val originatingPackage = selectPackageForUid(candidates)
         Timber.tag(TAG).d(
             "Proxy install source $proxyPackageName resolved originating uid " +
-                    "$originatingUid to package $originatingPackage"
+                "$originatingUid to package $originatingPackage",
         )
 
         return InstallSource(
@@ -166,7 +163,7 @@ class ConfigResolver(
             } else {
                 InstallSourceConfidence.TRUSTED_PROXY_ORIGINATING_UID
             },
-            viaProxyPackage = proxyPackageName
+            viaProxyPackage = proxyPackageName,
         )
     }
 
@@ -174,23 +171,20 @@ class ConfigResolver(
     private fun Activity.isTrustedNotUnknownSource(source: InstallSource): Boolean {
         val rawNotUnknownSource = intent.getBooleanExtra(
             PackageManagerHidden.EXTRA_NOT_UNKNOWN_SOURCE,
-            false
+            false,
         )
 
         val trusted = rawNotUnknownSource &&
-                intent.action == Intent.ACTION_INSTALL_PACKAGE &&
-                source.confidence.isTrustedForPlatformPolicy()
+            intent.action == Intent.ACTION_INSTALL_PACKAGE &&
+            source.confidence.isTrustedForPlatformPolicy()
         Timber.tag(TAG).d(
             "Evaluated not-unknown-source extra: raw=$rawNotUnknownSource, " +
-                    "action=${intent.action}, confidence=${source.confidence}, trusted=$trusted"
+                "action=${intent.action}, confidence=${source.confidence}, trusted=$trusted",
         )
         return trusted
     }
 
-    private suspend fun getConfigForSource(
-        source: InstallSource,
-        trustedNotUnknownSource: Boolean
-    ): ConfigModel {
+    private suspend fun getConfigForSource(source: InstallSource, trustedNotUnknownSource: Boolean): ConfigModel {
         var config = getResolvedConfigUseCase(source.packageName)
 
         val initialInstallFlags = listOfNotNull(
@@ -207,7 +201,7 @@ class ConfigResolver(
             installSourceUid = source.uid,
             installSourcePackageCandidates = source.packageCandidates,
             installSourceConfidence = source.confidence,
-            notUnknownSource = trustedNotUnknownSource
+            notUnknownSource = trustedNotUnknownSource,
         )
 
         Timber.tag(TAG).d("Resolved config for '${source.packageName ?: "default"}': $config")
@@ -221,31 +215,28 @@ class ConfigResolver(
     }
 
     @Suppress("DEPRECATION")
-    private fun Activity.packageUid(packageName: String): Int? =
-        runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packageManager.getPackageUid(packageName, PackageManager.PackageInfoFlags.of(0))
-            } else {
-                packageManager.getPackageUid(packageName, 0)
-            }
-        }.getOrNull()
+    private fun Activity.packageUid(packageName: String): Int? = runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageUid(packageName, PackageManager.PackageInfoFlags.of(0))
+        } else {
+            packageManager.getPackageUid(packageName, 0)
+        }
+    }.getOrNull()
 
-    private fun Activity.packageNamesForUid(uid: Int): List<String> =
-        packageManager.getPackagesForUid(uid)?.filterNotNull().orEmpty()
+    private fun Activity.packageNamesForUid(uid: Int): List<String> = packageManager.getPackagesForUid(uid)?.filterNotNull().orEmpty()
 
-    private fun Activity.selectPackageForUid(candidates: List<String>): String? =
-        candidates.firstOrNull {
-            Manifest.permission.REQUEST_INSTALL_PACKAGES in packageRequestedPermissions(it)
-        } ?: candidates.firstOrNull()
+    private fun Activity.selectPackageForUid(candidates: List<String>): String? = candidates.firstOrNull {
+        Manifest.permission.REQUEST_INSTALL_PACKAGES in packageRequestedPermissions(it)
+    } ?: candidates.firstOrNull()
 
     private fun Activity.isInstallSourceProxyPackage(packageName: String): Boolean {
         val hasManageDocuments = packageManager.checkPermission(
             Manifest.permission.MANAGE_DOCUMENTS,
-            packageName
+            packageName,
         ) == PackageManager.PERMISSION_GRANTED
 
         return (hasManageDocuments && isSystemOrUpdatedSystemPackage(packageName)) ||
-                isSystemDownloadsProviderPackage(packageName)
+            isSystemDownloadsProviderPackage(packageName)
     }
 
     private fun Activity.isSystemDownloadsProviderPackage(packageName: String): Boolean {
@@ -253,26 +244,24 @@ class ConfigResolver(
         return appInfo.isSystemOrUpdatedSystemApp() && appInfo.packageName == packageName
     }
 
-    private fun Activity.packageNameFromAuthority(authority: String): String? =
-        resolveProviderInfoCompat(authority)?.packageName
+    private fun Activity.packageNameFromAuthority(authority: String): String? = resolveProviderInfoCompat(authority)?.packageName
 
-    private fun Activity.resolveProviderInfoCompat(authority: String): ProviderInfo? =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            packageManager.resolveContentProvider(
-                authority,
-                PackageManager.ComponentInfoFlags.of(0)
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            packageManager.resolveContentProvider(authority, 0)
-        }
+    private fun Activity.resolveProviderInfoCompat(authority: String): ProviderInfo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        packageManager.resolveContentProvider(
+            authority,
+            PackageManager.ComponentInfoFlags.of(0),
+        )
+    } else {
+        @Suppress("DEPRECATION")
+        packageManager.resolveContentProvider(authority, 0)
+    }
 
     private fun Activity.isSystemOrUpdatedSystemPackage(packageName: String): Boolean {
         val appInfo = runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 packageManager.getApplicationInfo(
                     packageName,
-                    PackageManager.ApplicationInfoFlags.of(0)
+                    PackageManager.ApplicationInfoFlags.of(0),
                 )
             } else {
                 @Suppress("DEPRECATION")
@@ -283,37 +272,35 @@ class ConfigResolver(
         return appInfo.isSystemOrUpdatedSystemApp()
     }
 
-    private fun ApplicationInfo.isSystemOrUpdatedSystemApp(): Boolean =
-        flags and ApplicationInfo.FLAG_SYSTEM != 0 ||
-                flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0
+    private fun ApplicationInfo.isSystemOrUpdatedSystemApp(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0 ||
+        flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0
 
-    private fun Activity.packageRequestedPermissions(packageName: String): List<String> =
-        runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packageManager.getPackageInfo(
-                    packageName,
-                    PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong())
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
-            }.requestedPermissions.orEmpty()
-        }.getOrElse { emptyArray() }
-            .toList()
+    private fun Activity.packageRequestedPermissions(packageName: String): List<String> = runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageInfo(
+                packageName,
+                PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong()),
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+        }.requestedPermissions.orEmpty()
+    }.getOrElse { emptyArray() }
+        .toList()
 
     private data class InstallSource(
         val packageName: String?,
         val uid: Int?,
         val packageCandidates: List<String> = emptyList(),
         val confidence: InstallSourceConfidence,
-        val viaProxyPackage: String? = null
+        val viaProxyPackage: String? = null,
     ) {
         companion object {
             fun unknown(viaProxyPackage: String? = null) = InstallSource(
                 packageName = null,
                 uid = null,
                 confidence = InstallSourceConfidence.UNKNOWN,
-                viaProxyPackage = viaProxyPackage
+                viaProxyPackage = viaProxyPackage,
             )
         }
     }

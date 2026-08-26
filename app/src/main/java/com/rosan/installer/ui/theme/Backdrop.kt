@@ -36,8 +36,7 @@ fun rememberMiuixBlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
  * @return Transparent if Backdrop is active, otherwise the default surface color.
  */
 @Composable
-fun LayerBackdrop?.getMiuixAppBarColor(): Color =
-    this?.let { Color.Transparent } ?: MiuixTheme.colorScheme.surface
+fun LayerBackdrop?.getMiuixAppBarColor(): Color = this?.let { Color.Transparent } ?: MiuixTheme.colorScheme.surface
 
 /**
  * Apply a standard glassmorphism blur effect using Miuix Backdrop.
@@ -51,7 +50,7 @@ fun Modifier.installerMiuixBlurEffect(
     backdrop: LayerBackdrop?,
     enabled: Boolean = true,
     blurRadius: Float = 25f,
-    shape: Shape = RectangleShape
+    shape: Shape = RectangleShape,
 ): Modifier {
     // Return early if disabled or backdrop is unavailable
     if (!enabled || backdrop == null) return this
@@ -66,10 +65,10 @@ fun Modifier.installerMiuixBlurEffect(
             blurRadius = blurRadius,
             colors = BlurColors(
                 blendColors = listOf(
-                    BlendColorEntry(color = blendColor)
-                )
-            )
-        )
+                    BlendColorEntry(color = blendColor),
+                ),
+            ),
+        ),
     )
 }
 
@@ -96,8 +95,7 @@ fun rememberMaterial3BlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
  * @return Transparent if Backdrop is active, otherwise the surfaceContainer color.
  */
 @Composable
-fun LayerBackdrop?.getMaterial3AppBarColor(): Color =
-    this?.let { Color.Transparent } ?: MaterialTheme.colorScheme.surfaceContainer
+fun LayerBackdrop?.getMaterial3AppBarColor(): Color = this?.let { Color.Transparent } ?: MaterialTheme.colorScheme.surfaceContainer
 
 /**
  * Apply a standard glassmorphism blur effect using Material 3 color schemes.
@@ -112,7 +110,7 @@ fun Modifier.installerMaterial3BlurEffect(
     backdrop: LayerBackdrop?,
     enabled: Boolean = true,
     blurRadius: Float = 25f,
-    shape: Shape = RectangleShape
+    shape: Shape = RectangleShape,
 ): Modifier {
     // Return early if disabled or backdrop is unavailable
     if (!enabled || backdrop == null) return this
@@ -127,9 +125,9 @@ fun Modifier.installerMaterial3BlurEffect(
             blurRadius = blurRadius,
             colors = BlurColors(
                 blendColors = listOf(
-                    BlendColorEntry(color = blendColor)
-                )
-            )
-        )
+                    BlendColorEntry(color = blendColor),
+                ),
+            ),
+        ),
     )
 }

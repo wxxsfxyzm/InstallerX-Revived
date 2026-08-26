@@ -5,10 +5,7 @@ package com.rosan.installer.domain.engine.model.install
 /**
  * Byte progress while selected APK payloads are written into PackageInstaller sessions.
  */
-data class InstallWriteProgress(
-    val bytesWritten: Long,
-    val totalBytes: Long
-) {
+data class InstallWriteProgress(val bytesWritten: Long, val totalBytes: Long) {
     init {
         require(totalBytes > 0L) { "totalBytes must be positive" }
         require(bytesWritten in 0L..totalBytes) {

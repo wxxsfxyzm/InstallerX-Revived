@@ -17,12 +17,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.IntSize
 import com.rosan.installer.ui.util.inspectDragGestures
+import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class DampedDragAnimation(
     private val animationScope: CoroutineScope,
@@ -84,7 +84,7 @@ class DampedDragAnimation(
             onDragCancel = {
                 onDragCancelled()
                 release()
-            }
+            },
         ) { change, dragAmount ->
             val position = change.position
             val previousPosition = change.previousPosition
@@ -146,7 +146,7 @@ class DampedDragAnimation(
     private fun updateVelocity() {
         velocityTracker.addPosition(
             System.currentTimeMillis(),
-            Offset(value, 0f)
+            Offset(value, 0f),
         )
         val targetVelocity = velocityTracker.calculateVelocity().x / (valueRange.endInclusive - valueRange.start)
         animationScope.launch { velocityAnimation.animateTo(targetVelocity, velocityAnimationSpec) }

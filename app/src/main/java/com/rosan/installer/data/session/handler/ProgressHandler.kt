@@ -10,10 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class ProgressHandler(
-    override val scope: CoroutineScope,
-    override val session: InstallerSessionRepository
-) : Handler {
+class ProgressHandler(override val scope: CoroutineScope, override val session: InstallerSessionRepository) : Handler {
 
     private var job: Job? = null
 

@@ -8,10 +8,6 @@ import com.rosan.installer.domain.session.model.ResolveErrorType
 /**
  * Unified exception for all resolve-phase failures.
  */
-class ResolveException(
-    val errorType: ResolveErrorType,
-    message: String? = null,
-    cause: Throwable? = null
-) : InstallerException(message, cause) {
+class ResolveException(val errorType: ResolveErrorType, message: String? = null, cause: Throwable? = null) : InstallerException(message, cause) {
     override fun getStringResId() = errorType.stringResId
 }

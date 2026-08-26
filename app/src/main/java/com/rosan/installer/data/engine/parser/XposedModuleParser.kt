@@ -19,7 +19,7 @@ class XposedModuleParser {
     fun extract(
         zipFile: UnifiedZipFile,
         metaDataMap: Map<String, String>,
-        manifestDescription: String? = null
+        manifestDescription: String? = null,
     ): XposedModuleInfo {
         val moduleProp = loadModuleProp(zipFile)
 
@@ -30,7 +30,7 @@ class XposedModuleParser {
         return XposedModuleInfo(
             minApi = minApi,
             targetApi = targetApi,
-            description = description
+            description = description,
         )
     }
 
@@ -65,7 +65,7 @@ class XposedModuleParser {
     private fun resolveDescription(
         moduleProp: Properties?,
         metaDataMap: Map<String, String>,
-        manifestDescription: String?
+        manifestDescription: String?,
     ): String? {
         if (!manifestDescription.isNullOrBlank() && manifestDescription != "null") {
             return manifestDescription

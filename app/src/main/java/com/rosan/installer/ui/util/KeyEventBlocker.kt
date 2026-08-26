@@ -29,7 +29,7 @@ fun KeyEventBlocker(predicate: (KeyEvent) -> Boolean) {
                 predicate(it)
             }
             .focusRequester(requester)
-            .focusable()
+            .focusable(),
     )
     LaunchedEffect(Unit) {
         requester.requestFocus()

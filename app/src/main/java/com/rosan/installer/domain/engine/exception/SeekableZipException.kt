@@ -4,7 +4,4 @@ package com.rosan.installer.domain.engine.exception
 
 import java.io.IOException
 
-internal class SeekableZipException(
-    message: String,
-    cause: Throwable? = null
-) : IOException(message, cause)
+internal class SeekableZipException(message: String, cause: Throwable? = null) : IOException(message, cause)

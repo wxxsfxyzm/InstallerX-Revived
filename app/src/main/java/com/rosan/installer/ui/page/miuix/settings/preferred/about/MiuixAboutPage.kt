@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -130,13 +131,12 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.window.WindowListPopup
-import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 // Unified entry point
 @Composable
 fun MiuixAboutPage(
     useBlur: Boolean,
-    viewModel: AboutViewModel = koinViewModel()
+    viewModel: AboutViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val showUpdateDialog = remember { mutableStateOf(false) }
@@ -150,7 +150,9 @@ fun MiuixAboutPage(
         viewModel.uiEvents.collect { event ->
             when (event) {
                 is AboutEvent.ShowUpdateLoading -> showLoadingDialog.value = true
+
                 is AboutEvent.HideUpdateLoading -> showLoadingDialog.value = false
+
                 is AboutEvent.ShowInAppUpdateErrorDetail -> {
                     showLoadingDialog.value = false
                     updateErrorInfo = event
@@ -166,20 +168,20 @@ fun MiuixAboutPage(
         useBlur = useBlur,
         uiState = uiState,
         viewModel = viewModel,
-        onShowUpdateDialog = { showUpdateDialog.value = true }
+        onShowUpdateDialog = { showUpdateDialog.value = true },
     )
 
     // Hoisted common dialogs
     MiuixUpdateDialog(
         showState = showUpdateDialog,
-        onDismiss = { showUpdateDialog.value = false }
+        onDismiss = { showUpdateDialog.value = false },
     )
 
     WindowDialog(show = showLoadingDialog.value) {
         BackHandler { /* Block Input */ }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             InfiniteProgressIndicator()
             Spacer(modifier = Modifier.width(16.dp))
@@ -195,7 +197,7 @@ fun MiuixAboutPage(
             onDismissRequest = {
                 showUpdateErrorDialog.value = false
                 updateErrorInfo = null
-            }
+            },
         )
     }
 }
@@ -205,7 +207,7 @@ private fun MiuixAboutPageInternal(
     useBlur: Boolean,
     uiState: AboutState,
     viewModel: AboutViewModel,
-    onShowUpdateDialog: () -> Unit
+    onShowUpdateDialog: () -> Unit,
 ) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
@@ -221,7 +223,7 @@ private fun MiuixAboutPageInternal(
         id = R.string.app_version_info_format,
         level,
         AppConfig.VERSION_NAME,
-        AppConfig.VERSION_CODE
+        AppConfig.VERSION_CODE,
     )
     val blurSupported = useBlur && isRuntimeShaderSupported()
     val topBarBackdrop = rememberMiuixBlurBackdrop(blurSupported)
@@ -259,7 +261,7 @@ private fun MiuixAboutPageInternal(
                 },
                 titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress),
                 defaultWindowInsetsPadding = false,
-                navigationIcon = { MiuixBackButton(onClick = { navigator.pop() }) }
+                navigationIcon = { MiuixBackButton(onClick = { navigator.pop() }) },
             )
         },
     ) { innerPadding ->
@@ -279,7 +281,7 @@ private fun MiuixAboutPageInternal(
                 onLogToggle = { viewModel.dispatch(AboutAction.SetEnableFileLogging(it)) },
                 onLogExport = { viewModel.dispatch(AboutAction.ShareLog) },
                 uriHandler = uriHandler,
-                context = context
+                context = context,
             )
         }
     }
@@ -301,7 +303,7 @@ private fun AboutContentBody(
     onLogToggle: (Boolean) -> Unit,
     onLogExport: () -> Unit,
     uriHandler: UriHandler,
-    context: Context
+    context: Context,
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val isDark = InstallerTheme.isDark
@@ -375,13 +377,13 @@ private fun AboutContentBody(
         start = horizontalSafeInsets.calculateStartPadding(layoutDirection) + displayCutoutInsets.calculateLeftPadding(layoutDirection),
         top = padding.calculateTopPadding(),
         end = horizontalSafeInsets.calculateEndPadding(layoutDirection) + displayCutoutInsets.calculateRightPadding(layoutDirection),
-        bottom = padding.calculateBottomPadding()
+        bottom = padding.calculateBottomPadding(),
     )
 
     val logoPadding = PaddingValues(
         top = padding.calculateTopPadding() + 40.dp,
         start = horizontalSafeInsets.calculateStartPadding(layoutDirection) + displayCutoutInsets.calculateLeftPadding(layoutDirection),
-        end = horizontalSafeInsets.calculateEndPadding(layoutDirection) + displayCutoutInsets.calculateRightPadding(layoutDirection)
+        end = horizontalSafeInsets.calculateEndPadding(layoutDirection) + displayCutoutInsets.calculateRightPadding(layoutDirection),
     )
 
     BgEffectBackground(
@@ -399,7 +401,7 @@ private fun AboutContentBody(
                 .padding(
                     top = logoPadding.calculateTopPadding() + 52.dp,
                     start = logoPadding.calculateStartPadding(layoutDirection),
-                    end = logoPadding.calculateEndPadding(layoutDirection)
+                    end = logoPadding.calculateEndPadding(layoutDirection),
                 )
                 .onSizeChanged { size ->
                     with(density) { logoHeightDp = size.height.toDp() }
@@ -431,13 +433,13 @@ private fun AboutContentBody(
                                 contentBlendMode = BlendMode.DstIn,
                                 enabled = blurEnable,
                             ),
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 } else if (uiState.appIcon != null) {
                     Image(
                         bitmap = uiState.appIcon,
                         modifier = Modifier.size(80.dp),
-                        contentDescription = stringResource(id = R.string.app_name)
+                        contentDescription = stringResource(id = R.string.app_name),
                     )
                 }
             }
@@ -464,7 +466,7 @@ private fun AboutContentBody(
                             )
                         } else {
                             Modifier
-                        }
+                        },
                     ),
                 text = stringResource(id = R.string.app_name),
                 fontWeight = FontWeight.Bold,
@@ -480,7 +482,7 @@ private fun AboutContentBody(
                         scaleX = 1 - (versionCodeProgress * 0.05f)
                         scaleY = 1 - (versionCodeProgress * 0.05f)
                     },
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
@@ -494,7 +496,7 @@ private fun AboutContentBody(
                         text = stringResource(R.string.update_available, uiState.remoteVersion),
                         fontSize = 14.sp,
                         color = MiuixTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -529,7 +531,7 @@ private fun AboutContentBody(
                             }
                         },
                     contentAlignment = Alignment.TopCenter,
-                    content = { }
+                    content = { },
                 )
             }
 
@@ -562,7 +564,7 @@ private fun AboutContentBody(
                                     )
                                 } else {
                                     Modifier
-                                }
+                                },
                             ),
                         colors = CardDefaults.defaultColors(
                             if (backdrop != null && blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
@@ -572,23 +574,23 @@ private fun AboutContentBody(
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.get_source_code),
                             description = stringResource(R.string.get_source_code_detail),
-                            onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") }
+                            onClick = { uriHandler.openUri("https://github.com/wxxsfxyzm/InstallerX-Revived") },
                         )
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.open_source_license),
                             description = stringResource(R.string.open_source_license_settings_description),
-                            onClick = onLicenseClicked
+                            onClick = onLicenseClicked,
                         )
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.get_update),
                             description = stringResource(R.string.get_update_detail),
-                            onClick = onGetUpdateClicked
+                            onClick = onGetUpdateClicked,
                         )
                         if (uiState.hasUpdate) {
                             MiuixNavigationItemWidget(
                                 title = stringResource(R.string.get_update_directly),
                                 description = stringResource(R.string.get_update_directly_desc),
-                                onClick = onDirectUpdateClicked
+                                onClick = onDirectUpdateClicked,
                             )
                         }
                     }
@@ -616,7 +618,7 @@ private fun AboutContentBody(
                                         )
                                     } else {
                                         Modifier
-                                    }
+                                    },
                                 ),
                             colors = CardDefaults.defaultColors(
                                 if (backdrop != null && blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
@@ -627,17 +629,17 @@ private fun AboutContentBody(
                                 title = stringResource(R.string.save_logs),
                                 description = stringResource(R.string.save_logs_desc),
                                 checked = uiState.enableFileLogging,
-                                onCheckedChange = onLogToggle
+                                onCheckedChange = onLogToggle,
                             )
                             AnimatedVisibility(
                                 visible = uiState.enableFileLogging,
                                 enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
+                                exit = fadeOut() + shrinkVertically(),
                             ) {
                                 BasicComponent(
                                     title = stringResource(R.string.export_logs),
                                     summary = stringResource(R.string.export_logs_desc),
-                                    onClick = onLogExport
+                                    onClick = onLogExport,
                                 )
                             }
                         }

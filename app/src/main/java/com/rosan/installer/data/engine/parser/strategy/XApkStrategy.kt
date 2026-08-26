@@ -12,6 +12,7 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -26,13 +27,12 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import java.io.File
 
 class XApkStrategy(
     private val json: Json,
     // Inject ApkParser to handle fallback analysis for Base APK
     private val apkParser: ApkParser,
-    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer
+    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer,
 ) : AnalysisStrategy {
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -40,7 +40,7 @@ class XApkStrategy(
         config: ConfigModel,
         data: DataEntity,
         zipFile: UnifiedZipFile?,
-        extra: AnalyseExtraEntity
+        extra: AnalyseExtraEntity,
     ): List<AppEntity> {
         val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
@@ -92,7 +92,7 @@ class XApkStrategy(
                                 pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
                             } else {
                                 null
-                            }
+                            },
                         )
                     } else {
                         // Handle Base APK
@@ -140,7 +140,7 @@ class XApkStrategy(
                             minSdk = manifest.minSdk,
                             sourceType = extra.dataType,
                             signatureHash = signatureInfo?.primarySha256,
-                            signatureInfo = signatureInfo
+                            signatureInfo = signatureInfo,
                         )
                     }
                     listOf(entity)
@@ -156,10 +156,12 @@ class XApkStrategy(
                                 dmName = dmName,
                                 targetSdk = manifest.targetSdk,
                                 minSdk = manifest.minSdk,
-                                sourceType = extra.dataType
-                            )
+                                sourceType = extra.dataType,
+                            ),
                         )
-                    } else emptyList()
+                    } else {
+                        emptyList()
+                    }
                 }
 
                 else -> emptyList()
@@ -182,10 +184,7 @@ class XApkStrategy(
         val versionName: String = versionNameStr ?: ""
 
         @Serializable
-        data class Split(
-            @SerialName("file") val name: String,
-            @SerialName("id") val splitName: String
-        )
+        data class Split(@SerialName("file") val name: String, @SerialName("id") val splitName: String)
     }
 }
 
@@ -193,18 +192,15 @@ private object FlexibleXapkVersionCodeSerializer : KSerializer<Long> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("FlexibleXapkVersionCode", PrimitiveKind.LONG)
 
-    override fun serialize(encoder: Encoder, value: Long) =
-        encoder.encodeLong(value)
+    override fun serialize(encoder: Encoder, value: Long) = encoder.encodeLong(value)
 
-    override fun deserialize(decoder: Decoder): Long {
-        return try {
-            decoder.decodeLong()
-        } catch (_: Exception) {
-            try {
-                decoder.decodeString().toLong()
-            } catch (e: Exception) {
-                throw SerializationException("Expected string or number for XAPK version_code", e)
-            }
+    override fun deserialize(decoder: Decoder): Long = try {
+        decoder.decodeLong()
+    } catch (_: Exception) {
+        try {
+            decoder.decodeString().toLong()
+        } catch (e: Exception) {
+            throw SerializationException("Expected string or number for XAPK version_code", e)
         }
     }
 }

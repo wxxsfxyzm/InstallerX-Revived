@@ -33,14 +33,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
 @Composable
-fun dialogButtons(
-    id: String,
-    content: (@Composable () -> List<DialogButton>)
-) = DialogInnerParams(id) {
+fun dialogButtons(id: String, content: (@Composable () -> List<DialogButton>)) = DialogInnerParams(id) {
     val buttons = content.invoke()
     Column(
         modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         val single = if (buttons.size > 2) buttons.size % 2 else buttons.size
 
@@ -55,14 +52,14 @@ fun dialogButtons(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     // Force the Row to be as tall as its tallest child
-                    modifier = Modifier.height(IntrinsicSize.Max)
+                    modifier = Modifier.height(IntrinsicSize.Max),
                 ) {
                     buttons[i].let {
                         InnerButton(
                             it,
                             Modifier
                                 .weight(it.weight)
-                                .fillMaxHeight() // Stretch to fill the parent Row's height
+                                .fillMaxHeight(), // Stretch to fill the parent Row's height
                         )
                     }
                     buttons[i + 1].let {
@@ -70,7 +67,7 @@ fun dialogButtons(
                             it,
                             Modifier
                                 .weight(it.weight)
-                                .fillMaxHeight() // Stretch here too
+                                .fillMaxHeight(), // Stretch here too
                         )
                     }
                 }
@@ -80,9 +77,7 @@ fun dialogButtons(
 }
 
 @Composable
-private fun InnerButton(
-    button: DialogButton, modifier: Modifier = Modifier
-) {
+private fun InnerButton(button: DialogButton, modifier: Modifier = Modifier) {
     // Track the press interaction state for the button
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -116,10 +111,10 @@ private fun InnerButton(
         shape = RoundedCornerShape(4.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
         contentPadding = PaddingValues(16.dp),
-        interactionSource = interactionSource // Bind the interaction source
+        interactionSource = interactionSource, // Bind the interaction source
     ) {
         Text(button.text)
     }

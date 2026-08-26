@@ -11,5 +11,5 @@ data class ConfigWithScopeCount(
 
     // The exact name used in the SQL AS clause
     @ColumnInfo(name = "scope_count")
-    val scopeCount: Int
+    val scopeCount: Int,
 )

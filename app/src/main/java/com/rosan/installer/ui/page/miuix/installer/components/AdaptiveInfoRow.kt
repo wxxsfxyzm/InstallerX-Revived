@@ -28,7 +28,7 @@ internal fun AdaptiveInfoRow(
     oldValue: String?,
     isUninstalled: Boolean = false,
     isArchived: Boolean = false,
-    hideIdenticalComparison: Boolean = false
+    hideIdenticalComparison: Boolean = false,
 ) {
     val showComparison = oldValue != null && (!hideIdenticalComparison || newValue != oldValue)
     val oldTextContent = when {
@@ -43,7 +43,7 @@ internal fun AdaptiveInfoRow(
             Text(
                 text = stringResource(labelResId),
                 style = MiuixTheme.textStyles.body2,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
 
             if (showComparison) {
@@ -51,7 +51,7 @@ internal fun AdaptiveInfoRow(
                 Text(
                     text = oldTextContent,
                     style = MiuixTheme.textStyles.body2,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
                 )
                 // Index 2: Arrow
                 Icon(
@@ -59,24 +59,24 @@ internal fun AdaptiveInfoRow(
                     contentDescription = "to",
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
-                        .size(16.dp)
+                        .size(16.dp),
                 )
                 // Index 3: New text
                 Text(
                     text = newValue,
                     style = MiuixTheme.textStyles.body2,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
                 )
             } else {
                 // Index 1: Single text when no comparison
                 Text(
                     text = newValue,
                     style = MiuixTheme.textStyles.body2,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
                 )
             }
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) { measurables, constraints ->
         val spacing = 16.dp.roundToPx()
 
@@ -106,7 +106,7 @@ internal fun AdaptiveInfoRow(
                 layout(constraints.maxWidth, height) {
                     labelPlaceable.placeRelative(
                         x = 0,
-                        y = Alignment.CenterVertically.align(labelPlaceable.height, height)
+                        y = Alignment.CenterVertically.align(labelPlaceable.height, height),
                     )
 
                     var currentX = constraints.maxWidth
@@ -114,19 +114,19 @@ internal fun AdaptiveInfoRow(
                     currentX -= newPlaceable.width
                     newPlaceable.placeRelative(
                         x = currentX,
-                        y = Alignment.CenterVertically.align(newPlaceable.height, height)
+                        y = Alignment.CenterVertically.align(newPlaceable.height, height),
                     )
 
                     currentX -= arrowPlaceable.width
                     arrowPlaceable.placeRelative(
                         x = currentX,
-                        y = Alignment.CenterVertically.align(arrowPlaceable.height, height)
+                        y = Alignment.CenterVertically.align(arrowPlaceable.height, height),
                     )
 
                     currentX -= oldPlaceable.width
                     oldPlaceable.placeRelative(
                         x = currentX,
-                        y = Alignment.CenterVertically.align(oldPlaceable.height, height)
+                        y = Alignment.CenterVertically.align(oldPlaceable.height, height),
                     )
                 }
             } else {
@@ -150,23 +150,23 @@ internal fun AdaptiveInfoRow(
                     // Place Line 1
                     labelPlaceable.placeRelative(
                         x = 0,
-                        y = Alignment.CenterVertically.align(labelPlaceable.height, line1Height)
+                        y = Alignment.CenterVertically.align(labelPlaceable.height, line1Height),
                     )
                     oldPlaceable.placeRelative(
                         x = constraints.maxWidth - oldPlaceable.width,
-                        y = Alignment.CenterVertically.align(oldPlaceable.height, line1Height)
+                        y = Alignment.CenterVertically.align(oldPlaceable.height, line1Height),
                     )
 
                     // Place Line 2
                     val line2Y = line1Height + verticalSpacing
                     newPlaceable.placeRelative(
                         x = constraints.maxWidth - newPlaceable.width,
-                        y = line2Y + Alignment.CenterVertically.align(newPlaceable.height, line2Height)
+                        y = line2Y + Alignment.CenterVertically.align(newPlaceable.height, line2Height),
                     )
                     // Anchor arrow directly to the left of the new text
                     arrowPlaceable.placeRelative(
                         x = constraints.maxWidth - newPlaceable.width - arrowPlaceable.width,
-                        y = line2Y + Alignment.CenterVertically.align(arrowPlaceable.height, line2Height)
+                        y = line2Y + Alignment.CenterVertically.align(arrowPlaceable.height, line2Height),
                     )
                 }
             }
@@ -179,11 +179,11 @@ internal fun AdaptiveInfoRow(
             layout(constraints.maxWidth, height) {
                 labelPlaceable.placeRelative(
                     x = 0,
-                    y = Alignment.CenterVertically.align(labelPlaceable.height, height)
+                    y = Alignment.CenterVertically.align(labelPlaceable.height, height),
                 )
                 valuePlaceable.placeRelative(
                     x = constraints.maxWidth - valuePlaceable.width,
-                    y = Alignment.CenterVertically.align(valuePlaceable.height, height)
+                    y = Alignment.CenterVertically.align(valuePlaceable.height, height),
                 )
             }
         }

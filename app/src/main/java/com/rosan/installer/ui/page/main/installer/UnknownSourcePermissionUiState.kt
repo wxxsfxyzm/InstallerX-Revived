@@ -13,9 +13,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
-fun rememberUnknownSourcePermissionActionVisible(
-    isWaitingUnknownSource: Boolean
-): Boolean {
+fun rememberUnknownSourcePermissionActionVisible(isWaitingUnknownSource: Boolean): Boolean {
     val lifecycleOwner = LocalLifecycleOwner.current
     var actionVisible by remember(isWaitingUnknownSource) {
         mutableStateOf(!isWaitingUnknownSource)

@@ -15,36 +15,39 @@ import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import java.io.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
 
 class ModuleInstallerRepositoryImpl internal constructor(
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
-    private val moduleSourceMaterializer: ModuleSourceMaterializer
+    private val moduleSourceMaterializer: ModuleSourceMaterializer,
 ) : ModuleInstallerRepository {
     override fun doInstallWork(
         config: ConfigModel,
         module: AppEntity.ModuleEntity,
         useRoot: Boolean,
-        rootMode: RootMode
+        rootMode: RootMode,
     ): Flow<String> {
         // 1. Select the appropriate repository implementation
         val repo = when (config.authorizer) {
             Authorizer.Root,
-            Authorizer.Customize -> LocalModuleInstallerRepoImpl()
+            Authorizer.Customize,
+            -> LocalModuleInstallerRepoImpl()
 
             // Shizuku MUST use the Remote implementation
             Authorizer.Shizuku -> ShizukuModuleInstallerRepoImpl(deviceCapabilityProvider)
 
             Authorizer.None -> {
-                if (deviceCapabilityProvider.isSystemApp && useRoot)
+                if (deviceCapabilityProvider.isSystemApp && useRoot) {
                     LocalModuleInstallerRepoImpl()
-                else null // Signal that no session is available
+                } else {
+                    null // Signal that no session is available
+                }
             }
 
             else -> null
@@ -55,7 +58,7 @@ class ModuleInstallerRepositoryImpl internal constructor(
             return flow {
                 throw ModuleInstallException(
                     errorType = ModuleInstallErrorType.INCOMPATIBLE_AUTHORIZER,
-                    message = "Module installation is not supported with the '${config.authorizer.name}' authorizer."
+                    message = "Module installation is not supported with the '${config.authorizer.name}' authorizer.",
                 )
             }
         }
@@ -76,7 +79,7 @@ class ModuleInstallerRepositoryImpl internal constructor(
                     throw PrivilegedException(
                         errorType = PrivilegedErrorType.SHIZUKU_NOT_WORK,
                         message = "Shizuku service connection lost.",
-                        cause = e
+                        cause = e,
                     )
                 } else {
                     throw e

@@ -23,18 +23,18 @@ fun NavigationItemWidget(
     iconPlaceholder: Boolean = true,
     title: String,
     description: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     BaseWidget(
         icon = icon,
         iconPlaceholder = iconPlaceholder,
         title = title,
         description = description,
-        onClick = onClick
+        onClick = onClick,
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-            contentDescription = null
+            contentDescription = null,
         )
     }
 }

@@ -38,7 +38,10 @@ private fun getInstallOptions(authorizer: Authorizer, isSystemApp: Boolean) = In
         when (it) {
             // The AllowDowngrade option should only be available when the authorizer is Root, Shizuku(running as root).
             // Or running as SystemApp.
-            InstallOption.AllowDowngrade -> authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku || (authorizer == Authorizer.None && isSystemApp)
+            InstallOption.AllowDowngrade ->
+                authorizer == Authorizer.Root || authorizer == Authorizer.Shizuku ||
+                    (authorizer == Authorizer.None && isSystemApp)
+
             // All other options are available by default.
             else -> true
         }

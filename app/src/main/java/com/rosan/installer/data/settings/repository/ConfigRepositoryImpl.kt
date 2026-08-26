@@ -17,11 +17,7 @@ import com.rosan.installer.domain.settings.util.OrderType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class ConfigRepositoryImpl(
-    private val dao: ConfigDao,
-    private val appDao: AppDao,
-    private val room: InstallerRoom
-) : ConfigRepository {
+class ConfigRepositoryImpl(private val dao: ConfigDao, private val appDao: AppDao, private val room: InstallerRoom) : ConfigRepository {
 
     private fun buildOrderQuery(order: ConfigOrder): RoomRawQuery {
         val column = when (order) {
@@ -53,17 +49,11 @@ class ConfigRepositoryImpl(
         return dao.flowAllDynamically(query).map { list -> list.map { it.toDomainModel() } } // Requires Mapper update
     }
 
-    override suspend fun find(id: Long): ConfigModel? {
-        return dao.find(id)?.toDomainModel()
-    }
+    override suspend fun find(id: Long): ConfigModel? = dao.find(id)?.toDomainModel()
 
-    override fun flowFind(id: Long): Flow<ConfigModel?> {
-        return dao.flowFind(id).map { it?.toDomainModel() }
-    }
+    override fun flowFind(id: Long): Flow<ConfigModel?> = dao.flowFind(id).map { it?.toDomainModel() }
 
-    override suspend fun findDefault(): ConfigModel? {
-        return dao.findDefault()?.toDomainModel()
-    }
+    override suspend fun findDefault(): ConfigModel? = dao.findDefault()?.toDomainModel()
 
     override suspend fun update(model: ConfigModel) {
         val entity = model.toEntity()
@@ -82,16 +72,15 @@ class ConfigRepositoryImpl(
         dao.delete(model.toEntity())
     }
 
-    override suspend fun deleteWithScopes(model: ConfigModel): DeletedConfigSnapshot =
-        room.withWriteTransaction {
-            val scopes = appDao.findByConfigId(model.id).map { it.toDomainModel() }
-            val config = dao.find(model.id)?.toDomainModel(scopeCount = scopes.size) ?: model
-            dao.delete(config.toEntity())
-            DeletedConfigSnapshot(
-                configModel = config,
-                scopes = scopes
-            )
-        }
+    override suspend fun deleteWithScopes(model: ConfigModel): DeletedConfigSnapshot = room.withWriteTransaction {
+        val scopes = appDao.findByConfigId(model.id).map { it.toDomainModel() }
+        val config = dao.find(model.id)?.toDomainModel(scopeCount = scopes.size) ?: model
+        dao.delete(config.toEntity())
+        DeletedConfigSnapshot(
+            configModel = config,
+            scopes = scopes,
+        )
+    }
 
     override suspend fun restoreDeleted(snapshot: DeletedConfigSnapshot) {
         room.withWriteTransaction {
@@ -104,7 +93,7 @@ class ConfigRepositoryImpl(
                 }
                 val restoredScope = scope.copy(
                     id = currentScope?.id ?: 0L,
-                    configId = snapshot.configModel.id
+                    configId = snapshot.configModel.id,
                 )
 
                 if (currentScope == null) {

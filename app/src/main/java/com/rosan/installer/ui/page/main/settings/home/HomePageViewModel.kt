@@ -28,7 +28,7 @@ class HomePageViewModel(
     private val appSettingsRepo: AppSettingsRepository,
     private val capabilityProvider: DeviceCapabilityProvider,
     private val privilegedProvider: PrivilegedProvider,
-    private val updateSetting: UpdateSettingUseCase
+    private val updateSetting: UpdateSettingUseCase,
 ) : ViewModel() {
 
     // Trigger flow to manually refresh the combined state
@@ -36,7 +36,7 @@ class HomePageViewModel(
 
     // UI events stream to communicate one-off actions to the UI layer
     private val _uiEvents = MutableSharedFlow<HomePageViewEvent>(
-        extraBufferCapacity = 1
+        extraBufferCapacity = 1,
     )
     val uiEvents = _uiEvents.asSharedFlow()
 
@@ -48,7 +48,7 @@ class HomePageViewModel(
         val dhizukuAuthorized: Boolean,
         val rootMode: RootMode,
         val defaultInstaller: String,
-        val deviceName: String
+        val deviceName: String,
     )
 
     // Combine all capability flows into a single bundled state flow
@@ -58,7 +58,7 @@ class HomePageViewModel(
         capabilityProvider.dhizukuAvailableFlow,
         capabilityProvider.dhizukuAuthorizedFlow,
         capabilityProvider.rootModeFlow,
-        capabilityProvider.defaultInstallerFlow
+        capabilityProvider.defaultInstallerFlow,
     ) { array ->
         CapabilityState(
             shizukuMode = array[0] as ShizukuMode,
@@ -67,7 +67,7 @@ class HomePageViewModel(
             dhizukuAuthorized = array[3] as Boolean,
             rootMode = array[4] as RootMode,
             defaultInstaller = array[5] as String,
-            deviceName = capabilityProvider.deviceName
+            deviceName = capabilityProvider.deviceName,
         )
     }
 
@@ -75,7 +75,7 @@ class HomePageViewModel(
     val state: StateFlow<HomePageViewState> = combine(
         appSettingsRepo.preferencesFlow,
         capabilityStateFlow,
-        refreshFlow
+        refreshFlow,
     ) { prefs, caps, _ ->
 
         // Sync user preference with capability provider
@@ -109,12 +109,12 @@ class HomePageViewModel(
             availableAuthorizerCount = availableCount,
             userSetLSPosedActive = prefs.userSetLSPosedActive,
             defaultInstaller = caps.defaultInstaller,
-            deviceName = caps.deviceName
+            deviceName = caps.deviceName,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = HomePageViewState()
+        initialValue = HomePageViewState(),
     )
 
     // Handle user actions dispatched from the view
@@ -131,32 +131,32 @@ class HomePageViewModel(
             is HomePageViewAction.ChangeAuthorizer -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.Authorizer,
-                    action.authorizer.value
+                    action.authorizer.value,
                 )
             }
 
             is HomePageViewAction.ChangeCustomizeAuthorizer -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.CustomizeAuthorizer,
-                    action.customizeAuthorizer
+                    action.customizeAuthorizer,
                 )
             }
 
             is HomePageViewAction.EnableCustomizeAuthorizer -> viewModelScope.launch {
                 updateSetting(
                     StringSetting.CustomizeAuthorizer,
-                    action.customizeAuthorizer
+                    action.customizeAuthorizer,
                 )
                 updateSetting(
                     StringSetting.Authorizer,
-                    Authorizer.Customize.value
+                    Authorizer.Customize.value,
                 )
             }
 
             is HomePageViewAction.ChangeUserSetLSPosedActive -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.UserSetLSPosedActive,
-                    action.active
+                    action.active,
                 )
             }
         }
@@ -168,7 +168,7 @@ class HomePageViewModel(
             privilegedProvider.setDefaultInstaller(
                 state.value.globalAuthorizer,
                 state.value.customizeAuthorizer,
-                lock
+                lock,
             )
         }.onSuccess {
             val successResId = if (lock) R.string.lock_default_installer_success else R.string.unlock_default_installer_success
@@ -179,5 +179,4 @@ class HomePageViewModel(
             _uiEvents.emit(HomePageViewEvent.ShowDefaultInstallerErrorDetail(errorResId, e, action))
         }
     }
-
 }

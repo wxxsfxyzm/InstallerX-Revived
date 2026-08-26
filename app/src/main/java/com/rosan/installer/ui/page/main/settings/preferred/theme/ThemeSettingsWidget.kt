@@ -11,11 +11,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
-import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
-import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 
 @Composable
 fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {
@@ -26,7 +26,7 @@ fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {
         PaletteStyle.TonalSpot,
         PaletteStyle.Neutral,
         PaletteStyle.Vibrant,
-        PaletteStyle.Expressive
+        PaletteStyle.Expressive,
     )
 
     // Filter available specs based on support
@@ -56,15 +56,12 @@ fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {
         onChoiceChange = { index ->
             val selectedSpec = availableSpecs[index]
             viewModel.dispatch(ThemeSettingsAction.SetColorSpec(selectedSpec))
-        }
+        },
     )
 }
 
 @Composable
-fun PredictiveBackAnimationWidget(
-    uiState: ThemeSettingsState,
-    onClick: () -> Unit
-) {
+fun PredictiveBackAnimationWidget(uiState: ThemeSettingsState, onClick: () -> Unit) {
     BaseWidget(
         icon = AppIcons.PredictiveBack,
         title = stringResource(R.string.theme_settings_predictive_back_animation),
@@ -75,23 +72,28 @@ fun PredictiveBackAnimationWidget(
             PredictiveBackAnimation.Scale -> stringResource(R.string.theme_settings_predictive_back_animation_scale)
             PredictiveBackAnimation.Classic -> stringResource(R.string.theme_settings_predictive_back_animation_ksu_classic)
         },
-        onClick = onClick
+        onClick = onClick,
     ) {}
 }
 
 @Composable
-fun PredictiveBackAnimationDirectionWidget(
-    uiState: ThemeSettingsState,
-    onClick: () -> Unit
-) {
+fun PredictiveBackAnimationDirectionWidget(uiState: ThemeSettingsState, onClick: () -> Unit) {
     BaseWidget(
         icon = AppIcons.PredictiveBackDirection,
         title = stringResource(R.string.theme_settings_predictive_back_exit_direction),
         description = when (uiState.predictiveBackExitDirection) {
-            PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.theme_settings_predictive_back_exit_direction_follow_gesture)
-            PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_right)
-            PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.theme_settings_predictive_back_exit_direction_always_left)
+            PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(
+                R.string.theme_settings_predictive_back_exit_direction_follow_gesture,
+            )
+
+            PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(
+                R.string.theme_settings_predictive_back_exit_direction_always_right,
+            )
+
+            PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(
+                R.string.theme_settings_predictive_back_exit_direction_always_left,
+            )
         },
-        onClick = onClick
+        onClick = onClick,
     ) {}
 }

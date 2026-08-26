@@ -39,5 +39,4 @@ fun InstallMethod.labelRes(): Int = when (this) {
     InstallMethod.SESSION -> R.string.history_method_session
 }
 
-fun Long.formatHistoryTime(): String =
-    DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(this))
+fun Long.formatHistoryTime(): String = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(this))

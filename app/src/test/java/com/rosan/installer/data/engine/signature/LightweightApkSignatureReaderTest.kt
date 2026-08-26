@@ -44,7 +44,7 @@ class LightweightApkSignatureReaderTest {
             channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
             descriptorFactory = { error("A raw descriptor is not needed") },
             preInstallSignatureAnalysis = false,
-            preInstallSigningBlockAnalysis = true
+            preInstallSigningBlockAnalysis = true,
         )
 
         val result = reader.read(entity)
@@ -69,7 +69,7 @@ class LightweightApkSignatureReaderTest {
             channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
             descriptorFactory = { error("A raw descriptor is not needed") },
             preInstallSignatureAnalysis = false,
-            preInstallSigningBlockAnalysis = true
+            preInstallSigningBlockAnalysis = true,
         )
 
         val result = reader.read(entity)
@@ -87,8 +87,8 @@ class LightweightApkSignatureReaderTest {
             writeBytes(
                 createApkWithV3Signers(
                     createV3Signer(olderCertificate, minSdk = 28, maxSdk = 34),
-                    createV3Signer(currentCertificate, minSdk = 35, maxSdk = Int.MAX_VALUE)
-                )
+                    createV3Signer(currentCertificate, minSdk = 35, maxSdk = Int.MAX_VALUE),
+                ),
             )
         }
         val entity = DataEntity.FileDescriptorEntity(
@@ -98,7 +98,7 @@ class LightweightApkSignatureReaderTest {
             channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
             descriptorFactory = { error("A raw descriptor is not needed") },
             preInstallSignatureAnalysis = false,
-            preInstallSigningBlockAnalysis = true
+            preInstallSigningBlockAnalysis = true,
         )
 
         val sdk34Result = reader.read(entity, platformSdk = 34)
@@ -118,13 +118,13 @@ class LightweightApkSignatureReaderTest {
                 createApkWithSchemePairs(
                     createSchemePair(
                         V3_BLOCK_ID,
-                        createV3Signer(fallbackCertificate, minSdk = 28, maxSdk = Int.MAX_VALUE)
+                        createV3Signer(fallbackCertificate, minSdk = 28, maxSdk = Int.MAX_VALUE),
                     ),
                     createSchemePair(
                         V31_BLOCK_ID,
-                        createV3Signer(rotatedCertificate, minSdk = 33, maxSdk = Int.MAX_VALUE)
-                    )
-                )
+                        createV3Signer(rotatedCertificate, minSdk = 33, maxSdk = Int.MAX_VALUE),
+                    ),
+                ),
             )
         }
         val entity = DataEntity.FileDescriptorEntity(
@@ -134,7 +134,7 @@ class LightweightApkSignatureReaderTest {
             channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
             descriptorFactory = { error("A raw descriptor is not needed") },
             preInstallSignatureAnalysis = false,
-            preInstallSigningBlockAnalysis = true
+            preInstallSigningBlockAnalysis = true,
         )
 
         val sdk32Result = reader.read(entity, platformSdk = 32)
@@ -150,12 +150,12 @@ class LightweightApkSignatureReaderTest {
         val signedData = concat(
             lengthPrefixed(byteArrayOf()),
             lengthPrefixed(certificates),
-            lengthPrefixed(byteArrayOf())
+            lengthPrefixed(byteArrayOf()),
         )
         val signer = concat(
             lengthPrefixed(signedData),
             lengthPrefixed(byteArrayOf()),
-            lengthPrefixed(byteArrayOf())
+            lengthPrefixed(byteArrayOf()),
         )
         val schemeBlock = lengthPrefixed(lengthPrefixed(signer))
         val pair = littleEndianBuffer(8 + 4 + schemeBlock.size)
@@ -173,9 +173,7 @@ class LightweightApkSignatureReaderTest {
         return concat(signingBlock, createEocd(signingBlock.size))
     }
 
-    private fun createApkWithV3Signers(vararg signers: ByteArray): ByteArray {
-        return createApkWithSchemePairs(createSchemePair(V3_BLOCK_ID, *signers))
-    }
+    private fun createApkWithV3Signers(vararg signers: ByteArray): ByteArray = createApkWithSchemePairs(createSchemePair(V3_BLOCK_ID, *signers))
 
     private fun createSchemePair(id: Int, vararg signers: ByteArray): ByteArray {
         val schemeBlock = lengthPrefixed(concat(*signers.map(::lengthPrefixed).toTypedArray()))
@@ -204,42 +202,38 @@ class LightweightApkSignatureReaderTest {
             lengthPrefixed(byteArrayOf()),
             lengthPrefixed(certificates),
             littleEndianBuffer(8).putInt(minSdk).putInt(maxSdk).array(),
-            lengthPrefixed(byteArrayOf())
+            lengthPrefixed(byteArrayOf()),
         )
         return concat(
             lengthPrefixed(signedData),
             littleEndianBuffer(8).putInt(minSdk).putInt(maxSdk).array(),
             lengthPrefixed(byteArrayOf()),
-            lengthPrefixed(byteArrayOf())
+            lengthPrefixed(byteArrayOf()),
         )
     }
 
-    private fun createEocd(centralDirectoryOffset: Int): ByteArray =
-        littleEndianBuffer(22)
-            .putInt(ZIP_EOCD_SIGNATURE)
-            .putShort(0)
-            .putShort(0)
-            .putShort(0)
-            .putShort(0)
-            .putInt(0)
-            .putInt(centralDirectoryOffset)
-            .putShort(0)
-            .array()
+    private fun createEocd(centralDirectoryOffset: Int): ByteArray = littleEndianBuffer(22)
+        .putInt(ZIP_EOCD_SIGNATURE)
+        .putShort(0)
+        .putShort(0)
+        .putShort(0)
+        .putShort(0)
+        .putInt(0)
+        .putInt(centralDirectoryOffset)
+        .putShort(0)
+        .array()
 
-    private fun lengthPrefixed(value: ByteArray): ByteArray =
-        littleEndianBuffer(4 + value.size).putInt(value.size).put(value).array()
+    private fun lengthPrefixed(value: ByteArray): ByteArray = littleEndianBuffer(4 + value.size).putInt(value.size).put(value).array()
 
-    private fun concat(vararg values: ByteArray): ByteArray =
-        ByteArray(values.sumOf(ByteArray::size)).also { result ->
-            var offset = 0
-            values.forEach { value ->
-                value.copyInto(result, offset)
-                offset += value.size
-            }
+    private fun concat(vararg values: ByteArray): ByteArray = ByteArray(values.sumOf(ByteArray::size)).also { result ->
+        var offset = 0
+        values.forEach { value ->
+            value.copyInto(result, offset)
+            offset += value.size
         }
+    }
 
-    private fun littleEndianBuffer(size: Int): ByteBuffer =
-        ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN)
+    private fun littleEndianBuffer(size: Int): ByteBuffer = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN)
 
     private fun ByteArray.sha256(): String = MessageDigest.getInstance("SHA-256")
         .digest(this)

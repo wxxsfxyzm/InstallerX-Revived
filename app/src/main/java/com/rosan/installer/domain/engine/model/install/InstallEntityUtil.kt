@@ -26,7 +26,8 @@ fun ConfigModel.shouldAutoDeleteSource(sourceType: DataType?): Boolean {
     val requiresArchiveOptIn = when (sourceType) {
         DataType.MULTI_APK_ZIP,
         DataType.MIXED_MODULE_APK,
-        DataType.MIXED_MODULE_ZIP -> true
+        DataType.MIXED_MODULE_ZIP,
+        -> true
 
         else -> false
     }

@@ -80,7 +80,7 @@ fun <T> DraggableList(
     noContentTitle: String,
     noContentDescription: String? = stringResource(R.string.config_add_one_to_get_started),
     trailingContent: (@Composable (item: T) -> Unit)? = null,
-    bottomBarContent: (@Composable () -> Unit)? = null
+    bottomBarContent: (@Composable () -> Unit)? = null,
 ) {
     var isWaitingForUpdate by remember { mutableStateOf(false) }
     var localItems by remember { mutableStateOf(items) }
@@ -100,8 +100,9 @@ fun <T> DraggableList(
 
     val targetIndex by remember(itemHeightPx, localItems.size) {
         derivedStateOf {
-            if (draggedIndex == null || itemHeightPx <= 0f) null
-            else {
+            if (draggedIndex == null || itemHeightPx <= 0f) {
+                null
+            } else {
                 val shift = (dragOffsetY / itemHeightPx + if (dragOffsetY > 0) 0.5f else -0.5f).toInt()
                 (draggedIndex!! + shift).coerceIn(0, localItems.lastIndex)
             }
@@ -114,7 +115,7 @@ fun <T> DraggableList(
                 modifier = Modifier.clip(MaterialTheme.shapes.large),
                 title = noContentTitle,
                 description = noContentDescription,
-                icon = Icons.Default.Info
+                icon = Icons.Default.Info,
             )
         } else if (localItems.size == 1) {
             val item = localItems.first()
@@ -127,7 +128,7 @@ fun <T> DraggableList(
                 iconPlaceholder = icon != null,
                 iconColor = MaterialTheme.colorScheme.primary,
                 onClick = onItemClick?.let { { it(item) } },
-                trailingContent = { trailingContent?.invoke(item) }
+                trailingContent = { trailingContent?.invoke(item) },
             )
         } else {
             Column(
@@ -169,10 +170,10 @@ fun <T> DraggableList(
                                 draggedIndex = null
                                 dragOffsetY = 0f
                                 if (wasDragging) onDragStateChange(false)
-                            }
+                            },
                         )
                     },
-                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
                 localItems.forEachIndexed { index, item ->
                     key(itemKey(item)) {
@@ -196,15 +197,30 @@ fun <T> DraggableList(
                             }
                         }
 
-                        val translationY = if (isDragged) dragOffsetY
-                        else if (draggedIndex != null && targetIndex != null) {
-                            if (draggedIndex!! < targetIndex!! && index in (draggedIndex!! + 1)..targetIndex!!) -itemHeightPx
-                            else if (draggedIndex!! > targetIndex!! && index in targetIndex!!..<draggedIndex!!) itemHeightPx
-                            else 0f
-                        } else 0f
+                        val translationY = if (isDragged) {
+                            dragOffsetY
+                        } else if (draggedIndex != null && targetIndex != null) {
+                            if (draggedIndex!! < targetIndex!! && index in (draggedIndex!! + 1)..targetIndex!!) {
+                                -itemHeightPx
+                            } else if (draggedIndex!! > targetIndex!! && index in targetIndex!!..<draggedIndex!!) {
+                                itemHeightPx
+                            } else {
+                                0f
+                            }
+                        } else {
+                            0f
+                        }
 
                         val animatedTranslationY by animateFloatAsState(targetValue = translationY, label = "drag_anim")
-                        val finalTranslationY = if (isDragged) dragOffsetY else if (draggedIndex == null) 0f else animatedTranslationY
+                        val finalTranslationY = if (isDragged) {
+                            dragOffsetY
+                        } else if (draggedIndex ==
+                            null
+                        ) {
+                            0f
+                        } else {
+                            animatedTranslationY
+                        }
 
                         SegmentedListItem(
                             onClick = { onItemClick?.invoke(item) },
@@ -212,7 +228,7 @@ fun <T> DraggableList(
                             colors = ListItemDefaults.segmentedColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceBright,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
-                                leadingContentColor = MaterialTheme.colorScheme.primary
+                                leadingContentColor = MaterialTheme.colorScheme.primary,
                             ),
                             elevation = ListItemDefaults.elevation(0.dp, 6.dp),
                             interactionSource = interactionSource,
@@ -223,7 +239,7 @@ fun <T> DraggableList(
                             content = { Text(itemName(item)) },
                             supportingContent = { Text(itemDescription(item)) },
                             leadingContent = icon?.let { imageVector -> { Icon(imageVector, null) } },
-                            trailingContent = { trailingContent?.invoke(item) }
+                            trailingContent = { trailingContent?.invoke(item) },
                         )
                     }
                 }
