@@ -7,9 +7,10 @@ plugins {
 }
 
 val versions = extensions.getByType<VersionCatalogsExtension>().named("libs")
-val ktlintVersion = versions.findVersion("ktlint").get().requiredVersion
-val composeKtlintRules =
-    "io.nlopez.compose.rules:ktlint:${versions.findVersion("composeKtlintRules").get().requiredVersion}"
+val ktlintVersion = versions.findLibrary("ktlint-cli").get().get().versionConstraint.requiredVersion
+val composeKtlintRules = versions.findLibrary("compose-ktlint-rules").get().get().let {
+    "${it.module.group}:${it.module.name}:${it.versionConstraint.requiredVersion}"
+}
 val ratchetBase =
     providers.gradleProperty("spotlessRatchetFrom")
         .orElse(providers.environmentVariable("GITHUB_BASE_REF").map { "origin/$it" })
