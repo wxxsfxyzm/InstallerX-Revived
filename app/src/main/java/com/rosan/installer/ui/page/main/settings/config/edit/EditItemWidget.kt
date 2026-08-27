@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -602,7 +603,7 @@ fun DataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
                         val count = managedPackages.size
                         managedPackages.forEachIndexed { index, item ->
                             val isSelected = currentInstaller == item.packageName
-                            DropdownMenuItem(
+                            SelectableDropdownMenuItem(
                                 selected = isSelected,
                                 onClick = {
                                     dispatch(EditViewAction.ChangeDataInstaller(item.packageName))
