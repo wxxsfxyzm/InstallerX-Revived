@@ -157,6 +157,7 @@ class PendingApkSignatureAnalyzer(
         if (isVerifiedUsingV2Scheme) add("V2")
         if (isVerifiedUsingV3Scheme) add("V3")
         if (isVerifiedUsingV31Scheme) add("V3.1")
+        if (isVerifiedUsingV32Scheme) add("V3.2")
         if (isVerifiedUsingV4Scheme) add("V4")
     }
 

@@ -14,7 +14,7 @@ import java.nio.channels.SeekableByteChannel
 import timber.log.Timber
 
 /**
- * Reads signer certificate declarations from APK Signature Scheme v2/v3 blocks.
+ * Reads signer certificate declarations from APK Signature Scheme v2/v3.x blocks.
  *
  * This deliberately does not verify signer signatures or APK content digests. The result can
  * support certificate comparison and profile restrictions, while PackageInstaller remains the
@@ -94,6 +94,10 @@ class LightweightApkSignatureReader(private val certificateFormatter: Certificat
             schemes += scheme.label
         }
         val certificates = when {
+            platformSdk >= MIN_SDK_WITH_V32_SUPPORT &&
+                certificatesByScheme[SCHEME_V32].isNullOrEmpty().not() ->
+                certificatesByScheme.getValue(SCHEME_V32)
+
             platformSdk >= MIN_SDK_WITH_V31_SUPPORT &&
                 certificatesByScheme[SCHEME_V31].isNullOrEmpty().not() ->
                 certificatesByScheme.getValue(SCHEME_V31)
@@ -166,7 +170,7 @@ class LightweightApkSignatureReader(private val certificateFormatter: Certificat
     private fun readSdkRange(buffer: ByteBuffer, label: String): IntRange {
         val minSdk = buffer.int
         val maxSdk = buffer.int
-        if (minSdk < 0 || minSdk > maxSdk) {
+        if (minSdk !in 0..maxSdk) {
             throw IOException("Invalid $label SDK range: min=$minSdk, max=$maxSdk")
         }
         return minSdk..maxSdk
@@ -272,16 +276,19 @@ class LightweightApkSignatureReader(private val certificateFormatter: Certificat
         const val MAX_SIGNER_COUNT = 32
         const val MAX_CERTIFICATE_COUNT = 64
         const val MAX_CERTIFICATE_SIZE = 64 * 1024
-        const val MIN_SDK_WITH_V3_SUPPORT = 28
-        const val MIN_SDK_WITH_V31_SUPPORT = 33
+        const val MIN_SDK_WITH_V3_SUPPORT = Build.VERSION_CODES.P
+        const val MIN_SDK_WITH_V31_SUPPORT = Build.VERSION_CODES.TIRAMISU
+        const val MIN_SDK_WITH_V32_SUPPORT = Build.VERSION_CODES.CINNAMON_BUN
         const val SCHEME_V2 = "V2"
         const val SCHEME_V3 = "V3"
         const val SCHEME_V31 = "V3.1"
+        const val SCHEME_V32 = "V3.2"
         val APK_SIGNING_BLOCK_MAGIC = "APK Sig Block 42".toByteArray(Charsets.US_ASCII)
         val SCHEMES = mapOf(
             0x7109871a to Scheme(SCHEME_V2, hasSdkRange = false),
             0xf05368c0.toInt() to Scheme(SCHEME_V3, hasSdkRange = true),
             0x1b93ad61 to Scheme(SCHEME_V31, hasSdkRange = true),
+            0x70e1c89f to Scheme(SCHEME_V32, hasSdkRange = true),
         )
     }
 }

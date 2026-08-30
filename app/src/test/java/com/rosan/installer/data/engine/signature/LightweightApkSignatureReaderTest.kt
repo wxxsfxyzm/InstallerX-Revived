@@ -145,6 +145,45 @@ class LightweightApkSignatureReaderTest {
         assertEquals(setOf(rotatedCertificate.sha256()), sdk35Result.signerSha256Set)
     }
 
+    @Test
+    fun `v32 hybrid signer takes precedence over older v3 schemes`() {
+        val classicalCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x01)
+        val pqcCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x02)
+        val fallbackCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x03)
+        val apk = File(tempDirectory, "v32-with-v3-fallback.apk").apply {
+            writeBytes(
+                createApkWithSchemePairs(
+                    createSchemePair(
+                        V3_BLOCK_ID,
+                        createV3Signer(fallbackCertificate, minSdk = 28, maxSdk = Int.MAX_VALUE),
+                    ),
+                    createSchemePair(
+                        V32_BLOCK_ID,
+                        createV3Signer(classicalCertificate, minSdk = 37, maxSdk = Int.MAX_VALUE),
+                        createV3Signer(pqcCertificate, minSdk = 37, maxSdk = Int.MAX_VALUE),
+                    ),
+                ),
+            )
+        }
+        val entity = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/app.apk",
+            startOffset = 0L,
+            length = apk.length(),
+            channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
+            descriptorFactory = { error("A raw descriptor is not needed") },
+            preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = true,
+        )
+
+        val result = reader.read(entity, platformSdk = 37)
+
+        assertEquals(listOf("V3", "V3.2"), result.declaredSchemes)
+        assertEquals(
+            setOf(classicalCertificate.sha256(), pqcCertificate.sha256()),
+            result.signerSha256Set,
+        )
+    }
+
     private fun createApkWithV2Certificate(certificate: ByteArray): ByteArray {
         val certificates = lengthPrefixed(certificate)
         val signedData = concat(
@@ -243,6 +282,7 @@ class LightweightApkSignatureReaderTest {
         const val V2_BLOCK_ID = 0x7109871a
         const val V3_BLOCK_ID = 0xf05368c0.toInt()
         const val V31_BLOCK_ID = 0x1b93ad61
+        const val V32_BLOCK_ID = 0x70e1c89f
         const val ZIP_EOCD_SIGNATURE = 0x06054b50
         val APK_SIGNING_BLOCK_MAGIC = "APK Sig Block 42".toByteArray(Charsets.US_ASCII)
     }
