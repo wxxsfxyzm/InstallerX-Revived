@@ -960,4 +960,14 @@
     <string name="exception_analyse_failed_streaming_source_unsupported">Esta fuente no puede analizarse en el modo de almacenamiento reducido. Elige Inteligente o Descarga completa.</string>
     <string name="exception_analyse_failed_source_materialization">No se pudo descargar la fuente completa para el análisis</string>
     <string name="config_allow_sig_unknown_http_lightweight_desc">Durante el análisis ligero por HTTP, cualquier anomalía de firma se evalúa según este ajuste.</string>
+    <string name="history_recording">Registro del historial</string>
+    <string name="history_enable">Activar el historial</string>
+    <string name="history_show_indicators">Mostrar indicadores</string>
+    <string name="history_disabled_title">El historial está desactivado</string>
+    <string name="history_disabled_desc">Las nuevas operaciones de instalación y desinstalación no se registrarán.</string>
+    <string name="history_disable_confirm_title">¿Desactivar el historial?</string>
+    <string name="history_disable_confirm_desc">¿Desea borrar el historial ya registrado? Las nuevas operaciones no se registrarán mientras el historial esté desactivado.</string>
+    <string name="history_disable_and_clear">Borrar y desactivar</string>
+    <string name="history_disable_and_keep">Conservar y desactivar</string>
+    <string name="history_version_self_update">Actualización automática</string>
 </resources>
