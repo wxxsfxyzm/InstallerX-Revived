@@ -109,6 +109,7 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
         val APPLY_SELECTED_FIRST = register(booleanPreferencesKey("apply_selected_first"), PreferenceValueType.BOOLEAN)
         val APPLY_SHOW_SYSTEM_APP = register(booleanPreferencesKey("apply_show_system_app"), PreferenceValueType.BOOLEAN)
         val APPLY_SHOW_PACKAGE_NAME = register(booleanPreferencesKey("apply_show_package_name"), PreferenceValueType.BOOLEAN)
+        val APPLY_SHOW_UNKNOWN_SCOPE = register(booleanPreferencesKey("apply_show_unknown_scope"), PreferenceValueType.BOOLEAN)
 
         // InstallerViewModel
         val DIALOG_HIDE_IDENTICAL_COMPARISONS =

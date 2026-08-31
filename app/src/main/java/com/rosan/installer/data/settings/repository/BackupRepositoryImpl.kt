@@ -143,6 +143,13 @@ class BackupRepositoryImpl(
                 )
             }
 
+        if (envelope.scopes.count { it.packageName == null } > 1) {
+            issues += errorIssue(
+                code = "duplicate_unknown_scope",
+                messageResId = R.string.backup_settings_validation_duplicate_unknown_scope,
+            )
+        }
+
         envelope.scopes.forEach { scope ->
             if (scope.backupId !in profileIds) {
                 issues += warningIssue(

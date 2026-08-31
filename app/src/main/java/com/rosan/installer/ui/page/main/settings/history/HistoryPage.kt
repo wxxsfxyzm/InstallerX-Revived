@@ -159,7 +159,7 @@ private fun HistoryPageContent(
                             expanded = showHistoryMenu,
                             onDismissRequest = { showHistoryMenu = false },
                             groupSizes = listOf(1, 1),
-                        ) { groupIndex, _, shape ->
+                        ) { groupIndex, _, shape, dismissItem ->
                             val checked = if (groupIndex == 0) {
                                 state.isHistoryEnabled
                             } else {
@@ -168,7 +168,7 @@ private fun HistoryPageContent(
                             CheckableDropdownMenuItem(
                                 checked = checked,
                                 onCheckedChange = { enabled ->
-                                    showHistoryMenu = false
+                                    dismissItem()
                                     if (groupIndex == 0) {
                                         if (enabled) {
                                             onAction(HistoryViewAction.SetHistoryEnabled(enabled = true))

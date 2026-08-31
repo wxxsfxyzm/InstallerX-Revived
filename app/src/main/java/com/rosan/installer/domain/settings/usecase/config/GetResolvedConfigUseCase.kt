@@ -78,12 +78,7 @@ class GetResolvedConfigUseCase(
         return ConfigModel.generateOptimalDefault()
     }
 
-    private suspend fun getAppByPackageName(packageName: String?): AppModel? {
-        var app = appRepo.findByPackageName(packageName)
-        if (app != null) return app
-        if (packageName != null) app = appRepo.findByPackageName(null)
-        return app
-    }
+    private suspend fun getAppByPackageName(packageName: String?): AppModel? = appRepo.findByPackageName(packageName)
 
     private suspend fun getGlobalAuthorizer() = appSettingsRepo.preferencesFlow.first().authorizer
 

@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.ui.icons.AppIcons
 
 /**
  * A reusable item widget for displaying app information with a toggle switch.
@@ -146,6 +147,62 @@ fun ApplyItemWidget(
                 }
             } else {
                 null
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun UnknownScopeItemWidget(
+    modifier: Modifier = Modifier,
+    title: String,
+    shape: Shape = RoundedCornerShape(8.dp),
+    isApplied: Boolean,
+    onToggle: (Boolean) -> Unit,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceBright, shape)
+            .clip(shape)
+            .clickable(
+                onClick = onClick,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = MaterialTheme.colorScheme.primary),
+            )
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = AppIcons.InstallSource,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+
+        Text(
+            modifier = Modifier.weight(1f),
+            text = title,
+            style = MaterialTheme.typography.titleMediumEmphasized,
+        )
+
+        Switch(
+            checked = isApplied,
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedIconColor = MaterialTheme.colorScheme.primary,
+                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+            thumbContent = {
+                val iconVector = if (isApplied) Icons.Filled.Check else Icons.Filled.Close
+                Icon(
+                    imageVector = iconVector,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                )
             },
         )
     }

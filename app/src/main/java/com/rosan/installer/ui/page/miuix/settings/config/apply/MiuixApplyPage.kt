@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -49,10 +50,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -76,16 +75,13 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.DropdownImpl
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Switch
@@ -95,10 +91,10 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.More
+import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
-import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinViewModel { parametersOf(id) }) {
@@ -247,6 +243,7 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
                             uiState.appEntities.data.map { it.packageName }.toHashSet()
                         }
                     }
+                    val unknownLabel = stringResource(R.string.config_scope_unknown)
 
                     PullToRefresh(
                         isRefreshing = refreshing,
@@ -278,6 +275,38 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
                             overscrollEffect = null,
                         ) {
                             val apps = uiState.checkedApps
+                            val showUnknown = uiState.showUnknownScope &&
+                                (uiState.search.isBlank() || unknownLabel.contains(uiState.search, ignoreCase = true))
+
+                            if (showUnknown) {
+                                item(
+                                    key = "unknown_scope",
+                                    contentType = "scope_item",
+                                ) {
+                                    val isApplied = appliedPackageSet.contains(null)
+                                    UnknownScopeItemWidget(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        title = unknownLabel,
+                                        isApplied = isApplied,
+                                        onToggle = { isChecked ->
+                                            viewModel.dispatch(ApplyViewAction.ApplyPackageName(null, isChecked))
+                                        },
+                                        onClick = {
+                                            viewModel.dispatch(ApplyViewAction.ApplyPackageName(null, !isApplied))
+                                        },
+                                    )
+                                }
+                            }
+
+                            if (showUnknown && apps.isNotEmpty()) {
+                                item(
+                                    key = "unknown_apps_group_spacing",
+                                    contentType = "scope_group_spacing",
+                                ) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+                            }
+
                             itemsIndexed(
                                 items = apps,
                                 key = { _, app -> app.packageName },
@@ -420,63 +449,116 @@ private fun ItemWidget(
 }
 
 @Composable
-private fun TopAppBarActions(viewModel: ApplyViewModel, uiState: ApplyViewState) {
-    val showMenu = remember { mutableStateOf(false) }
-    val hapticFeedback = LocalHapticFeedback.current
+private fun UnknownScopeItemWidget(
+    modifier: Modifier = Modifier,
+    title: String,
+    isApplied: Boolean,
+    onToggle: (Boolean) -> Unit,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CardDefaults.CornerRadius))
+            .background(CardDefaults.defaultColors().color),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    onClick = onClick,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(color = MiuixTheme.colorScheme.primary),
+                )
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = AppIcons.InstallSource,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MiuixTheme.colorScheme.primary,
+            )
 
-    val menuOptions = remember(
+            Text(
+                modifier = Modifier.weight(1f),
+                text = title,
+                style = MiuixTheme.textStyles.title4,
+            )
+
+            Switch(
+                checked = isApplied,
+                onCheckedChange = onToggle,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopAppBarActions(viewModel: ApplyViewModel, uiState: ApplyViewState) {
+    val reverseText = stringResource(R.string.sort_by_reverse_order)
+    val selectedFirstText = stringResource(R.string.sort_by_selected_first)
+    val systemAppText = stringResource(R.string.sort_by_show_system_app)
+    val packageNameText = stringResource(R.string.sort_by_show_package_name)
+    val unknownScopeText = stringResource(R.string.sort_by_show_unknown_scope)
+    val menuEntries = remember(
         uiState.orderInReverse,
         uiState.selectedFirst,
         uiState.showSystemApp,
         uiState.showPackageName,
+        uiState.showUnknownScope,
+        reverseText,
+        selectedFirstText,
+        systemAppText,
+        packageNameText,
+        unknownScopeText,
     ) {
         listOf(
-            R.string.sort_by_reverse_order to uiState.orderInReverse,
-            R.string.sort_by_selected_first to uiState.selectedFirst,
-            R.string.sort_by_show_system_app to uiState.showSystemApp,
-            R.string.sort_by_show_package_name to uiState.showPackageName,
+            DropdownEntry(
+                items = listOf(
+                    DropdownItem(
+                        text = reverseText,
+                        selected = uiState.orderInReverse,
+                        onClick = { viewModel.dispatch(ApplyViewAction.OrderInReverse(!uiState.orderInReverse)) },
+                    ),
+                    DropdownItem(
+                        text = selectedFirstText,
+                        selected = uiState.selectedFirst,
+                        onClick = { viewModel.dispatch(ApplyViewAction.SelectedFirst(!uiState.selectedFirst)) },
+                    ),
+                    DropdownItem(
+                        text = systemAppText,
+                        selected = uiState.showSystemApp,
+                        onClick = { viewModel.dispatch(ApplyViewAction.ShowSystemApp(!uiState.showSystemApp)) },
+                    ),
+                    DropdownItem(
+                        text = packageNameText,
+                        selected = uiState.showPackageName,
+                        onClick = { viewModel.dispatch(ApplyViewAction.ShowPackageName(!uiState.showPackageName)) },
+                    ),
+                ),
+            ),
+            DropdownEntry(
+                items = listOf(
+                    DropdownItem(
+                        text = unknownScopeText,
+                        selected = uiState.showUnknownScope,
+                        onClick = { viewModel.dispatch(ApplyViewAction.ShowUnknownScope(!uiState.showUnknownScope)) },
+                    ),
+                ),
+            ),
         )
     }
 
-    WindowListPopup(
-        show = showMenu.value,
-        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-        alignment = PopupPositionProvider.Align.TopEnd,
-        onDismissRequest = {
-            showMenu.value = false
-        },
-    ) {
-        ListPopupColumn {
-            menuOptions.forEachIndexed { index, (labelResId, isSelected) ->
-                DropdownImpl(
-                    text = stringResource(labelResId),
-                    optionSize = menuOptions.size,
-                    isSelected = isSelected,
-                    onSelectedIndexChange = { selectedIndex ->
-                        when (selectedIndex) {
-                            0 -> viewModel.dispatch(ApplyViewAction.OrderInReverse(!uiState.orderInReverse))
-                            1 -> viewModel.dispatch(ApplyViewAction.SelectedFirst(!uiState.selectedFirst))
-                            2 -> viewModel.dispatch(ApplyViewAction.ShowSystemApp(!uiState.showSystemApp))
-                            3 -> viewModel.dispatch(ApplyViewAction.ShowPackageName(!uiState.showPackageName))
-                        }
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
-                    },
-                    index = index,
-                )
-            }
-        }
-    }
-
-    IconButton(
-        onClick = {
-            showMenu.value = true
-        },
-        holdDownState = showMenu.value,
+    WindowIconDropdownMenu(
+        entries = menuEntries,
+        collapseOnSelection = false,
     ) {
         Icon(
             imageVector = MiuixIcons.Regular.More,
             tint = MiuixTheme.colorScheme.onBackground,
-            contentDescription = "More Options",
+            contentDescription = stringResource(R.string.menu),
         )
     }
 }

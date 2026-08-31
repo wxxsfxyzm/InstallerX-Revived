@@ -11,6 +11,7 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemShapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -18,7 +19,9 @@ import androidx.compose.ui.unit.dp
  *
  * Each non-empty group is rendered as a separate Material 3 menu group. The
  * caller owns the menu item content and behavior, while this component keeps
- * the popup and group/item shape behavior consistent across screens.
+ * the popup, item spacing, and group/item shape behavior consistent across
+ * screens. Callers use the supplied `dismissItem` callback after handling an
+ * item click; [keepOpenOnItemClick] can disable that default dismissal.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -26,8 +29,16 @@ fun GroupedDropdownMenuPopup(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     groupSizes: List<Int>,
+    keepOpenOnItemClick: Boolean = false,
+    /** Vertical gap between items in the same group. */
+    itemSpacing: Dp = 2.dp,
     modifier: Modifier = Modifier,
-    itemContent: @Composable (groupIndex: Int, itemIndex: Int, shapes: MenuItemShapes) -> Unit,
+    itemContent: @Composable (
+        groupIndex: Int,
+        itemIndex: Int,
+        shapes: MenuItemShapes,
+        dismissItem: () -> Unit,
+    ) -> Unit,
 ) {
     DropdownMenuPopup(
         expanded = expanded,
@@ -51,10 +62,19 @@ fun GroupedDropdownMenuPopup(
                 ),
             ) {
                 repeat(itemCount) { itemIndex ->
+                    if (itemIndex > 0 && itemSpacing > 0.dp) {
+                        Spacer(modifier = Modifier.height(itemSpacing))
+                    }
                     itemContent(
                         groupIndex,
                         itemIndex,
-                        MenuDefaults.itemShape(index = itemIndex, count = itemCount),
+                        MenuDefaults.itemShape(
+                            index = if (itemSpacing > 0.dp) 0 else itemIndex,
+                            count = if (itemSpacing > 0.dp) 1 else itemCount,
+                        ),
+                        {
+                            if (!keepOpenOnItemClick) onDismissRequest()
+                        },
                     )
                 }
             }

@@ -45,13 +45,13 @@ fun DropDownMenuWidget(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     groupSizes = listOf(data.size),
-                ) { _, index, shape ->
+                ) { _, index, shape, dismissItem ->
                     val isSelected = index == choice
                     SelectableDropdownMenuItem(
                         selected = isSelected,
                         onClick = {
                             onChoiceChange(index)
-                            expanded = false
+                            dismissItem()
                         },
                         text = { Text(text = data[index]) },
                         shapes = shape,

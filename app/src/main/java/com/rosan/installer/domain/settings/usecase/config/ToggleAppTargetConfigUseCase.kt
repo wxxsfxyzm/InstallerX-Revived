@@ -6,7 +6,7 @@ import com.rosan.installer.domain.settings.model.app.AppModel
 import com.rosan.installer.domain.settings.repository.AppRepository
 
 class ToggleAppTargetConfigUseCase(private val appRepo: AppRepository) {
-    suspend operator fun invoke(packageName: String, configId: Long, applied: Boolean) {
+    suspend operator fun invoke(packageName: String?, configId: Long, applied: Boolean) {
         val model = appRepo.findByPackageName(packageName)
 
         if (applied) {

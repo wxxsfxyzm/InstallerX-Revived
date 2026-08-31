@@ -63,17 +63,23 @@ class ApplyViewModel(
         val selectedFirst: Boolean,
         val showSystemApp: Boolean,
         val showPackageName: Boolean,
+        val showUnknownScope: Boolean = false,
     )
 
     // Combine individual setting flows into a single flow for this page
     private val applyPrefsFlow = combine(
-        appSettingsRepo.getString(StringSetting.ApplyOrderType),
-        appSettingsRepo.getBoolean(BooleanSetting.ApplyOrderInReverse),
-        appSettingsRepo.getBoolean(BooleanSetting.ApplySelectedFirst, default = true),
-        appSettingsRepo.getBoolean(BooleanSetting.ApplyShowSystemApp),
-        appSettingsRepo.getBoolean(BooleanSetting.ApplyShowPackageName, default = false),
-    ) { orderTypeStr, orderInReverse, selectedFirst, showSystemApp, showPackageName ->
-        ApplyPrefs(orderTypeStr, orderInReverse, selectedFirst, showSystemApp, showPackageName)
+        combine(
+            appSettingsRepo.getString(StringSetting.ApplyOrderType),
+            appSettingsRepo.getBoolean(BooleanSetting.ApplyOrderInReverse),
+            appSettingsRepo.getBoolean(BooleanSetting.ApplySelectedFirst, default = true),
+            appSettingsRepo.getBoolean(BooleanSetting.ApplyShowSystemApp),
+            appSettingsRepo.getBoolean(BooleanSetting.ApplyShowPackageName, default = false),
+        ) { orderTypeStr, orderInReverse, selectedFirst, showSystemApp, showPackageName ->
+            ApplyPrefs(orderTypeStr, orderInReverse, selectedFirst, showSystemApp, showPackageName)
+        },
+        appSettingsRepo.getBoolean(BooleanSetting.ApplyShowUnknownScope, default = false),
+    ) { prefs, showUnknownScope ->
+        prefs.copy(showUnknownScope = showUnknownScope)
     }
 
     // Heavy lifting: filter and sort apps on a background thread to prevent UI stuttering
@@ -164,6 +170,7 @@ class ApplyViewModel(
             selectedFirst = uiData.applyPrefs.selectedFirst,
             showSystemApp = uiData.applyPrefs.showSystemApp,
             showPackageName = uiData.applyPrefs.showPackageName,
+            showUnknownScope = uiData.applyPrefs.showUnknownScope,
             search = uiData.search,
         )
     }.stateIn(
@@ -205,6 +212,10 @@ class ApplyViewModel(
                 updateSetting(BooleanSetting.ApplyShowPackageName, action.enabled)
             }
 
+            is ApplyViewAction.ShowUnknownScope -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ApplyShowUnknownScope, action.enabled)
+            }
+
             is ApplyViewAction.Search -> _search.value = action.text
         }
     }
@@ -238,7 +249,6 @@ class ApplyViewModel(
     }
 
     private fun applyPackageName(packageName: String?, applied: Boolean) {
-        if (packageName == null) return
         viewModelScope.launch(Dispatchers.IO) {
             toggleAppTargetConfig(packageName, id, applied)
         }

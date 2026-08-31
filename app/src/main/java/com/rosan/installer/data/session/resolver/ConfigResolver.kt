@@ -83,11 +83,19 @@ class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseC
 
         getLaunchedFromUidCompat()?.let { launchedUid ->
             val candidates = packageNamesForUid(launchedUid)
+            if (candidates.size != 1) {
+                Timber.tag(TAG).w(
+                    "Launched-from uid $launchedUid is ambiguous. " +
+                        "Keeping the install source as Unknown; candidates=$candidates",
+                )
+                return InstallSource.unknown(packageCandidates = candidates)
+            }
+
             Timber.tag(TAG).d(
                 "Using launched-from uid source: uid=$launchedUid, candidates=$candidates",
             )
             return InstallSource(
-                packageName = selectPackageForUid(candidates),
+                packageName = candidates.single(),
                 uid = launchedUid,
                 packageCandidates = candidates,
                 confidence = InstallSourceConfidence.LAUNCHED_FROM_UID,
@@ -132,7 +140,7 @@ class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseC
             )
         }
 
-        Timber.tag(TAG).w("Could not determine calling package. Using default config.")
+        Timber.tag(TAG).w("Could not determine calling package. Using Unknown source config.")
         return InstallSource.unknown()
     }
 
@@ -148,10 +156,10 @@ class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseC
         }
 
         val candidates = packageNamesForUid(originatingUid)
-        val originatingPackage = selectPackageForUid(candidates)
+        val originatingPackage = candidates.singleOrNull()
         Timber.tag(TAG).d(
             "Proxy install source $proxyPackageName resolved originating uid " +
-                "$originatingUid to package $originatingPackage",
+                "$originatingUid to package $originatingPackage (candidates=$candidates)",
         )
 
         return InstallSource(
@@ -204,7 +212,7 @@ class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseC
             notUnknownSource = trustedNotUnknownSource,
         )
 
-        Timber.tag(TAG).d("Resolved config for '${source.packageName ?: "default"}': $config")
+        Timber.tag(TAG).d("Resolved config for '${source.packageName ?: "unknown"}': $config")
         return config
     }
 
@@ -224,10 +232,6 @@ class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseC
     }.getOrNull()
 
     private fun Activity.packageNamesForUid(uid: Int): List<String> = packageManager.getPackagesForUid(uid)?.filterNotNull().orEmpty()
-
-    private fun Activity.selectPackageForUid(candidates: List<String>): String? = candidates.firstOrNull {
-        Manifest.permission.REQUEST_INSTALL_PACKAGES in packageRequestedPermissions(it)
-    } ?: candidates.firstOrNull()
 
     private fun Activity.isInstallSourceProxyPackage(packageName: String): Boolean {
         val hasManageDocuments = packageManager.checkPermission(
@@ -275,19 +279,6 @@ class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseC
     private fun ApplicationInfo.isSystemOrUpdatedSystemApp(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0 ||
         flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0
 
-    private fun Activity.packageRequestedPermissions(packageName: String): List<String> = runCatching {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            packageManager.getPackageInfo(
-                packageName,
-                PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong()),
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
-        }.requestedPermissions.orEmpty()
-    }.getOrElse { emptyArray() }
-        .toList()
-
     private data class InstallSource(
         val packageName: String?,
         val uid: Int?,
@@ -296,9 +287,13 @@ class ConfigResolver(private val getResolvedConfigUseCase: GetResolvedConfigUseC
         val viaProxyPackage: String? = null,
     ) {
         companion object {
-            fun unknown(viaProxyPackage: String? = null) = InstallSource(
+            fun unknown(
+                packageCandidates: List<String> = emptyList(),
+                viaProxyPackage: String? = null,
+            ) = InstallSource(
                 packageName = null,
                 uid = null,
+                packageCandidates = packageCandidates,
                 confidence = InstallSourceConfidence.UNKNOWN,
                 viaProxyPackage = viaProxyPackage,
             )

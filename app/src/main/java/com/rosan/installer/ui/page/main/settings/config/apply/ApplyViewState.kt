@@ -25,6 +25,7 @@ data class ApplyViewState(
     val selectedFirst: Boolean = true,
     val showSystemApp: Boolean = false,
     val showPackageName: Boolean = true,
+    val showUnknownScope: Boolean = false,
     val search: String = "",
 ) {
     enum class OrderType {

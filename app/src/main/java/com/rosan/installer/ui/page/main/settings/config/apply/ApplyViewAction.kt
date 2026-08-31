@@ -11,6 +11,7 @@ sealed interface ApplyViewAction {
     data class SelectedFirst(val enabled: Boolean) : ApplyViewAction
     data class ShowSystemApp(val enabled: Boolean) : ApplyViewAction
     data class ShowPackageName(val enabled: Boolean) : ApplyViewAction
+    data class ShowUnknownScope(val enabled: Boolean) : ApplyViewAction
 
     data class Search(val text: String) : ApplyViewAction
 }

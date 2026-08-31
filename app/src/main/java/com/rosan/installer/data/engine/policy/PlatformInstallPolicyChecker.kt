@@ -38,7 +38,9 @@ class PlatformInstallPolicyChecker(
         } else {
             config.installSourceUid ?: callerPackage?.let { packageUid(it) }
         }
-        val appOpPackage = callerPackage ?: callerUid?.let { packageNameForUid(it) }
+        // Never recover an AppOps package by taking the first package for a shared UID. When
+        // the source package is unknown, the UID may represent many unrelated packages.
+        val appOpPackage = callerPackage
         val trustedSource = config.installSourceConfidence.isTrustedForPlatformPolicy() && (
             callerUid != null && hasPermission(Manifest.permission.INSTALL_PACKAGES, callerUid) ||
                 (
@@ -167,8 +169,6 @@ class PlatformInstallPolicyChecker(
             context.packageManager.getPackageUid(packageName, 0)
         }
     }.getOrNull()
-
-    private fun packageNameForUid(uid: Int): String? = context.packageManager.getPackagesForUid(uid)?.firstOrNull()
 
     private fun packageRequestedPermissions(packageName: String): List<String> = runCatching {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

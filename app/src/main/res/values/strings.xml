@@ -242,6 +242,7 @@
     <string name="backup_settings_validation_duplicate_profile_id">Duplicate profile id: %1$s</string>
     <string name="backup_settings_validation_invalid_profile_field">Invalid profile field: %1$s</string>
     <string name="backup_settings_validation_duplicate_scope_package">Duplicate scope package: %1$s</string>
+    <string name="backup_settings_validation_duplicate_unknown_scope">Duplicate Unknown scope.</string>
     <string name="backup_settings_validation_invalid_history_field">Invalid history field: %1$s</string>
     <string name="backup_settings_validation_future_app_version">This backup was created by a newer app version: %1$s.</string>
     <string name="backup_settings_validation_future_room_schema">This backup uses a newer database schema: %1$s. Current schema is %2$s.</string>
@@ -286,6 +287,9 @@
     <string name="config_status_inactive">Inactive</string>
     <string name="config_name">Profile name</string>
     <string name="config_scope">Scope</string>
+    <string name="config_scope_unknown">Unknown</string>
+    <string name="config_scope_apps">Applications</string>
+    <string name="config_scope_unknown_group">Unknown scope</string>
     <string name="config_description">Profile description</string>
     <string name="authorizer_customization">Authorizer Tweaks</string>
     <string name="authorizer_customization_desc">Fine-tune options for supported authorizers</string>
@@ -456,6 +460,7 @@
     <string name="sort_by_selected_first">Selected go first</string>
     <string name="sort_by_show_system_app">Display system app</string>
     <string name="sort_by_show_package_name">Display package name</string>
+    <string name="sort_by_show_unknown_scope">Show unknown scope</string>
     <string name="auth_to_continue_work">Please authenticate to confirm this operation</string>
     <string name="auth_summary_install">You are doing an install operation, To continue, please confirm this action using your device authentication</string>
     <string name="auth_summary_uninstall">You are doing an uninstall operation, To continue, please confirm this action using your device authentication</string>

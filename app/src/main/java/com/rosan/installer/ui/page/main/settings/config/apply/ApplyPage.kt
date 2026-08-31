@@ -14,8 +14,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,15 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.Sort
-import androidx.compose.material.icons.twotone.LibraryAddCheck
-import androidx.compose.material.icons.twotone.Shield
-import androidx.compose.material.icons.twotone.Visibility
-import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.CheckableDropdownMenuItem
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -48,22 +38,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonShapes
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
@@ -76,14 +60,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -91,7 +70,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.chip.Chip
+import com.rosan.installer.ui.page.main.widget.menu.GroupedDropdownMenuPopup
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.theme.bottomShape
@@ -105,7 +84,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.nav.gesture.WindowNavigationEventBridge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +93,7 @@ fun ApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinViewMo
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showOptionsMenu by remember { mutableStateOf(false) }
     val showFloating by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex > 0 || lazyListState.firstVisibleItemScrollOffset > 0
@@ -199,10 +177,18 @@ fun ApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinViewMo
                             )
                         }
                     }
-                    IconButton(onClick = { showBottomSheet = true }) {
-                        Icon(
-                            imageVector = AppIcons.Menu,
-                            contentDescription = stringResource(R.string.menu),
+                    Box {
+                        IconButton(onClick = { showOptionsMenu = true }) {
+                            Icon(
+                                imageVector = AppIcons.Menu,
+                                contentDescription = stringResource(R.string.menu),
+                            )
+                        }
+                        ApplyOptionsDropdown(
+                            expanded = showOptionsMenu,
+                            uiState = uiState,
+                            onDismissRequest = { showOptionsMenu = false },
+                            onAction = viewModel::dispatch,
                         )
                     }
                 },
@@ -287,13 +273,6 @@ fun ApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinViewMo
             }
         }
     }
-
-    if (showBottomSheet) {
-        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
-            WindowNavigationEventBridge()
-            BottomSheetContent(uiState = uiState, viewModel = viewModel)
-        }
-    }
 }
 
 @Composable
@@ -307,6 +286,9 @@ private fun ItemsWidget(
     startPadding: Dp = 0.dp,
     endPadding: Dp = 0.dp,
 ) {
+    val unknownLabel = stringResource(R.string.config_scope_unknown)
+    val unknownGroupLabel = stringResource(R.string.config_scope_unknown_group)
+    val appsGroupLabel = stringResource(R.string.config_scope_apps)
     val appliedPackageSet by remember(uiState.appEntities.data) {
         derivedStateOf {
             uiState.appEntities.data.map { it.packageName }.toHashSet()
@@ -325,6 +307,59 @@ private fun ItemsWidget(
         ),
     ) {
         val apps = uiState.checkedApps
+        val showApps = apps.isNotEmpty()
+        val showUnknown = uiState.showUnknownScope &&
+            (uiState.search.isBlank() || unknownLabel.contains(uiState.search, ignoreCase = true))
+
+        if (showUnknown) {
+            item(
+                key = "unknown_group_label",
+                contentType = "scope_item",
+            ) {
+                LabelWidget(
+                    unknownGroupLabel,
+                    horizontalPadding = 16.dp,
+                    topPadding = 0.dp,
+                )
+            }
+            item(
+                key = "unknown_scope",
+                contentType = "scope_item",
+            ) {
+                val isApplied = appliedPackageSet.contains(null)
+                UnknownScopeItemWidget(
+                    modifier = Modifier.animateItem(
+                        placementSpec = spring(
+                            stiffness = Spring.StiffnessMediumLow,
+                            visibilityThreshold = IntOffset.VisibilityThreshold,
+                        ),
+                    ),
+                    title = unknownLabel,
+                    shape = singleShape,
+                    isApplied = isApplied,
+                    onToggle = { isChecked ->
+                        viewModel.dispatch(ApplyViewAction.ApplyPackageName(null, isChecked))
+                    },
+                    onClick = {
+                        viewModel.dispatch(ApplyViewAction.ApplyPackageName(null, !isApplied))
+                    },
+                )
+            }
+        }
+
+        if (showApps) {
+            item(
+                key = "apps_group_label",
+                contentType = "scope_item",
+            ) {
+                LabelWidget(
+                    appsGroupLabel,
+                    horizontalPadding = 16.dp,
+                    topPadding = if (showUnknown) 8.dp else 0.dp,
+                )
+            }
+        }
+
         itemsIndexed(
             items = apps,
             key = { _, app -> app.packageName },
@@ -377,140 +412,87 @@ private fun ItemsWidget(
 }
 
 @Composable
-private fun BottomSheetContent(uiState: ApplyViewState, viewModel: ApplyViewModel) {
-    Box(modifier = Modifier.fillMaxWidth()) {
-        CompositionLocalProvider(LocalContentColor provides AlertDialogDefaults.titleContentColor) {
-            ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
-                Text(stringResource(R.string.options), modifier = Modifier.align(Alignment.Center))
-            }
-        }
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        OrderWidget(uiState = uiState, viewModel = viewModel)
-        ChipsWidget(uiState = uiState, viewModel = viewModel)
-    }
-}
-
-/*@Composable
-private fun LabelWidget(text: String) {
-    CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.titleMedium) {
-        Text(text)
-    }
-}*/
-
-/*@Composable
-private fun OrderWidget(viewModel: ApplyViewModel) {
-    LabelWidget(stringResource(R.string.sort))
-
-    data class OrderData(val labelResId: Int, val type: ApplyViewState.OrderType)
-
-    val map = listOf(
-        OrderData(R.string.sort_by_label, ApplyViewState.OrderType.Label),
-        OrderData(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
-        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime)
+private fun ApplyOptionsDropdown(
+    expanded: Boolean,
+    uiState: ApplyViewState,
+    onDismissRequest: () -> Unit,
+    onAction: (ApplyViewAction) -> Unit,
+) {
+    data class OrderOption(
+        val labelResId: Int,
+        val type: ApplyViewState.OrderType,
     )
 
-    val selectedIndex = map.map { it.type }.indexOf(uiState.orderType)
-    ToggleRow(selectedIndex = selectedIndex) {
-        val a = mutableListOf<String>()
-        map.forEachIndexed { index, value ->
-            Toggle(selected = selectedIndex == index, onSelected = {
-                viewModel.dispatch(ApplyViewAction.Order(value.type))
-            }) {
-                Text(stringResource(value.labelResId))
-            }
-        }
-    }
-}*/
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun OrderWidget(uiState: ApplyViewState, viewModel: ApplyViewModel) {
-    val haptic = LocalHapticFeedback.current
-
-    LabelWidget(stringResource(R.string.sort), 0.dp)
-
-    data class OrderData(val labelResId: Int, val type: ApplyViewState.OrderType)
-
-    val map = listOf(
-        OrderData(R.string.sort_by_label, ApplyViewState.OrderType.Label),
-        OrderData(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
-        OrderData(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime),
+    val orderOptions = listOf(
+        OrderOption(R.string.sort_by_label, ApplyViewState.OrderType.Label),
+        OrderOption(R.string.sort_by_package_name, ApplyViewState.OrderType.PackageName),
+        OrderOption(R.string.sort_by_install_time, ApplyViewState.OrderType.FirstInstallTime),
+    )
+    val toggleLabels = listOf(
+        R.string.sort_by_reverse_order,
+        R.string.sort_by_selected_first,
+        R.string.sort_by_show_system_app,
+        R.string.sort_by_show_package_name,
+        R.string.sort_by_show_unknown_scope,
     )
 
-    val selectedIndex = map.map { it.type }.indexOf(uiState.orderType)
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-    ) {
-        val modifiers = List(map.size) { Modifier.weight(1f) } // 根据需要调整权重
-
-        map.forEachIndexed { index, value ->
-            ToggleButton(
-                checked = selectedIndex == index,
-                onCheckedChange = {
-                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                    viewModel.dispatch(ApplyViewAction.Order(value.type))
-                },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    map.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-                colors = ToggleButtonDefaults.colors(
-                    checkedContainerColor = MaterialTheme.colorScheme.primary,
-                    checkedContentColor = MaterialTheme.colorScheme.onPrimary,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-                modifier = modifiers[index]
-                    .semantics { role = Role.RadioButton },
-            ) {
-                Text(stringResource(value.labelResId))
+    GroupedDropdownMenuPopup(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        groupSizes = listOf(orderOptions.size, toggleLabels.size - 1, 1),
+        keepOpenOnItemClick = true,
+    ) { groupIndex, itemIndex, shape, dismissItem ->
+        val checked = if (groupIndex == 0) {
+            uiState.orderType == orderOptions[itemIndex].type
+        } else if (groupIndex == 2) {
+            uiState.showUnknownScope
+        } else {
+            when (itemIndex) {
+                0 -> uiState.orderInReverse
+                1 -> uiState.selectedFirst
+                2 -> uiState.showSystemApp
+                else -> uiState.showPackageName
             }
         }
-    }
-}
+        val labelResId = if (groupIndex == 0) {
+            orderOptions[itemIndex].labelResId
+        } else if (groupIndex == 2) {
+            toggleLabels.last()
+        } else {
+            toggleLabels[itemIndex]
+        }
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun ChipsWidget(uiState: ApplyViewState, viewModel: ApplyViewModel) {
-    LabelWidget(stringResource(R.string.more), 0.dp)
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        val orderInReverse = uiState.orderInReverse
-        val selectedFirst = uiState.selectedFirst
-        val showSystemApp = uiState.showSystemApp
-        val showPackageName = uiState.showPackageName
-        Chip(
-            selected = orderInReverse,
-            label = stringResource(R.string.sort_by_reverse_order),
-            icon = Icons.AutoMirrored.TwoTone.Sort,
-            onClick = { viewModel.dispatch(ApplyViewAction.OrderInReverse(!orderInReverse)) },
-        )
-        Chip(
-            selected = selectedFirst,
-            label = stringResource(R.string.sort_by_selected_first),
-            icon = Icons.TwoTone.LibraryAddCheck,
-            onClick = { viewModel.dispatch(ApplyViewAction.SelectedFirst(!selectedFirst)) },
-        )
-        Chip(
-            selected = showSystemApp,
-            label = stringResource(R.string.sort_by_show_system_app),
-            icon = Icons.TwoTone.Shield,
-            onClick = { viewModel.dispatch(ApplyViewAction.ShowSystemApp(!showSystemApp)) },
-        )
-        Chip(
-            selected = showPackageName,
-            label = stringResource(R.string.sort_by_show_package_name),
-            icon = Icons.TwoTone.Visibility,
-            onClick = { viewModel.dispatch(ApplyViewAction.ShowPackageName(!showPackageName)) },
+        CheckableDropdownMenuItem(
+            checked = checked,
+            onCheckedChange = { enabled ->
+                if (groupIndex == 0) {
+                    onDismissRequest()
+                    onAction(ApplyViewAction.Order(orderOptions[itemIndex].type))
+                } else if (groupIndex == 2) {
+                    dismissItem()
+                    onAction(ApplyViewAction.ShowUnknownScope(enabled))
+                } else {
+                    dismissItem()
+                    onAction(
+                        when (itemIndex) {
+                            0 -> ApplyViewAction.OrderInReverse(enabled)
+                            1 -> ApplyViewAction.SelectedFirst(enabled)
+                            2 -> ApplyViewAction.ShowSystemApp(enabled)
+                            else -> ApplyViewAction.ShowPackageName(enabled)
+                        },
+                    )
+                }
+            },
+            text = { Text(stringResource(labelResId)) },
+            trailingContent = if (checked) {
+                {
+                    Icon(imageVector = AppIcons.Check, contentDescription = null)
+                }
+            } else {
+                null
+            },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            shapes = shape,
         )
     }
 }
