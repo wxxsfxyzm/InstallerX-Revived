@@ -30,6 +30,7 @@ import com.rosan.installer.framework.notification.builder.MiIslandNotificationBu
 import com.rosan.installer.framework.notification.builder.ModernNotificationBuilder
 import com.rosan.installer.framework.notification.builder.NotificationPayload
 import com.rosan.installer.framework.notification.builder.UserSettings
+import com.rosan.installer.framework.notification.builder.VivoIslandNotificationBuilder
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
@@ -67,8 +68,11 @@ class SessionNotifierImpl(
 
     private data class NotificationSettings(
         val showDialog: Boolean,
+        val successAutoClearSeconds: Int,
         val showLiveActivity: Boolean,
         val showMiIsland: Boolean,
+        val showVivoIsland: Boolean,
+        val vivoIslandBypassRestriction: Boolean,
         val miIslandBypassRestriction: Boolean,
         val miIslandOuterGlow: Boolean,
         val showMiIslandBlockingInterval: Int,
@@ -79,6 +83,9 @@ class SessionNotifierImpl(
     private val notificationManager = NotificationManagerCompat.from(context)
     private val notificationId = session.id.hashCode() and Int.MAX_VALUE
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    @Volatile
+    private var isCancelled = false
 
     // Internal state flow to decouple data layer pushes from UI rendering ticks
     private val stateFlow = MutableStateFlow<Pair<ProgressEntity, Boolean>?>(null)
@@ -91,6 +98,9 @@ class SessionNotifierImpl(
     private var lastProgressClass: KClass<out ProgressEntity>? = null
     private var lastLogLine: String? = null
     private var lastNotifiedEntity: ProgressEntity? = null
+
+    @Volatile
+    private var lastPostedNotification: Notification? = null
     private var currentInstallKey: String? = null
     private var currentInstallStartTime: Long = 0L
 
@@ -110,6 +120,7 @@ class SessionNotifierImpl(
     private val helper by lazy { NotificationHelper(context, session, getAppIcon) }
 
     override fun updateState(progress: ProgressEntity, background: Boolean) {
+        if (isCancelled) return
         stateFlow.value = Pair(progress, background)
         if (!isObserving) {
             isObserving = true
@@ -124,7 +135,23 @@ class SessionNotifierImpl(
     }
 
     override fun cancel() {
-        notificationManager.cancel(notificationId)
+        if (isCancelled) return
+        isCancelled = true
+        val isVivoSuperIsland = lastPostedNotification?.let { notification ->
+            notification.extras.getInt("notification.superx.operation", -1) == 0 &&
+                notification.extras.containsKey("notification.superx.scene")
+        } == true
+        if (isVivoSuperIsland) {
+            val notification = requireNotNull(lastPostedNotification)
+            val endNotification = Notification.Builder.recoverBuilder(context, notification).build()
+            endNotification.extras.putInt("notification.superx.operation", 2)
+            notificationManager.notify(notificationId, endNotification)
+            Timber.d("[id=${session.id}] Sent Vivo Super Island close operation for notification id=$notificationId")
+        } else {
+            Timber.d("[id=${session.id}] Cancelling source notification id=$notificationId")
+            notificationManager.cancel(notificationId)
+        }
+        lastPostedNotification = null
     }
 
     @SuppressLint("MissingPermission")
@@ -137,8 +164,14 @@ class SessionNotifierImpl(
 
             val settings = NotificationSettings(
                 showDialog = appSettingsRepo.getBoolean(BooleanSetting.ShowDialogWhenPressingNotification, true).first(),
+                successAutoClearSeconds = appSettingsRepo.getInt(IntSetting.NotificationSuccessAutoClearSeconds, 0).first(),
                 showLiveActivity = appSettingsRepo.getBoolean(BooleanSetting.ShowLiveActivity, false).first(),
                 showMiIsland = appSettingsRepo.getBoolean(BooleanSetting.ShowMiIsland, false).first(),
+                showVivoIsland = appSettingsRepo.getBoolean(BooleanSetting.ShowVivoIsland, false).first(),
+                vivoIslandBypassRestriction = appSettingsRepo.getBoolean(
+                    BooleanSetting.ShowVivoIslandBypassRestriction,
+                    false,
+                ).first(),
                 miIslandBypassRestriction = appSettingsRepo.getBoolean(
                     BooleanSetting.ShowMiIslandBypassRestriction,
                     false,
@@ -150,11 +183,22 @@ class SessionNotifierImpl(
             )
 
             val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
-            val canAnimate = isModernEligible && settings.showLiveActivity && !settings.showMiIsland
+            val canAnimate = settings.showVivoIsland ||
+                (isModernEligible && settings.showLiveActivity && !settings.showMiIsland)
 
             val activeBuilder: InstallerNotificationBuilder = when {
+                settings.showVivoIsland -> VivoIslandNotificationBuilder(
+                    context = context,
+                    session = session,
+                    helper = helper,
+                    authorizer = globalAuthorizer,
+                    bypassRestriction = settings.vivoIslandBypassRestriction,
+                )
+
                 settings.showMiIsland -> MiIslandNotificationBuilder(context, session, helper)
+
                 isModernEligible && settings.showLiveActivity -> ModernNotificationBuilder(context, session, helper)
+
                 else -> LegacyNotificationBuilder(context, session, helper)
             }
 
@@ -205,6 +249,7 @@ class SessionNotifierImpl(
                             ),
                             settings = UserSettings(
                                 showDialog = settings.showDialog,
+                                successAutoClearSeconds = settings.successAutoClearSeconds,
                                 preferSystemIcon = settings.preferSystemIcon,
                                 preferDynamicColor = settings.preferDynamicColor,
                                 miIslandOuterGlow = settings.miIslandOuterGlow,
@@ -281,6 +326,7 @@ class SessionNotifierImpl(
         requiresAnimation: Boolean = false,
         isBypassEnabled: Boolean = false,
     ) {
+        if (isCancelled) return
         if (notification == null) {
             setNotificationImmediate(null)
             lastProgressValue = -1f
@@ -372,9 +418,11 @@ class SessionNotifierImpl(
         isBypassEnabled: Boolean = false,
         blockInterval: Int = 100,
     ) {
+        if (isCancelled) return
         if (notification == null) {
             notificationManager.cancel(notificationId)
         } else {
+            lastPostedNotification = notification
             if (isMiIsland) {
                 notifyWithXiaomiMagic(notificationId, notification, isBypassEnabled, blockInterval)
             } else {

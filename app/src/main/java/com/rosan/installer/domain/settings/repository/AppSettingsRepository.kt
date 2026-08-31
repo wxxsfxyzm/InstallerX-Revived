@@ -45,6 +45,8 @@ enum class BooleanSetting {
     LiveActivityDynColorFollowPkgIcon,
     ShowLiveActivity,
     ShowMiIsland,
+    ShowVivoIsland,
+    ShowVivoIslandBypassRestriction,
     ShowMiIslandBypassRestriction,
     ShowMiIslandOuterGlow,
     AlwaysUseRootInSystem,

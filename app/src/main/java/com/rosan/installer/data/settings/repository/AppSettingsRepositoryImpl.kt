@@ -82,6 +82,7 @@ class AppSettingsRepositoryImpl(
             uninstallerRequireBiometricAuth = prefs[AppDataStore.UNINSTALLER_REQUIRE_BIOMETRIC_AUTH] ?: false,
             showLiveActivity = prefs[AppDataStore.SHOW_LIVE_ACTIVITY] ?: false,
             useMiIsland = prefs[AppDataStore.SHOW_MI_ISLAND] ?: false,
+            useVivoIslandBypassRestriction = prefs[AppDataStore.SHOW_VIVO_ISLAND_BYPASS_RESTRICTION] ?: false,
             useMiIslandBypassRestriction = prefs[AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION] ?: false,
             useMiIslandOuterGlow = prefs[AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW] ?: true,
             useMiIslandBlockingIntervalMs = prefs[AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS] ?: 100,
@@ -155,6 +156,7 @@ class AppSettingsRepositoryImpl(
             colorSpec = ThemeColorSpec.fromValueOrDefault(prefs[AppDataStore.THEME_COLOR_SPEC] ?: ThemeColorSpec.SPEC_2025.name),
             useDynamicColor = prefs[AppDataStore.THEME_USE_DYNAMIC_COLOR] ?: true,
             useMiuixMonet = prefs[AppDataStore.UI_USE_MIUIX_MONET] ?: false,
+            useVivoIsland = prefs[AppDataStore.SHOW_VIVO_ISLAND] ?: false,
             useAppleFloatingBar = prefs[AppDataStore.UI_USE_APPLE_FLOATING_BAR] ?: false,
             seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: DEFAULT_SEED_COLOR,
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
@@ -262,6 +264,10 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.ShowLiveActivity -> AppDataStore.SHOW_LIVE_ACTIVITY
 
         BooleanSetting.ShowMiIsland -> AppDataStore.SHOW_MI_ISLAND
+
+        BooleanSetting.ShowVivoIsland -> AppDataStore.SHOW_VIVO_ISLAND
+
+        BooleanSetting.ShowVivoIslandBypassRestriction -> AppDataStore.SHOW_VIVO_ISLAND_BYPASS_RESTRICTION
 
         BooleanSetting.ShowMiIslandBypassRestriction -> AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION
 

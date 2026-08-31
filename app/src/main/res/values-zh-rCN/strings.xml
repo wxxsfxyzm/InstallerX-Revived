@@ -933,6 +933,9 @@
     <string name="notification_style_standard">标准通知</string>
     <string name="notification_style_live_activity">实时活动通知</string>
     <string name="notification_style_mi_island">小米超级岛</string>
+    <string name="notification_style_vivo_island">vivo 原子岛</string>
+    <string name="lab_vivo_island_bypass_restriction">绕过原子岛限制（仅 Shizuku/Root）</string>
+    <string name="lab_vivo_island_bypass_restriction_desc">通过 Shizuku/Root 为非系统应用注册原子岛场景</string>
     <string name="notification_style_unsupported_desc">仅支持标准通知样式</string>
     <string name="lab_mi_island_bypass_restriction">绕过超级岛限制（仅 Shizuku）</string>
     <string name="lab_mi_island_bypass_restriction_desc">绕过超级岛系统签名验证限制</string>

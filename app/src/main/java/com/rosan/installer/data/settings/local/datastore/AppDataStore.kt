@@ -67,6 +67,9 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
 
         // Show Mi Island
         val SHOW_MI_ISLAND = register(booleanPreferencesKey("show_mi_island"), PreferenceValueType.BOOLEAN)
+        val SHOW_VIVO_ISLAND = register(booleanPreferencesKey("show_vivo_island"), PreferenceValueType.BOOLEAN)
+        val SHOW_VIVO_ISLAND_BYPASS_RESTRICTION =
+            register(booleanPreferencesKey("show_vivo_island_bypass_restriction"), PreferenceValueType.BOOLEAN)
         val SHOW_MI_ISLAND_BYPASS_RESTRICTION =
             register(booleanPreferencesKey("show_mi_island_bypass_restriction"), PreferenceValueType.BOOLEAN)
         val SHOW_MI_ISLAND_OUTER_GLOW = register(booleanPreferencesKey("show_mi_island_outer_glow"), PreferenceValueType.BOOLEAN)

@@ -214,6 +214,10 @@
         </provider>
 
         <receiver
+            android:name=".data.session.handler.InstallerActionReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".framework.receiver.SecretCodeReceiver"
             android:exported="true">
             <intent-filter>

@@ -15,7 +15,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import com.rosan.installer.R
 import com.rosan.installer.data.session.handler.ActionHandler
-import com.rosan.installer.data.session.handler.BroadcastHandler
 import com.rosan.installer.data.session.handler.ForegroundInfoHandler
 import com.rosan.installer.data.session.handler.ProgressHandler
 import com.rosan.installer.data.session.manager.InstallerSessionManagerImpl
@@ -159,7 +158,6 @@ class InstallerService : Service() {
                 ActionHandler(scope, session),
                 ProgressHandler(scope, session),
                 ForegroundInfoHandler(scope, session),
-                BroadcastHandler(scope, session),
             )
 
             // Start observing UI effects (Toasts) on the main thread

@@ -6,4 +6,5 @@ enum class NotificationStyle {
     STANDARD,
     LIVE_ACTIVITY,
     MI_ISLAND,
+    VIVO_ISLAND,
 }
