@@ -3,19 +3,15 @@
 package com.rosan.installer.framework.notification.builder
 
 import android.app.Notification
-import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import androidx.core.app.NotificationCompat
 import com.rosan.installer.R
-import com.rosan.installer.domain.engine.model.packageinfo.getInfo
-import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.framework.notification.NotificationHelper
-import com.rosan.installer.util.getErrorMessage
 import com.xzakota.hyper.notification.focus.FocusNotification
 
 class MiIslandNotificationBuilder(
@@ -24,15 +20,9 @@ class MiIslandNotificationBuilder(
     private val helper: NotificationHelper,
 ) : InstallerNotificationBuilder {
 
-    private data class IslandAction(
-        val key: String,
-        val title: String,
-        val pendingIntent: PendingIntent,
-        val isHighlighted: Boolean = false,
-    )
-
     private val highlightBgColor = "#006EFF"
     private val highlightTitleColor = "#FFFFFF"
+    private val contentFactory = IslandNotificationContentFactory(context, session, helper)
 
     override suspend fun build(payload: NotificationPayload): Notification? {
         val progress = payload.state.progress
@@ -45,197 +35,17 @@ class MiIslandNotificationBuilder(
 
         val builder = createBaseBuilder(progress, payload.state.background, payload.settings.showDialog)
 
-        var title = context.getString(R.string.installer_ready)
-        var contentText = ""
-        var shortText = context.getString(R.string.installer_ready)
-        var progressValue = -1
-        var isOngoing = false
-        var showAppIcon = true // Flag to determine whether to display the app icon or the default logo
-        val actionsList = mutableListOf<IslandAction>()
-
-        when (progress) {
-            is ProgressEntity.InstallResolving -> {
-                title = context.getString(R.string.installer_resolving)
-                shortText = context.getString(R.string.installer_live_channel_short_text_resolving)
-                contentText = context.getString(R.string.installer_resolving_desc)
-                isOngoing = true
-                showAppIcon = false
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-            }
-
-            is ProgressEntity.InstallResolveSuccess -> {
-                title = context.getString(R.string.installer_resolve_success)
-                shortText = context.getString(R.string.installer_live_channel_short_text_resolving)
-                showAppIcon = false
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-            }
-
-            is ProgressEntity.InstallPreparing -> {
-                title = context.getString(R.string.installer_preparing)
-                shortText = context.getString(R.string.installer_live_channel_short_text_preparing)
-                contentText = context.getString(R.string.installer_preparing_desc)
-                progressValue = (progress.progress * 100).toInt()
-                isOngoing = true
-                showAppIcon = false
-            }
-
-            is ProgressEntity.InstallResolvedFailed -> {
-                title = context.getString(R.string.installer_resolve_failed)
-                shortText = context.getString(R.string.installer_live_channel_short_text_resolve_failed)
-                contentText = session.error.getErrorMessage(context)
-                showAppIcon = false
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-            }
-
-            is ProgressEntity.InstallAnalysing -> {
-                title = context.getString(R.string.installer_analysing)
-                shortText = context.getString(R.string.installer_live_channel_short_text_analysing)
-                isOngoing = true
-                showAppIcon = false
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-            }
-
-            is ProgressEntity.InstallAnalysedSuccess -> {
-                val allEntities = session.analysisResults.flatMap { it.appEntities }
-                val selectedApps = allEntities.map { it.app }
-                val hasComplexType =
-                    allEntities.any {
-                        it.app.sourceType == DataType.MIXED_MODULE_APK ||
-                            it.app.sourceType == DataType.MIXED_MODULE_ZIP
-                    }
-                val isMultiPackage = selectedApps.groupBy { it.packageName }.size > 1
-
-                shortText = if (hasComplexType || isMultiPackage) {
-                    context.getString(R.string.installer_live_channel_short_text_pending)
-                } else {
-                    context.getString(R.string.installer_live_channel_short_text_pending_install)
-                }
-
-                if (hasComplexType) {
-                    title = context.getString(R.string.installer_prepare_install)
-                    contentText = context.getString(R.string.installer_mixed_module_apk_description_notification)
-                    showAppIcon = false
-                    actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-                } else if (isMultiPackage) {
-                    title = context.getString(R.string.installer_prepare_install)
-                    contentText = context.getString(R.string.installer_multi_apk_description_notification)
-                    showAppIcon = false
-                    actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-                } else {
-                    title = context.getString(R.string.installer_prepare_type_unknown_confirm)
-                    contentText = selectedApps.getInfo(context).title
-                    actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-                    actionsList.add(
-                        IslandAction("miui_action_install", context.getString(R.string.install), helper.installIntent, true),
-                    )
-                }
-            }
-
-            is ProgressEntity.InstallAnalysedFailed -> {
-                title = context.getString(R.string.installer_analyse_failed)
-                shortText = context.getString(R.string.installer_live_channel_short_text_analyse_failed)
-                contentText = session.error.getErrorMessage(context)
-                showAppIcon = false
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-                actionsList.add(IslandAction("miui_action_retry", context.getString(R.string.retry), helper.analyseIntent))
-            }
-
-            is ProgressEntity.Installing -> {
-                val appLabel = progress.appLabel ?: context.getString(R.string.installer_installing)
-                title = context.getString(R.string.installer_installing)
-                shortText = context.getString(R.string.installer_live_channel_short_text_installing)
-                contentText = if (progress.total > 1) "(${(progress.current)}/${progress.total}) $appLabel" else appLabel
-                isOngoing = true
-                val total = progress.total.coerceAtLeast(1).toFloat()
-                val currentBase = (progress.current - 1).coerceAtLeast(0).toFloat()
-
-                val itemProgress = progress.writeProgress ?: 0f
-                val batchFraction = (currentBase + itemProgress) / total
-                progressValue = (100 * batchFraction).toInt()
-            }
-
-            is ProgressEntity.InstallingModule -> {
-                title = context.getString(R.string.installer_installing)
-                shortText = context.getString(R.string.installer_live_channel_short_text_installing)
-                isOngoing = true
-                contentText = progress.output.lastOrNull() ?: context.getString(R.string.installer_installing)
-            }
-
-            is ProgressEntity.InstallSuccess -> {
-                title = context.getString(R.string.installer_install_success)
-                shortText = context.getString(R.string.installer_live_channel_short_text_success)
-                contentText =
-                    session.analysisResults.flatMap {
-                        it.appEntities
-                    }.filter { it.selected }.map { it.app }.getInfo(context).title
-
-                actionsList.add(IslandAction("miui_action_finish", context.getString(R.string.finish), helper.finishIntent))
-                val openIntent =
-                    helper.getLaunchPendingIntent(
-                        session.analysisResults.flatMap {
-                            it.appEntities
-                        }.filter { it.selected }.map { it.app }
-                            .firstOrNull()?.packageName,
-                    )
-                if (openIntent != null) {
-                    actionsList.add(IslandAction("miui_action_open", context.getString(R.string.open), openIntent, true))
-                }
-            }
-
-            is ProgressEntity.InstallCompleted -> {
-                val successCount = progress.results.count { it.success }
-                val totalCount = progress.results.size
-                title =
-                    if (successCount ==
-                        totalCount
-                    ) {
-                        context.getString(R.string.installer_install_success)
-                    } else {
-                        "${context.getString(R.string.installer_install_success)}: $successCount/$totalCount"
-                    }
-                shortText =
-                    if (successCount ==
-                        totalCount
-                    ) {
-                        context.getString(R.string.installer_live_channel_short_text_success)
-                    } else {
-                        "$successCount/$totalCount ${
-                            context.getString(R.string.installer_live_channel_short_text_success)
-                        }"
-                    }
-                contentText = context.getString(R.string.installer_live_channel_short_text_success)
-                actionsList.add(IslandAction("miui_action_finish", context.getString(R.string.finish), helper.finishIntent))
-            }
-
-            is ProgressEntity.InstallFailed -> {
-                title = context.getString(R.string.installer_install_failed)
-                shortText = context.getString(R.string.installer_live_channel_short_text_install_failed)
-                contentText =
-                    session.analysisResults.flatMap {
-                        it.appEntities
-                    }.filter { it.selected }.map { it.app }.getInfo(context).title
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-                actionsList.add(IslandAction("miui_action_retry", context.getString(R.string.retry), helper.installIntent))
-            }
-
-            is ProgressEntity.InstallWaitingUnknownSource -> {
-                title = context.getString(R.string.installer_waiting_unknown_source)
-                shortText = context.getString(R.string.installer_waiting_unknown_source)
-                contentText = helper.unknownSourceDescription()
-                showAppIcon = false
-                actionsList.add(
-                    IslandAction(
-                        "miui_action_unknown_source",
-                        context.getString(R.string.suggestion_allow_unknown_source),
-                        helper.unknownSourceIntent,
-                        true,
-                    ),
-                )
-                actionsList.add(IslandAction("miui_action_cancel", context.getString(R.string.cancel), helper.finishIntent))
-            }
-
-            else -> {}
-        }
+        val content = contentFactory.create(
+            progress = progress,
+            cancelIntent = helper.finishIntent,
+        )
+        val title = content.title
+        val shortText = content.shortText
+        val contentText = content.contentText
+        val progressValue = content.progressValue ?: -1
+        val isOngoing = content.isOngoing
+        val showAppIcon = content.showAppIcon
+        val actionsList = content.actions
 
         builder.setContentTitle(title)
         if (contentText.isNotEmpty()) builder.setContentText(contentText)
@@ -296,7 +106,7 @@ class MiIslandNotificationBuilder(
                             }
                             textInfo {
                                 this.title = shortText.ifEmpty { title }
-                                content = contentText.ifEmpty { " " }
+                                this.content = contentText.ifEmpty { " " }
                             }
                         }
                     } else {
@@ -331,7 +141,7 @@ class MiIslandNotificationBuilder(
                 baseInfo {
                     type = 2
                     this.title = displayTitle
-                    content = displayContent.ifEmpty { " " }
+                    this.content = displayContent.ifEmpty { " " }
                 }
 
                 // Use multiProgressInfo during the Preparing stage to avoid progressInfo parsing bugs
@@ -344,7 +154,7 @@ class MiIslandNotificationBuilder(
                 // Standard template with icon for other stages
                 iconTextInfo {
                     this.title = displayTitle
-                    content = displayContent.ifEmpty { " " }
+                    this.content = displayContent.ifEmpty { " " }
                     animIconInfo {
                         type = 0
                         src = displayIconKey
