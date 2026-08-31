@@ -86,11 +86,11 @@
     <string name="ignore_battery_optimizations_desc">適用於背景限制較嚴格的 ROM。若通知卡住，請嘗試忽略電池最佳化</string>
     <string name="ignore_battery_optimizations_desc_disabled">已被忽略</string>
     <string name="lock_default_installer">鎖定為預設安裝程式</string>
-    <string name="lock_default_installer_desc">將 InstallerX Revived 設定為安裝 APK 的預設應用程式</string>
+    <string name="lock_default_installer_desc">將 InstallerX Revived 設定為安裝 APKs 的預設應用程式</string>
     <string name="lock_default_installer_success">鎖定成功</string>
     <string name="lock_default_installer_failed">鎖定失敗</string>
     <string name="unlock_default_installer">清除鎖定預設安裝程式</string>
-    <string name="unlock_default_installer_desc">取消將 InstallerX Revived 設定為安裝 APK 的預設安裝程式</string>
+    <string name="unlock_default_installer_desc">取消將 InstallerX Revived 設定為安裝 APKs 的預設安裝程式</string>
     <string name="unlock_default_installer_success">清除成功</string>
     <string name="unlock_default_installer_failed">清除失敗</string>
     <string name="details">詳細資訊</string>
@@ -598,7 +598,7 @@
     <string name="theme_settings_use_blur_desc">為應用程式啟用模糊效果</string>
     <string name="uninstaller_settings_require_biometric_auth">解除安裝時需進行生物辨識驗證</string>
     <string name="uninstaller_settings_require_biometric_auth_desc">解除安裝時需要進行系統指紋或臉部辨識驗證</string>
-    <string name="use_biometric_confirm_change_auth_settings">您確定要更改此設定嗎?</string>
+    <string name="use_biometric_confirm_change_auth_settings">您確定要更改此設定嗎？</string>
     <string name="use_biometric_confirm_change_auth_settings_desc">若要繼續，請使用裝置驗證來確認此操作</string>
     <string name="config_authorizer_none_system_app_tips">目前以系統安裝程式身分執行，多數選項不生效。</string>
     <string name="config_auto_delete_zip">自動刪除zip檔案</string>
@@ -960,4 +960,14 @@
     <string name="exception_analyse_failed_streaming_source_unsupported">無法在低儲存空間模式下分析此來源。請選擇「智慧」或「完整下載」。</string>
     <string name="exception_analyse_failed_source_materialization">無法下載完整的來源以進行分析</string>
     <string name="config_allow_sig_unknown_http_lightweight_desc">進行輕量級 HTTP 分析時，任何簽署異常都會依據此設定進行評估。</string>
+    <string name="history_recording">歷史紀錄</string>
+    <string name="history_enable">啟用歷史紀錄</string>
+    <string name="history_show_indicators">顯示標記</string>
+    <string name="history_disabled_title">歷史紀錄已停用</string>
+    <string name="history_disabled_desc">將不會記錄新的安裝與解除安裝操作。</string>
+    <string name="history_disable_confirm_title">停用歷史紀錄？</string>
+    <string name="history_disable_confirm_desc">要清除已記錄的歷史嗎？停用歷史紀錄期間，將不會記錄新的操作。</string>
+    <string name="history_disable_and_clear">清除並停用</string>
+    <string name="history_disable_and_keep">保留並停用</string>
+    <string name="history_version_self_update">自我更新</string>
 </resources>
