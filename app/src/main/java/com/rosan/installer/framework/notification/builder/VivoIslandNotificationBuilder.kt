@@ -21,6 +21,7 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.framework.notification.NotificationHelper
 import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
+import com.rosan.installer.framework.privileged.core.execution.runtime.DefaultPrivilegedService
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
@@ -132,6 +133,9 @@ class VivoIslandNotificationBuilder(
     private val sceneName = SCENE_PREFIX + context.packageName.replace('.', '_')
     private var sceneRegistered = false
     private var sceneRegistrationAttempted = false
+
+    val canAnimate: Boolean
+        get() = sceneRegistered
     private var changedRecord = 0
     private var newNode = 0
     private var lastNodeKey: String? = null
@@ -396,12 +400,17 @@ class VivoIslandNotificationBuilder(
         sceneRegistrationAttempted = true
 
         return try {
-            var accepted = false
-            useUserService(
-                isSystemApp = isSystemApp,
-                authorizer = authorizer,
-            ) { userService ->
-                accepted = userService.privileged.registerVivoIslandScene(sceneName, context.packageName)
+            val accepted = if (isSystemApp) {
+                DefaultPrivilegedService.system().registerVivoIslandScene(sceneName, context.packageName)
+            } else {
+                var accepted = false
+                useUserService(
+                    isSystemApp = false,
+                    authorizer = authorizer,
+                ) { userService ->
+                    accepted = userService.privileged.registerVivoIslandScene(sceneName, context.packageName)
+                }
+                accepted
             }
             check(accepted) { "OriginOS rejected the SuperX scene registration" }
             sceneRegistered = true

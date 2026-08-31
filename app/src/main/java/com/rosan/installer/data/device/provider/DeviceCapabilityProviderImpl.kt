@@ -132,8 +132,9 @@ class DeviceCapabilityProviderImpl(private val context: Context, private val ref
     override val isSupportVivoIsland: Boolean by lazy {
         val isVivoFamilyDevice = DeviceConfig.manufacturer in VIVO_FAMILY_IDENTIFIERS ||
             DeviceConfig.brand in VIVO_FAMILY_IDENTIFIERS
-        val islandEnabled = getSystemPropertyBoolean(KEY_VIVO_SUPPORT_ISLAND, true)
-        val superXEnabled = getSystemPropertyBoolean(KEY_VIVO_SUPERX_ENABLED, true)
+        val islandEnabled = getSystemPropertyBoolean(KEY_VIVO_SUPPORT_ISLAND)
+        val superXEnabled = getSystemPropertyBoolean(KEY_VIVO_SUPERX_ENABLED)
+        val hasIslandCapabilitySignal = islandEnabled == true || superXEnabled == true
         val islandDisabled = isVivoFeatureSupported(VIVO_ISLAND_DISABLED_FEATURE)
         val hasSystemUiPlugin = runCatching {
             context.packageManager.getPackageInfo(VIVO_SYSTEMUI_PLUGIN_PACKAGE, 0)
@@ -145,16 +146,19 @@ class DeviceCapabilityProviderImpl(private val context: Context, private val ref
                 "superX=$superXEnabled, plugin=$hasSystemUiPlugin",
         )
         isVivoFamilyDevice &&
-            islandEnabled &&
+            hasIslandCapabilitySignal &&
+            islandEnabled != false &&
             !islandDisabled &&
-            superXEnabled &&
+            superXEnabled != false &&
             hasSystemUiPlugin
     }
 
-    private fun getSystemPropertyBoolean(key: String, defaultValue: Boolean): Boolean = runCatching {
-        SystemProperties.getBoolean(key, defaultValue)
+    private fun getSystemPropertyBoolean(key: String): Boolean? = runCatching {
+        SystemProperties.get(key).takeIf { it.isNotEmpty() }?.let {
+            SystemProperties.getBoolean(key, false)
+        }
     }.getOrElse {
-        getSystemProperty(key, defaultValue.toString()) == "true"
+        getSystemProperty(key)?.let { it == "true" }
     }
 
     private fun isVivoFeatureSupported(feature: String): Boolean = runCatching {

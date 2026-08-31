@@ -183,8 +183,6 @@ class SessionNotifierImpl(
             )
 
             val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
-            val canAnimate = settings.showVivoIsland ||
-                (isModernEligible && settings.showLiveActivity && !settings.showMiIsland)
 
             val activeBuilder: InstallerNotificationBuilder = when {
                 settings.showVivoIsland -> VivoIslandNotificationBuilder(
@@ -201,6 +199,10 @@ class SessionNotifierImpl(
 
                 else -> LegacyNotificationBuilder(context, session, helper)
             }
+            fun canAnimate(): Boolean = when (val builder = activeBuilder) {
+                is VivoIslandNotificationBuilder -> builder.canAnimate
+                else -> isModernEligible && settings.showLiveActivity && !settings.showMiIsland
+            }
 
             val ticker = flow {
                 while (true) {
@@ -212,7 +214,7 @@ class SessionNotifierImpl(
             combine(stateFlow.filterNotNull(), ticker) { state, _ -> state }
                 .distinctUntilChanged { old, new ->
                     if (old.first != new.first || old.second != new.second) return@distinctUntilChanged false
-                    if (canAnimate) {
+                    if (canAnimate()) {
                         val installing = new.first as? ProgressEntity.Installing
                         val shouldAnimate =
                             installing != null && installing.writeProgress == null && new.second
@@ -238,7 +240,7 @@ class SessionNotifierImpl(
                     if (background) {
                         val isSameState = lastNotifiedEntity?.let { it::class == progress::class } == true
                         val currentRequiresAnimation =
-                            canAnimate && progress is ProgressEntity.Installing && progress.writeProgress == null
+                            canAnimate() && progress is ProgressEntity.Installing && progress.writeProgress == null
 
                         // Pack all context into a single consistent payload
                         val payload = NotificationPayload(
