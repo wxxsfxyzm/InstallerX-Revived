@@ -8,7 +8,7 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "9.3.2"
+agp = "9.4.0"
 biometric = "1.4.0-alpha07"
 focusApi = "1.4"
 kotlin = "2.4.10"
@@ -41,7 +41,7 @@ profileinstaller = "1.4.1"
 commonsCompress = "1.28.0"
 spotless = "8.10.1"
 ktlint = "1.8.0"
-composeKtlintRules = "0.6.4"
+composeKtlintRules = "0.6.6"
 
 [plugins]
 installerx-application = { id = "installerx.android.application" }
