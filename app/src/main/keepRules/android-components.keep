@@ -1,6 +1,9 @@
 # Keep Android IPC interfaces
 -keep public interface ** extends android.os.IInterface {*;}
 
+# Keep biometric classes for Android 8.x
+-keep class androidx.biometric.internal.FingerprintManagerCompat$Api* {*;}
+
 # Keep application entry point
 # -keep public class com.rosan.installer.App {*;}
 
