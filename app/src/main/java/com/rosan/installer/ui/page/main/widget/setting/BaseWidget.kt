@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -111,8 +112,14 @@ fun BaseWidget(
         }
     }
 
-    val density = LocalDensity.current
-    val dynamicInternalPadding = (4 * density.fontScale).dp
+    /*
+     * Material 3 ListItem uses fixed 56dp/72dp minimum heights that do not shrink with fontScale,
+     * leaving excessive vertical space at smaller system font sizes. Recheck this workaround when
+     * updating Material 3 in case ListItem starts adapting its minimum height internally.
+     */
+    val fontScale = LocalDensity.current.fontScale
+    val defaultMinHeight = if (description == null) 56.dp else 72.dp
+    val adaptiveMinHeight = (defaultMinHeight * fontScale).coerceAtLeast(48.dp)
 
     val baseShape = LocalSegmentedItemShape.current
 
@@ -176,7 +183,9 @@ fun BaseWidget(
         hoveredShape = baseShape,
     )
 
-    val itemModifier = modifier.fillMaxWidth()
+    val itemModifier = modifier
+        .fillMaxWidth()
+        .heightIn(min = adaptiveMinHeight)
 
     val leadingContent: (@Composable () -> Unit)? =
         if (icon != null || iconPlaceholder) {
@@ -208,9 +217,7 @@ fun BaseWidget(
                 Text(
                     text = text,
                     style = descriptionStyle,
-                    modifier = Modifier
-                        .alpha(alpha)
-                        .padding(bottom = dynamicInternalPadding),
+                    modifier = Modifier.alpha(alpha),
                 )
             }
         }
@@ -246,12 +253,7 @@ fun BaseWidget(
 
     val headline: @Composable () -> Unit = {
         Box(
-            modifier = Modifier
-                .alpha(alpha)
-                .padding(
-                    top = dynamicInternalPadding,
-                    bottom = if (description == null) dynamicInternalPadding else 0.dp,
-                ),
+            modifier = Modifier.alpha(alpha),
         ) {
             Text(
                 text = title,
