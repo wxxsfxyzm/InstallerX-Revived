@@ -39,7 +39,7 @@ benchmarkMacroJunit4 = "1.4.1"
 baselineprofile = "1.5.0-rc02"
 profileinstaller = "1.4.1"
 commonsCompress = "1.28.0"
-spotless = "8.10.1"
+spotless = "8.10.2"
 ktlint = "1.8.0"
 composeKtlintRules = "0.6.6"
 
