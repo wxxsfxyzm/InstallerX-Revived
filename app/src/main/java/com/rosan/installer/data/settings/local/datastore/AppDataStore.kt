@@ -67,9 +67,6 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
 
         // Show Mi Island
         val SHOW_MI_ISLAND = register(booleanPreferencesKey("show_mi_island"), PreferenceValueType.BOOLEAN)
-        val SHOW_VIVO_ISLAND = register(booleanPreferencesKey("show_vivo_island"), PreferenceValueType.BOOLEAN)
-        val SHOW_VIVO_ISLAND_BYPASS_RESTRICTION =
-            register(booleanPreferencesKey("show_vivo_island_bypass_restriction"), PreferenceValueType.BOOLEAN)
         val SHOW_MI_ISLAND_BYPASS_RESTRICTION =
             register(booleanPreferencesKey("show_mi_island_bypass_restriction"), PreferenceValueType.BOOLEAN)
         val SHOW_MI_ISLAND_OUTER_GLOW = register(booleanPreferencesKey("show_mi_island_outer_glow"), PreferenceValueType.BOOLEAN)
@@ -77,6 +74,11 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
         // The duration to keep the network blocked to bypass Xiaomi's notification scanner
         val SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS =
             register(intPreferencesKey("show_mi_island_blocking_interval"), PreferenceValueType.INT)
+
+        // Show Vivo Island
+        val SHOW_VIVO_ISLAND = register(booleanPreferencesKey("show_vivo_island"), PreferenceValueType.BOOLEAN)
+        val SHOW_VIVO_ISLAND_BYPASS_RESTRICTION =
+            register(booleanPreferencesKey("show_vivo_island_bypass_restriction"), PreferenceValueType.BOOLEAN)
 
         // Use Biometric Auth Install
         val INSTALLER_REQUIRE_BIOMETRIC_AUTH =

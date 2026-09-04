@@ -3,6 +3,7 @@
 package com.rosan.installer.framework.notification.builder
 
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
@@ -22,8 +23,6 @@ import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.framework.notification.NotificationHelper
 import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.framework.privileged.core.execution.runtime.DefaultPrivilegedService
-import kotlinx.coroutines.CancellationException
-import timber.log.Timber
 
 private const val OPERATION = "notification.superx.operation"
 private const val SCENE = "notification.superx.scene"
@@ -71,7 +70,6 @@ private const val ISLAND_LEFT_CONTENT = "island.superx.leftInfo.content"
 private const val ISLAND_RIGHT_CONTENT = "island.superx.rightInfo.content"
 private const val ISLAND_RIGHT_ICON = "island.superx.rightInfo.icon"
 private const val ISLAND_RIGHT_CAPSULE_CONTENT = "island.superx.rightInfo.capsuleContent"
-private const val ISLAND_RIGHT_CLICK = "island.superx.rightInfo.clickResp"
 private const val ISLAND_CLICK = "island.superx.clickResp"
 private const val ISLAND_LANDING_PACKAGE = "island.superx.landingPkg"
 private const val ISLAND_LANDING_INFO = "island.superx.landingInfo"
@@ -117,8 +115,8 @@ private const val NEVER_EXPIRE_SHOW_TIME_SECONDS = Int.MAX_VALUE
 /**
  * Adapts the installer notification to OriginOS SuperX/Vivo Island.
  *
- * The normal notification remains the fallback. OriginOS requires a privileged caller to
- * register the app scene before a non-system app can submit a SuperX notification.
+ * OriginOS requires a privileged caller to register the app scene before a non-system app
+ * can submit a SuperX notification.
  */
 class VivoIslandNotificationBuilder(
     private val context: Context,
@@ -127,37 +125,43 @@ class VivoIslandNotificationBuilder(
     private val authorizer: Authorizer,
     private val bypassRestriction: Boolean,
 ) : InstallerNotificationBuilder {
-    private val fallbackBuilder = LegacyNotificationBuilder(context, session, helper)
     private val contentFactory = IslandNotificationContentFactory(context, session, helper)
     private val isSystemApp = context.applicationInfo.flags.hasFlag(ApplicationInfo.FLAG_SYSTEM)
     private val sceneName = SCENE_PREFIX + context.packageName.replace('.', '_')
     private var sceneRegistered = false
-    private var sceneRegistrationAttempted = false
-
-    val canAnimate: Boolean
-        get() = sceneRegistered
+    private var islandCreated = false
     private var changedRecord = 0
     private var newNode = 0
     private var lastNodeKey: String? = null
 
     override suspend fun build(payload: NotificationPayload): Notification? {
-        val fallback = fallbackBuilder.build(payload) ?: return null
-        if (!ensureSceneRegistered()) return fallback
+        when (payload.state.progress) {
+            is ProgressEntity.InstallAnalysedUnsupported,
+            ProgressEntity.Error,
+            ProgressEntity.Finish,
+            -> return null
 
-        return try {
-            val content = contentFactory.create(
-                progress = payload.state.progress,
-                cancelIntent = helper.cancelIntent,
-                fakeItemProgress = payload.animation.fakeItemProgress,
-            )
-            val notification = createBaseNotification(payload, content)
-            addIslandExtras(notification, payload, content)
-            notification
-        } catch (t: Throwable) {
-            if (t is CancellationException) throw t
-            Timber.e(t, "OriginOS Vivo Island data preparation failed")
-            fallback
+            else -> Unit
         }
+
+        ensureSceneRegistered()
+
+        val content = contentFactory.create(
+            progress = payload.state.progress,
+            cancelIntent = helper.cancelIntent,
+            fakeItemProgress = payload.animation.fakeItemProgress,
+        )
+        val notification = createBaseNotification(payload, content)
+        addIslandExtras(notification, payload, content)
+        return notification
+    }
+
+    fun resetLifecycle() {
+        islandCreated = false
+    }
+
+    fun markLifecycleStarted() {
+        islandCreated = true
     }
 
     private suspend fun createBaseNotification(
@@ -166,13 +170,7 @@ class VivoIslandNotificationBuilder(
     ): Notification {
         val progress = payload.state.progress
         val icon = (if (isWorking(progress)) NotificationHelper.Icon.Working else NotificationHelper.Icon.Pausing).resId
-        val contentIntent = when (session.config.installMode) {
-            InstallMode.Notification,
-            InstallMode.AutoNotification,
-            -> if (payload.settings.showDialog) helper.openIntent else null
-
-            else -> helper.openIntent
-        }
+        val contentIntent = notificationContentIntent(payload.settings.showDialog)
 
         val builder = NotificationCompat.Builder(context, NotificationHelper.Channel.InstallerLiveChannel.value)
             .setSmallIcon(icon)
@@ -181,7 +179,7 @@ class VivoIslandNotificationBuilder(
             .setDeleteIntent(helper.finishIntent)
             .setAutoCancel(false)
             .setOnlyAlertOnce(true)
-            .setOngoing(!isTerminal(progress))
+            .setOngoing(false)
 
         if (content.contentText.isNotEmpty()) builder.setContentText(content.contentText)
         if (progress.isSuccessfulInstall() && payload.settings.successAutoClearSeconds > 0) {
@@ -214,6 +212,7 @@ class VivoIslandNotificationBuilder(
         val progress = payload.state.progress
         val logo = Icon.createWithBitmap(createLogoBitmap(COLLAPSED_LOGO_CONTAINER_DP, COLLAPSED_LOGO_CONTENT_DP))
         val expandedLogo = Icon.createWithBitmap(createLogoBitmap(EXPANDED_LOGO_CONTAINER_DP, EXPANDED_LOGO_CONTENT_DP))
+        val contentIntent = notificationContentIntent(payload.settings.showDialog)
         val appIcon = if (content.showAppIcon) {
             helper.getLargeIconBitmap(
                 payload.settings.preferSystemIcon,
@@ -232,7 +231,7 @@ class VivoIslandNotificationBuilder(
             putString(SHORT_CORE, content.title)
             putString(SHORT_DESCRIBE, rightContent)
             putParcelable(SHORT_IMAGE, appIcon)
-            putParcelable(SHORT_IMAGE_CLICK, helper.openIntent)
+            contentIntent?.let { putParcelable(SHORT_IMAGE_CLICK, it) }
         }
         val leftInfo = Bundle().apply {
             putParcelable(ISLAND_LEFT_ICON, appIcon)
@@ -244,7 +243,6 @@ class VivoIslandNotificationBuilder(
                 putParcelable(ISLAND_RIGHT_ICON, createCollapsedProgressIcon(content.progressValue ?: 0))
             }
             putCharSequence(ISLAND_RIGHT_CAPSULE_CONTENT, rightContent)
-            putParcelable(ISLAND_RIGHT_CLICK, helper.openIntent)
         }
         val cardBaseInfo = Bundle().apply {
             putCharSequence(BASE_TITLE, displayTitle)
@@ -273,7 +271,7 @@ class VivoIslandNotificationBuilder(
             putInt(ISLAND_RIGHT_TEMPLATE, ISLAND_RIGHT_TEMPLATE_TEXT_IMAGE)
             putBundle(ISLAND_LEFT_INFO, leftInfo)
             putBundle(ISLAND_RIGHT_INFO, rightInfo)
-            putParcelable(ISLAND_CLICK, helper.openIntent)
+            contentIntent?.let { putParcelable(ISLAND_CLICK, it) }
             putString(ISLAND_LANDING_PACKAGE, context.packageName)
             putString(ISLAND_LANDING_INFO, "{\"mType\":\"app\",\"mPkgName\":\"${context.packageName}\"}")
             putString(ISLAND_SCENE, sceneName)
@@ -291,7 +289,7 @@ class VivoIslandNotificationBuilder(
         }
 
         val extras = notification.extras ?: Bundle().also { notification.extras = it }
-        extras.putInt(OPERATION, 0)
+        extras.putInt(OPERATION, if (islandCreated) 1 else 0)
         extras.putInt(TEMPLATE, cardTemplate)
         extras.putString(SCENE, sceneName)
         extras.putInt(CHANGED_RECORD, changeRecord)
@@ -301,13 +299,21 @@ class VivoIslandNotificationBuilder(
         extras.putBoolean(ISLAND_NOTIFY, false)
         extras.putInt(CARD_BG_COLOR, Color.BLACK)
         extras.putBoolean(DISABLE_INVERT_COLOR, true)
-        extras.putParcelable(CLICK_RESP, helper.openIntent)
+        contentIntent?.let { extras.putParcelable(CLICK_RESP, it) }
         extras.putBoolean(ISLAND_KEEP_SCREEN_ON, false)
         extras.putBundle(BASE_INFOS, cardBaseInfo)
         cardInfos?.let { extras.putBundle(INFOS, it) }
         customTemplate?.let { extras.putParcelable(NOTIFICATION_CUSTOM_TEMPLATE, it) }
         extras.putBundle(SHORT_INFOS, shortInfos)
         extras.putBundle(ISLAND_INFO, islandInfo)
+    }
+
+    private fun notificationContentIntent(showDialog: Boolean): PendingIntent? = when (session.config.installMode) {
+        InstallMode.Notification,
+        InstallMode.AutoNotification,
+        -> if (showDialog) helper.openIntent else null
+
+        else -> helper.openIntent
     }
 
     private fun cardTemplate(progress: ProgressEntity, content: IslandContent): Int = when {
@@ -394,33 +400,26 @@ class VivoIslandNotificationBuilder(
         )
     }
 
-    private fun ensureSceneRegistered(): Boolean {
-        if (!bypassRestriction && !isSystemApp) return false
-        if (sceneRegistrationAttempted) return sceneRegistered
-        sceneRegistrationAttempted = true
-
-        return try {
-            val accepted = if (isSystemApp) {
-                DefaultPrivilegedService.system().registerVivoIslandScene(sceneName, context.packageName)
-            } else {
-                var accepted = false
-                useUserService(
-                    isSystemApp = false,
-                    authorizer = authorizer,
-                ) { userService ->
-                    accepted = userService.privileged.registerVivoIslandScene(sceneName, context.packageName)
-                }
-                accepted
-            }
-            check(accepted) { "OriginOS rejected the SuperX scene registration" }
-            sceneRegistered = true
-            true
-        } catch (t: Throwable) {
-            if (t is CancellationException) throw t
-            sceneRegistrationAttempted = false
-            Timber.e(t, "OriginOS Vivo Island scene registration failed")
-            false
+    private fun ensureSceneRegistered() {
+        if (sceneRegistered) return
+        check(bypassRestriction || isSystemApp) {
+            "Vivo Island requires system app access or bypass restriction"
         }
+
+        val accepted = if (isSystemApp) {
+            DefaultPrivilegedService.system().registerVivoIslandScene(sceneName, context.packageName)
+        } else {
+            var accepted = false
+            useUserService(
+                isSystemApp = false,
+                authorizer = authorizer,
+            ) { userService ->
+                accepted = userService.privileged.registerVivoIslandScene(sceneName, context.packageName)
+            }
+            accepted
+        }
+        check(accepted) { "OriginOS rejected the SuperX scene registration" }
+        sceneRegistered = true
     }
 
     private fun createCollapsedProgressIcon(progress: Int): Icon {
@@ -478,10 +477,6 @@ class VivoIslandNotificationBuilder(
         progress is ProgressEntity.Installing ||
         progress is ProgressEntity.InstallingModule ||
         progress is ProgressEntity.InstallSuccess ||
-        progress is ProgressEntity.InstallCompleted
-
-    private fun isTerminal(progress: ProgressEntity): Boolean = progress is ProgressEntity.InstallSuccess ||
-        progress is ProgressEntity.InstallFailed ||
         progress is ProgressEntity.InstallCompleted
 
     private fun nodeFor(progress: ProgressEntity, content: IslandContent): Int {

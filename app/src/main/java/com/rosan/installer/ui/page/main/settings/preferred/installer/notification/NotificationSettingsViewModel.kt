@@ -72,10 +72,6 @@ class NotificationSettingsViewModel(appSettingsRepo: AppSettingsRepository, priv
                 updateSetting(BooleanSetting.ShowDialogWhenPressingNotification, action.show)
             }
 
-            is NotificationSettingsAction.ChangeVivoIslandBypassRestriction -> viewModelScope.launch {
-                updateSetting(BooleanSetting.ShowVivoIslandBypassRestriction, action.bypass)
-            }
-
             is NotificationSettingsAction.ChangeMiIslandBypassRestriction -> viewModelScope.launch {
                 updateSetting(BooleanSetting.ShowMiIslandBypassRestriction, action.bypass)
             }
@@ -86,6 +82,10 @@ class NotificationSettingsViewModel(appSettingsRepo: AppSettingsRepository, priv
 
             is NotificationSettingsAction.ChangeMiIslandBlockingInterval -> viewModelScope.launch {
                 updateSetting(IntSetting.ShowMiIslandBlockingInterval, action.ms)
+            }
+
+            is NotificationSettingsAction.ChangeVivoIslandBypassRestriction -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ShowVivoIslandBypassRestriction, action.bypass)
             }
         }
     }

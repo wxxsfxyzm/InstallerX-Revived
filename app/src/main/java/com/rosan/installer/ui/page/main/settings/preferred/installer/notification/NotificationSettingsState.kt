@@ -6,7 +6,7 @@ data class NotificationSettingsState(
     val showLiveActivity: Boolean = false,
     val showMiIsland: Boolean = false,
     val showVivoIsland: Boolean = false,
-    val vivoIslandBypassRestriction: Boolean = true,
+    val vivoIslandBypassRestriction: Boolean = false,
     val miIslandBypassRestriction: Boolean = false,
     val miIslandOuterGlow: Boolean = true,
     val successAutoClearSeconds: Int = 10,
