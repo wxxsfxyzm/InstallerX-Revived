@@ -736,8 +736,8 @@
     <string name="working_status_none_authorizer_desc">No hagas uso de ningún privilegio, se requiere el permiso de Fuentes desconocidas para instalar aplicaciones</string>
     <string name="working_status_not_default_installer_click_details">Haz clic para ver los detalles</string>
     <string name="working_status_default_installer_tip">Configura esta aplicación como instalador de paquetes por defecto para que se encargue de la mayoría de las solicitudes de instalación. Tenga en cuenta que los siguientes casos no pueden ser interceptados:\n- OEM restringe la modificación del instalador por defecto\n- El iniciador especifica un componente objetivo\n- El iniciador utiliza una instalación de sesión</string>
-    <string name="setting_lsposed_module_title">Módulo Vector habilitado</string>
-    <string name="setting_lsposed_module_desc">Activa esto si has forzado la toma de control por defecto del instalador mediante un módulo Vector de terceros. Esto desactiva la comprobación interna de estado y la página principal mostrará constantemente como Activado</string>
+    <string name="setting_lsposed_module_title">Módulo LSPosed habilitado</string>
+    <string name="setting_lsposed_module_desc">Activa esto si has forzado la toma de control por defecto del instalador mediante un módulo LSPosed de terceros. Esto desactiva la comprobación interna de estado y la página principal mostrará constantemente como Activado</string>
     <string name="home_stat_authorizers">Privilegios disponibles</string>
     <string name="home_stat_profiles">Perfiles</string>
     <string name="home_label_lsp_link">¿Buscas un módulo?</string>

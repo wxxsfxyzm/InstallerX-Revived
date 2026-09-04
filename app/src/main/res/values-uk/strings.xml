@@ -442,9 +442,9 @@
     <string name="dhizuku_not_available">Будь ласка, активуйте Dhizuku</string>
     <string name="shizuku_not_authorized">Будь ласка, надайте дозвіл на доступ до Sui або Shizuku</string>
     <string name="home_stat_profiles">Профілі</string>
-    <string name="setting_lsposed_module_title">Модуль Vector увімкнено</string>
+    <string name="setting_lsposed_module_title">Модуль LSPosed увімкнено</string>
     <string name="history">Історія</string>
-    <string name="setting_lsposed_module_desc">Увімкніть цей параметр, якщо ви примусово встановили встановлювач за замовчуванням через сторонній модуль Vector. Це вимикає внутрішню перевірку статусу, і головна сторінка постійно показуватиметься як «Активовано»</string>
+    <string name="setting_lsposed_module_desc">Увімкніть цей параметр, якщо ви примусово встановили встановлювач за замовчуванням через сторонній модуль LSPosed. Це вимикає внутрішню перевірку статусу, і головна сторінка постійно показуватиметься як «Активовано»</string>
     <string name="working_status_default_installer_tip">Встановіть цей застосунок як встановлювач пакетів за замовчуванням, щоби виконувати більшість запитів на встановлення. Зверніть увагу, що перехоплення неможливе у таких випадках:\n- OEM обмежує зміну за замовчуванням встановлювача\n- Ініціатор вказує цільовий компонент\n- Ініціатор використовує сеанс встановлення</string>
     <string name="history_empty_title">Поки що немає записів</string>
     <string name="dhizuku_unsupported_desc">Dhizuku не підтримується</string>

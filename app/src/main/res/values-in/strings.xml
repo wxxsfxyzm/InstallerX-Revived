@@ -646,8 +646,8 @@
     <string name="working_status_none_authorizer_desc">Jangan gunakan hak istimewa apa pun, izin Sumber Tidak Dikenal diperlukan untuk menginstal aplikasi</string>
     <string name="working_status_not_default_installer_click_details">Klik untuk melihat detail</string>
     <string name="working_status_default_installer_tip">Tetapkan aplikasi ini sebagai penginstal paket default untuk mengambil alih sebagian besar permintaan instalasi. Perlu diperhatikan bahwa kasus berikut tidak dapat dicegat:\n- OEM membatasi modifikasi penginstal default\n- Inisiator menentukan Komponen target\n- Inisiator menggunakan Session Install</string>
-    <string name="setting_lsposed_module_title">Modul Vector Diaktifkan</string>
-    <string name="setting_lsposed_module_desc">Aktifkan ini jika Anda telah memaksa pengambilalihan penginstal default melalui modul Vector pihak ketiga. Ini akan menonaktifkan pemeriksaan status internal, dan halaman beranda akan selalu ditampilkan sebagai Diaktifkan</string>
+    <string name="setting_lsposed_module_title">Modul LSPosed Diaktifkan</string>
+    <string name="setting_lsposed_module_desc">Aktifkan ini jika Anda telah memaksa pengambilalihan penginstal default melalui modul LSPosed pihak ketiga. Ini akan menonaktifkan pemeriksaan status internal, dan halaman beranda akan selalu ditampilkan sebagai Diaktifkan</string>
     <string name="home_stat_authorizers">Hak Istimewa yang Tersedia</string>
     <string name="home_stat_profiles">Profil</string>
     <string name="home_label_lsp_link">Mencari modul?</string>

@@ -714,8 +714,8 @@
     <string name="working_status_none_authorizer_desc">Geen gebruik van privileges, toestemming voor Installatie uit onbekende bronnen vereist voor installeren</string>
     <string name="working_status_not_default_installer_click_details">Klik om de details te bekijken</string>
     <string name="working_status_default_installer_tip">Stel deze app in als de standaard pakketinstallateur om de meeste installatieaanvragen over te nemen. Wees ervan bewust dat het in de volgende gevallen niet werkt:\n- OEM vermindert het aanpassen van de standaard installateur\n- De aanvrager specificeert een doelcomponent\n- De aanvrager gebruikt een sessie-installatie</string>
-    <string name="setting_lsposed_module_title">Vector module ingeschakeld</string>
-    <string name="setting_lsposed_module_desc">Schakel dit in als je de standaard installateur hebt geforceerd via een Vector module. Dit schakelt het interne checken van de status uit en de startpagina zal de hele tijd getoond worden als Geactiveerd</string>
+    <string name="setting_lsposed_module_title">LSPosed module ingeschakeld</string>
+    <string name="setting_lsposed_module_desc">Schakel dit in als je de standaard installateur hebt geforceerd via een LSPosed module. Dit schakelt het interne checken van de status uit en de startpagina zal de hele tijd getoond worden als Geactiveerd</string>
     <string name="home_stat_authorizers">Beschikbare privileges</string>
     <string name="home_stat_profiles">Profielen</string>
     <string name="home_label_lsp_link">Ben je op zoek naar een module?</string>

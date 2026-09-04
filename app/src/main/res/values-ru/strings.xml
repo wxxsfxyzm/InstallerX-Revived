@@ -714,8 +714,8 @@
     <string name="working_status_none_authorizer_desc">Не используется никаких привилегий, для установки приложений требуется разрешение на доступ к неизвестным источникам</string>
     <string name="working_status_not_default_installer_click_details">Нажмите для просмотра подробностей</string>
     <string name="working_status_default_installer_tip">Установите это приложение как установщик пакетов по умолчанию для выполнения большинства запросов на установку. Обратите внимание, что перехват невозможен в следующих случаях:\n- OEM ограничивает изменение установщика по умолчанию\n- Инициатор указывает целевой компонент\n- Инициатор использует сессию установки</string>
-    <string name="setting_lsposed_module_title">Модуль Vector включен</string>
-    <string name="setting_lsposed_module_desc">Включите эту опцию, если вы принудительно активировали установщик по умолчанию с помощью стороннего модуля Vector. Это отключит внутреннюю проверку статуса и на главной странице будет постоянно отображаться статус Активировано</string>
+    <string name="setting_lsposed_module_title">Модуль LSPosed включен</string>
+    <string name="setting_lsposed_module_desc">Включите эту опцию, если вы принудительно активировали установщик по умолчанию с помощью стороннего модуля LSPosed. Это отключит внутреннюю проверку статуса и на главной странице будет постоянно отображаться статус Активировано</string>
     <string name="home_stat_authorizers">Доступные привилегии</string>
     <string name="home_stat_profiles">Профили</string>
     <string name="home_label_lsp_link">Ищете модуль?</string>

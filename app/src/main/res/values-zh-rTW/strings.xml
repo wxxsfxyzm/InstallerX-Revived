@@ -848,7 +848,7 @@
     <string name="installer_prepare_signature_analysis_issue">APK 簽名分析發現問題。安裝可能會失敗；最終結果取決於系統的驗證結果。</string>
     <string name="unarchive_error_storage_message">至少空出 %1$s 空間後再重新嘗試還原</string>
     <string name="config_smart_authorizer_fallback_list_desc">選取並排序備用授權者。\n已選取的授權順序： %1$s</string>
-    <string name="setting_lsposed_module_title">已啟用 Vector 模組</string>
+    <string name="setting_lsposed_module_title">已啟用 LSPosed 模組</string>
     <string name="unarchive_error_generic_title">無法還原應用程式</string>
     <string name="history_version_downgrade">降級</string>
     <string name="unarchive_error_generic_message">此存檔應用程式無法被還原</string>
@@ -868,7 +868,7 @@
     <string name="installer_signature_certificate_lineage">簽名證書血統</string>
     <string name="authorizer_customization_desc">針對受支援的授權者進行細調</string>
     <string name="exception_install_failed_blocked_by_profile_signature_unknown">設定檔會阻止安裝無法驗證簽名的應用程式</string>
-    <string name="setting_lsposed_module_desc">若您已透過第三方 Vector 模組強制啟用預設安裝程式接管功能，請啟用此選項。此舉將停用內部狀態檢查，且首頁將持續顯示為「已啟用」</string>
+    <string name="setting_lsposed_module_desc">若您已透過第三方 LSPosed 模組強制啟用預設安裝程式接管功能，請啟用此選項。此舉將停用內部狀態檢查，且首頁將持續顯示為「已啟用」</string>
     <string name="installer_settings_dialog_automation_options">自動化選項</string>
     <string name="priv_page_notice_title">安裝設定檔差異</string>
     <string name="history_method_session">工作階段確認</string>

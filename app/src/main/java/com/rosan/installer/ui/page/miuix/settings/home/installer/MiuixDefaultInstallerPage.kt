@@ -174,7 +174,7 @@ fun MiuixDefaultInstallerPage(useBlur: Boolean, viewModel: HomePageViewModel = k
             }
 
             if (!uiState.isSystemApp) {
-                item { SmallTitle(stringResource(R.string.home_label_lsp)) }
+                item { SmallTitle(stringResource(R.string.advanced)) }
                 item {
                     Card(
                         modifier = Modifier

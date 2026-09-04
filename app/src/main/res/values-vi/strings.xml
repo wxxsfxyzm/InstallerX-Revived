@@ -740,8 +740,8 @@
     <string name="working_status_none_authorizer_desc">Không sử dụng bất kỳ đặc quyền nào, yêu cầu quyền Nguồn Không xác định để cài đặt các ứng dụng</string>
     <string name="working_status_not_default_installer_click_details">Nhấn để xem chi tiết</string>
     <string name="working_status_default_installer_tip">Đặt ứng dụng này làm trình cài đặt gói mặc định để tiếp quản hầu hết các yêu cầu cài đặt. Lưu ý rằng các trường hợp sau không thể bị chặn:\n- OEM hạn chế việc sửa đổi trình cài đặt mặc định\n- Người khởi tạo chỉ định một Thành phần đích\n- Người khởi tạo sử dụng một Cài đặt Phiên</string>
-    <string name="setting_lsposed_module_title">Mô-đun Vector Đã bật</string>
-    <string name="setting_lsposed_module_desc">Bật tùy chọn này nếu bạn đã buộc trình cài đặt mặc định tiếp quản thông qua một mô-đun Vector bên thứ ba. Cái này sẽ vô hiệu hóa việc kiểm tra trạng thái bên tronh, và trang chủ sẽ luôn hiển thị là Đã kích hoạt</string>
+    <string name="setting_lsposed_module_title">Mô-đun LSPosed Đã bật</string>
+    <string name="setting_lsposed_module_desc">Bật tùy chọn này nếu bạn đã buộc trình cài đặt mặc định tiếp quản thông qua một mô-đun LSPosed bên thứ ba. Cái này sẽ vô hiệu hóa việc kiểm tra trạng thái bên tronh, và trang chủ sẽ luôn hiển thị là Đã kích hoạt</string>
     <string name="home_stat_authorizers">Các đặc quyền Khả dụng</string>
     <string name="home_stat_profiles">Hồ sơ</string>
     <string name="home_label_lsp_link">Đang tìm một mô-đun?</string>

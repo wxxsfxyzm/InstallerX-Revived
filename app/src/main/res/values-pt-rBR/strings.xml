@@ -714,8 +714,8 @@
     <string name="working_status_none_authorizer_desc">Não utilizar nenhum privilégio; é necessária a permissão “Fontes desconhecidas” para instalar apps</string>
     <string name="working_status_not_default_installer_click_details">Clique para ver os detalhes</string>
     <string name="working_status_default_installer_tip">Defina este app como o instalador de pacotes padrão para assumir a maioria das solicitações de instalação. Observe que os seguintes casos não podem ser interceptados:\n- O OEM restringe a modificação do instalador padrão\n- O iniciador especifica um componente de destino\n- O iniciador utiliza uma Instalação por Sessão</string>
-    <string name="setting_lsposed_module_title">Módulo Vector ativado</string>
-    <string name="setting_lsposed_module_desc">Ative esta opção se você tiver forçado a substituição do instalador padrão por meio de um módulo Vector de terceiros. Isso desativa a verificação interna de status, e a página inicial permanecerá constantemente como “Ativado”</string>
+    <string name="setting_lsposed_module_title">Módulo LSPosed ativado</string>
+    <string name="setting_lsposed_module_desc">Ative esta opção se você tiver forçado a substituição do instalador padrão por meio de um módulo LSPosed de terceiros. Isso desativa a verificação interna de status, e a página inicial permanecerá constantemente como “Ativado”</string>
     <string name="home_stat_authorizers">Privilégios Disponíveis</string>
     <string name="home_stat_profiles">Perfis</string>
     <string name="home_label_lsp_link">Procurando um módulo?</string>

@@ -18,8 +18,8 @@
     <string name="working_status_none_authorizer_desc">不使用任何特殊权限，需要授予安装应用权限才能安装应用</string>
     <string name="working_status_not_default_installer_click_details">点击查看详情</string>
     <string name="working_status_default_installer_tip">将本应用设置为默认软件包安装程序，即可接管大多数应用的安装操作。请注意，以下情况无法被直接接管：\n- OEM 系统限制修改默认安装程序\n- 安装发起方指定了目标组件 (Component)\n- 安装发起方使用了安装会话 (Session Install)</string>
-    <string name="setting_lsposed_module_title">已启用 LSPosed 模块</string>
-    <string name="setting_lsposed_module_desc">若已通过第三方 LSPosed 模块强制接管了默认安装器，请开启此项以停用应用内的状态检测。启用后，首页将始终显示为“已激活”</string>
+    <string name="setting_lsposed_module_title">已启用 Xposed 模块</string>
+    <string name="setting_lsposed_module_desc">若已通过第三方 Xposed 模块强制接管了默认安装器，请开启此项以停用应用内的状态检测。启用后，首页将始终显示为“已激活”</string>
     <string name="home_stat_authorizers">可用特权</string>
     <string name="home_stat_profiles">配置数量</string>
     <string name="home_label_lsp_link">在寻找模块吗？</string>
@@ -213,6 +213,7 @@
     <string name="installer_settings_auto_clear_time_seconds_format">%d 秒</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">%d 秒后自动清理安装成功通知</string>
     <string name="basic">常规</string>
+    <string name="advanced">高级选项</string>
     <string name="network_settings">网络设置</string>
     <string name="network_settings_internet_access_enabled_desc">应用可以访问互联网</string>
     <string name="network_settings_internet_access_disabled_desc">应用无法访问互联网</string>

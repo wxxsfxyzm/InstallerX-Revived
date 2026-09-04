@@ -714,7 +714,7 @@
     <string name="working_status_none_authorizer_desc">Herhangi bir ayrıcalık kullanılmaz, Bilinmeyen Kaynaklar izni uygulamaları yüklemek için gereklidir</string>
     <string name="working_status_not_default_installer_click_details">Ayrıntıları görüntülemek için tıklayın</string>
     <string name="working_status_default_installer_tip">Bu uygulamayı varsayılan paket yükleyici olarak ayarlayarak çoğu yükleme isteğini devralmasını sağlayın. Aşağıdaki durumların engellenemeyeceğini unutmayın:\n- OEM\'in varsayılan yükleyicinin değiştirilmesini kısıtlaması\n- Başlatıcının bir hedef Bileşeni belirtmesi\n- Başlatıcının bir Oturum Yüklemesi kullanması</string>
-    <string name="setting_lsposed_module_title">Vector Modülü Etkinleştirildi</string>
+    <string name="setting_lsposed_module_title">LSPosed Modülü Etkinleştirildi</string>
     <string name="home_stat_authorizers">Mevcut Ayrıcalıklar</string>
     <string name="home_stat_profiles">Profiller</string>
     <string name="home_label_lsp_link">Modül mü arıyorsunuz?</string>
@@ -731,7 +731,7 @@
     <string name="home_device_info_default_installer">Varsayılan Yükleyici Etkinliği</string>
     <string name="priv_page_notice_title">Yükleme profilinden farkı</string>
     <string name="priv_page_notice_desc">Bu ayar, uygulamanın ayrıcalıklı işlemler için kullanacağı yetkilendiriciyi kontrol eder. Yükleme profilleri, uygulamaları yüklerken kullanılan yetkilendiriciyi kontrol eder ve bu amaçla bu genel ayarı geçersiz kılabilir.</string>
-    <string name="setting_lsposed_module_desc">Üçüncü taraf bir Vector modülü aracılığıyla varsayılan yükleyiciyi zorladıysanız bunu etkinleştirin. Bu, dahili durum kontrolünü devre dışı bırakır ve ana sayfa sürekli Etkin olarak görünür</string>
+    <string name="setting_lsposed_module_desc">Üçüncü taraf bir LSPosed modülü aracılığıyla varsayılan yükleyiciyi zorladıysanız bunu etkinleştirin. Bu, dahili durum kontrolünü devre dışı bırakır ve ana sayfa sürekli Etkin olarak görünür</string>
     <string name="priv_page_what_is_this_desc">Bu bölüm, bu uygulama için mevcut tüm yetkilendirme yöntemlerini algılar ve ayrıcalıklı işlemler için kullanılacak varsayılan yöntemi seçmenize olanak tanır. Burada yalnızca kullanılabilirlik kontrol edilir; gerekli izinler, uygulama gerçekten ihtiyaç duyduğunda talep edilecektir.</string>
     <string name="exception_initiator_not_visible">Paket görünürlük kısıtlamaları nedeniyle izin reddedildi. Yüklemeyi talep eden uygulama InstallerX\'ten gizlenmiştir. \'Hide My Applist\' gibi modüller kullanıyorsanız, lütfen InstallerX\'i izin verilenler listesine ekleyin</string>
     <string name="installer_settings_xposed_detection">Xposed Tespiti</string>

@@ -203,7 +203,7 @@ fun DefaultInstallerPage(useBlur: Boolean, viewModel: HomePageViewModel = koinVi
             if (!uiState.isSystemApp) {
                 item {
                     SegmentedColumn(
-                        title = stringResource(R.string.home_label_lsp),
+                        title = stringResource(R.string.advanced),
                     ) {
                         item {
                             SwitchWidget(

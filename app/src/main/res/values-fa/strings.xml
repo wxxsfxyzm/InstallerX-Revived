@@ -304,5 +304,5 @@
     <string name="history_status_failed">شکست</string>
     <string name="history_version_fresh_install">نصب تمیز (حذف و سپس نصب)</string>
     <string name="history_version_update">بروزرسانی</string>
-    <string name="setting_lsposed_module_title">ماژول Vector فعال است</string>
+    <string name="setting_lsposed_module_title">ماژول LSPosed فعال است</string>
 </resources>

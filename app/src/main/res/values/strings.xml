@@ -20,11 +20,10 @@
     <string name="working_status_none_authorizer_desc">Do not make use of any privilege, Unknown Sources permission is required to install apps</string>
     <string name="working_status_not_default_installer_click_details">Click to view details</string>
     <string name="working_status_default_installer_tip">Set this app as the default package installer to take over most installation requests. Note that the following cases cannot be intercepted:\n- OEM restricts modifying the default installer\n- The initiator specifies a target Component\n- The initiator uses a Session Install</string>
-    <string name="setting_lsposed_module_title">Vector Module Enabled</string>
-    <string name="setting_lsposed_module_desc">Enable this if you have forced the default installer takeover via a third-party Vector module. This disables internal status checking, and the home page will constantly show as Activated</string>
+    <string name="setting_lsposed_module_title">Xposed Module Enabled</string>
+    <string name="setting_lsposed_module_desc">Enable this if you have forced the default installer takeover via a third-party Xposed module. This disables internal status checking, and the home page will constantly show as "Activated"</string>
     <string name="home_stat_authorizers">Available Privileges</string>
     <string name="home_stat_profiles">Profiles</string>
-    <string name="home_label_lsp" translatable="false">LSPosed</string>
     <string name="home_label_lsp_link">Looking for a module?</string>
     <string name="home_lsp_inxlocker_title" translatable="false">InxLocker</string>
     <string name="shizuku_not_authorized">Please grant permission to access Sui or Shizuku</string>
@@ -221,6 +220,7 @@
     <string name="installer_settings_auto_clear_time_seconds_format">%d seconds</string>
     <string name="installer_settings_auto_clear_time_seconds_format_desc">Clear install success notification after %d seconds</string>
     <string name="basic">Basic</string>
+    <string name="advanced">Advanced</string>
     <string name="network_settings">Network settings</string>
     <string name="network_settings_internet_access_enabled_desc">The app can access the internet</string>
     <string name="network_settings_internet_access_disabled_desc">The app cannot access the internet</string>

@@ -12,7 +12,7 @@
     <string name="working_status_default_installer">Работи като изтегляч по подразбиране</string>
     <string name="working_status_not_default_installer">Не работи като изтегляч по подразбиране</string>
     <string name="working_status_not_default_installer_click_details">Натисни да видиш детайли</string>
-    <string name="setting_lsposed_module_title">Vector модул активиран</string>
+    <string name="setting_lsposed_module_title">LSPosed модул активиран</string>
     <string name="home_stat_authorizers">Налични Привилегии</string>
     <string name="home_stat_profiles">Профили</string>
     <string name="home_label_lsp_link">Търсиш модул?</string>
@@ -231,5 +231,5 @@
     <string name="history_package_name">Име на пакета</string>
     <string name="history_time">Време</string>
     <string name="working_status_default_installer_tip">Задай това приложение като инсталатор на пакети по подразбиране, за да поеме повечето заявки за инсталиране. Обърнu внимание, че следните случаи не могат да бъдат прехванати: \n- OEMите ограничават модифицирането на инсталатора по подразбиране \n- Инициаторът указва целеви компонент \n- Инициаторът използва Сесийна Инсталация</string>
-    <string name="setting_lsposed_module_desc">Активирай това, ако сu принудил инсталатора по подразбиране да поеме контрола чрез Vector модул от трета страна. Това деактивира вътрешната проверка на състоянието и началната страница постоянно ще се показва като Активирано</string>
+    <string name="setting_lsposed_module_desc">Активирай това, ако сu принудил инсталатора по подразбиране да поеме контрола чрез LSPosed модул от трета страна. Това деактивира вътрешната проверка на състоянието и началната страница постоянно ще се показва като Активирано</string>
 </resources>

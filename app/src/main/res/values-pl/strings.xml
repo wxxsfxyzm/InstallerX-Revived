@@ -99,7 +99,7 @@
     <string name="history_version_same">Ta sama wersja</string>
     <string name="installer_result_pending">Inna instalacja już trwa. Poczekaj na jej zakończenie, a wtedy spróbuj ponownie.</string>
     <string name="working_status_not_default_installer_click_details">Kliknij, aby zobaczyć szczegóły</string>
-    <string name="setting_lsposed_module_title">Moduł Vector włączony</string>
+    <string name="setting_lsposed_module_title">Moduł LSPosed włączony</string>
     <string name="history_package_name">Nazwa pakietu</string>
     <string name="history_time">Czas</string>
     <string name="history_version_change">Zmiana wersji</string>
@@ -184,7 +184,7 @@
     <string name="installer_settings_signature_check">Sprawdzanie podpisów</string>
     <string name="config_check_app_signature">Sprawdz podpisy aplikacji</string>
     <string name="working_status_default_installer_tip">Ustaw tę aplikację jako domyślny instalator pakietów, aby przejąć większość żądań instalacji. Należy pamiętać, że nie można przechwycić następujących przypadków:\n- Producent OEM ogranicza możliwość modyfikacji domyślnego instalatora\n- Inicjator określa komponent docelowy\n- Inicjator używa instalacji sesyjnej</string>
-    <string name="setting_lsposed_module_desc">Włącz tę opcję, jeśli wymusiłeś przejęcie domyślnego instalatora za pomocą zewnętrznego modułu Vector. Wyłączy to wewnętrzne sprawdzanie statusu, a strona główna będzie stale wyświetlana jako Aktywowana</string>
+    <string name="setting_lsposed_module_desc">Włącz tę opcję, jeśli wymusiłeś przejęcie domyślnego instalatora za pomocą zewnętrznego modułu LSPosed. Wyłączy to wewnętrzne sprawdzanie statusu, a strona główna będzie stale wyświetlana jako Aktywowana</string>
     <string name="config_check_app_signature_desc">Przed instalacją przeanalizuj sygnatury APK i porównaj je z zainstalowanymi aplikacjami</string>
     <string name="config_check_split_package_signatures">Analizuj sygnatury podzielonych pakietów</string>
     <string name="config_check_split_package_signatures_desc">Analyze APK podpisuje się w pakietach APKS, APKM i XAPK. Może to znacznie zwiększyć ilość czasu analizy</string>
