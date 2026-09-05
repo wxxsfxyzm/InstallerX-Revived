@@ -41,6 +41,7 @@ internal fun scaleNavTransition(exitDirection: PredictiveBackExitDirection): Nav
                         .coerceIn(0f, 1f)
 
                 scope.gesture != null -> 1f
+
                 else -> coverProgress(scope.relativeDepth)
             }
         },
@@ -102,8 +103,7 @@ internal fun scaleNavTransition(exitDirection: PredictiveBackExitDirection): Nav
     )
 }
 
-private fun shapedTopProgress(progress: Float, gesture: NavGesture?): Float =
-    if (gesture == null) progress else 1f - BackGestureEasing.transform((1f - progress).coerceIn(0f, 1f))
+private fun shapedTopProgress(progress: Float, gesture: NavGesture?): Float = if (gesture == null) progress else 1f - BackGestureEasing.transform((1f - progress).coerceIn(0f, 1f))
 
 private fun exitDirectionSign(
     direction: PredictiveBackExitDirection,
@@ -113,12 +113,12 @@ private fun exitDirectionSign(
         if (scope.gesture?.swipeEdge == NavSwipeEdge.Left) 1f else -1f
 
     PredictiveBackExitDirection.ALWAYS_RIGHT -> 1f
+
     PredictiveBackExitDirection.ALWAYS_LEFT -> -1f
 }
 
-private fun gesturePivotY(gesture: NavGesture?, height: Float): Float =
-    if (gesture != null && height > 0f) {
-        (gesture.touchY / height).coerceIn(0.1f, 0.9f)
-    } else {
-        0.5f
-    }
+private fun gesturePivotY(gesture: NavGesture?, height: Float): Float = if (gesture != null && height > 0f) {
+    (gesture.touchY / height).coerceIn(0.1f, 0.9f)
+} else {
+    0.5f
+}
