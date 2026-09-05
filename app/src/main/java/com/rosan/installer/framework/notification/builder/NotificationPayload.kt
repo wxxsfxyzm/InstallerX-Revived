@@ -14,6 +14,7 @@ data class InstallState(val progress: ProgressEntity, val background: Boolean, v
 
 data class UserSettings(
     val showDialog: Boolean,
+    val successAutoClearSeconds: Int,
     val preferSystemIcon: Boolean,
     val preferDynamicColor: Boolean,
     val miIslandOuterGlow: Boolean,

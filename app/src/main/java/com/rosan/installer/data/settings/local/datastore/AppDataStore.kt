@@ -75,6 +75,11 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
         val SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS =
             register(intPreferencesKey("show_mi_island_blocking_interval"), PreferenceValueType.INT)
 
+        // Show Vivo Island
+        val SHOW_VIVO_ISLAND = register(booleanPreferencesKey("show_vivo_island"), PreferenceValueType.BOOLEAN)
+        val SHOW_VIVO_ISLAND_BYPASS_RESTRICTION =
+            register(booleanPreferencesKey("show_vivo_island_bypass_restriction"), PreferenceValueType.BOOLEAN)
+
         // Use Biometric Auth Install
         val INSTALLER_REQUIRE_BIOMETRIC_AUTH =
             register(stringPreferencesKey("installer_require_biometric_auth_mode"), PreferenceValueType.STRING)

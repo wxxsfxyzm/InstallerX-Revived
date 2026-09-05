@@ -85,6 +85,8 @@ class AppSettingsRepositoryImpl(
             useMiIslandBypassRestriction = prefs[AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION] ?: false,
             useMiIslandOuterGlow = prefs[AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW] ?: true,
             useMiIslandBlockingIntervalMs = prefs[AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS] ?: 100,
+            useVivoIsland = prefs[AppDataStore.SHOW_VIVO_ISLAND] ?: false,
+            useVivoIslandBypassRestriction = prefs[AppDataStore.SHOW_VIVO_ISLAND_BYPASS_RESTRICTION] ?: false,
             autoSilentInstall = prefs[AppDataStore.DIALOG_AUTO_SILENT_INSTALL] ?: false,
             longClickBackgroundInstall = prefs[AppDataStore.DIALOG_LONG_CLICK_BACKGROUND_INSTALL] ?: true,
             tryMultipleAuthorizersOnInstall = prefs[AppDataStore.TRY_MULTIPLE_AUTHORIZERS_ON_INSTALL] ?: false,
@@ -266,6 +268,10 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.ShowMiIslandBypassRestriction -> AppDataStore.SHOW_MI_ISLAND_BYPASS_RESTRICTION
 
         BooleanSetting.ShowMiIslandOuterGlow -> AppDataStore.SHOW_MI_ISLAND_OUTER_GLOW
+
+        BooleanSetting.ShowVivoIsland -> AppDataStore.SHOW_VIVO_ISLAND
+
+        BooleanSetting.ShowVivoIslandBypassRestriction -> AppDataStore.SHOW_VIVO_ISLAND_BYPASS_RESTRICTION
 
         BooleanSetting.AlwaysUseRootInSystem -> AppDataStore.ALWAYS_USE_ROOT_IN_SYSTEM
 

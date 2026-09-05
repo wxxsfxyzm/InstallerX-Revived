@@ -32,4 +32,11 @@ interface IPrivilegedService {
      */
     Bundle parsePackageArchive(String path);
 
+    /**
+     * Registers an OriginOS SuperX scene for an application package.
+     *
+     * @return true when the system service accepts the scene for the package.
+     */
+    boolean registerVivoIslandScene(String scene, String packageName);
+
 }
