@@ -11,7 +11,7 @@
 agp = "9.4.0"
 biometric = "1.4.0-alpha07"
 focusApi = "1.4"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 kotlinxCoroutines = "1.11.0"
 ksp = "2.3.11"
 composeBom = "2026.08.00"
