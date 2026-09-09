@@ -14,6 +14,8 @@ import com.rosan.installer.framework.privileged.core.execution.authorization.req
 import com.rosan.installer.framework.privileged.core.execution.dispatcher.useUserService
 import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_ROOT
 import com.rosan.installer.framework.privileged.core.infrastructure.process.SU_ARGS
+import java.io.StringReader
+import java.util.Properties
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,7 +59,7 @@ class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapa
             null
         }
 
-        output?.let { parseModuleList(it) }.orEmpty()
+        output?.let { parseModuleList(rootMode, it) }.orEmpty()
     }
 
     private fun moduleListCommand(rootMode: RootMode): Array<String>? = when (rootMode) {
@@ -65,9 +67,9 @@ class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapa
 
         RootMode.APatch -> arrayOf("apd", "module", "list")
 
-        RootMode.Magisk,
-        RootMode.None,
-        -> null
+        RootMode.Magisk -> arrayOf("sh", "-c", MAGISK_MODULE_LIST_SCRIPT)
+
+        RootMode.None -> null
     }
 
     private fun executeLocal(config: ConfigModel, command: Array<String>): String? {
@@ -104,7 +106,16 @@ class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapa
         return result
     }
 
-    private fun parseModuleList(raw: String): List<InstalledModuleInfo> = try {
+    private fun parseModuleList(rootMode: RootMode, raw: String): List<InstalledModuleInfo> = when (rootMode) {
+        RootMode.Magisk -> parseMagiskModuleList(raw)
+        RootMode.KernelSU,
+        RootMode.APatch,
+        -> parseJsonModuleList(raw)
+
+        RootMode.None -> emptyList()
+    }
+
+    private fun parseJsonModuleList(raw: String): List<InstalledModuleInfo> = try {
         json.decodeFromString<List<InstalledModuleInfoDto>>(raw)
             .mapNotNull { it.toDomain() }
     } catch (e: CancellationException) {
@@ -112,6 +123,43 @@ class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapa
     } catch (e: Exception) {
         Timber.d(e, "Failed to parse module list")
         emptyList()
+    }
+
+    companion object {
+        private const val MAGISK_MODULE_RECORD_SEPARATOR = '\u001e'
+        private const val MAGISK_MODULE_LIST_SCRIPT =
+            "for prop in /data/adb/modules/*/module.prop; do " +
+                "[ -f \"\$prop\" ] || continue; " +
+                "printf '\\036'; cat \"\$prop\"; " +
+                "done"
+
+        internal fun parseMagiskModuleList(raw: String): List<InstalledModuleInfo> =
+            raw.split(MAGISK_MODULE_RECORD_SEPARATOR)
+                .mapNotNull(::parseMagiskModuleProperties)
+
+        private fun parseMagiskModuleProperties(raw: String): InstalledModuleInfo? {
+            if (raw.isBlank()) return null
+
+            val properties = try {
+                Properties().apply {
+                    load(StringReader(raw.removePrefix("\uFEFF")))
+                }
+            } catch (e: Exception) {
+                Timber.d(e, "Failed to parse Magisk module.prop")
+                return null
+            }
+
+            val id = properties.getProperty("id")?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+            return InstalledModuleInfo(
+                id = id,
+                name = properties.getProperty("name")?.trim(),
+                version = properties.getProperty("version")?.trim(),
+                versionCode = properties.getProperty("versionCode")?.trim()?.toLongOrNull(),
+                author = properties.getProperty("author")?.trim(),
+                description = properties.getProperty("description")?.trim(),
+                updateJson = properties.getProperty("updateJson")?.trim(),
+            )
+        }
     }
 
     @Serializable
