@@ -64,11 +64,8 @@ class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapa
 
     private fun moduleListCommand(rootMode: RootMode): Array<String>? = when (rootMode) {
         RootMode.KernelSU -> arrayOf("ksud", "module", "list")
-
         RootMode.APatch -> arrayOf("apd", "module", "list")
-
         RootMode.Magisk -> arrayOf("sh", "-c", MAGISK_MODULE_LIST_SCRIPT)
-
         RootMode.None -> null
     }
 
@@ -108,6 +105,7 @@ class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapa
 
     private fun parseModuleList(rootMode: RootMode, raw: String): List<InstalledModuleInfo> = when (rootMode) {
         RootMode.Magisk -> parseMagiskModuleList(raw)
+
         RootMode.KernelSU,
         RootMode.APatch,
         -> parseJsonModuleList(raw)
@@ -133,9 +131,8 @@ class InstalledModuleInfoProviderImpl(private val capabilityProvider: DeviceCapa
                 "printf '\\036'; cat \"\$prop\"; " +
                 "done"
 
-        internal fun parseMagiskModuleList(raw: String): List<InstalledModuleInfo> =
-            raw.split(MAGISK_MODULE_RECORD_SEPARATOR)
-                .mapNotNull(::parseMagiskModuleProperties)
+        internal fun parseMagiskModuleList(raw: String): List<InstalledModuleInfo> = raw.split(MAGISK_MODULE_RECORD_SEPARATOR)
+            .mapNotNull(::parseMagiskModuleProperties)
 
         private fun parseMagiskModuleProperties(raw: String): InstalledModuleInfo? {
             if (raw.isBlank()) return null

@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -69,6 +70,12 @@ fun IntNumberPickerWidget(
     } else {
         0
     }
+    val trackRange = startInt.toFloat()..endInt.toFloat()
+    val sliderState = remember(stepsCount, trackRange) {
+        SliderState(value = value.toFloat(), steps = stepsCount, trackRange = trackRange)
+    }
+    // Keep the hoisted value authoritative, as in Material 3's value-based Slider.
+    sliderState.value = value.toFloat()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -109,9 +116,9 @@ fun IntNumberPickerWidget(
             modifier = Modifier.padding(start = 56.dp, end = 36.dp),
         ) {
             Slider(
-                value = value.toFloat(),
-                onValueChange = {
-                    val intValue = it.roundToInt()
+                state = sliderState,
+                onValueChange = { newValue: Float ->
+                    val intValue = newValue.roundToInt()
                     if (intValue != lastIntValue) {
                         if (stepSize == 0) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -122,12 +129,9 @@ fun IntNumberPickerWidget(
                         onValueChange(intValue)
                     }
                 },
-                valueRange = startInt.toFloat()..endInt.toFloat(),
-                steps = stepsCount, // Apply the dynamically calculated steps
                 enabled = enabled,
                 modifier = Modifier.weight(1f),
                 interactionSource = interactionSource,
-                // Highly customized thumb slot for seamless visual experience
                 thumb = {
                     TooltipSliderThumbDefinitive(
                         interactionSource = interactionSource,
