@@ -960,4 +960,9 @@
     <string name="history_disable_and_clear">Очистити та вимкнути</string>
     <string name="history_disable_and_keep">Залишити та вимкнути</string>
     <string name="history_version_self_update">Самооновлення</string>
+    <string name="backup_settings_validation_duplicate_unknown_scope">Дублювати невідому область.</string>
+    <string name="config_scope_unknown">Невідомо</string>
+    <string name="config_scope_apps">Додатки</string>
+    <string name="config_scope_unknown_group">Невідома область</string>
+    <string name="sort_by_show_unknown_scope">Показати невідому область</string>
 </resources>

@@ -960,4 +960,9 @@
     <string name="exception_analyse_failed_streaming_source_unsupported">Esta fonte não pode ser analisada no modo “Armazenamento reduzido”. Escolha o modo “Inteligente” ou “Completo”.</string>
     <string name="exception_analyse_failed_source_materialization">Não foi possível baixar o código-fonte completo para análise</string>
     <string name="config_allow_sig_unknown_http_lightweight_desc">Durante a análise HTTP simplificada, qualquer anomalia na assinatura é avaliada de acordo com essa configuração.</string>
+    <string name="backup_settings_validation_duplicate_unknown_scope">Escopo Desconhecido duplicado.</string>
+    <string name="config_scope_unknown">Desconhecido</string>
+    <string name="config_scope_apps">Apps</string>
+    <string name="config_scope_unknown_group">Escopo desconhecido</string>
+    <string name="sort_by_show_unknown_scope">Mostrar escopo desconhecido</string>
 </resources>
