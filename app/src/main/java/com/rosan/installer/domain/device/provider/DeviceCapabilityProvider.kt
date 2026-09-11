@@ -15,6 +15,7 @@ interface DeviceCapabilityProvider {
     val isHyperOS: Boolean
     val isMIUI: Boolean
     val isSupportMiIsland: Boolean
+    val isSupportVivoIsland: Boolean
     val oplusOSdkVersion: String?
 
     val deviceName: String

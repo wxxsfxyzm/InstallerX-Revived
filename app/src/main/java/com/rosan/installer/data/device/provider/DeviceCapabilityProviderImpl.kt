@@ -41,6 +41,10 @@ class DeviceCapabilityProviderImpl(private val context: Context, private val ref
 
         private const val KEY_MIUI_VERSION_NAME = "ro.miui.ui.version.name"
         private const val KEY_MI_OS_VERSION_NAME = "ro.mi.os.version.name"
+        private const val KEY_VIVO_OS_VERSION = "ro.vivo.os.version"
+        private const val KEY_VIVO_SUPPORT_ISLAND = "vivo.support.island"
+        private const val KEY_VIVO_SUPERX_ENABLED = "persist.vivo.superx_enabled"
+        private const val VIVO_ISLAND_DISABLED_FEATURE = "vivo.software.disable_island"
         private const val KEY_OPLUS_API = "ro.build.version.oplus.api"
         private const val KEY_OPLUS_SUB_API = "ro.build.version.oplus.sub_api"
 
@@ -123,6 +127,41 @@ class DeviceCapabilityProviderImpl(private val context: Context, private val ref
             false
         }
     }
+
+    override val isSupportVivoIsland: Boolean by lazy {
+        val vivoOsVersion = getSystemProperty(KEY_VIVO_OS_VERSION)
+        val isVivoDevice = !vivoOsVersion.isNullOrEmpty()
+        val islandEnabled = getSystemProperty(KEY_VIVO_SUPPORT_ISLAND, "true") == "true"
+        val superXEnabled = getSystemPropertyBoolean(KEY_VIVO_SUPERX_ENABLED, true)
+        val islandDisabled = isVivoFeatureSupported(VIVO_ISLAND_DISABLED_FEATURE)
+        Timber.d(
+            "vivo island capability: manufacturer=${DeviceConfig.manufacturer}, " +
+                "brand=${DeviceConfig.brand}, osVersion=$vivoOsVersion, device=$isVivoDevice, " +
+                "island=$islandEnabled, islandDisabled=$islandDisabled, superX=$superXEnabled",
+        )
+        isVivoDevice &&
+            islandEnabled &&
+            !islandDisabled &&
+            superXEnabled
+    }
+
+    private fun getSystemPropertyBoolean(key: String, defaultValue: Boolean): Boolean = runCatching {
+        SystemProperties.getBoolean(key, defaultValue)
+    }.getOrElse {
+        getSystemProperty(key, defaultValue.toString()) == "true"
+    }
+
+    private fun isVivoFeatureSupported(feature: String): Boolean = runCatching {
+        val ftFeature = Class.forName("android.util.FtFeature")
+        reflect.invokeStatic<Boolean>(
+            "isFeatureSupport",
+            ftFeature,
+            arrayOf(String::class.java),
+            feature,
+        ) == true
+    }.onFailure {
+        Timber.d(it, "Failed to query vivo feature: $feature")
+    }.getOrDefault(false)
 
     override val oplusOSdkVersion: String? by lazy {
         val api = getSystemProperty(KEY_OPLUS_API)

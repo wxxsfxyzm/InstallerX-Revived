@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 22026 InstallerX Revived contributors
+// Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.settings.preferred.installer.notification
 
 sealed interface NotificationSettingsAction {
@@ -9,4 +9,5 @@ sealed interface NotificationSettingsAction {
     data class ChangeMiIslandBypassRestriction(val bypass: Boolean) : NotificationSettingsAction
     data class ChangeMiIslandOuterGlow(val glow: Boolean) : NotificationSettingsAction
     data class ChangeMiIslandBlockingInterval(val ms: Int) : NotificationSettingsAction
+    data class ChangeVivoIslandBypassRestriction(val bypass: Boolean) : NotificationSettingsAction
 }

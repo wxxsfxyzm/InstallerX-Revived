@@ -62,11 +62,13 @@ fun NotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSettingsVi
 
     val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
     val isMiIslandSupported = capabilityProvider.isSupportMiIsland
+    val isVivoIslandSupported = capabilityProvider.isSupportVivoIsland
 
-    val styleOptions = remember(isModernEligible, isMiIslandSupported) {
+    val styleOptions = remember(isModernEligible, isMiIslandSupported, isVivoIslandSupported) {
         val list = mutableListOf(NotificationStyle.STANDARD)
         if (isModernEligible) list.add(NotificationStyle.LIVE_ACTIVITY)
         if (isMiIslandSupported) list.add(NotificationStyle.MI_ISLAND)
+        if (isVivoIslandSupported) list.add(NotificationStyle.VIVO_ISLAND)
         list
     }
 
@@ -75,6 +77,7 @@ fun NotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSettingsVi
             NotificationStyle.STANDARD -> stringResource(R.string.notification_style_standard)
             NotificationStyle.LIVE_ACTIVITY -> stringResource(R.string.notification_style_live_activity)
             NotificationStyle.MI_ISLAND -> stringResource(R.string.notification_style_mi_island)
+            NotificationStyle.VIVO_ISLAND -> stringResource(R.string.notification_style_vivo_island)
         }
     }
 
@@ -125,7 +128,7 @@ fun NotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSettingsVi
                     title = stringResource(R.string.notification_style),
                 ) {
                     item {
-                        val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported
+                        val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported || isVivoIslandSupported
                         DropDownMenuWidget(
                             icon = AppIcons.Palette,
                             title = stringResource(R.string.notification_style),
@@ -194,6 +197,19 @@ fun NotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSettingsVi
                                     NotificationSettingsAction.ChangeMiIslandOuterGlow(
                                         it,
                                     ),
+                                )
+                            },
+                        )
+                    }
+                    item(animatedVisibility = activeStyle == NotificationStyle.VIVO_ISLAND) {
+                        SwitchWidget(
+                            icon = AppIcons.Bypass,
+                            title = stringResource(id = R.string.lab_vivo_island_bypass_restriction),
+                            description = stringResource(id = R.string.lab_vivo_island_bypass_restriction_desc),
+                            checked = uiState.vivoIslandBypassRestriction,
+                            onCheckedChange = {
+                                viewModel.dispatch(
+                                    NotificationSettingsAction.ChangeVivoIslandBypassRestriction(it),
                                 )
                             },
                         )
