@@ -975,4 +975,5 @@
     <string name="sort_by_show_unknown_scope">Mostrar ámbito desconocido</string>
     <string name="config_scope_unknown_group">Ámbito desconocido</string>
     <string name="backup_settings_validation_duplicate_unknown_scope">Ámbito desconocido duplicado.</string>
+    <string name="advanced">Avanzado</string>
 </resources>
