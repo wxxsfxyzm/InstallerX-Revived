@@ -5,6 +5,7 @@ package com.rosan.installer.data.engine.parser
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.requireSupportedZipCompressionMethod
 import java.io.File
+import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.nio.channels.FileChannel
@@ -42,7 +43,10 @@ internal class CommonsZipFileProvider {
     fun openEntry(zipFile: ZipFile, entry: ZipArchiveEntry): InputStream {
         validateEntry(entry)
         return synchronized(zipFile) {
-            zipFile.getInputStream(entry)
+            // With lazy local headers, opening another entry seeks the same channel used by
+            // active payload streams. Commons locks payload reads on the channel, but does not
+            // use that lock for header resolution. Guard both operations with our archive lock.
+            LockedEntryInputStream(zipFile.getInputStream(entry), zipFile)
         }
     }
 
@@ -108,5 +112,28 @@ internal class CommonsZipFileProvider {
 
     private companion object {
         val ZIP_FALLBACK_CHARSET: Charset = Charset.forName("Cp437")
+    }
+
+    private class LockedEntryInputStream(
+        input: InputStream,
+        private val archiveLock: ZipFile,
+    ) : FilterInputStream(input) {
+        override fun read(): Int = synchronized(archiveLock) { `in`.read() }
+
+        override fun read(buffer: ByteArray): Int = read(buffer, 0, buffer.size)
+
+        override fun read(buffer: ByteArray, offset: Int, length: Int): Int = synchronized(archiveLock) {
+            `in`.read(buffer, offset, length)
+        }
+
+        override fun skip(count: Long): Long = synchronized(archiveLock) { `in`.skip(count) }
+
+        override fun available(): Int = synchronized(archiveLock) { `in`.available() }
+
+        override fun mark(readlimit: Int) = synchronized(archiveLock) { `in`.mark(readlimit) }
+
+        override fun reset() = synchronized(archiveLock) { `in`.reset() }
+
+        override fun close() = synchronized(archiveLock) { `in`.close() }
     }
 }

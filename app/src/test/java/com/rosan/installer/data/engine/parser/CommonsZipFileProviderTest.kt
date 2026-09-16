@@ -7,8 +7,16 @@ import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
+import java.nio.channels.SeekableByteChannel
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.StandardOpenOption
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -68,6 +76,169 @@ class CommonsZipFileProviderTest {
             requireNotNull(entity.getInputStream()).use { it.readBytes() },
         )
         assertEquals(splitPayload.size.toLong(), entity.getSize())
+    }
+
+    @Test
+    fun `reading an entry while opening another preserves both payloads`() {
+        assertConcurrentEntryAccess(resolveRange = false)
+    }
+
+    @Test
+    fun `reading an entry while resolving another data range preserves both payloads`() {
+        assertConcurrentEntryAccess(resolveRange = true)
+    }
+
+    @Test
+    fun `many mixed compression entries retain their contents during concurrent reads`() {
+        for (entryCount in listOf(3, 16, 64)) {
+            val payloads = List(entryCount) { index ->
+                ByteArray(65536 + index * 31).also { java.util.Random(index.toLong()).nextBytes(it) }
+            }
+            val names = List(entryCount) { index ->
+                when (index) {
+                    0 -> "module.prop"
+                    1 -> "launcher.png"
+                    else -> "app-$index.apk"
+                }
+            }
+            val file = File(tempDirectory, "parallel-$entryCount.zip")
+            ZipOutputStream(file.outputStream()).use { output ->
+                payloads.forEachIndexed { index, payload ->
+                    val entry = ZipEntry(names[index])
+                    if (index % 2 == 0) {
+                        entry.method = ZipEntry.STORED
+                        entry.size = payload.size.toLong()
+                        entry.compressedSize = payload.size.toLong()
+                        entry.crc = CRC32().apply { update(payload) }.value
+                    }
+                    output.putNextEntry(entry)
+                    output.write(payload)
+                    output.closeEntry()
+                }
+            }
+
+            val source = object : DataEntity.FileEntity(file.path) {
+                override fun openChannel(): SeekableByteChannel {
+                    val delegate = FileChannel.open(file.toPath(), StandardOpenOption.READ)
+                    return object : SeekableByteChannel by delegate {
+                        override fun position(newPosition: Long): SeekableByteChannel {
+                            delegate.position(newPosition)
+                            Thread.yield()
+                            return this
+                        }
+                    }
+                }
+            }
+
+            // Fresh metadata views retain unresolved headers in every round.
+            repeat(3) {
+                provider.openMetadata(source).use { archive ->
+                    val workers = minOf(entryCount, 16)
+                    val ready = CountDownLatch(workers)
+                    val start = CountDownLatch(1)
+                    val executor = Executors.newFixedThreadPool(workers)
+                    try {
+                        val results = names.mapIndexed { index, name ->
+                            executor.submit<ByteArray> {
+                                ready.countDown()
+                                check(start.await(5, TimeUnit.SECONDS))
+                                val entry = requireNotNull(archive.getEntry(name))
+                                if (index % 2 == 0) {
+                                    assertEquals(payloads[index].size.toLong(), provider.resolveStoredDataRange(archive, entry)?.length)
+                                } else {
+                                    assertEquals(entry.compressedSize, provider.resolveDataRange(archive, entry)?.length)
+                                }
+                                provider.openEntry(archive, entry).use { input ->
+                                    ByteArrayOutputStream().also { output ->
+                                        input.copyTo(output, bufferSize = 257 + index * 7)
+                                    }.toByteArray()
+                                }
+                            }
+                        }
+                        assertTrue(ready.await(5, TimeUnit.SECONDS))
+                        start.countDown()
+                        results.forEachIndexed { index, result ->
+                            assertContentEquals(payloads[index], result.get(10, TimeUnit.SECONDS), "entries=$entryCount, name=${names[index]}")
+                        }
+                    } finally {
+                        start.countDown()
+                        executor.shutdownNow()
+                        assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun assertConcurrentEntryAccess(resolveRange: Boolean) {
+        val daemon = ByteArray(65536).also { java.util.Random(1).nextBytes(it) }
+        val manager = ByteArray(65536).also { java.util.Random(2).nextBytes(it) }
+        val file = File(tempDirectory, "parallel.zip")
+        ZipOutputStream(file.outputStream()).use { output ->
+            output.writeEntry("daemon.apk", daemon)
+            output.writeEntry("manager.apk", manager)
+        }
+
+        val pauseNextRead = AtomicBoolean(false)
+        val payloadReadStarted = CountDownLatch(1)
+        val resumePayloadRead = CountDownLatch(1)
+        val metadataStarted = CountDownLatch(1)
+        val metadataSeekDuringRead = CountDownLatch(1)
+        val source = object : DataEntity.FileEntity(file.path) {
+            override fun openChannel(): SeekableByteChannel {
+                val delegate = FileChannel.open(file.toPath(), StandardOpenOption.READ)
+                // Content-provider and HTTP sources expose a generic seekable channel, not a
+                // FileChannel. Exercise Commons' seek + read path used for those sources.
+                return object : SeekableByteChannel by delegate {
+                    override fun position(newPosition: Long): SeekableByteChannel {
+                        if (payloadReadStarted.count == 0L && resumePayloadRead.count != 0L) {
+                            metadataSeekDuringRead.countDown()
+                        }
+                        delegate.position(newPosition)
+                        return this
+                    }
+
+                    override fun read(dst: ByteBuffer): Int {
+                        if (pauseNextRead.compareAndSet(true, false)) {
+                            payloadReadStarted.countDown()
+                            check(resumePayloadRead.await(5, TimeUnit.SECONDS))
+                        }
+                        return delegate.read(dst)
+                    }
+                }
+            }
+        }
+
+        provider.openMetadata(source).use { archive ->
+            val daemonEntry = requireNotNull(archive.getEntry("daemon.apk"))
+            val managerEntry = requireNotNull(archive.getEntry("manager.apk"))
+            provider.openEntry(archive, daemonEntry).use { daemonStream ->
+                val executor = Executors.newFixedThreadPool(2)
+                try {
+                    pauseNextRead.set(true)
+                    val daemonResult = executor.submit<ByteArray> { daemonStream.readBytes() }
+                    assertTrue(payloadReadStarted.await(5, TimeUnit.SECONDS))
+                    val managerResult = executor.submit<ByteArray> {
+                        metadataStarted.countDown()
+                        if (resolveRange) {
+                            assertEquals(managerEntry.compressedSize, provider.resolveDataRange(archive, managerEntry)?.length)
+                        }
+                        provider.openEntry(archive, managerEntry).use { it.readBytes() }
+                    }
+                    assertTrue(metadataStarted.await(5, TimeUnit.SECONDS))
+                    // Give lazy header resolution an opportunity to seek while the payload read
+                    // is paused. Correct synchronization blocks that seek until we release it.
+                    metadataSeekDuringRead.await(200, TimeUnit.MILLISECONDS)
+                    resumePayloadRead.countDown()
+                    assertContentEquals(daemon, daemonResult.get(5, TimeUnit.SECONDS))
+                    assertContentEquals(manager, managerResult.get(5, TimeUnit.SECONDS))
+                } finally {
+                    resumePayloadRead.countDown()
+                    executor.shutdownNow()
+                    assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS))
+                }
+            }
+        }
     }
 
     @Test
