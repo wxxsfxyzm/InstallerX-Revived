@@ -84,10 +84,11 @@ fun installChoiceDialog(
     var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
     val apkChooseAll = config.apkChooseAll
 
-    val allSelectedEntities = analysisResults.flatMap { it.appEntities }.filter { it.selected }
+    val allEntities = remember(analysisResults) { analysisResults.flatMap { it.appEntities } }
+    val allSelectedEntities = allEntities.filter { it.selected }
     val selectedModuleCount = allSelectedEntities.count { it.app is AppEntity.ModuleEntity }
     val selectedAppCount = allSelectedEntities.count { it.app !is AppEntity.ModuleEntity }
-    val totalModuleCount = analysisResults.flatMap { it.appEntities }.count { it.app is AppEntity.ModuleEntity }
+    val totalModuleCount = allEntities.count { it.app is AppEntity.ModuleEntity }
 
     val isMixedError = selectedModuleCount > 0 && selectedAppCount > 0
     val isMultiModuleError = selectedModuleCount > 1
@@ -113,17 +114,7 @@ fun installChoiceDialog(
 
     val cancelOrBackAction: () -> Unit = {
         if (isMmzBack) {
-            analysisResults.flatMap { it.appEntities }
-                .filter { it.selected && it.app !is AppEntity.ModuleEntity }
-                .forEach { entity ->
-                    viewModel.dispatch(
-                        InstallerViewAction.ToggleSelection(
-                            packageName = entity.app.packageName,
-                            entity = entity,
-                            isMultiSelect = true,
-                        ),
-                    )
-                }
+            viewModel.dispatch(InstallerViewAction.SetApkSelection(false))
             selectionMode = MmzSelectionMode.INITIAL_CHOICE
         } else {
             viewModel.dispatch(InstallerViewAction.Close)
@@ -138,7 +129,17 @@ fun installChoiceDialog(
         content = DialogInnerParams(DialogParamsType.InstallChoice.id) {
             ChoiceContent(
                 analysisResults = analysisResults,
-                viewModel = viewModel,
+                allSelectableEntities = allEntities,
+                onSelectMixedModuleType = { installAsModule ->
+                    viewModel.dispatch(InstallerViewAction.SelectMixedModuleType(installAsModule))
+                },
+                onToggleSelection = { packageName, entity, isMultiSelect ->
+                    viewModel.dispatch(InstallerViewAction.ToggleSelection(packageName, entity, isMultiSelect))
+                },
+                onTogglePackageSelection = { packageName, entity ->
+                    viewModel.dispatch(InstallerViewAction.TogglePackageSelection(packageName, entity))
+                },
+                onSelectAllApks = { viewModel.dispatch(InstallerViewAction.SetApkSelection(true)) },
                 isModuleApk = isModuleApk,
                 isMultiApk = isMultiApk,
                 isMixedModuleZip = isMixedModuleZip,
@@ -154,7 +155,7 @@ fun installChoiceDialog(
                 if ((!isModuleApk && !isMixedModuleZip) ||
                     (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE)
                 ) {
-                    add(DialogButton(stringResource(primaryButtonText), onClick = primaryButtonAction))
+                    add(DialogButton(stringResource(primaryButtonText), enabled = isPrimaryActionEnabled, onClick = primaryButtonAction))
                 }
                 add(DialogButton(stringResource(cancelOrBackText), onClick = cancelOrBackAction))
             }
@@ -165,8 +166,12 @@ fun installChoiceDialog(
 @Composable
 private fun ChoiceContent(
     analysisResults: List<PackageAnalysisResult>,
-    viewModel: InstallerViewModel,
-    isModuleApk: Boolean = false,
+    allSelectableEntities: List<SelectInstallEntity>,
+    onSelectMixedModuleType: (Boolean) -> Unit,
+    onSelectAllApks: () -> Unit,
+    onToggleSelection: (String, SelectInstallEntity, Boolean) -> Unit,
+    onTogglePackageSelection: (String, SelectInstallEntity) -> Unit,
+    isModuleApk: Boolean,
     isMultiApk: Boolean,
     isMixedModuleZip: Boolean,
     apkChooseAll: Boolean,
@@ -174,8 +179,9 @@ private fun ChoiceContent(
     onSetSelectionMode: (MmzSelectionMode) -> Unit,
     errorMessage: String?,
     totalModuleCount: Int,
+    modifier: Modifier = Modifier,
 ) {
-    Column {
+    Column(modifier = modifier) {
         AnimatedVisibility(visible = errorMessage != null) {
             InfoTipCard(
                 text = errorMessage ?: "",
@@ -184,7 +190,6 @@ private fun ChoiceContent(
             )
         }
         if (isModuleApk) {
-            val allSelectableEntities = analysisResults.flatMap { it.appEntities }
             val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
             val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
 
@@ -197,9 +202,7 @@ private fun ChoiceContent(
                             title = baseEntityInfo.label ?: "N/A",
                             description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
                             onClick = {
-                                viewModel.dispatch(
-                                    InstallerViewAction.SelectMixedModuleType(installAsModule = false),
-                                )
+                                onSelectMixedModuleType(false)
                             },
                         )
                     }
@@ -212,16 +215,13 @@ private fun ChoiceContent(
                             title = moduleEntityInfo.name,
                             description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                             onClick = {
-                                viewModel.dispatch(
-                                    InstallerViewAction.SelectMixedModuleType(installAsModule = true),
-                                )
+                                onSelectMixedModuleType(true)
                             },
                         )
                     }
                 }
             }
         } else if (isMixedModuleZip && selectionMode == MmzSelectionMode.INITIAL_CHOICE && totalModuleCount == 1) {
-            val allSelectableEntities = analysisResults.flatMap { it.appEntities }
             val moduleSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.ModuleEntity }
             val baseSelectableEntity = allSelectableEntities.firstOrNull { it.app is AppEntity.BaseEntity }
 
@@ -234,9 +234,7 @@ private fun ChoiceContent(
                             title = stringResource(R.string.installer_choice_install_as_module),
                             description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                             onClick = {
-                                viewModel.dispatch(
-                                    InstallerViewAction.SelectMixedModuleType(installAsModule = true),
-                                )
+                                onSelectMixedModuleType(true)
                             },
                         )
                     }
@@ -249,17 +247,7 @@ private fun ChoiceContent(
                             description = stringResource(R.string.installer_choice_install_as_app_desc),
                             onClick = {
                                 if (apkChooseAll) {
-                                    analysisResults.flatMap { it.appEntities }
-                                        .filter { it.app !is AppEntity.ModuleEntity && !it.selected }
-                                        .forEach { entity ->
-                                            viewModel.dispatch(
-                                                InstallerViewAction.ToggleSelection(
-                                                    packageName = entity.app.packageName,
-                                                    entity = entity,
-                                                    isMultiSelect = true,
-                                                ),
-                                            )
-                                        }
+                                    onSelectAllApks()
                                 }
                                 onSetSelectionMode(MmzSelectionMode.APK_CHOICE)
                             },
@@ -301,7 +289,9 @@ private fun ChoiceContent(
                     }
                     MultiApkGroupCard(
                         packageResult = packageResult,
-                        viewModel = viewModel,
+                        onToggleSelection = onToggleSelection,
+                        onTogglePackageSelection = onTogglePackageSelection,
+                        modifier = Modifier.fillMaxWidth(),
                         shape = shape,
                     )
                 }
@@ -339,7 +329,7 @@ private fun ChoiceContent(
                             text = groupTitle,
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 0.dp, bottom = 0.dp, start = 16.dp),
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
 
@@ -354,14 +344,9 @@ private fun ChoiceContent(
                         SingleItemCard(
                             item = item,
                             shape = shape,
+                            modifier = Modifier.fillMaxWidth(),
                             onClick = {
-                                viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
-                                        packageName = item.app.packageName,
-                                        entity = item,
-                                        isMultiSelect = true,
-                                    ),
-                                )
+                                onToggleSelection(item.app.packageName, item, true)
                             },
                         )
                     }
@@ -375,12 +360,14 @@ private fun ChoiceContent(
 @Composable
 private fun MultiApkGroupCard(
     packageResult: PackageAnalysisResult,
-    viewModel: InstallerViewModel,
+    onToggleSelection: (String, SelectInstallEntity, Boolean) -> Unit,
+    onTogglePackageSelection: (String, SelectInstallEntity) -> Unit,
     shape: Shape,
+    modifier: Modifier = Modifier,
 ) {
     val itemsInGroup = packageResult.appEntities
 
-    // Filter out the base entities to determine if it should be displayed as a single app item
+    // A base APK and its splits are selected together; multiple base APKs are version alternatives.
     val baseEntities = remember(itemsInGroup) {
         itemsInGroup.filter { it.app is AppEntity.BaseEntity }
     }
@@ -398,26 +385,18 @@ private fun MultiApkGroupCard(
         SingleItemCard(
             item = item,
             shape = shape,
+            modifier = modifier,
             onClick = {
-                // Sync the selection state for all items (Base and Splits) in the group
-                val targetState = !item.selected
-                itemsInGroup.forEach { entity ->
-                    if (entity.selected != targetState) {
-                        viewModel.dispatch(
-                            InstallerViewAction.ToggleSelection(
-                                packageName = packageResult.packageName,
-                                entity = entity,
-                                isMultiSelect = true,
-                            ),
-                        )
-                    }
-                }
+                onTogglePackageSelection(packageResult.packageName, item)
             },
         )
     } else {
+        val sortedItems = remember(itemsInGroup) {
+            itemsInGroup.sortedByDescending { (it.app as? AppEntity.BaseEntity)?.versionCode ?: 0 }
+        }
         val rotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "arrowRotation")
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier,
             shape = shape,
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
@@ -452,22 +431,14 @@ private fun MultiApkGroupCard(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    itemsInGroup
-                        .sortedByDescending { (it.app as? AppEntity.BaseEntity)?.versionCode ?: 0 }
-                        .forEach { item ->
-                            SelectableSubCard(
-                                item = item,
-                                onClick = {
-                                    viewModel.dispatch(
-                                        InstallerViewAction.ToggleSelection(
-                                            packageName = packageResult.packageName,
-                                            entity = item,
-                                            isMultiSelect = false,
-                                        ),
-                                    )
-                                },
-                            )
-                        }
+                    sortedItems.forEach { item ->
+                        SelectableSubCard(
+                            item = item,
+                            onClick = {
+                                onToggleSelection(packageResult.packageName, item, false)
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -478,6 +449,7 @@ private fun MultiApkGroupCard(
 private fun SingleItemCard(
     item: SelectInstallEntity,
     shape: Shape,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
@@ -487,8 +459,7 @@ private fun SingleItemCard(
     val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
 
     Card(
-        // Padding is now handled by the parent LazyColumn's contentPadding.
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             onClick()
@@ -520,7 +491,6 @@ private fun SingleItemCard(
 @Composable
 private fun SelectableSubCard(
     item: SelectInstallEntity,
-    isRadio: Boolean = true,
     onClick: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
@@ -547,17 +517,9 @@ private fun SelectableSubCard(
                 .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (isRadio) {
-                RadioButton(selected = item.selected, onClick = onClick)
-            } else {
-                Checkbox(checked = item.selected, onCheckedChange = { onClick() })
-            }
-            if (isRadio) {
-                (item.app as? AppEntity.BaseEntity)?.let { baseEntity ->
-                    MultiApkItemContent(app = baseEntity)
-                }
-            } else {
-                ItemContent(app = item.app)
+            RadioButton(selected = item.selected, onClick = onClick)
+            (item.app as? AppEntity.BaseEntity)?.let { baseEntity ->
+                MultiApkItemContent(app = baseEntity)
             }
         }
     }

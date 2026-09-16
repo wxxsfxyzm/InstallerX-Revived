@@ -22,6 +22,7 @@ The full user guide, installation instructions, advanced options, system integra
 ## Highlights
 
 - **Package formats:** APK, APKS, APKM, XAPK, APK files inside ZIP archives, and batch APK installation.
+- **Dialog batch selection:** clearing a single-version package row clears its files; selecting it again restores the file choices from before clearing, including split and dex metadata choices. This applies to both UI styles within the same analysis; individual file edits or explicit APK-wide selection changes supersede the saved choices.
 - **Install flows:** dialog installation, background notification installation, automatic installation, silent installation when privileges allow it, and Android 16+ Live Activity progress on supported systems.
 - **Authorizers:**
   - **Root:** can perform all privileged operations, but may be slower because of cold `app_process` startup.

@@ -128,6 +128,8 @@ class InstallerViewModel(
             result.appEntities.any { entity -> entity.selected && entity.app is AppEntity.ModuleEntity }
         }
 
+    private val packageSelectionsBeforeClear = mutableMapOf<String, List<SelectInstallEntity>>()
+
     private var originalAnalysisResults: List<PackageAnalysisResult> = emptyList()
     private var isRetryingInstall = false
 
@@ -227,6 +229,15 @@ class InstallerViewModel(
             is InstallerViewAction.SetTempLabShowInstallInitiator -> _localState.update { it.copy(tempLabShowInstallInitiator = action.show) }
 
             is InstallerViewAction.ToggleSelection -> toggleSelection(action.packageName, action.entity, action.isMultiSelect)
+
+            is InstallerViewAction.TogglePackageSelection -> togglePackageSelection(action.packageName, action.entity)
+
+            is InstallerViewAction.SetApkSelection -> {
+                packageSelectionsBeforeClear.clear()
+                updateSelections { _, entity ->
+                    if (entity.app is AppEntity.ModuleEntity) entity.selected else action.selected
+                }
+            }
 
             is InstallerViewAction.ToggleUninstallFlag -> toggleUninstallFlag(action.flag, action.enable)
 
@@ -371,6 +382,7 @@ class InstallerViewModel(
     }
 
     private fun collectRepo(session: InstallerSessionRepository) {
+        if (this.session !== session) packageSelectionsBeforeClear.clear()
         this.session = session
         if (session.config.enableCustomizeUser) {
             loadAvailableUsers(session.config.authorizer, session.config.customizeAuthorizer)
@@ -481,7 +493,10 @@ class InstallerViewModel(
                     is InstallerStage.InstallFailed,
                     is InstallerStage.InstallSuccess,
                     -> {
-                        _localState.value.currentPackageName ?: _localState.value.analysisResults.firstOrNull()?.packageName
+                        // A restored session may include unselected packages before the installed app.
+                        _localState.value.currentPackageName
+                            ?: _localState.value.analysisResults.firstOrNull { result -> result.appEntities.any { it.selected } }?.packageName
+                            ?: _localState.value.analysisResults.firstOrNull()?.packageName
                     }
 
                     is InstallerStage.InstallChoice, is InstallerStage.Ready -> null
@@ -678,6 +693,7 @@ class InstallerViewModel(
     private fun toast(@StringRes resId: Int) = _uiEvents.tryEmit(InstallerViewEvent.ShowToastRes(resId))
 
     private fun close() {
+        packageSelectionsBeforeClear.clear()
         autoInstallJob?.cancel()
         collectRepoJob?.cancel()
         iconJobs.values.forEach { it.cancel() }
@@ -749,30 +765,8 @@ class InstallerViewModel(
                 }
             } ?: return
 
-        val updatedResults = currentResults.map { result ->
-            val updatedEntities = result.appEntities.map { entity ->
-                entity.copy(selected = entity.app === targetEntity.app)
-            }
-            result.copy(
-                appEntities = updatedEntities,
-                signatureMatchStatus = if (result.signatureCheckPerformed) {
-                    updatedEntities.analyzePackageSignatureMatch(
-                        installedInfo = result.installedAppInfo,
-                        hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
-                    )
-                } else {
-                    result.signatureMatchStatus
-                },
-                signatureAnalysis = if (result.signatureCheckPerformed) {
-                    updatedEntities.analyzePackageSignatureSelection(result.installedAppInfo)
-                } else {
-                    result.signatureAnalysis
-                },
-            )
-        }
-
-        session.analysisResults = updatedResults.toMutableList()
-        _localState.update { it.copy(analysisResults = updatedResults) }
+        packageSelectionsBeforeClear.clear()
+        updateSelections { _, entity -> entity.app === targetEntity.app }
         installPrepare()
     }
 
@@ -833,52 +827,93 @@ class InstallerViewModel(
     private fun background() = session.background(true)
 
     fun toggleSelection(packageName: String, entityToToggle: SelectInstallEntity, isMultiSelect: Boolean) {
-        val currentResults = _localState.value.analysisResults.toMutableList()
-        val packageIndex = currentResults.indexOfFirst { it.packageName == packageName }
+        val currentPackage = _localState.value.analysisResults.firstOrNull { it.packageName == packageName } ?: return
+        // Selection copies retain the AppEntity. Never match by package/name alone: versions and
+        // splits can share those values, and an event from an old analysis must not affect a new one.
+        val target = currentPackage.appEntities.firstOrNull { it.app === entityToToggle.app } ?: return
+        // An event based on an outdated checked state must not undo a more recent selection.
+        if (target.selected != entityToToggle.selected) return
 
-        if (packageIndex != -1) {
-            val packageToUpdate = currentResults[packageIndex]
-            val updatedEntities = packageToUpdate.appEntities.map { currentEntity ->
-                if (currentEntity === entityToToggle) {
-                    currentEntity.copy(selected = !currentEntity.selected)
-                } else if (!isMultiSelect) {
-                    currentEntity.copy(selected = false)
-                } else {
-                    currentEntity
-                }
-            }.toMutableList()
-
-            if (!isMultiSelect && entityToToggle.selected) {
-                updatedEntities.replaceAll { it.copy(selected = false) }
+        packageSelectionsBeforeClear.remove(packageName)
+        updateSelections { result, entity ->
+            when {
+                result !== currentPackage -> entity.selected
+                entity === target -> !target.selected
+                !isMultiSelect -> false
+                else -> entity.selected
             }
-
-            val newSignatureAnalysis = if (packageToUpdate.signatureCheckPerformed) {
-                updatedEntities.analyzePackageSignatureSelection(packageToUpdate.installedAppInfo)
-            } else {
-                packageToUpdate.signatureAnalysis
-            }
-            val newSignatureMatchStatus = if (packageToUpdate.signatureCheckPerformed) {
-                updatedEntities.analyzePackageSignatureMatch(
-                    installedInfo = packageToUpdate.installedAppInfo,
-                    hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
-                )
-            } else {
-                packageToUpdate.signatureMatchStatus
-            }
-
-            val newPackageAnalysisResult = packageToUpdate.copy(
-                appEntities = updatedEntities,
-                signatureMatchStatus = newSignatureMatchStatus,
-                signatureAnalysis = newSignatureAnalysis,
-            )
-            currentResults[packageIndex] = newPackageAnalysisResult
-
-            // Sync to session
-            session.analysisResults = currentResults
-
-            // Correctly update the StateFlow with new data, Compose will recompose automatically
-            _localState.update { it.copy(analysisResults = currentResults.toList()) }
         }
+    }
+
+    private fun togglePackageSelection(packageName: String, requested: SelectInstallEntity) {
+        val result = _localState.value.analysisResults.firstOrNull { it.packageName == packageName } ?: return
+        val target = result.appEntities.firstOrNull { it.app === requested.app } ?: return
+        if (target.selected != requested.selected) return
+        // Mixed ZIP app lists hide module entries; do not change those hidden selections.
+        val isModule = target.app is AppEntity.ModuleEntity
+        val entries = result.appEntities.filter { (it.app is AppEntity.ModuleEntity) == isModule }
+        if (entries.count { it.app is AppEntity.BaseEntity } > 1) return
+        val representative = entries.firstOrNull { it.app is AppEntity.BaseEntity } ?: entries.firstOrNull()
+        if (representative !== target) return
+
+        val remembered = packageSelectionsBeforeClear.remove(packageName)?.takeIf { previous ->
+            previous.size == entries.size && previous.zip(entries).all { (old, current) -> old.app === current.app }
+        }
+        if (target.selected) packageSelectionsBeforeClear[packageName] = entries
+        updateSelections { currentResult, entity ->
+            when {
+                currentResult !== result || (entity.app is AppEntity.ModuleEntity) != isModule -> entity.selected
+
+                target.selected -> false
+
+                remembered != null -> remembered.first { it.app === entity.app }.selected
+
+                // Before the first clear, retain the parser/user's split choices, only enabling the base.
+                else -> entity === target || entity.selected
+            }
+        }
+    }
+
+    /** Computes each affected package once and publishes only the final selection snapshot. */
+    private fun updateSelections(selected: (PackageAnalysisResult, SelectInstallEntity) -> Boolean) {
+        val currentResults = _localState.value.analysisResults
+        var changed = false
+        val updatedResults = currentResults.map { result ->
+            var packageChanged = false
+            val entities = result.appEntities.map { entity ->
+                val nextSelected = selected(result, entity)
+                if (nextSelected == entity.selected) {
+                    entity
+                } else {
+                    packageChanged = true
+                    entity.copy(selected = nextSelected)
+                }
+            }
+            if (!packageChanged) {
+                result
+            } else {
+                changed = true
+                result.copy(
+                    appEntities = entities,
+                    signatureAnalysis = if (result.signatureCheckPerformed) {
+                        entities.analyzePackageSignatureSelection(result.installedAppInfo)
+                    } else {
+                        result.signatureAnalysis
+                    },
+                    signatureMatchStatus = if (result.signatureCheckPerformed) {
+                        entities.analyzePackageSignatureMatch(
+                            installedInfo = result.installedAppInfo,
+                            hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
+                        )
+                    } else {
+                        result.signatureMatchStatus
+                    },
+                )
+            }
+        }
+        if (!changed) return
+        session.analysisResults = updatedResults
+        _localState.update { it.copy(analysisResults = updatedResults) }
     }
 
     private fun toggleUninstallFlag(flag: Int, enable: Boolean) {

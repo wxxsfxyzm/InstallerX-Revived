@@ -59,6 +59,12 @@ sealed interface InstallerViewAction {
      */
     data class ToggleSelection(val packageName: String, val entity: SelectInstallEntity, val isMultiSelect: Boolean) : InstallerViewAction
 
+    /** Clears a single-package row or restores its previous file choices. */
+    data class TogglePackageSelection(val packageName: String, val entity: SelectInstallEntity) : InstallerViewAction
+
+    /** Sets all non-module entries in the current choice session in one update. */
+    data class SetApkSelection(val selected: Boolean) : InstallerViewAction
+
     /**
      * Sets the installer mode.
      * @param mode The [InstallerMode] to set.

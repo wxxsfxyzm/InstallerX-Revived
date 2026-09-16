@@ -21,9 +21,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -63,6 +61,10 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun InstallChoiceContent(
     viewModel: InstallerViewModel,
+    selectionMode: MmzSelectionMode,
+    onSelectionModeChange: (MmzSelectionMode) -> Unit,
+    onSelectMixedModuleType: (Boolean) -> Unit,
+    onBackToTypeChoice: () -> Unit,
     onCancel: () -> Unit,
 ) {
     val isDarkMode = InstallerTheme.isDark
@@ -73,8 +75,6 @@ fun InstallChoiceContent(
     val isMultiApk = currentSessionMode == SessionMode.Batch
     val isModuleApk = sourceType == DataType.MIXED_MODULE_APK
     val isMixedModuleZip = sourceType == DataType.MIXED_MODULE_ZIP
-    var selectionMode by remember(sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
-    // Timber.d("analysisResults: $analysisResults,sourceType: $sourceType, selectionMode: $selectionMode,isMultiApk: $isMultiApk, isModuleApk: $isModuleApk, isMixedModuleZip: $isMixedModuleZip")
     val totalModuleCount = analysisResults.flatMap { it.appEntities }
         .count { it.app is AppEntity.ModuleEntity }
     val isInstallTypeChoice = isModuleApk ||
@@ -110,7 +110,9 @@ fun InstallChoiceContent(
     val isPrimaryActionEnabled = allSelectedEntities.isNotEmpty() && !isMixedError && !isMultiModuleError
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val cardText = sourceType.getSupportSubtitle(selectionMode = selectionMode)
@@ -130,7 +132,8 @@ fun InstallChoiceContent(
                     analysisResults = analysisResults,
                     viewModel = viewModel,
                     apkChooseAll = uiState.config.apkChooseAll,
-                ) { selectionMode = MmzSelectionMode.APK_CHOICE }
+                    onSelectMixedModuleType = onSelectMixedModuleType,
+                ) { onSelectionModeChange(MmzSelectionMode.APK_CHOICE) }
             }
         } else {
             val resultsForList = if (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE) {
@@ -154,6 +157,7 @@ fun InstallChoiceContent(
                     viewModel = viewModel,
                     isModuleApk = isModuleApk,
                     isMultiApk = isMultiApk || (isMixedModuleZip && selectionMode == MmzSelectionMode.APK_CHOICE),
+                    onSelectMixedModuleType = onSelectMixedModuleType,
                 )
             }
         }
@@ -162,7 +166,6 @@ fun InstallChoiceContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
                     .padding(top = 24.dp, bottom = if (isGestureNavigation()) 24.dp else 0.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -172,20 +175,7 @@ fun InstallChoiceContent(
                     TextButton(
                         onClick = {
                             if (isBack) {
-                                // Clear selected APK entities when going back to initial choice
-                                // This prevents "Mixed Selection" error when subsequently selecting a module
-                                analysisResults.flatMap { it.appEntities }
-                                    .filter { it.selected && it.app !is AppEntity.ModuleEntity }
-                                    .forEach { entity ->
-                                        viewModel.dispatch(
-                                            InstallerViewAction.ToggleSelection(
-                                                packageName = entity.app.packageName,
-                                                entity = entity,
-                                                isMultiSelect = true,
-                                            ),
-                                        )
-                                    }
-                                selectionMode = MmzSelectionMode.INITIAL_CHOICE
+                                onBackToTypeChoice()
                             } else {
                                 onCancel()
                             }
@@ -234,6 +224,7 @@ private fun ChoiceLazyList(
     viewModel: InstallerViewModel,
     isModuleApk: Boolean,
     isMultiApk: Boolean,
+    onSelectMixedModuleType: (Boolean) -> Unit,
 ) {
     if (isModuleApk) {
         val allSelectableEntities = analysisResults.flatMap { it.appEntities }
@@ -259,9 +250,7 @@ private fun ChoiceLazyList(
                             title = baseEntityInfo.label ?: "N/A",
                             description = stringResource(R.string.installer_package_name, baseEntityInfo.packageName),
                             onClick = {
-                                viewModel.dispatch(
-                                    InstallerViewAction.SelectMixedModuleType(installAsModule = false),
-                                )
+                                onSelectMixedModuleType(false)
                             },
                         )
                     }
@@ -272,9 +261,7 @@ private fun ChoiceLazyList(
                             title = moduleEntityInfo.name,
                             description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                             onClick = {
-                                viewModel.dispatch(
-                                    InstallerViewAction.SelectMixedModuleType(installAsModule = true),
-                                )
+                                onSelectMixedModuleType(true)
                             },
                         )
                     }
@@ -330,10 +317,9 @@ private fun ChoiceLazyList(
                             checked = displayItem.selected,
                             onCheckedChange = {
                                 viewModel.dispatch(
-                                    InstallerViewAction.ToggleSelection(
+                                    InstallerViewAction.TogglePackageSelection(
                                         packageName = packageResult.packageName,
                                         entity = displayItem,
-                                        isMultiSelect = true,
                                     ),
                                 )
                             },
@@ -510,6 +496,7 @@ private fun MixedModuleZip_InitialChoice(
     analysisResults: List<PackageAnalysisResult>,
     viewModel: InstallerViewModel,
     apkChooseAll: Boolean,
+    onSelectMixedModuleType: (Boolean) -> Unit,
     onSelectApk: () -> Unit,
 ) {
     val allSelectableEntities = analysisResults.flatMap { it.appEntities }
@@ -535,9 +522,7 @@ private fun MixedModuleZip_InitialChoice(
                         title = stringResource(R.string.installer_choice_install_as_module),
                         description = stringResource(R.string.installer_module_id, moduleEntityInfo.id),
                         onClick = {
-                            viewModel.dispatch(
-                                InstallerViewAction.SelectMixedModuleType(installAsModule = true),
-                            )
+                            onSelectMixedModuleType(true)
                         },
                     )
                 }
@@ -548,18 +533,7 @@ private fun MixedModuleZip_InitialChoice(
                         description = stringResource(R.string.installer_choice_install_as_app_desc),
                         onClick = {
                             if (apkChooseAll) {
-                                analysisResults.flatMap { it.appEntities }
-                                    // Only toggle those that are NOT already selected
-                                    .filter { it.app !is AppEntity.ModuleEntity && !it.selected }
-                                    .forEach { entity ->
-                                        viewModel.dispatch(
-                                            InstallerViewAction.ToggleSelection(
-                                                packageName = entity.app.packageName,
-                                                entity = entity,
-                                                isMultiSelect = true,
-                                            ),
-                                        )
-                                    }
+                                viewModel.dispatch(InstallerViewAction.SetApkSelection(true))
                             }
                             onSelectApk()
                         },

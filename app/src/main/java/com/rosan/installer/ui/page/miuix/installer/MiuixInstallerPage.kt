@@ -24,6 +24,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -32,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.exception.ModuleInstallException
+import com.rosan.installer.domain.engine.model.install.MmzSelectionMode
+import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
@@ -124,6 +127,10 @@ fun MiuixInstallerPage(
 
     val analysisResults = uiState.analysisResults
     val sourceType = analysisResults.firstOrNull()?.appEntities?.firstOrNull()?.app?.sourceType ?: DataType.NONE
+    var selectionMode by remember(session.id, sourceType) { mutableStateOf(MmzSelectionMode.INITIAL_CHOICE) }
+    var preparedFromTypeChoice by remember(session.id, sourceType) { mutableStateOf(false) }
+    var returnedToTypeChoice by remember(session.id, sourceType) { mutableStateOf(false) }
+    val isApkChoice = sourceType == DataType.MIXED_MODULE_ZIP && selectionMode == MmzSelectionMode.APK_CHOICE
     val packageName = currentPackageName ?: analysisResults.firstOrNull()?.packageName ?: ""
     val appInfoState = rememberAppInfoState(
         analysisResults = analysisResults,
@@ -222,6 +229,22 @@ fun MiuixInstallerPage(
         }
     }
 
+    val backToTypeChoice: () -> Unit = {
+        // Clear the previous branch's selection before offering the other installation type.
+        viewModel.dispatch(InstallerViewAction.SetApkSelection(false))
+        analysisResults.flatMap { it.appEntities }
+            .filter { it.selected && it.app is AppEntity.ModuleEntity }
+            .forEach { entity ->
+                viewModel.dispatch(InstallerViewAction.ToggleSelection(entity.app.packageName, entity, true))
+            }
+        selectionMode = MmzSelectionMode.INITIAL_CHOICE
+        preparedFromTypeChoice = false
+        returnedToTypeChoice = true
+        if (stage !is InstallerStage.InstallChoice) {
+            viewModel.dispatch(InstallerViewAction.InstallChoice)
+        }
+    }
+
     CompositionLocalProvider(
         LocalInstallerColorScheme provides activeMd3ColorScheme,
     ) {
@@ -261,8 +284,12 @@ fun MiuixInstallerPage(
                         }
 
                         is InstallerStage.InstallChoice -> {
-                            // Check the new flag from uiState
-                            if (uiState.navigatedFromPrepareToChoice) {
+                            if (isApkChoice) {
+                                MiuixBackButton(
+                                    iconTint = MiuixTheme.colorScheme.onSurface,
+                                    onClick = backToTypeChoice,
+                                )
+                            } else if (uiState.navigatedFromPrepareToChoice && !returnedToTypeChoice) {
                                 // Came from Prepare (re-selecting splits) -> Show Back icon, go back to Prepare
                                 MiuixBackButton(
                                     icon = AppMiuixIcons.Back,
@@ -322,13 +349,15 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.InstallPrepare -> {
                             MiuixBackButton(
-                                icon = if (showSettings || showPermissions) AppMiuixIcons.Back else AppMiuixIcons.Close,
+                                icon = if (showSettings || showPermissions || preparedFromTypeChoice) AppMiuixIcons.Back else AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
                                     if (showSettings) {
                                         viewModel.dispatch(InstallerViewAction.HideMiuixSheetRightActionSettings)
                                     } else if (showPermissions) {
                                         viewModel.dispatch(InstallerViewAction.HideMiuixPermissionList)
+                                    } else if (preparedFromTypeChoice) {
+                                        backToTypeChoice()
                                     } else {
                                         dismissSheet {
                                             viewModel.dispatch(InstallerViewAction.Close)
@@ -503,6 +532,14 @@ fun MiuixInstallerPage(
                         is InstallerStage.InstallChoice -> {
                             InstallChoiceContent(
                                 viewModel = viewModel,
+                                selectionMode = selectionMode,
+                                onSelectionModeChange = { selectionMode = it },
+                                onSelectMixedModuleType = { installAsModule ->
+                                    preparedFromTypeChoice = true
+                                    returnedToTypeChoice = false
+                                    viewModel.dispatch(InstallerViewAction.SelectMixedModuleType(installAsModule))
+                                },
+                                onBackToTypeChoice = backToTypeChoice,
                                 onCancel = closeSheet,
                             )
                         }
