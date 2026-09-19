@@ -40,6 +40,8 @@ data class AppPreferences(
     val useMiIslandBypassRestriction: Boolean,
     val useMiIslandOuterGlow: Boolean,
     val useMiIslandBlockingIntervalMs: Int,
+    val useVivoIsland: Boolean,
+    val useVivoIslandBypassRestriction: Boolean,
     val autoSilentInstall: Boolean,
     val longClickBackgroundInstall: Boolean,
     val tryMultipleAuthorizersOnInstall: Boolean,

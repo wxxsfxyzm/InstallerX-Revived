@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.app.IActivityManager
 import android.app.IApplicationThread
+import android.app.NotificationManager
 import android.app.ProfilerInfo
 import android.content.ComponentName
 import android.content.ContentResolver
@@ -110,6 +111,50 @@ class DefaultPrivilegedService private constructor(private val runtime: Privileg
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun getUpdateOwnerPackageName(packageName: String, userId: Int): String? = iPackageManager.getInstallSourceInfo(packageName, userId).updateOwnerPackageName
+
+    override fun registerVivoIslandScene(scene: String, packageName: String): Boolean {
+        if (scene.isBlank() || packageName.isBlank()) return false
+
+        return try {
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+                ?: return false
+            val listType = List::class.java
+            NotificationManager::class.java.getMethod(
+                "setSuperXInfosSceneList",
+                listType,
+                listType,
+                listType,
+                listType,
+            ).apply { isAccessible = true }.invoke(
+                notificationManager,
+                listOf(scene),
+                listOf("true"),
+                listOf(packageName),
+                listOf("true"),
+            )
+
+            val accepted = NotificationManager::class.java.getMethod(
+                "getSceneStatus",
+                String::class.java,
+                String::class.java,
+            ).apply { isAccessible = true }.invoke(
+                notificationManager,
+                packageName,
+                scene,
+            ) as? Boolean == true
+            Timber.tag(TAG).d(
+                "OriginOS SuperX scene registration: package=%s, scene=%s, uid=%d, accepted=%b",
+                packageName,
+                scene,
+                AndroidProcess.myUid(),
+                accepted,
+            )
+            accepted
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to register OriginOS SuperX scene")
+            false
+        }
+    }
 
     override fun delete(paths: Array<out String>) = deletePaths(context, paths.toList())
 

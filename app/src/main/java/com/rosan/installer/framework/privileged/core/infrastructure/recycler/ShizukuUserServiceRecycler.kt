@@ -5,6 +5,7 @@ package com.rosan.installer.framework.privileged.core.infrastructure.recycler
 import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.IBinder
 import android.os.Process
 import androidx.annotation.Keep
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.shizuku.Shizuku
 import timber.log.Timber
 
@@ -43,6 +45,9 @@ class ShizukuUserServiceRecycler(
 
     abstract class BaseShizukuUserService(context: Context) : IShizukuUserService.Stub() {
         init {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                HiddenApiBypass.addHiddenApiExemptions("")
+            }
             if (AppConfig.isDebug && Timber.treeCount == 0) Timber.plant(Timber.DebugTree())
             startKoin {
                 modules(processModules)

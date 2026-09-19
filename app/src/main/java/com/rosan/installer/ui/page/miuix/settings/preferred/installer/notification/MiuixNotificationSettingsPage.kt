@@ -70,12 +70,14 @@ fun MiuixNotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSetti
 
     val isModernEligible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
     val isMiIslandSupported = capabilityProvider.isSupportMiIsland
+    val isVivoIslandSupported = capabilityProvider.isSupportVivoIsland
 
     // Dynamically build dropdown options based on device capabilities
-    val styleOptions = remember(isModernEligible, isMiIslandSupported) {
+    val styleOptions = remember(isModernEligible, isMiIslandSupported, isVivoIslandSupported) {
         val list = mutableListOf(NotificationStyle.STANDARD)
         if (isModernEligible) list.add(NotificationStyle.LIVE_ACTIVITY)
         if (isMiIslandSupported) list.add(NotificationStyle.MI_ISLAND)
+        if (isVivoIslandSupported) list.add(NotificationStyle.VIVO_ISLAND)
         list
     }
 
@@ -84,6 +86,7 @@ fun MiuixNotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSetti
             NotificationStyle.STANDARD -> stringResource(R.string.notification_style_standard)
             NotificationStyle.LIVE_ACTIVITY -> stringResource(R.string.notification_style_live_activity)
             NotificationStyle.MI_ISLAND -> stringResource(R.string.notification_style_mi_island)
+            NotificationStyle.VIVO_ISLAND -> stringResource(R.string.notification_style_vivo_island)
         }
     }
 
@@ -138,7 +141,7 @@ fun MiuixNotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSetti
                         .padding(bottom = 12.dp),
                 ) {
                     // 1. Notification style dropdown
-                    val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported
+                    val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported || isVivoIslandSupported
 
                     WindowSpinnerPreference(
                         title = stringResource(R.string.notification_style),
@@ -199,6 +202,21 @@ fun MiuixNotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSetti
                             checked = uiState.miIslandOuterGlow,
                             onCheckedChange = {
                                 viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandOuterGlow(it))
+                            },
+                        )
+                    }
+                    // 5. Vivo Island bypass restriction (animated visibility)
+                    AnimatedVisibility(
+                        visible = activeStyle == NotificationStyle.VIVO_ISLAND,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(id = R.string.lab_vivo_island_bypass_restriction),
+                            description = stringResource(id = R.string.lab_vivo_island_bypass_restriction_desc),
+                            checked = uiState.vivoIslandBypassRestriction,
+                            onCheckedChange = {
+                                viewModel.dispatch(NotificationSettingsAction.ChangeVivoIslandBypassRestriction(it))
                             },
                         )
                     }

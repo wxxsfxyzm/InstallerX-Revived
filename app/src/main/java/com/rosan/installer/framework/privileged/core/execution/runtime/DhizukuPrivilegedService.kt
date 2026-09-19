@@ -110,6 +110,8 @@ class DhizukuPrivilegedService(private val binderWrapper: (IBinder) -> IBinder) 
 
     override fun parsePackageArchive(path: String): Bundle? = unsupported()
 
+    override fun registerVivoIslandScene(scene: String, packageName: String): Boolean = unsupported()
+
     override fun setPackageNetworkingEnabled(uid: Int, enabled: Boolean) {
         unsupported<Unit>()
     }
