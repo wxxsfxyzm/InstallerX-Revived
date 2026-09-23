@@ -279,7 +279,8 @@ fun SegmentedColumn(
                                     // Defer state reading into the drawing phase.
                                     // This prevents the animation progression from causing frame-by-frame recompositions.
                                     val currentProgress = progresses[index].value
-                                    val safeProgress = currentProgress.coerceAtLeast(0f)
+                                    val safeProgress = currentProgress.coerceIn(0f, 1f)
+                                    val revealProgress = safeProgress * safeProgress * (3f - 2f * safeProgress)
 
                                     clip = true
                                     this.shape = object : Shape {
@@ -287,7 +288,7 @@ fun SegmentedColumn(
                                             size: Size,
                                             layoutDirection: LayoutDirection,
                                             density: Density,
-                                        ) = Outline.Rectangle(Rect(0f, 0f, size.width, size.height * safeProgress))
+                                        ) = Outline.Rectangle(Rect(0f, 0f, size.width, size.height * revealProgress))
                                     }
                                     alpha = (currentProgress * 1.5f).coerceIn(0f, 1f)
                                 },
@@ -303,16 +304,23 @@ fun SegmentedColumn(
             },
         ) { measurables, constraints ->
             val placeables = measurables.map { it.measure(constraints) }
+            // Share one rebound budget across the group, rather than multiplying the
+            // spring overshoot by every row's full height. Read animation state only
+            // during measurement; corner springs remain independent.
+            val advances = segmentedHeightAdvances(
+                heights = FloatArray(placeables.size) { placeables[it].height.toFloat() },
+                progresses = FloatArray(placeables.size) { progresses[it].value },
+                reboundLimit = 24.dp.toPx(),
+            )
             var currentY = 0f
             val positions = mutableListOf<Int>()
 
             // Calculate exact placement coordinates dynamically corresponding to the
             // current phase of the visibility animations.
-            placeables.forEachIndexed { index, placeable ->
+            placeables.indices.forEach { index ->
                 positions.add(currentY.roundToInt())
                 // Reading state during the measurement phase is perfectly fine and safe.
-                val progress = progresses[index].value
-                currentY += placeable.height * progress
+                currentY += advances[index]
             }
 
             layout(constraints.maxWidth, currentY.roundToInt().coerceAtLeast(0)) {
