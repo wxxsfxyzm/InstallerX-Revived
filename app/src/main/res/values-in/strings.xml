@@ -950,4 +950,20 @@
     <string name="expand_temporary_settings_by_default">Perpanjang panel secara default</string>
     <string name="expand_temporary_settings_by_default_desc">Perpanjang pengaturan sementara disaat dialog instalasi terbuka</string>
     <string name="config_allow_sig_unknown_http_lightweight_desc">Selama analisis HTTP ringan, setiap tanda tangan anomali dievaluasi sesuai dengan pengaturan ini.</string>
+    <string name="history_recording">Riwayat rekaman</string>
+    <string name="history_enable">Aktifkan riwayat</string>
+    <string name="history_show_indicators">Tampilkan indikator</string>
+    <string name="history_disabled_title">Riwayat dinonaktifkan</string>
+    <string name="history_disabled_desc">Operasi instalasi dan penghapusan instalasi baru tidak akan direkam.</string>
+    <string name="history_disable_confirm_title">Nonaktifkan riwayat?</string>
+    <string name="history_disable_confirm_desc">Apakah Anda ingin menghapus riwayat yang sudah tercatat? Operasi baru tidak akan tercatat selama riwayat dinonaktifkan.</string>
+    <string name="history_disable_and_clear">Bersihkan dan Nonaktifkan</string>
+    <string name="history_disable_and_keep">Pertahankan dan nonaktifkan</string>
+    <string name="history_version_self_update">Pembaruan mandiri</string>
+    <string name="advanced">Lanjutan</string>
+    <string name="backup_settings_validation_duplicate_unknown_scope">Duplikat Cakupan tidak diketahui.</string>
+    <string name="config_scope_unknown">Tidak diketahui</string>
+    <string name="config_scope_apps">Aplikasi</string>
+    <string name="config_scope_unknown_group">Lingkup tidak diketahui</string>
+    <string name="sort_by_show_unknown_scope">Tampilkan Lingkup tidak diketahui</string>
 </resources>
