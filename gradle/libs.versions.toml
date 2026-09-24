@@ -17,7 +17,7 @@ ksp = "2.3.12"
 composeBom = "2026.09.00"
 compose = "1.12.1"
 splashScreen = "1.2.0"
-material3 = "1.5.0-alpha28"
+material3 = "1.5.0-alpha29"
 room = "3.0.3"
 ktx-serialization = "1.11.0"
 rikka-shizuku = "13.1.5"
@@ -25,7 +25,7 @@ koin-bom = "4.2.2"
 datastore = "1.2.1"
 aboutLibraries = "15.2.0"
 appiconloader = "1.5.0"
-androidx-annotation = "1.10.0"
+androidx-annotation = "1.11.0"
 timber = "5.0.1"
 miuix = "0.9.4"
 okhttp = "5.5.0"
@@ -69,7 +69,7 @@ kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidx-annotation" }
-androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.19.0" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.19.1" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.13.0" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
