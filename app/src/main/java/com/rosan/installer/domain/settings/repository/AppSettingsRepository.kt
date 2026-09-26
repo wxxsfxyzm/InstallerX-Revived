@@ -47,6 +47,8 @@ enum class BooleanSetting {
     ShowMiIsland,
     ShowMiIslandBypassRestriction,
     ShowMiIslandOuterGlow,
+    ShowVivoIsland,
+    ShowVivoIslandBypassRestriction,
     AlwaysUseRootInSystem,
     UninstallerRequireBiometricAuth,
     ShowLauncherIcon,

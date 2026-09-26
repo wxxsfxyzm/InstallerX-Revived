@@ -5,6 +5,8 @@ package com.rosan.installer.ui.page.main.settings.preferred.installer.notificati
 data class NotificationSettingsState(
     val showLiveActivity: Boolean = false,
     val showMiIsland: Boolean = false,
+    val showVivoIsland: Boolean = false,
+    val vivoIslandBypassRestriction: Boolean = false,
     val miIslandBypassRestriction: Boolean = false,
     val miIslandOuterGlow: Boolean = true,
     val successAutoClearSeconds: Int = 10,
@@ -13,6 +15,7 @@ data class NotificationSettingsState(
 ) {
     val currentStyle: NotificationStyle
         get() = when {
+            showVivoIsland -> NotificationStyle.VIVO_ISLAND
             showMiIsland -> NotificationStyle.MI_ISLAND
             showLiveActivity -> NotificationStyle.LIVE_ACTIVITY
             else -> NotificationStyle.STANDARD
