@@ -5,4 +5,8 @@ package com.rosan.installer.domain.engine.model.state
 /**
  * The pure business result of the analysis.
  */
-data class DomainInstallState(val actionType: InstallActionType, val notices: List<InstallNotice>)
+data class DomainInstallState(
+    val actionType: InstallActionType,
+    val notices: List<InstallNotice>,
+    val isOplusOsdkIncompatible: Boolean = false,
+)

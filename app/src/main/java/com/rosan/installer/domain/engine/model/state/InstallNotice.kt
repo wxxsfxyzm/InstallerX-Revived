@@ -35,6 +35,7 @@ sealed interface InstallNotice {
         val details: SignatureNoticeDetails? = null,
     ) : InstallNotice
     data object SdkIncompatible : InstallNotice
+    data class OplusOsdkIncompatible(val required: String, val device: String) : InstallNotice
     data object Arch32On64 : InstallNotice
     data class Emulated(val appArch: Architecture, val sysArch: Architecture) : InstallNotice
 

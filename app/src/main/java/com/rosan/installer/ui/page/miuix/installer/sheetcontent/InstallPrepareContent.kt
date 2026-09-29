@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
@@ -68,6 +69,7 @@ import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.toast
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -185,6 +187,8 @@ fun InstallPrepareContent(
     val labelSignatureNoCertificates = stringResource(R.string.installer_signature_no_certificates)
     val tagSdk = stringResource(R.string.tag_sdk)
     val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
+    val tagOplusOsdk = stringResource(R.string.tag_oplus_osdk)
+    val oplusOsdkIncompatibleWarning = stringResource(R.string.installer_prepare_oplus_osdk_incompatible)
     val tagArch32 = stringResource(R.string.tag_arch_32)
     val textArch32 = stringResource(R.string.installer_prepare_arch_32_notice)
     val tagEmulated = stringResource(R.string.tag_arch_emulated)
@@ -239,6 +243,8 @@ fun InstallPrepareContent(
             labelSignatureNoCertificates = labelSignatureNoCertificates,
             tagSdk = tagSdk,
             textSdkIncompatible = sdkIncompatibleWarning,
+            tagOplusOsdk = tagOplusOsdk,
+            textOplusOsdkIncompatible = oplusOsdkIncompatibleWarning,
             tagArch32 = tagArch32,
             textArch32 = textArch32,
             tagEmulated = tagEmulated,
@@ -256,6 +262,13 @@ fun InstallPrepareContent(
 
     // Inject the pure domain use case
     val analyzeInstallStateUseCase = koinInject<AnalyzeInstallStateUseCase>()
+    val deviceCapabilityProvider = koinInject<DeviceCapabilityProvider>()
+    val checkOplusOsdk = settings.showOPPOSpecial &&
+        (
+            DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
+                DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+            )
+    val deviceOplusOsdkVersion = if (checkOplusOsdk) deviceCapabilityProvider.oplusOSdkVersion else null
 
     // Instantiate the UI mapper with the required Compose resources
     val installStateUiMapper = remember(installResources) {
@@ -273,6 +286,8 @@ fun InstallPrepareContent(
         settings.showSignatureInfoOnMatch,
         settings.showSignatureDetails,
         settings.detectXposedModule,
+        checkOplusOsdk,
+        deviceOplusOsdkVersion,
         installStateUiMapper,
     ) {
         // 1. Get pure domain state
@@ -284,6 +299,8 @@ fun InstallPrepareContent(
             containerType = containerType,
             systemArch = DeviceConfig.currentArchitecture,
             systemSdkInt = Build.VERSION.SDK_INT,
+            checkOplusOsdk = checkOplusOsdk,
+            deviceOplusOsdkVersion = deviceOplusOsdkVersion,
             checkAppSignature = checkAppSignature,
             showSignatureInfoOnMatch = settings.showSignatureInfoOnMatch,
             showSignatureDetails = settings.showSignatureDetails,
@@ -611,7 +628,8 @@ fun InstallPrepareContent(
             currentPackage.installedAppInfo != null
         } ?: false
 
-        val canInstall = canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity
+        val canInstall = !installStateResult.isOplusOsdkIncompatible &&
+            (canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity)
 
         // Even if we can't install (e.g. because Base is deselected), we might want to expand the menu to fix the selection.
         // We show the button if rawBaseEntity exists (Bundle/APK) and settings allow it.
@@ -629,7 +647,7 @@ fun InstallPrepareContent(
                 if (isPressed) {
                     hasLongPressed = false
                     // Wait for the system's default long press duration
-                    delay(viewConfiguration.longPressTimeoutMillis)
+                    delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                     hasLongPressed = true
                     // Perform haptic feedback immediately before the action
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)

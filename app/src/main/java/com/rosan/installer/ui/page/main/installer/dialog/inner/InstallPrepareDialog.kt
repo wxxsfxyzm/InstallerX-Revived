@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.DeviceConfig
+import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.domain.engine.model.source.DataType
@@ -208,6 +209,8 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
     val labelSignatureNoCertificates = stringResource(R.string.installer_signature_no_certificates)
     val tagSdk = stringResource(R.string.tag_sdk)
     val sdkIncompatibleWarning = stringResource(R.string.installer_prepare_sdk_incompatible)
+    val tagOplusOsdk = stringResource(R.string.tag_oplus_osdk)
+    val oplusOsdkIncompatibleWarning = stringResource(R.string.installer_prepare_oplus_osdk_incompatible)
     val tagArch32 = stringResource(R.string.tag_arch_32)
     val textArch32 = stringResource(R.string.installer_prepare_arch_32_notice)
     val tagEmulated = stringResource(R.string.tag_arch_emulated)
@@ -262,6 +265,8 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
             labelSignatureNoCertificates = labelSignatureNoCertificates,
             tagSdk = tagSdk,
             textSdkIncompatible = sdkIncompatibleWarning,
+            tagOplusOsdk = tagOplusOsdk,
+            textOplusOsdkIncompatible = oplusOsdkIncompatibleWarning,
             tagArch32 = tagArch32,
             textArch32 = textArch32,
             tagEmulated = tagEmulated,
@@ -279,6 +284,13 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
 
     // Inject the pure domain use case
     val analyzeInstallStateUseCase = koinInject<AnalyzeInstallStateUseCase>()
+    val deviceCapabilityProvider = koinInject<DeviceCapabilityProvider>()
+    val checkOplusOsdk = settings.showOPPOSpecial &&
+        (
+            DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
+                DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+            )
+    val deviceOplusOsdkVersion = if (checkOplusOsdk) deviceCapabilityProvider.oplusOSdkVersion else null
 
     // Instantiate the UI mapper with the required Compose resources
     val installStateUiMapper = remember(installResources) {
@@ -296,6 +308,8 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
         settings.showSignatureInfoOnMatch,
         settings.showSignatureDetails,
         settings.detectXposedModule,
+        checkOplusOsdk,
+        deviceOplusOsdkVersion,
         installStateUiMapper,
     ) {
         // 1. Get pure domain state
@@ -307,6 +321,8 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
             containerType = containerType,
             systemArch = DeviceConfig.currentArchitecture,
             systemSdkInt = Build.VERSION.SDK_INT,
+            checkOplusOsdk = checkOplusOsdk,
+            deviceOplusOsdkVersion = deviceOplusOsdkVersion,
             checkAppSignature = checkAppSignature,
             showSignatureInfoOnMatch = settings.showSignatureInfoOnMatch,
             showSignatureDetails = settings.showSignatureDetails,
@@ -449,7 +465,8 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
                     currentPackage.installedAppInfo != null
                 } ?: false
 
-                val canInstall = canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity
+                val canInstall = !installStateResult.isOplusOsdkIncompatible &&
+                    (canInstallBaseEntity || canInstallModuleEntity || canInstallSplitEntity)
 
                 // only when the entity is a split APK, XAPK, or APKM
                 if (canInstall && settings.showExtendedMenu && isAPK) {
