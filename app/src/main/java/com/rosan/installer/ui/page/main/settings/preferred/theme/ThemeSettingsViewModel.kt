@@ -32,23 +32,27 @@ class ThemeSettingsViewModel(
         appSettingsRepo.preferencesFlow,
         systemEnvProvider.getWallpaperColorsFlow().onStart { emit(emptyList()) },
     ) { prefs, wallpaperColors ->
-        val manualSeedColor = Color(prefs.seedColorInt)
+        val manualSeedColor =
+            if (PresetColors.any { it.color.toArgb() == prefs.seedColorInt }) {
+                Color(prefs.seedColorInt)
+            } else {
+                PresetColors[0].color
+            }
+        val manualWallpaperSeedColor = Color(prefs.wallpaperSeedColorInt)
 
         val effectiveSeedColor: Color =
             if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 if (!wallpaperColors.isNullOrEmpty()) {
-                    if (wallpaperColors.contains(manualSeedColor.toArgb())) {
-                        manualSeedColor
+                    if (wallpaperColors.contains(manualWallpaperSeedColor.toArgb())) {
+                        manualWallpaperSeedColor
                     } else {
                         Color(wallpaperColors[0])
                     }
                 } else {
                     manualSeedColor
                 }
-            } else if (PresetColors.any { it.color == manualSeedColor }) {
-                manualSeedColor
             } else {
-                PresetColors[0].color
+                manualSeedColor
             }
 
         val availableColors: List<RawColor> =
@@ -110,7 +114,6 @@ class ThemeSettingsViewModel(
 
             is ThemeSettingsAction.SetUseDynamicColor -> viewModelScope.launch {
                 updateSetting(BooleanSetting.ThemeUseDynamicColor, action.use)
-                updateSetting(IntSetting.ThemeSeedColor, Int.MIN_VALUE)
             }
 
             is ThemeSettingsAction.SetUseMiuixMonet -> viewModelScope.launch {
@@ -139,7 +142,14 @@ class ThemeSettingsViewModel(
             }
 
             is ThemeSettingsAction.SetSeedColor -> viewModelScope.launch {
-                updateSetting(IntSetting.ThemeSeedColor, action.color.toArgb())
+                updateSetting(
+                    if (action.isWallpaperSeedColor) {
+                        IntSetting.ThemeWallpaperSeedColor
+                    } else {
+                        IntSetting.ThemeSeedColor
+                    },
+                    action.color.toArgb(),
+                )
             }
 
             is ThemeSettingsAction.ChangePreferSystemIcon -> viewModelScope.launch {

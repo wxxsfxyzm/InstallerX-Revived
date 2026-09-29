@@ -25,23 +25,27 @@ class ThemeStateProviderImpl(appSettingsRepo: AppSettingsRepository, appScope: C
         appSettingsRepo.preferencesFlow,
         getWallpaperColorsFlow(),
     ) { prefs, wallpaperColors ->
-        val manualSeedColor = prefs.seedColorInt
+        val manualSeedColor =
+            if (PresetColors.any { it.color.toArgb() == prefs.seedColorInt }) {
+                prefs.seedColorInt
+            } else {
+                PresetColors[0].color.toArgb()
+            }
+        val manualWallpaperSeedColor = prefs.wallpaperSeedColorInt
 
         val effectiveSeedColor: Int =
             if (prefs.useDynamicColor && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 if (!wallpaperColors.isNullOrEmpty()) {
-                    if (wallpaperColors.contains(manualSeedColor)) {
-                        manualSeedColor
+                    if (wallpaperColors.contains(manualWallpaperSeedColor)) {
+                        manualWallpaperSeedColor
                     } else {
                         wallpaperColors[0]
                     }
                 } else {
                     manualSeedColor
                 }
-            } else if (PresetColors.any { it.color.toArgb() == manualSeedColor }) {
-                manualSeedColor
             } else {
-                PresetColors[0].color.toArgb()
+                manualSeedColor
             }
 
         ThemeState(

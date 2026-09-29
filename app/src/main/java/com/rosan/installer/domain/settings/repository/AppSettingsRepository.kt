@@ -27,6 +27,7 @@ enum class StringSetting {
 
 enum class IntSetting {
     ThemeSeedColor,
+    ThemeWallpaperSeedColor,
     ShowMiIslandBlockingInterval,
     NotificationSuccessAutoClearSeconds,
     CloseSessionCountdown,
