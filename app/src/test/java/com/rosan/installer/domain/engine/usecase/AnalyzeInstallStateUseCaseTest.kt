@@ -19,9 +19,57 @@ import com.rosan.installer.domain.engine.model.state.InstallNotice
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class AnalyzeInstallStateUseCaseTest {
+    @Test
+    fun `Oplus OS SDK mismatch only blocks checked standalone APK`() {
+        val base = AppEntity.BaseEntity(
+            packageName = "example.app",
+            sharedUserId = null,
+            data = DataEntity.FileEntity("example.apk"),
+            versionCode = 1,
+            versionName = "1",
+            label = "Example",
+            icon = null,
+            targetSdk = "36",
+            minSdk = "28",
+            minOsdkVersion = "15.1",
+            sourceType = DataType.APK,
+        )
+        val currentPackage = PackageAnalysisResult(
+            packageName = base.packageName,
+            sessionMode = SessionMode.Single,
+            appEntities = listOf(SelectInstallEntity(base, selected = true)),
+            installedAppInfo = null,
+            signatureCheckPerformed = false,
+            signatureMatchStatus = SignatureMatchStatus.NOT_INSTALLED,
+            identityStatus = PackageIdentityStatus.NOT_APPLICABLE,
+        )
+
+        fun analyze(check: Boolean, device: String?) = AnalyzeInstallStateUseCase()(
+            currentPackage = currentPackage,
+            entityToInstall = base,
+            primaryEntity = base,
+            isSplitUpdateMode = false,
+            containerType = DataType.APK,
+            systemArch = Architecture.ARM64,
+            systemSdkInt = 36,
+            checkAppSignature = false,
+            checkOplusOsdk = check,
+            deviceOplusOsdkVersion = device,
+        )
+
+        val incompatible = analyze(true, "15.0")
+        assertTrue(incompatible.isOplusOsdkIncompatible)
+        assertEquals(InstallNotice.OplusOsdkIncompatible("15.1", "15.0"), incompatible.notices.single())
+        assertFalse(analyze(false, "15.0").isOplusOsdkIncompatible)
+        assertFalse(analyze(true, "15.1").isOplusOsdkIncompatible)
+        assertFalse(analyze(true, null).isOplusOsdkIncompatible)
+    }
+
     @Test
     fun `signing block declaration is informational and cannot produce mismatch action`() {
         val signatureInfo = AppSignatureInfo(

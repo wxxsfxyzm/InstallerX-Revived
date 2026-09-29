@@ -486,6 +486,7 @@
     <string name="tag_identical">相同</string>
     <string name="installer_prepare_identical_notice">当前安装包与已安装的应用文件完全一致，可以考虑跳过本次安装</string>
     <string name="installer_prepare_sdk_incompatible">系统 SDK 不满足应用要求</string>
+    <string name="installer_prepare_oplus_osdk_incompatible">设备的 Oplus OS SDK 版本（%1$s）低于应用要求（%2$s），无法安装</string>
     <string name="installer_prepare_type_downgrade">这是一个降级操作，可能会导致数据丢失或应用不稳定</string>
     <string name="installer_prepare_type_unknown_confirm">你确定要安装吗？</string>
     <string name="installer_prepare_signature_new_install">新安装。系统中未发现同包名应用。</string>
@@ -779,7 +780,7 @@
     <string name="permission_list_desc">查看应用请求的权限</string>
     <string name="installer_oppo_related">OPPO 相关</string>
     <string name="installer_show_oem_special">展示 OEM 附加信息</string>
-    <string name="installer_show_oem_special_desc">分析并在安装对话框展示 OEM 的 apk 附加信息</string>
+    <string name="installer_show_oem_special_desc">在安装对话框展示 OEM APK 附加信息。若应用要求的 Oplus OS SDK 版本高于设备版本，将显示错误并禁止安装。</string>
     <string name="reboot">重启</string>
     <string name="reboot_userspace">用户空间重启</string>
     <string name="reboot_recovery">重启到 Recovery</string>
