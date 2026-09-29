@@ -37,6 +37,7 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
         return InstallStateResult(
             notices = noticesUiModels.toMutableList(),
             buttonTextId = buttonTextId,
+            isOplusOsdkIncompatible = domainState.isOplusOsdkIncompatible,
         )
     }
 
@@ -104,6 +105,12 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
         is InstallNotice.SdkIncompatible -> NoticeModel(
             shortLabel = resources.tagSdk,
             fullDescription = resources.textSdkIncompatible,
+            color = resources.errorColor,
+        )
+
+        is InstallNotice.OplusOsdkIncompatible -> NoticeModel(
+            shortLabel = resources.tagOplusOsdk,
+            fullDescription = resources.textOplusOsdkIncompatible.format(notice.device, notice.required),
             color = resources.errorColor,
         )
 

@@ -31,6 +31,8 @@ class AnalyzeInstallStateUseCase {
         containerType: DataType?,
         systemArch: Architecture,
         systemSdkInt: Int,
+        checkOplusOsdk: Boolean = false,
+        deviceOplusOsdkVersion: String? = null,
         checkAppSignature: Boolean = true,
         showSignatureInfoOnMatch: Boolean = false,
         showSignatureDetails: Boolean = false,
@@ -166,6 +168,19 @@ class AnalyzeInstallStateUseCase {
             notices.add(0, InstallNotice.SdkIncompatible)
         }
 
+        val isOplusOsdkIncompatible = checkOplusOsdk &&
+            entityToInstall?.sourceType == DataType.APK &&
+            isOplusOsdkIncompatible(entityToInstall.minOsdkVersion, deviceOplusOsdkVersion)
+        if (isOplusOsdkIncompatible) {
+            notices.add(
+                0,
+                InstallNotice.OplusOsdkIncompatible(
+                    required = requireNotNull(entityToInstall.minOsdkVersion),
+                    device = requireNotNull(deviceOplusOsdkVersion),
+                ),
+            )
+        }
+
         // 4. Check Architecture Compatibility
         val appArch = (primaryEntity as? AppEntity.BaseEntity)?.arch
         if (appArch != null && appArch != Architecture.NONE && appArch != Architecture.UNKNOWN) {
@@ -205,7 +220,7 @@ class AnalyzeInstallStateUseCase {
             }
         }
 
-        return DomainInstallState(actionType, notices)
+        return DomainInstallState(actionType, notices, isOplusOsdkIncompatible)
     }
 
     private fun DataType?.supportsApkSignatureAnalysis() = when (this) {
