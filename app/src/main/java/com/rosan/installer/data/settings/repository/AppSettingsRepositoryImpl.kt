@@ -363,6 +363,6 @@ class AppSettingsRepositoryImpl(
     }
 
     private companion object {
-        private const val DEFAULT_SEED_COLOR = 0xFF6750A4.toInt()
+        private const val DEFAULT_SEED_COLOR = 0xFF4A672D.toInt()
     }
 }
