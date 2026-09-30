@@ -19,8 +19,8 @@ import com.rosan.installer.domain.engine.model.state.InstallNotice
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class AnalyzeInstallStateUseCaseTest {

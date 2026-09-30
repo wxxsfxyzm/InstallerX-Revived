@@ -2,9 +2,14 @@ name: PR CI
 
 on:
   pull_request:
+    types: [opened, reopened, synchronize]
     branches:
       - main
       - dev
+
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 # Set the absolute minimum permissions for the GITHUB_TOKEN
 permissions:
@@ -12,9 +17,26 @@ permissions:
   packages: read # Required if you pull dependencies from GitHub Packages
 
 jobs:
+  target_check:
+    name: PR Target
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check PR target branch
+        if: >
+          github.event.pull_request.base.ref == 'main' &&
+          github.event.pull_request.user.login != 'wxxsfxyzm'
+        run: |
+          echo "::error::External pull requests must target the 'dev' branch."
+          echo "Please change the base branch from 'main' to 'dev'. You do not need to recreate the pull request."
+          exit 1
+
   format_check:
     name: Code Style
+    needs: target_check
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout code
@@ -45,7 +67,9 @@ jobs:
 
   unit_tests:
     name: Unit Tests
+    needs: target_check
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -85,6 +109,7 @@ jobs:
       - format_check
       - unit_tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -122,6 +147,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: pr-debug-apk-${{ github.event.pull_request.head.sha }}
-          path: app/build/outputs/apk/**/debug/*.apk
+          path: app/build/outputs/apk/Preview/debug/app-Preview-debug.apk
+          if-no-files-found: error
           retention-days: 7
           archive: false
