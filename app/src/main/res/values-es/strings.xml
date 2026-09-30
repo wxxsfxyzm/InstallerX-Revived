@@ -437,7 +437,7 @@
     <string name="auto_background_install_desc">Instalación automática silenciosa al iniciar el cuadro de diálogo de instalación</string>
     <string name="installer_oppo_related">Relacionado con OPPO</string>
     <string name="installer_show_oem_special">Mostrar información adicional del OEM</string>
-    <string name="installer_show_oem_special_desc">Analizar y mostrar algún valor específico para los APKs OEM en el cuadro de diálogo de instalación</string>
+    <string name="installer_show_oem_special_desc">Mostrar la información del APK del fabricante (OEM) en el diálogo de instalación. Si un APK requiere una versión del SDK de Oplus OS más reciente que la disponible en este dispositivo, mostrar un error y desactivar la instalación.</string>
     <string name="config_request_update_ownership">Solicitar actualización de propiedad</string>
     <string name="config_request_update_ownership_desc">Establecer este instalador como fuente para futuras actualizaciones</string>
     <string name="installer_select_multi_apk">Instalación en lotes</string>
@@ -976,4 +976,5 @@
     <string name="config_scope_unknown_group">Ámbito desconocido</string>
     <string name="backup_settings_validation_duplicate_unknown_scope">Ámbito desconocido duplicado.</string>
     <string name="advanced">Avanzado</string>
+    <string name="installer_prepare_oplus_osdk_incompatible">La versión del SDK de Oplus OS del dispositivo (%1$s) es inferior a la que requiere la aplicación (%2$s); la instalación no está disponible</string>
 </resources>
