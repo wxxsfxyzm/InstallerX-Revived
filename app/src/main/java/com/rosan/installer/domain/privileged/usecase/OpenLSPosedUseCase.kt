@@ -11,6 +11,7 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.ComponentOpsProvider
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 
 class OpenLSPosedUseCase(
@@ -19,26 +20,41 @@ class OpenLSPosedUseCase(
 ) {
     private companion object {
         const val LSPOSED_SECRET_CODE = "android_secret_code://5776733"
+        const val VECTOR_SECRET_CODE = "android_secret_code://832867"
     }
 
     /**
-     * Attempts to open LSPosed via a privileged broadcast.
-     * @return true if the broadcast was sent, false if skipped due to authorizer rules.
+     * Attempts to open LSPosed or Vector via privileged secret-code broadcasts.
+     * @return true if the action was attempted, false if skipped due to authorizer rules.
      */
     suspend operator fun invoke(config: ConfigModel): Boolean {
         if (!config.shouldAttemptPrivilegedStart(capabilityProvider.isSystemApp)) return false
 
-        val intent = Intent().apply {
-            action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                SECRET_CODE_ACTION
-            } else {
-                SECRET_CODE_ACTION_OLD
-            }
-            data = LSPOSED_SECRET_CODE.toUri()
+        val action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            SECRET_CODE_ACTION
+        } else {
+            SECRET_CODE_ACTION_OLD
+        }
+
+        fun createSecretCodeIntent(secretCode: String): Intent = Intent().apply {
+            this.action = action
+            data = secretCode.toUri()
         }
 
         withTimeoutOrNull(DEFAULT_PRIVILEGED_START_TIMEOUT_MS.milliseconds) {
-            componentOpsProvider.sendBroadcastPrivileged(config, intent)
+            componentOpsProvider.sendBroadcastPrivileged(
+                config,
+                createSecretCodeIntent(LSPOSED_SECRET_CODE),
+            )
+        }
+
+        delay(100)
+
+        withTimeoutOrNull(DEFAULT_PRIVILEGED_START_TIMEOUT_MS.milliseconds) {
+            componentOpsProvider.sendBroadcastPrivileged(
+                config,
+                createSecretCodeIntent(VECTOR_SECRET_CODE),
+            )
         }
 
         return true
