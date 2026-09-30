@@ -36,17 +36,15 @@ class OpenLSPosedUseCase(
             SECRET_CODE_ACTION_OLD
         }
 
-        fun createSecretCodeIntent(secretCode: String): Intent {
-            return Intent().apply {
-                this.action = action
-                data = secretCode.toUri()
-            }
+        fun createSecretCodeIntent(secretCode: String): Intent = Intent().apply {
+            this.action = action
+            data = secretCode.toUri()
         }
 
         withTimeoutOrNull(DEFAULT_PRIVILEGED_START_TIMEOUT_MS.milliseconds) {
             componentOpsProvider.sendBroadcastPrivileged(
                 config,
-                createSecretCodeIntent(LSPOSED_SECRET_CODE)
+                createSecretCodeIntent(LSPOSED_SECRET_CODE),
             )
         }
 
@@ -55,7 +53,7 @@ class OpenLSPosedUseCase(
         withTimeoutOrNull(DEFAULT_PRIVILEGED_START_TIMEOUT_MS.milliseconds) {
             componentOpsProvider.sendBroadcastPrivileged(
                 config,
-                createSecretCodeIntent(VECTOR_SECRET_CODE)
+                createSecretCodeIntent(VECTOR_SECRET_CODE),
             )
         }
 
