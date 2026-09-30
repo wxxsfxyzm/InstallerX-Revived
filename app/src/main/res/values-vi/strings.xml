@@ -245,11 +245,11 @@
     <string name="ignore_battery_optimizations_desc">Hữu ích trên các ROM có chính sách chạy nền nghiêm ngặt. Nếu thông báo bị kẹt, hãy thử bỏ qua tối ưu hóa pin</string>
     <string name="ignore_battery_optimizations_desc_disabled">Đã bỏ qua</string>
     <string name="lock_default_installer">Đặt làm trình cài đặt mặc định</string>
-    <string name="lock_default_installer_desc">Đặt InstallerX Revived làm ứng dụng mặc định để cài đặt các apk</string>
+    <string name="lock_default_installer_desc">Đặt InstallerX Revived làm ứng dụng mặc định để cài đặt các APK</string>
     <string name="lock_default_installer_success">Thành công đặt làm trình cài đặt mặc định</string>
     <string name="lock_default_installer_failed">Không thể đặt làm trình cài đặt mặc định</string>
     <string name="unlock_default_installer">Bỏ đặt làm trình cài đặt mặc định</string>
-    <string name="unlock_default_installer_desc">Bỏ đặt InstallerX Revived làm trình cài đặt mặc định để cài đặt các apk</string>
+    <string name="unlock_default_installer_desc">Bỏ đặt InstallerX Revived làm trình cài đặt mặc định để cài đặt các APK</string>
     <string name="unlock_default_installer_success">Thành công bỏ đặt làm trình cài đặt mặc định</string>
     <string name="unlock_default_installer_failed">Không thể bỏ đặt làm trình cài đặt mặc định</string>
     <string name="details">Chi tiết</string>
@@ -314,7 +314,7 @@
     <string name="exception_install_failed_unknown">Lỗi không xác định</string>
     <string name="exception_resolve_failed">Phân giải URI thất bại</string>
     <string name="exception_resolve_failed_link_not_valid">Liên kết này không chứa một tệp hợp lệ</string>
-    <string name="exception_resolve_failed_no_internet_access">Truy cập Internet bị tắt trong cài đặt ứng dụng. Bật nó trong Cài đặt mạng để sử dụng tính năng này.</string>
+    <string name="exception_resolve_failed_no_internet_access">Truy cập Internet đã bị tắt trong cài đặt của ứng dụng. Bật nó trong Cài đặt mạng để sử dụng tính năng này.</string>
     <string name="exception_analyse_failed_all_files_unsupported">Tệp không được hỗ trợ</string>
     <string name="exception_authentication_failed">Xác thực người dùng thất bại</string>
     <string name="exception_install_failed_invalid_uri">URI Không hợp lệ</string>
@@ -740,8 +740,8 @@
     <string name="working_status_none_authorizer_desc">Không sử dụng bất kỳ đặc quyền nào, yêu cầu quyền Nguồn Không xác định để cài đặt các ứng dụng</string>
     <string name="working_status_not_default_installer_click_details">Nhấn để xem chi tiết</string>
     <string name="working_status_default_installer_tip">Đặt ứng dụng này làm trình cài đặt gói mặc định để tiếp quản hầu hết các yêu cầu cài đặt. Lưu ý rằng các trường hợp sau không thể bị chặn:\n- OEM hạn chế việc sửa đổi trình cài đặt mặc định\n- Người khởi tạo chỉ định một Thành phần đích\n- Người khởi tạo sử dụng một Cài đặt Phiên</string>
-    <string name="setting_lsposed_module_title">Mô-đun LSPosed Đã bật</string>
-    <string name="setting_lsposed_module_desc">Bật tùy chọn này nếu bạn đã buộc trình cài đặt mặc định tiếp quản thông qua một mô-đun LSPosed bên thứ ba. Cái này sẽ vô hiệu hóa việc kiểm tra trạng thái bên tronh, và trang chủ sẽ luôn hiển thị là Đã kích hoạt</string>
+    <string name="setting_lsposed_module_title">Mô-đun Xposed Đã bật</string>
+    <string name="setting_lsposed_module_desc">Bật tùy chọn này nếu bạn đã buộc trình cài đặt mặc định tiếp quản thông qua một mô-đun Xposed bên thứ ba. Cái này sẽ vô hiệu hóa việc kiểm tra trạng thái bên trong, và trang chủ sẽ luôn hiển thị là Đã kích hoạt</string>
     <string name="home_stat_authorizers">Các đặc quyền Khả dụng</string>
     <string name="home_stat_profiles">Hồ sơ</string>
     <string name="home_label_lsp_link">Đang tìm một mô-đun?</string>
@@ -950,4 +950,20 @@
     <string name="exception_analyse_failed_streaming_source_unsupported">Nguồn này không thể được phân tích ở Chế độ lưu trữ thấp. Chọn Tải xuống Thông minh hoặc Đầy đủ.</string>
     <string name="exception_analyse_failed_source_materialization">Không thể tải xuống nguồn hoàn chỉnh để phân tích</string>
     <string name="config_allow_sig_unknown_http_lightweight_desc">Trong khi phân tích HTTP nhẹ, mọi điểm bất thường về chữ ký đều được đánh giá theo cài đặt này.</string>
+    <string name="history_recording">Bản ghi lịch sử</string>
+    <string name="history_enable">Bật lịch sử</string>
+    <string name="history_show_indicators">Hiện chỉ báo</string>
+    <string name="history_disabled_title">Lịch sử đã tắt</string>
+    <string name="history_disabled_desc">Các thao tác cài đặt và gỡ cài đặt mới sẽ không được ghi lại.</string>
+    <string name="history_disable_confirm_title">Tắt lịch sử?</string>
+    <string name="history_disable_confirm_desc">Bạn có muốn dọn lịch sử đã ghi lại không? Các thao tác mới sẽ không được ghi lại khi lịch sử đã tắt.</string>
+    <string name="history_disable_and_clear">Dọn và tắt</string>
+    <string name="history_disable_and_keep">Giữ và tắt</string>
+    <string name="history_version_self_update">Tự cập nhật</string>
+    <string name="advanced">Nâng cao</string>
+    <string name="backup_settings_validation_duplicate_unknown_scope">Phạm vi Không xác định Trùng lặp.</string>
+    <string name="config_scope_unknown">Không xác định</string>
+    <string name="config_scope_apps">Ứng dụng</string>
+    <string name="config_scope_unknown_group">Phạm vi không xác định</string>
+    <string name="sort_by_show_unknown_scope">Hiện phạm vi không xác định</string>
 </resources>
