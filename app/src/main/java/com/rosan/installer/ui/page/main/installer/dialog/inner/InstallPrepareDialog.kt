@@ -286,8 +286,10 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
     val analyzeInstallStateUseCase = koinInject<AnalyzeInstallStateUseCase>()
     val deviceCapabilityProvider = koinInject<DeviceCapabilityProvider>()
     val checkOplusOsdk = settings.showOPPOSpecial &&
-        (DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
-            DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS)
+        (
+            DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
+                DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+            )
     val deviceOplusOsdkVersion = if (checkOplusOsdk) deviceCapabilityProvider.oplusOSdkVersion else null
 
     // Instantiate the UI mapper with the required Compose resources
