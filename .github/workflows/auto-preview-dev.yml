@@ -205,7 +205,7 @@ jobs:
       - name: Upload mapping
         uses: actions/upload-artifact@v7
         with:
-          name: dev-apk-${{ steps.commit_sha.outputs.SHORT_SHA }}
+          name: mapping
           path: app/build/outputs/apk/**/release/mapping.txt
           retention-days: 15
           archive: false
