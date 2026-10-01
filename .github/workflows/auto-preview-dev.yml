@@ -201,3 +201,11 @@ jobs:
           path: app/build/outputs/apk/**/release/*.apk
           retention-days: 15
           archive: false
+
+      - name: Upload mapping
+        uses: actions/upload-artifact@v7
+        with:
+          name: mapping
+          path: app/build/outputs/apk/**/release/mapping.txt
+          retention-days: 15
+          archive: false
