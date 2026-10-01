@@ -213,3 +213,11 @@ jobs:
         run: |
           pip3 install telethon
           python3 .github/bot.py "${{ steps.rename_apks.outputs.apk }}"
+
+      - name: Upload mapping
+        uses: actions/upload-artifact@v7
+        with:
+          name: mapping
+          path: app/build/outputs/apk/**/release/mapping.txt
+          retention-days: 15
+          archive: false
