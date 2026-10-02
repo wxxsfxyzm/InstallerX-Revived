@@ -414,7 +414,7 @@
     <string name="uninstall_enter_package_name">Введіть назву пакета, щоб видалити</string>
     <string name="installer_temp_settings_tip">Ці налаштування є тимчасовими для цього сеансу. Щоб зберегти їх, перейдіть у Налаштування</string>
     <string name="installer_show_oem_special">Показати додаткову інформацію OEM</string>
-    <string name="installer_show_oem_special_desc">Проаналізуйте та покажіть певне значення для oem apk(s) у діалоговому вікні встановлення</string>
+    <string name="installer_show_oem_special_desc">Показати OEM APK інформацію у діалоговому вікні встановлення. Якщо для APK потрібен новіший Oplus OS SDK, ніж цей пристрій, показати помилку та вимкнути встановлення.</string>
     <string name="lab_show_apk_path">Показати шлях до файлу</string>
     <string name="lab_show_apk_path_desc">Відображати шлях до файлу в деталях програми</string>
     <string name="lab_show_install_initiator">Показати ініціатора встановлення</string>
@@ -966,4 +966,5 @@
     <string name="config_scope_unknown_group">Невідома область</string>
     <string name="sort_by_show_unknown_scope">Показати невідому область</string>
     <string name="advanced">Розширений</string>
+    <string name="installer_prepare_oplus_osdk_incompatible">Пристрій Oplus OS SDK (%1$s) є меншим, ніж потрібно для роботи програми (%2$s); встановлення недоступне</string>
 </resources>

@@ -474,7 +474,7 @@
     <string name="auto_background_install_desc">Автоматическая установка в фоне при нажатии кнопки \'Установить\'</string>
     <string name="installer_oppo_related">Связанные с OPPO</string>
     <string name="installer_show_oem_special">Показывать дополнительную информацию OEM</string>
-    <string name="installer_show_oem_special_desc">Проанализируйте и укажите определенное значение для oem apk(s) в диалоговом окне установки</string>
+    <string name="installer_show_oem_special_desc">Показать OEM APK информация в диалоговом окне установки. Если для APK требуется более новая версия Oplus OS SDK, чем установлена на данном устройстве, отобразите сообщение об ошибке и заблокируйте установку.</string>
     <string name="config_request_update_ownership">Запрос прав на обновление</string>
     <string name="config_request_update_ownership_desc">Назначить этот установщик в качестве источника для будущих обновлений</string>
     <string name="installer_select_multi_apk">Пакетная установка</string>
@@ -966,4 +966,5 @@
     <string name="config_scope_unknown_group">Неизвестная область</string>
     <string name="sort_by_show_unknown_scope">Показать неизвестную область</string>
     <string name="advanced">Расширенный</string>
+    <string name="installer_prepare_oplus_osdk_incompatible">Устройство Oplus OS SDK (%1$s) меньше, чем требуется приложению (%2$s); установка недоступна</string>
 </resources>

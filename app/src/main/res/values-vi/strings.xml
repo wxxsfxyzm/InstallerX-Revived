@@ -573,7 +573,7 @@
     <string name="show_intelligent_suggestion_desc">Hiển thị các gợi ý thông minh về lỗi cài đặt</string>
     <string name="installer_oppo_related">Liên quan đến OPPO</string>
     <string name="installer_show_oem_special">Hiện thông tin bổ sung OEM</string>
-    <string name="installer_show_oem_special_desc">Phân tích và hiện một số giá trị cụ thể cho các apk OEM ở hộp thoại cài đặt</string>
+    <string name="installer_show_oem_special_desc">Hiển thị thông tin APK OEM trong hộp thoại cài đặt. Nếu một APK yêu cầu SDK OnePlus OS mới hơn so với phiên bản hiện có trên thiết bị này, hiện một thông báo lỗi và tắt việc cài đặt.</string>
     <string name="reboot">Khởi động lại</string>
     <string name="reboot_userspace">Khởi động lại không gian người dùng</string>
     <string name="reboot_recovery">Khởi động lại vào Recovery</string>
@@ -966,4 +966,5 @@
     <string name="config_scope_apps">Ứng dụng</string>
     <string name="config_scope_unknown_group">Phạm vi không xác định</string>
     <string name="sort_by_show_unknown_scope">Hiện phạm vi không xác định</string>
+    <string name="installer_prepare_oplus_osdk_incompatible">SDK OnePlus OS của thiết bị (%1$s) thấp hơn mức ứng dụng yêu cầu (%2$s); cài đặt không khả dụng</string>
 </resources>
