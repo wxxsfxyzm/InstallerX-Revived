@@ -39,7 +39,7 @@ internal class CommonsZipFileProvider {
 
     fun openMetadata(file: DataEntity.FileEntity): ZipFile = open(file, ignoreLocalFileHeaders = true)
 
-    /** Opens an entry payload after enforcing InstallerX's STORE/DEFLATE-only policy. */
+    /** Opens an entry payload after checking its compression method against the bundled decoders. */
     fun openEntry(zipFile: ZipFile, entry: ZipArchiveEntry): InputStream {
         validateEntry(entry)
         return synchronized(zipFile) {
@@ -62,7 +62,7 @@ internal class CommonsZipFileProvider {
         return resolveDataRange(zipFile, entry)
     }
 
-    /** Resolves compressed payload bytes for STORE/DEFLATE entries while metadata is still open. */
+    /** Resolves compressed payload bytes while metadata is still open. */
     fun resolveDataRange(zipFile: ZipFile, entry: ZipArchiveEntry): StoredDataRange? {
         if (entry.compressedSize < 0L) return null
         return synchronized(zipFile) {

@@ -227,7 +227,7 @@ class SeekableZipReaderTest {
             dataOffset = 0,
             compressedSize = 0,
             uncompressedSize = 0,
-            compressionMethod = XZ_METHOD,
+            compressionMethod = ZSTANDARD_METHOD,
             crc = 0,
         )
 
@@ -442,7 +442,7 @@ class SeekableZipReaderTest {
         const val END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054B50L
         const val UTF8_FLAG = 1 shl 11
         const val DATA_DESCRIPTOR_FLAG = 1 shl 3
-        const val XZ_METHOD = 95
+        const val ZSTANDARD_METHOD = 93
         const val ZIP64_EXTRA_FIELD_ID = 0x0001
         const val UINT32_MAX = 0xFFFF_FFFFL
         const val APK_SIGNING_BLOCK_MIN_TOTAL_SIZE = 32

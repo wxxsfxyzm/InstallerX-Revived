@@ -1,6 +1,5 @@
 import com.mikepenz.aboutlibraries.plugin.DuplicateMode
 import com.mikepenz.aboutlibraries.plugin.DuplicateRule
-import java.io.File
 import java.util.Properties
 
 plugins {
@@ -204,6 +203,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 
     implementation(libs.commons.compress)
+    implementation(libs.xz)
     implementation(libs.androidx.profileinstaller)
     implementation(files(apksignerJar))
     "baselineProfile"(project(":baselineprofile"))
