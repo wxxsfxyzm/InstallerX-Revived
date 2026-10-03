@@ -20,6 +20,7 @@ import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
 import kotlin.math.min
 import org.apache.commons.compress.archivers.zip.ZipFile
+import org.tukaani.xz.SingleXZInputStream
 
 sealed class DataEntity(open var source: DataEntity? = null) {
     abstract fun getInputStream(): InputStream?
@@ -209,10 +210,20 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         override fun getInputStream(): InputStream {
             requireSupportedZipCompressionMethod(compressionMethod, name)
             val slice = FileSliceInputStream(parent, dataOffset, compressedSize)
-            val decoded = when (compressionMethod) {
-                ZipEntry.STORED -> slice
-                ZipEntry.DEFLATED -> RawDeflateInputStream(slice)
-                else -> error("Unsupported ZIP compression method: $compressionMethod")
+            val decoded = try {
+                when (compressionMethod) {
+                    ZipEntry.STORED -> slice
+                    ZipEntry.DEFLATED -> RawDeflateInputStream(slice)
+                    ZIP_COMPRESSION_XZ -> SingleXZInputStream(slice.buffered())
+                    else -> error("Unsupported ZIP compression method: $compressionMethod")
+                }
+            } catch (error: Exception) {
+                try {
+                    slice.close()
+                } catch (closeError: Exception) {
+                    error.addSuppressed(closeError)
+                }
+                throw error
             }
             return CrcVerifyingInputStream(decoded, uncompressedSize, crc, name)
         }
