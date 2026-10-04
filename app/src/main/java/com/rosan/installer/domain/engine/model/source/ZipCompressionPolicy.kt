@@ -6,15 +6,20 @@ import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import java.util.zip.ZipEntry
 
-/**
- * InstallerX only supports the compression methods required by regular ZIP/APK payloads.
- */
+internal const val ZIP_COMPRESSION_XZ = 95
+
+/** Compression methods supported by the bundled ZIP decoders. */
 fun requireSupportedZipCompressionMethod(compressionMethod: Int, entryName: String) {
-    if (compressionMethod == ZipEntry.STORED || compressionMethod == ZipEntry.DEFLATED) return
+    if (compressionMethod == ZipEntry.STORED ||
+        compressionMethod == ZipEntry.DEFLATED ||
+        compressionMethod == ZIP_COMPRESSION_XZ
+    ) {
+        return
+    }
 
     throw AnalyseException(
         errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
         message = "Unsupported ZIP compression method $compressionMethod for entry '$entryName'; " +
-            "only STORE (0) and DEFLATE (8) are supported",
+            "only STORE (0), DEFLATE (8), and XZ (95) are supported",
     )
 }

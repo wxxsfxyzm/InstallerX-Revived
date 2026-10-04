@@ -3,6 +3,7 @@
 package com.rosan.installer.data.engine.parser
 
 import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.engine.model.source.openZipEntryInputStream
 import com.rosan.installer.domain.engine.model.source.requireSupportedZipCompressionMethod
 import java.io.File
 import java.io.FilterInputStream
@@ -39,15 +40,12 @@ internal class CommonsZipFileProvider {
 
     fun openMetadata(file: DataEntity.FileEntity): ZipFile = open(file, ignoreLocalFileHeaders = true)
 
-    /** Opens an entry payload after enforcing InstallerX's STORE/DEFLATE-only policy. */
-    fun openEntry(zipFile: ZipFile, entry: ZipArchiveEntry): InputStream {
-        validateEntry(entry)
-        return synchronized(zipFile) {
-            // With lazy local headers, opening another entry seeks the same channel used by
-            // active payload streams. Commons locks payload reads on the channel, but does not
-            // use that lock for header resolution. Guard both operations with our archive lock.
-            LockedEntryInputStream(zipFile.getInputStream(entry), zipFile)
-        }
+    /** Opens an entry payload after checking its compression method against the bundled decoders. */
+    fun openEntry(zipFile: ZipFile, entry: ZipArchiveEntry): InputStream = synchronized(zipFile) {
+        // With lazy local headers, opening another entry seeks the same channel used by
+        // active payload streams. Commons locks payload reads on the channel, but does not
+        // use that lock for header resolution. Guard both operations with our archive lock.
+        LockedEntryInputStream(openZipEntryInputStream(zipFile, entry), zipFile)
     }
 
     /** Resolves the raw byte range of a stored entry without reading its payload. */
@@ -62,7 +60,7 @@ internal class CommonsZipFileProvider {
         return resolveDataRange(zipFile, entry)
     }
 
-    /** Resolves compressed payload bytes for STORE/DEFLATE entries while metadata is still open. */
+    /** Resolves compressed payload bytes while metadata is still open. */
     fun resolveDataRange(zipFile: ZipFile, entry: ZipArchiveEntry): StoredDataRange? {
         if (entry.compressedSize < 0L) return null
         return synchronized(zipFile) {

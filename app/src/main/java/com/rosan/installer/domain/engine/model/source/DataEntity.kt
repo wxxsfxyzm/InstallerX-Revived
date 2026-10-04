@@ -148,8 +148,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 return null
             }
             return try {
-                requireSupportedZipCompressionMethod(entry.method, entry.name)
-                ZipFileClosingInputStream(zipFile.getInputStream(entry), zipFile)
+                ZipFileClosingInputStream(openZipEntryInputStream(zipFile, entry), zipFile)
             } catch (error: Exception) {
                 zipFile.close()
                 throw error
@@ -209,10 +208,20 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         override fun getInputStream(): InputStream {
             requireSupportedZipCompressionMethod(compressionMethod, name)
             val slice = FileSliceInputStream(parent, dataOffset, compressedSize)
-            val decoded = when (compressionMethod) {
-                ZipEntry.STORED -> slice
-                ZipEntry.DEFLATED -> RawDeflateInputStream(slice)
-                else -> error("Unsupported ZIP compression method: $compressionMethod")
+            val decoded = try {
+                when (compressionMethod) {
+                    ZipEntry.STORED -> slice
+                    ZipEntry.DEFLATED -> RawDeflateInputStream(slice)
+                    ZIP_COMPRESSION_XZ -> openXzInputStream(slice)
+                    else -> error("Unsupported ZIP compression method: $compressionMethod")
+                }
+            } catch (error: Exception) {
+                try {
+                    slice.close()
+                } catch (closeError: Exception) {
+                    error.addSuppressed(closeError)
+                }
+                throw error
             }
             return CrcVerifyingInputStream(decoded, uncompressedSize, crc, name)
         }

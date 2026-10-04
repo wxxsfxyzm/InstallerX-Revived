@@ -6,6 +6,7 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.source.SeekableZipArchive
 import com.rosan.installer.domain.engine.model.source.SeekableZipEntry
+import com.rosan.installer.domain.engine.model.source.ZIP_COMPRESSION_XZ
 import com.rosan.installer.domain.engine.model.source.ZipEntryMetadata
 import java.io.Closeable
 import java.io.File
@@ -122,7 +123,11 @@ class UnifiedZipFile internal constructor(
             entry.size >= 0L &&
             entry.compressedSize >= 0L &&
             entry.crc >= 0L &&
-            (entry.compressionMethod == ZipEntry.STORED || entry.compressionMethod == ZipEntry.DEFLATED)
+            (
+                entry.compressionMethod == ZipEntry.STORED ||
+                    entry.compressionMethod == ZipEntry.DEFLATED ||
+                    entry.compressionMethod == ZIP_COMPRESSION_XZ
+                )
         ) {
             return DataEntity.SeekableZipEntryEntity(
                 name = entry.name,

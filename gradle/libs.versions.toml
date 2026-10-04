@@ -39,6 +39,7 @@ benchmarkMacroJunit4 = "1.5.0"
 baselineprofile = "1.5.0"
 profileinstaller = "1.4.1"
 commonsCompress = "1.28.0"
+xz = "1.12"
 spotless = "8.10.3"
 ktlint = "1.8.0"
 composeKtlintRules = "0.6.7"
@@ -99,6 +100,7 @@ ktx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-seria
 hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version = "6.1" }
 commons-cli = { group = "commons-cli", name = "commons-cli", version = "1.11.0" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
+xz = { module = "org.tukaani:xz", version.ref = "xz" }
 
 # Koin Inject
 # https://insert-koin.io/docs/setup/koin
