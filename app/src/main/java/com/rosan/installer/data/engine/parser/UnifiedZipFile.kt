@@ -123,9 +123,11 @@ class UnifiedZipFile internal constructor(
             entry.size >= 0L &&
             entry.compressedSize >= 0L &&
             entry.crc >= 0L &&
-            (entry.compressionMethod == ZipEntry.STORED ||
-                entry.compressionMethod == ZipEntry.DEFLATED ||
-                entry.compressionMethod == ZIP_COMPRESSION_XZ)
+            (
+                entry.compressionMethod == ZipEntry.STORED ||
+                    entry.compressionMethod == ZipEntry.DEFLATED ||
+                    entry.compressionMethod == ZIP_COMPRESSION_XZ
+                )
         ) {
             return DataEntity.SeekableZipEntryEntity(
                 name = entry.name,

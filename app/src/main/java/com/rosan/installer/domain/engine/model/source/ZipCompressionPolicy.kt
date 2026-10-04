@@ -13,7 +13,9 @@ fun requireSupportedZipCompressionMethod(compressionMethod: Int, entryName: Stri
     if (compressionMethod == ZipEntry.STORED ||
         compressionMethod == ZipEntry.DEFLATED ||
         compressionMethod == ZIP_COMPRESSION_XZ
-    ) return
+    ) {
+        return
+    }
 
     throw AnalyseException(
         errorType = AnalyseErrorType.ALL_FILES_UNSUPPORTED,
