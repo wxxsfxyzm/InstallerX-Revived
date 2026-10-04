@@ -72,6 +72,7 @@ import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -341,13 +342,17 @@ fun ThemeSettingsPage(viewModel: ThemeSettingsViewModel = koinViewModel()) {
                                                             ),
                                                             textColor = MaterialTheme.colorScheme.onSurface,
                                                             isSelected =
-                                                                uiState.seedColor == rawColor.color &&
-                                                                    !(
-                                                                        uiState.useDynamicColor &&
-                                                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                                                                        ),
+                                                                uiState.seedColor == rawColor.color,
                                                         ) {
-                                                            viewModel.dispatch(ThemeSettingsAction.SetSeedColor(rawColor.color))
+                                                            viewModel.dispatch(
+                                                                ThemeSettingsAction.SetSeedColor(
+                                                                    rawColor.color,
+                                                                    uiState.useDynamicColor &&
+                                                                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                                                        // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
+                                                                        uiState.availableColors != PresetColors,
+                                                                ),
+                                                            )
                                                         }
                                                     }
                                                 }

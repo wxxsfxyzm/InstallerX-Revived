@@ -634,6 +634,7 @@ class InstallerSelectionTest {
             useMiuixMonet = false,
             useAppleFloatingBar = false,
             seedColorInt = 0,
+            wallpaperSeedColorInt = 0,
             useDynColorFollowPkgIcon = false,
             useDynColorFollowPkgIconForLiveActivity = false,
             useBlur = false,

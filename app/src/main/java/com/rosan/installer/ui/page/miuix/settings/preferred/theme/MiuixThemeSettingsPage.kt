@@ -56,6 +56,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
+import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
@@ -274,12 +275,15 @@ fun MiuixThemeSettingsPage(
                                                         textStyle = MiuixTheme.textStyles.footnote1,
                                                         textColor = MiuixTheme.colorScheme.onSurface,
                                                         isSelected =
-                                                            uiState.seedColor == rawColor.color &&
-                                                                !(uiState.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S),
+                                                            uiState.seedColor == rawColor.color,
                                                     ) {
                                                         viewModel.dispatch(
                                                             ThemeSettingsAction.SetSeedColor(
                                                                 rawColor.color,
+                                                                uiState.useDynamicColor &&
+                                                                    Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                                                    // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
+                                                                    uiState.availableColors != PresetColors,
                                                             ),
                                                         )
                                                     }
