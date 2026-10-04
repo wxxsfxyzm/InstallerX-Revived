@@ -1,2 +1,0 @@
-# Zstd JNI resolves Java classes and fields by name from native code.
--keep class com.github.luben.zstd.** { *; }

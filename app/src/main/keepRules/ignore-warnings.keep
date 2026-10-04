@@ -5,3 +5,5 @@
 # Ignore warnings for optional Material Components dependency in MonetCompat
 -dontwarn com.google.android.material.color.DynamicColors
 
+# Commons Compress references the optional Zstandard ZIP decoder, which is not bundled.
+-dontwarn com.github.luben.zstd.ZstdInputStream

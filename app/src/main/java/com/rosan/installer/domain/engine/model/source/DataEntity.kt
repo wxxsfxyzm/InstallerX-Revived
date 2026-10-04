@@ -20,7 +20,6 @@ import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
 import kotlin.math.min
 import org.apache.commons.compress.archivers.zip.ZipFile
-import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream
 import org.tukaani.xz.SingleXZInputStream
 
 sealed class DataEntity(open var source: DataEntity? = null) {
@@ -215,7 +214,6 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 when (compressionMethod) {
                     ZipEntry.STORED -> slice
                     ZipEntry.DEFLATED -> RawDeflateInputStream(slice)
-                    ZIP_COMPRESSION_ZSTD_DEPRECATED, ZIP_COMPRESSION_ZSTD -> ZstdCompressorInputStream(slice.buffered())
                     ZIP_COMPRESSION_XZ -> SingleXZInputStream(slice.buffered())
                     else -> error("Unsupported ZIP compression method: $compressionMethod")
                 }

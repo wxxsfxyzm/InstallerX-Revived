@@ -204,11 +204,6 @@ dependencies {
 
     implementation(libs.commons.compress)
     implementation(libs.xz)
-    implementation(
-        variantOf(libs.zstd.jni) {
-            artifactType("aar")
-        },
-    )
     implementation(libs.androidx.profileinstaller)
     implementation(files(apksignerJar))
     "baselineProfile"(project(":baselineprofile"))
