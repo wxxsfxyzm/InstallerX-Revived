@@ -171,8 +171,7 @@ class XzMemoryLimitTest {
         return Fixture(TrackingFileEntity(file.path), dataOffset, compressed.size.toLong(), crc)
     }
 
-    private fun ByteArray.unsignedShortAt(offset: Int): Int =
-        (this[offset].toInt() and 0xFF) or ((this[offset + 1].toInt() and 0xFF) shl 8)
+    private fun ByteArray.unsignedShortAt(offset: Int): Int = (this[offset].toInt() and 0xFF) or ((this[offset + 1].toInt() and 0xFF) shl 8)
 
     private inner class Fixture(val source: TrackingFileEntity, val dataOffset: Long, val compressedSize: Long, val crc: Long) {
         fun slice() = DataEntity.SeekableZipEntryEntity(
