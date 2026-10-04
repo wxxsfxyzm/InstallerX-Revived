@@ -277,7 +277,7 @@ class CommonsZipFileProviderTest {
 
     @Test
     fun `rejects optional ZIP compression methods with an analysis exception`() {
-        listOf(ZSTANDARD_METHOD).forEach { compressionMethod ->
+        listOf(LZMA_METHOD).forEach { compressionMethod ->
             val entry = ZipArchiveEntry("base.apk").apply { method = compressionMethod }
 
             val error = assertFailsWith<AnalyseException> {
@@ -354,6 +354,6 @@ class CommonsZipFileProviderTest {
     private companion object {
         const val LOCAL_FILE_HEADER_SIGNATURE = 0x04034B50L
         const val UTF8_FLAG = 1 shl 11
-        const val ZSTANDARD_METHOD = 93
+        const val LZMA_METHOD = 14
     }
 }
