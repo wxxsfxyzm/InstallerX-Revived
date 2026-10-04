@@ -344,13 +344,15 @@ fun ThemeSettingsPage(viewModel: ThemeSettingsViewModel = koinViewModel()) {
                                                             isSelected =
                                                                 uiState.seedColor == rawColor.color,
                                                         ) {
-                                                            viewModel.dispatch(ThemeSettingsAction.SetSeedColor(
-                                                                rawColor.color,
-                                                                uiState.useDynamicColor &&
-                                                                    Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
-                                                                    // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
-                                                                    uiState.availableColors != PresetColors
-                                                            ))
+                                                            viewModel.dispatch(
+                                                                ThemeSettingsAction.SetSeedColor(
+                                                                    rawColor.color,
+                                                                    uiState.useDynamicColor &&
+                                                                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                                                        // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
+                                                                        uiState.availableColors != PresetColors,
+                                                                ),
+                                                            )
                                                         }
                                                     }
                                                 }
