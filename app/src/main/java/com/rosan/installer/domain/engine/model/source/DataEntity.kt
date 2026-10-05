@@ -20,6 +20,7 @@ import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
 import kotlin.math.min
 import org.apache.commons.compress.archivers.zip.ZipFile
+import org.tukaani.xz.SingleXZInputStream
 
 sealed class DataEntity(open var source: DataEntity? = null) {
     abstract fun getInputStream(): InputStream?
@@ -148,7 +149,8 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 return null
             }
             return try {
-                ZipFileClosingInputStream(openZipEntryInputStream(zipFile, entry), zipFile)
+                requireSupportedZipCompressionMethod(entry.method, entry.name)
+                ZipFileClosingInputStream(zipFile.getInputStream(entry), zipFile)
             } catch (error: Exception) {
                 zipFile.close()
                 throw error
@@ -212,7 +214,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 when (compressionMethod) {
                     ZipEntry.STORED -> slice
                     ZipEntry.DEFLATED -> RawDeflateInputStream(slice)
-                    ZIP_COMPRESSION_XZ -> openXzInputStream(slice)
+                    ZIP_COMPRESSION_XZ -> SingleXZInputStream(slice.buffered())
                     else -> error("Unsupported ZIP compression method: $compressionMethod")
                 }
             } catch (error: Exception) {
