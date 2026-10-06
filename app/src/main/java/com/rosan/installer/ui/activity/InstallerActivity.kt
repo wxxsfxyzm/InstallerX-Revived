@@ -705,14 +705,12 @@ class InstallerActivity :
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private object Api34Impl {
-        fun launchedFromUid(activity: InstallerActivity): Int =
-            runCatching { activity.launchedFromUid }.getOrDefault(Process.INVALID_UID)
+        fun launchedFromUid(activity: InstallerActivity): Int = runCatching { activity.launchedFromUid }.getOrDefault(Process.INVALID_UID)
     }
 
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     private object Api35Impl {
-        fun currentCallerUid(activity: InstallerActivity): Int =
-            runCatching { activity.currentCaller.uid }.getOrDefault(Process.INVALID_UID)
+        fun currentCallerUid(activity: InstallerActivity): Int = runCatching { activity.currentCaller.uid }.getOrDefault(Process.INVALID_UID)
     }
 
     private fun updateReturnResultStateFromIntent(intent: Intent) {
