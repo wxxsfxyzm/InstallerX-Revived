@@ -23,6 +23,7 @@ import com.rosan.installer.BuildConfig
 import com.rosan.installer.core.bitmask.addFlag
 import com.rosan.installer.core.bitmask.removeFlag
 import com.rosan.installer.core.device.model.Architecture
+import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.core.reflection.getValue
 import com.rosan.installer.data.engine.executor.PackageInstallerUtil.abiOverride
@@ -357,27 +358,16 @@ abstract class IBinderAppInstallerRepoImpl(
         // Android System will ignore INSTALL_ALLOW_DOWNGRADE for None ROOT/SYSTEM on Android 15+, no need to disable it here
 
         // --- Set abiOverride ---
-        // Get the architecture of the base APK.
-        // With the updated ApkParser logic, this accurately reflects the actual native libraries in the APK.
+        // Force an ABI only when this standalone/batch APK's concrete base architecture is advertised.
+        // Unadvertised, unknown, and pure Java/Kotlin packages stay unset so Android selects and validates.
         val baseApkArch = entities.firstOrNull { it.name == "base.apk" }?.arch
         Timber.d("Current Arch to install: $baseApkArch")
-
-        // Only set abiOverride if the APK actually contains native libraries.
-        // Pure Java/Kotlin apps (Architecture.NONE) should be left to the system to decide.
-        if ((sourceType == DataType.APK || sourceType == DataType.MULTI_APK || sourceType == DataType.MULTI_APK_ZIP) &&
-            baseApkArch != null &&
-            baseApkArch != Architecture.NONE
-        ) {
-            val abiToOverride = if (baseApkArch != Architecture.UNKNOWN) {
-                // Trust the parser result.
-                // Even for mismatched architectures (e.g., x86 on ARM), passing the actual arch string (e.g., "x86")
-                // allows the system to attempt binary translation (like Houdini) if available.
-                baseApkArch.arch
-            } else {
-                // Fallback for extremely rare cases where arch cannot be identified but native libs exist.
-                "armeabi-v7a"
-            }
-
+        val abiToOverride = resolveSessionAbiOverride(
+            sourceType = sourceType,
+            baseArchitecture = baseApkArch,
+            supportedArchitectures = DeviceConfig.supportedArchitectures,
+        )
+        if (abiToOverride != null) {
             Timber.d("Setting abiOverride to $abiToOverride")
             params.abiOverride = abiToOverride
         }
@@ -492,4 +482,25 @@ abstract class IBinderAppInstallerRepoImpl(
             }
         }
     }
+}
+
+internal fun resolveSessionAbiOverride(
+    sourceType: DataType,
+    baseArchitecture: Architecture?,
+    supportedArchitectures: List<Architecture>,
+): String? {
+    val eligibleSource = sourceType == DataType.APK ||
+        sourceType == DataType.MULTI_APK ||
+        sourceType == DataType.MULTI_APK_ZIP
+    if (!eligibleSource) return null
+    // UNKNOWN and NONE are never installable ABIs, even if malformed device data lists them.
+    if (
+        baseArchitecture == null ||
+        baseArchitecture == Architecture.UNKNOWN ||
+        baseArchitecture == Architecture.NONE ||
+        baseArchitecture !in supportedArchitectures
+    ) {
+        return null
+    }
+    return baseArchitecture.arch
 }
