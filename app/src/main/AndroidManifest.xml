@@ -230,6 +230,24 @@
             </intent-filter>
         </receiver>
 
+        <!--
+            Guarded by DUMP rather than a custom permission. A custom permission cannot work here:
+            callers only hold one by declaring it in their own manifest, which third-party
+            automation and the shell UID cannot do. DUMP is signature|privileged|development, so
+            the shell UID, root and privileged system apps already hold it, while an ordinary
+            sideloaded app is rejected before onReceive runs. The development flag does allow
+            `adb shell pm grant` to widen that, which requires the ADB access this entry point
+            already assumes.
+        -->
+        <receiver
+            android:name=".framework.receiver.DefaultInstallerReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="com.rosan.installer.action.SET_DEFAULT_INSTALLER" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="app_description_title"
             android:resource="@string/uninstall_title" />

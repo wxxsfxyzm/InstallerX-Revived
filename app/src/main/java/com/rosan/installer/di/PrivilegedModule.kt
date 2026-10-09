@@ -12,6 +12,7 @@ import com.rosan.installer.domain.privileged.provider.SystemInfoProvider
 import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenAppUseCase
 import com.rosan.installer.domain.privileged.usecase.OpenLSPosedUseCase
+import com.rosan.installer.domain.privileged.usecase.ResolveAuthorizerCandidatesUseCase
 import com.rosan.installer.framework.privileged.core.infrastructure.lifecycle.RecyclerManager
 import com.rosan.installer.framework.privileged.core.infrastructure.process.AppProcessTerminal
 import com.rosan.installer.framework.privileged.core.infrastructure.recycler.AppProcessRecycler
@@ -51,6 +52,7 @@ val privilegedModule = module {
     factoryOf(::OpenAppUseCase)
     factoryOf(::OpenLSPosedUseCase)
     factoryOf(::GetAvailableUsersUseCase)
+    factoryOf(::ResolveAuthorizerCandidatesUseCase)
 
     // Recycler Infrastructure
 

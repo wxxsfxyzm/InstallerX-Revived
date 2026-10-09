@@ -263,6 +263,12 @@
     <string name="unlock_default_installer_desc">清除锁定时授权方式应尽量与锁定时一致，否则可能无效</string>
     <string name="unlock_default_installer_success">清除成功</string>
     <string name="unlock_default_installer_failed">清除失败</string>
+    <string name="default_installer_changed_with">已改用 %1$s 变更默认安装器</string>
+    <string name="default_installer_change_failed">默认安装器变更失败：%1$s</string>
+    <string name="default_installer_lsposed_managed">默认安装器由 Xposed 模块接管，无需变更</string>
+    <string name="default_installer_unchanged">未能确认默认安装器已变更</string>
+    <string name="default_installer_no_authorizer">没有可用于变更默认安装器的授权方式</string>
+    <string name="default_installer_timed_out">授权方式未在超时前响应</string>
     <string name="locking_default_installer">正在锁定默认安装器…</string>
     <string name="unlocking_default_installer">正在清除默认安装器…</string>
     <string name="details">详情</string>
