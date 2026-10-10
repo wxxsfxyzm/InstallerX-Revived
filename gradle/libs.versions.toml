@@ -40,9 +40,9 @@ baselineprofile = "1.5.0"
 profileinstaller = "1.4.1"
 commonsCompress = "1.28.0"
 xz = "1.12"
-spotless = "8.10.3"
+spotless = "8.10.4"
 ktlint = "1.8.0"
-composeKtlintRules = "0.6.7"
+composeKtlintRules = "0.6.8"
 
 [plugins]
 installerx-application = { id = "installerx.android.application" }
@@ -97,7 +97,7 @@ room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref
 ktx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "ktx-serialization" }
 # AndroidHiddenApiBypass
 # https://github.com/LSPosed/AndroidHiddenApiBypass
-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version = "6.1" }
+hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version = "6.2" }
 commons-cli = { group = "commons-cli", name = "commons-cli", version = "1.11.0" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
