@@ -400,7 +400,7 @@
     <string name="exception_install_failed_missing_split">Pacote(s) dividido(s) necessário(s) ausente(s)</string>
     <string name="installer_oppo_related">Relacionado ao OPPO</string>
     <string name="installer_show_oem_special">Mostrar informações extras do OEM</string>
-    <string name="installer_show_oem_special_desc">Analise e mostre algum valor específico para APK(S) do fabricante na caixa de diálogo de instalação</string>
+    <string name="installer_show_oem_special_desc">Exibir as informações do APK do fabricante na caixa de diálogo de instalação. Se um APK exigir uma versão mais recente do SDK do Oplus OS do que a disponível neste dispositivo, exibir uma mensagem de erro e desativar a instalação.</string>
     <string name="config_global_default">Padrão Global</string>
     <string name="installer_version_name_label">Nome da Versão:</string>
     <string name="installer_version_code_label">Código da Versão:</string>
@@ -966,4 +966,5 @@
     <string name="config_scope_unknown_group">Escopo desconhecido</string>
     <string name="sort_by_show_unknown_scope">Mostrar escopo desconhecido</string>
     <string name="advanced">Avançado</string>
+    <string name="installer_prepare_oplus_osdk_incompatible">A versão do SDK do sistema operacional do dispositivo Oplus (%1$s) é inferior à exigida pelo app (%2$s); a instalação não está disponível</string>
 </resources>
