@@ -33,12 +33,12 @@ import com.rosan.installer.domain.history.usecase.VersionChangeResolver
 import com.rosan.installer.domain.history.usecase.historyErrorSummary
 import com.rosan.installer.domain.history.usecase.historyErrorType
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
+import com.rosan.installer.domain.privileged.usecase.ResolveAuthorizerCandidatesUseCase
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
-import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerPreferences
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
@@ -61,6 +61,7 @@ class ProcessInstallationUseCase(
     private val capabilityProvider: DeviceCapabilityProvider,
     private val installedPackageSignatureProvider: InstalledPackageSignatureProvider,
     private val recordOperationHistory: RecordOperationHistoryUseCase,
+    private val resolveAuthorizerCandidates: ResolveAuthorizerCandidatesUseCase,
 ) {
     companion object {
         private const val MODULE_INSTALL_BANNER = """
@@ -352,7 +353,7 @@ class ProcessInstallationUseCase(
             return config
         }
 
-        val candidates = buildAuthorizerCandidates(config)
+        val candidates = resolveAuthorizerCandidates(config.authorizer, config.customizeAuthorizer)
         if (candidates.isEmpty()) {
             submitInstall(
                 config,
@@ -416,25 +417,6 @@ class ProcessInstallationUseCase(
             onProgress = onProgress,
             onPhaseChanged = onPhaseChanged,
         )
-    }
-
-    private suspend fun buildAuthorizerCandidates(config: ConfigModel): List<Authorizer> {
-        val fallbackAuthorizers = SmartAuthorizerPreferences.decode(
-            value = appSettingsRepo
-                .getString(StringSetting.SmartAuthorizerCandidates)
-                .first(),
-            isSessionInstallSupported = capabilityProvider.isSessionInstallSupported,
-        )
-            .filter { it.enabled }
-            .map { it.authorizer }
-
-        return buildList {
-            if (config.authorizer != Authorizer.Global) add(config.authorizer)
-            addAll(fallbackAuthorizers)
-        }.filter { authorizer ->
-            authorizer != Authorizer.Global &&
-                (authorizer != Authorizer.Customize || config.customizeAuthorizer.isNotBlank())
-        }.distinct()
     }
 
     private fun ConfigModel.withAuthorizerAdjustedInstallFlags(): ConfigModel {
