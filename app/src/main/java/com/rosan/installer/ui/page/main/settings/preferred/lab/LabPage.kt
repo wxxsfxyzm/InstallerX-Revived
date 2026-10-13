@@ -220,6 +220,34 @@ fun LabPage(useBlur: Boolean, viewModel: LabSettingsViewModel = koinViewModel())
                     }
                 }
             }
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.lab_compatibility),
+                ) {
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Authorizer,
+                            title = stringResource(R.string.lab_enable_abi_override),
+                            description = stringResource(R.string.lab_enable_abi_override_desc),
+                            checked = uiState.labEnableAbiOverride,
+                            onCheckedChange = {
+                                viewModel.dispatch(LabSettingsAction.LabChangeEnableAbiOverride(it))
+                            },
+                        )
+                    }
+                    item(animatedVisibility = uiState.labEnableAbiOverride) {
+                        SwitchWidget(
+                            icon = AppIcons.Authorizer,
+                            title = stringResource(R.string.lab_try_different_architecture),
+                            description = stringResource(R.string.lab_try_different_architecture_desc),
+                            checked = uiState.labTryDifferentArchitecture,
+                            onCheckedChange = {
+                                viewModel.dispatch(LabSettingsAction.LabChangeTryDifferentArchitecture(it))
+                            },
+                        )
+                    }
+                }
+            }
             if (AppConfig.isRespectPlatformInstallPolicyAvailable) {
                 item {
                     SegmentedColumn(

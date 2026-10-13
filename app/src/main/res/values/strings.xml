@@ -943,6 +943,11 @@
     <string name="lab_update_github_proxy_custom">Custom GHProxy</string>
     <string name="lab_update_github_proxy_url">Custom URL</string>
     <string name="lab_unstable_features">Unstable features</string>
+    <string name="lab_compatibility">Compatibility</string>
+    <string name="lab_enable_abi_override">Try translation</string>
+    <string name="lab_enable_abi_override_desc">Try installing native libraries within the same architecture family. Requires system support</string>
+    <string name="lab_try_different_architecture">Other architectures</string>
+    <string name="lab_try_different_architecture_desc">Also try installing native libraries from other architecture families</string>
     <string name="lab_show_apk_path">Show file path</string>
     <string name="lab_show_apk_path_label">File path</string>
     <string name="lab_show_apk_path_desc">Display the file path in app details</string>

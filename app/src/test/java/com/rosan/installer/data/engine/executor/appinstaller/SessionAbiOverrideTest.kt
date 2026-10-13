@@ -10,51 +10,156 @@ import kotlin.test.assertNull
 
 class SessionAbiOverrideTest {
     @Test
-    fun `leaves unadvertised architectures unset`() {
-        val arm64Only = listOf(Architecture.ARM64)
-        val arm64AndArm = listOf(Architecture.ARM64, Architecture.ARM)
-
-        assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.X86_64, arm64Only))
-        assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.X86_64, arm64AndArm))
-        assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.ARM, arm64Only))
+    fun `leaves every architecture unset by default and when disabled`() {
+        for (sourceType in DataType.entries) {
+            for (architecture in Architecture.entries) {
+                assertNull(resolveSessionAbiOverride(sourceType, architecture, Architecture.ARM64))
+                assertNull(
+                    resolveSessionAbiOverride(
+                        sourceType,
+                        architecture,
+                        Architecture.ARM64,
+                        enableAbiOverride = false,
+                        tryDifferentArchitecture = true,
+                    ),
+                )
+            }
+        }
     }
 
     @Test
-    fun `overrides advertised concrete architectures with their abi strings`() {
-        assertEquals(
-            "arm64-v8a",
-            resolveSessionAbiOverride(DataType.APK, Architecture.ARM64, listOf(Architecture.ARM64)),
+    fun `both opt ins preserve legacy concrete abis including translation candidates`() {
+        val architectures = mapOf(
+            Architecture.ARM64 to "arm64-v8a",
+            Architecture.ARM to "armeabi-v7a",
+            Architecture.ARMEABI to "armeabi",
+            Architecture.X86 to "x86",
+            Architecture.X86_64 to "x86_64",
+            Architecture.MIPS to "mips",
+            Architecture.MIPS64 to "mips64",
         )
-        assertEquals(
-            "x86_64",
-            resolveSessionAbiOverride(DataType.APK, Architecture.X86_64, listOf(Architecture.X86_64)),
+        for ((architecture, abi) in architectures) {
+            assertEquals(
+                abi,
+                resolveSessionAbiOverride(
+                    DataType.APK,
+                    architecture,
+                    Architecture.ARM64,
+                    enableAbiOverride = true,
+                    tryDifferentArchitecture = true,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `main opt in restores the arm32 fallback on arm devices`() {
+        for (sourceType in listOf(DataType.APK, DataType.MULTI_APK, DataType.MULTI_APK_ZIP)) {
+            assertEquals(
+                "armeabi-v7a",
+                resolveSessionAbiOverride(sourceType, Architecture.UNKNOWN, Architecture.ARM64, enableAbiOverride = true),
+            )
+            assertNull(resolveSessionAbiOverride(sourceType, null, Architecture.ARM64, enableAbiOverride = true))
+            assertNull(resolveSessionAbiOverride(sourceType, Architecture.NONE, Architecture.ARM64, enableAbiOverride = true))
+        }
+    }
+
+    @Test
+    fun `both opt ins limit overrides to apk and batch apk sources`() {
+        val eligibleSources = listOf(DataType.APK, DataType.MULTI_APK, DataType.MULTI_APK_ZIP)
+        for (sourceType in eligibleSources) {
+            assertEquals(
+                "arm64-v8a",
+                resolveSessionAbiOverride(
+                    sourceType,
+                    Architecture.ARM64,
+                    Architecture.ARM64,
+                    enableAbiOverride = true,
+                    tryDifferentArchitecture = true,
+                ),
+            )
+        }
+        for (sourceType in DataType.entries - eligibleSources.toSet()) {
+            assertNull(
+                resolveSessionAbiOverride(
+                    sourceType,
+                    Architecture.ARM64,
+                    Architecture.ARM64,
+                    enableAbiOverride = true,
+                    tryDifferentArchitecture = true,
+                ),
+            )
+            assertNull(
+                resolveSessionAbiOverride(
+                    sourceType,
+                    Architecture.UNKNOWN,
+                    Architecture.ARM64,
+                    enableAbiOverride = true,
+                    tryDifferentArchitecture = true,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `main opt in permits 32 and 64 bit overrides within the same family`() {
+        val families = listOf(
+            listOf(Architecture.ARMEABI, Architecture.ARM, Architecture.ARM64),
+            listOf(Architecture.X86, Architecture.X86_64),
+            listOf(Architecture.MIPS, Architecture.MIPS64),
         )
-
-        val translated = listOf(Architecture.X86_64, Architecture.ARM)
-        assertEquals("x86_64", resolveSessionAbiOverride(DataType.APK, Architecture.X86_64, translated))
-        assertEquals("armeabi-v7a", resolveSessionAbiOverride(DataType.APK, Architecture.ARM, translated))
+        for (family in families) {
+            for (device in family) {
+                for (app in family) {
+                    assertEquals(
+                        app.arch,
+                        resolveSessionAbiOverride(DataType.APK, app, device, enableAbiOverride = true),
+                    )
+                }
+            }
+        }
     }
 
     @Test
-    fun `leaves empty unknown none and missing base metadata unset`() {
-        val malformed = listOf(Architecture.UNKNOWN, Architecture.NONE, Architecture.ARM64)
-
-        assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.ARM64, emptyList()))
-        assertNull(resolveSessionAbiOverride(DataType.APK, null, listOf(Architecture.ARM64)))
-        assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.UNKNOWN, malformed))
-        assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.NONE, malformed))
-        assertNull(resolveSessionAbiOverride(DataType.MULTI_APK, null, malformed))
+    fun `different architecture is disabled by default for arm and x86 in both directions`() {
+        val arm = listOf(Architecture.ARMEABI, Architecture.ARM, Architecture.ARM64)
+        val x86 = listOf(Architecture.X86, Architecture.X86_64)
+        for (armArchitecture in arm) {
+            for (x86Architecture in x86) {
+                assertNull(
+                    resolveSessionAbiOverride(DataType.APK, armArchitecture, x86Architecture, enableAbiOverride = true),
+                )
+                assertNull(
+                    resolveSessionAbiOverride(DataType.APK, x86Architecture, armArchitecture, enableAbiOverride = true),
+                )
+            }
+        }
     }
 
     @Test
-    fun `limits overrides to apk and batch apk sources`() {
-        val supported = listOf(Architecture.ARM64)
-
-        assertEquals("arm64-v8a", resolveSessionAbiOverride(DataType.APK, Architecture.ARM64, supported))
-        assertEquals("arm64-v8a", resolveSessionAbiOverride(DataType.MULTI_APK, Architecture.ARM64, supported))
-        assertEquals("arm64-v8a", resolveSessionAbiOverride(DataType.MULTI_APK_ZIP, Architecture.ARM64, supported))
-        assertNull(resolveSessionAbiOverride(DataType.APKS, Architecture.ARM64, supported))
-        assertNull(resolveSessionAbiOverride(DataType.APKM, Architecture.ARM64, supported))
-        assertNull(resolveSessionAbiOverride(DataType.XAPK, Architecture.ARM64, supported))
+    fun `unknown fallback respects the different architecture opt in`() {
+        for (device in listOf(Architecture.X86_64, Architecture.MIPS64, Architecture.UNKNOWN, Architecture.NONE)) {
+            assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.UNKNOWN, device, enableAbiOverride = true))
+            assertNull(resolveSessionAbiOverride(DataType.APK, Architecture.ARM64, device, enableAbiOverride = true))
+            assertEquals(
+                "armeabi-v7a",
+                resolveSessionAbiOverride(
+                    DataType.APK,
+                    Architecture.UNKNOWN,
+                    device,
+                    enableAbiOverride = true,
+                    tryDifferentArchitecture = true,
+                ),
+            )
+            assertNull(
+                resolveSessionAbiOverride(
+                    DataType.APK,
+                    Architecture.NONE,
+                    device,
+                    enableAbiOverride = true,
+                    tryDifferentArchitecture = true,
+                ),
+            )
+        }
     }
 }

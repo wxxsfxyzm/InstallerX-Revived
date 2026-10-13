@@ -73,6 +73,8 @@ data class AppPreferences(
     val labShowInstallInitiator: Boolean,
     val labInstallWithoutUserAction: Boolean,
     val labRespectPlatformInstallPolicy: Boolean,
+    val labEnableAbiOverride: Boolean,
+    val labTryDifferentArchitecture: Boolean,
     val enableFileLogging: Boolean,
     // Theme Settings
     val themeMode: ThemeMode,

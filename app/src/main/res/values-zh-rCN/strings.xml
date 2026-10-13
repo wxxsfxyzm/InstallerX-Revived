@@ -922,6 +922,11 @@
     <string name="lab_update_github_proxy_custom">自定义 GHProxy</string>
     <string name="lab_update_github_proxy_url">自定义 URL</string>
     <string name="lab_unstable_features">不稳定功能</string>
+    <string name="lab_compatibility">兼容性</string>
+    <string name="lab_enable_abi_override">尝试转译</string>
+    <string name="lab_enable_abi_override_desc">尝试安装同系列架构的二进制库，需系统支持</string>
+    <string name="lab_try_different_architecture">跨架构</string>
+    <string name="lab_try_different_architecture_desc">同时尝试安装其他架构系列的二进制库</string>
     <string name="lab_show_apk_path">显示文件路径</string>
     <string name="lab_show_apk_path_label">文件路径</string>
     <string name="lab_show_apk_path_desc">在应用详情中显示文件路径</string>

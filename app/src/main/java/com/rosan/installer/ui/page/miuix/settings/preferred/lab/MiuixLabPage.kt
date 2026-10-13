@@ -245,8 +245,38 @@ fun MiuixLabPage(useBlur: Boolean, viewModel: LabSettingsViewModel = koinViewMod
                     }
                 }
             }
+            item { SmallTitle(stringResource(R.string.lab_compatibility)) }
+            item {
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp),
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.lab_enable_abi_override),
+                        description = stringResource(R.string.lab_enable_abi_override_desc),
+                        checked = uiState.labEnableAbiOverride,
+                        onCheckedChange = {
+                            viewModel.dispatch(LabSettingsAction.LabChangeEnableAbiOverride(it))
+                        },
+                    )
+                    AnimatedVisibility(
+                        visible = uiState.labEnableAbiOverride,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.lab_try_different_architecture),
+                            description = stringResource(R.string.lab_try_different_architecture_desc),
+                            checked = uiState.labTryDifferentArchitecture,
+                            onCheckedChange = {
+                                viewModel.dispatch(LabSettingsAction.LabChangeTryDifferentArchitecture(it))
+                            },
+                        )
+                    }
+                }
+            }
             if (AppConfig.isRespectPlatformInstallPolicyAvailable) {
-                // item { SmallTitle(stringResource(R.string.lab_ui_settings)) }
                 item { SmallTitle(stringResource(R.string.lab_unstable_features)) }
                 item {
                     Card(

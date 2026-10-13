@@ -24,6 +24,8 @@ class LabSettingsViewModel(appSettingsRepo: AppSettingsRepository, private val u
             labRootMode = prefs.labRootMode,
             labAllowInstallWithoutUserAction = prefs.labInstallWithoutUserAction,
             labRespectPlatformInstallPolicy = prefs.labRespectPlatformInstallPolicy,
+            labEnableAbiOverride = prefs.labEnableAbiOverride,
+            labTryDifferentArchitecture = prefs.labTryDifferentArchitecture,
             tryMultipleAuthorizersOnInstall = prefs.tryMultipleAuthorizersOnInstall,
             smartAuthorizerCandidates = prefs.smartAuthorizerCandidates,
         )
@@ -66,6 +68,20 @@ class LabSettingsViewModel(appSettingsRepo: AppSettingsRepository, private val u
             is LabSettingsAction.LabChangeRespectPlatformInstallPolicy -> viewModelScope.launch {
                 updateSetting(
                     BooleanSetting.LabRespectPlatformInstallPolicy,
+                    action.enable,
+                )
+            }
+
+            is LabSettingsAction.LabChangeEnableAbiOverride -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.LabEnableAbiOverride,
+                    action.enable,
+                )
+            }
+
+            is LabSettingsAction.LabChangeTryDifferentArchitecture -> viewModelScope.launch {
+                updateSetting(
+                    BooleanSetting.LabTryDifferentArchitecture,
                     action.enable,
                 )
             }

@@ -46,10 +46,13 @@ import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
+import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.framework.privileged.core.execution.authorization.requireDhizukuPermissionGranted
 import com.rosan.installer.util.pm.isFreshInstallCandidate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -58,6 +61,7 @@ abstract class IBinderAppInstallerRepoImpl(
     protected val reflect: ReflectionProvider,
     protected val capabilityProvider: DeviceCapabilityProvider,
     protected val postInstallTaskProvider: PostInstallTaskProvider,
+    private val appSettingsRepo: AppSettingsRepository,
 ) : AppInstallerRepository {
     private companion object {
         const val INSTALL_FLAGS_TAG = "InstallFlags"
@@ -170,6 +174,9 @@ abstract class IBinderAppInstallerRepoImpl(
         onProgress: suspend (InstallWriteProgress) -> Unit,
         onPhaseChanged: suspend (InstallPhase) -> Unit,
     ) {
+        val enableAbiOverride = appSettingsRepo.getBoolean(BooleanSetting.LabEnableAbiOverride).first()
+        val tryDifferentArchitecture = enableAbiOverride &&
+            appSettingsRepo.getBoolean(BooleanSetting.LabTryDifferentArchitecture).first()
         onPhaseChanged(InstallPhase.WRITING)
         val totalBytes = InstallProgressWriter.totalBytesOrNull(entities.map { it.data.getSize() })
         val progressWriter = totalBytes?.let {
@@ -183,6 +190,8 @@ abstract class IBinderAppInstallerRepoImpl(
                     entities,
                     metadata,
                     respectPlatformInstallPolicy,
+                    enableAbiOverride,
+                    tryDifferentArchitecture,
                     packageName,
                     blacklist,
                     sharedUserIdBlacklist,
@@ -235,6 +244,8 @@ abstract class IBinderAppInstallerRepoImpl(
         entities: List<InstallEntity>,
         metadata: InstallMetadata,
         respectPlatformInstallPolicy: Boolean,
+        enableAbiOverride: Boolean,
+        tryDifferentArchitecture: Boolean,
         packageName: String,
         managedBlacklistPackages: List<String>,
         sharedUserIdBlacklist: List<String>,
@@ -277,6 +288,8 @@ abstract class IBinderAppInstallerRepoImpl(
                 entities,
                 metadata,
                 respectPlatformInstallPolicy,
+                enableAbiOverride,
+                tryDifferentArchitecture,
                 packageInstaller,
                 packageName,
             )
@@ -302,6 +315,8 @@ abstract class IBinderAppInstallerRepoImpl(
         entities: List<InstallEntity>,
         metadata: InstallMetadata,
         respectPlatformInstallPolicy: Boolean,
+        enableAbiOverride: Boolean,
+        tryDifferentArchitecture: Boolean,
         packageInstaller: PackageInstaller,
         packageName: String,
     ): Pair<Int, Session> {
@@ -358,14 +373,16 @@ abstract class IBinderAppInstallerRepoImpl(
         // Android System will ignore INSTALL_ALLOW_DOWNGRADE for None ROOT/SYSTEM on Android 15+, no need to disable it here
 
         // --- Set abiOverride ---
-        // Force an ABI only when this standalone/batch APK's concrete base architecture is advertised.
-        // Unadvertised, unknown, and pure Java/Kotlin packages stay unset so Android selects and validates.
+        // Leave ABI selection to Android by default. The main lab opt-in allows overrides
+        // within the device's architecture family; the sub-option restores cross-family attempts.
         val baseApkArch = entities.firstOrNull { it.name == "base.apk" }?.arch
         Timber.d("Current Arch to install: $baseApkArch")
         val abiToOverride = resolveSessionAbiOverride(
             sourceType = sourceType,
             baseArchitecture = baseApkArch,
-            supportedArchitectures = DeviceConfig.supportedArchitectures,
+            deviceArchitecture = DeviceConfig.currentArchitecture,
+            enableAbiOverride = enableAbiOverride,
+            tryDifferentArchitecture = tryDifferentArchitecture,
         )
         if (abiToOverride != null) {
             Timber.d("Setting abiOverride to $abiToOverride")
@@ -487,20 +504,31 @@ abstract class IBinderAppInstallerRepoImpl(
 internal fun resolveSessionAbiOverride(
     sourceType: DataType,
     baseArchitecture: Architecture?,
-    supportedArchitectures: List<Architecture>,
+    deviceArchitecture: Architecture,
+    enableAbiOverride: Boolean = false,
+    tryDifferentArchitecture: Boolean = false,
 ): String? {
+    if (!enableAbiOverride) return null
     val eligibleSource = sourceType == DataType.APK ||
         sourceType == DataType.MULTI_APK ||
         sourceType == DataType.MULTI_APK_ZIP
     if (!eligibleSource) return null
-    // UNKNOWN and NONE are never installable ABIs, even if malformed device data lists them.
-    if (
-        baseArchitecture == null ||
-        baseArchitecture == Architecture.UNKNOWN ||
-        baseArchitecture == Architecture.NONE ||
-        baseArchitecture !in supportedArchitectures
-    ) {
-        return null
+    val architecture = when (baseArchitecture) {
+        null, Architecture.NONE -> return null
+        Architecture.UNKNOWN -> Architecture.ARM
+        else -> baseArchitecture
     }
-    return baseArchitecture.arch
+    if (!tryDifferentArchitecture && !architecture.isSameFamilyAs(deviceArchitecture)) return null
+    return architecture.arch
+}
+
+private fun Architecture.isSameFamilyAs(other: Architecture): Boolean = when (this) {
+    Architecture.ARMEABI, Architecture.ARM, Architecture.ARM64 ->
+        other in listOf(Architecture.ARMEABI, Architecture.ARM, Architecture.ARM64)
+
+    Architecture.X86, Architecture.X86_64 -> other in listOf(Architecture.X86, Architecture.X86_64)
+
+    Architecture.MIPS, Architecture.MIPS64 -> other in listOf(Architecture.MIPS, Architecture.MIPS64)
+
+    Architecture.UNKNOWN, Architecture.NONE -> false
 }

@@ -8,6 +8,7 @@ import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.framework.privileged.core.execution.authorization.requireDhizukuPermissionGranted
 
 class DhizukuAppInstallerRepoImpl(
@@ -15,7 +16,8 @@ class DhizukuAppInstallerRepoImpl(
     reflect: ReflectionProvider,
     capabilityProvider: DeviceCapabilityProvider,
     postInstallTaskProvider: PostInstallTaskProvider,
-) : IBinderAppInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
+    appSettingsRepo: AppSettingsRepository,
+) : IBinderAppInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider, appSettingsRepo) {
     override suspend fun iBinderWrapper(iBinder: IBinder): IBinder = requireDhizukuPermissionGranted {
         Dhizuku.binderWrapper(iBinder)
     }
