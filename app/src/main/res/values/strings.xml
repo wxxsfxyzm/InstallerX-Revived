@@ -270,6 +270,12 @@
     <string name="unlock_default_installer_desc">Unset InstallerX Revived as the default installer to install APKs</string>
     <string name="unlock_default_installer_success">Successfully unset as default installer</string>
     <string name="unlock_default_installer_failed">Couldn\'t unset as default installer</string>
+    <string name="default_installer_changed_with">Default installer changed using %1$s instead</string>
+    <string name="default_installer_change_failed">Couldn\'t change the default installer: %1$s</string>
+    <string name="default_installer_lsposed_managed">The Xposed module manages the default installer, so there is nothing to change</string>
+    <string name="default_installer_unchanged">Couldn\'t confirm the default installer changed</string>
+    <string name="default_installer_no_authorizer">No authorizer was available to change the default installer</string>
+    <string name="default_installer_timed_out">No authorizer answered in time</string>
     <string name="locking_default_installer">Setting as default installer…</string>
     <string name="unlocking_default_installer">Unsetting default installer…</string>
     <string name="details">Details</string>
