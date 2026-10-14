@@ -528,6 +528,18 @@
     <string name="installer_signature_lineage_certificate">Signing certificate</string>
     <string name="installer_signature_current_marker">current</string>
     <string name="installer_signature_sha256" translatable="false">SHA-256</string>
+    <string name="installer_signature_source_stamp_sha256">Source stamp certificate SHA-256</string>
+    <string name="installer_signature_source_stamp">Source stamp</string>
+    <string name="installer_signature_source_stamp_status">Verification status</string>
+    <string name="installer_signature_source_stamp_unverified">Not verified</string>
+    <string name="installer_signature_source_stamp_verified">Verified</string>
+    <string name="installer_signature_source_stamp_failed">Verification failed</string>
+    <string name="installer_signature_source_stamp_certificate_mismatch">Certificate digest mismatch</string>
+    <string name="installer_signature_source_stamp_verification_error">Unable to complete verification</string>
+    <string name="installer_signature_source_stamp_timestamp">Stamp time (UTC)</string>
+    <string name="installer_signature_source_stamp_certificate">Source stamp certificate</string>
+    <string name="installer_signature_source_stamp_lineage">Source stamp certificate lineage</string>
+    <string name="installer_signature_information">Information</string>
     <string name="installer_signature_sha1" translatable="false">SHA-1</string>
     <string name="installer_signature_subject">Subject</string>
     <string name="installer_signature_issuer">Issuer</string>

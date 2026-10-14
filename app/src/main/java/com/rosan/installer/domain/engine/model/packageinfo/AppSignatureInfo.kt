@@ -17,6 +17,7 @@ data class AppSignatureInfo(
     },
     val warnings: List<String> = emptyList(),
     val errors: List<String> = emptyList(),
+    val sourceStampInfo: SourceStampInfo? = null,
 ) {
     val primarySha256: String?
         get() = certificates.firstOrNull()?.sha256 ?: signerSha256Set.firstOrNull()
