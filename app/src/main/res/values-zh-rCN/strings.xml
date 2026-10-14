@@ -181,6 +181,8 @@
     <string name="installer_settings_signature_check">签名检查</string>
     <string name="config_check_app_signature">检查应用签名</string>
     <string name="config_check_app_signature_desc">安装前分析 APK 签名，并与已安装应用进行对比</string>
+    <string name="config_check_source_stamp">分析来源戳</string>
+    <string name="config_check_source_stamp_desc">在签名详情中包含来源戳验证状态、证书和时间戳。</string>
     <string name="config_check_split_package_signatures">分析拆分包签名</string>
     <string name="config_check_split_package_signatures_desc">分析 APKS、APKM、XAPK 中的 APK 签名，会显著增加分析时间</string>
     <string name="config_show_signature_info_on_match">正常签名状态也显示信息</string>

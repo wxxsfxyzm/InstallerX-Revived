@@ -24,6 +24,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class LightweightApkSignatureReaderTest {
     private lateinit var tempDirectory: File
@@ -142,6 +144,31 @@ class LightweightApkSignatureReaderTest {
             assertEquals(emptyList(), stamp.warnings)
         }
         assertEquals(2, openCount)
+    }
+
+    @Test
+    fun `disabled source stamp analysis keeps lightweight signer declarations without stamp reads`() {
+        val apk = SignatureTestFixtures.copy("stamp-valid-timestamp-value.apk", tempDirectory)
+        var openCount = 0
+        val entity = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/stamped.apk",
+            startOffset = 0L,
+            length = apk.length(),
+            channelFactory = {
+                openCount++
+                FileChannel.open(apk.toPath(), StandardOpenOption.READ)
+            },
+            descriptorFactory = { error("Unused") },
+            preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = true,
+        )
+
+        val result = reader.read(entity, platformSdk = 30, checkSourceStamp = false)
+
+        assertNull(result.sourceStampInfo)
+        assertTrue(result.certificates.isNotEmpty())
+        assertEquals(SignatureVerificationStatus.SIGNING_BLOCK_ONLY, result.verificationStatus)
+        assertEquals(1, openCount)
     }
 
     @Test

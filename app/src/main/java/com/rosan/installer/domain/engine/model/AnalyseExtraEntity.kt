@@ -8,6 +8,7 @@ import com.rosan.installer.domain.engine.model.source.DataType
  * @param dataType The type of data being analysed.
  * @param isModuleFlashEnabled Whether module flash is enabled.
  * @param checkAppSignature Whether APK signatures should be analysed.
+ * @param checkSourceStamp Whether source stamp information should be included in signature analysis.
  * @param checkSplitPackageSignatures Whether APK signatures inside APKS, APKM, and XAPK should be analysed.
  */
 data class AnalyseExtraEntity(
@@ -15,6 +16,7 @@ data class AnalyseExtraEntity(
     val dataType: DataType? = null,
     val isModuleFlashEnabled: Boolean = false,
     val checkAppSignature: Boolean = true,
+    val checkSourceStamp: Boolean = true,
     val checkSplitPackageSignatures: Boolean = false,
 ) {
     fun shouldCheckAppSignatures(type: DataType? = dataType): Boolean = checkAppSignature && (checkSplitPackageSignatures || type !in SPLIT_PACKAGE_TYPES)

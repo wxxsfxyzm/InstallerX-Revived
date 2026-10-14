@@ -33,16 +33,21 @@ class PendingApkSignatureAnalyzer(
     /**
      * apksig is the source of truth for pending APK signer certificates.
      */
-    fun analyze(apkPath: String): AppSignatureInfo {
+    fun analyze(apkPath: String, checkSourceStamp: Boolean = true): AppSignatureInfo {
         val startedAt = System.nanoTime()
-        return analyze(File(apkPath), apkPath).also {
+        return analyze(File(apkPath), apkPath, checkSourceStamp = checkSourceStamp).also {
             Timber.d(
                 "Pending APK signature analysis finished: route=file, elapsedMs=${startedAt.elapsedMillis()}, source=$apkPath",
             )
         }
     }
 
-    fun analyze(data: DataEntity, cacheDirectory: String, zipFile: UnifiedZipFile? = null): AppSignatureInfo? {
+    fun analyze(
+        data: DataEntity,
+        cacheDirectory: String,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo? {
         val startedAt = System.nanoTime()
         val route = when (data) {
             is DataEntity.FileDescriptorEntity -> "descriptor"
@@ -52,18 +57,18 @@ class PendingApkSignatureAnalyzer(
         return when (data) {
             is DataEntity.FileDescriptorEntity -> {
                 if (data.preInstallSignatureAnalysis) {
-                    analyze(data, zipFile)
+                    analyze(data, zipFile, checkSourceStamp)
                 } else if (data.preInstallSigningBlockAnalysis) {
-                    lightweightApkSignatureReader.read(data, zipFile)
+                    lightweightApkSignatureReader.read(data, zipFile, checkSourceStamp)
                 } else {
                     Timber.d("Skipping pre-install signature analysis; PackageInstaller will verify: ${data.path}")
                     null
                 }
             }
 
-            is DataEntity.FileEntity -> analyze(File(data.path), data.path, zipFile)
+            is DataEntity.FileEntity -> analyze(File(data.path), data.path, zipFile, checkSourceStamp)
 
-            else -> analyzeStream(data, cacheDirectory)
+            else -> analyzeStream(data, cacheDirectory, checkSourceStamp)
         }.also {
             Timber.d(
                 "Pending APK signature analysis finished: route=$route, " +
@@ -72,7 +77,12 @@ class PendingApkSignatureAnalyzer(
         }
     }
 
-    private fun analyze(file: File, displayName: String, zipFile: UnifiedZipFile? = null): AppSignatureInfo = verify(displayName, DataEntity.FileEntity(file.path), zipFile) {
+    private fun analyze(
+        file: File,
+        displayName: String,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo = verify(displayName, DataEntity.FileEntity(file.path), zipFile, checkSourceStamp) {
         ApkVerifier.Builder(file)
             .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
             .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
@@ -80,8 +90,12 @@ class PendingApkSignatureAnalyzer(
             .verify()
     }
 
-    private fun analyze(data: DataEntity.FileDescriptorEntity, zipFile: UnifiedZipFile?): AppSignatureInfo = data.openChannel().use { channel ->
-        verify(data.path, data, zipFile) {
+    private fun analyze(
+        data: DataEntity.FileDescriptorEntity,
+        zipFile: UnifiedZipFile?,
+        checkSourceStamp: Boolean,
+    ): AppSignatureInfo = data.openChannel().use { channel ->
+        verify(data.path, data, zipFile, checkSourceStamp) {
             ApkVerifier.Builder(SeekableChannelDataSource(channel))
                 .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
                 .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
@@ -94,14 +108,17 @@ class PendingApkSignatureAnalyzer(
         displayName: String,
         data: DataEntity.FileEntity,
         zipFile: UnifiedZipFile?,
+        checkSourceStamp: Boolean,
         operation: () -> ApkVerifier.Result,
     ): AppSignatureInfo = try {
-        mapVerificationResult(operation(), data, zipFile)
+        mapVerificationResult(operation(), data, zipFile, checkSourceStamp)
     } catch (e: Exception) {
         Timber.e(e, "Failed to get signature hash from APK: $displayName")
         failedSignatureInfo(e.message ?: e::class.java.simpleName).copy(
-            sourceStampInfo = sourceStampReader.read(data, zipFile)?.let {
-                SourceStampInfo(declaredCertificateSha256 = it)
+            sourceStampInfo = if (checkSourceStamp) {
+                sourceStampReader.read(data, zipFile)?.let { SourceStampInfo(declaredCertificateSha256 = it) }
+            } else {
+                null
             },
         )
     }
@@ -110,6 +127,7 @@ class PendingApkSignatureAnalyzer(
         result: ApkVerifier.Result,
         data: DataEntity.FileEntity,
         zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
     ): AppSignatureInfo {
         val certificates = result.signerCertificates.map { certificate ->
             certificateFormatter.format(certificate)
@@ -123,9 +141,11 @@ class PendingApkSignatureAnalyzer(
             },
             hasMultipleSigners = certificates.size > 1,
             verifiedSchemes = result.verifiedSchemes(),
-            warnings = result.warnings.map { it.toString() },
-            errors = result.errors.map { it.toString() },
-            sourceStampInfo = readSourceStampInfo(result, data, zipFile),
+            warnings = result.warnings.filter { checkSourceStamp || !it.issue.name.startsWith("SOURCE_STAMP_") }
+                .map { it.toString() },
+            errors = result.errors.filter { checkSourceStamp || !it.issue.name.startsWith("SOURCE_STAMP_") }
+                .map { it.toString() },
+            sourceStampInfo = if (checkSourceStamp) readSourceStampInfo(result, data, zipFile) else null,
         )
     }
 
@@ -182,7 +202,7 @@ class PendingApkSignatureAnalyzer(
         )
     }
 
-    private fun analyzeStream(data: DataEntity, cacheDirectory: String): AppSignatureInfo {
+    private fun analyzeStream(data: DataEntity, cacheDirectory: String, checkSourceStamp: Boolean): AppSignatureInfo {
         val tempFile = createSignatureTempFile(cacheDirectory)
         return try {
             val input = data.getInputStream()
@@ -198,7 +218,7 @@ class PendingApkSignatureAnalyzer(
                     "elapsedMs=${materializeStartedAt.elapsedMillis()}, source=$data",
             )
             val verificationStartedAt = System.nanoTime()
-            analyze(tempFile, data.toString()).also {
+            analyze(tempFile, data.toString(), checkSourceStamp = checkSourceStamp).also {
                 Timber.d(
                     "Verified materialized APK signature: elapsedMs=${verificationStartedAt.elapsedMillis()}, " +
                         "source=$data",

@@ -33,7 +33,7 @@ The full user guide, installation instructions, advanced options, system integra
 - **System integration:** InstallerX can be locked as the default installer from the Home page status card, used with LSPosed modules such as [InxLocker](https://github.com/Chimioo/InxLocker), or installed as a replacement system package manager by advanced users.
 - **Modern UI:** Material 3 Expressive and Miuix interface styles, dark mode, dynamic color, advanced palettes, system icon packs, colorful dialogs, standard notifications, Live Activity, and Xiaomi HyperOS-style island notifications on supported Xiaomi devices.
 - **Safety controls:** package-name and SharedUID blacklists, signature mismatch and unknown-signature policy gates, permission preview, install flags, and one-time smart suggestions for selected blocked cases.
-- **Dialog signature details:** show source stamp verification, certificate information, timestamps, and diagnostics when available. HTTP lightweight analysis displays unverified stamp declarations; source stamp information does not affect app signer matching or signature policy gates.
+- **Dialog signature details:** show source stamp verification, certificate information, timestamps, and diagnostics when available. The global **Analyze source stamps** switch is enabled by default; turning it off skips stamp information parsing and display while retaining APK signature verification, which may still verify stamps. HTTP lightweight analysis displays unverified stamp declarations; source stamp information does not affect app signer matching or signature policy gates.
 
 ## Supported Android Versions
 

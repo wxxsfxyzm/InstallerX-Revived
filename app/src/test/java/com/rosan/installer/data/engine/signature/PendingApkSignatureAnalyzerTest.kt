@@ -20,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PendingApkSignatureAnalyzerTest {
@@ -180,6 +181,65 @@ class PendingApkSignatureAnalyzerTest {
             assertNotNull(stamp.declaredCertificateSha256)
             assertTrue(stamp.warnings.isNotEmpty())
         }
+        assertEquals(1, openCount)
+    }
+
+    @Test
+    fun `disabled source stamp analysis preserves APK verification and hides stamp diagnostics`() {
+        for (name in listOf("valid-stamp.apk", "stamp-without-block.apk")) {
+            val apk = SignatureTestFixtures.copy(name, tempDirectory)
+            val nativeResult = verifyFixture(apk)
+            val source = DataEntity.FileDescriptorEntity(
+                path = "https://example.test/$name",
+                startOffset = 0L,
+                length = apk.length(),
+                channelFactory = { error("Disabled stamp analysis must not read stamp metadata") },
+                descriptorFactory = { error("Unused") },
+            )
+
+            val result = analyzer.mapVerificationResult(nativeResult, source, checkSourceStamp = false)
+
+            assertTrue(result.verified)
+            assertNull(result.sourceStampInfo)
+            assertEquals(
+                nativeResult.signerCertificates.mapTo(linkedSetOf()) { certificateFormatter.format(it).sha256 },
+                result.signerSha256Set,
+            )
+            assertEquals(
+                nativeResult.warnings.filterNot { it.issue.name.startsWith("SOURCE_STAMP_") }.map { it.toString() },
+                result.warnings,
+            )
+        }
+    }
+
+    @Test
+    fun `disabled source stamp analysis skips fallback reads after an APK verification failure`() {
+        val backingFile = File(tempDirectory, "invalid-manifest.apk")
+        ZipOutputStream(backingFile.outputStream()).use { output ->
+            output.putNextEntry(ZipEntry("AndroidManifest.xml"))
+            output.write("invalid manifest".toByteArray())
+            output.closeEntry()
+            output.putNextEntry(ZipEntry("stamp-cert-sha256"))
+            output.write(ByteArray(32) { 0x12 })
+            output.closeEntry()
+        }
+        var openCount = 0
+        val source = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/app.apk",
+            startOffset = 0L,
+            length = backingFile.length(),
+            channelFactory = {
+                openCount++
+                FileChannel.open(backingFile.toPath(), StandardOpenOption.READ)
+            },
+            descriptorFactory = { error("Unused") },
+        )
+
+        val result = assertNotNull(analyzer.analyze(source, tempDirectory.path, checkSourceStamp = false))
+
+        assertFalse(result.verified)
+        assertTrue(result.errors.isNotEmpty())
+        assertNull(result.sourceStampInfo)
         assertEquals(1, openCount)
     }
 

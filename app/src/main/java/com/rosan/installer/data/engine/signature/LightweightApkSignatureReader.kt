@@ -26,11 +26,20 @@ class LightweightApkSignatureReader(
     private val certificateFormatter: CertificateFormatter,
     private val sourceStampReader: ApkSourceStampReader,
 ) {
-    fun read(data: DataEntity.FileDescriptorEntity, zipFile: UnifiedZipFile? = null): AppSignatureInfo = read(data, Build.VERSION.SDK_INT, zipFile)
+    fun read(
+        data: DataEntity.FileDescriptorEntity,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo = read(data, Build.VERSION.SDK_INT, zipFile, checkSourceStamp)
 
-    internal fun read(data: DataEntity.FileDescriptorEntity, platformSdk: Int, zipFile: UnifiedZipFile? = null): AppSignatureInfo {
+    internal fun read(
+        data: DataEntity.FileDescriptorEntity,
+        platformSdk: Int,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo {
         val declarations = runCatching {
-            data.openChannel().use { channel -> readDeclarations(channel, platformSdk) }
+            data.openChannel().use { channel -> readDeclarations(channel, platformSdk, checkSourceStamp) }
         }.onFailure { error ->
             Timber.w(error, "Unable to read lightweight APK signer declarations: ${data.path}")
         }.getOrDefault(SignatureDeclarations())
@@ -41,7 +50,7 @@ class LightweightApkSignatureReader(
         }
         val certificates = uniqueCertificates
             .map(certificateFormatter::format)
-        val digest = sourceStampReader.read(data, zipFile)
+        val digest = if (checkSourceStamp) sourceStampReader.read(data, zipFile) else null
         val sourceStampInfo = declarations.sourceStampInfo?.copy(declaredCertificateSha256 = digest)
             ?: digest?.let { SourceStampInfo(declaredCertificateSha256 = it) }
 
@@ -56,7 +65,7 @@ class LightweightApkSignatureReader(
         )
     }
 
-    private fun readDeclarations(channel: SeekableByteChannel, platformSdk: Int): SignatureDeclarations {
+    private fun readDeclarations(channel: SeekableByteChannel, platformSdk: Int, checkSourceStamp: Boolean): SignatureDeclarations {
         val fileSize = channel.size()
         if (fileSize < ZIP_EOCD_MIN_SIZE) return SignatureDeclarations()
 
@@ -99,6 +108,7 @@ class LightweightApkSignatureReader(
             if (pair.remaining() < 4) throw IOException("APK Signing Block pair has no ID")
             val id = pair.int
             if (id == ApkSourceStampReader.STAMP_BLOCK_ID) {
+                if (!checkSourceStamp) continue
                 if (sourceStampInfo == null) {
                     sourceStampInfo = sourceStampReader.readDeclaration(pair)
                 } else {

@@ -585,6 +585,7 @@ class InstallerSelectionTest {
             sdkCompareInMultiLine = false,
             showOPPOSpecial = false,
             checkAppSignature = false,
+            checkSourceStamp = true,
             checkSplitPackageSignatures = false,
             showSignatureInfoOnMatch = false,
             showSignatureDetails = false,
