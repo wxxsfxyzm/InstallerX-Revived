@@ -11,6 +11,7 @@ import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
+import com.rosan.installer.domain.engine.model.install.shouldAutoDeleteSource
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
@@ -33,6 +34,8 @@ import com.rosan.installer.domain.history.usecase.VersionChangeResolver
 import com.rosan.installer.domain.history.usecase.historyErrorSummary
 import com.rosan.installer.domain.history.usecase.historyErrorType
 import com.rosan.installer.domain.privileged.exception.PrivilegedException
+import com.rosan.installer.domain.privileged.model.PostInstallTaskInfo
+import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.settings.model.config.Authorizer
@@ -44,6 +47,7 @@ import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.NamedPackageListSetting
 import com.rosan.installer.domain.settings.repository.SharedUidListSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -61,6 +65,7 @@ class ProcessInstallationUseCase(
     private val capabilityProvider: DeviceCapabilityProvider,
     private val installedPackageSignatureProvider: InstalledPackageSignatureProvider,
     private val recordOperationHistory: RecordOperationHistoryUseCase,
+    private val postInstallTaskProvider: PostInstallTaskProvider,
 ) {
     companion object {
         private const val MODULE_INSTALL_BANNER = """
@@ -184,6 +189,28 @@ class ProcessInstallationUseCase(
         }
 
         Timber.d("installModule: Succeeded.")
+        if (config.shouldAutoDeleteSource(module.sourceType ?: DataType.MODULE_ZIP)) {
+            val sourcePath = module.data.sourcePath()
+            if (sourcePath != null) {
+                try {
+                    postInstallTaskProvider.executeTasks(
+                        authorizer = config.authorizer,
+                        customizeAuthorizer = config.customizeAuthorizer,
+                        info = PostInstallTaskInfo(
+                            packageName = module.packageName,
+                            enableAutoDelete = true,
+                            deletePaths = listOf(sourcePath),
+                        ),
+                    )
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    Timber.e(error, "Failed to delete module source after successful installation")
+                }
+            } else {
+                Timber.w("Module source has no path available for automatic deletion")
+            }
+        }
         emit(ProgressEntity.InstallSuccess)
     }
 

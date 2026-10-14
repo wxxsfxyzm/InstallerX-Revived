@@ -25,6 +25,7 @@ fun DataEntity.sourcePath(): String? = when (val source = this.getSourceTop()) {
 fun ConfigModel.shouldAutoDeleteSource(sourceType: DataType?): Boolean {
     val requiresArchiveOptIn = when (sourceType) {
         DataType.MULTI_APK_ZIP,
+        DataType.MODULE_ZIP,
         DataType.MIXED_MODULE_APK,
         DataType.MIXED_MODULE_ZIP,
         -> true
