@@ -265,23 +265,25 @@ fun BaseWidget(
     }
 
     if (onClick != null) {
-        ListItem(
-            selected = selected,
-            modifier = itemModifier,
-            onClick = {
-                clickHaptic?.let { haptic.performHapticFeedback(it) }
-                onClick()
-            },
-            enabled = enabled,
-            colors = colors,
-            shapes = shapes,
-            verticalAlignment = Alignment.CenterVertically,
-            leadingContent = leadingContent,
-            supportingContent = supportingContent,
-            trailingContent = trailing,
-            interactionSource = interactionSource,
-            content = headline,
-        )
+        ListItemMotion {
+            ListItem(
+                selected = selected,
+                modifier = itemModifier,
+                onClick = {
+                    clickHaptic?.let { haptic.performHapticFeedback(it) }
+                    onClick()
+                },
+                enabled = enabled,
+                colors = colors,
+                shapes = shapes,
+                verticalAlignment = Alignment.CenterVertically,
+                leadingContent = leadingContent,
+                supportingContent = supportingContent,
+                trailingContent = trailing,
+                interactionSource = interactionSource,
+                content = headline,
+            )
+        }
     } else {
         /*
          * Non-clickable item:

@@ -222,25 +222,27 @@ fun <T> DraggableList(
                             animatedTranslationY
                         }
 
-                        SegmentedListItem(
-                            onClick = { onItemClick?.invoke(item) },
-                            shapes = ListItemDefaults.segmentedShapes(index, localItems.size),
-                            colors = ListItemDefaults.segmentedColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceBright,
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                leadingContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                            elevation = ListItemDefaults.elevation(0.dp, 6.dp),
-                            interactionSource = interactionSource,
-                            modifier = Modifier
-                                .onGloballyPositioned { if (itemHeightPx == 0f) itemHeightPx = it.size.height.toFloat() }
-                                .zIndex(if (isDragged || finalTranslationY != 0f) 10f else 0f)
-                                .graphicsLayer { this.translationY = finalTranslationY },
-                            content = { Text(itemName(item)) },
-                            supportingContent = { Text(itemDescription(item)) },
-                            leadingContent = icon?.let { imageVector -> { Icon(imageVector, null) } },
-                            trailingContent = { trailingContent?.invoke(item) },
-                        )
+                        ListItemMotion {
+                            SegmentedListItem(
+                                onClick = { onItemClick?.invoke(item) },
+                                shapes = ListItemDefaults.segmentedShapes(index, localItems.size),
+                                colors = ListItemDefaults.segmentedColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceBright,
+                                    contentColor = MaterialTheme.colorScheme.onSurface,
+                                    leadingContentColor = MaterialTheme.colorScheme.primary,
+                                ),
+                                elevation = ListItemDefaults.elevation(0.dp, 6.dp),
+                                interactionSource = interactionSource,
+                                modifier = Modifier
+                                    .onGloballyPositioned { if (itemHeightPx == 0f) itemHeightPx = it.size.height.toFloat() }
+                                    .zIndex(if (isDragged || finalTranslationY != 0f) 10f else 0f)
+                                    .graphicsLayer { this.translationY = finalTranslationY },
+                                content = { Text(itemName(item)) },
+                                supportingContent = { Text(itemDescription(item)) },
+                                leadingContent = icon?.let { imageVector -> { Icon(imageVector, null) } },
+                                trailingContent = { trailingContent?.invoke(item) },
+                            )
+                        }
                     }
                 }
             }
