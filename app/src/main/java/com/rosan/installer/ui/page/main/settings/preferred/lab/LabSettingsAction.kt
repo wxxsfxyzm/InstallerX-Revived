@@ -11,6 +11,8 @@ sealed interface LabSettingsAction {
     data class LabChangeRootImplementation(val implementation: RootMode) : LabSettingsAction
     data class LabChangeAllowInstallWithoutUserAction(val enable: Boolean) : LabSettingsAction
     data class LabChangeRespectPlatformInstallPolicy(val enable: Boolean) : LabSettingsAction
+    data class LabChangeEnableAbiOverride(val enable: Boolean) : LabSettingsAction
+    data class LabChangeTryDifferentArchitecture(val enable: Boolean) : LabSettingsAction
     data class LabChangeTryMultipleAuthorizersOnInstall(val enable: Boolean) : LabSettingsAction
     data class LabChangeSmartAuthorizerCandidates(val candidates: List<SmartAuthorizerCandidate>) : LabSettingsAction
 }

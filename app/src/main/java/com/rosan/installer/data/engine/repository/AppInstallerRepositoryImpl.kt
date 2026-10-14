@@ -227,15 +227,16 @@ class AppInstallerRepositoryImpl(
         reflect,
         deviceCapabilityProvider,
         postInstallTaskProvider,
+        appSettingsRepo,
     )
 
     /**
      * Resolve the InstallerRepo based on the provided
      */
     private fun resolveRepo(config: ConfigModel) = when (config.authorizer) {
-        Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+        Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, appSettingsRepo)
 
-        Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+        Authorizer.Dhizuku -> DhizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, appSettingsRepo)
 
         Authorizer.None -> {
             if (deviceCapabilityProvider.isSystemApp) {
@@ -245,6 +246,6 @@ class AppInstallerRepositoryImpl(
             }
         }
 
-        else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider)
+        else -> ProcessAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, appSettingsRepo)
     }
 }

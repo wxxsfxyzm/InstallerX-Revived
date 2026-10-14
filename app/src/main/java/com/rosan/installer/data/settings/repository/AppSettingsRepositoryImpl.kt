@@ -146,6 +146,8 @@ class AppSettingsRepositoryImpl(
             labRespectPlatformInstallPolicy =
                 AppConfig.isRespectPlatformInstallPolicyAvailable &&
                     (prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false),
+            labEnableAbiOverride = prefs[AppDataStore.LAB_ENABLE_ABI_OVERRIDE] ?: false,
+            labTryDifferentArchitecture = prefs[AppDataStore.LAB_TRY_DIFFERENT_ARCHITECTURE] ?: false,
             enableFileLogging = prefs[AppDataStore.ENABLE_FILE_LOGGING] ?: true,
             // UI State
             themeMode = ThemeMode.fromValueOrDefault(prefs[AppDataStore.THEME_MODE] ?: ThemeMode.SYSTEM.name),
@@ -344,6 +346,10 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.LabInstallWithoutUserAction -> AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION
 
         BooleanSetting.LabRespectPlatformInstallPolicy -> AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY
+
+        BooleanSetting.LabEnableAbiOverride -> AppDataStore.LAB_ENABLE_ABI_OVERRIDE
+
+        BooleanSetting.LabTryDifferentArchitecture -> AppDataStore.LAB_TRY_DIFFERENT_ARCHITECTURE
 
         BooleanSetting.DetectXposedModule -> AppDataStore.DETECT_XPOSED_MODULE
 

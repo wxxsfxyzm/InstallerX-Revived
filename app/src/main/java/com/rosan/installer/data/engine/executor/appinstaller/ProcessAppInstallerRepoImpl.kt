@@ -13,6 +13,7 @@ import com.rosan.installer.domain.engine.model.install.InstallWriteProgress
 import com.rosan.installer.domain.privileged.provider.PostInstallTaskProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.framework.privileged.core.execution.authorization.requireCustomizeAuthorizer
 import com.rosan.installer.framework.privileged.core.infrastructure.process.AppProcessTerminal
 import com.rosan.installer.framework.privileged.core.infrastructure.process.SHELL_SH
@@ -26,7 +27,8 @@ class ProcessAppInstallerRepoImpl(
     reflect: ReflectionProvider,
     capabilityProvider: DeviceCapabilityProvider,
     postInstallTaskProvider: PostInstallTaskProvider,
-) : IBinderAppInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider) {
+    appSettingsRepo: AppSettingsRepository,
+) : IBinderAppInstallerRepoImpl(context, reflect, capabilityProvider, postInstallTaskProvider, appSettingsRepo) {
     private var localService: ProcessHookRecycler.HookedUserService? = null
 
     override suspend fun doInstallWork(

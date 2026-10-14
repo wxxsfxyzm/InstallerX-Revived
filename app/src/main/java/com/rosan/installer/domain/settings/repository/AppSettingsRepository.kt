@@ -85,6 +85,8 @@ enum class BooleanSetting {
     LabShowInstallInitiator,
     LabInstallWithoutUserAction,
     LabRespectPlatformInstallPolicy,
+    LabEnableAbiOverride,
+    LabTryDifferentArchitecture,
     DetectXposedModule,
     QuickOpenLSPosed,
     EnableFileLogging,
