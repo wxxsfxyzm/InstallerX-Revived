@@ -19,6 +19,10 @@ on:
       - 'gradle/**'
       - '.github/workflows/auto-preview-dev.yml'
 
+concurrency:
+  group: branch-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pre_job:
     name: Duplicate Check
@@ -34,7 +38,7 @@ jobs:
         with:
           # Core parameter: skip if an identical commit has already succeeded
           skip_after_successful_duplicate: 'true'
-          # Optional: cancel concurrent runs? 'never' = keep both running (good for dev merges)
+          # Workflow concurrency handles cancellation; only skip successful duplicates here.
           concurrent_skipping: 'never'
           # Optional: ignore certain paths (usually handled in on.push.paths)
           do_not_skip: '[]'
