@@ -11,7 +11,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
-import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
@@ -21,27 +20,15 @@ import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
-    // Check if the current PaletteStyle supports SPEC_2025
-    val isSpec2025Supported = uiState.paletteStyle in listOf(
-        PaletteStyle.TonalSpot,
-        PaletteStyle.Neutral,
-        PaletteStyle.Vibrant,
-        PaletteStyle.Expressive,
-    )
-
-    // Filter available specs based on support
-    val availableSpecs = if (isSpec2025Supported) {
-        ThemeColorSpec.entries
-    } else {
-        listOf(ThemeColorSpec.SPEC_2021)
-    }
-
-    // Determine the actual spec being applied to match the fallback logic
-    val activeSpec = if (!isSpec2025Supported) ThemeColorSpec.SPEC_2021 else uiState.colorSpec
-
-    // Use a static localized string for the unsupported state
-    val descriptionText = if (!isSpec2025Supported) {
-        stringResource(id = R.string.theme_settings_color_spec_only_2021)
+    val availableSpecs = uiState.paletteStyle.supportedSpecs
+    val activeSpec = uiState.paletteStyle.effectiveSpec(uiState.colorSpec)
+    val descriptionText = if (availableSpecs.size == 1) {
+        stringResource(
+            id = when (activeSpec) {
+                ThemeColorSpec.SPEC_2026 -> R.string.theme_settings_color_spec_only_2026
+                else -> R.string.theme_settings_color_spec_only_2021
+            },
+        )
     } else {
         activeSpec.displayName
     }
@@ -50,7 +37,7 @@ fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {
         icon = Icons.TwoTone.DesignServices,
         title = stringResource(id = R.string.theme_settings_color_spec),
         description = descriptionText,
-        enabled = isSpec2025Supported, // Disable interaction if not supported
+        enabled = availableSpecs.size > 1,
         choice = availableSpecs.indexOf(activeSpec).coerceAtLeast(0),
         data = availableSpecs.map { it.displayName },
         onChoiceChange = { index ->

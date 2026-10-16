@@ -585,7 +585,7 @@ fun MiuixPaletteStyleWidget(
 
 /**
  * WindowSpinnerPreference widget for selecting the Theme Color Spec.
- * Includes fallback logic to gracefully handle styles that do not support SPEC_2025.
+ * Shows the effective spec and restricts choices to those supported by the palette style.
  */
 @Composable
 fun MiuixColorSpecWidget(
@@ -594,27 +594,15 @@ fun MiuixColorSpecWidget(
     currentPaletteStyle: PaletteStyle,
     onColorSpecChange: (ThemeColorSpec) -> Unit,
 ) {
-    // 1. Check if the current PaletteStyle supports SPEC_2025
-    val isSpec2025Supported = currentPaletteStyle in listOf(
-        PaletteStyle.TonalSpot,
-        PaletteStyle.Neutral,
-        PaletteStyle.Vibrant,
-        PaletteStyle.Expressive,
-    )
-
-    // 2. Filter available specs based on support
-    val availableSpecs = if (isSpec2025Supported) {
-        ThemeColorSpec.entries
-    } else {
-        listOf(ThemeColorSpec.SPEC_2021)
-    }
-
-    // 3. Determine the actual spec being applied to match the fallback logic
-    val activeSpec = if (!isSpec2025Supported) ThemeColorSpec.SPEC_2021 else currentColorSpec
-
-    // 4. Use a static localized string for the unsupported state
-    val descriptionText = if (!isSpec2025Supported) {
-        stringResource(id = R.string.theme_settings_color_spec_only_2021)
+    val availableSpecs = currentPaletteStyle.supportedSpecs
+    val activeSpec = currentPaletteStyle.effectiveSpec(currentColorSpec)
+    val descriptionText = if (availableSpecs.size == 1) {
+        stringResource(
+            id = when (activeSpec) {
+                ThemeColorSpec.SPEC_2026 -> R.string.theme_settings_color_spec_only_2026
+                else -> R.string.theme_settings_color_spec_only_2021
+            },
+        )
     } else {
         null
     }
@@ -631,6 +619,7 @@ fun MiuixColorSpecWidget(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_color_spec),
         summary = descriptionText,
+        enabled = availableSpecs.size > 1,
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->

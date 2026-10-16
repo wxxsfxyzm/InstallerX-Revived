@@ -12,8 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
 import com.materialkolor.PaletteStyle as MaterialKolorPaletteStyle
-import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.material3.dynamicColorScheme
 import com.rosan.installer.R
 import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.engine.model.packageinfo.getInfo
@@ -436,6 +436,7 @@ class ModernNotificationBuilder(
             PaletteStyle.Monochrome -> MaterialKolorPaletteStyle.Monochrome
             PaletteStyle.Fidelity -> MaterialKolorPaletteStyle.Fidelity
             PaletteStyle.Content -> MaterialKolorPaletteStyle.Content
+            PaletteStyle.Cmf -> MaterialKolorPaletteStyle.Cmf()
         }
 
         return dynamicColorScheme(

@@ -128,6 +128,7 @@
     <string name="theme_settings_palette_style_desc">选择调色板样式</string>
     <string name="theme_settings_color_spec">颜色规格</string>
     <string name="theme_settings_color_spec_only_2021">当前调色板样式仅支持 Spec 2021</string>
+    <string name="theme_settings_color_spec_only_2026">当前调色板样式仅支持 Spec 2026</string>
     <string name="theme_settings_dynamic_color">动态颜色</string>
     <string name="theme_settings_dynamic_color_desc">基于壁纸的主题颜色</string>
     <string name="theme_settings_theme_color">主题颜色</string>

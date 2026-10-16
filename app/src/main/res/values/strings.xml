@@ -133,6 +133,7 @@
     <string name="theme_settings_palette_style_desc">Select palette style</string>
     <string name="theme_settings_color_spec">Color Spec</string>
     <string name="theme_settings_color_spec_only_2021">Current palette style only supports Spec 2021</string>
+    <string name="theme_settings_color_spec_only_2026">Current palette style only supports Spec 2026</string>
     <string name="theme_settings_dynamic_color">Dynamic Color</string>
     <string name="theme_settings_dynamic_color_desc">Theme color based on wallpaper</string>
     <string name="theme_settings_theme_color">Theme Color</string>

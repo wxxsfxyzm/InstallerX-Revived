@@ -12,13 +12,18 @@ enum class PaletteStyle(val displayName: String, val desc: String = "") {
     Monochrome("Monochrome"),
     Fidelity("Fidelity"),
     Content("Content"),
+    Cmf("CMF"),
     ;
 
-    val supportsSpec2025: Boolean
-        get() = this == TonalSpot ||
-            this == Neutral ||
-            this == Vibrant ||
-            this == Expressive
+    val supportedSpecs: List<ThemeColorSpec>
+        get() = when (this) {
+            TonalSpot, Neutral, Vibrant, Expressive -> listOf(ThemeColorSpec.SPEC_2021, ThemeColorSpec.SPEC_2025)
+            Cmf -> listOf(ThemeColorSpec.SPEC_2026)
+            else -> listOf(ThemeColorSpec.SPEC_2021)
+        }
+
+    /** Resolve the active spec without overwriting the user's preferred spec. */
+    fun effectiveSpec(preferredSpec: ThemeColorSpec): ThemeColorSpec = preferredSpec.takeIf { it in supportedSpecs } ?: supportedSpecs.last()
 
     companion object {
         fun fromValueOrDefault(value: String) = entries.find { it.name == value } ?: TonalSpot

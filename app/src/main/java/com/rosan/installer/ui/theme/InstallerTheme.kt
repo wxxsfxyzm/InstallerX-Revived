@@ -230,10 +230,12 @@ fun InstallerMiuixTheme(
             PaletteStyle.Monochrome -> MiuixPaletteStyle.Monochrome
             PaletteStyle.Fidelity -> MiuixPaletteStyle.Fidelity
             PaletteStyle.Content -> MiuixPaletteStyle.Content
+            PaletteStyle.Cmf -> MiuixPaletteStyle.Cmf
         }
 
-        val colorSpecVersion = when (colorSpec) {
-            ThemeColorSpec.SPEC_2025 -> if (paletteStyle.supportsSpec2025) MiuixColorSpec.Spec2025 else MiuixColorSpec.Spec2021
+        val colorSpecVersion = when (paletteStyle.effectiveSpec(colorSpec)) {
+            ThemeColorSpec.SPEC_2026 -> MiuixColorSpec.Spec2026
+            ThemeColorSpec.SPEC_2025 -> MiuixColorSpec.Spec2025
             ThemeColorSpec.SPEC_2021 -> MiuixColorSpec.Spec2021
         }
 
