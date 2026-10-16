@@ -4,11 +4,15 @@ package com.rosan.installer.data.engine.signature
 
 import android.os.Build
 import com.android.apksig.ApkVerifier
+import com.android.apksig.SigningCertificateLineage
 import com.android.apksig.util.DataSink
 import com.android.apksig.util.DataSource
 import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureCertificateInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SigningCertificateCapabilities
+import com.rosan.installer.domain.engine.model.packageinfo.SigningIdentity
 import com.rosan.installer.domain.engine.model.packageinfo.SourceStampInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SourceStampVerificationStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -129,16 +133,27 @@ class PendingApkSignatureAnalyzer(
         zipFile: UnifiedZipFile? = null,
         checkSourceStamp: Boolean = true,
     ): AppSignatureInfo {
-        val certificates = result.signerCertificates.map { certificate ->
-            certificateFormatter.format(certificate)
+        val formatted = mutableMapOf<X509Certificate, SignatureCertificateInfo>()
+        fun format(certificate: X509Certificate) = formatted.getOrPut(certificate) { certificateFormatter.format(certificate) }
+        val legacyCertificates = result.signerCertificates.map(::format)
+        val legacyHistory = result.signingCertificateLineageCertificates().map(::format)
+        val legacyCapabilities = result.signingCertificateLineage.capabilities(::format)
+        val hybrid = result.v32SchemeSigner?.takeIf { result.isVerified && result.isVerifiedUsingV32Scheme }
+        val classical = hybrid?.classicalSignerInfo?.certificate?.let(::format)
+        val pqc = hybrid?.pqcSignerInfo?.certificate?.let(::format)
+        val certificates = pqc?.let(::listOf) ?: legacyCertificates
+        // Android represents a hybrid as the classical lineage followed by its PQC signer.
+        val history = if (hybrid != null && pqc != null && classical != null) {
+            hybrid.classicalSignerInfo.signingCertificateLineage?.certificatesInLineage.orEmpty()
+                .map(::format).ifEmpty { listOf(classical) } + pqc
+        } else {
+            legacyHistory
         }
         return AppSignatureInfo(
             verified = result.isVerified,
             signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
             certificates = certificates,
-            signingCertificateHistory = result.signingCertificateLineageCertificates().map { certificate ->
-                certificateFormatter.format(certificate)
-            },
+            signingCertificateHistory = history,
             hasMultipleSigners = certificates.size > 1,
             verifiedSchemes = result.verifiedSchemes(),
             warnings = result.warnings.filter { checkSourceStamp || !it.issue.name.startsWith("SOURCE_STAMP_") }
@@ -146,7 +161,26 @@ class PendingApkSignatureAnalyzer(
             errors = result.errors.filter { checkSourceStamp || !it.issue.name.startsWith("SOURCE_STAMP_") }
                 .map { it.toString() },
             sourceStampInfo = if (checkSourceStamp) readSourceStampInfo(result, data, zipFile) else null,
+            isHybrid = hybrid != null,
+            hybridClassicalCertificate = classical,
+            lineageCapabilities = if (hybrid != null) hybrid.classicalSignerInfo.signingCertificateLineage.capabilities(::format) else legacyCapabilities,
+            fallbackIdentity = if (hybrid != null && legacyCertificates.isNotEmpty()) {
+                SigningIdentity(
+                    signerSha256Set = legacyCertificates.mapTo(linkedSetOf()) { it.sha256 },
+                    historySha256 = legacyHistory.map { it.sha256 },
+                    capabilities = legacyCapabilities,
+                )
+            } else {
+                null
+            },
         )
+    }
+
+    private fun SigningCertificateLineage?.capabilities(
+        format: (X509Certificate) -> SignatureCertificateInfo,
+    ): Map<String, SigningCertificateCapabilities> = this?.certificatesInLineage.orEmpty().associate { certificate ->
+        val flags = requireNotNull(this).getSignerCapabilities(certificate)
+        format(certificate).sha256 to SigningCertificateCapabilities(flags.hasInstalledData(), flags.hasRollback())
     }
 
     private fun readSourceStampInfo(

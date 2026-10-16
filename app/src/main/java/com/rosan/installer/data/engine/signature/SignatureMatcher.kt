@@ -13,10 +13,9 @@ import com.rosan.installer.domain.session.model.SelectInstallEntity
 /**
  * Signature matcher.
  */
-class SignatureMatcher(private val installedPackageSignatureReader: InstalledPackageSignatureReader) {
+class SignatureMatcher {
     fun match(baseEntity: AppEntity.BaseEntity?, installedInfo: InstalledAppInfo?): SignatureMatchStatus = baseEntity.analyzePackageSignatureMatch(
         installedInfo = installedInfo,
-        hasSigningCertificate = installedPackageSignatureReader::hasSigningCertificate,
     )
 
     fun analyzeSelection(

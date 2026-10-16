@@ -21,7 +21,6 @@ import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureMatch
 import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureSelection
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppIconUseCase
 import com.rosan.installer.domain.engine.usecase.GetAppLabelUseCase
@@ -62,7 +61,6 @@ class InstallerViewModel(
     private val getAppIconColor: GetAppIconColorUseCase,
     private val getAppLabel: GetAppLabelUseCase,
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
-    private val installedPackageSignatureProvider: InstalledPackageSignatureProvider,
 ) : ViewModel() {
 
     // Event channel for one-off side effects (e.g. Toasts)
@@ -727,7 +725,6 @@ class InstallerViewModel(
                     signatureMatchStatus = if (result.signatureCheckPerformed) {
                         clearedEntities.analyzePackageSignatureMatch(
                             installedInfo = result.installedAppInfo,
-                            hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
                         )
                     } else {
                         result.signatureMatchStatus
@@ -903,7 +900,6 @@ class InstallerViewModel(
                     signatureMatchStatus = if (result.signatureCheckPerformed) {
                         entities.analyzePackageSignatureMatch(
                             installedInfo = result.installedAppInfo,
-                            hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
                         )
                     } else {
                         result.signatureMatchStatus

@@ -79,6 +79,8 @@ data class InstallNoticeResources(
     val errorColor: Color,
     val tertiaryColor: Color,
     val primaryColor: Color,
+    val labelSignatureHybridClassical: String = "",
+    val labelSignatureHybridPqc: String = "",
 )
 
 // Return type containing the list and the button ID

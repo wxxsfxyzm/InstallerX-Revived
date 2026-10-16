@@ -534,7 +534,6 @@ class InstallerSelectionTest {
                 check(name == "isSystemApp")
                 true
             },
-            installedPackageSignatureProvider = stub(),
         )
 
         fun load(results: List<PackageAnalysisResult>) {

@@ -22,7 +22,6 @@ import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatu
 import com.rosan.installer.domain.engine.model.packageinfo.analyzePackageSignatureSelection
 import com.rosan.installer.domain.engine.model.packageinfo.selectedSigningBlockCertificateStatus
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.history.model.InstallMethod
@@ -63,7 +62,6 @@ class ProcessInstallationUseCase(
     private val appInstaller: AppInstallerRepository,
     private val moduleInstaller: ModuleInstallerRepository,
     private val capabilityProvider: DeviceCapabilityProvider,
-    private val installedPackageSignatureProvider: InstalledPackageSignatureProvider,
     private val recordOperationHistory: RecordOperationHistoryUseCase,
     private val postInstallTaskProvider: PostInstallTaskProvider,
 ) {
@@ -241,7 +239,6 @@ class ProcessInstallationUseCase(
             )
             val signatureMatchStatus = result.appEntities.analyzePackageSignatureMatch(
                 installedInfo = result.installedAppInfo,
-                hasSigningCertificate = installedPackageSignatureProvider::hasSigningCertificate,
             )
 
             if (!config.allowSigMismatch &&

@@ -6,6 +6,7 @@ import android.os.Build
 import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SigningIdentity
 import com.rosan.installer.domain.engine.model.packageinfo.SourceStampInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import java.io.EOFException
@@ -48,8 +49,12 @@ class LightweightApkSignatureReader(
             if (result.none(certificate::contentEquals)) result += certificate
             result
         }
-        val certificates = uniqueCertificates
-            .map(certificateFormatter::format)
+        val declaredCertificates = uniqueCertificates.map(certificateFormatter::format)
+        val hybrid = declarations.isHybrid
+        val pqc = declaredCertificates.singleOrNull { it.isPqcCertificate() }
+        val classical = declaredCertificates.singleOrNull { !it.isPqcCertificate() }
+            ?.takeIf { declaredCertificates.size == 2 && pqc != null }
+        val certificates = if (hybrid) pqc?.takeIf { classical != null }?.let(::listOf).orEmpty() else declaredCertificates
         val digest = if (checkSourceStamp) sourceStampReader.read(data, zipFile) else null
         val sourceStampInfo = declarations.sourceStampInfo?.copy(declaredCertificateSha256 = digest)
             ?: digest?.let { SourceStampInfo(declaredCertificateSha256 = it) }
@@ -58,10 +63,16 @@ class LightweightApkSignatureReader(
             verified = false,
             signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
             certificates = certificates,
-            hasMultipleSigners = certificates.size > 1,
+            signingCertificateHistory = if (hybrid && classical != null && pqc != null) listOf(classical, pqc) else emptyList(),
+            hasMultipleSigners = !hybrid && certificates.size > 1,
             declaredSchemes = declarations.schemes,
             verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY,
             sourceStampInfo = sourceStampInfo,
+            isHybrid = hybrid,
+            hybridClassicalCertificate = classical.takeIf { hybrid },
+            fallbackIdentity = declarations.fallbackCertificates.takeIf { it.isNotEmpty() }?.let { fallback ->
+                SigningIdentity(fallback.mapTo(linkedSetOf()) { certificateFormatter.format(it).sha256 })
+            },
         )
     }
 
@@ -123,11 +134,7 @@ class LightweightApkSignatureReader(
                 parseSchemeSigners(pair, scheme.hasSdkRange, platformSdk)
             schemes += scheme.label
         }
-        val certificates = when {
-            platformSdk >= MIN_SDK_WITH_V32_SUPPORT &&
-                certificatesByScheme[SCHEME_V32].isNullOrEmpty().not() ->
-                certificatesByScheme.getValue(SCHEME_V32)
-
+        val fallbackCertificates = when {
             platformSdk >= MIN_SDK_WITH_V31_SUPPORT &&
                 certificatesByScheme[SCHEME_V31].isNullOrEmpty().not() ->
                 certificatesByScheme.getValue(SCHEME_V31)
@@ -138,7 +145,14 @@ class LightweightApkSignatureReader(
 
             else -> certificatesByScheme[SCHEME_V2].orEmpty()
         }
-        return SignatureDeclarations(certificates, schemes.toList(), sourceStampInfo)
+        val hybrid = platformSdk >= MIN_SDK_WITH_V32_SUPPORT && !certificatesByScheme[SCHEME_V32].isNullOrEmpty()
+        return SignatureDeclarations(
+            certificates = if (hybrid) certificatesByScheme.getValue(SCHEME_V32) else fallbackCertificates,
+            schemes = schemes.toList(),
+            sourceStampInfo = sourceStampInfo,
+            isHybrid = hybrid,
+            fallbackCertificates = if (hybrid) fallbackCertificates else emptyList(),
+        )
     }
 
     private fun parseSchemeSigners(block: ByteBuffer, hasSdkRange: Boolean, platformSdk: Int): List<ByteArray> {
@@ -291,6 +305,8 @@ class LightweightApkSignatureReader(
         val certificates: List<ByteArray> = emptyList(),
         val schemes: List<String> = emptyList(),
         val sourceStampInfo: SourceStampInfo? = null,
+        val isHybrid: Boolean = false,
+        val fallbackCertificates: List<ByteArray> = emptyList(),
     )
 
     private data class Scheme(val label: String, val hasSdkRange: Boolean)

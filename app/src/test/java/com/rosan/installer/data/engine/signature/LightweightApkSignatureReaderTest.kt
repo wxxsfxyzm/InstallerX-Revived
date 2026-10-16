@@ -238,7 +238,7 @@ class LightweightApkSignatureReaderTest {
     }
 
     @Test
-    fun `v32 hybrid signer takes precedence over older v3 schemes`() {
+    fun `unrecognized v32 hybrid roles remain unknown instead of ordinary multisigners`() {
         val classicalCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x01)
         val pqcCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x02)
         val fallbackCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x03)
@@ -270,10 +270,11 @@ class LightweightApkSignatureReaderTest {
         val result = reader.read(entity, platformSdk = 37)
 
         assertEquals(listOf("V3", "V3.2"), result.declaredSchemes)
-        assertEquals(
-            setOf(classicalCertificate.sha256(), pqcCertificate.sha256()),
-            result.signerSha256Set,
-        )
+        assertTrue(result.isHybrid)
+        assertFalse(result.hasMultipleSigners)
+        assertTrue(result.signerSha256Set.isEmpty())
+        assertFalse(result.signingIdentity.isComplete)
+        assertEquals(setOf(fallbackCertificate.sha256()), result.fallbackIdentity?.signerSha256Set)
     }
 
     private fun createApkWithV2Certificate(certificate: ByteArray, stampDigest: ByteArray? = null): ByteArray {

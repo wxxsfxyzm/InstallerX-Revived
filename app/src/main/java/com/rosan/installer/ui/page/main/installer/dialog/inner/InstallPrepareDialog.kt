@@ -233,6 +233,9 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
     val labelXposedMinApi = stringResource(R.string.installer_xposed_min_api)
     val labelXposedTargetApi = stringResource(R.string.installer_xposed_target_api)
 
+    val labelSignatureHybridClassical = stringResource(R.string.installer_signature_hybrid_classical)
+    val labelSignatureHybridPqc = stringResource(R.string.installer_signature_hybrid_pqc)
+
     val installResources = remember(primaryColor, errorColor, tertiaryColor) {
         InstallNoticeResources(
             tagDowngrade = tagDowngrade,
@@ -264,6 +267,8 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
             labelSignatureCertificateLineage = labelSignatureCertificateLineage,
             labelSignatureLineageCertificate = labelSignatureLineageCertificate,
             labelSignatureCurrentMarker = labelSignatureCurrentMarker,
+            labelSignatureHybridClassical = labelSignatureHybridClassical,
+            labelSignatureHybridPqc = labelSignatureHybridPqc,
             labelSignatureSha256 = labelSignatureSha256,
             labelSignatureSourceStampSha256 = labelSignatureSourceStampSha256,
             labelSignatureSourceStamp = labelSignatureSourceStamp,

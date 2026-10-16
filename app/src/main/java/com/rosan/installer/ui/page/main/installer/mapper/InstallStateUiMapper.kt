@@ -325,9 +325,17 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
     }
 
     private fun StringBuilder.appendCurrentCertificates(info: AppSignatureInfo) {
+        if (info.isHybrid) {
+            info.hybridClassicalCertificate?.let {
+                appendCertificateDetails(resources.labelSignatureHybridClassical, it)
+                appendLine()
+            }
+        }
         info.certificates.forEachIndexed { index, certificate ->
             if (index > 0) appendLine()
-            val label = if (info.certificates.size == 1) {
+            val label = if (info.isHybrid) {
+                resources.labelSignatureHybridPqc
+            } else if (info.certificates.size == 1) {
                 resources.labelSignatureCurrentCertificate
             } else {
                 "${resources.labelSignatureCurrentCertificate} ${index + 1}"
@@ -340,10 +348,11 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
         appendLine(resources.labelSignatureCertificateLineage)
         info.signingCertificateHistory.forEachIndexed { index, certificate ->
             if (index > 0) appendLine()
-            val currentMarker = if (certificate.sha256 in info.signerSha256Set) {
-                " (${resources.labelSignatureCurrentMarker})"
-            } else {
-                ""
+            val currentMarker = when {
+                certificate.sha256 == info.hybridClassicalCertificate?.sha256 -> " (${resources.labelSignatureHybridClassical})"
+                info.isHybrid && certificate.sha256 in info.signerSha256Set -> " (${resources.labelSignatureHybridPqc})"
+                certificate.sha256 in info.signerSha256Set -> " (${resources.labelSignatureCurrentMarker})"
+                else -> ""
             }
             appendCertificateDetails(
                 "${resources.labelSignatureLineageCertificate} ${index + 1}$currentMarker",

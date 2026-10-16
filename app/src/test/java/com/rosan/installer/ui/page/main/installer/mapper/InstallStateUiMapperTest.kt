@@ -4,6 +4,7 @@ package com.rosan.installer.ui.page.main.installer.mapper
 
 import androidx.compose.ui.graphics.Color
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureCertificateInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SourceStampInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SourceStampVerificationStatus
@@ -64,14 +65,31 @@ class InstallStateUiMapperTest {
         assertFalse(text.contains("Source stamp certificate\n"))
     }
 
-    private fun description(stamp: SourceStampInfo?): String {
+    @Test
+    fun `hybrid history labels the two active certificate roles`() {
+        val classical = SignatureCertificateInfo("cc", "cc", "classical", "issuer", "1", null, null, "RSA", "RSA")
+        val pqc = classical.copy(sha256 = "dd", subject = "pqc", publicKeyAlgorithm = "ML-DSA")
+        val info = AppSignatureInfo(
+            verified = true,
+            signerSha256Set = setOf(pqc.sha256),
+            certificates = listOf(pqc),
+            signingCertificateHistory = listOf(classical, pqc),
+            isHybrid = true,
+            hybridClassicalCertificate = classical,
+        )
+        val text = description(null, info)
+        assertTrue(text.contains("(V3.2 classical certificate)"))
+        assertTrue(text.contains("(V3.2 PQC certificate)"))
+    }
+
+    private fun description(stamp: SourceStampInfo?, signature: AppSignatureInfo? = null): String {
         val state = DomainInstallState(
             actionType = InstallActionType.INSTALL,
             notices = listOf(
                 InstallNotice.SignatureSummary(
                     status = SignatureMatchStatus.NOT_INSTALLED,
                     details = SignatureNoticeDetails(
-                        pendingSignatureInfo = AppSignatureInfo(
+                        pendingSignatureInfo = signature ?: AppSignatureInfo(
                             verified = true,
                             signerSha256Set = emptySet(),
                             certificates = emptyList(),
@@ -115,6 +133,8 @@ class InstallStateUiMapperTest {
         labelSignatureCertificateLineage = "",
         labelSignatureLineageCertificate = "",
         labelSignatureCurrentMarker = "",
+        labelSignatureHybridClassical = "V3.2 classical certificate",
+        labelSignatureHybridPqc = "V3.2 PQC certificate",
         labelSignatureSha256 = "",
         labelSignatureSourceStampSha256 = "Source stamp SHA-256",
         labelSignatureSourceStamp = "Source stamp",
