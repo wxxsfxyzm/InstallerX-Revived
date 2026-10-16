@@ -30,9 +30,18 @@ data class SigningIdentity(
 
 enum class SigningIdentityComparison { MATCH, MISMATCH, UNKNOWN }
 
-/** Compares the same platform branch on both sides without guessing the device's feature flag. */
-fun AppSignatureInfo.compareSigningIdentity(other: AppSignatureInfo): SigningIdentityComparison {
+/**
+ * Compares the same platform branch on both sides. A complete installed hybrid identity confirms
+ * V3.2 selection; an installed legacy identity leaves the device's feature flag unknown.
+ */
+fun AppSignatureInfo.compareSigningIdentity(
+    other: AppSignatureInfo,
+    installedIdentity: SigningIdentity? = null,
+): SigningIdentityComparison {
     val pairs = when {
+        installedIdentity?.let { it.isHybrid && it.isComplete } == true ->
+            listOf(signingIdentity to other.signingIdentity)
+
         fallbackIdentity != null && other.fallbackIdentity != null ->
             listOf(signingIdentity to other.signingIdentity, fallbackIdentity to other.fallbackIdentity)
 

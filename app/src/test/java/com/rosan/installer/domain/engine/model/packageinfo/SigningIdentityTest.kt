@@ -85,37 +85,36 @@ class SigningIdentityTest {
     }
 
     @Test fun `split comparison includes the classical member of a hybrid`() {
-        val base = base(hybrid("C", "P"))
-        val split = AppEntity.SplitEntity(
-            "test.app",
-            DataEntity.FileEntity("unused"),
-            "config.test",
-            "37",
-            "28",
-            null,
-            size = 0,
-            signatureInfo = hybrid("D", "P"),
-        )
-        val result = listOf(SelectInstallEntity(base, true), SelectInstallEntity(split, true)).analyzePackageSignatureSelection(null)
+        val result = selection(hybrid("C", "P"), hybrid("D", "P"))
         assertEquals(listOf("config.test.apk"), result.splitSignatureMismatchFiles)
+    }
+
+    @Test fun `installed hybrid scheme confirms matching splits despite different fallbacks`() {
+        val base = hybrid("C", "P").copy(fallbackIdentity = single("A").signingIdentity)
+        val split = hybrid("C", "P").copy(fallbackIdentity = single("B").signingIdentity)
+        val result = selection(base, split, hybrid("C", "P"))
+        assertFalse(result.hasIssues)
+    }
+
+    @Test fun `installed hybrid scheme rejects different pairs despite matching fallbacks`() {
+        val fallback = single("A").signingIdentity
+        val base = hybrid("C", "P").copy(fallbackIdentity = fallback)
+        val split = hybrid("D", "P").copy(fallbackIdentity = fallback)
+        val result = selection(base, split, hybrid("C", "P"))
+        assertEquals(listOf("config.test.apk"), result.splitSignatureMismatchFiles)
+        assertTrue(result.verificationFailedFiles.isEmpty())
     }
 
     @Test fun `ambiguous split comparisons follow unknown policy`() {
         val fallback = single("A").signingIdentity
-        val base = base(hybrid("C", "P").copy(fallbackIdentity = fallback))
-        val split = AppEntity.SplitEntity(
-            "test.app",
-            DataEntity.FileEntity("unused"),
-            "config.test",
-            "37",
-            "28",
-            null,
-            size = 0,
-            signatureInfo = hybrid("D", "P").copy(fallbackIdentity = fallback),
-        )
-        val result = listOf(SelectInstallEntity(base, true), SelectInstallEntity(split, true)).analyzePackageSignatureSelection(null)
-        assertTrue(result.splitSignatureMismatchFiles.isEmpty())
-        assertEquals(listOf("config.test.apk"), result.verificationFailedFiles)
+        val base = hybrid("C", "P").copy(fallbackIdentity = fallback)
+        val split = hybrid("D", "P").copy(fallbackIdentity = fallback)
+        val incompleteHybrid = hybrid("C", "P").copy(hybridClassicalCertificate = null)
+        for (installedSignature in listOf(null, single("A"), incompleteHybrid, hybrid("C", "P").copy(verified = false))) {
+            val result = selection(base, split, installedSignature)
+            assertTrue(result.splitSignatureMismatchFiles.isEmpty())
+            assertEquals(listOf("config.test.apk"), result.verificationFailedFiles)
+        }
     }
 
     @Test fun `lightweight comparison uses the complete pair and remains unverified`() {
@@ -140,6 +139,21 @@ class SigningIdentityTest {
     }
 
     private fun match(pending: AppSignatureInfo, installed: AppSignatureInfo) = base(pending).analyzePackageSignatureMatch(installed(installed))
+
+    private fun selection(baseSignature: AppSignatureInfo, splitSignature: AppSignatureInfo, installedSignature: AppSignatureInfo? = null): PackageSignatureAnalysis {
+        val split = AppEntity.SplitEntity(
+            "test.app",
+            DataEntity.FileEntity("unused"),
+            "config.test",
+            "37",
+            "28",
+            null,
+            size = 0,
+            signatureInfo = splitSignature,
+        )
+        return listOf(SelectInstallEntity(base(baseSignature), true), SelectInstallEntity(split, true))
+            .analyzePackageSignatureSelection(installedSignature?.let(::installed))
+    }
 
     private fun packageResult(pending: AppSignatureInfo, installed: AppSignatureInfo) = PackageAnalysisResult(
         packageName = "test.app",

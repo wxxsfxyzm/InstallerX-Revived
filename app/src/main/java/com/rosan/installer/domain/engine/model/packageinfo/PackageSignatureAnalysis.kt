@@ -30,12 +30,15 @@ fun List<SelectInstallEntity>.analyzePackageSignatureSelection(installedInfo: In
 
     val referenceSignature = selectedBase?.signatureInfo?.takeIf { it.verified }
         ?: installedInfo?.signatureInfo
+    val installedIdentity = installedInfo?.signatureInfo?.takeIf { it.verified }?.signingIdentity
 
     val splitComparisons = if (referenceSignature == null) {
         emptyList()
     } else {
         selectedSplits.mapNotNull { split ->
-            split.signatureInfo?.takeIf { it.verified }?.let { split.signatureDisplayName() to it.compareSigningIdentity(referenceSignature) }
+            split.signatureInfo?.takeIf { it.verified }?.let {
+                split.signatureDisplayName() to it.compareSigningIdentity(referenceSignature, installedIdentity)
+            }
         }
     }
     val splitSignatureMismatchFiles = splitComparisons
