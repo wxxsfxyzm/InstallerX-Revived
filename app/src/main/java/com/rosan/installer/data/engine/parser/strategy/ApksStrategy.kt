@@ -108,7 +108,7 @@ class ApksStrategy(private val apkParser: ApkParser, private val pendingApkSigna
                 filterType = metadata.filterType,
                 configValue = metadata.configValue,
                 signatureInfo = if (checkSignatures) {
-                    pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                    pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory, checkSourceStamp = extra.checkSourceStamp)
                 } else {
                     null
                 },

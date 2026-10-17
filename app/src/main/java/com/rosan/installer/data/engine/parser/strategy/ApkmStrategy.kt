@@ -75,14 +75,14 @@ class ApkmStrategy(private val json: Json, private val pendingApkSignatureAnalyz
                                 filterType = metadata.filterType,
                                 configValue = metadata.configValue,
                                 signatureInfo = if (checkSignatures) {
-                                    pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                                    pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory, checkSourceStamp = extra.checkSourceStamp)
                                 } else {
                                     null
                                 },
                             )
                         } else {
                             val signatureInfo = if (checkSignatures) {
-                                pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                                pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory, checkSourceStamp = extra.checkSourceStamp)
                             } else {
                                 null
                             }

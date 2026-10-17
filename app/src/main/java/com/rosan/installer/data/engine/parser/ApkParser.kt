@@ -402,7 +402,7 @@ class ApkParser(
         var targetSdk: String? = null
         val permissions = mutableListOf<String>()
         val signatureInfo = if (extra.checkAppSignature) {
-            pendingApkSignatureAnalyzer.analyze(data, extra.cacheDirectory)
+            pendingApkSignatureAnalyzer.analyze(data, extra.cacheDirectory, zipFile, extra.checkSourceStamp)
         } else {
             null
         }

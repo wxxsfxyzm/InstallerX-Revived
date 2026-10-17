@@ -4,10 +4,17 @@ package com.rosan.installer.data.engine.signature
 
 import android.os.Build
 import com.android.apksig.ApkVerifier
+import com.android.apksig.SigningCertificateLineage
 import com.android.apksig.util.DataSink
 import com.android.apksig.util.DataSource
+import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.domain.engine.exception.AnalyseException
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureCertificateInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SigningCertificateCapabilities
+import com.rosan.installer.domain.engine.model.packageinfo.SigningIdentity
+import com.rosan.installer.domain.engine.model.packageinfo.SourceStampInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SourceStampVerificationStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import java.io.EOFException
 import java.io.File
@@ -25,20 +32,26 @@ import timber.log.Timber
 class PendingApkSignatureAnalyzer(
     private val certificateFormatter: CertificateFormatter,
     private val lightweightApkSignatureReader: LightweightApkSignatureReader,
+    private val sourceStampReader: ApkSourceStampReader,
 ) {
     /**
      * apksig is the source of truth for pending APK signer certificates.
      */
-    fun analyze(apkPath: String): AppSignatureInfo {
+    fun analyze(apkPath: String, checkSourceStamp: Boolean = true): AppSignatureInfo {
         val startedAt = System.nanoTime()
-        return analyze(File(apkPath), apkPath).also {
+        return analyze(File(apkPath), apkPath, checkSourceStamp = checkSourceStamp).also {
             Timber.d(
                 "Pending APK signature analysis finished: route=file, elapsedMs=${startedAt.elapsedMillis()}, source=$apkPath",
             )
         }
     }
 
-    fun analyze(data: DataEntity, cacheDirectory: String): AppSignatureInfo? {
+    fun analyze(
+        data: DataEntity,
+        cacheDirectory: String,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo? {
         val startedAt = System.nanoTime()
         val route = when (data) {
             is DataEntity.FileDescriptorEntity -> "descriptor"
@@ -48,18 +61,18 @@ class PendingApkSignatureAnalyzer(
         return when (data) {
             is DataEntity.FileDescriptorEntity -> {
                 if (data.preInstallSignatureAnalysis) {
-                    analyze(data)
+                    analyze(data, zipFile, checkSourceStamp)
                 } else if (data.preInstallSigningBlockAnalysis) {
-                    lightweightApkSignatureReader.read(data)
+                    lightweightApkSignatureReader.read(data, zipFile, checkSourceStamp)
                 } else {
                     Timber.d("Skipping pre-install signature analysis; PackageInstaller will verify: ${data.path}")
                     null
                 }
             }
 
-            is DataEntity.FileEntity -> analyze(File(data.path), data.path)
+            is DataEntity.FileEntity -> analyze(File(data.path), data.path, zipFile, checkSourceStamp)
 
-            else -> analyzeStream(data, cacheDirectory)
+            else -> analyzeStream(data, cacheDirectory, checkSourceStamp)
         }.also {
             Timber.d(
                 "Pending APK signature analysis finished: route=$route, " +
@@ -68,7 +81,12 @@ class PendingApkSignatureAnalyzer(
         }
     }
 
-    private fun analyze(file: File, displayName: String): AppSignatureInfo = verify(displayName) {
+    private fun analyze(
+        file: File,
+        displayName: String,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo = verify(displayName, DataEntity.FileEntity(file.path), zipFile, checkSourceStamp) {
         ApkVerifier.Builder(file)
             .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
             .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
@@ -76,8 +94,12 @@ class PendingApkSignatureAnalyzer(
             .verify()
     }
 
-    private fun analyze(data: DataEntity.FileDescriptorEntity): AppSignatureInfo = data.openChannel().use { channel ->
-        verify(data.path) {
+    private fun analyze(
+        data: DataEntity.FileDescriptorEntity,
+        zipFile: UnifiedZipFile?,
+        checkSourceStamp: Boolean,
+    ): AppSignatureInfo = data.openChannel().use { channel ->
+        verify(data.path, data, zipFile, checkSourceStamp) {
             ApkVerifier.Builder(SeekableChannelDataSource(channel))
                 .setMinCheckedPlatformVersion(Build.VERSION.SDK_INT)
                 .setMaxCheckedPlatformVersion(Build.VERSION.SDK_INT)
@@ -86,29 +108,138 @@ class PendingApkSignatureAnalyzer(
         }
     }
 
-    private fun verify(displayName: String, operation: () -> ApkVerifier.Result): AppSignatureInfo = try {
-        val result = operation()
-        val certificates = result.signerCertificates.map { certificate ->
-            certificateFormatter.format(certificate)
+    private fun verify(
+        displayName: String,
+        data: DataEntity.FileEntity,
+        zipFile: UnifiedZipFile?,
+        checkSourceStamp: Boolean,
+        operation: () -> ApkVerifier.Result,
+    ): AppSignatureInfo = try {
+        mapVerificationResult(operation(), data, zipFile, checkSourceStamp)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to get signature hash from APK: $displayName")
+        failedSignatureInfo(e.message ?: e::class.java.simpleName).copy(
+            sourceStampInfo = if (checkSourceStamp) {
+                sourceStampReader.read(data, zipFile)?.let { SourceStampInfo(declaredCertificateSha256 = it) }
+            } else {
+                null
+            },
+        )
+    }
+
+    internal fun mapVerificationResult(
+        result: ApkVerifier.Result,
+        data: DataEntity.FileEntity,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo {
+        val formatted = mutableMapOf<X509Certificate, SignatureCertificateInfo>()
+        fun format(certificate: X509Certificate) = formatted.getOrPut(certificate) { certificateFormatter.format(certificate) }
+        // Build Tools 37 apksig populates signerCertificates from V3.1/V3/V2/V1.
+        // V3.2 hybrid signers are exposed separately through v32SchemeSigner.
+        // Recheck this fallback selection when upgrading apksig.
+        val legacyCertificates = result.signerCertificates.map(::format)
+        val legacyHistory = result.signingCertificateLineageCertificates().map(::format)
+        val legacyCapabilities = result.signingCertificateLineage.capabilities(::format)
+        val hybrid = result.v32SchemeSigner?.takeIf { result.isVerified && result.isVerifiedUsingV32Scheme }
+        val classical = hybrid?.classicalSignerInfo?.certificate?.let(::format)
+        val pqc = hybrid?.pqcSignerInfo?.certificate?.let(::format)
+        val certificates = pqc?.let(::listOf) ?: legacyCertificates
+        // Android represents a hybrid as the classical lineage followed by its PQC signer.
+        val history = if (hybrid != null && pqc != null && classical != null) {
+            hybrid.classicalSignerInfo.signingCertificateLineage?.certificatesInLineage.orEmpty()
+                .map(::format).ifEmpty { listOf(classical) } + pqc
+        } else {
+            legacyHistory
         }
-        AppSignatureInfo(
+        return AppSignatureInfo(
             verified = result.isVerified,
             signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
             certificates = certificates,
-            signingCertificateHistory = result.signingCertificateLineageCertificates().map { certificate ->
-                certificateFormatter.format(certificate)
-            },
+            signingCertificateHistory = history,
             hasMultipleSigners = certificates.size > 1,
             verifiedSchemes = result.verifiedSchemes(),
-            warnings = result.warnings.map { it.toString() },
-            errors = result.errors.map { it.toString() },
+            warnings = result.warnings.filter { checkSourceStamp || !it.issue.name.startsWith("SOURCE_STAMP_") }
+                .map { it.toString() },
+            errors = result.errors.filter { checkSourceStamp || !it.issue.name.startsWith("SOURCE_STAMP_") }
+                .map { it.toString() },
+            sourceStampInfo = if (checkSourceStamp) readSourceStampInfo(result, data, zipFile) else null,
+            isHybrid = hybrid != null,
+            hybridClassicalCertificate = classical,
+            lineageCapabilities = if (hybrid != null) hybrid.classicalSignerInfo.signingCertificateLineage.capabilities(::format) else legacyCapabilities,
+            fallbackIdentity = if (hybrid != null && legacyCertificates.isNotEmpty()) {
+                SigningIdentity(
+                    signerSha256Set = legacyCertificates.mapTo(linkedSetOf()) { it.sha256 },
+                    historySha256 = legacyHistory.map { it.sha256 },
+                    capabilities = legacyCapabilities,
+                )
+            } else {
+                null
+            },
         )
-    } catch (e: Exception) {
-        Timber.e(e, "Failed to get signature hash from APK: $displayName")
-        failedSignatureInfo(e.message ?: e::class.java.simpleName)
     }
 
-    private fun analyzeStream(data: DataEntity, cacheDirectory: String): AppSignatureInfo {
+    private fun SigningCertificateLineage?.capabilities(
+        format: (X509Certificate) -> SignatureCertificateInfo,
+    ): Map<String, SigningCertificateCapabilities> = this?.certificatesInLineage.orEmpty().associate { certificate ->
+        val flags = requireNotNull(this).getSignerCapabilities(certificate)
+        format(certificate).sha256 to SigningCertificateCapabilities(flags.hasInstalledData(), flags.hasRollback())
+    }
+
+    private fun readSourceStampInfo(
+        result: ApkVerifier.Result,
+        data: DataEntity.FileEntity,
+        zipFile: UnifiedZipFile?,
+    ): SourceStampInfo? = runCatching {
+        val nativeStamp = result.sourceStampInfo
+        val stamp = nativeStamp?.takeUnless {
+            it.sourceStampVerificationStatus == ApkVerifier.Result.SourceStampInfo.SourceStampVerificationStatus.STAMP_MISSING
+        }?.let {
+            SourceStampInfo(
+                verificationStatus = when {
+                    result.isSourceStampVerified -> SourceStampVerificationStatus.VERIFIED
+
+                    else -> when (it.sourceStampVerificationStatus) {
+                        ApkVerifier.Result.SourceStampInfo.SourceStampVerificationStatus.STAMP_VERIFICATION_FAILED -> SourceStampVerificationStatus.FAILED
+                        ApkVerifier.Result.SourceStampInfo.SourceStampVerificationStatus.CERT_DIGEST_MISMATCH -> SourceStampVerificationStatus.CERTIFICATE_MISMATCH
+                        ApkVerifier.Result.SourceStampInfo.SourceStampVerificationStatus.VERIFICATION_ERROR -> SourceStampVerificationStatus.VERIFICATION_ERROR
+                        else -> SourceStampVerificationStatus.UNVERIFIED
+                    }
+                },
+                certificate = it.certificate?.let(certificateFormatter::format),
+                certificateLineage = it.certificatesInLineage.map(certificateFormatter::format),
+                timestampEpochSeconds = it.timestampEpochSeconds.takeIf { timestamp -> timestamp > 0L },
+                infoMessages = it.infoMessages.map { message -> message.toString() },
+                warnings = it.warnings.map { warning -> warning.toString() },
+                errors = it.errors.map { error -> error.toString() },
+            )
+        }
+        // A successful full verification has already checked the entry against this certificate.
+        // Mapping that result must not reopen the APK or scan its central directory again.
+        if (stamp?.verificationStatus == SourceStampVerificationStatus.VERIFIED) return stamp
+
+        val hasDeclaredDigest = zipFile?.getEntry(ApkSourceStampReader.STAMP_ENTRY_NAME) != null
+        val missingStampSignature = result.warnings.any { it.issue == ApkVerifier.Issue.SOURCE_STAMP_SIG_MISSING }
+        if (stamp == null && result.isVerified && !hasDeclaredDigest && !missingStampSignature) return null
+
+        val digest = sourceStampReader.read(data, zipFile)
+        stamp?.copy(declaredCertificateSha256 = digest)
+            ?: digest?.let {
+                SourceStampInfo(
+                    declaredCertificateSha256 = it,
+                    warnings = result.warnings.filter { warning -> warning.issue == ApkVerifier.Issue.SOURCE_STAMP_SIG_MISSING }
+                        .map { warning -> warning.toString() },
+                )
+            }
+    }.getOrElse { error ->
+        Timber.w(error, "Unable to map APK source stamp information: ${data.path}")
+        SourceStampInfo(
+            verificationStatus = SourceStampVerificationStatus.VERIFICATION_ERROR,
+            errors = listOf(error.message ?: error::class.java.simpleName),
+        )
+    }
+
+    private fun analyzeStream(data: DataEntity, cacheDirectory: String, checkSourceStamp: Boolean): AppSignatureInfo {
         val tempFile = createSignatureTempFile(cacheDirectory)
         return try {
             val input = data.getInputStream()
@@ -124,7 +255,7 @@ class PendingApkSignatureAnalyzer(
                     "elapsedMs=${materializeStartedAt.elapsedMillis()}, source=$data",
             )
             val verificationStartedAt = System.nanoTime()
-            analyze(tempFile, data.toString()).also {
+            analyze(tempFile, data.toString(), checkSourceStamp = checkSourceStamp).also {
                 Timber.d(
                     "Verified materialized APK signature: elapsedMs=${verificationStartedAt.elapsedMillis()}, " +
                         "source=$data",

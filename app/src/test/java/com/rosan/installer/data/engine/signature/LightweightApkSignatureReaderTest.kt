@@ -2,8 +2,14 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.signature
 
+import com.rosan.installer.data.engine.parser.CommonsZipFileProvider
+import com.rosan.installer.data.engine.parser.SeekableZipReader
+import com.rosan.installer.data.engine.parser.UnifiedZipFileProvider
+import com.rosan.installer.data.engine.signature.SignatureTestFixtures.Stamp
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SourceStampVerificationStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -11,15 +17,23 @@ import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import java.security.MessageDigest
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class LightweightApkSignatureReaderTest {
     private lateinit var tempDirectory: File
-    private val reader = LightweightApkSignatureReader(CertificateFormatter())
+    private val reader = LightweightApkSignatureReader(
+        CertificateFormatter(),
+        ApkSourceStampReader(CommonsZipFileProvider(), CertificateFormatter()),
+    )
 
     @BeforeTest
     fun setUp() {
@@ -77,6 +91,87 @@ class LightweightApkSignatureReaderTest {
         assertEquals(SignatureVerificationStatus.SIGNING_BLOCK_ONLY, result.verificationStatus)
         assertEquals(emptyList(), result.declaredSchemes)
         assertEquals(emptySet(), result.signerSha256Set)
+    }
+
+    @Test
+    fun `source stamp digest is separate from lightweight signer declarations`() {
+        val encodedCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x01)
+        val stampDigest = ByteArray(32) { 0x34 }
+        val apk = File(tempDirectory, "stamped-v2.apk").apply {
+            writeBytes(createApkWithV2Certificate(encodedCertificate, stampDigest))
+        }
+        val entity = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/stamped.apk",
+            startOffset = 0L,
+            length = apk.length(),
+            channelFactory = { FileChannel.open(apk.toPath(), StandardOpenOption.READ) },
+            descriptorFactory = { error("A raw descriptor is not needed") },
+            preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = true,
+        )
+
+        val result = reader.read(entity, platformSdk = 35)
+
+        assertEquals("34".repeat(32), result.sourceStampInfo?.sha256)
+        assertEquals(setOf(encodedCertificate.sha256()), result.signerSha256Set)
+        assertEquals(SignatureVerificationStatus.SIGNING_BLOCK_ONLY, result.verificationStatus)
+        assertFalse(result.verified)
+    }
+
+    @Test
+    fun `lightweight stamp metadata reuses the signing block and borrowed ZIP view`() {
+        val signingStartedAt = System.currentTimeMillis() / 1000
+        val apk = SignatureTestFixtures.create(tempDirectory, Stamp.TIMESTAMP)
+        val signingFinishedAt = System.currentTimeMillis() / 1000
+        var openCount = 0
+        val entity = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/stamped.apk",
+            startOffset = 0L,
+            length = apk.length(),
+            channelFactory = {
+                check(++openCount <= 2) { "Stamp reads must not open a third channel" }
+                FileChannel.open(apk.toPath(), StandardOpenOption.READ)
+            },
+            descriptorFactory = { error("Unused") },
+            preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = true,
+        )
+        UnifiedZipFileProvider(CommonsZipFileProvider(), SeekableZipReader()).open(entity).use { archive ->
+            val result = reader.read(entity, platformSdk = 30, zipFile = archive)
+
+            val stamp = assertNotNull(result.sourceStampInfo)
+            assertFalse(result.verified)
+            assertEquals(SourceStampVerificationStatus.UNVERIFIED, stamp.verificationStatus)
+            assertTrue(assertNotNull(stamp.timestampEpochSeconds) in signingStartedAt..signingFinishedAt)
+            assertEquals(stamp.declaredCertificateSha256, stamp.certificate?.sha256)
+            assertEquals(emptyList(), stamp.warnings)
+        }
+        assertEquals(2, openCount)
+    }
+
+    @Test
+    fun `disabled source stamp analysis keeps lightweight signer declarations without stamp reads`() {
+        val apk = SignatureTestFixtures.create(tempDirectory, Stamp.TIMESTAMP)
+        var openCount = 0
+        val entity = DataEntity.FileDescriptorEntity(
+            path = "https://example.test/stamped.apk",
+            startOffset = 0L,
+            length = apk.length(),
+            channelFactory = {
+                openCount++
+                FileChannel.open(apk.toPath(), StandardOpenOption.READ)
+            },
+            descriptorFactory = { error("Unused") },
+            preInstallSignatureAnalysis = false,
+            preInstallSigningBlockAnalysis = true,
+        )
+
+        val result = reader.read(entity, platformSdk = 30, checkSourceStamp = false)
+
+        assertNull(result.sourceStampInfo)
+        assertTrue(result.certificates.isNotEmpty())
+        assertEquals(SignatureVerificationStatus.SIGNING_BLOCK_ONLY, result.verificationStatus)
+        assertEquals(1, openCount)
     }
 
     @Test
@@ -146,7 +241,7 @@ class LightweightApkSignatureReaderTest {
     }
 
     @Test
-    fun `v32 hybrid signer takes precedence over older v3 schemes`() {
+    fun `unrecognized v32 hybrid roles remain unknown instead of ordinary multisigners`() {
         val classicalCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x01)
         val pqcCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x02)
         val fallbackCertificate = byteArrayOf(0x30, 0x03, 0x02, 0x01, 0x03)
@@ -178,13 +273,14 @@ class LightweightApkSignatureReaderTest {
         val result = reader.read(entity, platformSdk = 37)
 
         assertEquals(listOf("V3", "V3.2"), result.declaredSchemes)
-        assertEquals(
-            setOf(classicalCertificate.sha256(), pqcCertificate.sha256()),
-            result.signerSha256Set,
-        )
+        assertTrue(result.isHybrid)
+        assertFalse(result.hasMultipleSigners)
+        assertTrue(result.signerSha256Set.isEmpty())
+        assertFalse(result.signingIdentity.isComplete)
+        assertEquals(setOf(fallbackCertificate.sha256()), result.fallbackIdentity?.signerSha256Set)
     }
 
-    private fun createApkWithV2Certificate(certificate: ByteArray): ByteArray {
+    private fun createApkWithV2Certificate(certificate: ByteArray, stampDigest: ByteArray? = null): ByteArray {
         val certificates = lengthPrefixed(certificate)
         val signedData = concat(
             lengthPrefixed(byteArrayOf()),
@@ -209,6 +305,24 @@ class LightweightApkSignatureReaderTest {
             .putLong(sizeWithoutHeader)
             .put(APK_SIGNING_BLOCK_MAGIC)
             .array()
+        if (stampDigest != null) {
+            val output = ByteArrayOutputStream()
+            ZipOutputStream(output).use { zip ->
+                zip.putNextEntry(ZipEntry("stamp-cert-sha256"))
+                zip.write(stampDigest)
+                zip.closeEntry()
+            }
+            val zipBytes = output.toByteArray()
+            val eocdOffset = zipBytes.size - 22
+            val zipBuffer = ByteBuffer.wrap(zipBytes).order(ByteOrder.LITTLE_ENDIAN)
+            val centralDirectoryOffset = zipBuffer.getInt(eocdOffset + 16)
+            zipBuffer.putInt(eocdOffset + 16, centralDirectoryOffset + signingBlock.size)
+            return concat(
+                zipBytes.copyOfRange(0, centralDirectoryOffset),
+                signingBlock,
+                zipBytes.copyOfRange(centralDirectoryOffset, zipBytes.size),
+            )
+        }
         return concat(signingBlock, createEocd(signingBlock.size))
     }
 

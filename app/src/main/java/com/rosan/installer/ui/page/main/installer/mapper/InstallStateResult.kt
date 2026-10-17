@@ -38,6 +38,18 @@ data class InstallNoticeResources(
     val labelSignatureLineageCertificate: String,
     val labelSignatureCurrentMarker: String,
     val labelSignatureSha256: String,
+    val labelSignatureSourceStampSha256: String,
+    val labelSignatureSourceStamp: String,
+    val labelSignatureSourceStampStatus: String,
+    val textSourceStampUnverified: String,
+    val textSourceStampVerified: String,
+    val textSourceStampFailed: String,
+    val textSourceStampCertificateMismatch: String,
+    val textSourceStampVerificationError: String,
+    val labelSignatureSourceStampTimestamp: String,
+    val labelSignatureSourceStampCertificate: String,
+    val labelSignatureSourceStampLineage: String,
+    val labelSignatureInformation: String,
     val labelSignatureSha1: String,
     val labelSignatureSubject: String,
     val labelSignatureIssuer: String,
@@ -67,6 +79,8 @@ data class InstallNoticeResources(
     val errorColor: Color,
     val tertiaryColor: Color,
     val primaryColor: Color,
+    val labelSignatureHybridClassical: String = "",
+    val labelSignatureHybridPqc: String = "",
 )
 
 // Return type containing the list and the button ID

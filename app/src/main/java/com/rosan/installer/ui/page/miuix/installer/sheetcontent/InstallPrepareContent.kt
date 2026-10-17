@@ -175,6 +175,18 @@ fun InstallPrepareContent(
     val labelSignatureLineageCertificate = stringResource(R.string.installer_signature_lineage_certificate)
     val labelSignatureCurrentMarker = stringResource(R.string.installer_signature_current_marker)
     val labelSignatureSha256 = stringResource(R.string.installer_signature_sha256)
+    val labelSignatureSourceStampSha256 = stringResource(R.string.installer_signature_source_stamp_sha256)
+    val labelSignatureSourceStamp = stringResource(R.string.installer_signature_source_stamp)
+    val labelSignatureSourceStampStatus = stringResource(R.string.installer_signature_source_stamp_status)
+    val textSourceStampUnverified = stringResource(R.string.installer_signature_source_stamp_unverified)
+    val textSourceStampVerified = stringResource(R.string.installer_signature_source_stamp_verified)
+    val textSourceStampFailed = stringResource(R.string.installer_signature_source_stamp_failed)
+    val textSourceStampCertificateMismatch = stringResource(R.string.installer_signature_source_stamp_certificate_mismatch)
+    val textSourceStampVerificationError = stringResource(R.string.installer_signature_source_stamp_verification_error)
+    val labelSignatureSourceStampTimestamp = stringResource(R.string.installer_signature_source_stamp_timestamp)
+    val labelSignatureSourceStampCertificate = stringResource(R.string.installer_signature_source_stamp_certificate)
+    val labelSignatureSourceStampLineage = stringResource(R.string.installer_signature_source_stamp_lineage)
+    val labelSignatureInformation = stringResource(R.string.installer_signature_information)
     val labelSignatureSha1 = stringResource(R.string.installer_signature_sha1)
     val labelSignatureSubject = stringResource(R.string.installer_signature_subject)
     val labelSignatureIssuer = stringResource(R.string.installer_signature_issuer)
@@ -198,6 +210,9 @@ fun InstallPrepareContent(
     val tagXposed = stringResource(R.string.tag_xposed)
     val labelXposedMinApi = stringResource(R.string.installer_xposed_min_api)
     val labelXposedTargetApi = stringResource(R.string.installer_xposed_target_api)
+
+    val labelSignatureHybridClassical = stringResource(R.string.installer_signature_hybrid_classical)
+    val labelSignatureHybridPqc = stringResource(R.string.installer_signature_hybrid_pqc)
 
     val installResources = remember(errorColor, primaryColor) {
         InstallNoticeResources(
@@ -230,7 +245,21 @@ fun InstallPrepareContent(
             labelSignatureCertificateLineage = labelSignatureCertificateLineage,
             labelSignatureLineageCertificate = labelSignatureLineageCertificate,
             labelSignatureCurrentMarker = labelSignatureCurrentMarker,
+            labelSignatureHybridClassical = labelSignatureHybridClassical,
+            labelSignatureHybridPqc = labelSignatureHybridPqc,
             labelSignatureSha256 = labelSignatureSha256,
+            labelSignatureSourceStampSha256 = labelSignatureSourceStampSha256,
+            labelSignatureSourceStamp = labelSignatureSourceStamp,
+            labelSignatureSourceStampStatus = labelSignatureSourceStampStatus,
+            textSourceStampUnverified = textSourceStampUnverified,
+            textSourceStampVerified = textSourceStampVerified,
+            textSourceStampFailed = textSourceStampFailed,
+            textSourceStampCertificateMismatch = textSourceStampCertificateMismatch,
+            textSourceStampVerificationError = textSourceStampVerificationError,
+            labelSignatureSourceStampTimestamp = labelSignatureSourceStampTimestamp,
+            labelSignatureSourceStampCertificate = labelSignatureSourceStampCertificate,
+            labelSignatureSourceStampLineage = labelSignatureSourceStampLineage,
+            labelSignatureInformation = labelSignatureInformation,
             labelSignatureSha1 = labelSignatureSha1,
             labelSignatureSubject = labelSignatureSubject,
             labelSignatureIssuer = labelSignatureIssuer,

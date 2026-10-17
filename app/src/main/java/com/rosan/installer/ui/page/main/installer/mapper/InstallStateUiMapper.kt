@@ -8,11 +8,17 @@ import com.rosan.installer.domain.engine.model.packageinfo.PackageSignatureAnaly
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureCertificateInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SigningBlockCertificateStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SourceStampInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SourceStampVerificationStatus
 import com.rosan.installer.domain.engine.model.state.DomainInstallState
 import com.rosan.installer.domain.engine.model.state.InstallActionType
 import com.rosan.installer.domain.engine.model.state.InstallNotice
 import com.rosan.installer.domain.engine.model.state.SignatureNoticeDetails
 import com.rosan.installer.ui.page.main.widget.chip.NoticeModel
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class InstallStateUiMapper(private val resources: InstallNoticeResources) {
     fun mapToUiState(domainState: DomainInstallState): InstallStateResult {
@@ -252,6 +258,11 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
             }
         }
 
+        info.sourceStampInfo?.let { stamp ->
+            appendLine()
+            appendSourceStampInfo(stamp)
+        }
+
         val visibleWarnings = info.userVisibleWarnings()
         if (visibleWarnings.isNotEmpty()) {
             appendLine()
@@ -268,10 +279,63 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
         trimTrailingWhitespace()
     }
 
+    private fun StringBuilder.appendSourceStampInfo(stamp: SourceStampInfo) {
+        appendLine(resources.labelSignatureSourceStamp)
+        val status = when (stamp.verificationStatus) {
+            SourceStampVerificationStatus.UNVERIFIED -> resources.textSourceStampUnverified
+            SourceStampVerificationStatus.VERIFIED -> resources.textSourceStampVerified
+            SourceStampVerificationStatus.FAILED -> resources.textSourceStampFailed
+            SourceStampVerificationStatus.CERTIFICATE_MISMATCH -> resources.textSourceStampCertificateMismatch
+            SourceStampVerificationStatus.VERIFICATION_ERROR -> resources.textSourceStampVerificationError
+        }
+        appendLine("${resources.labelSignatureSourceStampStatus}: $status")
+        stamp.timestampEpochSeconds?.takeIf { it > 0L }?.let { timestamp ->
+            runCatching {
+                STAMP_TIME_FORMATTER.format(Instant.ofEpochSecond(timestamp))
+            }.getOrNull()?.let { formatted ->
+                appendLine("${resources.labelSignatureSourceStampTimestamp}: $formatted")
+            }
+        }
+        stamp.sha256?.takeIf { it.isNotBlank() && it != stamp.certificate?.sha256 }?.let { digest ->
+            appendLine("${resources.labelSignatureSourceStampSha256}: ${digest.formatDigestForDisplay()}")
+        }
+        stamp.certificate?.let { certificate ->
+            appendCertificateDetails(resources.labelSignatureSourceStampCertificate, certificate)
+        }
+        if (stamp.certificateLineage.isNotEmpty() &&
+            (stamp.certificateLineage.size > 1 || stamp.certificateLineage.single().sha256 != stamp.certificate?.sha256)
+        ) {
+            appendLine()
+            appendLine(resources.labelSignatureSourceStampLineage)
+            stamp.certificateLineage.forEachIndexed { index, certificate ->
+                if (index > 0) appendLine()
+                appendCertificateDetails("${resources.labelSignatureCertificate} ${index + 1}", certificate)
+            }
+        }
+        appendStampMessages(resources.labelSignatureInformation, stamp.infoMessages)
+        appendStampMessages(resources.labelSignatureWarnings, stamp.warnings)
+        appendStampMessages(resources.labelSignatureErrors, stamp.errors)
+    }
+
+    private fun StringBuilder.appendStampMessages(title: String, messages: List<String>) {
+        if (messages.isEmpty()) return
+        appendLine()
+        appendLine(title)
+        messages.forEach { appendLine("- $it") }
+    }
+
     private fun StringBuilder.appendCurrentCertificates(info: AppSignatureInfo) {
+        if (info.isHybrid) {
+            info.hybridClassicalCertificate?.let {
+                appendCertificateDetails(resources.labelSignatureHybridClassical, it)
+                appendLine()
+            }
+        }
         info.certificates.forEachIndexed { index, certificate ->
             if (index > 0) appendLine()
-            val label = if (info.certificates.size == 1) {
+            val label = if (info.isHybrid) {
+                resources.labelSignatureHybridPqc
+            } else if (info.certificates.size == 1) {
                 resources.labelSignatureCurrentCertificate
             } else {
                 "${resources.labelSignatureCurrentCertificate} ${index + 1}"
@@ -284,10 +348,11 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
         appendLine(resources.labelSignatureCertificateLineage)
         info.signingCertificateHistory.forEachIndexed { index, certificate ->
             if (index > 0) appendLine()
-            val currentMarker = if (certificate.sha256 in info.signerSha256Set) {
-                " (${resources.labelSignatureCurrentMarker})"
-            } else {
-                ""
+            val currentMarker = when {
+                certificate.sha256 == info.hybridClassicalCertificate?.sha256 -> " (${resources.labelSignatureHybridClassical})"
+                info.isHybrid && certificate.sha256 in info.signerSha256Set -> " (${resources.labelSignatureHybridPqc})"
+                certificate.sha256 in info.signerSha256Set -> " (${resources.labelSignatureCurrentMarker})"
+                else -> ""
             }
             appendCertificateDetails(
                 "${resources.labelSignatureLineageCertificate} ${index + 1}$currentMarker",
@@ -336,5 +401,11 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
         chunked(2).joinToString(":") { it.uppercase() }
     } else {
         this
+    }
+
+    private companion object {
+        val STAMP_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss", Locale.US)
+            .withZone(ZoneOffset.UTC)
     }
 }

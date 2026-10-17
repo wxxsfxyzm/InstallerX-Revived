@@ -89,7 +89,7 @@ class XApkStrategy(
                             filterType = metadata.filterType,
                             configValue = metadata.configValue,
                             signatureInfo = if (checkSignatures) {
-                                pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                                pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory, checkSourceStamp = extra.checkSourceStamp)
                             } else {
                                 null
                             },
@@ -125,7 +125,7 @@ class XApkStrategy(
                         }
 
                         if (signatureInfo == null && checkSignatures) {
-                            signatureInfo = pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory)
+                            signatureInfo = pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory, checkSourceStamp = extra.checkSourceStamp)
                         }
 
                         AppEntity.BaseEntity(

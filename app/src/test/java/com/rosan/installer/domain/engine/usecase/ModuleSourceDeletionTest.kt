@@ -10,7 +10,6 @@ import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.repository.ModuleInstallerRepository
 import com.rosan.installer.domain.history.repository.OperationHistoryRepository
@@ -124,7 +123,6 @@ class ModuleSourceDeletionTest {
                     }
                 },
                 capabilityProvider = stub<DeviceCapabilityProvider> { false },
-                installedPackageSignatureProvider = stub<InstalledPackageSignatureProvider>(),
                 recordOperationHistory = RecordOperationHistoryUseCase(stub<OperationHistoryRepository>()),
                 postInstallTaskProvider = object : PostInstallTaskProvider {
                     override suspend fun executeTasks(authorizer: Authorizer, customizeAuthorizer: String, info: PostInstallTaskInfo) {

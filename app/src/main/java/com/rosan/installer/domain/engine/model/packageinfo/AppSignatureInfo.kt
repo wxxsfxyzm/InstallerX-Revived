@@ -17,7 +17,21 @@ data class AppSignatureInfo(
     },
     val warnings: List<String> = emptyList(),
     val errors: List<String> = emptyList(),
+    val sourceStampInfo: SourceStampInfo? = null,
+    val isHybrid: Boolean = false,
+    val hybridClassicalCertificate: SignatureCertificateInfo? = null,
+    val lineageCapabilities: Map<String, SigningCertificateCapabilities> = emptyMap(),
+    /** Verified/declared older-scheme identity, when the platform's V3.2 selection is unknown. */
+    val fallbackIdentity: SigningIdentity? = null,
 ) {
+    val signingIdentity: SigningIdentity
+        get() = SigningIdentity(
+            signerSha256Set,
+            signingCertificateHistory.map { it.sha256 },
+            lineageCapabilities,
+            isHybrid,
+            hybridClassicalCertificate?.sha256,
+        )
     val primarySha256: String?
         get() = certificates.firstOrNull()?.sha256 ?: signerSha256Set.firstOrNull()
 

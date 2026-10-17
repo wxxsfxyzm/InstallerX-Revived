@@ -251,6 +251,21 @@ fun MiuixInstallerGlobalSettingsPage(useBlur: Boolean, viewModel: InstallerSetti
                         exit = fadeOut() + shrinkVertically(),
                     ) {
                         MiuixSwitchWidget(
+                            title = stringResource(R.string.config_check_source_stamp),
+                            description = stringResource(R.string.config_check_source_stamp_desc),
+                            checked = uiState.checkSourceStamp,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerSettingsAction.ChangeCheckSourceStamp(it))
+                            },
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = uiState.checkAppSignature,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                    ) {
+                        MiuixSwitchWidget(
                             title = stringResource(R.string.config_show_signature_info_on_match),
                             description = stringResource(R.string.config_show_signature_info_on_match_desc),
                             checked = uiState.showSignatureInfoOnMatch,

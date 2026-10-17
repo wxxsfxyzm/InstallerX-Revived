@@ -534,7 +534,6 @@ class InstallerSelectionTest {
                 check(name == "isSystemApp")
                 true
             },
-            installedPackageSignatureProvider = stub(),
         )
 
         fun load(results: List<PackageAnalysisResult>) {
@@ -585,6 +584,7 @@ class InstallerSelectionTest {
             sdkCompareInMultiLine = false,
             showOPPOSpecial = false,
             checkAppSignature = false,
+            checkSourceStamp = true,
             checkSplitPackageSignatures = false,
             showSignatureInfoOnMatch = false,
             showSignatureDetails = false,

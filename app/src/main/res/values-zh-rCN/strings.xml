@@ -181,6 +181,8 @@
     <string name="installer_settings_signature_check">签名检查</string>
     <string name="config_check_app_signature">检查应用签名</string>
     <string name="config_check_app_signature_desc">安装前分析 APK 签名，并与已安装应用进行对比</string>
+    <string name="config_check_source_stamp">分析来源戳</string>
+    <string name="config_check_source_stamp_desc">在签名详情中包含来源戳验证状态、证书和时间戳。</string>
     <string name="config_check_split_package_signatures">分析拆分包签名</string>
     <string name="config_check_split_package_signatures_desc">分析 APKS、APKM、XAPK 中的 APK 签名，会显著增加分析时间</string>
     <string name="config_show_signature_info_on_match">正常签名状态也显示信息</string>
@@ -492,8 +494,8 @@
     <string name="installer_prepare_type_unknown_confirm">你确定要安装吗？</string>
     <string name="installer_prepare_signature_new_install">新安装。系统中未发现同包名应用。</string>
     <string name="installer_prepare_signature_match">签名一致。当前安装包与已安装应用使用相同签名者集合。</string>
-    <string name="installer_prepare_signature_rotation_compatible">签名轮换兼容。当前安装包证书存在于已安装应用的签名证书谱系中，最终能否覆盖安装以系统校验为准。</string>
-    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">检测到签名轮换证明，但无法确认它与已安装应用兼容，最终结果以系统校验为准。</string>
+    <string name="installer_prepare_signature_rotation_compatible">已验证的签名身份和轮换授权确认签名轮换兼容，最终能否覆盖安装以系统校验为准。</string>
+    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">无法确认当前采用的签名方案或轮换授权，最终结果以系统校验为准。</string>
     <string name="installer_prepare_signature_mismatch">签名不一致！继续安装可能导致数据丢失或带来安全风险。</string>
     <string name="installer_prepare_signature_unknown">无法验证应用签名，请谨慎操作。</string>
     <string name="installer_prepare_signature_analysis_issue">安装包签名分析发现异常，安装可能失败，最终结果以系统校验为准。</string>
@@ -509,11 +511,25 @@
     <string name="installer_signature_schemes">已验证签名方案</string>
     <string name="installer_signature_declared_schemes">声明的签名方案（未验证）</string>
     <string name="installer_signature_certificate">证书</string>
+    <string name="installer_signature_hybrid_classical">V3.2 传统密钥证书</string>
+    <string name="installer_signature_hybrid_pqc">V3.2 PQC 密钥证书</string>
     <string name="installer_signature_current_certificate">当前证书</string>
     <string name="installer_signature_certificate_lineage">签名证书谱系</string>
     <string name="installer_signature_lineage_certificate">签名证书</string>
     <string name="installer_signature_current_marker">当前</string>
     <string name="installer_signature_sha256" translatable="false">SHA-256</string>
+    <string name="installer_signature_source_stamp_sha256">来源戳证书 SHA-256</string>
+    <string name="installer_signature_source_stamp">来源戳</string>
+    <string name="installer_signature_source_stamp_status">验证状态</string>
+    <string name="installer_signature_source_stamp_unverified">未验证</string>
+    <string name="installer_signature_source_stamp_verified">验证通过</string>
+    <string name="installer_signature_source_stamp_failed">验证失败</string>
+    <string name="installer_signature_source_stamp_certificate_mismatch">证书摘要不匹配</string>
+    <string name="installer_signature_source_stamp_verification_error">无法完成验证</string>
+    <string name="installer_signature_source_stamp_timestamp">戳时间（UTC）</string>
+    <string name="installer_signature_source_stamp_certificate">来源戳证书</string>
+    <string name="installer_signature_source_stamp_lineage">来源戳证书谱系</string>
+    <string name="installer_signature_information">信息提示</string>
     <string name="installer_signature_sha1" translatable="false">SHA-1</string>
     <string name="installer_signature_subject">主体</string>
     <string name="installer_signature_issuer">颁发者</string>

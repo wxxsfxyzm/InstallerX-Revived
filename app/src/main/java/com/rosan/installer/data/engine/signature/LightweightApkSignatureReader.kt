@@ -3,8 +3,11 @@
 package com.rosan.installer.data.engine.signature
 
 import android.os.Build
+import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
+import com.rosan.installer.domain.engine.model.packageinfo.SigningIdentity
+import com.rosan.installer.domain.engine.model.packageinfo.SourceStampInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import java.io.EOFException
 import java.io.IOException
@@ -20,12 +23,24 @@ import timber.log.Timber
  * support certificate comparison and profile restrictions, while PackageInstaller remains the
  * authority for final signature verification.
  */
-class LightweightApkSignatureReader(private val certificateFormatter: CertificateFormatter) {
-    fun read(data: DataEntity.FileDescriptorEntity): AppSignatureInfo = read(data, Build.VERSION.SDK_INT)
+class LightweightApkSignatureReader(
+    private val certificateFormatter: CertificateFormatter,
+    private val sourceStampReader: ApkSourceStampReader,
+) {
+    fun read(
+        data: DataEntity.FileDescriptorEntity,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo = read(data, Build.VERSION.SDK_INT, zipFile, checkSourceStamp)
 
-    internal fun read(data: DataEntity.FileDescriptorEntity, platformSdk: Int): AppSignatureInfo {
+    internal fun read(
+        data: DataEntity.FileDescriptorEntity,
+        platformSdk: Int,
+        zipFile: UnifiedZipFile? = null,
+        checkSourceStamp: Boolean = true,
+    ): AppSignatureInfo {
         val declarations = runCatching {
-            data.openChannel().use { channel -> readDeclarations(channel, platformSdk) }
+            data.openChannel().use { channel -> readDeclarations(channel, platformSdk, checkSourceStamp) }
         }.onFailure { error ->
             Timber.w(error, "Unable to read lightweight APK signer declarations: ${data.path}")
         }.getOrDefault(SignatureDeclarations())
@@ -34,20 +49,34 @@ class LightweightApkSignatureReader(private val certificateFormatter: Certificat
             if (result.none(certificate::contentEquals)) result += certificate
             result
         }
-        val certificates = uniqueCertificates
-            .map(certificateFormatter::format)
+        val declaredCertificates = uniqueCertificates.map(certificateFormatter::format)
+        val hybrid = declarations.isHybrid
+        val pqc = declaredCertificates.singleOrNull { it.isPqcCertificate() }
+        val classical = declaredCertificates.singleOrNull { !it.isPqcCertificate() }
+            ?.takeIf { declaredCertificates.size == 2 && pqc != null }
+        val certificates = if (hybrid) pqc?.takeIf { classical != null }?.let(::listOf).orEmpty() else declaredCertificates
+        val digest = if (checkSourceStamp) sourceStampReader.read(data, zipFile) else null
+        val sourceStampInfo = declarations.sourceStampInfo?.copy(declaredCertificateSha256 = digest)
+            ?: digest?.let { SourceStampInfo(declaredCertificateSha256 = it) }
 
         return AppSignatureInfo(
             verified = false,
             signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
             certificates = certificates,
-            hasMultipleSigners = certificates.size > 1,
+            signingCertificateHistory = if (hybrid && classical != null && pqc != null) listOf(classical, pqc) else emptyList(),
+            hasMultipleSigners = !hybrid && certificates.size > 1,
             declaredSchemes = declarations.schemes,
             verificationStatus = SignatureVerificationStatus.SIGNING_BLOCK_ONLY,
+            sourceStampInfo = sourceStampInfo,
+            isHybrid = hybrid,
+            hybridClassicalCertificate = classical.takeIf { hybrid },
+            fallbackIdentity = declarations.fallbackCertificates.takeIf { it.isNotEmpty() }?.let { fallback ->
+                SigningIdentity(fallback.mapTo(linkedSetOf()) { certificateFormatter.format(it).sha256 })
+            },
         )
     }
 
-    private fun readDeclarations(channel: SeekableByteChannel, platformSdk: Int): SignatureDeclarations {
+    private fun readDeclarations(channel: SeekableByteChannel, platformSdk: Int, checkSourceStamp: Boolean): SignatureDeclarations {
         val fileSize = channel.size()
         if (fileSize < ZIP_EOCD_MIN_SIZE) return SignatureDeclarations()
 
@@ -82,22 +111,30 @@ class LightweightApkSignatureReader(private val certificateFormatter: Certificat
         val pairs = block.sliceRange(8, block.limit() - APK_SIGNING_BLOCK_FOOTER_SIZE)
         val certificatesByScheme = mutableMapOf<String, MutableList<ByteArray>>()
         val schemes = linkedSetOf<String>()
+        var sourceStampInfo: SourceStampInfo? = null
         while (pairs.hasRemaining()) {
             if (pairs.remaining() < 8) throw IOException("Truncated APK Signing Block pair")
             val pairSize = pairs.long.toBoundedInt(pairs.remaining(), "APK Signing Block pair")
             val pair = pairs.readSlice(pairSize)
             if (pair.remaining() < 4) throw IOException("APK Signing Block pair has no ID")
             val id = pair.int
+            if (id == ApkSourceStampReader.STAMP_BLOCK_ID) {
+                if (!checkSourceStamp) continue
+                if (sourceStampInfo == null) {
+                    sourceStampInfo = sourceStampReader.readDeclaration(pair)
+                } else {
+                    sourceStampInfo = sourceStampInfo.copy(
+                        warnings = sourceStampInfo.warnings + "Duplicate source stamp block",
+                    )
+                }
+                continue
+            }
             val scheme = SCHEMES[id] ?: continue
             certificatesByScheme.getOrPut(scheme.label, ::mutableListOf) +=
                 parseSchemeSigners(pair, scheme.hasSdkRange, platformSdk)
             schemes += scheme.label
         }
-        val certificates = when {
-            platformSdk >= MIN_SDK_WITH_V32_SUPPORT &&
-                certificatesByScheme[SCHEME_V32].isNullOrEmpty().not() ->
-                certificatesByScheme.getValue(SCHEME_V32)
-
+        val fallbackCertificates = when {
             platformSdk >= MIN_SDK_WITH_V31_SUPPORT &&
                 certificatesByScheme[SCHEME_V31].isNullOrEmpty().not() ->
                 certificatesByScheme.getValue(SCHEME_V31)
@@ -108,7 +145,14 @@ class LightweightApkSignatureReader(private val certificateFormatter: Certificat
 
             else -> certificatesByScheme[SCHEME_V2].orEmpty()
         }
-        return SignatureDeclarations(certificates, schemes.toList())
+        val hybrid = platformSdk >= MIN_SDK_WITH_V32_SUPPORT && !certificatesByScheme[SCHEME_V32].isNullOrEmpty()
+        return SignatureDeclarations(
+            certificates = if (hybrid) certificatesByScheme.getValue(SCHEME_V32) else fallbackCertificates,
+            schemes = schemes.toList(),
+            sourceStampInfo = sourceStampInfo,
+            isHybrid = hybrid,
+            fallbackCertificates = if (hybrid) fallbackCertificates else emptyList(),
+        )
     }
 
     private fun parseSchemeSigners(block: ByteBuffer, hasSdkRange: Boolean, platformSdk: Int): List<ByteArray> {
@@ -260,6 +304,9 @@ class LightweightApkSignatureReader(private val certificateFormatter: Certificat
     private data class SignatureDeclarations(
         val certificates: List<ByteArray> = emptyList(),
         val schemes: List<String> = emptyList(),
+        val sourceStampInfo: SourceStampInfo? = null,
+        val isHybrid: Boolean = false,
+        val fallbackCertificates: List<ByteArray> = emptyList(),
     )
 
     private data class Scheme(val label: String, val hasSdkRange: Boolean)

@@ -70,6 +70,7 @@ enum class BooleanSetting {
     DialogDisableNotificationOnDismiss,
     DialogShowOppoSpecial,
     CheckAppSignature,
+    CheckSourceStamp,
     CheckSplitPackageSignatures,
     ShowSignatureInfoOnMatch,
     ShowSignatureDetails,

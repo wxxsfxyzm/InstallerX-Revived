@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.Build
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureCertificateInfo
 import com.rosan.installer.domain.engine.provider.InstalledPackageSignatureProvider
 import timber.log.Timber
 
@@ -42,13 +43,7 @@ class InstalledPackageSignatureReader(private val context: Context, private val 
             val signingCertificateHistory = signatures.history.map { signature ->
                 certificateFormatter.format(signature)
             }
-            AppSignatureInfo(
-                verified = true,
-                signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
-                certificates = certificates,
-                signingCertificateHistory = signingCertificateHistory,
-                hasMultipleSigners = signatures.hasMultipleSigners,
-            )
+            mapInstalledSignatureInfo(certificates, signingCertificateHistory, signatures.hasMultipleSigners, Build.VERSION.SDK_INT)
         } catch (_: PackageManager.NameNotFoundException) {
             Timber.d("Package not found, can't get signature: $packageName")
             null
@@ -123,4 +118,34 @@ class InstalledPackageSignatureReader(private val context: Context, private val 
         val history: List<Signature> = emptyList(),
         val hasMultipleSigners: Boolean = false,
     )
+}
+
+/** Maps the existing PackageManager snapshot; it never opens the installed APK. */
+internal fun mapInstalledSignatureInfo(
+    certificates: List<SignatureCertificateInfo>,
+    history: List<SignatureCertificateInfo>,
+    hasMultipleSigners: Boolean,
+    platformSdk: Int,
+): AppSignatureInfo {
+    val hybrid = platformSdk >= Build.VERSION_CODES.CINNAMON_BUN && !hasMultipleSigners && certificates.singleOrNull()?.isPqcCertificate() == true
+    val classical = if (hybrid && history.lastOrNull()?.sha256 == certificates.single().sha256) {
+        history.dropLast(1).lastOrNull()?.takeUnless { it.isPqcCertificate() }
+    } else {
+        null
+    }
+    return AppSignatureInfo(
+        verified = true,
+        signerSha256Set = certificates.mapTo(linkedSetOf()) { it.sha256 },
+        certificates = certificates,
+        signingCertificateHistory = history,
+        hasMultipleSigners = hasMultipleSigners,
+        isHybrid = hybrid,
+        hybridClassicalCertificate = classical,
+        // Signature's parcel format does not transport capability flags: absent means unknown.
+    )
+}
+
+internal fun SignatureCertificateInfo.isPqcCertificate(): Boolean = when (publicKeyAlgorithm) {
+    "ML-DSA", "2.16.840.1.101.3.4.3.18", "2.16.840.1.101.3.4.3.19" -> true
+    else -> false
 }

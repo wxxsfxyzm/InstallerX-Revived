@@ -13,7 +13,7 @@ enum class SigningBlockCertificateStatus {
 }
 
 fun PackageAnalysisResult.selectedSigningBlockCertificateStatus(): SigningBlockCertificateStatus? {
-    val pendingSignerSets = appEntities
+    val pendingSignatures = appEntities
         .asSequence()
         .filter { it.selected }
         .map { it.app }
@@ -25,17 +25,16 @@ fun PackageAnalysisResult.selectedSigningBlockCertificateStatus(): SigningBlockC
             }
         }
         .filter { it.verificationStatus == SignatureVerificationStatus.SIGNING_BLOCK_ONLY }
-        .map { it.signerSha256Set }
         .toList()
 
-    if (pendingSignerSets.isEmpty()) return null
-    if (pendingSignerSets.any { it.isEmpty() }) return SigningBlockCertificateStatus.UNKNOWN
+    if (pendingSignatures.isEmpty()) return null
+    if (pendingSignatures.any { it.signerSha256Set.isEmpty() }) return SigningBlockCertificateStatus.UNKNOWN
     val installedInfo = installedAppInfo ?: return SigningBlockCertificateStatus.NOT_INSTALLED
-    val installedSignerSet = installedInfo.signatureInfo?.signerSha256Set
-    if (installedSignerSet.isNullOrEmpty()) {
+    val installedSignature = installedInfo.signatureInfo
+    if (installedSignature == null || installedSignature.signerSha256Set.isEmpty()) {
         return SigningBlockCertificateStatus.UNKNOWN
     }
-    return if (pendingSignerSets.all { it == installedSignerSet }) {
+    return if (pendingSignatures.all { it.compareSigningIdentity(installedSignature) == SigningIdentityComparison.MATCH }) {
         SigningBlockCertificateStatus.MATCH
     } else {
         SigningBlockCertificateStatus.UNKNOWN

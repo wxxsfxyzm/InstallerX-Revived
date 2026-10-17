@@ -366,6 +366,9 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         val checkAppSignature = appSettingsRepo.getBoolean(BooleanSetting.CheckAppSignature, true).first()
         Timber.d("[id=$sessionId] App signature checks enabled: $checkAppSignature")
 
+        val checkSourceStamp = appSettingsRepo.getBoolean(BooleanSetting.CheckSourceStamp, true).first()
+        Timber.d("[id=$sessionId] Source stamp analysis enabled: $checkSourceStamp")
+
         val checkSplitPackageSignatures = appSettingsRepo
             .getBoolean(BooleanSetting.CheckSplitPackageSignatures, false)
             .first()
@@ -375,6 +378,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
             cacheDirectory = cacheDirectory,
             isModuleFlashEnabled = isModuleEnabled,
             checkAppSignature = checkAppSignature,
+            checkSourceStamp = checkSourceStamp,
             checkSplitPackageSignatures = checkSplitPackageSignatures,
         )
 

@@ -11,10 +11,10 @@ enum class SignatureMatchStatus {
     /** The signatures match. It's a safe update. */
     MATCH,
 
-    /** The signer is different, but the installed package signing history confirms compatibility. */
+    /** Verified rotation capabilities and the complete signing identities confirm compatibility. */
     ROTATION_COMPATIBLE,
 
-    /** The APK declares a signing lineage, but installed package compatibility could not be confirmed. */
+    /** Rotation capabilities or the platform's active signing scheme could not be confirmed. */
     CANDIDATE_ROTATION_UNCONFIRMED,
 
     /** The signatures do NOT match. This is a potential security risk. */
