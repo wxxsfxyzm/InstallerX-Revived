@@ -341,7 +341,7 @@
     <string name="theme_settings_package_icons">Fuente del icono del paquete</string>
     <string name="theme_settings_prefer_system_icon">Preferir el icono del sistema para la aplicación que se va a instalar</string>
     <string name="theme_settings_prefer_system_icon_desc">Intenta obtener el icono del sistema, útil al usar paquetes de iconos. Desactiva esta opción para mostrar el icono del paquete de instalación</string>
-    <string name="theme_settings_hide_launcher_icon">Esconder ícono en el launcher</string>
+    <string name="theme_settings_hide_launcher_icon">Esconder icono en el launcher</string>
     <string name="theme_settings_hide_launcher_icon_desc">Escribir *#*#46789#*#* en el marcador para abrir los ajustes</string>
     <string name="theme_settings_hide_launcher_icon_warning">¡Asegúrate de poder acceder a esta página antes de ocultar el icono del lanzador!</string>
     <string name="theme_settings_hide_launcher_icon_warning_xiaomi">En HyperOS, permite el inicio automático y Abrir nuevas ventanas mientras se ejecuta en segundo plano para recibir el código del marcador!</string>
@@ -977,4 +977,10 @@
     <string name="backup_settings_validation_duplicate_unknown_scope">Ámbito desconocido duplicado.</string>
     <string name="advanced">Avanzado</string>
     <string name="installer_prepare_oplus_osdk_incompatible">La versión del SDK de Oplus OS del dispositivo (%1$s) es inferior a la que requiere la aplicación (%2$s); la instalación no está disponible</string>
+    <string name="lab_compatibility">Compatibilidad</string>
+    <string name="lab_enable_abi_override_desc">Intenta instalar librerías nativas dentro de la misma familia de arquitectura. Requiere soporte del sistema</string>
+    <string name="lab_try_different_architecture">Otras arquitecturas</string>
+    <string name="lab_try_different_architecture_desc">También intenta instalar librerías nativas de otras familias de arquitectura</string>
+    <string name="lab_enable_abi_override">Intentar traducir</string>
+    <string name="theme_settings_color_spec_only_2026">El estilo de paleta actual solo es compatible con la Especificación 2026</string>
 </resources>
