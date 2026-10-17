@@ -135,6 +135,9 @@ class PendingApkSignatureAnalyzer(
     ): AppSignatureInfo {
         val formatted = mutableMapOf<X509Certificate, SignatureCertificateInfo>()
         fun format(certificate: X509Certificate) = formatted.getOrPut(certificate) { certificateFormatter.format(certificate) }
+        // Build Tools 37 apksig populates signerCertificates from V3.1/V3/V2/V1.
+        // V3.2 hybrid signers are exposed separately through v32SchemeSigner.
+        // Recheck this fallback selection when upgrading apksig.
         val legacyCertificates = result.signerCertificates.map(::format)
         val legacyHistory = result.signingCertificateLineageCertificates().map(::format)
         val legacyCapabilities = result.signingCertificateLineage.capabilities(::format)
