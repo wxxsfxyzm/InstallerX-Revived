@@ -6,6 +6,7 @@ import com.android.apksig.ApkVerifier
 import com.rosan.installer.data.engine.parser.CommonsZipFileProvider
 import com.rosan.installer.data.engine.parser.SeekableZipReader
 import com.rosan.installer.data.engine.parser.UnifiedZipFileProvider
+import com.rosan.installer.data.engine.signature.SignatureTestFixtures.Stamp
 import com.rosan.installer.domain.engine.model.packageinfo.SourceStampVerificationStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import java.io.File
@@ -110,13 +111,13 @@ class PendingApkSignatureAnalyzerTest {
 
     @Test
     fun `verified source stamp metadata is mapped without reopening the APK`() {
-        for (name in listOf("valid-stamp.apk", "stamp-valid-timestamp-value.apk")) {
-            val apk = SignatureTestFixtures.copy(name, tempDirectory)
+        for (stampType in listOf(Stamp.VALID, Stamp.TIMESTAMP)) {
+            val apk = SignatureTestFixtures.create(tempDirectory, stampType)
             val nativeResult = verifyFixture(apk)
             assertTrue(nativeResult.isVerified)
             assertTrue(nativeResult.isSourceStampVerified)
             val source = DataEntity.FileDescriptorEntity(
-                path = "https://example.test/$name",
+                path = "https://example.test/${apk.name}",
                 startOffset = 0L,
                 length = apk.length(),
                 channelFactory = { error("A verified stamp must reuse the apksig result") },
@@ -139,7 +140,7 @@ class PendingApkSignatureAnalyzerTest {
 
     @Test
     fun `failed stamp verification preserves verified app signer identity`() {
-        val apk = SignatureTestFixtures.copy("stamp-certificate-mismatch.apk", tempDirectory)
+        val apk = SignatureTestFixtures.create(tempDirectory, Stamp.CERTIFICATE_MISMATCH)
         val nativeResult = verifyFixture(apk)
         assertTrue(nativeResult.isVerified)
         assertFalse(nativeResult.isSourceStampVerified)
@@ -159,7 +160,7 @@ class PendingApkSignatureAnalyzerTest {
 
     @Test
     fun `missing stamp block retains its declaration using borrowed ZIP metadata`() {
-        val apk = SignatureTestFixtures.copy("stamp-without-block.apk", tempDirectory)
+        val apk = SignatureTestFixtures.create(tempDirectory, Stamp.MISSING_BLOCK)
         val nativeResult = verifyFixture(apk)
         var openCount = 0
         val source = DataEntity.FileDescriptorEntity(
@@ -186,11 +187,11 @@ class PendingApkSignatureAnalyzerTest {
 
     @Test
     fun `disabled source stamp analysis preserves APK verification and hides stamp diagnostics`() {
-        for (name in listOf("valid-stamp.apk", "stamp-without-block.apk")) {
-            val apk = SignatureTestFixtures.copy(name, tempDirectory)
+        for (stampType in listOf(Stamp.VALID, Stamp.MISSING_BLOCK)) {
+            val apk = SignatureTestFixtures.create(tempDirectory, stampType)
             val nativeResult = verifyFixture(apk)
             val source = DataEntity.FileDescriptorEntity(
-                path = "https://example.test/$name",
+                path = "https://example.test/${apk.name}",
                 startOffset = 0L,
                 length = apk.length(),
                 channelFactory = { error("Disabled stamp analysis must not read stamp metadata") },

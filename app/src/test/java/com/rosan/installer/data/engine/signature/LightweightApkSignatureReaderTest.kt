@@ -5,6 +5,7 @@ package com.rosan.installer.data.engine.signature
 import com.rosan.installer.data.engine.parser.CommonsZipFileProvider
 import com.rosan.installer.data.engine.parser.SeekableZipReader
 import com.rosan.installer.data.engine.parser.UnifiedZipFileProvider
+import com.rosan.installer.data.engine.signature.SignatureTestFixtures.Stamp
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SourceStampVerificationStatus
 import com.rosan.installer.domain.engine.model.source.DataEntity
@@ -119,7 +120,9 @@ class LightweightApkSignatureReaderTest {
 
     @Test
     fun `lightweight stamp metadata reuses the signing block and borrowed ZIP view`() {
-        val apk = SignatureTestFixtures.copy("stamp-valid-timestamp-value.apk", tempDirectory)
+        val signingStartedAt = System.currentTimeMillis() / 1000
+        val apk = SignatureTestFixtures.create(tempDirectory, Stamp.TIMESTAMP)
+        val signingFinishedAt = System.currentTimeMillis() / 1000
         var openCount = 0
         val entity = DataEntity.FileDescriptorEntity(
             path = "https://example.test/stamped.apk",
@@ -139,7 +142,7 @@ class LightweightApkSignatureReaderTest {
             val stamp = assertNotNull(result.sourceStampInfo)
             assertFalse(result.verified)
             assertEquals(SourceStampVerificationStatus.UNVERIFIED, stamp.verificationStatus)
-            assertEquals(1644886584L, stamp.timestampEpochSeconds)
+            assertTrue(assertNotNull(stamp.timestampEpochSeconds) in signingStartedAt..signingFinishedAt)
             assertEquals(stamp.declaredCertificateSha256, stamp.certificate?.sha256)
             assertEquals(emptyList(), stamp.warnings)
         }
@@ -148,7 +151,7 @@ class LightweightApkSignatureReaderTest {
 
     @Test
     fun `disabled source stamp analysis keeps lightweight signer declarations without stamp reads`() {
-        val apk = SignatureTestFixtures.copy("stamp-valid-timestamp-value.apk", tempDirectory)
+        val apk = SignatureTestFixtures.create(tempDirectory, Stamp.TIMESTAMP)
         var openCount = 0
         val entity = DataEntity.FileDescriptorEntity(
             path = "https://example.test/stamped.apk",
