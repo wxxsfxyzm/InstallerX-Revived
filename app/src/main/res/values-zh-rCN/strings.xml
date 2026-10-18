@@ -482,6 +482,8 @@
     <string name="tag_signature_match">签名一致</string>
     <string name="tag_signature_rotation">签名轮换</string>
     <string name="tag_signature_rotation_unconfirmed">轮换声明</string>
+    <string name="tag_aosp_signature">AOSP 签名</string>
+    <string name="installer_prepare_aosp_signature">这个软件包使用了 AOSP 签名\n\n密钥：%1$s</string>
     <string name="tag_arch_32">32位应用</string>
     <string name="tag_arch_emulated">架构转译</string>
     <string name="installer_prepare_arch_32_notice">此应用将以 32 位模式运行。在 64 位设备上，这可能会增加内存消耗或降低性能</string>

@@ -40,6 +40,7 @@ sealed interface InstallNotice {
     data class Emulated(val appArch: Architecture, val sysArch: Architecture) : InstallNotice
 
     // --- Info (Usually displayed with primary/neutral colors) ---
+    data class AospSignature(val keyNames: Set<String>) : InstallNotice
     data object Identical : InstallNotice
     data class Xposed(val minApi: String?, val targetApi: String?, val description: String?) : InstallNotice
 }

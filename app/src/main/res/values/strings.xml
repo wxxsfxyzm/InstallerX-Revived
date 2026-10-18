@@ -494,6 +494,8 @@
     <string name="tag_signature_match">Signature match</string>
     <string name="tag_signature_rotation">Signature rotation</string>
     <string name="tag_signature_rotation_unconfirmed">Rotation claimed</string>
+    <string name="tag_aosp_signature">AOSP signature</string>
+    <string name="installer_prepare_aosp_signature">This package uses an AOSP signature.\n\nKeys: %1$s</string>
     <string name="tag_sdk" translatable="false">SDK</string>
     <string name="tag_arch_32">32-Bit</string>
     <string name="tag_arch_emulated">Arch Emulated</string>

@@ -19,6 +19,20 @@ import kotlin.test.assertTrue
 
 class InstallStateUiMapperTest {
     @Test
+    fun `AOSP signature dialog names every matching key in a stable order`() {
+        for ((keys, expectedKeys) in listOf(setOf("platform") to "platform", setOf("testkey", "platform") to "platform, testkey")) {
+            val result = InstallStateUiMapper(resources()).mapToUiState(
+                DomainInstallState(InstallActionType.INSTALL, listOf(InstallNotice.AospSignature(keys))),
+            )
+            val notice = result.notices.single()
+            assertEquals("AOSP signature", notice.shortLabel)
+            assertEquals("This package uses an AOSP signature.\n\nKeys: $expectedKeys", notice.fullDescription)
+            assertEquals(Color.Gray, notice.color)
+            assertEquals(com.rosan.installer.R.string.install, result.buttonTextId)
+        }
+    }
+
+    @Test
     fun `source stamp row is only shown when a digest is available`() {
         val withoutStamp = description(null)
         assertEquals("New install\n\nPending signature\nNo certificates", withoutStamp)
@@ -110,6 +124,8 @@ class InstallStateUiMapperTest {
         tagSignatureMatch = "",
         tagSignatureRotation = "",
         tagSignatureRotationUnconfirmed = "",
+        tagAospSignature = "AOSP signature",
+        textAospSignature = "This package uses an AOSP signature.\n\nKeys: %1\$s",
         textSigNewInstall = "New install",
         textSigMatch = "",
         textSigRotationCompatible = "",

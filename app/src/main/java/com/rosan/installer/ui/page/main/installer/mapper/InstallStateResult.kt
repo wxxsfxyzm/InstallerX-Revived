@@ -14,6 +14,8 @@ data class InstallNoticeResources(
     val tagSignatureMatch: String,
     val tagSignatureRotation: String,
     val tagSignatureRotationUnconfirmed: String,
+    val tagAospSignature: String,
+    val textAospSignature: String,
     val textSigNewInstall: String,
     val textSigMatch: String,
     val textSigRotationCompatible: String,

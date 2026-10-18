@@ -108,6 +108,12 @@ class InstallStateUiMapper(private val resources: InstallNoticeResources) {
             },
         )
 
+        is InstallNotice.AospSignature -> NoticeModel(
+            shortLabel = resources.tagAospSignature,
+            fullDescription = resources.textAospSignature.format(notice.keyNames.sorted().joinToString(", ")),
+            color = resources.tertiaryColor,
+        )
+
         is InstallNotice.SdkIncompatible -> NoticeModel(
             shortLabel = resources.tagSdk,
             fullDescription = resources.textSdkIncompatible,

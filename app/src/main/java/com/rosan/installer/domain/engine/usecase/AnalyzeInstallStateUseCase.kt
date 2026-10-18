@@ -10,6 +10,7 @@ import com.rosan.installer.domain.engine.model.packageinfo.PackageIdentityStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureMatchStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.packageinfo.SigningBlockCertificateStatus
+import com.rosan.installer.domain.engine.model.packageinfo.aospSigningKeys
 import com.rosan.installer.domain.engine.model.packageinfo.selectedSigningBlockCertificateStatus
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.model.state.DomainInstallState
@@ -76,6 +77,19 @@ class AnalyzeInstallStateUseCase {
                 packageSignatureAnalysis = signatureAnalysis,
             )
             val signatureNoticeDetails = fullSignatureNoticeDetails.takeIf { showSignatureDetails }
+
+            val aospKeys = buildSet {
+                for (entity in currentPackage.appEntities) {
+                    if (!entity.selected) continue
+                    val signature = when (val app = entity.app) {
+                        is AppEntity.BaseEntity -> app.signatureInfo
+                        is AppEntity.SplitEntity -> app.signatureInfo
+                        else -> null
+                    }
+                    signature?.aospSigningKeys()?.let { addAll(it) }
+                }
+            }
+            if (aospKeys.isNotEmpty()) notices.add(InstallNotice.AospSignature(aospKeys))
 
             if (pendingSignatureInfo?.verificationStatus == SignatureVerificationStatus.SIGNING_BLOCK_ONLY) {
                 notices.add(
