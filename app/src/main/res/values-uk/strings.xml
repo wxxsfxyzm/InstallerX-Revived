@@ -812,8 +812,8 @@
     <string name="tag_signature_rotation_unconfirmed">Заявлена ротація</string>
     <string name="installer_prepare_signature_new_install">Нове встановлення. Не знайдено жодної встановленої програми з такою ж назвою пакета.</string>
     <string name="installer_prepare_signature_match">Збіг підписів. Поточний пакет використовує той самий набір підписувачів, що й встановлена програма.</string>
-    <string name="installer_prepare_signature_rotation_compatible">Сумісність з ротацією підпису. Поточний сертифікат пакета існує у встановленому рядку сертифікатів підпису програм. Остаточна сумісність оновлень визначається системою.</string>
-    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">Виявлено підтвердження ротації підпису, але сумісність із встановленою програмою не вдалося підтвердити. Остаточний результат залежить від системної перевірки.</string>
+    <string name="installer_prepare_signature_rotation_compatible">Сумісність ротації підписів залежить від перевірених ідентифікаторів підпису та наданих можливостей ротації. Остаточна сумісність оновлень визначається системою.</string>
+    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">Не вдалося підтвердити активну схему підписання або можливості ротації. Остаточний результат залежить від перевірки системи.</string>
     <string name="installer_prepare_signature_analysis_issue">Аналіз сигнатури APK виявив проблеми. Встановлення може завершитися невдачею; кінцевий результат залежить від перевірки системи.</string>
     <string name="installer_signature_pending_package">Поточний підпис пакета</string>
     <string name="installer_signature_installed_package">Підпис встановленого додатка</string>
@@ -973,4 +973,22 @@
     <string name="lab_enable_abi_override_desc">Спробуйте встановити нативні бібліотеки в межах тієї ж архітектурної родини. Потрібна системна підтримка</string>
     <string name="lab_try_different_architecture">Інші архітектури</string>
     <string name="theme_settings_color_spec_only_2026">Поточний стиль палітри підтримує лише Spec 2026</string>
+    <string name="config_check_source_stamp">Аналіз вихідних штампів</string>
+    <string name="config_check_source_stamp_desc">Включити до деталей підпису інформацію про стан перевірки штампа джерела, сертифікати та часові мітки.</string>
+    <string name="installer_signature_hybrid_classical">V3.2 класичний сертифікат</string>
+    <string name="installer_signature_hybrid_pqc">V3.2 PQC сертифікат</string>
+    <string name="installer_signature_source_stamp_sha256">Сертифікат із відбитком джерела SHA-256</string>
+    <string name="installer_signature_source_stamp">Штамп джерела</string>
+    <string name="installer_signature_source_stamp_status">Статус перевірки</string>
+    <string name="installer_signature_source_stamp_unverified">Не підтверджено</string>
+    <string name="installer_signature_source_stamp_verified">Перевірено</string>
+    <string name="installer_signature_source_stamp_failed">Перевірка не вдалася</string>
+    <string name="installer_signature_source_stamp_certificate_mismatch">Невідповідність дайджесту сертифіката</string>
+    <string name="installer_signature_source_stamp_verification_error">Не вдалося завершити перевірку</string>
+    <string name="installer_signature_source_stamp_timestamp">Час штампа (UTC)</string>
+    <string name="installer_signature_source_stamp_certificate">Сертифікат джерела печатки</string>
+    <string name="installer_signature_source_stamp_lineage">Історія сертифікатів із штампом джерела</string>
+    <string name="installer_signature_information">Інформація</string>
+    <string name="tag_aosp_signature">AOSP підпис</string>
+    <string name="installer_prepare_aosp_signature">Цей пакет використовує AOSP підпис.\n\nКлючі: %1$s</string>
 </resources>

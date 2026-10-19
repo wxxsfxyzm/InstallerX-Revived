@@ -852,8 +852,8 @@
     <string name="tag_signature_rotation_unconfirmed">Rotación declarada</string>
     <string name="installer_prepare_signature_new_install">Instalación nueva. No se encontró ninguna aplicación instalada con el mismo nombre de paquete.</string>
     <string name="installer_prepare_signature_match">Coincidencia de firmas. El paquete actual utiliza el mismo conjunto de firmantes que la aplicación instalada.</string>
-    <string name="installer_prepare_signature_rotation_compatible">Compatible con rotación de firmas. El certificado del paquete actual existe en la línea de certificados de firma de la aplicación instalada. La compatibilidad final de la actualización la decide el sistema.</string>
-    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">Se detectó una prueba de rotación de firmas, pero no se pudo confirmar la compatibilidad con la aplicación instalada. El resultado final depende de la verificación del sistema.</string>
+    <string name="installer_prepare_signature_rotation_compatible">Rotación de firmas compatible según las identidades de firma verificadas y las capacidades de rotación otorgadas. La compatibilidad final de la actualización la decide el sistema.</string>
+    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">No se pudo confirmar el esquema de firma activo o las capacidades de rotación. El resultado final depende de la verificación del sistema.</string>
     <string name="installer_prepare_signature_analysis_issue">El análisis de la firma del APK encontró problemas. La instalación podría fallar; el resultado final depende de la verificación del sistema.</string>
     <string name="installer_signature_pending_package">Firma del paquete actual</string>
     <string name="installer_signature_installed_package">Firma de la aplicación instalada</string>
@@ -983,4 +983,22 @@
     <string name="lab_try_different_architecture_desc">También intenta instalar librerías nativas de otras familias de arquitectura</string>
     <string name="lab_enable_abi_override">Intentar traducir</string>
     <string name="theme_settings_color_spec_only_2026">El estilo de paleta actual solo es compatible con la Especificación 2026</string>
+    <string name="config_check_source_stamp">Analizar sellos de origen</string>
+    <string name="config_check_source_stamp_desc">Incluir el estado de verificación del sello de origen, los certificados y las marcas de tiempo en los detalles de la firma.</string>
+    <string name="installer_signature_hybrid_classical">Certificado clásico V3.2</string>
+    <string name="installer_signature_hybrid_pqc">Certificado PQC V3.2</string>
+    <string name="installer_signature_source_stamp_sha256">Certificado de sello de origen SHA-256</string>
+    <string name="installer_signature_source_stamp">Sello de origen</string>
+    <string name="installer_signature_source_stamp_status">Estado de la verificación</string>
+    <string name="installer_signature_source_stamp_unverified">No verificado</string>
+    <string name="installer_signature_source_stamp_verified">Verificado</string>
+    <string name="installer_signature_source_stamp_failed">Error de verificación</string>
+    <string name="installer_signature_source_stamp_certificate_mismatch">Discrepancia en el resumen del certificado</string>
+    <string name="installer_signature_source_stamp_verification_error">No se pudo completar la verificación</string>
+    <string name="installer_signature_source_stamp_timestamp">Fecha del sello (UTC)</string>
+    <string name="installer_signature_source_stamp_certificate">Certificado del sello de origen</string>
+    <string name="installer_signature_source_stamp_lineage">Linaje del certificado del sello de origen</string>
+    <string name="installer_signature_information">Información</string>
+    <string name="tag_aosp_signature">Firma de AOSP</string>
+    <string name="installer_prepare_aosp_signature">Este paquete usa una firma de AOSP.\n\nClaves: %1$s</string>
 </resources>

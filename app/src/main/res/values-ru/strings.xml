@@ -838,8 +838,8 @@
     <string name="tag_signature_match">Совпадение подписи</string>
     <string name="installer_prepare_signature_new_install">Новая установка. Не найдено никакой установленной программы с таким же названием пакета.</string>
     <string name="installer_prepare_signature_match">Совпадение подписи. Текущий пакет использует тот же набор подписей, что и установленное приложение.</string>
-    <string name="installer_prepare_signature_rotation_compatible">Поддерживается ротация подписей. Сертификат текущего пакета присутствует в цепочке преемственности подписей установленного приложения. Совместимость обновления окончательно определяется системой.</string>
-    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">Обнаружено подтверждение ротации подписи, но совместимость с установленным приложением не подтверждена. Финальный результат зависит от проверки системой.</string>
+    <string name="installer_prepare_signature_rotation_compatible">Совместимость ротации подписей зависит от проверенных идентификаторов подписи и предоставленных возможностей ротации. Окончательная совместимость обновлений определяется системой.</string>
+    <string name="installer_prepare_signature_candidate_rotation_unconfirmed">Не удалось подтвердить действующую схему подписания или возможность ротации. Окончательный результат зависит от проверки системы.</string>
     <string name="installer_prepare_signature_analysis_issue">Проблема анализа подписи APK. Возможен сбой установки; финальный результат зависит от проверки системой.</string>
     <string name="installer_signature_pending_package">Подпись текущего пакета</string>
     <string name="installer_signature_installed_package">Подпись установленного пакета</string>
@@ -973,4 +973,22 @@
     <string name="lab_try_different_architecture">Другие архитектуры</string>
     <string name="lab_try_different_architecture_desc">Также попробуйте установить нативные библиотеки из других семейств</string>
     <string name="theme_settings_color_spec_only_2026">Текущий стиль палитры поддерживает только Spec 2026</string>
+    <string name="config_check_source_stamp">Анализ исходных штампов</string>
+    <string name="config_check_source_stamp_desc">Включить в детали подписи информацию о статусе проверки штампа источника, сертификаты и временные метки.</string>
+    <string name="installer_signature_hybrid_classical">V3.2 классический сертификат</string>
+    <string name="installer_signature_hybrid_pqc">V3.2 PQC сертификат</string>
+    <string name="installer_signature_source_stamp_sha256">Сертификат с оттиском источника SHA-256</string>
+    <string name="installer_signature_source_stamp">Штамп источника</string>
+    <string name="installer_signature_source_stamp_status">Статус проверки</string>
+    <string name="installer_signature_source_stamp_unverified">Не подтверждено</string>
+    <string name="installer_signature_source_stamp_verified">Проверено</string>
+    <string name="installer_signature_source_stamp_failed">Проверка не удалась</string>
+    <string name="installer_signature_source_stamp_certificate_mismatch">Несоответствие дайджеста сертификату</string>
+    <string name="installer_signature_source_stamp_verification_error">Не удалось завершить проверку</string>
+    <string name="installer_signature_source_stamp_timestamp">Время штампа (UTC)</string>
+    <string name="installer_signature_source_stamp_certificate">Сертификат источника печати</string>
+    <string name="installer_signature_source_stamp_lineage">История сертификатов со штампом источника</string>
+    <string name="installer_signature_information">Информация</string>
+    <string name="tag_aosp_signature">AOSP подпись</string>
+    <string name="installer_prepare_aosp_signature">В этом пакете используется AOSP подпись.\n\nКлючи: %1$s</string>
 </resources>
