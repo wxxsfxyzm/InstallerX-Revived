@@ -176,6 +176,10 @@ class UninstallerActivity :
     }
 
     private fun Intent.uninstallPackageName(): String? {
+        if (action == Intent.ACTION_SHOW_APP_INFO) {
+            return getStringExtra(Intent.EXTRA_PACKAGE_NAME)
+        }
+
         getStringExtra(EXTRA_PACKAGE_NAME)?.let { if (it.isNotBlank()) return it }
 
         @Suppress("DEPRECATION")
