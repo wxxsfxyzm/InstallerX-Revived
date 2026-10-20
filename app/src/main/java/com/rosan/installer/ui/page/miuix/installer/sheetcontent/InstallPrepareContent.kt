@@ -65,6 +65,7 @@ import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInfoChipGroup
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.formatSize
 import com.rosan.installer.ui.util.isGestureNavigation
@@ -368,6 +369,28 @@ fun InstallPrepareContent(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
                 notices = notices,
             )
+        }
+        // Only offered when this APK could replace the installed system installer. Placed after the
+        // chip group so the badge spacer does not inflate the gap to the version card below.
+        if (entityToInstall?.canInstallAsSystemInstaller == true) {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // The version card below keeps 6dp, so 8dp here yields the same 14dp gap.
+                        .padding(vertical = 8.dp),
+                    colors = miuixSheetCardColors(),
+                ) {
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.installer_prepare_system_installer_update_option),
+                        description = stringResource(R.string.installer_prepare_system_installer_update_option_summary),
+                        checked = uiState.installAsSystemInstaller,
+                        onCheckedChange = {
+                            viewModel.dispatch(InstallerViewAction.SetInstallAsSystemInstaller(it))
+                        },
+                    )
+                }
+            }
         }
         item {
             Card(

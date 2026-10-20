@@ -380,6 +380,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
             checkAppSignature = checkAppSignature,
             checkSourceStamp = checkSourceStamp,
             checkSplitPackageSignatures = checkSplitPackageSignatures,
+            installAsSystemInstaller = session.installAsSystemInstaller,
         )
 
         val materializedSources = mutableSetOf<AnalysisMaterializationKey>()
@@ -417,6 +418,13 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
                 )
                 session.data = sourceResolver.materializeForAnalysis(session.data, source)
                 session.progress.emit(ProgressEntity.InstallAnalysing)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                // A rejected system installer rewrite must not stick: the failure dialog offers no
+                // way to turn the option off, so retrying would fail the same way.
+                session.installAsSystemInstaller = false
+                throw error
             }
         }
 
@@ -428,6 +436,17 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         }
 
         session.analysisResults = results
+
+        val hasRewrittenUpdate = results.any { result ->
+            result.appEntities.any { (it.app as? AppEntity.BaseEntity)?.originalPackageName != null }
+        }
+        if (hasRewrittenUpdate) {
+            // Always show the package/signature change before a self-update, including auto modes.
+            session.config = session.config.copy(installMode = InstallMode.Dialog)
+            session.background(false)
+        } else if (session.config.installMode.isNotification) {
+            session.background(true)
+        }
 
         Timber.d("[id=$sessionId] analyse: Emitting ProgressEntity.InstallAnalysedSuccess.")
         session.progress.emit(ProgressEntity.InstallAnalysedSuccess)
@@ -976,6 +995,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         session.referrerUri = null
         session.data = emptyList()
         session.analysisResults = emptyList()
+        session.installAsSystemInstaller = false
         session.progress.tryEmit(ProgressEntity.Ready)
     }
 

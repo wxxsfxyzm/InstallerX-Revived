@@ -13,6 +13,13 @@ sealed interface InstallerViewAction {
     data object PrepareClose : InstallerViewAction
     data object Close : InstallerViewAction
     data object Analyse : InstallerViewAction
+
+    /**
+     * Opts into (or out of) installing the analysed APK as a replacement system installer update.
+     * The analysis runs again because the package name and installed-app comparison change.
+     * @param enabled Whether the APK should replace the installed system installer.
+     */
+    data class SetInstallAsSystemInstaller(val enabled: Boolean) : InstallerViewAction
     data object InstallChoice : InstallerViewAction
     data class SelectMixedModuleType(val installAsModule: Boolean) : InstallerViewAction
     data object InstallExtendedMenu : InstallerViewAction

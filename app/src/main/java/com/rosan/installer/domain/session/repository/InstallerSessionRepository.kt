@@ -28,6 +28,12 @@ interface InstallerSessionRepository : Closeable {
     var sourceUris: List<String>
     var referrerUri: String?
     var analysisResults: List<PackageAnalysisResult>
+
+    /**
+     * Whether the user asked to replace the system installer with the analysed APK.
+     * Changing it only takes effect after [analyse] runs again.
+     */
+    var installAsSystemInstaller: Boolean
     val progress: Flow<ProgressEntity>
     val toastEvents: Flow<String>
     val background: Flow<Boolean>

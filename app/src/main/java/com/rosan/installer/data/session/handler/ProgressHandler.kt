@@ -37,11 +37,6 @@ class ProgressHandler(override val scope: CoroutineScope, override val session: 
 
     private fun onResolved(success: Boolean) {
         Timber.d("[id=${session.id}] onResolved called with success: $success")
-        val installMode = session.config.installMode
-        if (installMode == InstallMode.Notification || installMode == InstallMode.AutoNotification) {
-            Timber.d("[id=${session.id}] onResolved: Notification mode detected. Setting background(true).")
-            session.background(true)
-        }
         if (success) {
             Timber.d("[id=${session.id}] onResolved: Success. Triggering analyse().")
             session.analyse()

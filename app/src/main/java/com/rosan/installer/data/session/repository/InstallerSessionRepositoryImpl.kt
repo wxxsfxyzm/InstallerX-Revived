@@ -41,6 +41,7 @@ class InstallerSessionRepositoryImpl(override val id: String, private val onClos
     override var sourceUris: List<String> by mutableStateOf(emptyList())
     override var referrerUri: String? by mutableStateOf(null)
     override var analysisResults: List<PackageAnalysisResult> by mutableStateOf(emptyList())
+    override var installAsSystemInstaller: Boolean = false
     override val progress: MutableSharedFlow<ProgressEntity> = MutableStateFlow(ProgressEntity.Ready)
     override val toastEvents: MutableSharedFlow<String> = MutableSharedFlow(extraBufferCapacity = 16)
 

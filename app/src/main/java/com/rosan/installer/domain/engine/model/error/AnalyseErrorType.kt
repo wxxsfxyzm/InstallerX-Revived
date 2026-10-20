@@ -10,4 +10,5 @@ enum class AnalyseErrorType(@param:StringRes val stringResId: Int) {
     STREAMING_SOURCE_UNSUPPORTED(R.string.exception_analyse_failed_streaming_source_unsupported),
     SOURCE_MATERIALIZATION_FAILED(R.string.exception_analyse_failed_source_materialization),
     ALL_FILES_UNSUPPORTED(R.string.exception_analyse_failed_all_files_unsupported),
+    SYSTEM_INSTALLER_UPDATE_FAILED(R.string.exception_analyse_failed_system_installer_update),
 }

@@ -13,7 +13,6 @@ import android.provider.Settings
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.kieronquinn.monetcompat.core.MonetCompat
-import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.framework.auth.safeBiometricAuth
@@ -80,7 +79,7 @@ class SystemEnvProviderImpl(private val context: Context) : SystemEnvProvider {
 
         if (latestLogFile == null || latestLogFile.length() == 0L) return@withContext null
 
-        val authority = "${BuildConfig.APPLICATION_ID}.fileprovider"
+        val authority = "${context.packageName}.fileprovider"
         return@withContext FileProvider.getUriForFile(context, authority, latestLogFile).toString()
     }
 

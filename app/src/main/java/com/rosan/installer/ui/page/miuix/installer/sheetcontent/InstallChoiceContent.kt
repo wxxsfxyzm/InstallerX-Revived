@@ -118,6 +118,20 @@ fun InstallChoiceContent(
         val cardText = sourceType.getSupportSubtitle(selectionMode = selectionMode)
         cardText?.let { MiuixInstallerTipCard(it) }
 
+        analysisResults.flatMap { it.appEntities }
+            .mapNotNull { it.app as? AppEntity.BaseEntity }
+            .filter { it.originalPackageName != null }
+            .distinctBy { it.originalPackageName }
+            .forEach { entity ->
+                MiuixInstallerTipCard(
+                    text = stringResource(
+                        R.string.installer_prepare_system_installer_update,
+                        entity.originalPackageName.orEmpty(),
+                        entity.packageName,
+                    ),
+                )
+            }
+
         AnimatedVisibility(
             visible = errorMessage != null,
             enter = expandVertically() + fadeIn(),

@@ -42,6 +42,10 @@ sealed interface AppEntity {
         val signatureInfo: AppSignatureInfo? = null,
         val fileHash: String? = null,
         val installLocation: Int? = null,
+        // Set only after the user opts into replacing the system installer; holds the APK's own package name.
+        val originalPackageName: String? = null,
+        // Set when this APK could replace the system installer, so the dialog can offer that choice.
+        val canInstallAsSystemInstaller: Boolean = false,
     ) : AppEntity {
         val isXposedModule: Boolean
             get() = xposedInfo != null

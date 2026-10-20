@@ -499,6 +499,9 @@
     <string name="installer_prepare_signature_rotation_compatible">已验证的签名身份和轮换授权确认签名轮换兼容，最终能否覆盖安装以系统校验为准。</string>
     <string name="installer_prepare_signature_candidate_rotation_unconfirmed">无法确认当前采用的签名方案或轮换授权，最终结果以系统校验为准。</string>
     <string name="installer_prepare_signature_mismatch">签名不一致！继续安装可能导致数据丢失或带来安全风险。</string>
+    <string name="installer_prepare_system_installer_update_option">更新系统安装器</string>
+    <string name="installer_prepare_system_installer_update_option_summary">将 APK 包名改为系统安装器包名，并使用本机密钥重新签名，以覆盖更新系统中已安装的 InstallerX。</string>
+    <string name="installer_prepare_system_installer_update">已按你的选择将包名从 %1$s 改为 %2$s。APK 已使用本机密钥重新签名，能否覆盖更新系统版仍取决于设备的签名校验设置。</string>
     <string name="installer_prepare_signature_unknown">无法验证应用签名，请谨慎操作。</string>
     <string name="installer_prepare_signature_analysis_issue">安装包签名分析发现异常，安装可能失败，最终结果以系统校验为准。</string>
     <string name="installer_prepare_signature_signing_block_not_installed">HTTP 轻量解析读取到了未经验证的签名证书声明；当前是新安装，无已安装应用可供比较。APK 内容尚未验证，最终签名验证由 PackageInstaller 完成。</string>
@@ -688,6 +691,7 @@
     <string name="exception_analyse_failed_all_files_unsupported">不支持的文件格式</string>
     <string name="exception_analyse_failed_streaming_source_unsupported">此来源无法在低存储占用模式下完成分析，请改用“智能”或“完整下载”模式。</string>
     <string name="exception_analyse_failed_source_materialization">无法完整下载来源以继续分析</string>
+    <string name="exception_analyse_failed_system_installer_update">无法修改 InstallerX APK 的包名或重新签名，系统安装器更新准备失败</string>
     <string name="installer_analyse_failed_corrupted_archive">损坏的压缩包</string>
     <string name="exception_authentication_failed">用户认证失败</string>
     <string name="exception_install_failed_already_exists">应用已安装（包名相同、版本相同），请先卸载再安装</string>

@@ -5,6 +5,7 @@ package com.rosan.installer.data.engine.repository
 import com.rosan.installer.data.engine.parser.CommonsZipException
 import com.rosan.installer.data.engine.parser.FileTypeDetector
 import com.rosan.installer.data.engine.parser.PackagePreprocessor
+import com.rosan.installer.data.engine.parser.SystemInstallerUpdatePreparer
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
 import com.rosan.installer.data.engine.signature.PackageSignatureAnalyzer
 import com.rosan.installer.domain.engine.exception.AnalyseException
@@ -33,6 +34,7 @@ class AnalyserRepositoryImpl(
     private val packagePreprocessor: PackagePreprocessor,
     private val packageSignatureAnalyzer: PackageSignatureAnalyzer,
     private val selectOptimalSplitsUseCase: SelectOptimalSplitsUseCase,
+    private val systemInstallerUpdatePreparer: SystemInstallerUpdatePreparer,
 ) : AnalyserRepository {
     override suspend fun doWork(
         config: ConfigModel,
@@ -44,7 +46,7 @@ class AnalyserRepositoryImpl(
         Timber.d("AnalyserRepo: Step 0 - Starting analysis for ${data.size} items.")
 
         // Step 1: Analyze all inputs
-        val rawEntities = data.map { entity ->
+        val parsedEntities = data.map { entity ->
             async(Dispatchers.IO) {
                 Timber.d("AnalyserRepo: analyzing source -> ${entity.source}")
                 val result = analyzeSingleSource(config, entity, extra)
@@ -56,6 +58,9 @@ class AnalyserRepositoryImpl(
                 result
             }
         }.awaitAll().flatten()
+
+        // Marks eligible system installer updates, and rewrites them only when the user asked for it.
+        val rawEntities = systemInstallerUpdatePreparer.prepare(parsedEntities, extra)
 
         Timber.d("AnalyserRepo: Step 1 Finished. Total rawEntities count: ${rawEntities.size}")
         rawEntities.forEachIndexed { index, app ->

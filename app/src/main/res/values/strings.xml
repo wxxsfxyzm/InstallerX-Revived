@@ -513,6 +513,9 @@
     <string name="installer_prepare_signature_rotation_compatible">Signature rotation compatible according to verified signing identities and granted rotation capabilities. Final update compatibility is decided by the system.</string>
     <string name="installer_prepare_signature_candidate_rotation_unconfirmed">The active signing scheme or rotation capabilities could not be confirmed. Final result depends on system verification.</string>
     <string name="installer_prepare_signature_mismatch">Signature mismatch! Continuing installation may cause data loss or security risks.</string>
+    <string name="installer_prepare_system_installer_update_option">Update the system installer</string>
+    <string name="installer_prepare_system_installer_update_option_summary">Rename this APK to the system installer package and re-sign it with a device key, so it replaces the system-installed InstallerX.</string>
+    <string name="installer_prepare_system_installer_update">The package name was changed from %1$s to %2$s because you chose to update the system installer. The APK was re-signed with a device key; replacing the system version is still subject to the device’s signature checks.</string>
     <string name="installer_prepare_signature_unknown">Unable to verify app signature, please proceed with caution.</string>
     <string name="installer_prepare_signature_analysis_issue">APK signature analysis found issues. Installation may fail; final result depends on system verification.</string>
     <string name="installer_prepare_signature_signing_block_not_installed">Lightweight HTTP analysis read an unverified signer certificate declaration. No installed app exists for comparison. APK content was not verified; PackageInstaller performs final signature verification.</string>
@@ -710,6 +713,7 @@
     <string name="exception_analyse_failed_all_files_unsupported">File not supported</string>
     <string name="exception_analyse_failed_streaming_source_unsupported">This source cannot be analyzed in Low storage mode. Choose Smart or Full download.</string>
     <string name="exception_analyse_failed_source_materialization">Unable to download the complete source for analysis</string>
+    <string name="exception_analyse_failed_system_installer_update">Unable to change the InstallerX APK package name or re-sign it for the system installer update</string>
     <string name="exception_authentication_failed">User authentication failed</string>
     <string name="exception_install_failed_already_exists">This app version is already installed, please uninstall and try again</string>
     <string name="exception_install_failed_blacklisted_package">You don\'t allow installation of the app!</string>

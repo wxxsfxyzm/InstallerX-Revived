@@ -181,6 +181,8 @@ class InstallerViewModel(
 
             is InstallerViewAction.Analyse -> analyse()
 
+            is InstallerViewAction.SetInstallAsSystemInstaller -> setInstallAsSystemInstaller(action.enabled)
+
             is InstallerViewAction.InstallChoice -> {
                 _localState.update { it.copy(navigatedFromPrepareToChoice = uiState.value.stage is InstallerStage.InstallPrepare) }
                 installChoice()
@@ -395,6 +397,7 @@ class InstallerViewModel(
                 initiatorAppLabel = null, // Reset label on new session
                 unknownSourcePermissionAppLabel = null,
                 analysisResults = session.analysisResults,
+                installAsSystemInstaller = session.installAsSystemInstaller,
                 displayIcons = it.displayIcons.filterKeys { key -> key in validPackages } + analysedIcons,
                 error = session.error,
             )
@@ -445,10 +448,15 @@ class InstallerViewModel(
                     }
                     // Update state first
                     val analysedIcons = session.analysisResults.toDisplayIconMap()
+                    val analysedPackages = session.analysisResults.map { it.packageName }.toSet()
                     _localState.update {
                         it.copy(
                             analysisResults = session.analysisResults,
                             displayIcons = it.displayIcons + analysedIcons,
+                            installAsSystemInstaller = session.installAsSystemInstaller,
+                            // A system installer update rewrites the package name, which makes a
+                            // target remembered from the previous analysis stale.
+                            currentPackageName = it.currentPackageName?.takeIf { name -> name in analysedPackages },
                         )
                     }
                 }
@@ -707,6 +715,17 @@ class InstallerViewModel(
     }
 
     private fun analyse() = session.analyse()
+
+    /**
+     * Records the user's choice to replace the installed system installer and analyses again, because
+     * the rewritten APK changes the package name and the installed-app comparison.
+     */
+    private fun setInstallAsSystemInstaller(enabled: Boolean) {
+        if (_localState.value.installAsSystemInstaller == enabled) return
+        _localState.update { it.copy(installAsSystemInstaller = enabled) }
+        session.installAsSystemInstaller = enabled
+        session.analyse()
+    }
 
     private fun installChoice() {
         autoInstallJob?.cancel()

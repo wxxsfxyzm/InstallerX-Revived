@@ -182,6 +182,20 @@ private fun ChoiceContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
+        allSelectableEntities.mapNotNull { it.app as? AppEntity.BaseEntity }
+            .filter { it.originalPackageName != null }
+            .distinctBy { it.originalPackageName }
+            .forEach { entity ->
+                InfoTipCard(
+                    text = stringResource(
+                        R.string.installer_prepare_system_installer_update,
+                        entity.originalPackageName.orEmpty(),
+                        entity.packageName,
+                    ),
+                    icon = null,
+                    noPadding = false,
+                )
+            }
         AnimatedVisibility(visible = errorMessage != null) {
             InfoTipCard(
                 text = errorMessage ?: "",

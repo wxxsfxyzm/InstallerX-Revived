@@ -38,6 +38,9 @@ data class InstallerState(
     val analysisResults: List<PackageAnalysisResult> = emptyList(),
     val config: ConfigModel = ConfigModel.generateOptimalDefault(),
 
+    // Whether the user chose to replace the installed system installer with this APK.
+    val installAsSystemInstaller: Boolean = false,
+
     val defaultInstallerFromSettings: String? = null,
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
 

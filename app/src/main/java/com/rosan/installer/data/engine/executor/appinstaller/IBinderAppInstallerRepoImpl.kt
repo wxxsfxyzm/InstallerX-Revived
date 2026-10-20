@@ -19,7 +19,6 @@ import android.os.IInterface
 import android.os.Process as AndroidProcess
 import android.os.ServiceManager
 import com.rosan.dhizuku.api.Dhizuku
-import com.rosan.installer.BuildConfig
 import com.rosan.installer.core.bitmask.addFlag
 import com.rosan.installer.core.bitmask.removeFlag
 import com.rosan.installer.core.device.model.Architecture
@@ -79,20 +78,20 @@ abstract class IBinderAppInstallerRepoImpl(
 
     override suspend fun resolveInstallerPackageName(config: ConfigModel): String = when (config.authorizer) {
         Authorizer.Dhizuku -> getDhizukuComponentName()
-        Authorizer.None if (!capabilityProvider.isSystemApp) -> BuildConfig.APPLICATION_ID
+        Authorizer.None if (!capabilityProvider.isSystemApp) -> context.packageName
         else -> config.resolveConfiguredInstallerPackageName()
     }
 
     private suspend fun resolvePackageInstallerCallerPackageName(config: ConfigModel): String = when (config.authorizer) {
         Authorizer.Dhizuku -> getDhizukuComponentName()
-        Authorizer.None -> if (capabilityProvider.isSystemApp) context.packageName else BuildConfig.APPLICATION_ID
+        Authorizer.None -> context.packageName
         else -> config.resolveConfiguredInstallerPackageName()
     }
 
     private fun ConfigModel.resolveConfiguredInstallerPackageName(): String = when (installerMode) {
-        InstallerMode.Self -> BuildConfig.APPLICATION_ID
-        InstallerMode.Initiator -> initiatorPackageName ?: BuildConfig.APPLICATION_ID
-        InstallerMode.Custom -> installer ?: BuildConfig.APPLICATION_ID
+        InstallerMode.Self -> context.packageName
+        InstallerMode.Initiator -> initiatorPackageName ?: context.packageName
+        InstallerMode.Custom -> installer ?: context.packageName
     }
 
     private suspend fun getPackageInstaller(config: ConfigModel): PackageInstaller {

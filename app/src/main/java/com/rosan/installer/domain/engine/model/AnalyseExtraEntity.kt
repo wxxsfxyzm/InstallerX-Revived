@@ -10,6 +10,7 @@ import com.rosan.installer.domain.engine.model.source.DataType
  * @param checkAppSignature Whether APK signatures should be analysed.
  * @param checkSourceStamp Whether source stamp information should be included in signature analysis.
  * @param checkSplitPackageSignatures Whether APK signatures inside APKS, APKM, and XAPK should be analysed.
+ * @param installAsSystemInstaller Whether the user asked to replace the installed system installer with this APK.
  */
 data class AnalyseExtraEntity(
     val cacheDirectory: String,
@@ -18,6 +19,7 @@ data class AnalyseExtraEntity(
     val checkAppSignature: Boolean = true,
     val checkSourceStamp: Boolean = true,
     val checkSplitPackageSignatures: Boolean = false,
+    val installAsSystemInstaller: Boolean = false,
 ) {
     fun shouldCheckAppSignatures(type: DataType? = dataType): Boolean = checkAppSignature && (checkSplitPackageSignatures || type !in SPLIT_PACKAGE_TYPES)
 

@@ -39,6 +39,7 @@ import com.rosan.installer.domain.engine.usecase.AnalyzeInstallStateUseCase
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.page.main.installer.components.OptionSwitchRow
 import com.rosan.installer.ui.page.main.installer.components.WarningTextBlock
 import com.rosan.installer.ui.page.main.installer.components.failedIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton
@@ -374,6 +375,20 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
             DialogParamsType.InstallerPrepareInstall.id,
         ) {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Only offered when this APK could replace the installed system installer.
+                if (entityToInstall?.canInstallAsSystemInstaller == true) {
+                    item {
+                        OptionSwitchRow(
+                            title = stringResource(R.string.installer_prepare_system_installer_update_option),
+                            description = stringResource(R.string.installer_prepare_system_installer_update_option_summary),
+                            checked = uiState.installAsSystemInstaller,
+                            onCheckedChange = {
+                                viewModel.dispatch(InstallerViewAction.SetInstallAsSystemInstaller(it))
+                            },
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        )
+                    }
+                }
                 item {
                     InstallInfoChipGroup(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
