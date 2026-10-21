@@ -37,6 +37,40 @@ public abstract class AppProcess implements Closeable {
 
     protected final ConcurrentMap<String, IBinder> mChildProcess = new ConcurrentHashMap<>();
 
+    /**
+     * Shell wrappers (su / sh) spawned for this session.
+     * <p>
+     * Upstream never destroys them: {@link #close()} only sends exit to the
+     * app_process helper, so the wrapping shell stays alive in pipe_read and the
+     * matching ProcessReaper thread is kept forever. Measured on a real device:
+     * 33 leaked sh + 33 reaper threads + 101 pipe fds after ~36h, burning ~23%
+     * of one core.
+     */
+    protected final java.util.Set<Process> mShells =
+            java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /**
+     * Registers a spawned shell so that it can be destroyed on {@link #close()}.
+     */
+    public void trackShell(@NonNull Process process) {
+        mShells.add(process);
+    }
+
+    /**
+     * Destroys every shell wrapper tracked by this session.
+     */
+    protected void closeShells() {
+        if (mShells.isEmpty()) return;
+        for (Process process : mShells) {
+            try {
+                process.destroy();
+            } catch (Throwable ignored) {
+                // best effort: the process may have exited on its own
+            }
+        }
+        mShells.clear();
+    }
+
     public static ProcessParams generateProcessParams(@NonNull String classPath, @NonNull String entryClassName, @NonNull List<String> args) {
         return generateProcessParams(classPath, entryClassName, args, null);
     }
@@ -155,12 +189,17 @@ public abstract class AppProcess implements Closeable {
         mContext = null;
         mManager = null;
         mChildProcess.clear();
-        if (manager == null || !manager.asBinder().pingBinder()) return;
         try {
-            manager.exit(0);
-        } catch (RuntimeException rethrown) {
-            throw rethrown;
+            if (manager != null && manager.asBinder().pingBinder()) {
+                manager.exit(0);
+            }
+        } catch (RuntimeException ignored) {
+            // never let teardown escape into the recycler
         } catch (Exception ignored) {
+        } finally {
+            // Always reap the shell wrappers, otherwise every session leaks one
+            // su/sh process plus its ProcessReaper thread.
+            closeShells();
         }
     }
 

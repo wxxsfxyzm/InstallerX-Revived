@@ -81,6 +81,8 @@ abstract class NewProcessReceiver extends BroadcastReceiver {
                     String.format("--token=%s", token),
                     String.format("--component=%s", componentName.flattenToString())
             }, processName(context, componentName));
+            // Track the shell wrapper so AppProcess#close() can reap it.
+            appProcess.trackShell(process);
             NewProcessResult result = waitForResult(process, queue);
             IBinder binder = result != null ? result.getBinder() : null;
             long elapsed = SystemClock.elapsedRealtime() - startedAt;
