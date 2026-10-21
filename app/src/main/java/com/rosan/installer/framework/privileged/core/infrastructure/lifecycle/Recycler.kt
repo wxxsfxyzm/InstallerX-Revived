@@ -58,9 +58,17 @@ abstract class Recycler<T : Closeable> : Closeable {
         recycleJob?.cancel()
         recycleJob = null
 
-        val localEntity = _entity ?: onMake().also {
-            _entity = it
-            Timber.d("${this::class.simpleName}: Entity created")
+        val localEntity = _entity?.takeIf { isEntityValid(it) } ?: run {
+            // A stale entity (dead shell / dead helper) must never be reused.
+            _entity?.let { stale ->
+                Timber.d("${this::class.simpleName}: Entity invalid, recreating")
+                runCatching { stale.close() }
+                _entity = null
+            }
+            onMake().also {
+                _entity = it
+                Timber.d("${this::class.simpleName}: Entity created")
+            }
         }
 
         _referenceCount.incrementAndGet()
@@ -75,6 +83,13 @@ abstract class Recycler<T : Closeable> : Closeable {
      * Factory method to create the entity.
      */
     protected abstract fun onMake(): T
+
+    /**
+     * Whether a cached entity can still serve a new [make] call.
+     * Override this to detect a dead session (e.g. the underlying shell exited)
+     * instead of handing out a stale handle.
+     */
+    protected open fun isEntityValid(entity: T): Boolean = true
 
     /**
      * Callback triggered when the entity is recycled.

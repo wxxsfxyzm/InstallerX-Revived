@@ -15,7 +15,28 @@ import java.io.PrintWriter
 
 class AppProcessRecycler(private val terminal: AppProcessTerminal) : Recycler<AppProcess>() {
 
-    override val delayDuration: Long = 100L
+    private companion object {
+        /**
+         * Idle timeout before the shared privileged session is torn down.
+         */
+        const val IDLE_TIMEOUT_MS = 180_000L
+    }
+
+    /**
+     * Single-session reuse.
+     * <p>
+     * Upstream used 100 ms, which tore the privileged session down after almost
+     * every operation and spawned a fresh `su` + `app_process` pair for the next
+     * one (measured: 33 leaked shells + 33 reaper threads after ~36 h).
+     * Keeping the session alive for {@link #IDLE_TIMEOUT_MS} means consecutive
+     * operations share ONE shell, and the session is still reaped after idling.
+     */
+    override val delayDuration: Long = IDLE_TIMEOUT_MS
+
+    /**
+     * A cached session is only reusable while its app_process helper is alive.
+     */
+    override fun isEntityValid(entity: AppProcess): Boolean = entity.initialized()
 
     private class CustomizeAppProcess(private val shell: ShellCommand) : AppProcess.Default() {
         override fun newProcess(params: ProcessParams): Process {
