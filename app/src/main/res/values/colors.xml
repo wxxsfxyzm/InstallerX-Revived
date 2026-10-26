@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="ic_launcher_background">@color/light_primary_container</color>
+    <color name="ic_launcher_foreground_primary">@color/light_primary</color>
+    <color name="ic_launcher_foreground_secondary">@color/light_on_primary</color>
+    <color name="ic_launcher_foreground_accent">@color/light_error</color>
+
     <color name="light_primary">#FF4A672D</color>
     <color name="light_on_primary">#FF0E2000</color>
     <color name="light_primary_container">#FFCBEEA5</color>
