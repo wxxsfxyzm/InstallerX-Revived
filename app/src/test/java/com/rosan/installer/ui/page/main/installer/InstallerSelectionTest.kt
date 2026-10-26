@@ -630,6 +630,7 @@ class InstallerSelectionTest {
             labTryDifferentArchitecture = false,
             enableFileLogging = false,
             themeMode = com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode.entries.first(),
+            useAmoled = false,
             paletteStyle = com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle.entries.first(),
             colorSpec = com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec.entries.first(),
             useDynamicColor = false,

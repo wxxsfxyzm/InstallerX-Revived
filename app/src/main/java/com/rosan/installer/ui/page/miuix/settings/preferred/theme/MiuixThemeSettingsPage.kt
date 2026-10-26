@@ -148,6 +148,12 @@ fun MiuixThemeSettingsPage(
                             viewModel.dispatch(ThemeSettingsAction.SetThemeMode(newMode))
                         },
                     )
+                    MiuixSwitchWidget(
+                        title = stringResource(R.string.theme_settings_use_amoled),
+                        description = stringResource(R.string.theme_settings_use_amoled_desc),
+                        checked = uiState.useAmoled,
+                        onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseAmoled(it)) },
+                    )
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         MiuixSwitchWidget(
                             title = stringResource(R.string.theme_settings_use_blur),

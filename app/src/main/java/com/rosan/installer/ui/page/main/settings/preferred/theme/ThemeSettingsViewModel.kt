@@ -72,6 +72,7 @@ class ThemeSettingsViewModel(
             showMiuixUI = prefs.showMiuixUI,
             useBlur = prefs.useBlur,
             themeMode = prefs.themeMode,
+            useAmoled = prefs.useAmoled,
             paletteStyle = prefs.paletteStyle,
             colorSpec = prefs.colorSpec,
             useDynamicColor = prefs.useDynamicColor,
@@ -102,6 +103,10 @@ class ThemeSettingsViewModel(
 
             is ThemeSettingsAction.SetThemeMode -> viewModelScope.launch {
                 updateSetting(StringSetting.ThemeMode, action.mode.name)
+            }
+
+            is ThemeSettingsAction.SetUseAmoled -> viewModelScope.launch {
+                updateSetting(BooleanSetting.ThemeUseAmoled, action.use)
             }
 
             is ThemeSettingsAction.SetPaletteStyle -> viewModelScope.launch {

@@ -16,6 +16,7 @@ data class ThemeSettingsState(
     val showMiuixUI: Boolean = false,
     val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val useAmoled: Boolean = false,
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,
     val useDynamicColor: Boolean = true,

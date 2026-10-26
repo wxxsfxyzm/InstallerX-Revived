@@ -129,6 +129,8 @@
     <string name="theme_settings_theme_mode_light">Light theme</string>
     <string name="theme_settings_theme_mode_dark">Dark theme</string>
     <string name="theme_settings_theme_mode_system">Follow system theme</string>
+    <string name="theme_settings_use_amoled">AMOLED Background</string>
+    <string name="theme_settings_use_amoled_desc">Use a pure black background for settings screens in dark mode</string>
     <string name="theme_settings_palette_style">Palette Style</string>
     <string name="theme_settings_palette_style_desc">Select palette style</string>
     <string name="theme_settings_color_spec">Color Spec</string>

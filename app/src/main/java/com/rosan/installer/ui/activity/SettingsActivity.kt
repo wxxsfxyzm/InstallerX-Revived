@@ -82,6 +82,7 @@ class SettingsActivity :
                     useDynamicColor = uiState.useDynamicColor,
                     useMiuixMonet = uiState.useMiuixMonet,
                     seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor),
+                    useAmoled = uiState.useAmoled,
                 ) {
                     val backgroundColor =
                         if (uiState.useMiuix) {

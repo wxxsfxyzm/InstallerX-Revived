@@ -32,6 +32,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.twotone.Colorize
+import androidx.compose.material.icons.twotone.Contrast
 import androidx.compose.material.icons.twotone.InvertColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -248,6 +249,15 @@ fun ThemeSettingsPage(viewModel: ThemeSettingsViewModel = koinViewModel()) {
                                 ThemeMode.SYSTEM -> stringResource(R.string.theme_settings_theme_mode_system)
                             },
                             onClick = { showThemeModeDialog = true },
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = Icons.TwoTone.Contrast,
+                            title = stringResource(R.string.theme_settings_use_amoled),
+                            description = stringResource(R.string.theme_settings_use_amoled_desc),
+                            checked = uiState.useAmoled,
+                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseAmoled(it)) },
                         )
                     }
                     item {

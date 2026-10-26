@@ -87,6 +87,7 @@ fun InstallerTheme(
     useDynamicColor: Boolean,
     useMiuixMonet: Boolean,
     seedColor: Color,
+    useAmoled: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val preservedContent = remember {
@@ -117,8 +118,19 @@ fun InstallerTheme(
         )
     }
 
+    // Only callers that opt in use AMOLED backgrounds, and only in dark mode.
+    val colorScheme = if (useAmoled && isDark) {
+        baseColorScheme.copy(
+            background = Color.Black,
+            surface = Color.Black,
+            surfaceContainer = Color.Black,
+        )
+    } else {
+        baseColorScheme
+    }
+
     // 2. Wrap it with smooth transitions
-    val animatedColorScheme = baseColorScheme.animateAsState()
+    val animatedColorScheme = colorScheme.animateAsState()
 
     CompositionLocalProvider(
         LocalIsDark provides isDark,
@@ -145,7 +157,13 @@ fun InstallerTheme(
                 paletteStyle = paletteStyle,
                 colorSpec = colorSpec,
             ) {
-                preservedContent(content)
+                val colors = MiuixTheme.colorScheme
+                // Keep the controller's dynamic-color mode and the card palette intact.
+                MiuixTheme(
+                    colors = if (useAmoled && isDark) colors.copy(surface = Color.Black) else colors,
+                ) {
+                    preservedContent(content)
+                }
             }
         } else {
             InstallerMaterialExpressiveTheme(

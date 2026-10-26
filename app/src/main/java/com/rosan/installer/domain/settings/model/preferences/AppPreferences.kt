@@ -79,6 +79,7 @@ data class AppPreferences(
     val enableFileLogging: Boolean,
     // Theme Settings
     val themeMode: ThemeMode,
+    val useAmoled: Boolean,
     val paletteStyle: PaletteStyle,
     val colorSpec: ThemeColorSpec,
     val useDynamicColor: Boolean,

@@ -124,6 +124,8 @@
     <string name="theme_settings_theme_mode_light">浅色主题</string>
     <string name="theme_settings_theme_mode_dark">深色主题</string>
     <string name="theme_settings_theme_mode_system">跟随系统主题</string>
+    <string name="theme_settings_use_amoled">AMOLED 纯黑背景</string>
+    <string name="theme_settings_use_amoled_desc">深色模式下为设置页面使用纯黑背景</string>
     <string name="theme_settings_palette_style">调色板样式</string>
     <string name="theme_settings_palette_style_desc">选择调色板样式</string>
     <string name="theme_settings_color_spec">颜色规格</string>

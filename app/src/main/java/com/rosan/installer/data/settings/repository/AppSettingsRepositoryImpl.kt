@@ -152,6 +152,7 @@ class AppSettingsRepositoryImpl(
             enableFileLogging = prefs[AppDataStore.ENABLE_FILE_LOGGING] ?: true,
             // UI State
             themeMode = ThemeMode.fromValueOrDefault(prefs[AppDataStore.THEME_MODE] ?: ThemeMode.SYSTEM.name),
+            useAmoled = prefs[AppDataStore.THEME_USE_AMOLED] ?: false,
             paletteStyle = PaletteStyle.fromValueOrDefault(
                 prefs[AppDataStore.THEME_PALETTE_STYLE] ?: PaletteStyle.TonalSpot.name,
             ),
@@ -251,6 +252,8 @@ class AppSettingsRepositoryImpl(
             AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED
 
         BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
+
+        BooleanSetting.ThemeUseAmoled -> AppDataStore.THEME_USE_AMOLED
 
         BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
 
