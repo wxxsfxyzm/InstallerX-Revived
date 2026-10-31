@@ -88,7 +88,7 @@ fun InstallPrepareContent(
     appInfo: AppInfoState,
     onCancel: () -> Unit,
     onInstall: () -> Unit,
-    onLongInstall: () -> Unit,
+    onLongInstall: (() -> Unit)?,
 ) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
@@ -681,11 +681,13 @@ fun InstallPrepareContent(
                     hasLongPressed = false
                     // Wait for the system's default long press duration
                     delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
-                    hasLongPressed = true
-                    // Perform haptic feedback immediately before the action
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                    // Trigger the long press action
-                    onLongInstall()
+                    onLongInstall?.let { action ->
+                        hasLongPressed = true
+                        // Perform haptic feedback immediately before the action
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        // Trigger the long press action
+                        action()
+                    }
                 }
             }
 
@@ -722,6 +724,7 @@ fun InstallPrepareContent(
                     onClick = {
                         // Only trigger normal install if long press didn't happen
                         if (!hasLongPressed) onInstall()
+                        hasLongPressed = false
                     },
                     enabled = canInstall,
                     text = stringResource(buttonTextId),
