@@ -991,4 +991,6 @@
     <string name="lab_enable_abi_override_desc">Tentar instalar bibliotecas nativas dentro da mesma família de arquitetura. Requer suporte do sistema</string>
     <string name="lab_try_different_architecture">Outras arquiteturas</string>
     <string name="lab_try_different_architecture_desc">Tentar também instalar bibliotecas nativas de outras famílias de arquitetura</string>
+    <string name="theme_settings_use_amoled">Fundo AMOLED</string>
+    <string name="theme_settings_use_amoled_desc">Use um fundo preto puro nas telas de configurações no modo escuro</string>
 </resources>
