@@ -2,10 +2,13 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.util
 
+import com.rosan.installer.domain.engine.model.install.hasZipSource
+import com.rosan.installer.domain.engine.model.source.DataEntity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class SourcePathUtilTest {
     @Test
@@ -136,5 +139,31 @@ class SourcePathUtilTest {
             providerFileFallbackPath(missing) { true },
         )
         assertNull(providerFileFallbackPath("/storage/emulated/0/Download/app.apk") { false })
+    }
+
+    @Test
+    fun `scoped zip keeps its extension when the source identity is an opaque uri`() {
+        val contentUri = "content://provider/document/1234"
+        val resolved = ResolvedSourcePath(
+            displayPath = "/storage/emulated/0/Android/data/pkg/files/module.zip",
+            filePath = null,
+        )
+        val entity = DataEntity.FileEntity("/cache/descriptor").apply {
+            source = DataEntity.FileEntity(resolved.sourceIdentityPath(contentUri))
+            sourceDisplayPath = resolved.descriptorEntityPath(contentUri)
+        }
+
+        assertEquals(contentUri, resolved.sourceIdentityPath(contentUri))
+        assertTrue(entity.hasZipSource())
+    }
+
+    @Test
+    fun `opaque uri with an apk display path is not a zip source`() {
+        val entity = DataEntity.FileEntity("/cache/descriptor").apply {
+            source = DataEntity.FileEntity("content://provider/document/1234")
+            sourceDisplayPath = "base.apk"
+        }
+
+        assertFalse(entity.hasZipSource())
     }
 }

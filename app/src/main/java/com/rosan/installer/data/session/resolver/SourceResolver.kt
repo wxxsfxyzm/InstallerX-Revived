@@ -293,6 +293,7 @@ class SourceResolver(
                     // Provider, SMB, and scoped external paths stay descriptor-backed. A filesystem
                     // path is recorded only when it is safe for path-only consumers to open.
                     source = DataEntity.FileEntity(sourcePath)
+                    sourceDisplayPath = displayPath
                 }
                 closeables += providerAsset
                 retainProviderAsset = true
@@ -304,7 +305,7 @@ class SourceResolver(
             }
 
             Timber.d("Content descriptor is not seekable ($sourcePath). Falling back to cache.")
-            return cacheStream(uri, afd, sourcePath)
+            return cacheStream(uri, afd, sourcePath, displayPath)
         } finally {
             if (!retainProviderAsset) providerAsset.close()
         }
@@ -500,7 +501,12 @@ class SourceResolver(
         }
     }
 
-    private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> = withContext(Dispatchers.IO) {
+    private suspend fun cacheStream(
+        uri: Uri,
+        afd: AssetFileDescriptor,
+        sourcePath: String,
+        displayPath: String,
+    ): List<DataEntity> = withContext(Dispatchers.IO) {
         val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
         val knownLength =
             if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) {
@@ -544,7 +550,12 @@ class SourceResolver(
             }
         }
 
-        listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+        listOf(
+            DataEntity.FileEntity(tempFile.absolutePath).apply {
+                source = DataEntity.FileEntity(sourcePath)
+                sourceDisplayPath = displayPath
+            },
+        )
     }
 
     /**
