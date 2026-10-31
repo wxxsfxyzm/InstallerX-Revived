@@ -23,6 +23,9 @@ import org.apache.commons.compress.archivers.zip.ZipFile
 import org.tukaani.xz.SingleXZInputStream
 
 sealed class DataEntity(open var source: DataEntity? = null) {
+    /** Provider display path, kept for a source whose identity is an opaque content URI. */
+    var sourceDisplayPath: String? = null
+
     abstract fun getInputStream(): InputStream?
 
     open fun getInstallInputStream(): InputStream? = getInputStream()

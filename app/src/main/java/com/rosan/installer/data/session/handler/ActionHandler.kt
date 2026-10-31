@@ -25,6 +25,7 @@ import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.engine.model.install.InstallPhase
 import com.rosan.installer.domain.engine.model.install.SessionMode
+import com.rosan.installer.domain.engine.model.install.hasZipSource
 import com.rosan.installer.domain.engine.model.install.sourcePath
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
@@ -334,7 +335,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         Timber.d("[id=$sessionId] resolve: Data resolved successfully (${session.data.size} items).")
 
         // Post-Resolution Logic
-        val forceDialog = session.data.size > 1 || session.data.any { it.sourcePath()?.endsWith(".zip", true) == true }
+        val forceDialog = session.data.size > 1 || session.data.any { it.hasZipSource() }
         if (forceDialog) {
             Timber.d("[id=$sessionId] resolve: Batch share or module file detected. Forcing install mode to Dialog.")
             session.config = session.config.copy(installMode = InstallMode.Dialog)
