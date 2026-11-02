@@ -594,6 +594,57 @@ fun MiuixCustomGithubProxyUrlDialog(
 }
 
 @Composable
+fun MiuixVirusTotalApiKeyDialog(
+    showState: MutableState<Boolean>,
+    initialApiKey: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
+    var apiKey by remember(initialApiKey) { mutableStateOf(initialApiKey) }
+
+    WindowDialog(
+        show = showState.value,
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.virustotal_api_key),
+        content = {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = apiKey,
+                    onValueChange = { apiKey = it },
+                    label = stringResource(R.string.virustotal_api_key),
+                    useLabelAsPlaceholder = true,
+                    singleLine = true,
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = stringResource(R.string.virustotal_api_key_hint))
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.confirm),
+                        onClick = {
+                            onConfirm(apiKey.trim())
+                            onDismiss()
+                        },
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
+                    )
+                }
+            }
+        },
+    )
+}
+
+@Composable
 fun MiuixCustomAuthorizerDialog(
     showState: MutableState<Boolean>,
     initialAuthorizer: String,

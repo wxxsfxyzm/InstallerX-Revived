@@ -27,6 +27,12 @@ sealed interface InstallerViewAction {
     data object InstallMultiple : InstallerViewAction
     data object InstallPrepare : InstallerViewAction
 
+    /** Normal VirusTotal mode: compute the SHA-256 locally and look it up. */
+    data object VirusTotalLookup : InstallerViewAction
+
+    /** VirusTotal: upload the file and wait for the analysis result. */
+    data object VirusTotalUpload : InstallerViewAction
+
     /**
      * Install single module/apk
      *

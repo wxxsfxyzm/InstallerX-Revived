@@ -2,6 +2,8 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.page.main.installer
 
+import com.rosan.installer.domain.settings.model.preferences.VirusTotalMode
+
 data class InstallerViewSettings(
     val useBlur: Boolean = true,
     val preferSystemIconForUpdates: Boolean = false,
@@ -27,4 +29,7 @@ data class InstallerViewSettings(
     val labTapIconToShare: Boolean = false,
     val labShowFilePath: Boolean = false,
     val labShowInstallInitiator: Boolean = false,
+    // VirusTotal (the API key itself never leaves the repository/ViewModel layer)
+    val virusTotalMode: VirusTotalMode = VirusTotalMode.OFF,
+    val virusTotalHasApiKey: Boolean = false,
 )

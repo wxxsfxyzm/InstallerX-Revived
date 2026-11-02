@@ -33,6 +33,7 @@ The full user guide, installation instructions, advanced options, system integra
 - **System integration:** InstallerX can be locked as the default installer from the Home page status card, used with LSPosed modules such as [InxLocker](https://github.com/Chimioo/InxLocker), or installed as a replacement system package manager by advanced users.
 - **Modern UI:** Material 3 Expressive and Miuix interface styles, dark mode, dynamic color, advanced palettes, system icon packs, colorful dialogs, standard notifications, Live Activity, and Xiaomi HyperOS-style island notifications on supported Xiaomi devices.
 - **Safety controls:** package-name and SharedUID blacklists, signature mismatch and unknown-signature policy gates, permission preview, install flags, and one-time smart suggestions for selected blocked cases.
+- **VirusTotal scanning (dialog flow):** with your own VirusTotal API key in Network settings, Normal mode offers an optional SHA-256 lookup plus a manual upload button in the install dialog, while Strict mode always uploads the primary file (base APK when present) and blocks installation until the analysis finishes. Strict scan failures such as oversized files (over 650 MB) or network errors are shown and then allow installation. Scanning only runs while in-app network access is enabled, and does not apply to notification or automatic installation.
 
 ## Supported Android Versions
 

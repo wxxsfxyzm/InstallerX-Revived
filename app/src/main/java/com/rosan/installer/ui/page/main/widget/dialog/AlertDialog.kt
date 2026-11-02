@@ -411,6 +411,43 @@ fun CustomGithubProxyUrlDialog(initialUrl: String, onDismiss: () -> Unit, onConf
 }
 
 @Composable
+fun VirusTotalApiKeyDialog(initialApiKey: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var apiKey by remember(initialApiKey) { mutableStateOf(initialApiKey) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.virustotal_api_key)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = apiKey,
+                    onValueChange = { apiKey = it },
+                    label = { Text(stringResource(R.string.virustotal_api_key)) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                )
+                Text(
+                    text = stringResource(R.string.virustotal_api_key_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(apiKey.trim()) },
+            ) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
 fun CustomAuthorizerDialog(initialAuthorizer: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var authorizer by remember(initialAuthorizer) { mutableStateOf(initialAuthorizer) }
 

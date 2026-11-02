@@ -23,6 +23,8 @@ enum class StringSetting {
     CustomGithubProxyUrl,
     InstallerBiometricAuthMode,
     SmartAuthorizerCandidates,
+    VirusTotalMode,
+    VirusTotalApiKey,
 }
 
 enum class IntSetting {

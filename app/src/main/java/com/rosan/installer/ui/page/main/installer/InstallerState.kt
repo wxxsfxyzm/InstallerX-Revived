@@ -9,6 +9,7 @@ import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.domain.virustotal.model.VirusTotalScanState
 
 /**
  * Represents the entire UI state for the Installer screen.
@@ -40,6 +41,9 @@ data class InstallerState(
 
     val defaultInstallerFromSettings: String? = null,
     val managedInstallerPackages: List<NamedPackage> = emptyList(),
+
+    // VirusTotal scan for the package currently shown in InstallPrepare
+    val virusTotalState: VirusTotalScanState = VirusTotalScanState.Idle,
 
     // User State & Other
     val rootMode: RootMode = RootMode.Magisk,

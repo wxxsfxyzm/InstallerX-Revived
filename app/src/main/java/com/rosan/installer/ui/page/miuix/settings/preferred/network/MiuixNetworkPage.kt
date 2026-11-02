@@ -38,12 +38,14 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.VirusTotalMode
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixGithubUpdateChannelSelectionDialog
+import com.rosan.installer.ui.page.miuix.widgets.MiuixVirusTotalApiKeyDialog
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
@@ -134,6 +136,18 @@ fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koi
                         ),
                     )
                 }
+            },
+        )
+    }
+
+    if (showVirusTotalApiKeyDialog.value) {
+        MiuixVirusTotalApiKeyDialog(
+            showState = showVirusTotalApiKeyDialog,
+            initialApiKey = uiState.virusTotalApiKey,
+            onDismiss = { showVirusTotalApiKeyDialog.value = false },
+            onConfirm = { apiKey ->
+                showVirusTotalApiKeyDialog.value = false
+                viewModel.dispatch(NetworkSettingsAction.ChangeVirusTotalApiKey(apiKey))
             },
         )
     }
@@ -299,6 +313,31 @@ private fun NetworkSourceModeWarningDialog(
                     )
                 }
             }
+        },
+    )
+}
+
+@Composable
+private fun MiuixVirusTotalModePreference(currentMode: VirusTotalMode, onModeChange: (VirusTotalMode) -> Unit) {
+    val modes = linkedMapOf(
+        VirusTotalMode.OFF to stringResource(R.string.virustotal_mode_off),
+        VirusTotalMode.NORMAL to stringResource(R.string.virustotal_mode_normal),
+        VirusTotalMode.STRICT to stringResource(R.string.virustotal_mode_strict),
+    )
+    val descriptions = mapOf(
+        VirusTotalMode.OFF to stringResource(R.string.virustotal_mode_off_desc),
+        VirusTotalMode.NORMAL to stringResource(R.string.virustotal_mode_normal_desc),
+        VirusTotalMode.STRICT to stringResource(R.string.virustotal_mode_strict_desc),
+    )
+    val entries = modes.values.map { DropdownItem(title = it) }
+
+    WindowSpinnerPreference(
+        title = stringResource(R.string.virustotal_mode),
+        summary = descriptions.getValue(currentMode),
+        items = entries,
+        selectedIndex = modes.keys.indexOf(currentMode).coerceAtLeast(0),
+        onSelectedIndexChange = { index ->
+            modes.keys.elementAtOrNull(index)?.let(onModeChange)
         },
     )
 }

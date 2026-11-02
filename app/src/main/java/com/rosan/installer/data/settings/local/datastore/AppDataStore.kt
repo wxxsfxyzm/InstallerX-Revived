@@ -202,6 +202,10 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
         // Updater
         val GITHUB_UPDATE_CHANNEL = register(stringPreferencesKey("github_update_channel"), PreferenceValueType.STRING)
         val CUSTOM_GITHUB_PROXY_URL = register(stringPreferencesKey("custom_github_proxy_url"), PreferenceValueType.STRING)
+
+        // VirusTotal
+        val VIRUSTOTAL_MODE = register(stringPreferencesKey("virustotal_mode"), PreferenceValueType.STRING)
+        val VIRUSTOTAL_API_KEY = register(stringPreferencesKey("virustotal_api_key"), PreferenceValueType.STRING)
     }
 
     suspend fun putString(key: Preferences.Key<String>, value: String) {

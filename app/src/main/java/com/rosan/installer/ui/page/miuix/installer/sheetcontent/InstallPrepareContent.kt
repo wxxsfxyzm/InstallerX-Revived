@@ -54,12 +54,15 @@ import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.usecase.AnalyzeInstallStateUseCase
 import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.preferences.VirusTotalMode
+import com.rosan.installer.domain.virustotal.model.VirusTotalPolicy
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.installer.InstallerViewAction
 import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.mapper.InstallNoticeResources
 import com.rosan.installer.ui.page.main.installer.mapper.InstallStateUiMapper
 import com.rosan.installer.ui.page.miuix.installer.components.AdaptiveInfoRow
+import com.rosan.installer.ui.page.miuix.installer.components.MiuixVirusTotalSection
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoSlot
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
 import com.rosan.installer.ui.page.miuix.widgets.MiuixInfoChipGroup
@@ -549,6 +552,17 @@ fun InstallPrepareContent(
             }
         }
 
+        if (settings.virusTotalMode != VirusTotalMode.OFF) {
+            item {
+                MiuixVirusTotalSection(
+                    state = uiState.virusTotalState,
+                    mode = settings.virusTotalMode,
+                    onLookup = { viewModel.dispatch(InstallerViewAction.VirusTotalLookup) },
+                    onUpload = { viewModel.dispatch(InstallerViewAction.VirusTotalUpload) },
+                )
+            }
+        }
+
         val isInvalidSplitInstall = currentPackage.installedAppInfo == null &&
             entityToInstall == null &&
             selectedEntities.any { it is AppEntity.SplitEntity }
@@ -723,7 +737,7 @@ fun InstallPrepareContent(
                         // Only trigger normal install if long press didn't happen
                         if (!hasLongPressed) onInstall()
                     },
-                    enabled = canInstall,
+                    enabled = canInstall && !VirusTotalPolicy.blocksInstall(settings.virusTotalMode, uiState.virusTotalState),
                     text = stringResource(buttonTextId),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     modifier = Modifier.weight(1f),

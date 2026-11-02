@@ -33,8 +33,13 @@ import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.config.InstallMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.domain.settings.model.preferences.VirusTotalMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
+import com.rosan.installer.domain.virustotal.model.VirusTotalErrorKind
+import com.rosan.installer.domain.virustotal.model.VirusTotalPolicy
+import com.rosan.installer.domain.virustotal.model.VirusTotalScanState
+import com.rosan.installer.domain.virustotal.usecase.VirusTotalScanUseCase
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -61,6 +66,7 @@ class InstallerViewModel(
     private val getAppIconColor: GetAppIconColorUseCase,
     private val getAppLabel: GetAppLabelUseCase,
     private val deviceCapabilityProvider: DeviceCapabilityProvider,
+    private val virusTotalScan: VirusTotalScanUseCase,
 ) : ViewModel() {
 
     // Event channel for one-off side effects (e.g. Toasts)
@@ -111,6 +117,8 @@ class InstallerViewModel(
                 labTapIconToShare = prefs.labTapIconToShare,
                 labShowFilePath = local.tempLabShowFilePath ?: prefs.labShowFilePath,
                 labShowInstallInitiator = local.tempLabShowInstallInitiator ?: prefs.labShowInstallInitiator,
+                virusTotalMode = prefs.virusTotalMode,
+                virusTotalHasApiKey = prefs.virusTotalApiKey.isNotBlank(),
             ),
             rootMode = prefs.labRootMode,
             managedInstallerPackages = prefs.managedInstallerPackages,
@@ -134,6 +142,8 @@ class InstallerViewModel(
     private var loadingStateJob: Job? = null
     private val iconJobs = mutableMapOf<String, Job>()
     private var autoInstallJob: Job? = null
+    private var virusTotalJob: Job? = null
+    private var virusTotalTargetKey: String? = null
     private val settingsLoadingJob: Job
     private var collectRepoJob: Job? = null
     private var unknownSourcePermissionLabelPackageName: String? = null
@@ -189,6 +199,10 @@ class InstallerViewModel(
             is InstallerViewAction.SelectMixedModuleType -> selectMixedModuleType(action.installAsModule)
 
             is InstallerViewAction.InstallPrepare -> installPrepare()
+
+            is InstallerViewAction.VirusTotalLookup -> startVirusTotalScan(upload = false)
+
+            is InstallerViewAction.VirusTotalUpload -> startVirusTotalScan(upload = true)
 
             is InstallerViewAction.InstallExtendedMenu -> installExtendedMenu()
 
@@ -397,8 +411,11 @@ class InstallerViewModel(
                 analysisResults = session.analysisResults,
                 displayIcons = it.displayIcons.filterKeys { key -> key in validPackages } + analysedIcons,
                 error = session.error,
+                virusTotalState = VirusTotalScanState.Idle,
             )
         }
+        virusTotalJob?.cancel()
+        virusTotalTargetKey = null
 
         unknownSourcePermissionLabelPackageName = null
         fetchInitiatorAppLabel(session.config.initiatorPackageName)
@@ -593,6 +610,9 @@ class InstallerViewModel(
                 }
 
                 autoInstallJob?.cancel()
+                if (newStage is InstallerStage.InstallPrepare) {
+                    ensureStrictVirusTotalScan()
+                }
                 if (newStage is InstallerStage.InstallPrepare && session.config.installMode == InstallMode.AutoDialog) {
                     autoInstallJob = viewModelScope.launch {
                         delay(500.milliseconds)
@@ -693,6 +713,7 @@ class InstallerViewModel(
     private fun close() {
         packageSelectionsBeforeClear.clear()
         autoInstallJob?.cancel()
+        virusTotalJob?.cancel()
         collectRepoJob?.cancel()
         iconJobs.values.forEach { it.cancel() }
         iconJobs.clear()
@@ -702,6 +723,7 @@ class InstallerViewModel(
 
     private fun cancel() {
         autoInstallJob?.cancel()
+        virusTotalJob?.cancel()
         iconJobs.values.forEach { it.cancel() }
         session.cancel()
     }
@@ -785,6 +807,8 @@ class InstallerViewModel(
                     },
                 )
             }
+            resetVirusTotalIfTargetChanged()
+            ensureStrictVirusTotalScan()
         } else {
             _localState.update { it.copy(stage = InstallerStage.InstallChoice) }
         }
@@ -812,6 +836,7 @@ class InstallerViewModel(
     }
 
     private fun install() {
+        if (isVirusTotalBlockingInstall()) return
         autoInstallJob?.cancel()
         Timber.d("Standard foreground installation triggered. Contains Module: $isInstallingModule")
         session.install(true)
@@ -821,7 +846,97 @@ class InstallerViewModel(
         _uiEvents.tryEmit(InstallerViewEvent.RequestUnknownSourcePermission)
     }
 
-    private fun background() = session.background(true)
+    private fun background() {
+        if (isVirusTotalBlockingInstall()) return
+        session.background(true)
+    }
+
+    // --- VirusTotal ---
+
+    /** Strict mode gates dialog installation until the scan reaches a final outcome (Completed or Failed). */
+    private fun isVirusTotalBlockingInstall(): Boolean {
+        val mode = uiState.value.viewSettings.virusTotalMode
+        if (!VirusTotalPolicy.blocksInstall(mode, _localState.value.virusTotalState)) return false
+        toast(R.string.virustotal_install_blocked)
+        ensureStrictVirusTotalScan()
+        return true
+    }
+
+    private fun resolveVirusTotalTarget(): AppEntity? {
+        val results = _localState.value.analysisResults
+        val result = _localState.value.currentPackageName?.let { name -> results.find { it.packageName == name } }
+            ?: results.firstOrNull { it.appEntities.any { entity -> entity.selected } }
+            ?: results.firstOrNull()
+            ?: return null
+        val selected = result.appEntities.filter { it.selected }.map { it.app }
+        return selected.filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+            ?: selected.filterIsInstance<AppEntity.ModuleEntity>().firstOrNull()
+            ?: selected.filterIsInstance<AppEntity.SplitEntity>().firstOrNull()
+            ?: selected.firstOrNull()
+    }
+
+    private fun virusTotalKeyOf(entity: AppEntity): String = "${entity.packageName}/${entity.name}/${entity.size}"
+
+    private fun resetVirusTotalIfTargetChanged() {
+        val startedFor = virusTotalTargetKey ?: return
+        val target = resolveVirusTotalTarget() ?: return
+        if (virusTotalKeyOf(target) == startedFor) return
+        virusTotalJob?.cancel()
+        virusTotalTargetKey = null
+        _localState.update { it.copy(virusTotalState = VirusTotalScanState.Idle) }
+    }
+
+    private fun ensureStrictVirusTotalScan() {
+        viewModelScope.launch {
+            val prefs = appSettingsRepo.preferencesFlow.first()
+            if (prefs.virusTotalMode != VirusTotalMode.STRICT) return@launch
+            if (_localState.value.stage !is InstallerStage.InstallPrepare) return@launch
+            val target = resolveVirusTotalTarget() ?: return@launch
+            val alreadyHandled = virusTotalTargetKey == virusTotalKeyOf(target) &&
+                _localState.value.virusTotalState !is VirusTotalScanState.Idle
+            if (!alreadyHandled) startVirusTotalScan(upload = true)
+        }
+    }
+
+    private fun startVirusTotalScan(upload: Boolean) {
+        if (_localState.value.virusTotalState.isBusy) return
+        val target = resolveVirusTotalTarget() ?: return
+        val targetKey = virusTotalKeyOf(target)
+        val previous = _localState.value.virusTotalState.takeIf { virusTotalTargetKey == targetKey }
+        virusTotalTargetKey = targetKey
+        virusTotalJob?.cancel()
+        virusTotalJob = viewModelScope.launch {
+            val prefs = appSettingsRepo.preferencesFlow.first()
+            if (!prefs.allowInternetAccess) {
+                _localState.update {
+                    it.copy(virusTotalState = VirusTotalScanState.Failed(VirusTotalErrorKind.INTERNET_DISABLED))
+                }
+                return@launch
+            }
+            if (prefs.virusTotalApiKey.isBlank()) {
+                _localState.update {
+                    it.copy(virusTotalState = VirusTotalScanState.Failed(VirusTotalErrorKind.NO_API_KEY))
+                }
+                return@launch
+            }
+            val scanFlow = if (upload) {
+                virusTotalScan.uploadAndWait(
+                    apiKey = prefs.virusTotalApiKey,
+                    source = target.data,
+                    fileName = target.name,
+                    knownSha256 = (previous as? VirusTotalScanState.NotFound)?.sha256,
+                    knownSize = (previous as? VirusTotalScanState.NotFound)?.size,
+                )
+            } else {
+                virusTotalScan.lookupByHash(prefs.virusTotalApiKey, target.data)
+            }
+            scanFlow.collect { state ->
+                if (virusTotalTargetKey == targetKey) {
+                    _localState.update { it.copy(virusTotalState = state) }
+                }
+            }
+        }
+    }
 
     fun toggleSelection(packageName: String, entityToToggle: SelectInstallEntity, isMultiSelect: Boolean) {
         val currentPackage = _localState.value.analysisResults.firstOrNull { it.packageName == packageName } ?: return
@@ -910,6 +1025,8 @@ class InstallerViewModel(
         if (!changed) return
         session.analysisResults = updatedResults
         _localState.update { it.copy(analysisResults = updatedResults) }
+        resetVirusTotalIfTargetChanged()
+        if (_localState.value.stage is InstallerStage.InstallPrepare) ensureStrictVirusTotalScan()
     }
 
     private fun toggleUninstallFlag(flag: Int, enable: Boolean) {
@@ -946,6 +1063,9 @@ class InstallerViewModel(
     private fun installMultiple() {
         // Read from _localState instead of session
         val selectedEntities = _localState.value.analysisResults.flatMap { it.appEntities }.filter { it.selected }
+        // Strict VirusTotal gating covers the single-package dialog flow; multi-package batches are not gated.
+        val isSinglePackage = selectedEntities.map { it.app.packageName }.distinct().size == 1
+        if (isSinglePackage && isVirusTotalBlockingInstall()) return
         session.installMultiple(selectedEntities)
     }
 

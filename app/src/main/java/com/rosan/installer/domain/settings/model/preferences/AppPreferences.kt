@@ -62,6 +62,8 @@ data class AppPreferences(
     val allowInternetAccess: Boolean,
     val githubUpdateChannel: GithubUpdateChannel,
     val customGithubProxyUrl: String,
+    val virusTotalMode: VirusTotalMode,
+    val virusTotalApiKey: String,
     // Lab Settings
     val labRootEnableModuleFlash: Boolean,
     val labRootShowModuleArt: Boolean,

@@ -19,6 +19,7 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnima
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerPreferences
+import com.rosan.installer.domain.settings.model.preferences.VirusTotalMode
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
@@ -133,6 +134,8 @@ class AppSettingsRepositoryImpl(
             allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
             customGithubProxyUrl = customGithubProxyUrl,
+            virusTotalMode = VirusTotalMode.fromValueOrDefault(prefs[AppDataStore.VIRUSTOTAL_MODE]),
+            virusTotalApiKey = prefs[AppDataStore.VIRUSTOTAL_API_KEY] ?: "",
             // Lab
             labRootEnableModuleFlash = prefs[AppDataStore.LAB_ENABLE_MODULE_FLASH] ?: false,
             labRootShowModuleArt = prefs[AppDataStore.LAB_MODULE_FLASH_SHOW_ART] ?: true,
@@ -233,6 +236,8 @@ class AppSettingsRepositoryImpl(
         StringSetting.CustomGithubProxyUrl -> AppDataStore.CUSTOM_GITHUB_PROXY_URL
         StringSetting.InstallerBiometricAuthMode -> AppDataStore.INSTALLER_REQUIRE_BIOMETRIC_AUTH
         StringSetting.SmartAuthorizerCandidates -> AppDataStore.SMART_AUTHORIZER_CANDIDATES
+        StringSetting.VirusTotalMode -> AppDataStore.VIRUSTOTAL_MODE
+        StringSetting.VirusTotalApiKey -> AppDataStore.VIRUSTOTAL_API_KEY
     }
 
     private fun intKey(setting: IntSetting): Preferences.Key<Int> = when (setting) {

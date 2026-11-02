@@ -25,6 +25,8 @@ class NetworkSettingsViewModel(appSettingsRepo: AppSettingsRepository, private v
             httpProfile = prefs.labHttpProfile,
             githubUpdateChannel = prefs.githubUpdateChannel,
             customGithubProxyUrl = prefs.customGithubProxyUrl,
+            virusTotalMode = prefs.virusTotalMode,
+            virusTotalApiKey = prefs.virusTotalApiKey,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -68,6 +70,20 @@ class NetworkSettingsViewModel(appSettingsRepo: AppSettingsRepository, private v
                 updateSetting(
                     StringSetting.CustomGithubProxyUrl,
                     action.url,
+                )
+            }
+
+            is NetworkSettingsAction.ChangeVirusTotalMode -> viewModelScope.launch {
+                updateSetting(
+                    StringSetting.VirusTotalMode,
+                    action.mode.name,
+                )
+            }
+
+            is NetworkSettingsAction.ChangeVirusTotalApiKey -> viewModelScope.launch {
+                updateSetting(
+                    StringSetting.VirusTotalApiKey,
+                    action.apiKey.trim(),
                 )
             }
         }

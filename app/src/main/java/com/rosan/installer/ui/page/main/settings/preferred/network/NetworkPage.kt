@@ -54,10 +54,12 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.VirusTotalMode
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelectionDialog
+import com.rosan.installer.ui.page.main.widget.dialog.VirusTotalApiKeyDialog
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
@@ -153,6 +155,17 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
                         ),
                     )
                 }
+            },
+        )
+    }
+
+    if (showVirusTotalApiKeyDialog) {
+        VirusTotalApiKeyDialog(
+            initialApiKey = uiState.virusTotalApiKey,
+            onDismiss = { showVirusTotalApiKeyDialog = false },
+            onConfirm = { apiKey ->
+                showVirusTotalApiKeyDialog = false
+                viewModel.dispatch(NetworkSettingsAction.ChangeVirusTotalApiKey(apiKey))
             },
         )
     }
@@ -265,9 +278,64 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
                         }
                     }
                 }
+                item {
+                    SegmentedColumn(
+                        title = stringResource(R.string.virustotal_title),
+                    ) {
+                        item {
+                            VirusTotalModeWidget(
+                                currentMode = uiState.virusTotalMode,
+                                onModeChange = { mode ->
+                                    viewModel.dispatch(NetworkSettingsAction.ChangeVirusTotalMode(mode))
+                                },
+                            )
+                        }
+                        item {
+                            val apiKeySummary = if (uiState.virusTotalApiKey.isBlank()) {
+                                stringResource(R.string.virustotal_api_key_not_set)
+                            } else {
+                                stringResource(
+                                    R.string.virustotal_api_key_masked_format,
+                                    uiState.virusTotalApiKey.takeLast(4),
+                                )
+                            }
+                            BaseWidget(
+                                icon = Icons.Default.Security,
+                                title = stringResource(R.string.virustotal_api_key),
+                                description = apiKeySummary,
+                                onClick = { showVirusTotalApiKeyDialog = true },
+                            ) {}
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+private fun VirusTotalModeWidget(currentMode: VirusTotalMode, onModeChange: (VirusTotalMode) -> Unit) {
+    val modes = linkedMapOf(
+        VirusTotalMode.OFF to stringResource(R.string.virustotal_mode_off),
+        VirusTotalMode.NORMAL to stringResource(R.string.virustotal_mode_normal),
+        VirusTotalMode.STRICT to stringResource(R.string.virustotal_mode_strict),
+    )
+    val descriptions = mapOf(
+        VirusTotalMode.OFF to stringResource(R.string.virustotal_mode_off_desc),
+        VirusTotalMode.NORMAL to stringResource(R.string.virustotal_mode_normal_desc),
+        VirusTotalMode.STRICT to stringResource(R.string.virustotal_mode_strict_desc),
+    )
+
+    DropDownMenuWidget(
+        icon = AppIcons.BugReport,
+        title = stringResource(R.string.virustotal_mode),
+        description = descriptions.getValue(currentMode),
+        choice = modes.keys.indexOf(currentMode).coerceAtLeast(0),
+        data = modes.values.toList(),
+        onChoiceChange = { index ->
+            modes.keys.elementAtOrNull(index)?.let(onModeChange)
+        },
+    )
 }
 
 @Composable

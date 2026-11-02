@@ -19,6 +19,7 @@ import com.rosan.installer.domain.privileged.usecase.GetAvailableUsersUseCase
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.model.SelectInstallEntity
 import com.rosan.installer.domain.settings.model.preferences.AppPreferences
+import com.rosan.installer.domain.virustotal.usecase.VirusTotalScanUseCase
 import java.lang.reflect.Proxy
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -534,6 +535,7 @@ class InstallerSelectionTest {
                 check(name == "isSystemApp")
                 true
             },
+            virusTotalScan = VirusTotalScanUseCase(stub()),
         )
 
         fun load(results: List<PackageAnalysisResult>) {
@@ -615,6 +617,8 @@ class InstallerSelectionTest {
             allowInternetAccess = false,
             githubUpdateChannel = com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel.entries.first(),
             customGithubProxyUrl = "",
+            virusTotalMode = com.rosan.installer.domain.settings.model.preferences.VirusTotalMode.entries.first(),
+            virusTotalApiKey = "",
             labRootEnableModuleFlash = false,
             labRootShowModuleArt = false,
             labRootMode = com.rosan.installer.domain.settings.model.preferences.RootMode.entries.first(),
