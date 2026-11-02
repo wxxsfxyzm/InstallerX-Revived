@@ -514,14 +514,17 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
                         DialogButton(
                             text = stringResource(buttonTextId),
                             weight = 1f,
-                            onLongClick = {
-                                if (!settings.longClickBackgroundInstall) return@DialogButton
-                                // Trigger install directly
-                                viewModel.dispatch(InstallerViewAction.Install(true))
-                                // Force background auto silent install regardless of settings
-                                if (!viewModel.isInstallingModule) {
-                                    viewModel.dispatch(InstallerViewAction.Background)
+                            onLongClick = if (settings.longClickBackgroundInstall) {
+                                {
+                                    // Trigger install directly
+                                    viewModel.dispatch(InstallerViewAction.Install(true))
+                                    // Force background auto silent install regardless of settings
+                                    if (!viewModel.isInstallingModule) {
+                                        viewModel.dispatch(InstallerViewAction.Background)
+                                    }
                                 }
+                            } else {
+                                null
                             },
                             onClick = {
                                 viewModel.dispatch(InstallerViewAction.Install(true))

@@ -106,6 +106,7 @@ private fun InnerButton(button: DialogButton, modifier: Modifier = Modifier) {
             if (!hasLongPressed) {
                 button.onClick()
             }
+            hasLongPressed = false
         },
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(4.dp),
