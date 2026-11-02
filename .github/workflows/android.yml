@@ -1,0 +1,71 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Unstable Release APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Get commit short SHA
+        id: commit_sha
+        run: echo "SHORT_SHA=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
+          build-scan-publish: false
+          cache-read-only: true
+          cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Decode and set up signing key
+        env:
+          SIGNING_KEY_STORE_BASE64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          if [ -z "${SIGNING_STORE_PASSWORD:-}" ] || [ -z "${SIGNING_KEY_STORE_BASE64:-}" ] || [ -z "${SIGNING_KEY_PASSWORD:-}" ] || [ -z "${SIGNING_KEY_ALIAS:-}" ]; then
+            exit 0
+          fi
+          mkdir -p keystore
+          echo "${SIGNING_KEY_STORE_BASE64}" | base64 --decode > keystore/carlyu.jks
+          echo "storeFile=keystore/carlyu.jks" > keystore.properties
+          echo "keyAlias=${SIGNING_KEY_ALIAS}" >> keystore.properties
+          echo "keyPassword=${SIGNING_KEY_PASSWORD}" >> keystore.properties
+          echo "storePassword=${SIGNING_STORE_PASSWORD}" >> keystore.properties
+
+      - name: Build Unstable Release APK
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew assembleUnstableRelease --no-configuration-cache
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-apk-${{ steps.commit_sha.outputs.SHORT_SHA }}
+          path: app/build/outputs/apk/**/release/*.apk
+          retention-days: 15
+          archive: false
