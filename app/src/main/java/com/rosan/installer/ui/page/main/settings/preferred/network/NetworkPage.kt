@@ -86,6 +86,7 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     var showChannelDialog by remember { mutableStateOf(false) }
     var showCustomProxyDialog by remember { mutableStateOf(false) }
+    var showVirusTotalApiKeyDialog by remember { mutableStateOf(false) }
     var pendingNetworkSourceMode by rememberSaveable { mutableStateOf<NetworkSourceMode?>(null) }
     var exitAfterInternetDisable by rememberSaveable { mutableStateOf(false) }
 

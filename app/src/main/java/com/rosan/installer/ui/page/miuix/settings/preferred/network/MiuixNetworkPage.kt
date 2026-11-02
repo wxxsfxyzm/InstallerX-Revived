@@ -79,6 +79,7 @@ fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koi
     val topBarBackdrop = rememberMiuixBlurBackdrop(useBlur)
     val showChannelDialog = remember { mutableStateOf(false) }
     val showCustomProxyDialog = remember { mutableStateOf(false) }
+    val showVirusTotalApiKeyDialog = remember { mutableStateOf(false) }
     var pendingNetworkSourceMode by rememberSaveable { mutableStateOf<NetworkSourceMode?>(null) }
     var exitAfterInternetDisable by rememberSaveable { mutableStateOf(false) }
 
@@ -272,6 +273,34 @@ fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koi
                             title = stringResource(R.string.lab_update_github_proxy),
                             summary = channelSummary,
                             onClick = { showChannelDialog.value = true },
+                        )
+                    }
+                }
+                item { SmallTitle(stringResource(R.string.virustotal_title)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        MiuixVirusTotalModePreference(
+                            currentMode = uiState.virusTotalMode,
+                            onModeChange = { mode ->
+                                viewModel.dispatch(NetworkSettingsAction.ChangeVirusTotalMode(mode))
+                            },
+                        )
+                        val apiKeySummary = if (uiState.virusTotalApiKey.isBlank()) {
+                            stringResource(R.string.virustotal_api_key_not_set)
+                        } else {
+                            stringResource(
+                                R.string.virustotal_api_key_masked_format,
+                                uiState.virusTotalApiKey.takeLast(4),
+                            )
+                        }
+                        BasicComponent(
+                            title = stringResource(R.string.virustotal_api_key),
+                            summary = apiKeySummary,
+                            onClick = { showVirusTotalApiKeyDialog.value = true },
                         )
                     }
                 }

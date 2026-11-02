@@ -157,7 +157,9 @@ class VirusTotalRepositoryImpl(
 
     private fun mapResponse(response: Response, notFoundReturnsNull: Boolean): String? = when {
         response.isSuccessful -> response.body.string()
+
         response.code == 404 && notFoundReturnsNull -> null
+
         response.code == 401 || response.code == 403 ->
             throw VirusTotalException(VirusTotalErrorKind.UNAUTHORIZED, "VirusTotal rejected the API key (HTTP ${response.code})")
 
