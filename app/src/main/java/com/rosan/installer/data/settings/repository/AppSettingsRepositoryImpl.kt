@@ -165,12 +165,8 @@ class AppSettingsRepositoryImpl(
             wallpaperSeedColorInt = prefs[AppDataStore.THEME_WALLPAPER_SEED_COLOR] ?: 0,
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useDynColorFollowPkgIconForLiveActivity = prefs[AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
-            useBlur = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                prefs[AppDataStore.UI_USE_BLUR]
-                    ?: true
-            } else {
-                false
-            },
+            useBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                (prefs[AppDataStore.UI_USE_BLUR] ?: true),
             predictiveBackAnimation = PredictiveBackAnimation.fromValueOrDefault(
                 prefs[AppDataStore.PREDICTIVE_BACK_ANIMATION] ?: PredictiveBackAnimation.MIUIX.value,
             ),
