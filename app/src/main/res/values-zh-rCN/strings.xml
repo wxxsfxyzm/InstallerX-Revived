@@ -1012,4 +1012,5 @@
     <string name="exception_install_non_adb_unsupported_user">此实验后端仅支持当前用户。请取消自定义其他目标用户和所有用户安装，或关闭 Shizuku 非 ADB 安装。</string>
     <string name="network_load_app_icon">加载应用图标</string>
     <string name="network_load_app_icon_desc">可能降低网络快速分析的速度。</string>
+    <string name="lab_shizuku_non_adb_install_confirmation">开启后，安装者将固定为本应用包名（%1$s）。此方式可能绕过部分定制 ROM 对 shell 安装应用的拦截。</string>
 </resources>

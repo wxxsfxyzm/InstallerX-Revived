@@ -1032,4 +1032,5 @@
     <string name="exception_install_non_adb_unsupported_user">This experimental backend only supports the current user. Disable custom target users and installation for all users, or turn off Shizuku non-ADB installation.</string>
     <string name="network_load_app_icon">Load app icon</string>
     <string name="network_load_app_icon_desc">May slow down fast network analysis.</string>
+    <string name="lab_shizuku_non_adb_install_confirmation">When enabled, the installer package is always %1$s. This may bypass shell installation restrictions on some custom ROMs.</string>
 </resources>
