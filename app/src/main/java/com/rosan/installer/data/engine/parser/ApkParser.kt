@@ -397,7 +397,6 @@ class ApkParser(
         var installLocation: Int? = null
         var label: String? = null
         var icon: Drawable? = null
-        var roundIcon: Drawable? = null
         var minSdk: String? = null
         var targetSdk: String? = null
         val permissions = mutableListOf<String>()
@@ -482,17 +481,24 @@ class ApkParser(
                                     manifestParser.getAndroidAttributeResourceValue("label", android.R.attr.label),
                                     manifestParser.getAndroidAttributeValue("label", android.R.attr.label),
                                 )
-                                icon = resolveDrawable(
-                                    resources,
-                                    theme,
-                                    manifestParser.getAndroidAttributeResourceValue("icon", android.R.attr.icon),
-                                    "icon",
-                                )
-                                roundIcon = resolveDrawable(
-                                    resources,
-                                    theme,
-                                    manifestParser.getAndroidAttributeResourceValue("roundIcon", android.R.attr.roundIcon),
-                                    "roundIcon",
+                                icon = resolveApkIcon(
+                                    data = data,
+                                    loadPrimaryIcon = {
+                                        resolveDrawable(
+                                            resources,
+                                            theme,
+                                            manifestParser.getAndroidAttributeResourceValue("icon", android.R.attr.icon),
+                                            "icon",
+                                        )
+                                    },
+                                    loadRoundIcon = {
+                                        resolveDrawable(
+                                            resources,
+                                            theme,
+                                            manifestParser.getAndroidAttributeResourceValue("roundIcon", android.R.attr.roundIcon),
+                                            "roundIcon",
+                                        )
+                                    },
                                 )
 
                                 // Extract description for Xposed fallback
@@ -590,7 +596,7 @@ class ApkParser(
                 versionCode = versionCode,
                 versionName = versionName,
                 label = label,
-                icon = icon ?: roundIcon,
+                icon = icon,
                 targetSdk = targetSdk,
                 minSdk = minSdk,
                 minOsdkVersion = minOsdkVersion,
@@ -717,6 +723,12 @@ class ApkParser(
             ?: apkArchs.firstOrNull { it == Architecture.X86 }
             ?: apkArchs.firstOrNull()
     }
+}
+
+/** Keep icon resource reads lazy so remote analysis can skip both drawable variants. */
+internal fun <T> resolveApkIcon(data: DataEntity, loadPrimaryIcon: () -> T?, loadRoundIcon: () -> T?): T? {
+    if (data is DataEntity.FileDescriptorEntity && !data.preInstallIconAnalysis) return null
+    return loadPrimaryIcon() ?: loadRoundIcon()
 }
 
 private fun DataEntity.FileEntity.apkLogContext(): String = buildString {

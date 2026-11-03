@@ -44,6 +44,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettin
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixGithubUpdateChannelSelectionDialog
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
@@ -209,6 +210,16 @@ fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koi
                                 }
                             },
                         )
+                        if (uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.network_load_app_icon),
+                                description = stringResource(R.string.network_load_app_icon_desc),
+                                checked = uiState.networkLoadAppIcon,
+                                onCheckedChange = {
+                                    viewModel.dispatch(NetworkSettingsAction.ChangeLoadAppIcon(it))
+                                },
+                            )
+                        }
                         val allowSecureString = stringResource(R.string.lab_http_profile_secure)
                         val allowLocalString = stringResource(R.string.lab_http_profile_local)
                         val allowAllString = stringResource(R.string.lab_http_profile_all)

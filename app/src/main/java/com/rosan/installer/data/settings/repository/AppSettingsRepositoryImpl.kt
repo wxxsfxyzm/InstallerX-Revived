@@ -129,6 +129,7 @@ class AppSettingsRepositoryImpl(
             ),
             networkSourceModeWarningAcknowledged =
                 prefs[AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED] ?: false,
+            networkLoadAppIcon = prefs[AppDataStore.NETWORK_LOAD_APP_ICON] ?: false,
             // Updater
             allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
@@ -247,6 +248,8 @@ class AppSettingsRepositoryImpl(
 
         BooleanSetting.NetworkSourceModeWarningAcknowledged ->
             AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED
+
+        BooleanSetting.NetworkLoadAppIcon -> AppDataStore.NETWORK_LOAD_APP_ICON
 
         BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
 

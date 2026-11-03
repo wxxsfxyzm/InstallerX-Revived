@@ -59,6 +59,7 @@ data class AppPreferences(
     // Network Settings
     val networkSourceMode: NetworkSourceMode,
     val networkSourceModeWarningAcknowledged: Boolean,
+    val networkLoadAppIcon: Boolean,
     val allowInternetAccess: Boolean,
     val githubUpdateChannel: GithubUpdateChannel,
     val customGithubProxyUrl: String,

@@ -62,6 +62,7 @@ import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
+import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
@@ -229,6 +230,19 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
                                     }
                                 },
                             )
+                        }
+                        if (uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                            item {
+                                SwitchWidget(
+                                    icon = AppIcons.LoadAppIcon,
+                                    title = stringResource(R.string.network_load_app_icon),
+                                    description = stringResource(R.string.network_load_app_icon_desc),
+                                    checked = uiState.networkLoadAppIcon,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(NetworkSettingsAction.ChangeLoadAppIcon(it))
+                                    },
+                                )
+                            }
                         }
                         item {
                             NetworkHttpProfileWidget(

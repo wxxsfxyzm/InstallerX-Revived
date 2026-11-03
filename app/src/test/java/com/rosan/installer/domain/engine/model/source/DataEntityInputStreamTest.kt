@@ -53,6 +53,7 @@ class DataEntityInputStreamTest {
                 descriptorFactory = { error("descriptor is unused") },
                 preInstallSignatureAnalysis = false,
                 preInstallIdentityAnalysis = false,
+                preInstallIconAnalysis = false,
                 analysisMaterializationPolicy =
                     AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
                 analysisMaterializationKey = materializationKey,
@@ -61,6 +62,7 @@ class DataEntityInputStreamTest {
             val subrange = entity.subrange(relativeOffset = 0L, subrangeLength = 1L)
             assertFalse(subrange.preInstallSignatureAnalysis)
             assertFalse(subrange.preInstallIdentityAnalysis)
+            assertFalse(subrange.preInstallIconAnalysis)
             assertEquals(
                 AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
                 subrange.analysisMaterializationPolicy,

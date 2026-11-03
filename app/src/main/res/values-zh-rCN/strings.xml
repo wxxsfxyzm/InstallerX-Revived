@@ -1010,4 +1010,6 @@
     <string name="lab_shizuku_non_adb_install">Shizuku 非 ADB 安装后端</string>
     <string name="lab_shizuku_non_adb_install_desc">尝试绕过 ROM 的 ADB 安装限制。需要 Shizuku，仅支持当前用户。</string>
     <string name="exception_install_non_adb_unsupported_user">此实验后端仅支持当前用户。请取消自定义其他目标用户和所有用户安装，或关闭 Shizuku 非 ADB 安装。</string>
+    <string name="network_load_app_icon">加载应用图标</string>
+    <string name="network_load_app_icon_desc">可能降低网络快速分析的速度。</string>
 </resources>

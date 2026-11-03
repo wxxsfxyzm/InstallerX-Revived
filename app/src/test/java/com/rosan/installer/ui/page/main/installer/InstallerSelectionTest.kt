@@ -612,6 +612,7 @@ class InstallerSelectionTest {
             uninstallFlags = 0,
             networkSourceMode = com.rosan.installer.domain.settings.model.config.NetworkSourceMode.entries.first(),
             networkSourceModeWarningAcknowledged = false,
+            networkLoadAppIcon = false,
             allowInternetAccess = false,
             githubUpdateChannel = com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel.entries.first(),
             customGithubProxyUrl = "",

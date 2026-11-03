@@ -55,6 +55,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         val preInstallSignatureAnalysis: Boolean = true,
         val preInstallSigningBlockAnalysis: Boolean = false,
         val preInstallIdentityAnalysis: Boolean = true,
+        val preInstallIconAnalysis: Boolean = true,
         val analysisMaterializationPolicy: AnalysisMaterializationPolicy =
             AnalysisMaterializationPolicy.TEMPORARY_CACHE,
         val analysisMaterializationKey: AnalysisMaterializationKey? = null,
@@ -117,6 +118,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 preInstallSignatureAnalysis = parent.preInstallSignatureAnalysis,
                 preInstallSigningBlockAnalysis = parent.preInstallSigningBlockAnalysis,
                 preInstallIdentityAnalysis = parent.preInstallIdentityAnalysis,
+                preInstallIconAnalysis = parent.preInstallIconAnalysis,
                 analysisMaterializationPolicy = parent.analysisMaterializationPolicy,
                 analysisMaterializationKey = parent.analysisMaterializationKey,
                 zipEntryMetadata = zipEntryMetadata,

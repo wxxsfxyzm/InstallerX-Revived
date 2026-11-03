@@ -37,6 +37,7 @@ enum class IntSetting {
 enum class BooleanSetting {
     AllowInternetAccess,
     NetworkSourceModeWarningAcknowledged,
+    NetworkLoadAppIcon,
     UiUseBlur,
     ThemeUseAmoled,
     ThemeUseDynamicColor,

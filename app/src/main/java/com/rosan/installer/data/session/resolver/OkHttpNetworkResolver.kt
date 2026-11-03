@@ -147,6 +147,7 @@ class OkHttpNetworkResolver(
                             blockSize = RANGE_CACHE_BLOCK_SIZE,
                         ),
                         inspectSigningBlock = true,
+                        loadAppIcon = preferences.networkLoadAppIcon,
                         analysisMaterializationPolicy = mode.streamingAnalysisMaterializationPolicy(),
                     )
                     probeRemotePackage(remoteEntity)
@@ -209,6 +210,7 @@ class OkHttpNetworkResolver(
         identity: RemoteSourceIdentity,
         rangeCacheMaxBytes: Int,
         inspectSigningBlock: Boolean,
+        loadAppIcon: Boolean,
         analysisMaterializationPolicy: AnalysisMaterializationPolicy,
     ): DataEntity.FileDescriptorEntity {
         val contentLength = identity.contentLength
@@ -222,7 +224,7 @@ class OkHttpNetworkResolver(
         Timber.d(
             "Remote range source configured: size=$contentLength, " +
                 "cacheMaxBytes=$rangeCacheMaxBytes, analysisBlockSize=$RANGE_CACHE_BLOCK_SIZE, " +
-                "signatureVerification=PackageInstaller",
+                "signatureVerification=PackageInstaller, loadAppIcon=$loadAppIcon",
         )
         return DataEntity.FileDescriptorEntity(
             path = identity.url.toString(),
@@ -237,6 +239,7 @@ class OkHttpNetworkResolver(
             preInstallSignatureAnalysis = false,
             preInstallSigningBlockAnalysis = inspectSigningBlock,
             preInstallIdentityAnalysis = false,
+            preInstallIconAnalysis = loadAppIcon,
             analysisMaterializationPolicy = analysisMaterializationPolicy,
             analysisMaterializationKey = if (
                 analysisMaterializationPolicy ==
