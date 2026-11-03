@@ -8,6 +8,7 @@ import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.data.engine.parser.openContainerMetadata
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
 import com.rosan.installer.data.engine.parser.resolveApkIcon
+import com.rosan.installer.data.engine.parser.shouldLoadApkIcon
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
@@ -107,8 +108,10 @@ class XApkStrategy(
                         var resolvedIcon = icon
                         var signatureInfo: AppSignatureInfo? = null
 
-                        // Fallback: If label is missing from JSON, parse the Base APK fully to extract it
-                        if (resolvedLabel.isNullOrBlank() || data.networkAppNameSource == NetworkAppNameSource.ApkResources) {
+                        // The JSON label does not replace resources needed for a missing container icon.
+                        if (resolvedLabel.isNullOrBlank() || data.networkAppNameSource == NetworkAppNameSource.ApkResources ||
+                            (resolvedIcon == null && data.shouldLoadApkIcon())
+                        ) {
                             val parsedEntities = apkParser.parseArchiveEntryFull(archive, entry, data, baseExtra)
                             val parsedBase = parsedEntities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
 

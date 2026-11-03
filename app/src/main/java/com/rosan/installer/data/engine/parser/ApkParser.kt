@@ -193,7 +193,7 @@ class ApkParser(
                     "bytes=${tempFile.length()}, elapsedMs=${extractionStartedAt.elapsedMillis()}",
             )
 
-            val tempData = DataEntity.FileEntity(tempFile.absolutePath).apply {
+            val tempData = DataEntity.FileEntity(tempFile.absolutePath, networkLoadAppIcon = parentData.networkLoadAppIcon).apply {
                 source = entryData
             }
 
@@ -811,8 +811,14 @@ class ApkParser(
 
 /** Keep icon resource reads lazy so remote analysis can skip both drawable variants. */
 internal fun <T> resolveApkIcon(data: DataEntity, loadPrimaryIcon: () -> T?, loadRoundIcon: () -> T?): T? {
-    if (data is DataEntity.FileDescriptorEntity && !data.preInstallIconAnalysis) return null
+    if (!data.shouldLoadApkIcon()) return null
     return loadPrimaryIcon() ?: loadRoundIcon()
+}
+
+internal fun DataEntity.shouldLoadApkIcon(): Boolean = when (this) {
+    is DataEntity.FileDescriptorEntity -> preInstallIconAnalysis
+    is DataEntity.FileEntity -> networkLoadAppIcon ?: true
+    else -> true
 }
 
 private fun DataEntity.FileEntity.apkLogContext(): String = buildString {

@@ -204,13 +204,13 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
                                 },
                             )
                         }
-                        item(animatedVisibility = uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                        item(animatedVisibility = uiState.networkSourceMode == NetworkSourceMode.Automatic) {
                             NetworkAppNameSourceWidget(
                                 source = uiState.networkAppNameSource,
                                 onChange = { viewModel.dispatch(NetworkSettingsAction.ChangeAppNameSource(it)) },
                             )
                         }
-                        item(animatedVisibility = uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                        item(animatedVisibility = uiState.networkSourceMode == NetworkSourceMode.Automatic) {
                             SwitchWidget(
                                 icon = AppIcons.LoadAppIcon,
                                 title = stringResource(R.string.network_load_app_icon),
@@ -266,13 +266,13 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
 private fun NetworkSourceModeWidget(currentMode: NetworkSourceMode, onModeChange: (NetworkSourceMode) -> Unit) {
     val modes = linkedMapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache),
-        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage),
+        NetworkSourceMode.Automatic to stringResource(R.string.config_network_source_smart),
+        NetworkSourceMode.StreamOnly to stringResource(R.string.config_network_source_low_storage),
     )
     val descriptions = mapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache_desc),
-        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart_desc),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc),
+        NetworkSourceMode.Automatic to stringResource(R.string.config_network_source_smart_desc),
+        NetworkSourceMode.StreamOnly to stringResource(R.string.config_network_source_low_storage_desc),
     )
 
     DropDownMenuWidget(

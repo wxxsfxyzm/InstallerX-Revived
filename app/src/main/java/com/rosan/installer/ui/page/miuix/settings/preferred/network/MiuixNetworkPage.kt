@@ -211,7 +211,7 @@ fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koi
                                 }
                             },
                         )
-                        if (uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                        if (uiState.networkSourceMode == NetworkSourceMode.Automatic) {
                             MiuixNetworkAppNameSourcePreference(
                                 source = uiState.networkAppNameSource,
                                 onChange = { viewModel.dispatch(NetworkSettingsAction.ChangeAppNameSource(it)) },
@@ -339,13 +339,13 @@ private fun MiuixNetworkAppNameSourcePreference(source: NetworkAppNameSource, on
 private fun MiuixNetworkSourceModePreference(currentMode: NetworkSourceMode, onModeChange: (NetworkSourceMode) -> Unit) {
     val modes = linkedMapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache),
-        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage),
+        NetworkSourceMode.Automatic to stringResource(R.string.config_network_source_smart),
+        NetworkSourceMode.StreamOnly to stringResource(R.string.config_network_source_low_storage),
     )
     val descriptions = mapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache_desc),
-        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart_desc),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc),
+        NetworkSourceMode.Automatic to stringResource(R.string.config_network_source_smart_desc),
+        NetworkSourceMode.StreamOnly to stringResource(R.string.config_network_source_low_storage_desc),
     )
     val entries = modes.values.map { DropdownItem(title = it) }
 

@@ -65,6 +65,14 @@ class ApkIconLoadingTest {
         assertNull(resolveApkIcon<String>(view, { error("Unexpected primary read") }, { error("Unexpected round read") }))
     }
 
+    @Test
+    fun `downloaded network sources preserve icon choice`() {
+        val disabled = DataEntity.FileEntity("cached.apk", networkLoadAppIcon = false)
+        assertNull(resolveApkIcon<String>(disabled, { error("Disabled primary read") }, { error("Disabled round read") }))
+        val enabled = DataEntity.FileEntity("cached.apk", networkLoadAppIcon = true)
+        assertEquals("primary", resolveApkIcon(enabled, { "primary" }, { error("Unnecessary round read") }))
+    }
+
     private fun descriptor(loadIcon: Boolean = true) = DataEntity.FileDescriptorEntity(
         path = "https://example.com/app.apk",
         startOffset = 0,

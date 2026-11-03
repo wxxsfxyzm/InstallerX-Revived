@@ -52,6 +52,7 @@ class AnalysisSourceMaterializerTest {
             assertEquals("https://example.com/app.apk", retained.getSourceTop().toString())
             assertEquals(NetworkAppNameSource.ServerFilename, retained.networkAppNameSource)
             assertEquals("Server Name.apk", retained.networkFileName)
+            assertEquals(false, retained.networkLoadAppIcon)
             assertContentEquals(
                 installBytes,
                 requireNotNull(retained.getInstallInputStream()).use { it.readBytes() },
@@ -143,5 +144,7 @@ class AnalysisSourceMaterializerTest {
         analysisMaterializationKey = key,
         networkAppNameSource = NetworkAppNameSource.ServerFilename,
         networkFileName = "Server Name.apk",
+        isNetworkSource = true,
+        preInstallIconAnalysis = false,
     )
 }

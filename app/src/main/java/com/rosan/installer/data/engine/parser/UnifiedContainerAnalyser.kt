@@ -8,14 +8,18 @@ import com.rosan.installer.data.engine.parser.strategy.ModuleStrategy
 import com.rosan.installer.data.engine.parser.strategy.MultiApkZipStrategy
 import com.rosan.installer.data.engine.parser.strategy.SingleApkStrategy
 import com.rosan.installer.data.engine.parser.strategy.XApkStrategy
+import com.rosan.installer.data.engine.signature.LightweightApkSignatureReader
 import com.rosan.installer.domain.engine.exception.DescriptorAnalysisUnsupportedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
+import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.io.IOException
+import java.util.zip.ZipEntry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -32,6 +36,7 @@ class UnifiedContainerAnalyser(
     multiApkZipStrategy: MultiApkZipStrategy,
     moduleStrategy: ModuleStrategy,
     private val unifiedZipFileProvider: UnifiedZipFileProvider,
+    private val lightweightApkSignatureReader: LightweightApkSignatureReader,
 ) {
 
     private val strategies = mapOf(
@@ -47,7 +52,7 @@ class UnifiedContainerAnalyser(
 
     suspend fun analyze(config: ConfigModel, data: DataEntity, type: DataType, extra: AnalyseExtraEntity): List<AppEntity> = withContext(Dispatchers.IO) {
         val strategy = strategies[type] ?: return@withContext emptyList()
-        requireStreamingContainerAnalysis(data, type, extra)
+        val analysisExtra = prepareStreamingContainerAnalysis(data, type, extra)
 
         val entities = if (data is DataEntity.FileEntity) {
             val zipFile = try {
@@ -60,10 +65,13 @@ class UnifiedContainerAnalyser(
                 Timber.w(e, "ZIP view unavailable for APK analysis, parsing without it: ${data.path}")
                 null
             }
-            zipFile?.use { strategy.analyze(config, data, it, extra) }
-                ?: strategy.analyze(config, data, null, extra)
+            zipFile?.use { archive ->
+                val parsed = strategy.analyze(config, data, archive, analysisExtra)
+                readStreamingBaseSignatures(parsed, data, type, archive, extra)
+            }
+                ?: strategy.analyze(config, data, null, analysisExtra)
         } else {
-            strategy.analyze(config, data, null, extra)
+            strategy.analyze(config, data, null, analysisExtra)
         }
         applyNetworkAppName(entities, data)
     }
@@ -77,9 +85,55 @@ class UnifiedContainerAnalyser(
         extra: AnalyseExtraEntity,
     ): List<AppEntity> = withContext(Dispatchers.IO) {
         val strategy = strategies[type] ?: return@withContext emptyList()
-        requireStreamingContainerAnalysis(data, type, extra)
-        applyNetworkAppName(strategy.analyze(config, data, archive, extra), data)
+        val analysisExtra = prepareStreamingContainerAnalysis(data, type, extra)
+        val parsed = strategy.analyze(config, data, archive, analysisExtra)
+        applyNetworkAppName(readStreamingBaseSignatures(parsed, data, type, archive, extra), data)
     }
+
+    private fun readStreamingBaseSignatures(
+        entities: List<AppEntity>,
+        data: DataEntity,
+        type: DataType,
+        archive: UnifiedZipFile?,
+        extra: AnalyseExtraEntity,
+    ): List<AppEntity> {
+        if (archive == null || data !is DataEntity.FileDescriptorEntity || !data.isNetworkSource ||
+            type == DataType.APK || !extra.checkAppSignature
+        ) {
+            return entities
+        }
+        return entities.map { entity ->
+            if (entity !is AppEntity.BaseEntity) return@map entity
+            val signature = readStreamingBaseSignature(archive, entity.data) {
+                lightweightApkSignatureReader.read(it, checkSourceStamp = extra.checkSourceStamp)
+            }
+            if (signature == null) entity else entity.copy(signatureInfo = signature, signatureHash = null)
+        }
+    }
+}
+
+internal fun readStreamingBaseSignature(
+    archive: UnifiedZipFile,
+    data: DataEntity,
+    readSignature: (DataEntity.FileDescriptorEntity) -> AppSignatureInfo,
+): AppSignatureInfo? = try {
+    val descriptor = when (data) {
+        is DataEntity.FileDescriptorEntity -> data
+
+        is DataEntity.ZipFileEntity -> {
+            val entry = archive.getEntry(data.name)
+            if (entry?.compressionMethod == ZipEntry.STORED) archive.toDataEntity(entry, data.parent) as? DataEntity.FileDescriptorEntity else null
+        }
+
+        else -> null
+    }
+    descriptor?.takeIf { it.isNetworkSource }?.let(readSignature)
+} catch (error: CancellationException) {
+    throw error
+} catch (error: Exception) {
+    // Signature declarations are optional; never download the archive to obtain them.
+    Timber.w(error, "Unable to read streamed base APK signing block")
+    null
 }
 
 internal fun applyNetworkAppName(entities: List<AppEntity>, source: DataEntity): List<AppEntity> {
@@ -89,13 +143,13 @@ internal fun applyNetworkAppName(entities: List<AppEntity>, source: DataEntity):
     return entities.map { if (it is AppEntity.BaseEntity) it.copy(label = name) else it }
 }
 
-internal fun requireStreamingContainerAnalysis(data: DataEntity, type: DataType, extra: AnalyseExtraEntity) {
-    if (data !is DataEntity.FileDescriptorEntity || !data.isNetworkSource || type == DataType.APK) return
+internal fun prepareStreamingContainerAnalysis(data: DataEntity, type: DataType, extra: AnalyseExtraEntity): AnalyseExtraEntity {
+    if (data !is DataEntity.FileDescriptorEntity || !data.isNetworkSource || type == DataType.APK) return extra
     val splitArchive = type == DataType.APKS || type == DataType.APKM || type == DataType.XAPK
-    if (!splitArchive || extra.shouldCheckAppSignatures(type)) {
-        throw DescriptorAnalysisUnsupportedException(
-            data,
-            IOException(if (splitArchive) "Full split-package signature verification requires caching" else "Unsupported streaming container: $type"),
-        )
+    if (!splitArchive) {
+        throw DescriptorAnalysisUnsupportedException(data, IOException("Unsupported streaming container: $type"))
     }
+    // Do not materialize a remote archive just for pre-install signature verification.
+    // Android verifies every selected APK when the installation session is committed.
+    return extra.copy(checkAppSignature = false, checkSplitPackageSignatures = false)
 }

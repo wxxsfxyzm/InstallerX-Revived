@@ -8,6 +8,7 @@ import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
 
 class StreamingContainerPolicyTest {
@@ -15,21 +16,21 @@ class StreamingContainerPolicyTest {
     private val extra = AnalyseExtraEntity(cacheDirectory = "unused")
 
     @Test
-    fun `default split analysis is allowed but full signature checks request caching`() {
+    fun `streaming splits skip full signature verification even when both settings are enabled`() {
         for (type in listOf(DataType.APKS, DataType.APKM, DataType.XAPK)) {
-            requireStreamingContainerAnalysis(source, type, extra)
-            val failure = assertFailsWith<DescriptorAnalysisUnsupportedException> {
-                requireStreamingContainerAnalysis(source, type, extra.copy(checkSplitPackageSignatures = true))
-            }
-            assertSame(source, failure.source)
-            requireStreamingContainerAnalysis(source, type, extra.copy(checkAppSignature = false, checkSplitPackageSignatures = true))
+            val requested = extra.copy(dataType = type, checkSplitPackageSignatures = true)
+            val effective = prepareStreamingContainerAnalysis(source, type, requested)
+            assertFalse(effective.checkAppSignature)
+            assertFalse(effective.checkSplitPackageSignatures)
+            assertFalse(effective.shouldCheckAppSignatures())
+            assertFalse(prepareStreamingContainerAnalysis(source, type, extra).checkAppSignature)
         }
     }
 
     @Test
     fun `batch and module archives do not silently enter split streaming`() {
         for (type in listOf(DataType.MULTI_APK_ZIP, DataType.MODULE_ZIP, DataType.MIXED_MODULE_APK, DataType.MIXED_MODULE_ZIP)) {
-            assertFailsWith<DescriptorAnalysisUnsupportedException> { requireStreamingContainerAnalysis(source, type, extra) }
+            assertFailsWith<DescriptorAnalysisUnsupportedException> { prepareStreamingContainerAnalysis(source, type, extra) }
         }
     }
 
@@ -37,10 +38,10 @@ class StreamingContainerPolicyTest {
     fun `local archives and the existing single APK path retain their policies`() {
         val verify = extra.copy(checkSplitPackageSignatures = true)
         for (type in DataType.entries) {
-            requireStreamingContainerAnalysis(DataEntity.FileEntity("local.zip"), type, verify)
-            requireStreamingContainerAnalysis(descriptor(network = false), type, verify)
+            assertSame(verify, prepareStreamingContainerAnalysis(DataEntity.FileEntity("local.zip"), type, verify))
+            assertSame(verify, prepareStreamingContainerAnalysis(descriptor(network = false), type, verify))
         }
-        requireStreamingContainerAnalysis(source, DataType.APK, verify)
+        assertSame(verify, prepareStreamingContainerAnalysis(source, DataType.APK, verify))
     }
 
     private fun descriptor(network: Boolean) = DataEntity.FileDescriptorEntity(

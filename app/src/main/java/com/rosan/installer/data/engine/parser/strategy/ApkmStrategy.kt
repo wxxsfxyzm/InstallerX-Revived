@@ -8,6 +8,7 @@ import com.rosan.installer.data.engine.parser.UnifiedZipFile
 import com.rosan.installer.data.engine.parser.openContainerMetadata
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
 import com.rosan.installer.data.engine.parser.resolveApkIcon
+import com.rosan.installer.data.engine.parser.shouldLoadApkIcon
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
@@ -94,7 +95,9 @@ class ApkmStrategy(
                                 },
                             )
                         } else {
-                            val parsedBase = if (data.networkAppNameSource == NetworkAppNameSource.ApkResources) {
+                            val parsedBase = if (data.networkAppNameSource == NetworkAppNameSource.ApkResources ||
+                                (icon == null && data.shouldLoadApkIcon())
+                            ) {
                                 apkParser.parseArchiveEntryFull(archive, entry, data, baseExtra)
                                     .filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
                             } else {

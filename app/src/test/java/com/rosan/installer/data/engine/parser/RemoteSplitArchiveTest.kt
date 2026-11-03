@@ -2,7 +2,11 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.data.engine.parser
 
+import com.rosan.installer.data.engine.signature.ApkSourceStampReader
+import com.rosan.installer.data.engine.signature.CertificateFormatter
+import com.rosan.installer.data.engine.signature.LightweightApkSignatureReader
 import com.rosan.installer.domain.engine.exception.DescriptorAnalysisUnsupportedException
+import com.rosan.installer.domain.engine.model.packageinfo.SignatureVerificationStatus
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import java.io.ByteArrayOutputStream
@@ -22,6 +26,8 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class RemoteSplitArchiveTest {
@@ -60,6 +66,19 @@ class RemoteSplitArchiveTest {
                         requireNotNull(baseData.getInputStream()).use { readStreamingApkManifest(it) }
                     }
                     assertContentEquals(manifest, actual)
+                    val baseEntry = requireNotNull(archive.getEntry("base.apk"))
+                    val lazyBase = archive.toDataEntity(baseEntry, source, deferLocalHeader = true)
+                    val readsBeforeSigningBlock = reads.get()
+                    val formatter = CertificateFormatter()
+                    val reader = LightweightApkSignatureReader(formatter, ApkSourceStampReader(CommonsZipFileProvider(), formatter))
+                    val signature = readStreamingBaseSignature(archive, lazyBase) { reader.read(it, checkSourceStamp = false) }
+                    if (method == ZipEntry.STORED) {
+                        assertEquals(SignatureVerificationStatus.SIGNING_BLOCK_ONLY, assertNotNull(signature).verificationStatus)
+                        assertEquals(false, signature.verified)
+                    } else {
+                        assertNull(signature)
+                        assertEquals(readsBeforeSigningBlock, reads.get(), "Compressed bases must not be read for signing information")
+                    }
                 }
                 assertTrue(reads.get() < backing.length() / 4, "Analysis read too much: ${reads.get()} of ${backing.length()}")
                 // The archive's metadata handle is now closed. Installation must reopen each original range.

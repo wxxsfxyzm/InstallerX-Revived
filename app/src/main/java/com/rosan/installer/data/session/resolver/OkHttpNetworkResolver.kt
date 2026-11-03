@@ -149,8 +149,8 @@ class OkHttpNetworkResolver(
                             blockSize = RANGE_CACHE_BLOCK_SIZE,
                         ),
                         inspectSigningBlock = true,
-                        loadAppIcon = preferences.networkLoadAppIcon,
-                        appNameSource = preferences.networkAppNameSource,
+                        loadAppIcon = mode.shouldLoadAppIcon(preferences.networkLoadAppIcon),
+                        appNameSource = mode.resolveAppNameSource(preferences.networkAppNameSource),
                         fileName = preFlight.fileName,
                         analysisMaterializationPolicy = mode.streamingAnalysisMaterializationPolicy(),
                     )
@@ -160,7 +160,7 @@ class OkHttpNetworkResolver(
 
             when (mode.actionFor(probeResult)) {
                 RemotePackageAction.Stream -> {
-                    Timber.i("Using low-storage HTTP range source. Size: $contentLength")
+                    Timber.i("Using HTTP range source. Size: $contentLength")
                     return@withContext listOf(requireNotNull(remoteEntity))
                 }
 
@@ -168,7 +168,7 @@ class OkHttpNetworkResolver(
                     Timber.i("Remote source probe selected the full-download path: $probeResult")
                 }
 
-                RemotePackageAction.Reject -> throw probeResult.toLowStorageException()
+                RemotePackageAction.Reject -> throw probeResult.toStreamingException()
             }
         }
 
@@ -202,6 +202,7 @@ class OkHttpNetworkResolver(
                     path = tempFile.absolutePath,
                     networkAppNameSource = preferences.networkAppNameSource.takeIf { mode != NetworkSourceMode.Cache },
                     networkFileName = preFlight.fileName,
+                    networkLoadAppIcon = mode.shouldLoadAppIcon(preferences.networkLoadAppIcon),
                 ).apply {
                     source = DataEntity.FileEntity(uri.toString())
                 },
@@ -279,7 +280,7 @@ class OkHttpNetworkResolver(
         RemotePackageProbeResult.ProbeFailed(error)
     }
 
-    private fun RemotePackageProbeResult.toLowStorageException(): ResolveException = when (this) {
+    private fun RemotePackageProbeResult.toStreamingException(): ResolveException = when (this) {
         is RemotePackageProbeResult.StreamingUnsupported -> when (reason) {
             StreamingUnsupportedReason.Platform -> ResolveException(
                 errorType = ResolveErrorType.LOW_STORAGE_UNSUPPORTED,

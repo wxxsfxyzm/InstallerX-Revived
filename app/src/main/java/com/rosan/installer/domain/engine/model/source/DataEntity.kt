@@ -40,6 +40,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         val path: String,
         val networkAppNameSource: NetworkAppNameSource? = null,
         val networkFileName: String? = null,
+        val networkLoadAppIcon: Boolean? = null,
     ) : DataEntity() {
         open fun openChannel(): SeekableByteChannel = FileChannel.open(File(path).toPath(), StandardOpenOption.READ)
 
@@ -69,7 +70,7 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         val analysisMaterializationKey: AnalysisMaterializationKey? = null,
         override val zipEntryMetadata: ZipEntryMetadata? = null,
         val archiveEntryName: String? = null,
-    ) : FileEntity(path, networkAppNameSource, networkFileName),
+    ) : FileEntity(path, networkAppNameSource, networkFileName, preInstallIconAnalysis.takeIf { isNetworkSource }),
         ZipEntryMetadataSource {
         init {
             require(startOffset >= 0L) { "startOffset must be non-negative" }

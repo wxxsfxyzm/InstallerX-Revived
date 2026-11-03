@@ -2,6 +2,8 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.model.config
 
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
+
 /**
  * Define Toast Modes used by InstallerX
  */
@@ -58,13 +60,27 @@ enum class DexoptMode(val value: String) {
 
 enum class NetworkSourceMode(val value: String) {
     Cache("cache"),
-    Smart("smart"),
-    LowStorage("low_storage"),
+
+    // Preserve stored values so existing settings keep their selected mode.
+    Automatic("smart"),
+    StreamOnly("low_storage"),
     ;
 
     fun shouldTryRemoteSource(supportsRange: Boolean, contentLength: Long, platformSupported: Boolean): Boolean = this != Cache && supportsRange && contentLength > 0 && platformSupported
 
-    fun requiresRemoteSource(supportsRange: Boolean, contentLength: Long, platformSupported: Boolean): Boolean = this == LowStorage && !shouldTryRemoteSource(supportsRange, contentLength, platformSupported)
+    fun requiresRemoteSource(supportsRange: Boolean, contentLength: Long, platformSupported: Boolean): Boolean = this == StreamOnly && !shouldTryRemoteSource(supportsRange, contentLength, platformSupported)
+
+    fun resolveAppNameSource(configured: NetworkAppNameSource): NetworkAppNameSource = when (this) {
+        Cache -> NetworkAppNameSource.ApkResources
+        Automatic -> configured
+        StreamOnly -> NetworkAppNameSource.ServerFilename
+    }
+
+    fun shouldLoadAppIcon(configured: Boolean): Boolean = when (this) {
+        Cache -> true
+        Automatic -> configured
+        StreamOnly -> false
+    }
 
     companion object {
         fun fromValue(value: String): NetworkSourceMode = entries.find { it.value == value } ?: Cache

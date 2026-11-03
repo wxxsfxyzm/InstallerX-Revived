@@ -42,15 +42,15 @@ internal fun classifyRemotePackageEntries(entries: Sequence<String>): RemotePack
 }
 
 internal fun NetworkSourceMode.streamingAnalysisMaterializationPolicy(): AnalysisMaterializationPolicy = when (this) {
-    NetworkSourceMode.Smart -> AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
-    NetworkSourceMode.LowStorage -> AnalysisMaterializationPolicy.DISALLOW
+    NetworkSourceMode.Automatic -> AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
+    NetworkSourceMode.StreamOnly -> AnalysisMaterializationPolicy.DISALLOW
     NetworkSourceMode.Cache -> error("Cache mode does not create remote sources")
 }
 
 internal fun NetworkSourceMode.actionFor(result: RemotePackageProbeResult): RemotePackageAction = when (this) {
     NetworkSourceMode.Cache -> RemotePackageAction.FullDownload
 
-    NetworkSourceMode.Smart -> when (result) {
+    NetworkSourceMode.Automatic -> when (result) {
         RemotePackageProbeResult.SingleApk,
         RemotePackageProbeResult.SplitArchive,
         -> RemotePackageAction.Stream
@@ -61,7 +61,7 @@ internal fun NetworkSourceMode.actionFor(result: RemotePackageProbeResult): Remo
         -> RemotePackageAction.FullDownload
     }
 
-    NetworkSourceMode.LowStorage -> when (result) {
+    NetworkSourceMode.StreamOnly -> when (result) {
         RemotePackageProbeResult.SingleApk,
         RemotePackageProbeResult.SplitArchive,
         -> RemotePackageAction.Stream
