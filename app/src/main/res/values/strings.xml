@@ -1027,4 +1027,7 @@
     <string name="unarchive_action_clear_storage">Clear storage</string>
     <string name="unarchive_action_app_settings">App settings</string>
     <string name="installer_result_pending">Another installation is already in progress. Wait for it to finish, then try again.</string>
+    <string name="lab_shizuku_non_adb_install">Shizuku non-ADB installation backend</string>
+    <string name="lab_shizuku_non_adb_install_desc">Try bypassing ROM restrictions on ADB installs. Requires Shizuku; current user only.</string>
+    <string name="exception_install_non_adb_unsupported_user">This experimental backend only supports the current user. Disable custom target users and installation for all users, or turn off Shizuku non-ADB installation.</string>
 </resources>

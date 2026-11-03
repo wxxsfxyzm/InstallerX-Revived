@@ -253,6 +253,14 @@ fun MiuixLabPage(useBlur: Boolean, viewModel: LabSettingsViewModel = koinViewMod
                         .padding(bottom = 12.dp),
                 ) {
                     MiuixSwitchWidget(
+                        title = stringResource(R.string.lab_shizuku_non_adb_install),
+                        description = stringResource(R.string.lab_shizuku_non_adb_install_desc),
+                        checked = uiState.labShizukuNonAdbInstall,
+                        onCheckedChange = {
+                            viewModel.dispatch(LabSettingsAction.LabChangeShizukuNonAdbInstall(it))
+                        },
+                    )
+                    MiuixSwitchWidget(
                         title = stringResource(R.string.lab_enable_abi_override),
                         description = stringResource(R.string.lab_enable_abi_override_desc),
                         checked = uiState.labEnableAbiOverride,

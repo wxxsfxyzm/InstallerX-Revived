@@ -227,6 +227,17 @@ fun LabPage(useBlur: Boolean, viewModel: LabSettingsViewModel = koinViewModel())
                     item {
                         SwitchWidget(
                             icon = AppIcons.Authorizer,
+                            title = stringResource(R.string.lab_shizuku_non_adb_install),
+                            description = stringResource(R.string.lab_shizuku_non_adb_install_desc),
+                            checked = uiState.labShizukuNonAdbInstall,
+                            onCheckedChange = {
+                                viewModel.dispatch(LabSettingsAction.LabChangeShizukuNonAdbInstall(it))
+                            },
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = AppIcons.Authorizer,
                             title = stringResource(R.string.lab_enable_abi_override),
                             description = stringResource(R.string.lab_enable_abi_override_desc),
                             checked = uiState.labEnableAbiOverride,

@@ -147,6 +147,7 @@ class AppSettingsRepositoryImpl(
             labRespectPlatformInstallPolicy =
                 AppConfig.isRespectPlatformInstallPolicyAvailable &&
                     (prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false),
+            labShizukuNonAdbInstall = prefs[AppDataStore.LAB_SHIZUKU_NON_ADB_INSTALL] ?: false,
             labEnableAbiOverride = prefs[AppDataStore.LAB_ENABLE_ABI_OVERRIDE] ?: false,
             labTryDifferentArchitecture = prefs[AppDataStore.LAB_TRY_DIFFERENT_ARCHITECTURE] ?: false,
             enableFileLogging = prefs[AppDataStore.ENABLE_FILE_LOGGING] ?: true,
@@ -352,6 +353,8 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.LabInstallWithoutUserAction -> AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION
 
         BooleanSetting.LabRespectPlatformInstallPolicy -> AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY
+
+        BooleanSetting.LabShizukuNonAdbInstall -> AppDataStore.LAB_SHIZUKU_NON_ADB_INSTALL
 
         BooleanSetting.LabEnableAbiOverride -> AppDataStore.LAB_ENABLE_ABI_OVERRIDE
 

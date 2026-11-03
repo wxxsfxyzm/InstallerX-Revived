@@ -8,24 +8,32 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstallerHidden
 import androidx.core.content.IntentCompat
 import com.rosan.installer.data.engine.executor.appinstaller.LocalIntentReceiver
+import com.rosan.installer.data.engine.executor.appinstaller.awaitInstallResult
 import com.rosan.installer.domain.engine.exception.InstallException
 import com.rosan.installer.domain.engine.exception.UninstallException
 import com.rosan.installer.domain.engine.model.error.InstallErrorType
 import com.rosan.installer.domain.engine.model.error.UninstallErrorType
 
 object PackageManagerUtil {
-    suspend fun installResultVerify(context: Context, receiver: LocalIntentReceiver) {
-        val intent = receiver.getResult()
+    suspend fun installResultVerify(
+        context: Context,
+        receiver: LocalIntentReceiver,
+        onPendingUserAction: (suspend () -> Unit)? = null,
+    ) {
+        val intent = awaitInstallResult(
+            receive = receiver::getResult,
+            status = { it.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE) },
+        ) { pending ->
+            if (onPendingUserAction != null) {
+                onPendingUserAction()
+            } else {
+                val action = IntentCompat.getParcelableExtra(pending, Intent.EXTRA_INTENT, Intent::class.java)
+                    ?: throw InstallException(InstallErrorType.UNKNOWN, "Missing pending installation user action")
+                context.startActivity(action.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
+        }
         val status =
             intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
-        val action =
-            IntentCompat.getParcelableExtra(intent, Intent.EXTRA_INTENT, Intent::class.java)
-
-        if (status == PackageInstaller.STATUS_PENDING_USER_ACTION && action != null) {
-            context.startActivity(action.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            installResultVerify(context, receiver)
-            return
-        }
 
         if (status == PackageInstaller.STATUS_SUCCESS) return
 

@@ -626,6 +626,7 @@ class InstallerSelectionTest {
             labShowInstallInitiator = false,
             labInstallWithoutUserAction = false,
             labRespectPlatformInstallPolicy = false,
+            labShizukuNonAdbInstall = false,
             labEnableAbiOverride = false,
             labTryDifferentArchitecture = false,
             enableFileLogging = false,

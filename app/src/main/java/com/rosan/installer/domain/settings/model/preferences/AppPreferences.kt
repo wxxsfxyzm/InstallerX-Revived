@@ -74,6 +74,7 @@ data class AppPreferences(
     val labShowInstallInitiator: Boolean,
     val labInstallWithoutUserAction: Boolean,
     val labRespectPlatformInstallPolicy: Boolean,
+    val labShizukuNonAdbInstall: Boolean,
     val labEnableAbiOverride: Boolean,
     val labTryDifferentArchitecture: Boolean,
     val enableFileLogging: Boolean,
