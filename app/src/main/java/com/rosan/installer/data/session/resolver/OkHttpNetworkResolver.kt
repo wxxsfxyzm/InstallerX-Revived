@@ -22,6 +22,7 @@ import com.rosan.installer.domain.session.model.ResolveErrorType
 import com.rosan.installer.domain.session.repository.NetworkResolver
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.util.isZipMagicNumber
 import java.io.File
@@ -81,6 +82,7 @@ class OkHttpNetworkResolver(
         val supportsRange: Boolean,
         val isArchive: Boolean,
         val remoteIdentity: RemoteSourceIdentity? = null,
+        val fileName: String? = null,
     )
 
     private class RangeNotSupportedException(message: String) : IOException(message)
@@ -148,6 +150,8 @@ class OkHttpNetworkResolver(
                         ),
                         inspectSigningBlock = true,
                         loadAppIcon = preferences.networkLoadAppIcon,
+                        appNameSource = preferences.networkAppNameSource,
+                        fileName = preFlight.fileName,
                         analysisMaterializationPolicy = mode.streamingAnalysisMaterializationPolicy(),
                     )
                     probeRemotePackage(remoteEntity)
@@ -194,7 +198,11 @@ class OkHttpNetworkResolver(
             }
 
             return@withContext listOf(
-                DataEntity.FileEntity(tempFile.absolutePath).apply {
+                DataEntity.FileEntity(
+                    path = tempFile.absolutePath,
+                    networkAppNameSource = preferences.networkAppNameSource.takeIf { mode != NetworkSourceMode.Cache },
+                    networkFileName = preFlight.fileName,
+                ).apply {
                     source = DataEntity.FileEntity(uri.toString())
                 },
             )
@@ -211,6 +219,8 @@ class OkHttpNetworkResolver(
         rangeCacheMaxBytes: Int,
         inspectSigningBlock: Boolean,
         loadAppIcon: Boolean,
+        appNameSource: NetworkAppNameSource,
+        fileName: String?,
         analysisMaterializationPolicy: AnalysisMaterializationPolicy,
     ): DataEntity.FileDescriptorEntity {
         val contentLength = identity.contentLength
@@ -240,6 +250,9 @@ class OkHttpNetworkResolver(
             preInstallSigningBlockAnalysis = inspectSigningBlock,
             preInstallIdentityAnalysis = false,
             preInstallIconAnalysis = loadAppIcon,
+            isNetworkSource = true,
+            networkAppNameSource = appNameSource,
+            networkFileName = fileName,
             analysisMaterializationPolicy = analysisMaterializationPolicy,
             analysisMaterializationKey = if (
                 analysisMaterializationPolicy ==
@@ -259,11 +272,7 @@ class OkHttpNetworkResolver(
             .setSeekableByteChannel(entity.openChannel())
             .setIgnoreLocalFileHeader(true)
             .get().use { archive ->
-                if (archive.getEntry("AndroidManifest.xml") != null) {
-                    RemotePackageProbeResult.SingleApk
-                } else {
-                    RemotePackageProbeResult.PackageArchive
-                }
+                classifyRemotePackageEntries(archive.entries.asSequence().map { it.name })
             }
     } catch (error: Exception) {
         Timber.w(error, "Unable to inspect remote package as a seekable APK.")
@@ -295,6 +304,7 @@ class OkHttpNetworkResolver(
         )
 
         RemotePackageProbeResult.SingleApk,
+        RemotePackageProbeResult.SplitArchive,
         RemotePackageProbeResult.PackageArchive,
         -> error("A successful probe cannot be rejected")
     }
@@ -645,6 +655,7 @@ class OkHttpNetworkResolver(
                     contentLength = length,
                     supportsRange = supportsRange,
                     isArchive = isArchive,
+                    fileName = remoteFileName(response.header("Content-Disposition"), response.request.url),
                     remoteIdentity = if (supportsRange) {
                         RemoteSourceIdentity.fromResponse(response, length)
                     } else {
@@ -675,6 +686,7 @@ class OkHttpNetworkResolver(
                     supportsRange = false,
                     isArchive = true,
                     remoteIdentity = null,
+                    fileName = remoteFileName(response.header("Content-Disposition"), response.request.url),
                 )
             }
         } catch (e: Exception) {

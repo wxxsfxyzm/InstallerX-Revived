@@ -15,6 +15,7 @@ import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.AppPreferences
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.preferences.RootMode
@@ -130,6 +131,7 @@ class AppSettingsRepositoryImpl(
             networkSourceModeWarningAcknowledged =
                 prefs[AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED] ?: false,
             networkLoadAppIcon = prefs[AppDataStore.NETWORK_LOAD_APP_ICON] ?: false,
+            networkAppNameSource = NetworkAppNameSource.fromValue(prefs[AppDataStore.NETWORK_APP_NAME_SOURCE]),
             // Updater
             allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
@@ -225,6 +227,7 @@ class AppSettingsRepositoryImpl(
         StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
         StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
         StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
+        StringSetting.NetworkAppNameSource -> AppDataStore.NETWORK_APP_NAME_SOURCE
         StringSetting.NetworkSourceMode -> AppDataStore.NETWORK_SOURCE_MODE
         StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
         StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION

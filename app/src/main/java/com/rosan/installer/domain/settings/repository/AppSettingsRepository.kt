@@ -17,6 +17,7 @@ enum class StringSetting {
     LabRootImplementation,
     LabHttpProfile,
     NetworkSourceMode,
+    NetworkAppNameSource,
     PredictiveBackAnimation,
     PredictiveBackExitDirection,
     GithubUpdateChannel,

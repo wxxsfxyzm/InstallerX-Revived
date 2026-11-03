@@ -5,13 +5,16 @@ package com.rosan.installer.data.engine.parser.strategy
 import android.graphics.drawable.Drawable
 import com.rosan.installer.data.engine.parser.ApkParser
 import com.rosan.installer.data.engine.parser.UnifiedZipFile
+import com.rosan.installer.data.engine.parser.openContainerMetadata
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
+import com.rosan.installer.data.engine.parser.resolveApkIcon
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppSignatureInfo
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -50,24 +53,28 @@ class XApkStrategy(
         // 1. Parse Manifest
         val manifestEntry = archive.getEntry("manifest.json") ?: return emptyList()
         val manifest = withContext(Dispatchers.IO) {
-            archive.openEntry(manifestEntry)
+            archive.openContainerMetadata(manifestEntry)
         }.use {
             json.decodeFromStream<Manifest>(it)
         }
 
         // 2. Load Icon (if available)
-        val icon = archive.getEntry("icon.png")?.let { entry ->
-            archive.openEntry(entry).use { input ->
-                Drawable.createFromStream(input, entry.name)
-            }
-        }
+        val icon = resolveApkIcon(
+            data = data,
+            loadPrimaryIcon = {
+                archive.getEntry("icon.png")?.let { entry ->
+                    archive.openEntry(entry).use { input -> Drawable.createFromStream(input, entry.name) }
+                }
+            },
+            loadRoundIcon = { null },
+        )
 
         // 3. Map Splits to Entities
         return manifest.splits.flatMap { split ->
             val entryName = split.name
             // Construct the virtual data entity for the entry
             val entry = archive.getEntry(entryName) ?: return@flatMap emptyList()
-            val entryData = archive.toDataEntity(entry, data)
+            val entryData = archive.toDataEntity(entry, data, deferLocalHeader = true)
 
             val file = File(entryName)
             when (file.extension) {
@@ -101,12 +108,12 @@ class XApkStrategy(
                         var signatureInfo: AppSignatureInfo? = null
 
                         // Fallback: If label is missing from JSON, parse the Base APK fully to extract it
-                        if (resolvedLabel.isNullOrBlank()) {
+                        if (resolvedLabel.isNullOrBlank() || data.networkAppNameSource == NetworkAppNameSource.ApkResources) {
                             val parsedEntities = apkParser.parseArchiveEntryFull(archive, entry, data, baseExtra)
                             val parsedBase = parsedEntities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
 
                             if (parsedBase != null) {
-                                resolvedLabel = parsedBase.label
+                                resolvedLabel = parsedBase.label ?: resolvedLabel
                                 // Optionally fallback the icon as well if missing from zip root
                                 if (resolvedIcon == null) {
                                     resolvedIcon = parsedBase.icon

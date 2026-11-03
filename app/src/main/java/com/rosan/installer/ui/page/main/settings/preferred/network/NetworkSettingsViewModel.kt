@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
-import com.rosan.installer.domain.settings.repository.IntSetting
 import com.rosan.installer.domain.settings.repository.StringSetting
 import com.rosan.installer.domain.settings.usecase.settings.UpdateSettingUseCase
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +22,7 @@ class NetworkSettingsViewModel(appSettingsRepo: AppSettingsRepository, private v
             networkSourceMode = prefs.networkSourceMode,
             networkSourceModeWarningAcknowledged = prefs.networkSourceModeWarningAcknowledged,
             networkLoadAppIcon = prefs.networkLoadAppIcon,
+            networkAppNameSource = prefs.networkAppNameSource,
             httpProfile = prefs.labHttpProfile,
             githubUpdateChannel = prefs.githubUpdateChannel,
             customGithubProxyUrl = prefs.customGithubProxyUrl,
@@ -49,6 +49,10 @@ class NetworkSettingsViewModel(appSettingsRepo: AppSettingsRepository, private v
             is NetworkSettingsAction.ConfirmNetworkSourceMode -> viewModelScope.launch {
                 updateSetting(StringSetting.NetworkSourceMode, action.mode.value)
                 updateSetting(BooleanSetting.NetworkSourceModeWarningAcknowledged, true)
+            }
+
+            is NetworkSettingsAction.ChangeAppNameSource -> viewModelScope.launch {
+                updateSetting(StringSetting.NetworkAppNameSource, action.source.value)
             }
 
             is NetworkSettingsAction.ChangeLoadAppIcon -> viewModelScope.launch {

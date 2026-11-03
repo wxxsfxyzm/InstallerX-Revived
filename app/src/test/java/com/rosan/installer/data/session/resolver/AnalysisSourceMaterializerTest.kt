@@ -7,6 +7,7 @@ import com.rosan.installer.domain.engine.model.error.AnalyseErrorType
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationKey
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
@@ -49,6 +50,8 @@ class AnalysisSourceMaterializerTest {
             val retained = assertIs<DataEntity.FileEntity>(result[1])
             assertContentEquals(installBytes, retained.getInputStream().use { it.readBytes() })
             assertEquals("https://example.com/app.apk", retained.getSourceTop().toString())
+            assertEquals(NetworkAppNameSource.ServerFilename, retained.networkAppNameSource)
+            assertEquals("Server Name.apk", retained.networkFileName)
             assertContentEquals(
                 installBytes,
                 requireNotNull(retained.getInstallInputStream()).use { it.readBytes() },
@@ -138,5 +141,7 @@ class AnalysisSourceMaterializerTest {
         inputStreamFactory = { installBytes.inputStream() },
         analysisMaterializationPolicy = policy,
         analysisMaterializationKey = key,
+        networkAppNameSource = NetworkAppNameSource.ServerFilename,
+        networkFileName = "Server Name.apk",
     )
 }

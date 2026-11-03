@@ -94,7 +94,7 @@ class ApksStrategy(private val apkParser: ApkParser, private val pendingApkSigna
 
         val splits = splitEntities.map { (entry, name) ->
             val metadata = name.parseSplitMetadata()
-            val entryData = archive.toDataEntity(entry, data)
+            val entryData = archive.toDataEntity(entry, data, deferLocalHeader = true)
 
             AppEntity.SplitEntity(
                 packageName = finalBase.packageName,

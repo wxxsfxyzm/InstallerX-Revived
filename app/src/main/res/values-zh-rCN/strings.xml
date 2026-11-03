@@ -373,13 +373,13 @@
     <string name="config_auto_delete_zip_desc">不仅删除安装包，还删除包含安装包的压缩文件。</string>
     <string name="config_network_source_mode">网络源处理</string>
     <string name="network_source_mode_warning_title">签名验证限制</string>
-    <string name="network_source_mode_warning_desc">“智能”和“低存储占用”模式可能流式处理单个 APK。流式处理时，InstallerX 无法执行完整 APK 验签，因此配置中的“禁止安装签名不匹配的应用”无法生效。InstallerX 仍会读取并比较签名证书：证书一致时放行；证书不同或无法确认兼容性时，按“禁止安装签名未知的应用”设置处理。Android 系统仍会在安装时执行最终签名验证。</string>
+    <string name="network_source_mode_warning_desc">“智能”和“低存储占用”模式可能流式处理 APK 和分包归档。对于流式处理的单个 APK，InstallerX 无法执行完整 APK 验签，因此配置中的“禁止安装签名不匹配的应用”无法生效。InstallerX 仍会读取并比较签名证书：证书一致时放行；证书不同或无法确认兼容性时，按“禁止安装签名未知的应用”设置处理。开启分包签名检查后，分包归档需要缓存：智能模式会下载整个归档，低存储占用模式会提示不支持。Android 系统仍会在安装时执行最终签名验证。</string>
     <string name="config_network_source_cache">完整下载</string>
     <string name="config_network_source_cache_desc">分析前完整下载，兼容性最好</string>
     <string name="config_network_source_smart">智能</string>
-    <string name="config_network_source_smart_desc">条件满足时流式处理单 APK，其余来源完整下载</string>
+    <string name="config_network_source_smart_desc">优先流式处理 APK 和分包，不支持时转为缓存。</string>
     <string name="config_network_source_low_storage">低存储占用</string>
-    <string name="config_network_source_low_storage_desc">为单 APK 提供流式支持，应用包归档仍会完整下载</string>
+    <string name="config_network_source_low_storage_desc">流式处理 APK 和分包，不支持的分析会报错。</string>
     <string name="config_display_sdk_version">显示 SDK 信息</string>
     <string name="config_display_sdk_version_desc">在安装界面显示 target 与 min 信息</string>
     <string name="config_display_module_extra_info_desc">如果是模块则显示额外信息</string>
@@ -1013,4 +1013,9 @@
     <string name="network_load_app_icon">加载应用图标</string>
     <string name="network_load_app_icon_desc">可能降低网络快速分析的速度。</string>
     <string name="lab_shizuku_non_adb_install_confirmation">开启后，安装者将固定为本应用包名（%1$s）。此方式可能绕过部分定制 ROM 对 shell 安装应用的拦截。</string>
+    <string name="network_app_name_source">应用名称来源</string>
+    <string name="network_app_name_server">服务器文件名</string>
+    <string name="network_app_name_resources">解析 APK 资源</string>
+    <string name="network_app_name_server_desc">使用服务器文件名，分析更快。</string>
+    <string name="network_app_name_resources_desc">从 APK 资源读取应用名称，分析可能较慢。</string>
 </resources>

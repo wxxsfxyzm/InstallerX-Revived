@@ -199,6 +199,7 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
         val NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED =
             register(booleanPreferencesKey("network_source_mode_warning_acknowledged"), PreferenceValueType.BOOLEAN)
 
+        val NETWORK_APP_NAME_SOURCE = register(stringPreferencesKey("network_app_name_source"), PreferenceValueType.STRING)
         val NETWORK_LOAD_APP_ICON =
             register(booleanPreferencesKey("network_load_app_icon"), PreferenceValueType.BOOLEAN)
 

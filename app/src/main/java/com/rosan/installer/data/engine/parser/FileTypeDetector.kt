@@ -195,7 +195,7 @@ class FileTypeDetector(private val json: Json, private val unifiedZipFileProvide
         val manifestEntry = zipFile.getEntry("manifest.json")
         if (manifestEntry != null) {
             try {
-                val content = zipFile.openEntry(manifestEntry).use { input ->
+                val content = zipFile.openContainerMetadata(manifestEntry).use { input ->
                     input.reader().readText()
                 }
 
@@ -228,7 +228,7 @@ class FileTypeDetector(private val json: Json, private val unifiedZipFileProvide
         val infoEntry = zipFile.getEntry("info.json")
         if (infoEntry != null) {
             try {
-                val content = zipFile.openEntry(infoEntry).use { input ->
+                val content = zipFile.openContainerMetadata(infoEntry).use { input ->
                     input.reader().readText()
                 }
 

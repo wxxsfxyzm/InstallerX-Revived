@@ -1,35 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2026 InstallerX Revived contributors
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.rosan.installer.ui.page.main.settings.preferred.network
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -41,19 +27,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.dialog.CustomGithubProxyUrlDialog
@@ -61,6 +44,7 @@ import com.rosan.installer.ui.page.main.widget.dialog.GithubUpdateChannelSelecti
 import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
 import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
 import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
+import com.rosan.installer.ui.page.main.widget.setting.MasterSwitch
 import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
 import com.rosan.installer.ui.theme.getMaterial3AppBarColor
@@ -69,13 +53,6 @@ import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
-private val AospMainSwitchBarMargin = 16.dp
-private val AospMainSwitchBarMinHeight = 72.dp
-private val AospMainSwitchBarHorizontalPadding = 20.dp
-private val AospMainSwitchTitleMargin = 16.dp
-private val AospMainSwitchBarRadius = 35.dp
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinViewModel()) {
     val navigator = LocalNavigator.current
@@ -192,13 +169,9 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
             contentPadding = paddingValues,
         ) {
             item {
-                NetworkMasterSwitch(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = AospMainSwitchBarMargin,
-                            vertical = AospMainSwitchBarMargin,
-                        ),
+                MasterSwitch(
+                    title = stringResource(R.string.network_access),
+                    modifier = Modifier.fillMaxWidth(),
                     checked = uiState.allowInternetAccess,
                     onCheckedChange = { enabled ->
                         if (!enabled) {
@@ -231,19 +204,24 @@ fun NetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koinView
                                 },
                             )
                         }
-                        if (uiState.networkSourceMode != NetworkSourceMode.Cache) {
-                            item {
-                                SwitchWidget(
-                                    icon = AppIcons.LoadAppIcon,
-                                    title = stringResource(R.string.network_load_app_icon),
-                                    description = stringResource(R.string.network_load_app_icon_desc),
-                                    checked = uiState.networkLoadAppIcon,
-                                    onCheckedChange = {
-                                        viewModel.dispatch(NetworkSettingsAction.ChangeLoadAppIcon(it))
-                                    },
-                                )
-                            }
+                        item(animatedVisibility = uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                            NetworkAppNameSourceWidget(
+                                source = uiState.networkAppNameSource,
+                                onChange = { viewModel.dispatch(NetworkSettingsAction.ChangeAppNameSource(it)) },
+                            )
                         }
+                        item(animatedVisibility = uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                            SwitchWidget(
+                                icon = AppIcons.LoadAppIcon,
+                                title = stringResource(R.string.network_load_app_icon),
+                                description = stringResource(R.string.network_load_app_icon_desc),
+                                checked = uiState.networkLoadAppIcon,
+                                onCheckedChange = {
+                                    viewModel.dispatch(NetworkSettingsAction.ChangeLoadAppIcon(it))
+                                },
+                            )
+                        }
+
                         item {
                             NetworkHttpProfileWidget(
                                 currentProfile = uiState.httpProfile,
@@ -310,6 +288,21 @@ private fun NetworkSourceModeWidget(currentMode: NetworkSourceMode, onModeChange
 }
 
 @Composable
+private fun NetworkAppNameSourceWidget(source: NetworkAppNameSource, onChange: (NetworkAppNameSource) -> Unit) {
+    val names = listOf(stringResource(R.string.network_app_name_server), stringResource(R.string.network_app_name_resources))
+    DropDownMenuWidget(
+        icon = AppIcons.Info,
+        title = stringResource(R.string.network_app_name_source),
+        description = stringResource(
+            if (source == NetworkAppNameSource.ServerFilename) R.string.network_app_name_server_desc else R.string.network_app_name_resources_desc,
+        ),
+        choice = NetworkAppNameSource.entries.indexOf(source),
+        data = names,
+        onChoiceChange = { NetworkAppNameSource.entries.getOrNull(it)?.let(onChange) },
+    )
+}
+
+@Composable
 private fun NetworkHttpProfileWidget(currentProfile: HttpProfile, onProfileChange: (HttpProfile) -> Unit) {
     val profiles = remember {
         listOf(
@@ -338,57 +331,4 @@ private fun NetworkHttpProfileWidget(currentProfile: HttpProfile, onProfileChang
                 .let(onProfileChange)
         },
     )
-}
-
-@Composable
-private fun NetworkMasterSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
-    val containerColor = if (checked) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    }
-    val contentColor = if (checked) {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
-
-    Row(
-        modifier = modifier
-            .heightIn(min = AospMainSwitchBarMinHeight)
-            .clip(shape = RoundedCornerShape(AospMainSwitchBarRadius))
-            .background(containerColor)
-            .toggleable(
-                value = checked,
-                role = Role.Switch,
-                onValueChange = onCheckedChange,
-            )
-            .padding(horizontal = AospMainSwitchBarHorizontalPadding),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(R.string.network_access),
-            style = MaterialTheme.typography.titleMediumEmphasized,
-            color = contentColor,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = AospMainSwitchTitleMargin),
-        )
-        Switch(
-            modifier = Modifier.clearAndSetSemantics {},
-            checked = checked,
-            onCheckedChange = null,
-            colors = SwitchDefaults.colors(
-                checkedIconColor = MaterialTheme.colorScheme.primary,
-                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-            ),
-            thumbContent = {
-                Icon(
-                    imageVector = if (checked) Icons.Filled.Check else Icons.Filled.Close,
-                    contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize),
-                )
-            },
-        )
-    }
 }

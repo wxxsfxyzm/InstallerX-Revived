@@ -38,6 +38,7 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettingsViewModel
@@ -211,6 +212,10 @@ fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koi
                             },
                         )
                         if (uiState.networkSourceMode != NetworkSourceMode.Cache) {
+                            MiuixNetworkAppNameSourcePreference(
+                                source = uiState.networkAppNameSource,
+                                onChange = { viewModel.dispatch(NetworkSettingsAction.ChangeAppNameSource(it)) },
+                            )
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.network_load_app_icon),
                                 description = stringResource(R.string.network_load_app_icon_desc),
@@ -311,6 +316,22 @@ private fun NetworkSourceModeWarningDialog(
                 }
             }
         },
+    )
+}
+
+@Composable
+private fun MiuixNetworkAppNameSourcePreference(source: NetworkAppNameSource, onChange: (NetworkAppNameSource) -> Unit) {
+    WindowSpinnerPreference(
+        title = stringResource(R.string.network_app_name_source),
+        summary = stringResource(
+            if (source == NetworkAppNameSource.ServerFilename) R.string.network_app_name_server_desc else R.string.network_app_name_resources_desc,
+        ),
+        items = listOf(
+            DropdownItem(title = stringResource(R.string.network_app_name_server)),
+            DropdownItem(title = stringResource(R.string.network_app_name_resources)),
+        ),
+        selectedIndex = NetworkAppNameSource.entries.indexOf(source),
+        onSelectedIndexChange = { NetworkAppNameSource.entries.getOrNull(it)?.let(onChange) },
     )
 }
 

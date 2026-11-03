@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 class RemotePackageProbeResultTest {
     private val samples = listOf(
         RemotePackageProbeResult.SingleApk,
+        RemotePackageProbeResult.SplitArchive,
         RemotePackageProbeResult.PackageArchive,
         RemotePackageProbeResult.StreamingUnsupported(StreamingUnsupportedReason.Platform),
         RemotePackageProbeResult.StreamingUnsupported(StreamingUnsupportedReason.RangeSource),
@@ -26,22 +27,24 @@ class RemotePackageProbeResultTest {
     }
 
     @Test
-    fun `smart mode streams a single APK and downloads every other outcome`() {
+    fun `smart mode streams APKs and split archives and downloads other outcomes`() {
         assertEquals(
             RemotePackageAction.Stream,
             NetworkSourceMode.Smart.actionFor(RemotePackageProbeResult.SingleApk),
         )
-        samples.minus(RemotePackageProbeResult.SingleApk).forEach { result ->
+        assertEquals(RemotePackageAction.Stream, NetworkSourceMode.Smart.actionFor(RemotePackageProbeResult.SplitArchive))
+        samples.filter { it != RemotePackageProbeResult.SingleApk && it != RemotePackageProbeResult.SplitArchive }.forEach { result ->
             assertEquals(RemotePackageAction.FullDownload, NetworkSourceMode.Smart.actionFor(result))
         }
     }
 
     @Test
-    fun `low storage mode downloads archives and rejects unavailable streaming`() {
+    fun `low storage streams split archives but downloads other archives and rejects unavailable streaming`() {
         assertEquals(
             RemotePackageAction.Stream,
             NetworkSourceMode.LowStorage.actionFor(RemotePackageProbeResult.SingleApk),
         )
+        assertEquals(RemotePackageAction.Stream, NetworkSourceMode.LowStorage.actionFor(RemotePackageProbeResult.SplitArchive))
         assertEquals(
             RemotePackageAction.FullDownload,
             NetworkSourceMode.LowStorage.actionFor(RemotePackageProbeResult.PackageArchive),

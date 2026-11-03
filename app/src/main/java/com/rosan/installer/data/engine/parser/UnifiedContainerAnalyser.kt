@@ -8,11 +8,13 @@ import com.rosan.installer.data.engine.parser.strategy.ModuleStrategy
 import com.rosan.installer.data.engine.parser.strategy.MultiApkZipStrategy
 import com.rosan.installer.data.engine.parser.strategy.SingleApkStrategy
 import com.rosan.installer.data.engine.parser.strategy.XApkStrategy
+import com.rosan.installer.domain.engine.exception.DescriptorAnalysisUnsupportedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -45,8 +47,9 @@ class UnifiedContainerAnalyser(
 
     suspend fun analyze(config: ConfigModel, data: DataEntity, type: DataType, extra: AnalyseExtraEntity): List<AppEntity> = withContext(Dispatchers.IO) {
         val strategy = strategies[type] ?: return@withContext emptyList()
+        requireStreamingContainerAnalysis(data, type, extra)
 
-        if (data is DataEntity.FileEntity) {
+        val entities = if (data is DataEntity.FileEntity) {
             val zipFile = try {
                 unifiedZipFileProvider.open(data, type.allowsLocalHeaderFallback)
             } catch (e: IOException) {
@@ -62,6 +65,7 @@ class UnifiedContainerAnalyser(
         } else {
             strategy.analyze(config, data, null, extra)
         }
+        applyNetworkAppName(entities, data)
     }
 
     /** Analyzes with the archive retained by file-type detection; the caller owns its lifecycle. */
@@ -73,6 +77,25 @@ class UnifiedContainerAnalyser(
         extra: AnalyseExtraEntity,
     ): List<AppEntity> = withContext(Dispatchers.IO) {
         val strategy = strategies[type] ?: return@withContext emptyList()
-        strategy.analyze(config, data, archive, extra)
+        requireStreamingContainerAnalysis(data, type, extra)
+        applyNetworkAppName(strategy.analyze(config, data, archive, extra), data)
+    }
+}
+
+internal fun applyNetworkAppName(entities: List<AppEntity>, source: DataEntity): List<AppEntity> {
+    if (source !is DataEntity.FileEntity || source.networkAppNameSource != NetworkAppNameSource.ServerFilename) return entities
+    if (entities.filterIsInstance<AppEntity.BaseEntity>().map { it.packageName }.distinct().size > 1) return entities
+    val name = source.networkFileName?.takeIf { it.isNotBlank() } ?: return entities
+    return entities.map { if (it is AppEntity.BaseEntity) it.copy(label = name) else it }
+}
+
+internal fun requireStreamingContainerAnalysis(data: DataEntity, type: DataType, extra: AnalyseExtraEntity) {
+    if (data !is DataEntity.FileDescriptorEntity || !data.isNetworkSource || type == DataType.APK) return
+    val splitArchive = type == DataType.APKS || type == DataType.APKM || type == DataType.XAPK
+    if (!splitArchive || extra.shouldCheckAppSignatures(type)) {
+        throw DescriptorAnalysisUnsupportedException(
+            data,
+            IOException(if (splitArchive) "Full split-package signature verification requires caching" else "Unsupported streaming container: $type"),
+        )
     }
 }

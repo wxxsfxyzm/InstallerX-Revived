@@ -8,6 +8,7 @@ import com.rosan.installer.data.engine.parser.PackagePreprocessor
 import com.rosan.installer.data.engine.parser.UnifiedContainerAnalyser
 import com.rosan.installer.data.engine.signature.PackageSignatureAnalyzer
 import com.rosan.installer.domain.engine.exception.AnalyseException
+import com.rosan.installer.domain.engine.exception.DescriptorAnalysisUnsupportedException
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.install.SessionMode
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
@@ -21,6 +22,7 @@ import com.rosan.installer.domain.engine.repository.AnalyserRepository
 import com.rosan.installer.domain.engine.usecase.SelectOptimalSplitsUseCase
 import com.rosan.installer.domain.settings.model.config.ConfigModel
 import java.util.zip.ZipException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -188,8 +190,13 @@ class AnalyserRepositoryImpl(
                 extra = extra.copy(dataType = fileType),
             )
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Timber.e(e, "Fatal error analyzing source: ${data.source}")
+        if (data is DataEntity.FileDescriptorEntity && data.isNetworkSource && e !is DescriptorAnalysisUnsupportedException) {
+            throw DescriptorAnalysisUnsupportedException(data, e)
+        }
         if (e is AnalyseException || e is CommonsZipException || e is ZipException) throw e
         emptyList()
     }
