@@ -76,7 +76,10 @@ class ShizukuNonAdbAppInstallerRepoImpl(
     }
 }
 
-internal fun nonAdbInstallFlags(flags: Int): Int = flags.removeFlag(PackageManagerHidden.INSTALL_FROM_ADB)
+// Shizuku approval does not give the app-owned session permission to grant runtime permissions.
+internal fun nonAdbInstallFlags(flags: Int): Int = flags
+    .removeFlag(PackageManagerHidden.INSTALL_FROM_ADB)
+    .removeFlag(PackageManagerHidden.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS)
 
 internal fun validateNonAdbInstallUser(currentUserId: Int, targetUserId: Int?, installFlags: Int) {
     if ((targetUserId != null && targetUserId != currentUserId) ||

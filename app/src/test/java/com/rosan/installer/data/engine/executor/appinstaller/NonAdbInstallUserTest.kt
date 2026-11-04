@@ -19,6 +19,15 @@ class NonAdbInstallUserTest {
     }
 
     @Test
+    fun `removes privileged permission grants from app owned sessions`() {
+        val grantPermissions = InstallOption.GrantAllRequestedPermissions.value
+        val otherOptions = InstallOption.AllowDowngrade.value or InstallOption.Internal.value
+        assertEquals(0, nonAdbInstallFlags(grantPermissions))
+        assertEquals(otherOptions, nonAdbInstallFlags(otherOptions or grantPermissions))
+        assertEquals(otherOptions, nonAdbInstallFlags(otherOptions or grantPermissions or InstallOption.FromAdb.value))
+    }
+
+    @Test
     fun `accepts the current user including secondary profiles`() {
         for (user in listOf(0, 10, 999)) {
             validateNonAdbInstallUser(user, null, 0)
