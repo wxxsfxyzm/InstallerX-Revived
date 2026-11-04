@@ -264,7 +264,7 @@
     <string name="save">Сохранить</string>
     <string name="search">Поиск</string>
     <string name="close_session_countdown">Таймер закрытия сессии</string>
-    <string name="show_dialog_install_extended_menu">Расширенное меню</string>
+    <string name="show_dialog_install_extended_menu">Показать расширенное меню</string>
     <string name="show_dialog_install_extended_menu_desc">Дополнительное меню с параметрами в диалоговом окне установки</string>
     <string name="show_dialog_when_pressing_notification">Показать диалоговое окно при нажатии на уведомление</string>
     <string name="show_intelligent_suggestion">Показывать умные предложения</string>
@@ -812,8 +812,8 @@
     <string name="backup_settings_validation_future_room_schema">Это резервирование использует новую схему базы данных: %1$s. Текущая схема %2$s.</string>
     <string name="backup_settings_validation_missing_scope_profile">Область не имеет соответствующего профиля и будет проигнорирована: %1$s</string>
     <string name="backup_settings_validation_ignored_setting">Настройка не поддерживается или имеет недействительное значение и будет проигнорирована: %1$s</string>
-    <string name="backup_settings_export_success">Резервирование настроек экспортировано</string>
-    <string name="backup_settings_export_failed">Не смог экспортировать настройки резервированния</string>
+    <string name="backup_settings_export_success">Резервная копия настроек экспортирована</string>
+    <string name="backup_settings_export_failed">Не удалось экспортировать резервную копию настроек</string>
     <string name="backup_settings_restore_success">Настройки восстановлены</string>
     <string name="backup_settings_restore_failed">Не удалось восстановить резервную копию настроек</string>
     <string name="backup_settings_file_read_failed">Не удалось прочитать файл резервной копии</string>
@@ -991,4 +991,6 @@
     <string name="installer_signature_information">Информация</string>
     <string name="tag_aosp_signature">AOSP подпись</string>
     <string name="installer_prepare_aosp_signature">В этом пакете используется AOSP подпись.\n\nКлючи: %1$s</string>
+    <string name="theme_settings_use_amoled">AMOLED Фон</string>
+    <string name="theme_settings_use_amoled_desc">Используйте черный фон для экранов настроек в темном режиме</string>
 </resources>

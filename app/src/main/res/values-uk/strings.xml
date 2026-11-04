@@ -699,7 +699,7 @@
     <string name="backup_settings_validation_missing_scope_profile">Область не має відповідного профілю та буде проігнорована: %1$s</string>
     <string name="backup_settings_validation_ignored_setting">Налаштування не підтримується або має недійсне значення та буде проігноровано: %1$s</string>
     <string name="backup_settings_export_success">Резервування налаштувань експортовано</string>
-    <string name="backup_settings_export_failed">Не зміг експортувати налаштування резервування</string>
+    <string name="backup_settings_export_failed">Не вдалося експортувати резервну копію налаштувань</string>
     <string name="backup_settings_restore_success">Налаштування відновлено</string>
     <string name="backup_settings_restore_failed">Не вдалося відновити резервну копію налаштувань</string>
     <string name="backup_settings_file_read_failed">Не вдалося прочитати файл резервної копії</string>
@@ -991,4 +991,6 @@
     <string name="installer_signature_information">Інформація</string>
     <string name="tag_aosp_signature">AOSP підпис</string>
     <string name="installer_prepare_aosp_signature">Цей пакет використовує AOSP підпис.\n\nКлючі: %1$s</string>
+    <string name="theme_settings_use_amoled">AMOLED Фон</string>
+    <string name="theme_settings_use_amoled_desc">Використовуйте чисто чорний фон для екранів налаштувань у темному режимі</string>
 </resources>
