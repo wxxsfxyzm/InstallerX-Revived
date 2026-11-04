@@ -251,18 +251,19 @@ fun InstallerMiuixTheme(
             PaletteStyle.Cmf -> MiuixPaletteStyle.Cmf
         }
 
-        val colorSpecVersion = when (paletteStyle.effectiveSpec(colorSpec)) {
-            ThemeColorSpec.SPEC_2026 -> MiuixColorSpec.Spec2026
-            ThemeColorSpec.SPEC_2025 -> MiuixColorSpec.Spec2025
+        // Pass the saved preference; Miuix resolves palette support and forces SPEC_2026 for Cmf.
+        // SPEC_2026 is only an effective spec in our UI, so fall back to the default preference.
+        val preferredColorSpec = when (colorSpec) {
             ThemeColorSpec.SPEC_2021 -> MiuixColorSpec.Spec2021
+            else -> MiuixColorSpec.Spec2025
         }
 
-        remember(colorSchemeMode, keyColor, paletteStyle, colorSpecVersion, darkTheme) {
+        remember(colorSchemeMode, keyColor, paletteStyle, preferredColorSpec, darkTheme) {
             ThemeController(
                 colorSchemeMode = colorSchemeMode,
                 keyColor = keyColor,
                 paletteStyle = style,
-                colorSpec = colorSpecVersion,
+                colorSpec = preferredColorSpec,
                 isDark = darkTheme,
             )
         }
