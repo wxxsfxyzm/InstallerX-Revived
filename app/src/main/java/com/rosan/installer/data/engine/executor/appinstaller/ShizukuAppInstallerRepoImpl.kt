@@ -11,7 +11,7 @@ import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.framework.privileged.core.execution.authorization.requireShizukuPermissionGranted
 import rikka.shizuku.ShizukuBinderWrapper
 
-class ShizukuAppInstallerRepoImpl(
+open class ShizukuAppInstallerRepoImpl(
     context: Context,
     reflect: ReflectionProvider,
     capabilityProvider: DeviceCapabilityProvider,

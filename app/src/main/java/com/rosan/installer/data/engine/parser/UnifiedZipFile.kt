@@ -89,8 +89,16 @@ class UnifiedZipFile internal constructor(
         }
     }
 
-    fun toDataEntity(entry: UnifiedZipEntry, parent: DataEntity.FileEntity): DataEntity {
+    fun toDataEntity(entry: UnifiedZipEntry, parent: DataEntity.FileEntity, deferLocalHeader: Boolean = false): DataEntity {
         require(entry in ownedEntries) { "ZIP entry does not belong to ${file.path}: ${entry.name}" }
+
+        if (deferLocalHeader && parent is DataEntity.FileDescriptorEntity && parent.isNetworkSource &&
+            entry.source is UnifiedZipEntrySource.Commons
+        ) {
+            // Listing/selecting splits needs central-directory metadata only. Resolve the local
+            // header when a selected entry is opened, after the analysis ZIP has been closed.
+            return DataEntity.ZipFileEntity(entry.name, parent, entry.toMetadata())
+        }
 
         val dataRange = entry.storedDataRange ?: resolveCommonsDataRange(entry)
         if (entry.compressionMethod == ZipEntry.STORED &&

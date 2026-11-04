@@ -13,6 +13,8 @@ public interface IPackageInstaller extends IInterface {
 
     void abandonSession(int sessionId) throws RemoteException;
 
+    void disableVerificationForUid(int uid) throws RemoteException;
+
     void setPermissionsResult(int sessionId, boolean accepted) throws RemoteException;
 
     abstract class Stub extends Binder implements IPackageInstaller {

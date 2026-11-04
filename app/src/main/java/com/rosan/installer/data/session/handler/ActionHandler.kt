@@ -369,17 +369,11 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         val checkSourceStamp = appSettingsRepo.getBoolean(BooleanSetting.CheckSourceStamp, true).first()
         Timber.d("[id=$sessionId] Source stamp analysis enabled: $checkSourceStamp")
 
-        val checkSplitPackageSignatures = appSettingsRepo
-            .getBoolean(BooleanSetting.CheckSplitPackageSignatures, false)
-            .first()
-        Timber.d("[id=$sessionId] Split package signature checks enabled: $checkSplitPackageSignatures")
-
         val extra = AnalyseExtraEntity(
             cacheDirectory = cacheDirectory,
             isModuleFlashEnabled = isModuleEnabled,
             checkAppSignature = checkAppSignature,
             checkSourceStamp = checkSourceStamp,
-            checkSplitPackageSignatures = checkSplitPackageSignatures,
         )
 
         val materializedSources = mutableSetOf<AnalysisMaterializationKey>()
@@ -399,8 +393,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
                     source.analysisMaterializationPolicy !=
                     AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT
                 ) {
-                    // Low Storage deliberately refuses this compatibility fallback: materializing
-                    // here would violate the mode's disk-usage contract.
+                    // Stream only refuses cached analysis fallback.
                     throw error
                 }
 
@@ -413,7 +406,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
                 Timber.i(
                     error,
                     "[id=$sessionId] Direct HTTP descriptor analysis is unsupported; " +
-                        "retaining the complete Smart-mode source and retrying.",
+                        "retaining the complete Automatic-mode source and retrying.",
                 )
                 session.data = sourceResolver.materializeForAnalysis(session.data, source)
                 session.progress.emit(ProgressEntity.InstallAnalysing)

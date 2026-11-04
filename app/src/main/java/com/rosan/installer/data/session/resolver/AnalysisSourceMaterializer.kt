@@ -53,7 +53,12 @@ internal suspend fun materializeAnalysisSource(
             )
         }
 
-        val replacement = DataEntity.FileEntity(retainedFile.absolutePath).apply {
+        val replacement = DataEntity.FileEntity(
+            path = retainedFile.absolutePath,
+            networkAppNameSource = source.networkAppNameSource,
+            networkFileName = source.networkFileName,
+            networkLoadAppIcon = source.networkLoadAppIcon,
+        ).apply {
             // Preserve the original URI identity while the retained file becomes the only
             // analysis and install input for the remainder of the session.
             this.source = source.source ?: DataEntity.FileEntity(source.path)

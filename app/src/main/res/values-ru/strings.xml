@@ -922,8 +922,6 @@
     <string name="expand_temporary_settings_by_default_desc">Развернуть временные настройки при открытии диалогового окна установки</string>
     <string name="self_update_install_success">InstallerX Revived был успешно обновлен</string>
     <string name="installer_writing">Записываю…</string>
-    <string name="config_check_split_package_signatures">Анализируйте подписи split пакетов</string>
-    <string name="config_check_split_package_signatures_desc">Анализируйте APK сигнатуры в APKS, APKM и XAPK пакетах. Это может значительно увеличить время анализа</string>
     <string name="network_access">Доступ к сети</string>
     <string name="allow_internet_access">Разрешить доступ в Интернет</string>
     <string name="allow_internet_access_desc">Разрешить InstallerX Revived проверять наличие обновлений и загружать APK с сетевых ссылок</string>

@@ -15,6 +15,7 @@ import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.AppPreferences
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.preferences.RootMode
@@ -74,7 +75,6 @@ class AppSettingsRepositoryImpl(
             showOPPOSpecial = prefs[AppDataStore.DIALOG_SHOW_OPPO_SPECIAL] ?: false,
             checkAppSignature = prefs[AppDataStore.CHECK_APP_SIGNATURE] ?: true,
             checkSourceStamp = prefs[AppDataStore.CHECK_SOURCE_STAMP] ?: true,
-            checkSplitPackageSignatures = prefs[AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES] ?: false,
             showSignatureInfoOnMatch = prefs[AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH] ?: false,
             showSignatureDetails = prefs[AppDataStore.SHOW_SIGNATURE_DETAILS] ?: false,
             installerRequireBiometricAuth = BiometricAuthMode.fromValueOrDefault(
@@ -129,6 +129,8 @@ class AppSettingsRepositoryImpl(
             ),
             networkSourceModeWarningAcknowledged =
                 prefs[AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED] ?: false,
+            networkLoadAppIcon = prefs[AppDataStore.NETWORK_LOAD_APP_ICON] ?: false,
+            networkAppNameSource = NetworkAppNameSource.fromValue(prefs[AppDataStore.NETWORK_APP_NAME_SOURCE]),
             // Updater
             allowInternetAccess = prefs[AppDataStore.ALLOW_INTERNET_ACCESS] ?: true,
             githubUpdateChannel = githubUpdateChannel,
@@ -147,6 +149,7 @@ class AppSettingsRepositoryImpl(
             labRespectPlatformInstallPolicy =
                 AppConfig.isRespectPlatformInstallPolicyAvailable &&
                     (prefs[AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY] ?: false),
+            labShizukuNonAdbInstall = prefs[AppDataStore.LAB_SHIZUKU_NON_ADB_INSTALL] ?: false,
             labEnableAbiOverride = prefs[AppDataStore.LAB_ENABLE_ABI_OVERRIDE] ?: false,
             labTryDifferentArchitecture = prefs[AppDataStore.LAB_TRY_DIFFERENT_ARCHITECTURE] ?: false,
             enableFileLogging = prefs[AppDataStore.ENABLE_FILE_LOGGING] ?: true,
@@ -164,12 +167,8 @@ class AppSettingsRepositoryImpl(
             wallpaperSeedColorInt = prefs[AppDataStore.THEME_WALLPAPER_SEED_COLOR] ?: 0,
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useDynColorFollowPkgIconForLiveActivity = prefs[AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
-            useBlur = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                prefs[AppDataStore.UI_USE_BLUR]
-                    ?: true
-            } else {
-                false
-            },
+            useBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                (prefs[AppDataStore.UI_USE_BLUR] ?: true),
             predictiveBackAnimation = PredictiveBackAnimation.fromValueOrDefault(
                 prefs[AppDataStore.PREDICTIVE_BACK_ANIMATION] ?: PredictiveBackAnimation.MIUIX.value,
             ),
@@ -227,6 +226,7 @@ class AppSettingsRepositoryImpl(
         StringSetting.ApplyOrderType -> AppDataStore.APPLY_ORDER_TYPE
         StringSetting.LabRootImplementation -> AppDataStore.LAB_ROOT_IMPLEMENTATION
         StringSetting.LabHttpProfile -> AppDataStore.LAB_HTTP_PROFILE
+        StringSetting.NetworkAppNameSource -> AppDataStore.NETWORK_APP_NAME_SOURCE
         StringSetting.NetworkSourceMode -> AppDataStore.NETWORK_SOURCE_MODE
         StringSetting.PredictiveBackAnimation -> AppDataStore.PREDICTIVE_BACK_ANIMATION
         StringSetting.PredictiveBackExitDirection -> AppDataStore.PREDICTIVE_BACK_EXIT_DIRECTION
@@ -250,6 +250,8 @@ class AppSettingsRepositoryImpl(
 
         BooleanSetting.NetworkSourceModeWarningAcknowledged ->
             AppDataStore.NETWORK_SOURCE_MODE_WARNING_ACKNOWLEDGED
+
+        BooleanSetting.NetworkLoadAppIcon -> AppDataStore.NETWORK_LOAD_APP_ICON
 
         BooleanSetting.UiUseBlur -> AppDataStore.UI_USE_BLUR
 
@@ -323,8 +325,6 @@ class AppSettingsRepositoryImpl(
 
         BooleanSetting.CheckSourceStamp -> AppDataStore.CHECK_SOURCE_STAMP
 
-        BooleanSetting.CheckSplitPackageSignatures -> AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES
-
         BooleanSetting.ShowSignatureInfoOnMatch -> AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH
 
         BooleanSetting.ShowSignatureDetails -> AppDataStore.SHOW_SIGNATURE_DETAILS
@@ -352,6 +352,8 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.LabInstallWithoutUserAction -> AppDataStore.LAB_INSTALL_WITHOUT_USER_ACTION
 
         BooleanSetting.LabRespectPlatformInstallPolicy -> AppDataStore.LAB_RESPECT_PLATFORM_INSTALL_POLICY
+
+        BooleanSetting.LabShizukuNonAdbInstall -> AppDataStore.LAB_SHIZUKU_NON_ADB_INSTALL
 
         BooleanSetting.LabEnableAbiOverride -> AppDataStore.LAB_ENABLE_ABI_OVERRIDE
 

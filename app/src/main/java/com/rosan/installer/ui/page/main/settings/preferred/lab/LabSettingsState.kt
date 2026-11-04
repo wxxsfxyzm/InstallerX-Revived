@@ -11,6 +11,7 @@ data class LabSettingsState(
     val labRootMode: RootMode = RootMode.Magisk,
     val labAllowInstallWithoutUserAction: Boolean = false,
     val labRespectPlatformInstallPolicy: Boolean = false,
+    val labShizukuNonAdbInstall: Boolean = false,
     val labEnableAbiOverride: Boolean = false,
     val labTryDifferentArchitecture: Boolean = false,
     val tryMultipleAuthorizersOnInstall: Boolean = false,

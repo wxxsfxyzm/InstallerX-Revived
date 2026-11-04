@@ -58,6 +58,7 @@ import androidx.compose.material.icons.twotone.Healing
 import androidx.compose.material.icons.twotone.History
 import androidx.compose.material.icons.twotone.HourglassDisabled
 import androidx.compose.material.icons.twotone.HourglassEmpty
+import androidx.compose.material.icons.twotone.Image
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.InstallMobile
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
@@ -181,6 +182,7 @@ object AppIcons {
     val Settings = Icons.TwoTone.Settings
     val Network = Icons.TwoTone.Language
     val NetworkSource = Icons.TwoTone.CloudDownload
+    val LoadAppIcon = Icons.TwoTone.Image
     val UpdateChannel = Icons.TwoTone.SystemUpdate
     val OEMSpecial = Icons.TwoTone.FindInPage
     val ShowSize = Icons.AutoMirrored.TwoTone.CompareArrows

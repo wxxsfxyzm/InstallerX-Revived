@@ -920,9 +920,7 @@
     <string name="unarchive_action_clear_storage">Depolamayı temizle</string>
     <string name="unarchive_action_app_settings">Uygulama ayarları</string>
     <string name="installer_result_pending">Başka bir yükleme işlemi halihazırda devam ediyor. İşlemin tamamlanmasını bekleyin, ardından tekrar deneyin.</string>
-    <string name="config_check_split_package_signatures_desc">APKS, APKM ve XAPK paketlerindeki APK imzalarını analiz edin. Bu, analiz süresini önemli ölçüde artırabilir</string>
     <string name="installer_writing">Yazılıyor…</string>
-    <string name="config_check_split_package_signatures">Bölünmüş paket imzalarını analiz et</string>
     <string name="self_update_install_success">InstallerX Revived başarıyla güncellendi</string>
     <string name="allow_internet_access">İnternet erişimine izin ver</string>
     <string name="allow_internet_access_desc">InstallerX Revived\'in ağ bağlantılarından güncellemeleri kontrol etmesine ve APK dosyalarını indirmesine izin verin</string>

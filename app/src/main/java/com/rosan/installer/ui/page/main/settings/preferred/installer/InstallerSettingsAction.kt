@@ -13,7 +13,6 @@ sealed interface InstallerSettingsAction {
     data class ChangeShowOPPOSpecial(val show: Boolean) : InstallerSettingsAction
     data class ChangeCheckAppSignature(val check: Boolean) : InstallerSettingsAction
     data class ChangeCheckSourceStamp(val check: Boolean) : InstallerSettingsAction
-    data class ChangeCheckSplitPackageSignatures(val check: Boolean) : InstallerSettingsAction
     data class ChangeShowSignatureInfoOnMatch(val show: Boolean) : InstallerSettingsAction
     data class ChangeShowSignatureDetails(val show: Boolean) : InstallerSettingsAction
     data class ChangeDetectXposedModule(val detect: Boolean) : InstallerSettingsAction

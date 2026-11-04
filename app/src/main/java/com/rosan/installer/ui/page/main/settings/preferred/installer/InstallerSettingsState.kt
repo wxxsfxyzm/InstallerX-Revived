@@ -16,7 +16,6 @@ data class InstallerSettingsState(
     val showOPPOSpecial: Boolean = false,
     val checkAppSignature: Boolean = true,
     val checkSourceStamp: Boolean = true,
-    val checkSplitPackageSignatures: Boolean = false,
     val showSignatureInfoOnMatch: Boolean = false,
     val showSignatureDetails: Boolean = false,
     val detectXposedModule: Boolean = true,

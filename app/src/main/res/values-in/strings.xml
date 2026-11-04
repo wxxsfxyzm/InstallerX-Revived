@@ -919,8 +919,6 @@
     <string name="network_access">Akses jaringan</string>
     <string name="allow_internet_access">Izinkan akses internet</string>
     <string name="allow_internet_access_desc">Izinkan InstallerX Revived untuk memeriksa pembaruan dan mengunduh APKs dari tautan jaringan</string>
-    <string name="config_check_split_package_signatures">Analisa tanda tangan paket terpisah</string>
-    <string name="config_check_split_package_signatures_desc">Analisa tanda tangan APK dalam paket APKS, APKM, dan XAPK. Ini bisa meningkatkan waktu analisa secara signifikan</string>
     <string name="network_settings">Pengaturan jaringan</string>
     <string name="network_settings_internet_access_enabled_desc">Aplikasi dapat mengakses internet</string>
     <string name="network_settings_internet_access_disabled_desc">Aplikasi tidak dapat mengakses internet</string>

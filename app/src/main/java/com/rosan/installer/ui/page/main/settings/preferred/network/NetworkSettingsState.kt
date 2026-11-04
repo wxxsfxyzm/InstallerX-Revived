@@ -5,11 +5,14 @@ package com.rosan.installer.ui.page.main.settings.preferred.network
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 
 data class NetworkSettingsState(
     val allowInternetAccess: Boolean = true,
     val networkSourceMode: NetworkSourceMode = NetworkSourceMode.Cache,
     val networkSourceModeWarningAcknowledged: Boolean = false,
+    val networkLoadAppIcon: Boolean = false,
+    val networkAppNameSource: NetworkAppNameSource = NetworkAppNameSource.ServerFilename,
     val httpProfile: HttpProfile = HttpProfile.ALLOW_SECURE,
     val githubUpdateChannel: GithubUpdateChannel = GithubUpdateChannel.OFFICIAL,
     val customGithubProxyUrl: String = "",

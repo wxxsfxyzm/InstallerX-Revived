@@ -3,13 +3,18 @@
 package com.rosan.installer.data.engine.parser.strategy
 
 import android.graphics.drawable.Drawable
+import com.rosan.installer.data.engine.parser.ApkParser
 import com.rosan.installer.data.engine.parser.UnifiedZipFile
+import com.rosan.installer.data.engine.parser.openContainerMetadata
 import com.rosan.installer.data.engine.parser.parseSplitMetadata
+import com.rosan.installer.data.engine.parser.resolveApkIcon
+import com.rosan.installer.data.engine.parser.shouldLoadApkIcon
 import com.rosan.installer.data.engine.signature.PendingApkSignatureAnalyzer
 import com.rosan.installer.domain.engine.model.AnalyseExtraEntity
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.settings.model.config.ConfigModel
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,7 +24,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 
-class ApkmStrategy(private val json: Json, private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer) : AnalysisStrategy {
+class ApkmStrategy(
+    private val json: Json,
+    private val pendingApkSignatureAnalyzer: PendingApkSignatureAnalyzer,
+    private val apkParser: ApkParser,
+) : AnalysisStrategy {
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun analyze(
@@ -30,29 +39,33 @@ class ApkmStrategy(private val json: Json, private val pendingApkSignatureAnalyz
     ): List<AppEntity> {
         val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
-        val checkSignatures = extra.shouldCheckAppSignatures()
+        val checkSignatures = extra.checkAppSignature
 
         // 1. Parse Info
         val infoEntry = archive.getEntry("info.json") ?: return emptyList()
         val manifest = withContext(Dispatchers.IO) {
-            archive.openEntry(infoEntry)
+            archive.openContainerMetadata(infoEntry)
         }.use {
             json.decodeFromStream<Manifest>(it)
         }
 
         // 2. Load Icon
-        val icon = archive.getEntry("icon.png")?.let { entry ->
-            archive.openEntry(entry).use { input ->
-                Drawable.createFromStream(input, entry.name)
-            }
-        }
+        val icon = resolveApkIcon(
+            data = data,
+            loadPrimaryIcon = {
+                archive.getEntry("icon.png")?.let { entry ->
+                    archive.openEntry(entry).use { input -> Drawable.createFromStream(input, entry.name) }
+                }
+            },
+            loadRoundIcon = { null },
+        )
 
         // 3. Iterate all entries (ApkM usually just lists files flatly)
         return archive.entries.asSequence()
             .filter { !it.isDirectory }
             .flatMap { entry ->
                 val entryName = entry.name
-                val entryData = archive.toDataEntity(entry, data)
+                val entryData = archive.toDataEntity(entry, data, deferLocalHeader = true)
                 val file = File(entryName)
 
                 when (file.extension) {
@@ -81,7 +94,15 @@ class ApkmStrategy(private val json: Json, private val pendingApkSignatureAnalyz
                                 },
                             )
                         } else {
-                            val signatureInfo = if (checkSignatures) {
+                            val parsedBase = if (data.networkAppNameSource == NetworkAppNameSource.ApkResources ||
+                                (icon == null && data.shouldLoadApkIcon())
+                            ) {
+                                apkParser.parseArchiveEntryFull(archive, entry, data, extra)
+                                    .filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
+                            } else {
+                                null
+                            }
+                            val signatureInfo = parsedBase?.signatureInfo ?: if (checkSignatures) {
                                 pendingApkSignatureAnalyzer.analyze(entryData, extra.cacheDirectory, checkSourceStamp = extra.checkSourceStamp)
                             } else {
                                 null
@@ -92,8 +113,8 @@ class ApkmStrategy(private val json: Json, private val pendingApkSignatureAnalyz
                                 data = entryData,
                                 versionCode = manifest.versionCode,
                                 versionName = manifest.versionName,
-                                label = manifest.label,
-                                icon = icon,
+                                label = parsedBase?.label ?: manifest.label,
+                                icon = icon ?: parsedBase?.icon,
                                 targetSdk = null,
                                 minSdk = manifest.minApi,
                                 sourceType = extra.dataType,

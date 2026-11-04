@@ -922,8 +922,6 @@
     <string name="exception_uninstall_failed_hyperos_system_app">HyperOS не дозволяє деінсталювати цей застосунок!</string>
     <string name="exception_install_failed_multi_arch_not_match_all_native_abis">Упакований нативний код не відповідав усім нативним ABI, що підтримувалися системою</string>
     <string name="installer_writing">Записую…</string>
-    <string name="config_check_split_package_signatures">Аналізуйте підписи split пакетів</string>
-    <string name="config_check_split_package_signatures_desc">Аналізуйте APK сигнатури у APKS, APKM та XAPK пакетах. Це може значно збільшити час аналізу</string>
     <string name="network_access">Доступ до мережі</string>
     <string name="allow_internet_access">Дозволити доступ до Інтернету</string>
     <string name="allow_internet_access_desc">Дозволити InstallerX Revived перевіряти наявність оновлень та завантажувати APK з мережевих посилань</string>
