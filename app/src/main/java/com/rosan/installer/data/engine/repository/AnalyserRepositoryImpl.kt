@@ -131,7 +131,7 @@ class AnalyserRepositoryImpl(
                 .map { it.app }
                 .filter { it is AppEntity.BaseEntity || it is AppEntity.SplitEntity }
                 .any { entity ->
-                    extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureAnalysisResult()
+                    extra.checkAppSignature && entity.hasSignatureAnalysisResult()
                 }
 
             val signatureStatus = if (signatureCheckPerformed) {
@@ -203,7 +203,7 @@ class AnalyserRepositoryImpl(
 }
 
 internal fun shouldLoadInstalledSignatures(entities: List<AppEntity>, extra: AnalyseExtraEntity): Boolean = entities.any { entity ->
-    extra.shouldCheckAppSignatures(entity.sourceType) && entity.hasSignatureMetadata()
+    extra.checkAppSignature && entity.hasSignatureMetadata()
 }
 
 private fun AppEntity.hasSignatureMetadata(): Boolean = when (this) {

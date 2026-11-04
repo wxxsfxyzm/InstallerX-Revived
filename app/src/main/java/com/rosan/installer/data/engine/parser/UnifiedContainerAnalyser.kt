@@ -151,5 +151,5 @@ internal fun prepareStreamingContainerAnalysis(data: DataEntity, type: DataType,
     }
     // Do not materialize a remote archive just for pre-install signature verification.
     // Android verifies every selected APK when the installation session is committed.
-    return extra.copy(checkAppSignature = false, checkSplitPackageSignatures = false)
+    return extra.copy(checkAppSignature = false)
 }

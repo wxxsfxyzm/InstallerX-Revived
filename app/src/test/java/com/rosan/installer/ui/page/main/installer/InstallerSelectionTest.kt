@@ -585,7 +585,6 @@ class InstallerSelectionTest {
             showOPPOSpecial = false,
             checkAppSignature = false,
             checkSourceStamp = true,
-            checkSplitPackageSignatures = false,
             showSignatureInfoOnMatch = false,
             showSignatureDetails = false,
             installerRequireBiometricAuth = com.rosan.installer.domain.settings.model.config.BiometricAuthMode.entries.first(),

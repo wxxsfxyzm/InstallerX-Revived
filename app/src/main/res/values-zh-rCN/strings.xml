@@ -182,11 +182,9 @@
     <string name="installer_settings_xposed_detection">Xposed 检测</string>
     <string name="installer_settings_signature_check">签名检查</string>
     <string name="config_check_app_signature">检查应用签名</string>
-    <string name="config_check_app_signature_desc">安装前分析 APK 签名，并与已安装应用进行对比</string>
+    <string name="config_check_app_signature_desc">安装前分析 APK 和分包签名，并与已安装应用对比；流式处理仅获取最小所需信息。</string>
     <string name="config_check_source_stamp">分析来源戳</string>
     <string name="config_check_source_stamp_desc">在签名详情中包含来源戳验证状态、证书和时间戳。</string>
-    <string name="config_check_split_package_signatures">分析拆分包签名</string>
-    <string name="config_check_split_package_signatures_desc">完整验证 APKS、APKM、XAPK 中的 APK 签名，可能显著增加耗时；流式处理仅获取最小所需信息。</string>
     <string name="config_show_signature_info_on_match">正常签名状态也显示信息</string>
     <string name="config_show_signature_info_on_match_desc">签名一致或全新安装时，也在安装界面显示签名提示</string>
     <string name="config_show_signature_details">显示签名详情</string>
@@ -373,7 +371,7 @@
     <string name="config_auto_delete_zip_desc">不仅删除安装包，还删除包含安装包的压缩文件。</string>
     <string name="config_network_source_mode">网络源处理</string>
     <string name="network_source_mode_warning_title">签名验证限制</string>
-    <string name="network_source_mode_warning_desc">“自动”和“仅流式”模式可能流式处理 APK 和分包归档。对于流式处理的单个 APK，InstallerX 无法执行完整 APK 验签，因此配置中的“禁止安装签名不匹配的应用”无法生效。InstallerX 仍会读取并比较签名证书：证书一致时放行；证书不同或无法确认兼容性时，按“禁止安装签名未知的应用”设置处理。流式处理的 APKS、APKM、XAPK 仅在可按范围读取时获取 base APK 签名信息，不逐个完整验签，也不为签名分析下载归档；本地或完整下载的归档仍按分包签名检查设置处理。Android 系统仍会在安装时执行最终签名验证。</string>
+    <string name="network_source_mode_warning_desc">“自动”和“仅流式”模式可能流式处理 APK 和分包归档。对于流式处理的单个 APK，InstallerX 无法执行完整 APK 验签，因此配置中的“禁止安装签名不匹配的应用”无法生效。InstallerX 仍会读取并比较签名证书：证书一致时放行；证书不同或无法确认兼容性时，按“禁止安装签名未知的应用”设置处理。流式处理的 APKS、APKM、XAPK 仅在可按范围读取时获取 base APK 签名信息，不逐个完整验签，也不为签名分析下载归档；本地或完整下载的归档仍按签名检查总开关设置处理。Android 系统仍会在安装时执行最终签名验证。</string>
     <string name="config_network_source_cache">完整下载</string>
     <string name="config_network_source_cache_desc">分析前完整下载，兼容性最好</string>
     <string name="config_network_source_smart">自动</string>

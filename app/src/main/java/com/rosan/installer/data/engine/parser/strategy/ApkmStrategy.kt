@@ -39,8 +39,7 @@ class ApkmStrategy(
     ): List<AppEntity> {
         val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
-        val checkSignatures = extra.shouldCheckAppSignatures()
-        val baseExtra = if (checkSignatures) extra else extra.copy(checkAppSignature = false)
+        val checkSignatures = extra.checkAppSignature
 
         // 1. Parse Info
         val infoEntry = archive.getEntry("info.json") ?: return emptyList()
@@ -98,7 +97,7 @@ class ApkmStrategy(
                             val parsedBase = if (data.networkAppNameSource == NetworkAppNameSource.ApkResources ||
                                 (icon == null && data.shouldLoadApkIcon())
                             ) {
-                                apkParser.parseArchiveEntryFull(archive, entry, data, baseExtra)
+                                apkParser.parseArchiveEntryFull(archive, entry, data, extra)
                                     .filterIsInstance<AppEntity.BaseEntity>().firstOrNull()
                             } else {
                                 null

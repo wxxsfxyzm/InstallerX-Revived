@@ -75,7 +75,6 @@ class AppSettingsRepositoryImpl(
             showOPPOSpecial = prefs[AppDataStore.DIALOG_SHOW_OPPO_SPECIAL] ?: false,
             checkAppSignature = prefs[AppDataStore.CHECK_APP_SIGNATURE] ?: true,
             checkSourceStamp = prefs[AppDataStore.CHECK_SOURCE_STAMP] ?: true,
-            checkSplitPackageSignatures = prefs[AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES] ?: false,
             showSignatureInfoOnMatch = prefs[AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH] ?: false,
             showSignatureDetails = prefs[AppDataStore.SHOW_SIGNATURE_DETAILS] ?: false,
             installerRequireBiometricAuth = BiometricAuthMode.fromValueOrDefault(
@@ -325,8 +324,6 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.CheckAppSignature -> AppDataStore.CHECK_APP_SIGNATURE
 
         BooleanSetting.CheckSourceStamp -> AppDataStore.CHECK_SOURCE_STAMP
-
-        BooleanSetting.CheckSplitPackageSignatures -> AppDataStore.CHECK_SPLIT_PACKAGE_SIGNATURES
 
         BooleanSetting.ShowSignatureInfoOnMatch -> AppDataStore.SHOW_SIGNATURE_INFO_ON_MATCH
 

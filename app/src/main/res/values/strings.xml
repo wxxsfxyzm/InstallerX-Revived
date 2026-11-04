@@ -189,11 +189,9 @@
     <string name="installer_settings_xposed_detection">Xposed Detection</string>
     <string name="installer_settings_signature_check">Signature checks</string>
     <string name="config_check_app_signature">Check app signatures</string>
-    <string name="config_check_app_signature_desc">Analyze APK signatures before installation and compare them with installed apps</string>
+    <string name="config_check_app_signature_desc">Analyze and compare APK and split-package signatures. Streaming retrieves only the minimum required information.</string>
     <string name="config_check_source_stamp">Analyze source stamps</string>
     <string name="config_check_source_stamp_desc">Include source stamp verification status, certificates, and timestamps in signature details.</string>
-    <string name="config_check_split_package_signatures">Analyze split package signatures</string>
-    <string name="config_check_split_package_signatures_desc">Fully verify APK signatures inside APKS, APKM and XAPK; this can be slow. Streaming only retrieves the minimum required information.</string>
     <string name="config_show_signature_info_on_match">Show info for normal signature states</string>
     <string name="config_show_signature_info_on_match_desc">Show signature notices for matching signatures and new installs</string>
     <string name="config_show_signature_details">Show signature details</string>
@@ -384,7 +382,7 @@
     <string name="config_auto_delete_zip_desc">In addition to deleting the installation package, also delete the compressed file containing the installation package.</string>
     <string name="config_network_source_mode">Network source handling</string>
     <string name="network_source_mode_warning_title">Signature verification limitations</string>
-    <string name="network_source_mode_warning_desc">Automatic and Stream only modes may stream APKs and split-package archives. For streamed single APKs, InstallerX Revived cannot perform full APK signature verification, so the profile setting that blocks apps with mismatched signatures cannot take effect. InstallerX Revived still reads and compares signing certificates: matching certificates are allowed, while different certificates or compatibility that cannot be confirmed follow the profile setting for blocking unknown signatures. Streamed APKS, APKM, and XAPK archives only read base APK signing information when accessible, without fully verifying each APK or downloading the archive for signature analysis. Local or fully downloaded archives follow the split-package signature check setting. Android still performs final signature verification during installation.</string>
+    <string name="network_source_mode_warning_desc">Automatic and Stream only modes may stream APKs and split-package archives. For streamed single APKs, InstallerX Revived cannot perform full APK signature verification, so the profile setting that blocks apps with mismatched signatures cannot take effect. InstallerX Revived still reads and compares signing certificates: matching certificates are allowed, while different certificates or compatibility that cannot be confirmed follow the profile setting for blocking unknown signatures. Streamed APKS, APKM, and XAPK archives only read base APK signing information when accessible, without fully verifying each APK or downloading the archive for signature analysis. Local or fully downloaded archives follow the signature check setting. Android still performs final signature verification during installation.</string>
     <string name="config_network_source_cache">Full download</string>
     <string name="config_network_source_cache_desc">Download the complete source before analysis, Maximum Compatibility</string>
     <string name="config_network_source_smart">Automatic</string>

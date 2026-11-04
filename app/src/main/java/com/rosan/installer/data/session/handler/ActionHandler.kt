@@ -369,17 +369,11 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         val checkSourceStamp = appSettingsRepo.getBoolean(BooleanSetting.CheckSourceStamp, true).first()
         Timber.d("[id=$sessionId] Source stamp analysis enabled: $checkSourceStamp")
 
-        val checkSplitPackageSignatures = appSettingsRepo
-            .getBoolean(BooleanSetting.CheckSplitPackageSignatures, false)
-            .first()
-        Timber.d("[id=$sessionId] Split package signature checks enabled: $checkSplitPackageSignatures")
-
         val extra = AnalyseExtraEntity(
             cacheDirectory = cacheDirectory,
             isModuleFlashEnabled = isModuleEnabled,
             checkAppSignature = checkAppSignature,
             checkSourceStamp = checkSourceStamp,
-            checkSplitPackageSignatures = checkSplitPackageSignatures,
         )
 
         val materializedSources = mutableSetOf<AnalysisMaterializationKey>()

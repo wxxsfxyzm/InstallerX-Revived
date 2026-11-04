@@ -81,7 +81,7 @@ class ContainerIconFallbackTest {
                     val extra = prepareStreamingContainerAnalysis(
                         source,
                         type,
-                        AnalyseExtraEntity(directory.path, dataType = type, checkAppSignature = true, checkSplitPackageSignatures = true),
+                        AnalyseExtraEntity(directory.path, dataType = type, checkAppSignature = true),
                     )
                     if (loadIcon) {
                         val error = assertFailsWith<DescriptorAnalysisUnsupportedException> {

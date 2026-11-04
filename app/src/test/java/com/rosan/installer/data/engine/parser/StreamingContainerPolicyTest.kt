@@ -16,13 +16,11 @@ class StreamingContainerPolicyTest {
     private val extra = AnalyseExtraEntity(cacheDirectory = "unused")
 
     @Test
-    fun `streaming splits skip full signature verification even when both settings are enabled`() {
+    fun `streaming splits skip full verification while the signature master switch is enabled`() {
         for (type in listOf(DataType.APKS, DataType.APKM, DataType.XAPK)) {
-            val requested = extra.copy(dataType = type, checkSplitPackageSignatures = true)
+            val requested = extra.copy(dataType = type)
             val effective = prepareStreamingContainerAnalysis(source, type, requested)
             assertFalse(effective.checkAppSignature)
-            assertFalse(effective.checkSplitPackageSignatures)
-            assertFalse(effective.shouldCheckAppSignatures())
             assertFalse(prepareStreamingContainerAnalysis(source, type, extra).checkAppSignature)
         }
     }
@@ -36,7 +34,7 @@ class StreamingContainerPolicyTest {
 
     @Test
     fun `local archives and the existing single APK path retain their policies`() {
-        val verify = extra.copy(checkSplitPackageSignatures = true)
+        val verify = extra.copy(checkAppSignature = true)
         for (type in DataType.entries) {
             assertSame(verify, prepareStreamingContainerAnalysis(DataEntity.FileEntity("local.zip"), type, verify))
             assertSame(verify, prepareStreamingContainerAnalysis(descriptor(network = false), type, verify))

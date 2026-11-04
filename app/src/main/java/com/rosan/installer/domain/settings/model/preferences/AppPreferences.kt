@@ -31,7 +31,6 @@ data class AppPreferences(
     val showOPPOSpecial: Boolean,
     val checkAppSignature: Boolean,
     val checkSourceStamp: Boolean,
-    val checkSplitPackageSignatures: Boolean,
     val showSignatureInfoOnMatch: Boolean,
     val showSignatureDetails: Boolean,
     val installerRequireBiometricAuth: BiometricAuthMode,

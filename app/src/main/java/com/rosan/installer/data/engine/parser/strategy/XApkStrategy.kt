@@ -48,8 +48,7 @@ class XApkStrategy(
     ): List<AppEntity> {
         val archive = requireNotNull(zipFile)
         require(data is DataEntity.FileEntity)
-        val checkSignatures = extra.shouldCheckAppSignatures()
-        val baseExtra = if (checkSignatures) extra else extra.copy(checkAppSignature = false)
+        val checkSignatures = extra.checkAppSignature
 
         // 1. Parse Manifest
         val manifestEntry = archive.getEntry("manifest.json") ?: return emptyList()
@@ -112,7 +111,7 @@ class XApkStrategy(
                         if (resolvedLabel.isNullOrBlank() || data.networkAppNameSource == NetworkAppNameSource.ApkResources ||
                             (resolvedIcon == null && data.shouldLoadApkIcon())
                         ) {
-                            val parsedEntities = apkParser.parseArchiveEntryFull(archive, entry, data, baseExtra)
+                            val parsedEntities = apkParser.parseArchiveEntryFull(archive, entry, data, extra)
                             val parsedBase = parsedEntities.firstOrNull { it is AppEntity.BaseEntity } as? AppEntity.BaseEntity
 
                             if (parsedBase != null) {
