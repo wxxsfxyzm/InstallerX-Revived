@@ -43,13 +43,12 @@ class ApksStrategy(private val apkParser: ApkParser, private val pendingApkSigna
         }
 
         Timber.d("ApksStrategy: Base APK identified: ${baseEntry.name}")
-        val checkSignatures = extra.shouldCheckAppSignatures()
-        val baseExtra = if (checkSignatures) extra else extra.copy(checkAppSignature = false)
+        val checkSignatures = extra.checkAppSignature
 
         // 2. Parse Base APK (Heavy operation - needs Icon/Label)
         val baseDeferred = async {
             Timber.d("ApksStrategy: Parsing base entry full details...")
-            apkParser.parseArchiveEntryFull(archive, baseEntry, data, baseExtra)
+            apkParser.parseArchiveEntryFull(archive, baseEntry, data, extra)
         }
 
         // 3. Process Splits (Lightweight operation)
@@ -94,7 +93,7 @@ class ApksStrategy(private val apkParser: ApkParser, private val pendingApkSigna
 
         val splits = splitEntities.map { (entry, name) ->
             val metadata = name.parseSplitMetadata()
-            val entryData = archive.toDataEntity(entry, data)
+            val entryData = archive.toDataEntity(entry, data, deferLocalHeader = true)
 
             AppEntity.SplitEntity(
                 packageName = finalBase.packageName,

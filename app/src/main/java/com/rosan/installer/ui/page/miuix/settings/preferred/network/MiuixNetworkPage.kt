@@ -38,12 +38,14 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.HttpProfile
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkSettingsViewModel
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCustomGithubProxyUrlDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixGithubUpdateChannelSelectionDialog
+import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
@@ -209,6 +211,20 @@ fun MiuixNetworkPage(useBlur: Boolean, viewModel: NetworkSettingsViewModel = koi
                                 }
                             },
                         )
+                        if (uiState.networkSourceMode == NetworkSourceMode.Automatic) {
+                            MiuixNetworkAppNameSourcePreference(
+                                source = uiState.networkAppNameSource,
+                                onChange = { viewModel.dispatch(NetworkSettingsAction.ChangeAppNameSource(it)) },
+                            )
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.network_load_app_icon),
+                                description = stringResource(R.string.network_load_app_icon_desc),
+                                checked = uiState.networkLoadAppIcon,
+                                onCheckedChange = {
+                                    viewModel.dispatch(NetworkSettingsAction.ChangeLoadAppIcon(it))
+                                },
+                            )
+                        }
                         val allowSecureString = stringResource(R.string.lab_http_profile_secure)
                         val allowLocalString = stringResource(R.string.lab_http_profile_local)
                         val allowAllString = stringResource(R.string.lab_http_profile_all)
@@ -304,16 +320,32 @@ private fun NetworkSourceModeWarningDialog(
 }
 
 @Composable
+private fun MiuixNetworkAppNameSourcePreference(source: NetworkAppNameSource, onChange: (NetworkAppNameSource) -> Unit) {
+    WindowSpinnerPreference(
+        title = stringResource(R.string.network_app_name_source),
+        summary = stringResource(
+            if (source == NetworkAppNameSource.ServerFilename) R.string.network_app_name_server_desc else R.string.network_app_name_resources_desc,
+        ),
+        items = listOf(
+            DropdownItem(title = stringResource(R.string.network_app_name_server)),
+            DropdownItem(title = stringResource(R.string.network_app_name_resources)),
+        ),
+        selectedIndex = NetworkAppNameSource.entries.indexOf(source),
+        onSelectedIndexChange = { NetworkAppNameSource.entries.getOrNull(it)?.let(onChange) },
+    )
+}
+
+@Composable
 private fun MiuixNetworkSourceModePreference(currentMode: NetworkSourceMode, onModeChange: (NetworkSourceMode) -> Unit) {
     val modes = linkedMapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache),
-        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage),
+        NetworkSourceMode.Automatic to stringResource(R.string.config_network_source_smart),
+        NetworkSourceMode.StreamOnly to stringResource(R.string.config_network_source_low_storage),
     )
     val descriptions = mapOf(
         NetworkSourceMode.Cache to stringResource(R.string.config_network_source_cache_desc),
-        NetworkSourceMode.Smart to stringResource(R.string.config_network_source_smart_desc),
-        NetworkSourceMode.LowStorage to stringResource(R.string.config_network_source_low_storage_desc),
+        NetworkSourceMode.Automatic to stringResource(R.string.config_network_source_smart_desc),
+        NetworkSourceMode.StreamOnly to stringResource(R.string.config_network_source_low_storage_desc),
     )
     val entries = modes.values.map { DropdownItem(title = it) }
 

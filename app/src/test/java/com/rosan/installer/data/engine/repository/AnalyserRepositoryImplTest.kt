@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 
 class AnalyserRepositoryImplTest {
     @Test
-    fun `signing block metadata requests installed signatures`() {
+    fun `APK and split signing block metadata request installed certificates under the master switch`() {
         val entity = AppEntity.BaseEntity(
             packageName = "example.app",
             sharedUserId = null,
@@ -39,8 +39,11 @@ class AnalyserRepositoryImplTest {
         )
         val disabled = enabled.copy(checkAppSignature = false)
 
-        assertTrue(shouldLoadInstalledSignatures(listOf(entity), enabled))
-        assertFalse(shouldLoadInstalledSignatures(listOf(entity), disabled))
-        assertFalse(shouldLoadInstalledSignatures(listOf(entity.copy(signatureInfo = null)), enabled))
+        for (type in listOf(DataType.APK, DataType.APKS, DataType.APKM, DataType.XAPK)) {
+            val base = entity.copy(sourceType = type)
+            assertTrue(shouldLoadInstalledSignatures(listOf(base), enabled), "Missing installed certificate for $type")
+            assertFalse(shouldLoadInstalledSignatures(listOf(base), disabled))
+            assertFalse(shouldLoadInstalledSignatures(listOf(base.copy(signatureInfo = null)), enabled))
+        }
     }
 }

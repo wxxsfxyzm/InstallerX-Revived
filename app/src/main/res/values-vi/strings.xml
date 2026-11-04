@@ -894,7 +894,6 @@
     <string name="unarchive_failed">Khôi phục thất bại</string>
     <string name="install_confirm_permissions_tip">Phê duyệt yêu cầu xác nhận quyền từ %1$s?</string>
     <string name="uninstall_archive_message">Gỡ cài đặt ứng dụng đã lưu trữ này khỏi thiết bị này</string>
-    <string name="config_check_split_package_signatures_desc">Phân tích chữ ký APK trong các gói APKS, APKM và XAPK. Điều này có thể làm tăng đáng kể thời gian phân tích</string>
     <string name="uninstall_archive">Gỡ cài đặt Lưu trũ</string>
     <string name="install_confirm_pre_approval_tip">Cho phép %1$s phê duyệt trước khi cài đặt ứng dụng này?</string>
     <string name="unarchive_error_offline_message">Hãy kết nối với internet, sau đó thử khôi phục lại</string>
@@ -921,7 +920,6 @@
     <string name="unarchive_error_action_required_title">Yêu cầu hành động</string>
     <string name="unarchive_error_installer_uninstalled_title">%1$s không khả dụng</string>
     <string name="install_confirm_approved_toast">Đã phê duyệt yêu cầu cài đặt của %1$s</string>
-    <string name="config_check_split_package_signatures">Phân tích chữ ký gói chia tách</string>
     <string name="exception_install_failed_blocked_by_profile_signature_mismatch">Hồ sơ chặn cài đặt các ứng dụng với một chữ ký khác</string>
     <string name="unarchive_error_action_required_message">Hành động bổ sung là bắt buộc trước khi ứng dụng này có thể được khôi phục</string>
     <string name="network_access">Truy cập mạng</string>

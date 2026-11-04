@@ -26,9 +26,11 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.XposedModuleInfo
 import com.rosan.installer.domain.engine.model.source.AnalysisMaterializationPolicy
 import com.rosan.installer.domain.engine.model.source.DataEntity
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.io.File
 import java.io.IOException
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import timber.log.Timber
@@ -65,6 +67,21 @@ class ApkParser(
         }
 
         return try {
+            if (fileEntity is DataEntity.FileDescriptorEntity && fileEntity.isNetworkSource && !fileEntity.preInstallIconAnalysis &&
+                fileEntity.networkAppNameSource != NetworkAppNameSource.ApkResources
+            ) {
+                val manifestStartedAt = System.nanoTime()
+                val apk = archive ?: throw IOException("Manifest-only analysis requires an APK ZIP directory")
+                val manifest = apk.getEntry("AndroidManifest.xml") ?: throw IOException("APK has no AndroidManifest.xml")
+                val bytes = apk.openEntry(manifest).use { readBoundedManifest(it) }
+                val entity = parseManifestBytes(bytes, fileEntity, extra, apk)
+                Timber.d(
+                    "ApkParser timing: manifest-only analysis finished in ${manifestStartedAt.elapsedMillis()} ms " +
+                        "for $sourceContext",
+                )
+                return listOf(entity)
+            }
+
             val architectureStartedAt = System.nanoTime()
             val bestArch = archive?.let {
                 analyseAndSelectBestArchitecture(it, DeviceConfig.supportedArchitectures)
@@ -139,6 +156,10 @@ class ApkParser(
     ): List<AppEntity> {
         val entryData = zipFile.toDataEntity(entry, parentData)
 
+        if (parentData is DataEntity.FileDescriptorEntity && parentData.isNetworkSource) {
+            return parseRemoteArchiveEntry(entryData, parentData, extra)
+        }
+
         // A stored entry from a retained descriptor is already a bounded APK view. Keep the
         // original fd and let ApkAssets/apksig read that range directly instead of extracting it.
         if (entryData is DataEntity.FileDescriptorEntity &&
@@ -172,7 +193,7 @@ class ApkParser(
                     "bytes=${tempFile.length()}, elapsedMs=${extractionStartedAt.elapsedMillis()}",
             )
 
-            val tempData = DataEntity.FileEntity(tempFile.absolutePath).apply {
+            val tempData = DataEntity.FileEntity(tempFile.absolutePath, networkLoadAppIcon = parentData.networkLoadAppIcon).apply {
                 source = entryData
             }
 
@@ -187,6 +208,64 @@ class ApkParser(
             Timber.e(e, "Failed to parse zip entry: ${entry.name}")
             tempFile.delete()
             emptyList()
+        }
+    }
+
+    private fun parseRemoteArchiveEntry(
+        entryData: DataEntity,
+        parent: DataEntity.FileDescriptorEntity,
+        extra: AnalyseExtraEntity,
+    ): List<AppEntity> = try {
+        if (extra.checkAppSignature) throw IOException("Full split-package signature verification requires a cached source")
+        if (parent.preInstallIconAnalysis || parent.networkAppNameSource == NetworkAppNameSource.ApkResources) {
+            if (entryData !is DataEntity.FileDescriptorEntity ||
+                (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && entryData.startOffset != 0L)
+            ) {
+                throw IOException("Loading resources from this base APK requires a cached source")
+            }
+            parseFull(entryData, extra).also {
+                if (it.isEmpty()) throw IOException("Unable to load remote base APK resources")
+            }
+        } else if (entryData is DataEntity.FileDescriptorEntity) {
+            unifiedZipFileProvider.open(entryData, allowLocalHeaderFallback = false).use { apk ->
+                val manifest = apk.getEntry("AndroidManifest.xml") ?: throw IOException("Base APK has no AndroidManifest.xml")
+                val bytes = apk.openEntry(manifest).use { readBoundedManifest(it) }
+                listOf(parseManifestBytes(bytes, entryData, extra, apk))
+            }
+        } else {
+            val bytes = requireNotNull(entryData.getInputStream()).use { readStreamingApkManifest(it) }
+            listOf(parseManifestBytes(bytes, entryData, extra, null))
+        }
+    } catch (error: CancellationException) {
+        throw error
+    } catch (error: Exception) {
+        // The session owns fallback: Smart retains the entire source once; Low Storage rejects it.
+        throw DescriptorAnalysisUnsupportedException(parent, error)
+    }
+
+    private fun parseManifestBytes(
+        bytes: ByteArray,
+        data: DataEntity,
+        extra: AnalyseExtraEntity,
+        archive: UnifiedZipFile?,
+    ): AppEntity {
+        val xmlBlockClass = Class.forName("android.content.res.XmlBlock")
+        val constructor = reflect.getDeclaredConstructor(xmlBlockClass, ByteArray::class.java)
+            ?: throw IOException("XmlBlock constructor is unavailable")
+        val newParser = reflect.getDeclaredMethod("newParser", xmlBlockClass)
+            ?: throw IOException("XmlBlock parser is unavailable")
+        return (constructor.newInstance(bytes) as AutoCloseable).use { block ->
+            loadAppEntity(
+                resources = null,
+                theme = null,
+                openManifestParser = { newParser.invoke(block) as XmlResourceParser },
+                zipFile = archive,
+                path = data.toString(),
+                data = data,
+                extra = extra,
+                arch = archive?.let { analyseAndSelectBestArchitecture(it, DeviceConfig.supportedArchitectures) }
+                    ?: Architecture.UNKNOWN,
+            )
         }
     }
 
@@ -379,7 +458,7 @@ class ApkParser(
     }
 
     private fun loadAppEntity(
-        resources: Resources,
+        resources: Resources?,
         theme: Resources.Theme?,
         openManifestParser: () -> XmlResourceParser,
         zipFile: UnifiedZipFile?,
@@ -397,7 +476,6 @@ class ApkParser(
         var installLocation: Int? = null
         var label: String? = null
         var icon: Drawable? = null
-        var roundIcon: Drawable? = null
         var minSdk: String? = null
         var targetSdk: String? = null
         val permissions = mutableListOf<String>()
@@ -482,18 +560,29 @@ class ApkParser(
                                     manifestParser.getAndroidAttributeResourceValue("label", android.R.attr.label),
                                     manifestParser.getAndroidAttributeValue("label", android.R.attr.label),
                                 )
-                                icon = resolveDrawable(
-                                    resources,
-                                    theme,
-                                    manifestParser.getAndroidAttributeResourceValue("icon", android.R.attr.icon),
-                                    "icon",
-                                )
-                                roundIcon = resolveDrawable(
-                                    resources,
-                                    theme,
-                                    manifestParser.getAndroidAttributeResourceValue("roundIcon", android.R.attr.roundIcon),
-                                    "roundIcon",
-                                )
+                                icon = if (resources != null) {
+                                    resolveApkIcon(
+                                        data = data,
+                                        loadPrimaryIcon = {
+                                            resolveDrawable(
+                                                resources,
+                                                theme,
+                                                manifestParser.getAndroidAttributeResourceValue("icon", android.R.attr.icon),
+                                                "icon",
+                                            )
+                                        },
+                                        loadRoundIcon = {
+                                            resolveDrawable(
+                                                resources,
+                                                theme,
+                                                manifestParser.getAndroidAttributeResourceValue("roundIcon", android.R.attr.roundIcon),
+                                                "roundIcon",
+                                            )
+                                        },
+                                    )
+                                } else {
+                                    null
+                                }
 
                                 // Extract description for Xposed fallback
                                 appDescription = resolveString(
@@ -590,7 +679,7 @@ class ApkParser(
                 versionCode = versionCode,
                 versionName = versionName,
                 label = label,
-                icon = icon ?: roundIcon,
+                icon = icon,
                 targetSdk = targetSdk,
                 minSdk = minSdk,
                 minOsdkVersion = minOsdkVersion,
@@ -652,8 +741,9 @@ class ApkParser(
         return if (index >= 0) getAttributeIntValue(index, defaultValue) else defaultValue
     }
 
-    private fun resolveString(res: Resources, resId: Int, rawValue: String?): String? {
+    private fun resolveString(res: Resources?, resId: Int, rawValue: String?): String? {
         if (resId == ResourcesCompat.ID_NULL) return rawValue
+        if (res == null) return null
         return try {
             res.getString(resId)
         } catch (_: Exception) {
@@ -717,6 +807,18 @@ class ApkParser(
             ?: apkArchs.firstOrNull { it == Architecture.X86 }
             ?: apkArchs.firstOrNull()
     }
+}
+
+/** Keep icon resource reads lazy so remote analysis can skip both drawable variants. */
+internal fun <T> resolveApkIcon(data: DataEntity, loadPrimaryIcon: () -> T?, loadRoundIcon: () -> T?): T? {
+    if (!data.shouldLoadApkIcon()) return null
+    return loadPrimaryIcon() ?: loadRoundIcon()
+}
+
+internal fun DataEntity.shouldLoadApkIcon(): Boolean = when (this) {
+    is DataEntity.FileDescriptorEntity -> preInstallIconAnalysis
+    is DataEntity.FileEntity -> networkLoadAppIcon ?: true
+    else -> true
 }
 
 private fun DataEntity.FileEntity.apkLogContext(): String = buildString {

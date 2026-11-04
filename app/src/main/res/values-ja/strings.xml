@@ -902,8 +902,6 @@
     <string name="exception_install_failed_blocked_by_profile_signature_unknown">プロファイルは、署名を検証できないアプリのインストールをブロックします</string>
     <string name="installer_writing">書き込み中…</string>
     <string name="tag_signature_match">署名の一致</string>
-    <string name="config_check_split_package_signatures">分割パッケージの署名を分析</string>
-    <string name="config_check_split_package_signatures_desc">APKS、APKM、および XAPK パッケージ内の APK 署名を分析します。これにより、分析時間が大幅に増加する可能性があります</string>
     <string name="config_auto_approve_session_disabled_desc">「プラットフォームのインストール ポリシーを遵守」が有効になっている場合は利用できません</string>
     <string name="config_auto_approve_session_warning">このスイッチを有効にすると、このプロファイルの適用範囲内のアプリは、ユーザーによる明示的な許可なしに、バックグラウンドでアプリをインストールできるようになります。有効にする際は十分にご注意ください。</string>
     <string name="config_customize_install_reason_disabled_desc">「プラットフォームのインストール ポリシーを遵守」が有効になっている場合、デフォルトは「ユーザー」になります</string>

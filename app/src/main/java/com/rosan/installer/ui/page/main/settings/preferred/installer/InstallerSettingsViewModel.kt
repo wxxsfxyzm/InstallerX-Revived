@@ -37,7 +37,6 @@ class InstallerSettingsViewModel(
             showOPPOSpecial = prefs.showOPPOSpecial,
             checkAppSignature = prefs.checkAppSignature,
             checkSourceStamp = prefs.checkSourceStamp,
-            checkSplitPackageSignatures = prefs.checkSplitPackageSignatures,
             showSignatureInfoOnMatch = prefs.showSignatureInfoOnMatch,
             showSignatureDetails = prefs.showSignatureDetails,
             detectXposedModule = prefs.detectXposedModule,
@@ -80,13 +79,6 @@ class InstallerSettingsViewModel(
 
             is InstallerSettingsAction.ChangeCheckSourceStamp -> viewModelScope.launch {
                 updateSetting(BooleanSetting.CheckSourceStamp, action.check)
-            }
-
-            is InstallerSettingsAction.ChangeCheckSplitPackageSignatures -> viewModelScope.launch {
-                updateSetting(
-                    BooleanSetting.CheckSplitPackageSignatures,
-                    action.check,
-                )
             }
 
             is InstallerSettingsAction.ChangeShowSignatureInfoOnMatch -> viewModelScope.launch {

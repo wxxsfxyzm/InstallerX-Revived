@@ -2,6 +2,7 @@
 // Copyright (C) 2026 InstallerX Revived contributors
 package com.rosan.installer.domain.engine.model.source
 
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
@@ -53,6 +54,10 @@ class DataEntityInputStreamTest {
                 descriptorFactory = { error("descriptor is unused") },
                 preInstallSignatureAnalysis = false,
                 preInstallIdentityAnalysis = false,
+                preInstallIconAnalysis = false,
+                isNetworkSource = true,
+                networkAppNameSource = NetworkAppNameSource.ServerFilename,
+                networkFileName = "Server Name.apks",
                 analysisMaterializationPolicy =
                     AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
                 analysisMaterializationKey = materializationKey,
@@ -61,6 +66,10 @@ class DataEntityInputStreamTest {
             val subrange = entity.subrange(relativeOffset = 0L, subrangeLength = 1L)
             assertFalse(subrange.preInstallSignatureAnalysis)
             assertFalse(subrange.preInstallIdentityAnalysis)
+            assertFalse(subrange.preInstallIconAnalysis)
+            assertEquals(true, subrange.isNetworkSource)
+            assertEquals(NetworkAppNameSource.ServerFilename, subrange.networkAppNameSource)
+            assertEquals("Server Name.apks", subrange.networkFileName)
             assertEquals(
                 AnalysisMaterializationPolicy.RETAINED_SOURCE_REPLACEMENT,
                 subrange.analysisMaterializationPolicy,

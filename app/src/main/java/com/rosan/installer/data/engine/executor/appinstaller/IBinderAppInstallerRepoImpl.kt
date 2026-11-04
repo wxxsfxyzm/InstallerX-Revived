@@ -71,7 +71,7 @@ abstract class IBinderAppInstallerRepoImpl(
 
     protected abstract suspend fun iBinderWrapper(iBinder: IBinder): IBinder
 
-    private suspend fun resolvePackageInstallerBinder(): IPackageInstaller {
+    protected suspend fun resolvePackageInstallerBinder(): IPackageInstaller {
         val packageManager =
             IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
         return IPackageInstaller.Stub.asInterface(iBinderWrapper(packageManager.packageInstaller.asBinder()))
@@ -95,7 +95,7 @@ abstract class IBinderAppInstallerRepoImpl(
         InstallerMode.Custom -> installer ?: BuildConfig.APPLICATION_ID
     }
 
-    private suspend fun getPackageInstaller(config: ConfigModel): PackageInstaller {
+    protected open suspend fun getPackageInstaller(config: ConfigModel): PackageInstaller {
         val packageInstaller = resolvePackageInstallerBinder()
 
         // Resolve the target user ID based on config
@@ -131,7 +131,7 @@ abstract class IBinderAppInstallerRepoImpl(
         Dhizuku.getOwnerPackageName()
     }
 
-    private suspend fun setSessionIBinder(session: Session) {
+    protected open suspend fun setSessionIBinder(session: Session) {
         val iPackageInstallerSession = reflect.getValue<IInterface>(session, "mSession") ?: return
         val iBinder = iPackageInstallerSession.asBinder()
         reflect.setFieldValue(
@@ -298,7 +298,7 @@ abstract class IBinderAppInstallerRepoImpl(
             metadata.onPlatformSessionActiveChanged(createdSession.first, true)
             installIts(entities, session, progressWriter)
             onPhaseChanged(InstallPhase.INSTALLING)
-            commit(session)
+            commit(config, createdSession.first, session)
         } catch (e: Exception) {
             session?.abandon()
             throw e
@@ -390,6 +390,7 @@ abstract class IBinderAppInstallerRepoImpl(
         }
         // --- abiOverride End ---
 
+        prepareSessionCreation(config, params, respectPlatformInstallPolicy)
         val sessionId = packageInstaller.createSession(params)
         val session = packageInstaller.openSession(sessionId)
         setSessionIBinder(session)
@@ -463,8 +464,14 @@ abstract class IBinderAppInstallerRepoImpl(
         false
     }
 
+    protected open suspend fun prepareSessionCreation(
+        config: ConfigModel,
+        params: PackageInstaller.SessionParams,
+        respectPlatformInstallPolicy: Boolean,
+    ) = Unit
+
     @SuppressLint("RequestInstallPackagesPolicy")
-    private suspend fun commit(session: Session) {
+    protected open suspend fun commit(config: ConfigModel, sessionId: Int, session: Session) {
         val receiver = LocalIntentReceiver(reflect)
         session.commit(receiver.getIntentSender())
         PackageManagerUtil.installResultVerify(context, receiver)

@@ -10,6 +10,7 @@ import com.rosan.installer.data.engine.executor.appinstaller.DhizukuAppInstaller
 import com.rosan.installer.data.engine.executor.appinstaller.NoneAppInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appinstaller.ProcessAppInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appinstaller.ShizukuAppInstallerRepoImpl
+import com.rosan.installer.data.engine.executor.appinstaller.ShizukuNonAdbAppInstallerRepoImpl
 import com.rosan.installer.data.engine.executor.appinstaller.SystemAppInstallerRepoImpl
 import com.rosan.installer.data.engine.policy.PlatformInstallPolicyChecker
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
@@ -43,7 +44,7 @@ class AppInstallerRepositoryImpl(
     private val platformInstallPolicyChecker: PlatformInstallPolicyChecker,
     private val selfUpdateRecoveryRepository: SelfUpdateRecoveryRepository,
 ) : AppInstallerRepository {
-    override suspend fun resolveInstallerPackageName(config: ConfigModel): String? = executeWithRepo(config) { repo ->
+    override suspend fun resolveInstallerPackageName(config: ConfigModel): String? = executeWithRepo(config, resolveInstallRepo(config)) { repo ->
         repo.resolveInstallerPackageName(config)
     }
 
@@ -57,7 +58,7 @@ class AppInstallerRepositoryImpl(
         sharedUserIdExemption: List<String>,
         onProgress: suspend (InstallWriteProgress) -> Unit,
         onPhaseChanged: suspend (InstallPhase) -> Unit,
-    ) = executeWithRepo(config) { repo ->
+    ) = executeWithRepo(config, resolveInstallRepo(config)) { repo ->
         persistSelfUpdatePostInstallState(config, entities, metadata)
 
         val requestedRespectPlatformInstallPolicy =
@@ -230,9 +231,15 @@ class AppInstallerRepositoryImpl(
         appSettingsRepo,
     )
 
-    /**
-     * Resolve the InstallerRepo based on the provided
-     */
+    // Keep the experiment scoped to installation; uninstall and external approvals use resolveRepo.
+    private suspend fun resolveInstallRepo(config: ConfigModel): AppInstallerRepository = if (config.authorizer == Authorizer.Shizuku &&
+        appSettingsRepo.getBoolean(BooleanSetting.LabShizukuNonAdbInstall, false).first()
+    ) {
+        ShizukuNonAdbAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, appSettingsRepo)
+    } else {
+        resolveRepo(config)
+    }
+
     private fun resolveRepo(config: ConfigModel) = when (config.authorizer) {
         Authorizer.Shizuku -> ShizukuAppInstallerRepoImpl(context, reflect, deviceCapabilityProvider, postInstallTaskProvider, appSettingsRepo)
 

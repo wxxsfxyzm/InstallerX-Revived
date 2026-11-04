@@ -1,5 +1,6 @@
 package com.rosan.installer.domain.engine.model.source
 
+import com.rosan.installer.domain.settings.model.preferences.NetworkAppNameSource
 import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
@@ -35,7 +36,12 @@ sealed class DataEntity(open var source: DataEntity? = null) {
 
     fun getSourceTop(): DataEntity = source?.getSourceTop() ?: this
 
-    open class FileEntity(val path: String) : DataEntity() {
+    open class FileEntity(
+        val path: String,
+        val networkAppNameSource: NetworkAppNameSource? = null,
+        val networkFileName: String? = null,
+        val networkLoadAppIcon: Boolean? = null,
+    ) : DataEntity() {
         open fun openChannel(): SeekableByteChannel = FileChannel.open(File(path).toPath(), StandardOpenOption.READ)
 
         override fun getInputStream(): InputStream = File(path).inputStream()
@@ -55,12 +61,16 @@ sealed class DataEntity(open var source: DataEntity? = null) {
         val preInstallSignatureAnalysis: Boolean = true,
         val preInstallSigningBlockAnalysis: Boolean = false,
         val preInstallIdentityAnalysis: Boolean = true,
+        val preInstallIconAnalysis: Boolean = true,
+        val isNetworkSource: Boolean = false,
+        networkAppNameSource: NetworkAppNameSource? = null,
+        networkFileName: String? = null,
         val analysisMaterializationPolicy: AnalysisMaterializationPolicy =
             AnalysisMaterializationPolicy.TEMPORARY_CACHE,
         val analysisMaterializationKey: AnalysisMaterializationKey? = null,
         override val zipEntryMetadata: ZipEntryMetadata? = null,
         val archiveEntryName: String? = null,
-    ) : FileEntity(path),
+    ) : FileEntity(path, networkAppNameSource, networkFileName, preInstallIconAnalysis.takeIf { isNetworkSource }),
         ZipEntryMetadataSource {
         init {
             require(startOffset >= 0L) { "startOffset must be non-negative" }
@@ -117,6 +127,10 @@ sealed class DataEntity(open var source: DataEntity? = null) {
                 preInstallSignatureAnalysis = parent.preInstallSignatureAnalysis,
                 preInstallSigningBlockAnalysis = parent.preInstallSigningBlockAnalysis,
                 preInstallIdentityAnalysis = parent.preInstallIdentityAnalysis,
+                preInstallIconAnalysis = parent.preInstallIconAnalysis,
+                isNetworkSource = parent.isNetworkSource,
+                networkAppNameSource = parent.networkAppNameSource,
+                networkFileName = parent.networkFileName,
                 analysisMaterializationPolicy = parent.analysisMaterializationPolicy,
                 analysisMaterializationKey = parent.analysisMaterializationKey,
                 zipEntryMetadata = zipEntryMetadata,
@@ -150,7 +164,12 @@ sealed class DataEntity(open var source: DataEntity? = null) {
             }
             return try {
                 requireSupportedZipCompressionMethod(entry.method, entry.name)
-                ZipFileClosingInputStream(zipFile.getInputStream(entry), zipFile)
+                val input = ZipFileClosingInputStream(zipFile.getInputStream(entry), zipFile)
+                if (parent is FileDescriptorEntity && parent.isNetworkSource && entry.size >= 0L && entry.crc >= 0L) {
+                    CrcVerifyingInputStream(input, entry.size, entry.crc, entry.name)
+                } else {
+                    input
+                }
             } catch (error: Exception) {
                 zipFile.close()
                 throw error

@@ -136,6 +136,8 @@ enum class InstallErrorType(val legacyCode: Int, @param:StringRes val stringResI
     BLOCKED_BY_PROFILE_SIGNATURE_MISMATCH(5, R.string.exception_install_failed_blocked_by_profile_signature_mismatch),
     BLOCKED_BY_PROFILE_SIGNATURE_UNKNOWN(6, R.string.exception_install_failed_blocked_by_profile_signature_unknown),
 
+    NON_ADB_UNSUPPORTED_USER(7, R.string.exception_install_non_adb_unsupported_user),
+
     // --- Fallback for unknown status codes ---
     UNKNOWN(Int.MAX_VALUE, R.string.exception_install_failed_unknown),
     ;
