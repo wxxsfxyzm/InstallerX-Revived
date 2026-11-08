@@ -119,6 +119,9 @@
     <string name="theme_settings_miuix_custom_colors_desc">Customize theme colors in Miuix theme style</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Standard Material Design UI</string>
+    <string name="theme_settings_miuix_os_version">Miuix UI version</string>
+    <string name="theme_settings_miuix_os3">OS3</string>
+    <string name="theme_settings_miuix_os4">OS4</string>
     <string name="theme_settings_ui_engine">UI Engine</string>
     <string name="theme_settings_use_apple_floating_bar">Enable floating bottom bar</string>
     <string name="theme_settings_use_apple_floating_bar_desc">Display a floating style navigation bar at the bottom of the screen</string>

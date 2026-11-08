@@ -38,11 +38,12 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsViewModel
 import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationStyle
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixSpinnerPreference
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -51,9 +52,6 @@ import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -103,135 +101,138 @@ fun MiuixNotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSetti
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
+            InstallerMiuixTopAppBar(
+                backdrop = topBarBackdrop,
                 title = stringResource(R.string.notification_settings),
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navigator.pop() })
+                    InstallerMiuixBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-            ),
-            overscrollEffect = null,
+        InstallerMiuixBackdropSurface(
+            backdrop = topBarBackdrop,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.notification_style)) }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(
+                    start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                ),
+                overscrollEffect = null,
+            ) {
+                item { Spacer(modifier = Modifier.size(12.dp)) }
+                item { SmallTitle(stringResource(R.string.notification_style)) }
 
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    // 1. Notification style dropdown
-                    val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported
-
-                    WindowSpinnerPreference(
-                        title = stringResource(R.string.notification_style),
-                        // Show "unsupported" only if no advanced styles are available
-                        summary = if (isStyleSelectionEnabled) {
-                            styleNames.getOrNull(selectedIndex) ?: ""
-                        } else {
-                            stringResource(R.string.notification_style_unsupported_desc)
-                        },
-                        enabled = isStyleSelectionEnabled,
-                        items = spinnerEntries,
-                        selectedIndex = selectedIndex,
-                        onSelectedIndexChange = { index ->
-                            val selectedStyle = styleOptions[index]
-                            viewModel.dispatch(NotificationSettingsAction.ChangeStyle(selectedStyle))
-                        },
-                    )
-                    // 2. Mi Island bypass restriction (animated visibility)
-                    AnimatedVisibility(
-                        visible = activeStyle == NotificationStyle.MI_ISLAND,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
                     ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(id = R.string.lab_mi_island_bypass_restriction),
-                            description = stringResource(id = R.string.lab_mi_island_bypass_restriction_desc),
-                            checked = uiState.miIslandBypassRestriction,
-                            onCheckedChange = {
-                                viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBypassRestriction(it))
+                        // 1. Notification style dropdown
+                        val isStyleSelectionEnabled = isModernEligible || isMiIslandSupported
+
+                        InstallerMiuixSpinnerPreference(
+                            title = stringResource(R.string.notification_style),
+                            // Show "unsupported" only if no advanced styles are available
+                            summary = if (isStyleSelectionEnabled) {
+                                styleNames.getOrNull(selectedIndex) ?: ""
+                            } else {
+                                stringResource(R.string.notification_style_unsupported_desc)
+                            },
+                            enabled = isStyleSelectionEnabled,
+                            items = spinnerEntries,
+                            selectedIndex = selectedIndex,
+                            onSelectedIndexChange = { index ->
+                                val selectedStyle = styleOptions[index]
+                                viewModel.dispatch(NotificationSettingsAction.ChangeStyle(selectedStyle))
                             },
                         )
-                    }
-                    // 3. Mi Island network blocking duration (animated visibility)
-                    AnimatedVisibility(
-                        visible = activeStyle == NotificationStyle.MI_ISLAND && uiState.miIslandBypassRestriction,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixIntNumberPickerWidget(
-                            title = stringResource(R.string.lab_mi_island_countdown),
-                            description = stringResource(R.string.lab_mi_island_countdown_desc),
-                            value = uiState.miIslandBlockingInterval,
-                            startInt = 50,
-                            endInt = 350,
+                        // 2. Mi Island bypass restriction (animated visibility)
+                        AnimatedVisibility(
+                            visible = activeStyle == NotificationStyle.MI_ISLAND,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
                         ) {
-                            viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBlockingInterval(it))
+                            MiuixSwitchWidget(
+                                title = stringResource(id = R.string.lab_mi_island_bypass_restriction),
+                                description = stringResource(id = R.string.lab_mi_island_bypass_restriction_desc),
+                                checked = uiState.miIslandBypassRestriction,
+                                onCheckedChange = {
+                                    viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBypassRestriction(it))
+                                },
+                            )
+                        }
+                        // 3. Mi Island network blocking duration (animated visibility)
+                        AnimatedVisibility(
+                            visible = activeStyle == NotificationStyle.MI_ISLAND && uiState.miIslandBypassRestriction,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            MiuixIntNumberPickerWidget(
+                                title = stringResource(R.string.lab_mi_island_countdown),
+                                description = stringResource(R.string.lab_mi_island_countdown_desc),
+                                value = uiState.miIslandBlockingInterval,
+                                startInt = 50,
+                                endInt = 350,
+                            ) {
+                                viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandBlockingInterval(it))
+                            }
+                        }
+                        // 4. Mi Island outer glow (animated visibility)
+                        AnimatedVisibility(
+                            visible = activeStyle == NotificationStyle.MI_ISLAND,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            MiuixSwitchWidget(
+                                title = stringResource(id = R.string.lab_mi_island_outer_glow),
+                                description = stringResource(id = R.string.lab_mi_island_outer_glow_desc),
+                                checked = uiState.miIslandOuterGlow,
+                                onCheckedChange = {
+                                    viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandOuterGlow(it))
+                                },
+                            )
                         }
                     }
-                    // 4. Mi Island outer glow (animated visibility)
-                    AnimatedVisibility(
-                        visible = activeStyle == NotificationStyle.MI_ISLAND,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
+                }
+                item { SmallTitle(stringResource(R.string.config_label_preferences)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
                     ) {
+                        // 3. Show dialog when pressing notification
                         MiuixSwitchWidget(
-                            title = stringResource(id = R.string.lab_mi_island_outer_glow),
-                            description = stringResource(id = R.string.lab_mi_island_outer_glow_desc),
-                            checked = uiState.miIslandOuterGlow,
+                            title = stringResource(id = R.string.show_dialog_when_pressing_notification),
+                            description = stringResource(id = R.string.change_notification_touch_behavior),
+                            checked = uiState.showDialogOnPress,
                             onCheckedChange = {
-                                viewModel.dispatch(NotificationSettingsAction.ChangeMiIslandOuterGlow(it))
+                                viewModel.dispatch(NotificationSettingsAction.ChangeShowDialogOnPress(it))
+                            },
+                        )
+
+                        // 4. Auto-clear success notification time
+                        MiuixAutoClearNotificationTimeWidget(
+                            currentValue = uiState.successAutoClearSeconds,
+                            onValueChange = { seconds ->
+                                viewModel.dispatch(NotificationSettingsAction.ChangeAutoClearSeconds(seconds))
                             },
                         )
                     }
                 }
-            }
-            item { SmallTitle(stringResource(R.string.config_label_preferences)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    // 3. Show dialog when pressing notification
-                    MiuixSwitchWidget(
-                        title = stringResource(id = R.string.show_dialog_when_pressing_notification),
-                        description = stringResource(id = R.string.change_notification_touch_behavior),
-                        checked = uiState.showDialogOnPress,
-                        onCheckedChange = {
-                            viewModel.dispatch(NotificationSettingsAction.ChangeShowDialogOnPress(it))
-                        },
-                    )
 
-                    // 4. Auto-clear success notification time
-                    MiuixAutoClearNotificationTimeWidget(
-                        currentValue = uiState.successAutoClearSeconds,
-                        onValueChange = { seconds ->
-                            viewModel.dispatch(NotificationSettingsAction.ChangeAutoClearSeconds(seconds))
-                        },
-                    )
-                }
+                item { Spacer(Modifier.navigationBarsPadding()) }
             }
-
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }
@@ -259,7 +260,7 @@ private fun MiuixAutoClearNotificationTimeWidget(modifier: Modifier = Modifier, 
         options.indexOf(currentValue).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.installer_settings_auto_clear_success_notification),
         summary = stringResource(id = R.string.installer_settings_auto_clear_success_notification_desc),

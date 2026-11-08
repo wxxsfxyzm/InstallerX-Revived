@@ -28,12 +28,14 @@ import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpe
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 import com.rosan.installer.ui.theme.material.animateAsState
 import com.rosan.installer.ui.theme.material.dynamicColorScheme
+import top.yukonga.miuix.kmp.material.isRenderEffectSupported
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeColorSpec as MiuixColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle as MiuixPaletteStyle
 
+private val LocalUseMiuixOs4 = staticCompositionLocalOf { false }
 private val LocalIsDark = staticCompositionLocalOf { false }
 private val LocalPaletteStyle = staticCompositionLocalOf { PaletteStyle.Expressive }
 private val LocalThemeColorSpec = staticCompositionLocalOf { ThemeColorSpec.SPEC_2025 }
@@ -45,6 +47,10 @@ private val LocalUseDynamicColor = staticCompositionLocalOf { false }
 val LocalInstallerColorScheme = staticCompositionLocalOf<ColorScheme> { error("No ColorScheme provided") }
 
 object InstallerTheme {
+    val useMiuixOs4: Boolean
+        @Composable @ReadOnlyComposable
+        get() = LocalUseMiuixOs4.current
+
     val colorScheme: ColorScheme
         @Composable @ReadOnlyComposable
         get() = LocalInstallerColorScheme.current
@@ -88,6 +94,7 @@ fun InstallerTheme(
     useMiuixMonet: Boolean,
     seedColor: Color,
     useAmoled: Boolean = false,
+    useMiuixOs4: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val preservedContent = remember {
@@ -133,6 +140,9 @@ fun InstallerTheme(
     val animatedColorScheme = colorScheme.animateAsState()
 
     CompositionLocalProvider(
+        LocalUseMiuixOs4 provides (
+            useMiuix && useMiuixOs4 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && isRenderEffectSupported()
+            ),
         LocalIsDark provides isDark,
         LocalPaletteStyle provides paletteStyle,
         LocalSeedColor provides seedColor,

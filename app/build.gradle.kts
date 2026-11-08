@@ -263,8 +263,10 @@ dependencies {
     // miuix
     implementation(libs.miuix.core)
     implementation(libs.miuix.ui)
-    implementation(libs.miuix.shader)
+    implementation(libs.miuix.material)
     implementation(libs.miuix.blur)
+    implementation(libs.miuix.glass)
+    implementation(libs.miuix.glass.icons)
     implementation(libs.miuix.preference)
     implementation(libs.miuix.icons)
     implementation(libs.miuix.navigation)

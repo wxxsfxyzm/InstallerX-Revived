@@ -16,6 +16,7 @@ data class ThemeState(
     val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,
     val useDynamicColor: Boolean = true,
+    val useMiuixOs4: Boolean = false,
     val useMiuixMonet: Boolean = false,
     val useAppleFloatingBar: Boolean = false,
     val seedColor: Int = 0xFF6750A4.toInt(),

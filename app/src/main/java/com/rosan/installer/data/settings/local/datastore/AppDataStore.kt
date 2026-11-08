@@ -48,6 +48,7 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
         val THEME_SEED_COLOR = register(intPreferencesKey("theme_seed_color"), PreferenceValueType.INT)
         val THEME_WALLPAPER_SEED_COLOR = register(intPreferencesKey("theme_wallpaper_seed_color"), PreferenceValueType.INT)
         val UI_USE_MIUIX = register(booleanPreferencesKey("ui_use_miui_x"), PreferenceValueType.BOOLEAN)
+        val UI_USE_MIUIX_OS4 = register(booleanPreferencesKey("ui_use_miuix_os4"), PreferenceValueType.BOOLEAN)
         val UI_USE_MIUIX_MONET = register(booleanPreferencesKey("ui_use_miui_x_monet"), PreferenceValueType.BOOLEAN)
         val UI_USE_APPLE_FLOATING_BAR = register(booleanPreferencesKey("ui_use_apple_floating_bar"), PreferenceValueType.BOOLEAN)
         val UI_DYN_COLOR_FOLLOW_PKG_ICON =

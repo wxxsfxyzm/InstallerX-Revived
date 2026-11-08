@@ -31,7 +31,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -52,21 +54,18 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsViewModel
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixComponentHost
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixSpinnerPreference
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.material.PresetColors
-import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -78,228 +77,253 @@ fun MiuixThemeSettingsPage(
     val navigator = LocalNavigator.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = MiuixScrollBehavior()
+    val listState = rememberLazyListState()
+    val isContentScrolled by remember { derivedStateOf { listState.canScrollBackward } }
+    val supportsOs4 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val useOs4 = supportsOs4 && uiState.useMiuixOs4
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
 
-    val topBarBackdrop = rememberMiuixBlurBackdrop(uiState.useBlur)
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
-                title = stringResource(R.string.theme_settings),
-                navigationIcon = {
-                    MiuixBackButton(onClick = { navigator.pop() })
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-            ),
-            overscrollEffect = null,
-        ) {
-            item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.theme_settings_ui_style)) }
-            item {
-                Card(
+    InstallerMiuixComponentHost(
+        useOs4 = useOs4,
+        useBlur = uiState.useBlur,
+        modifier = Modifier.fillMaxSize(),
+    ) { scope ->
+        Scaffold(
+            modifier = scope.pageBackdropModifier,
+            topBar = {
+                InstallerMiuixTopAppBar(
+                    title = stringResource(R.string.theme_settings),
+                    isContentScrolled = isContentScrolled,
+                    useOs4 = scope.useOs4,
+                    backdrop = scope.contentBackdrop,
+                    persistentProgressiveBlur = true,
+                    navigationIcon = {
+                        InstallerMiuixBackButton(onClick = { navigator.pop() })
+                    },
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(scope.contentBackdropModifier),
+            ) {
+                LazyColumn(
+                    state = listState,
                     modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
+                        .fillMaxSize()
+                        .scrollEndHaptic()
+                        .overScrollVertical()
+                        .nestedScroll(scrollBehavior.nestedScrollConnection),
+                    contentPadding = PaddingValues(
+                        start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                        top = paddingValues.calculateTopPadding(),
+                        end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                    ),
+                    overscrollEffect = null,
                 ) {
-                    MiuixThemeEngineWidget(
-                        currentThemeIsMiuix = uiState.showMiuixUI,
-                        onThemeChange = { useMiuix ->
-                            viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(useMiuix))
-                        },
-                    )
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_use_apple_floating_bar),
-                        description = stringResource(R.string.theme_settings_use_apple_floating_bar_desc),
-                        checked = uiState.useAppleFloatingBar,
-                        onCheckedChange = {
-                            viewModel.dispatch(ThemeSettingsAction.SetUseAppleFloatingBar(it))
-                        },
-                    )
-                }
-            }
-            item { SmallTitle(stringResource(R.string.theme_settings_miuix_ui)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixThemeModeWidget(
-                        currentThemeMode = uiState.themeMode,
-                        onThemeModeChange = { newMode ->
-                            viewModel.dispatch(ThemeSettingsAction.SetThemeMode(newMode))
-                        },
-                    )
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_use_amoled),
-                        description = stringResource(R.string.theme_settings_use_amoled_desc),
-                        checked = uiState.useAmoled,
-                        onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseAmoled(it)) },
-                    )
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.theme_settings_use_blur),
-                            description = stringResource(R.string.theme_settings_use_blur_desc),
-                            checked = uiState.useBlur,
-                            onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseBlur(it)) },
-                        )
-                    }
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_miuix_custom_colors),
-                        description = stringResource(R.string.theme_settings_miuix_custom_colors_desc),
-                        checked = uiState.useMiuixMonet,
-                        onCheckedChange = {
-                            viewModel.dispatch(ThemeSettingsAction.SetUseMiuixMonet(it))
-                        },
-                    )
-                    AnimatedVisibility(
-                        visible = uiState.useMiuixMonet,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.theme_settings_dynamic_color),
-                            description = stringResource(R.string.theme_settings_dynamic_color_desc),
-                            checked = uiState.useDynamicColor,
-                            onCheckedChange = {
-                                viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it))
-                            },
-                        )
-                    }
-                    AnimatedVisibility(
-                        visible = uiState.useMiuixMonet,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixPaletteStyleWidget(
-                            currentPaletteStyle = uiState.paletteStyle,
-                            onPaletteStyleChange = { newStyle ->
-                                viewModel.dispatch(ThemeSettingsAction.SetPaletteStyle(newStyle))
-                            },
-                        )
-                    }
-                    AnimatedVisibility(
-                        visible = uiState.useMiuixMonet,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixColorSpecWidget(
-                            currentColorSpec = uiState.colorSpec,
-                            currentPaletteStyle = uiState.paletteStyle,
-                            onColorSpecChange = { newSpec ->
-                                viewModel.dispatch(ThemeSettingsAction.SetColorSpec(newSpec))
-                            },
-                        )
-                    }
-                    AnimatedVisibility(
-                        visible = uiState.useMiuixMonet,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
-                            description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
-                            checked = uiState.useDynColorFollowPkgIcon,
-                            onCheckedChange = {
-                                viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it))
-                            },
-                        )
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && uiState.showLiveActivity) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
-                            description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
-                            checked = uiState.useDynColorFollowPkgIconForLiveActivity,
-                            onCheckedChange = {
-                                viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIconForLiveActivity(it))
-                            },
-                        )
-                    }
-                }
-            }
-
-            item {
-                AnimatedVisibility(
-                    visible = uiState.useMiuixMonet && (!uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S),
-                    enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
-                        expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
-                        shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)),
-                ) {
-                    Column {
-                        SmallTitle(stringResource(R.string.theme_settings_theme_color))
+                    item { Spacer(modifier = Modifier.size(12.dp)) }
+                    item { SmallTitle(stringResource(R.string.theme_settings_ui_style)) }
+                    item {
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
                                 .padding(bottom = 12.dp),
                         ) {
-                            BoxWithConstraints(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 16.dp),
+                            MiuixThemeEngineWidget(
+                                currentThemeIsMiuix = uiState.showMiuixUI,
+                                onThemeChange = { useMiuix ->
+                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(useMiuix))
+                                },
+                            )
+                            if (supportsOs4) {
+                                MiuixOsVersionWidget(
+                                    useOs4 = uiState.useMiuixOs4,
+                                    onUseOs4Change = { viewModel.dispatch(ThemeSettingsAction.SetUseMiuixOs4(it)) },
+                                )
+                            }
+                            if (!useOs4) {
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.theme_settings_use_apple_floating_bar),
+                                    description = stringResource(R.string.theme_settings_use_apple_floating_bar_desc),
+                                    checked = uiState.useAppleFloatingBar,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(ThemeSettingsAction.SetUseAppleFloatingBar(it))
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    item { SmallTitle(stringResource(R.string.theme_settings_miuix_ui)) }
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                        ) {
+                            MiuixThemeModeWidget(
+                                currentThemeMode = uiState.themeMode,
+                                onThemeModeChange = { newMode ->
+                                    viewModel.dispatch(ThemeSettingsAction.SetThemeMode(newMode))
+                                },
+                            )
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.theme_settings_use_amoled),
+                                description = stringResource(R.string.theme_settings_use_amoled_desc),
+                                checked = uiState.useAmoled,
+                                onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseAmoled(it)) },
+                            )
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !useOs4) {
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.theme_settings_use_blur),
+                                    description = stringResource(R.string.theme_settings_use_blur_desc),
+                                    checked = uiState.useBlur,
+                                    onCheckedChange = { viewModel.dispatch(ThemeSettingsAction.SetUseBlur(it)) },
+                                )
+                            }
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.theme_settings_miuix_custom_colors),
+                                description = stringResource(R.string.theme_settings_miuix_custom_colors_desc),
+                                checked = uiState.useMiuixMonet,
+                                onCheckedChange = {
+                                    viewModel.dispatch(ThemeSettingsAction.SetUseMiuixMonet(it))
+                                },
+                            )
+                            AnimatedVisibility(
+                                visible = uiState.useMiuixMonet,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
                             ) {
-                                val itemMinWidth = 88.dp
-                                val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
-                                val chunkedColors = uiState.availableColors.chunked(columns)
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.theme_settings_dynamic_color),
+                                    description = stringResource(R.string.theme_settings_dynamic_color_desc),
+                                    checked = uiState.useDynamicColor,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(ThemeSettingsAction.SetUseDynamicColor(it))
+                                    },
+                                )
+                            }
+                            AnimatedVisibility(
+                                visible = uiState.useMiuixMonet,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
+                                MiuixPaletteStyleWidget(
+                                    currentPaletteStyle = uiState.paletteStyle,
+                                    onPaletteStyleChange = { newStyle ->
+                                        viewModel.dispatch(ThemeSettingsAction.SetPaletteStyle(newStyle))
+                                    },
+                                )
+                            }
+                            AnimatedVisibility(
+                                visible = uiState.useMiuixMonet,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
+                                MiuixColorSpecWidget(
+                                    currentColorSpec = uiState.colorSpec,
+                                    currentPaletteStyle = uiState.paletteStyle,
+                                    onColorSpecChange = { newSpec ->
+                                        viewModel.dispatch(ThemeSettingsAction.SetColorSpec(newSpec))
+                                    },
+                                )
+                            }
+                            AnimatedVisibility(
+                                visible = uiState.useMiuixMonet,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically(),
+                            ) {
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.theme_settings_dynamic_color_follow_icon),
+                                    description = stringResource(R.string.theme_settings_dynamic_color_follow_icon_desc),
+                                    checked = uiState.useDynColorFollowPkgIcon,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIcon(it))
+                                    },
+                                )
+                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && uiState.showLiveActivity) {
+                                MiuixSwitchWidget(
+                                    title = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon),
+                                    description = stringResource(R.string.theme_settings_live_activity_dynamic_color_follow_icon_desc),
+                                    checked = uiState.useDynColorFollowPkgIconForLiveActivity,
+                                    onCheckedChange = {
+                                        viewModel.dispatch(ThemeSettingsAction.SetDynColorFollowPkgIconForLiveActivity(it))
+                                    },
+                                )
+                            }
+                        }
+                    }
 
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    item {
+                        AnimatedVisibility(
+                            visible = uiState.useMiuixMonet && (!uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S),
+                            enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
+                                expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
+                            exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)),
+                        ) {
+                            Column {
+                                SmallTitle(stringResource(R.string.theme_settings_theme_color))
+                                Card(
+                                    modifier = Modifier
+                                        .padding(horizontal = 12.dp)
+                                        .padding(bottom = 12.dp),
                                 ) {
-                                    chunkedColors.forEach { rowItems ->
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.Center,
-                                        ) {
-                                            rowItems.forEach { rawColor ->
-                                                Box(
-                                                    modifier = Modifier.weight(1f),
-                                                    contentAlignment = Alignment.Center,
-                                                ) {
-                                                    ColorSwatchPreview(
-                                                        rawColor = rawColor,
-                                                        currentStyle = uiState.paletteStyle,
-                                                        colorSpec = uiState.colorSpec,
-                                                        textStyle = MiuixTheme.textStyles.footnote1,
-                                                        textColor = MiuixTheme.colorScheme.onSurface,
-                                                        isSelected =
-                                                            uiState.seedColor == rawColor.color,
-                                                    ) {
-                                                        viewModel.dispatch(
-                                                            ThemeSettingsAction.SetSeedColor(
-                                                                rawColor.color,
-                                                                uiState.useDynamicColor &&
-                                                                    Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
-                                                                    // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
-                                                                    uiState.availableColors != PresetColors,
-                                                            ),
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                    BoxWithConstraints(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 16.dp),
+                                    ) {
+                                        val itemMinWidth = 88.dp
+                                        val columns = (this.maxWidth / itemMinWidth).toInt().coerceAtLeast(1)
+                                        val chunkedColors = uiState.availableColors.chunked(columns)
 
-                                            val remaining = columns - rowItems.size
-                                            if (remaining > 0) {
-                                                repeat(remaining) {
-                                                    Spacer(Modifier.weight(1f))
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        ) {
+                                            chunkedColors.forEach { rowItems ->
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.Center,
+                                                ) {
+                                                    rowItems.forEach { rawColor ->
+                                                        Box(
+                                                            modifier = Modifier.weight(1f),
+                                                            contentAlignment = Alignment.Center,
+                                                        ) {
+                                                            ColorSwatchPreview(
+                                                                rawColor = rawColor,
+                                                                currentStyle = uiState.paletteStyle,
+                                                                colorSpec = uiState.colorSpec,
+                                                                textStyle = MiuixTheme.textStyles.footnote1,
+                                                                textColor = MiuixTheme.colorScheme.onSurface,
+                                                                isSelected =
+                                                                    uiState.seedColor == rawColor.color,
+                                                            ) {
+                                                                viewModel.dispatch(
+                                                                    ThemeSettingsAction.SetSeedColor(
+                                                                        rawColor.color,
+                                                                        uiState.useDynamicColor &&
+                                                                            Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                                                            // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
+                                                                            uiState.availableColors != PresetColors,
+                                                                    ),
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+
+                                                    val remaining = columns - rowItems.size
+                                                    if (remaining > 0) {
+                                                        repeat(remaining) {
+                                                            Spacer(Modifier.weight(1f))
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -308,61 +332,61 @@ fun MiuixThemeSettingsPage(
                             }
                         }
                     }
-                }
-            }
 
-            // Predictive Back Section
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                item { SmallTitle(stringResource(R.string.theme_settings_predictive_back)) }
-                item {
-                    Card(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp),
-                    ) {
-                        MiuixPredictiveBackAnimationWidget(
-                            currentAnimation = uiState.predictiveBackAnimation,
-                            onAnimationChange = { newAnim ->
-                                viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(newAnim))
-                            },
-                        )
+                    // Predictive Back Section
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        item { SmallTitle(stringResource(R.string.theme_settings_predictive_back)) }
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .padding(horizontal = 12.dp)
+                                    .padding(bottom = 12.dp),
+                            ) {
+                                MiuixPredictiveBackAnimationWidget(
+                                    currentAnimation = uiState.predictiveBackAnimation,
+                                    onAnimationChange = { newAnim ->
+                                        viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackAnimation(newAnim))
+                                    },
+                                )
 
-                        AnimatedVisibility(
-                            visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically(),
+                                AnimatedVisibility(
+                                    visible = uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically(),
+                                ) {
+                                    MiuixPredictiveBackExitDirectionWidget(
+                                        currentDirection = uiState.predictiveBackExitDirection,
+                                        onDirectionChange = {
+                                            viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackExitDirection(it))
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    item { SmallTitle(stringResource(R.string.theme_settings_package_icons)) }
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
                         ) {
-                            MiuixPredictiveBackExitDirectionWidget(
-                                currentDirection = uiState.predictiveBackExitDirection,
-                                onDirectionChange = {
-                                    viewModel.dispatch(ThemeSettingsAction.SetPredictiveBackExitDirection(it))
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.theme_settings_prefer_system_icon),
+                                description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
+                                checked = uiState.preferSystemIcon,
+                                onCheckedChange = {
+                                    viewModel.dispatch(
+                                        ThemeSettingsAction.ChangePreferSystemIcon(it),
+                                    )
                                 },
                             )
                         }
                     }
+                    item { Spacer(Modifier.navigationBarsPadding()) }
                 }
             }
-
-            item { SmallTitle(stringResource(R.string.theme_settings_package_icons)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_prefer_system_icon),
-                        description = stringResource(R.string.theme_settings_prefer_system_icon_desc),
-                        checked = uiState.preferSystemIcon,
-                        onCheckedChange = {
-                            viewModel.dispatch(
-                                ThemeSettingsAction.ChangePreferSystemIcon(it),
-                            )
-                        },
-                    )
-                }
-            }
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }
@@ -394,7 +418,7 @@ private fun MiuixPredictiveBackAnimationWidget(
         options.indexOf(currentAnimation).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_predictive_back_animation),
         items = spinnerEntries,
@@ -433,7 +457,7 @@ private fun MiuixPredictiveBackExitDirectionWidget(
         options.indexOf(currentDirection).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_predictive_back_exit_direction),
         items = spinnerEntries,
@@ -442,6 +466,27 @@ private fun MiuixPredictiveBackExitDirectionWidget(
             val newDir = options[newIndex]
             if (currentDirection != newDir) {
                 onDirectionChange(newDir)
+            }
+        },
+    )
+}
+
+@Composable
+private fun MiuixOsVersionWidget(
+    useOs4: Boolean,
+    onUseOs4Change: (Boolean) -> Unit,
+) {
+    InstallerMiuixSpinnerPreference(
+        title = stringResource(R.string.theme_settings_miuix_os_version),
+        items = listOf(
+            DropdownItem(title = stringResource(R.string.theme_settings_miuix_os3)),
+            DropdownItem(title = stringResource(R.string.theme_settings_miuix_os4)),
+        ),
+        selectedIndex = if (useOs4) 1 else 0,
+        onSelectedIndexChange = { index ->
+            val newUseOs4 = index == 1
+            if (useOs4 != newUseOs4) {
+                onUseOs4Change(newUseOs4)
             }
         },
     )
@@ -486,7 +531,7 @@ private fun MiuixThemeEngineWidget(
         if (currentThemeIsMiuix) 0 else 1
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_ui_engine),
         // summary = spinnerEntries[selectedIndex].title,
@@ -542,7 +587,7 @@ fun MiuixThemeModeWidget(
         themeModeOptions.keys.indexOf(currentThemeMode).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_theme_mode),
         items = spinnerEntries,
@@ -575,7 +620,7 @@ fun MiuixPaletteStyleWidget(
         options.indexOf(currentPaletteStyle).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_palette_style),
         items = spinnerEntries,
@@ -621,7 +666,7 @@ fun MiuixColorSpecWidget(
         availableSpecs.indexOf(activeSpec).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_color_spec),
         summary = descriptionText,

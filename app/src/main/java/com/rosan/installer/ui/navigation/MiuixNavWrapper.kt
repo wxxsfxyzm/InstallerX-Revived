@@ -31,6 +31,7 @@ import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.material.isRenderEffectSupported
 
 // Centralized complex layout logic to keep provider clean and readable
 @Composable
@@ -38,7 +39,8 @@ fun MiuixMainPageWrapper(uiState: ThemeState, sharedViewModel: SettingsSharedVie
     val layoutInfo = LocalWindowLayoutInfo.current
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
-    val useFloatingBottomBar = uiState.useAppleFloatingBar
+    val useOs4 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && uiState.useMiuixOs4 && isRenderEffectSupported()
+    val useFloatingBottomBar = useOs4 || uiState.useAppleFloatingBar
     val floatingBottomBarMode = when {
         useBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> FloatingBottomBarMode.LiquidGlass
         useBlur -> FloatingBottomBarMode.Blur
@@ -109,6 +111,7 @@ fun MiuixMainPageWrapper(uiState: ThemeState, sharedViewModel: SettingsSharedVie
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             useFloatingBottomBar = useFloatingBottomBar,
+            useOs4 = useOs4,
             floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop,
@@ -120,6 +123,7 @@ fun MiuixMainPageWrapper(uiState: ThemeState, sharedViewModel: SettingsSharedVie
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             useFloatingBottomBar = useFloatingBottomBar,
+            useOs4 = useOs4,
             floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop,

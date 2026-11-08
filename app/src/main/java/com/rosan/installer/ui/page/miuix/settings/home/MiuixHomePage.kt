@@ -21,11 +21,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,9 +56,9 @@ import com.rosan.installer.ui.page.main.settings.home.HomePageViewEvent
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
 import com.rosan.installer.ui.page.main.settings.home.HomePageViewState
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.miuixHomeStatusCardColorActivated
 import com.rosan.installer.ui.theme.miuixHomeStatusCardColorDeactivated
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
@@ -68,8 +71,6 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -79,6 +80,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun MiuixHomePage(
     enableBlur: Boolean,
+    useOs4: Boolean = false,
     viewModel: HomePageViewModel = koinViewModel(),
     title: String,
     configCount: Int = 0,
@@ -90,6 +92,8 @@ fun MiuixHomePage(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+    val isContentScrolled by remember { derivedStateOf { listState.canScrollBackward } }
     val scrollBehavior = MiuixScrollBehavior()
     val layoutDirection = LocalLayoutDirection.current
 
@@ -117,113 +121,119 @@ fun MiuixHomePage(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(backdrop),
-                color = backdrop.getMiuixAppBarColor(),
+            InstallerMiuixTopAppBar(
+                useOs4 = useOs4,
+                backdrop = backdrop,
+                isContentScrolled = isContentScrolled,
                 title = title,
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                start = innerPadding.calculateStartPadding(layoutDirection) + 12.dp,
-                top = innerPadding.calculateTopPadding() + 12.dp,
-                end = innerPadding.calculateEndPadding(layoutDirection) + 12.dp,
-                bottom = outerPadding.calculateBottomPadding(),
-            ),
-            overscrollEffect = null,
+        InstallerMiuixBackdropSurface(
+            backdrop = backdrop,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            item {
-                MiuixStatusGrid(
-                    uiState = uiState,
-                    configCount = configCount,
-                    onInstallerClick = { navigator.push(Route.DefaultInstaller) },
-                    onAuthorizersClick = { navigator.push(Route.Priv) },
-                    onProfilesClick = onNavigateToProfiles,
-                )
-            }
-
-            item {
-                Card(modifier = Modifier.padding(vertical = 12.dp)) {
-                    BasicComponent(
-                        title = stringResource(R.string.home_device_info_model),
-                        summary = uiState.deviceName,
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(
+                    start = innerPadding.calculateStartPadding(layoutDirection) + 12.dp,
+                    top = innerPadding.calculateTopPadding() + 12.dp,
+                    end = innerPadding.calculateEndPadding(layoutDirection) + 12.dp,
+                    bottom = outerPadding.calculateBottomPadding(),
+                ),
+                overscrollEffect = null,
+            ) {
+                item {
+                    MiuixStatusGrid(
+                        uiState = uiState,
+                        configCount = configCount,
+                        onInstallerClick = { navigator.push(Route.DefaultInstaller) },
+                        onAuthorizersClick = { navigator.push(Route.Priv) },
+                        onProfilesClick = onNavigateToProfiles,
                     )
-                    BasicComponent(
-                        title = stringResource(R.string.home_device_info_system),
-                        summary = DeviceConfig.systemVersion,
-                    )
-                    val isCustomizeAuthorizer = uiState.globalAuthorizer == Authorizer.Customize
-                    val authorizerText = when {
-                        isCustomizeAuthorizer ->
-                            uiState.customizeAuthorizer
-                                .takeIf { it.isNotBlank() }
-                                ?.let { stringResource(R.string.config_authorizer_command_desc, it) }
-                                ?: stringResource(R.string.config_authorizer_customize)
+                }
 
-                        uiState.isSystemApp -> stringResource(R.string.working_status_system_installer)
+                item {
+                    Card(modifier = Modifier.padding(vertical = 12.dp)) {
+                        BasicComponent(
+                            title = stringResource(R.string.home_device_info_model),
+                            summary = uiState.deviceName,
+                        )
+                        BasicComponent(
+                            title = stringResource(R.string.home_device_info_system),
+                            summary = DeviceConfig.systemVersion,
+                        )
+                        val isCustomizeAuthorizer = uiState.globalAuthorizer == Authorizer.Customize
+                        val authorizerText = when {
+                            isCustomizeAuthorizer ->
+                                uiState.customizeAuthorizer
+                                    .takeIf { it.isNotBlank() }
+                                    ?.let { stringResource(R.string.config_authorizer_command_desc, it) }
+                                    ?: stringResource(R.string.config_authorizer_customize)
 
-                        uiState.globalAuthorizer == Authorizer.Shizuku -> {
-                            stringResource(R.string.config_authorizer_shizuku) + " " + when {
-                                uiState.shizukuAuthorized -> "(${uiState.shizukuMode.desc})"
-                                uiState.shizukuAvailable -> "(${stringResource(R.string.shizuku_not_authorized)})"
-                                else -> "(${stringResource(R.string.shizuku_not_available)})"
+                            uiState.isSystemApp -> stringResource(R.string.working_status_system_installer)
+
+                            uiState.globalAuthorizer == Authorizer.Shizuku -> {
+                                stringResource(R.string.config_authorizer_shizuku) + " " + when {
+                                    uiState.shizukuAuthorized -> "(${uiState.shizukuMode.desc})"
+                                    uiState.shizukuAvailable -> "(${stringResource(R.string.shizuku_not_authorized)})"
+                                    else -> "(${stringResource(R.string.shizuku_not_available)})"
+                                }
                             }
-                        }
 
-                        uiState.globalAuthorizer == Authorizer.Root -> {
-                            stringResource(R.string.config_authorizer_root) + " " + if (uiState.rootMode != RootMode.None) {
-                                "(${uiState.rootMode.name})"
-                            } else {
-                                "(${stringResource(R.string.unavailable)})"
+                            uiState.globalAuthorizer == Authorizer.Root -> {
+                                stringResource(R.string.config_authorizer_root) + " " + if (uiState.rootMode != RootMode.None) {
+                                    "(${uiState.rootMode.name})"
+                                } else {
+                                    "(${stringResource(R.string.unavailable)})"
+                                }
                             }
-                        }
 
-                        uiState.globalAuthorizer == Authorizer.Dhizuku -> {
-                            stringResource(R.string.config_authorizer_dhizuku) + " " + when {
-                                uiState.dhizukuAuthorized -> "(${stringResource(R.string.activate)})"
-                                uiState.dhizukuAvailable -> "(${stringResource(R.string.dhizuku_not_authorized)})"
-                                else -> "(${stringResource(R.string.dhizuku_not_available)})"
+                            uiState.globalAuthorizer == Authorizer.Dhizuku -> {
+                                stringResource(R.string.config_authorizer_dhizuku) + " " + when {
+                                    uiState.dhizukuAuthorized -> "(${stringResource(R.string.activate)})"
+                                    uiState.dhizukuAvailable -> "(${stringResource(R.string.dhizuku_not_authorized)})"
+                                    else -> "(${stringResource(R.string.dhizuku_not_available)})"
+                                }
                             }
-                        }
 
-                        else -> stringResource(uiState.globalAuthorizer.displayNameRes)
+                            else -> stringResource(uiState.globalAuthorizer.displayNameRes)
+                        }
+                        BasicComponent(
+                            title = stringResource(R.string.home_device_info_active_authorizer),
+                            summary = authorizerText,
+                        )
+                        BasicComponent(
+                            title = stringResource(R.string.home_device_info_default_installer),
+                            summary = uiState.defaultInstaller,
+                        )
                     }
-                    BasicComponent(
-                        title = stringResource(R.string.home_device_info_active_authorizer),
-                        summary = authorizerText,
-                    )
-                    BasicComponent(
-                        title = stringResource(R.string.home_device_info_default_installer),
-                        summary = uiState.defaultInstaller,
-                    )
                 }
-            }
 
-            item {
-                Card(modifier = Modifier.padding(bottom = 12.dp)) {
-                    BasicComponent(
-                        title = stringResource(R.string.home_learn_more_installerx_title),
-                        summary = stringResource(R.string.home_learn_more_installerx_desc),
-                        endActions = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_link_icon),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = { uriHandler.openUri("https://wxxsfxyzm.github.io/InstallerX-Revived-Website/") },
-                    )
+                item {
+                    Card(modifier = Modifier.padding(bottom = 12.dp)) {
+                        BasicComponent(
+                            title = stringResource(R.string.home_learn_more_installerx_title),
+                            summary = stringResource(R.string.home_learn_more_installerx_desc),
+                            endActions = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_link_icon),
+                                    contentDescription = null,
+                                )
+                            },
+                            onClick = { uriHandler.openUri("https://wxxsfxyzm.github.io/InstallerX-Revived-Website/") },
+                        )
+                    }
                 }
-            }
 
-            item { Spacer(modifier = Modifier.navigationBarsPadding()) }
+                item { Spacer(modifier = Modifier.navigationBarsPadding()) }
+            }
         }
     }
 }

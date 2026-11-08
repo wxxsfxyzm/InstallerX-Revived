@@ -114,6 +114,9 @@
     <string name="theme_settings_miuix_custom_colors_desc">在 Miuix 主题风格下自定义主题颜色</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">标准 Material Design 界面</string>
+    <string name="theme_settings_miuix_os_version">Miuix UI 版本</string>
+    <string name="theme_settings_miuix_os3">OS3</string>
+    <string name="theme_settings_miuix_os4">OS4</string>
     <string name="theme_settings_ui_engine">UI 引擎</string>
     <string name="theme_settings_use_apple_floating_bar">启用悬浮底栏</string>
     <string name="theme_settings_use_apple_floating_bar_desc">在屏幕底部使用悬浮样式的导航栏</string>

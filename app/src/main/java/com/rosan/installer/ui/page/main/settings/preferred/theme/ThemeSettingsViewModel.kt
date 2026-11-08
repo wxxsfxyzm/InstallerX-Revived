@@ -76,6 +76,7 @@ class ThemeSettingsViewModel(
             paletteStyle = prefs.paletteStyle,
             colorSpec = prefs.colorSpec,
             useDynamicColor = prefs.useDynamicColor,
+            useMiuixOs4 = prefs.useMiuixOs4,
             useMiuixMonet = prefs.useMiuixMonet,
             useAppleFloatingBar = prefs.useAppleFloatingBar,
             seedColor = effectiveSeedColor,
@@ -119,6 +120,10 @@ class ThemeSettingsViewModel(
 
             is ThemeSettingsAction.SetUseDynamicColor -> viewModelScope.launch {
                 updateSetting(BooleanSetting.ThemeUseDynamicColor, action.use)
+            }
+
+            is ThemeSettingsAction.SetUseMiuixOs4 -> viewModelScope.launch {
+                updateSetting(BooleanSetting.UiUseMiuixOs4, action.use)
             }
 
             is ThemeSettingsAction.SetUseMiuixMonet -> viewModelScope.launch {

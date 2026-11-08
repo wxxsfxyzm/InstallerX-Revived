@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +50,8 @@ import com.rosan.installer.ui.page.miuix.settings.config.all.MiuixAllPage
 import com.rosan.installer.ui.page.miuix.settings.history.MiuixHistoryPage
 import com.rosan.installer.ui.page.miuix.settings.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixGlassNavigationAction
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixGlassNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
@@ -66,6 +70,8 @@ import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.LayerBackdrop as MiuixLayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop as miuixLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Add
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -75,43 +81,82 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 private fun SettingsFloatingBottomBar(
     mainPagerState: MainPagerState,
     navigationItems: List<NavigationItem>,
+    useOs4: Boolean,
     floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop,
 ) {
+    val navigator = LocalNavigator.current
     Box(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        FloatingBottomBar(
-            items = navigationItems,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(
-                    bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding(),
-                ),
-            selectedIndex = { mainPagerState.selectedPage },
-            onSelected = { index ->
-                mainPagerState.animateToPage(index)
-            },
-            backdrop = floatingBackdrop,
-            mode = floatingBottomBarMode,
-            iconContent = { item, _ ->
-                Icon(
-                    imageVector = item.icon,
-                    contentDescription = null,
-                )
-            },
-            labelContent = { item, _ ->
-                Text(
-                    text = item.label,
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Visible,
-                )
-            },
-        )
+        if (useOs4) {
+            val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
+            val bottomMargin = maxOf(
+                24.dp,
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 8.dp,
+            )
+            InstallerMiuixGlassNavigationBar(
+                items = navigationItems,
+                selectedIndex = mainPagerState.selectedPage,
+                onSelect = { mainPagerState.animateToPage(it) },
+                backdrop = floatingBackdrop,
+                trailingAction = if (mainPagerState.selectedPage == 1) {
+                    {
+                        InstallerMiuixGlassNavigationAction(
+                            onClick = { navigator.push(Route.EditConfig(-1)) },
+                            backdrop = floatingBackdrop,
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Glass.Add,
+                                contentDescription = stringResource(R.string.add),
+                                modifier = Modifier.size(24.dp),
+                                tint = MiuixTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                } else {
+                    null
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontalSafeInsets)
+                    .widthIn(max = 440.dp)
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomMargin),
+            )
+        } else {
+            FloatingBottomBar(
+                items = navigationItems,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(
+                        bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding(),
+                    ),
+                selectedIndex = { mainPagerState.selectedPage },
+                onSelected = { index ->
+                    mainPagerState.animateToPage(index)
+                },
+                backdrop = floatingBackdrop,
+                mode = floatingBottomBarMode,
+                iconContent = { item, _ ->
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = null,
+                    )
+                },
+                labelContent = { item, _ ->
+                    Text(
+                        text = item.label,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Visible,
+                    )
+                },
+            )
+        }
     }
 }
 
@@ -125,6 +170,7 @@ fun SettingsCompactLayout(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     useFloatingBottomBar: Boolean,
+    useOs4: Boolean,
     floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop?,
     miuixBackdrop: MiuixLayerBackdrop?,
@@ -138,6 +184,7 @@ fun SettingsCompactLayout(
                 SettingsFloatingBottomBar(
                     mainPagerState = mainPagerState,
                     navigationItems = navigationItems,
+                    useOs4 = useOs4,
                     floatingBottomBarMode = floatingBottomBarMode,
                     floatingBackdrop = floatingBackdrop,
                 )
@@ -184,7 +231,7 @@ fun SettingsCompactLayout(
         snackbarHost = { SnackbarHost(state = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = mainPagerState.selectedPage == 1,
+                visible = !useOs4 && mainPagerState.selectedPage == 1,
                 enter = scaleIn(),
                 exit = scaleOut(),
             ) {
@@ -212,6 +259,7 @@ fun SettingsCompactLayout(
             modifier = Modifier.fillMaxSize(),
             outerPadding = paddingValues,
             useFloatingBottomBar = useFloatingBottomBar,
+            useOs4 = useOs4,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop,
         )
@@ -228,6 +276,7 @@ fun SettingsWideScreenLayout(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     useFloatingBottomBar: Boolean,
+    useOs4: Boolean,
     floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop?,
     miuixBackdrop: MiuixLayerBackdrop?,
@@ -239,6 +288,7 @@ fun SettingsWideScreenLayout(
             navigationItems = navigationItems,
             snackbarHostState = snackbarHostState,
             useFloatingBottomBar = true,
+            useOs4 = useOs4,
             floatingBottomBarMode = floatingBottomBarMode,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop,
@@ -295,6 +345,7 @@ fun SettingsWideScreenLayout(
                     navigationItems = navigationItems,
                     snackbarHostState = snackbarHostState,
                     useFloatingBottomBar = false,
+                    useOs4 = false,
                     floatingBottomBarMode = FloatingBottomBarMode.None,
                     floatingBackdrop = floatingBackdrop,
                     miuixBackdrop = miuixBackdrop,
@@ -312,6 +363,7 @@ private fun SettingsWideContent(
     navigationItems: List<NavigationItem>,
     snackbarHostState: SnackbarHostState,
     useFloatingBottomBar: Boolean,
+    useOs4: Boolean,
     floatingBottomBarMode: FloatingBottomBarMode,
     floatingBackdrop: MiuixLayerBackdrop?,
     miuixBackdrop: MiuixLayerBackdrop?,
@@ -326,6 +378,7 @@ private fun SettingsWideContent(
                 SettingsFloatingBottomBar(
                     mainPagerState = mainPagerState,
                     navigationItems = navigationItems,
+                    useOs4 = useOs4,
                     floatingBottomBarMode = floatingBottomBarMode,
                     floatingBackdrop = floatingBackdrop,
                 )
@@ -334,7 +387,7 @@ private fun SettingsWideContent(
         snackbarHost = { SnackbarHost(state = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = mainPagerState.selectedPage == 1,
+                visible = !useOs4 && mainPagerState.selectedPage == 1,
                 enter = scaleIn(),
                 exit = scaleOut(),
             ) {
@@ -362,6 +415,7 @@ private fun SettingsWideContent(
             modifier = Modifier.fillMaxSize(),
             outerPadding = paddingValues,
             useFloatingBottomBar = useFloatingBottomBar,
+            useOs4 = useOs4,
             floatingBackdrop = floatingBackdrop,
             miuixBackdrop = miuixBackdrop,
         )
@@ -386,6 +440,7 @@ private fun SettingsPagerContent(
     snackbarHostState: SnackbarHostState,
     outerPadding: PaddingValues,
     useFloatingBottomBar: Boolean,
+    useOs4: Boolean,
     floatingBackdrop: MiuixLayerBackdrop?,
     miuixBackdrop: MiuixLayerBackdrop?,
 ) {
@@ -402,6 +457,7 @@ private fun SettingsPagerContent(
         when (page) {
             0 -> MiuixHomePage(
                 enableBlur = useBlur,
+                useOs4 = useOs4,
                 title = navigationItems[page].label,
                 configCount = configCount,
                 outerPadding = outerPadding,
@@ -411,6 +467,7 @@ private fun SettingsPagerContent(
 
             1 -> MiuixAllPage(
                 enableBlur = useBlur,
+                useOs4 = useOs4,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,
                 snackbarHostState = snackbarHostState,
@@ -418,12 +475,14 @@ private fun SettingsPagerContent(
 
             2 -> MiuixHistoryPage(
                 enableBlur = useBlur,
+                useOs4 = useOs4,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,
             )
 
             3 -> MiuixPreferredPage(
                 enableBlur = useBlur,
+                useOs4 = useOs4,
                 title = navigationItems[page].label,
                 outerPadding = outerPadding,
                 snackbarHostState = snackbarHostState,

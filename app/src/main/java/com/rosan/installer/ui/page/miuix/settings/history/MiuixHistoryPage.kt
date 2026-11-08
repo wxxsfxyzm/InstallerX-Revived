@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,10 +57,12 @@ import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
 import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
 import com.rosan.installer.ui.page.main.settings.history.historyBadgeType
 import com.rosan.installer.ui.page.main.settings.history.labelRes
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopBarIconButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.launch
@@ -74,8 +78,17 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.glass.GlassIconDropdownMenu
+import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
+import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
+import top.yukonga.miuix.kmp.glass.glassPopupAnchor
+import top.yukonga.miuix.kmp.glass.glassPopupAnchorContent
+import top.yukonga.miuix.kmp.glass.rememberGlassPopupAnchor
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.glass.Delete
+import top.yukonga.miuix.kmp.icon.glass.Tune
+import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -87,14 +100,20 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 @Composable
 fun MiuixHistoryPage(
     enableBlur: Boolean,
+    useOs4: Boolean = false,
     viewModel: HistoryViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+    val isContentScrolled by remember { derivedStateOf { listState.canScrollBackward } }
     val scrollBehavior = MiuixScrollBehavior()
     val layoutDirection = LocalLayoutDirection.current
     val topBarBackdrop = rememberMiuixBlurBackdrop(enableBlur)
+    val menuBackdrop = rememberMiuixBlurBackdrop(useOs4)
+    val historyMenuAnchor = rememberGlassPopupAnchor()
+    var showHistoryMenu by remember { mutableStateOf(false) }
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -141,101 +160,177 @@ fun MiuixHistoryPage(
         )
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
-                title = title,
-                actions = {
-                    IconButton(
-                        enabled = state.isHistoryEnabled && state.records.isNotEmpty(),
-                        onClick = { showClearConfirmDialog = true },
-                    ) {
-                        Icon(
-                            imageVector = AppMiuixIcons.Delete,
-                            contentDescription = stringResource(R.string.history_clear),
-                        )
-                    }
-                    OverlayIconDropdownMenu(
-                        entries = historyMenuEntries,
-                        // Keep the grouped toggle menu open, as in the Miuix example's
-                        // grouped and multi-select menus, so both states can be adjusted together.
-                        collapseOnSelection = false,
-                    ) {
-                        Icon(
-                            imageVector = AppMiuixIcons.Tune,
-                            contentDescription = stringResource(R.string.history_recording),
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-    ) { innerPadding ->
-        if (state.isLoading && state.records.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = innerPadding.calculateTopPadding(),
-                        bottom = outerPadding.calculateBottomPadding(),
-                    ),
-                contentAlignment = Alignment.Center,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(menuBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
+            topBar = {
+                InstallerMiuixTopAppBar(
+                    useOs4 = useOs4,
+                    backdrop = topBarBackdrop,
+                    isContentScrolled = isContentScrolled,
+                    title = title,
+                    actions = {
+                        if (useOs4) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                val canClearHistory = state.isHistoryEnabled && state.records.isNotEmpty()
+                                if (canClearHistory) {
+                                    InstallerMiuixTopBarIconButton(onClick = { showClearConfirmDialog = true }) {
+                                        Icon(
+                                            imageVector = MiuixIcons.Glass.Delete,
+                                            contentDescription = stringResource(R.string.history_clear),
+                                            modifier = Modifier.size(24.dp),
+                                            tint = MiuixTheme.colorScheme.onSurface,
+                                        )
+                                    }
+                                } else {
+                                    IconButton(
+                                        enabled = false,
+                                        onClick = {},
+                                        minWidth = GlassTopAppBarDefaults.ButtonSize,
+                                        minHeight = GlassTopAppBarDefaults.ButtonSize,
+                                    ) {
+                                        Icon(
+                                            imageVector = MiuixIcons.Glass.Delete,
+                                            contentDescription = stringResource(R.string.history_clear),
+                                            modifier = Modifier.size(24.dp),
+                                            tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                                        )
+                                    }
+                                }
+                                InstallerMiuixTopBarIconButton(
+                                    onClick = { showHistoryMenu = !showHistoryMenu },
+                                    modifier = Modifier.glassPopupAnchor(
+                                        anchor = historyMenuAnchor,
+                                        cornerRadius = GlassTopAppBarDefaults.ButtonSize / 2,
+                                        floating = isContentScrolled,
+                                    ),
+                                ) {
+                                    Icon(
+                                        imageVector = MiuixIcons.Glass.Tune,
+                                        contentDescription = stringResource(R.string.history_recording),
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .glassPopupAnchorContent(historyMenuAnchor),
+                                        tint = MiuixTheme.colorScheme.onSurface,
+                                    )
+                                }
+                            }
+                        } else {
+                            IconButton(
+                                enabled = state.isHistoryEnabled && state.records.isNotEmpty(),
+                                onClick = { showClearConfirmDialog = true },
+                            ) {
+                                Icon(
+                                    imageVector = AppMiuixIcons.Delete,
+                                    contentDescription = stringResource(R.string.history_clear),
+                                )
+                            }
+                            OverlayIconDropdownMenu(
+                                entries = historyMenuEntries,
+                                // Keep the grouped toggle menu open, as in the Miuix example's
+                                // grouped and multi-select menus, so both states can be adjusted together.
+                                collapseOnSelection = false,
+                            ) {
+                                Icon(
+                                    imageVector = AppMiuixIcons.Tune,
+                                    contentDescription = stringResource(R.string.history_recording),
+                                )
+                            }
+                        }
+                    },
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+        ) { innerPadding ->
+            InstallerMiuixBackdropSurface(
+                backdrop = topBarBackdrop,
+                modifier = Modifier.fillMaxSize(),
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    InfiniteProgressIndicator()
-                    Text(
-                        text = stringResource(id = R.string.loading),
-                        style = MiuixTheme.textStyles.main,
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                    .overScrollVertical()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
-                contentPadding = PaddingValues(
-                    start = innerPadding.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
-                        layoutDirection,
-                    ) + 16.dp,
-                    top = innerPadding.calculateTopPadding() + 16.dp,
-                    end = innerPadding.calculateEndPadding(layoutDirection) + outerPadding.calculateEndPadding(
-                        layoutDirection,
-                    ) + 16.dp,
-                    bottom = outerPadding.calculateBottomPadding() + 16.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (!state.isHistoryEnabled || state.records.isEmpty()) {
-                    item {
-                        EmptyHistory(
-                            isHistoryEnabled = state.isHistoryEnabled,
-                            modifier = Modifier
-                                .fillParentMaxSize()
-                                .padding(horizontal = 8.dp),
-                        )
+                if (state.isLoading && state.records.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                bottom = outerPadding.calculateBottomPadding(),
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            InfiniteProgressIndicator()
+                            Text(
+                                text = stringResource(id = R.string.loading),
+                                style = MiuixTheme.textStyles.main,
+                            )
+                        }
                     }
                 } else {
-                    items(state.records, key = { it.id }) { record ->
-                        HistoryRecordBriefCard(
-                            record = record,
-                            showIndicator = state.areIndicatorsEnabled,
-                            onClick = {
-                                selectedRecord = record
-                                showRecordDetailSheet = true
-                            },
-                        )
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .overScrollVertical()
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        contentPadding = PaddingValues(
+                            start = innerPadding.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
+                                layoutDirection,
+                            ) + 16.dp,
+                            top = innerPadding.calculateTopPadding() + 16.dp,
+                            end = innerPadding.calculateEndPadding(layoutDirection) + outerPadding.calculateEndPadding(
+                                layoutDirection,
+                            ) + 16.dp,
+                            bottom = outerPadding.calculateBottomPadding() + 16.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (!state.isHistoryEnabled || state.records.isEmpty()) {
+                            item {
+                                EmptyHistory(
+                                    isHistoryEnabled = state.isHistoryEnabled,
+                                    modifier = Modifier
+                                        .fillParentMaxSize()
+                                        .padding(horizontal = 8.dp),
+                                )
+                            }
+                        } else {
+                            items(state.records, key = { it.id }) { record ->
+                                HistoryRecordBriefCard(
+                                    record = record,
+                                    showIndicator = state.areIndicatorsEnabled,
+                                    onClick = {
+                                        selectedRecord = record
+                                        showRecordDetailSheet = true
+                                    },
+                                )
+                            }
+                        }
                     }
                 }
             }
+        }
+        if (useOs4) {
+            GlassIconDropdownMenu(
+                show = showHistoryMenu,
+                onDismissRequest = { showHistoryMenu = false },
+                anchor = historyMenuAnchor,
+                anchorContent = {
+                    Icon(
+                        imageVector = MiuixIcons.Glass.Tune,
+                        contentDescription = stringResource(R.string.history_recording),
+                        modifier = Modifier.size(24.dp),
+                        tint = MiuixTheme.colorScheme.onSurface,
+                    )
+                },
+                entries = historyMenuEntries,
+                backdrop = menuBackdrop,
+                visuals = GlassPopupDefaults.visuals(style = GlassDefaults.style(InstallerTheme.isDark)),
+                collapseOnSelection = false,
+            )
         }
     }
 

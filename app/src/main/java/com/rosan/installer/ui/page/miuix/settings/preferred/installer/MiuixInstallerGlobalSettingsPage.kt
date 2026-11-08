@@ -67,11 +67,12 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerSettingsViewModel
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixSpinnerPreference
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -87,9 +88,6 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -110,206 +108,115 @@ fun MiuixInstallerGlobalSettingsPage(useBlur: Boolean, viewModel: InstallerSetti
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
+            InstallerMiuixTopAppBar(
+                backdrop = topBarBackdrop,
                 title = stringResource(R.string.installer_settings),
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navigator.pop() })
+                    InstallerMiuixBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-            ),
-            overscrollEffect = null,
+        InstallerMiuixBackdropSurface(
+            backdrop = topBarBackdrop,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.installer_settings_global_installer)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixNavigationItemWidget(
-                        title = stringResource(R.string.dialog_settings),
-                        description = stringResource(R.string.dialog_settings_desc),
-                        onClick = { navigator.push(Route.DialogSettings) },
-                    )
-                    MiuixNavigationItemWidget(
-                        title = stringResource(R.string.notification_settings),
-                        description = stringResource(R.string.notification_settings_desc),
-                        onClick = { navigator.push(Route.NotificationSettings) },
-                    )
-                    MiuixNavigationItemWidget(
-                        title = stringResource(R.string.authorizer_customization),
-                        description = stringResource(R.string.authorizer_customization_desc),
-                        onClick = { navigator.push(Route.AuthorizerCust) },
-                    )
-
-                    if (BiometricManager
-                            .from(context)
-                            .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
-                        BiometricManager.BIOMETRIC_SUCCESS
-                    ) {
-                        val biometricModes = remember {
-                            listOf(
-                                BiometricAuthMode.Disable,
-                                BiometricAuthMode.Enable,
-                                BiometricAuthMode.FollowConfig,
-                            )
-                        }
-
-                        val entries = remember(biometricModes) {
-                            biometricModes.map { mode ->
-                                val text = when (mode) {
-                                    BiometricAuthMode.Disable -> context.getString(R.string.installer_biometric_auth_mode_disable)
-
-                                    BiometricAuthMode.Enable -> context.getString(R.string.installer_biometric_auth_mode_enable)
-
-                                    BiometricAuthMode.FollowConfig -> context.getString(
-                                        R.string.installer_biometric_auth_mode_follow_config,
-                                    )
-                                }
-                                DropdownItem(title = text)
-                            }
-                        }
-
-                        val selectedIndex = remember(uiState.installerRequireBiometricAuth, biometricModes) {
-                            biometricModes.indexOf(uiState.installerRequireBiometricAuth).coerceAtLeast(0)
-                        }
-
-                        val dynamicSummary = when (biometricModes[selectedIndex]) {
-                            BiometricAuthMode.Disable -> stringResource(R.string.installer_biometric_auth_mode_disable_desc)
-
-                            BiometricAuthMode.Enable -> stringResource(R.string.installer_biometric_auth_mode_enable_desc)
-
-                            BiometricAuthMode.FollowConfig -> stringResource(
-                                R.string.installer_biometric_auth_mode_follow_config_desc,
-                            )
-                        }
-
-                        WindowSpinnerPreference(
-                            title = stringResource(R.string.installer_settings_require_biometric_auth),
-                            summary = dynamicSummary,
-                            items = entries,
-                            selectedIndex = selectedIndex,
-                            onSelectedIndexChange = { index ->
-                                viewModel.dispatch(
-                                    InstallerSettingsAction.ChangeBiometricAuth(biometricModes[index]),
-                                )
-                            },
-                        )
-                    }
-                }
-            }
-
-            item { SmallTitle(stringResource(R.string.installer_settings_signature_check)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.config_check_app_signature),
-                        description = stringResource(R.string.config_check_app_signature_desc),
-                        checked = uiState.checkAppSignature,
-                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeCheckAppSignature(it)) },
-                    )
-
-                    AnimatedVisibility(
-                        visible = uiState.checkAppSignature,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.config_check_source_stamp),
-                            description = stringResource(R.string.config_check_source_stamp_desc),
-                            checked = uiState.checkSourceStamp,
-                            onCheckedChange = {
-                                viewModel.dispatch(InstallerSettingsAction.ChangeCheckSourceStamp(it))
-                            },
-                        )
-                    }
-
-                    AnimatedVisibility(
-                        visible = uiState.checkAppSignature,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.config_show_signature_info_on_match),
-                            description = stringResource(R.string.config_show_signature_info_on_match_desc),
-                            checked = uiState.showSignatureInfoOnMatch,
-                            onCheckedChange = {
-                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureInfoOnMatch(it))
-                            },
-                        )
-                    }
-
-                    AnimatedVisibility(
-                        visible = uiState.checkAppSignature,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.config_show_signature_details),
-                            description = stringResource(R.string.config_show_signature_details_desc),
-                            checked = uiState.showSignatureDetails,
-                            onCheckedChange = {
-                                viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureDetails(it))
-                            },
-                        )
-                    }
-                }
-            }
-
-            item { SmallTitle(stringResource(R.string.installer_settings_xposed_detection)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.config_detect_xposed_module),
-                        description = stringResource(R.string.config_detect_xposed_module_desc),
-                        checked = uiState.detectXposedModule,
-                        onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeDetectXposedModule(it)) },
-                    )
-
-                    AnimatedVisibility(
-                        visible = uiState.detectXposedModule,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                    ) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.config_quick_open_lsposed),
-                            description = stringResource(R.string.config_quick_open_lsposed_desc),
-                            checked = uiState.quickOpenLSPosed,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeQuickOpenLSPosed(it)) },
-                        )
-                    }
-                }
-            }
-
-            if (DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
-                DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(
+                    start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                ),
+                overscrollEffect = null,
             ) {
-                item { SmallTitle(stringResource(R.string.installer_oppo_related)) }
+                item { Spacer(modifier = Modifier.size(12.dp)) }
+                item { SmallTitle(stringResource(R.string.installer_settings_global_installer)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        MiuixNavigationItemWidget(
+                            title = stringResource(R.string.dialog_settings),
+                            description = stringResource(R.string.dialog_settings_desc),
+                            onClick = { navigator.push(Route.DialogSettings) },
+                        )
+                        MiuixNavigationItemWidget(
+                            title = stringResource(R.string.notification_settings),
+                            description = stringResource(R.string.notification_settings_desc),
+                            onClick = { navigator.push(Route.NotificationSettings) },
+                        )
+                        MiuixNavigationItemWidget(
+                            title = stringResource(R.string.authorizer_customization),
+                            description = stringResource(R.string.authorizer_customization_desc),
+                            onClick = { navigator.push(Route.AuthorizerCust) },
+                        )
+
+                        if (BiometricManager
+                                .from(context)
+                                .canAuthenticate(BIOMETRIC_WEAK or BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
+                            BiometricManager.BIOMETRIC_SUCCESS
+                        ) {
+                            val biometricModes = remember {
+                                listOf(
+                                    BiometricAuthMode.Disable,
+                                    BiometricAuthMode.Enable,
+                                    BiometricAuthMode.FollowConfig,
+                                )
+                            }
+
+                            val entries = remember(biometricModes) {
+                                biometricModes.map { mode ->
+                                    val text = when (mode) {
+                                        BiometricAuthMode.Disable -> context.getString(R.string.installer_biometric_auth_mode_disable)
+
+                                        BiometricAuthMode.Enable -> context.getString(R.string.installer_biometric_auth_mode_enable)
+
+                                        BiometricAuthMode.FollowConfig -> context.getString(
+                                            R.string.installer_biometric_auth_mode_follow_config,
+                                        )
+                                    }
+                                    DropdownItem(title = text)
+                                }
+                            }
+
+                            val selectedIndex = remember(uiState.installerRequireBiometricAuth, biometricModes) {
+                                biometricModes.indexOf(uiState.installerRequireBiometricAuth).coerceAtLeast(0)
+                            }
+
+                            val dynamicSummary = when (biometricModes[selectedIndex]) {
+                                BiometricAuthMode.Disable -> stringResource(R.string.installer_biometric_auth_mode_disable_desc)
+
+                                BiometricAuthMode.Enable -> stringResource(R.string.installer_biometric_auth_mode_enable_desc)
+
+                                BiometricAuthMode.FollowConfig -> stringResource(
+                                    R.string.installer_biometric_auth_mode_follow_config_desc,
+                                )
+                            }
+
+                            InstallerMiuixSpinnerPreference(
+                                title = stringResource(R.string.installer_settings_require_biometric_auth),
+                                summary = dynamicSummary,
+                                items = entries,
+                                selectedIndex = selectedIndex,
+                                onSelectedIndexChange = { index ->
+                                    viewModel.dispatch(
+                                        InstallerSettingsAction.ChangeBiometricAuth(biometricModes[index]),
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+
+                item { SmallTitle(stringResource(R.string.installer_settings_signature_check)) }
                 item {
                     Card(
                         modifier = Modifier
@@ -317,104 +224,198 @@ fun MiuixInstallerGlobalSettingsPage(useBlur: Boolean, viewModel: InstallerSetti
                             .padding(bottom = 12.dp),
                     ) {
                         MiuixSwitchWidget(
-                            title = stringResource(id = R.string.installer_show_oem_special),
-                            description = stringResource(id = R.string.installer_show_oem_special_desc),
-                            checked = uiState.showOPPOSpecial,
-                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) },
+                            title = stringResource(R.string.config_check_app_signature),
+                            description = stringResource(R.string.config_check_app_signature_desc),
+                            checked = uiState.checkAppSignature,
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeCheckAppSignature(it)) },
                         )
+
+                        AnimatedVisibility(
+                            visible = uiState.checkAppSignature,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.config_check_source_stamp),
+                                description = stringResource(R.string.config_check_source_stamp_desc),
+                                checked = uiState.checkSourceStamp,
+                                onCheckedChange = {
+                                    viewModel.dispatch(InstallerSettingsAction.ChangeCheckSourceStamp(it))
+                                },
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = uiState.checkAppSignature,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.config_show_signature_info_on_match),
+                                description = stringResource(R.string.config_show_signature_info_on_match_desc),
+                                checked = uiState.showSignatureInfoOnMatch,
+                                onCheckedChange = {
+                                    viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureInfoOnMatch(it))
+                                },
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = uiState.checkAppSignature,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.config_show_signature_details),
+                                description = stringResource(R.string.config_show_signature_details_desc),
+                                checked = uiState.showSignatureDetails,
+                                onCheckedChange = {
+                                    viewModel.dispatch(InstallerSettingsAction.ChangeShowSignatureDetails(it))
+                                },
+                            )
+                        }
                     }
                 }
-            }
 
-            item { SmallTitle(stringResource(R.string.config_managed_installer_packages_title)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixManagedPackagesWidget(
-                        noContentTitle = stringResource(R.string.config_no_preset_install_sources),
-                        packages = uiState.managedInstallerPackages,
-                        onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
-                        onRemovePackage = {
-                            viewModel.dispatch(
-                                InstallerSettingsAction.RemoveManagedInstallerPackage(it),
-                            )
-                        },
-                    )
-                }
-            }
-
-            item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_package_name_title)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixManagedPackagesWidget(
-                        noContentTitle = stringResource(R.string.config_no_managed_blacklist),
-                        packages = uiState.managedBlacklistPackages,
-                        onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
-                        onRemovePackage = {
-                            viewModel.dispatch(
-                                InstallerSettingsAction.RemoveManagedBlacklistPackage(it),
-                            )
-                        },
-                    )
-                }
-            }
-
-            item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_shared_user_id_title)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 16.dp),
-                ) {
-                    MiuixManagedUidsWidget(
-                        noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
-                        uids = uiState.managedSharedUserIdBlacklist,
-                        onAddUid = {
-                            viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdBlacklist(it))
-                        },
-                        onRemoveUid = {
-                            viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it))
-                        },
-                    )
-                    AnimatedVisibility(
-                        visible = uiState.managedSharedUserIdBlacklist.isNotEmpty(),
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
+                item { SmallTitle(stringResource(R.string.installer_settings_xposed_detection)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
                     ) {
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outline,
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.config_detect_xposed_module),
+                            description = stringResource(R.string.config_detect_xposed_module_desc),
+                            checked = uiState.detectXposedModule,
+                            onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeDetectXposedModule(it)) },
                         )
+
+                        AnimatedVisibility(
+                            visible = uiState.detectXposedModule,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.config_quick_open_lsposed),
+                                description = stringResource(R.string.config_quick_open_lsposed_desc),
+                                checked = uiState.quickOpenLSPosed,
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeQuickOpenLSPosed(it)) },
+                            )
+                        }
+                    }
+                }
+
+                if (DeviceConfig.currentManufacturer == Manufacturer.OPPO ||
+                    DeviceConfig.currentManufacturer == Manufacturer.ONEPLUS
+                ) {
+                    item { SmallTitle(stringResource(R.string.installer_oppo_related)) }
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                        ) {
+                            MiuixSwitchWidget(
+                                title = stringResource(id = R.string.installer_show_oem_special),
+                                description = stringResource(id = R.string.installer_show_oem_special_desc),
+                                checked = uiState.showOPPOSpecial,
+                                onCheckedChange = { viewModel.dispatch(InstallerSettingsAction.ChangeShowOPPOSpecial(it)) },
+                            )
+                        }
+                    }
+                }
+
+                item { SmallTitle(stringResource(R.string.config_managed_installer_packages_title)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
                         MiuixManagedPackagesWidget(
-                            noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                            noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
-                            packages = uiState.managedSharedUserIdExemptedPackages,
-                            infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
-                            isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
-                            onAddPackage = {
-                                viewModel.dispatch(
-                                    InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(it),
-                                )
-                            },
+                            noContentTitle = stringResource(R.string.config_no_preset_install_sources),
+                            packages = uiState.managedInstallerPackages,
+                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedInstallerPackage(it)) },
                             onRemovePackage = {
                                 viewModel.dispatch(
-                                    InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(it),
+                                    InstallerSettingsAction.RemoveManagedInstallerPackage(it),
                                 )
                             },
                         )
                     }
                 }
+
+                item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_package_name_title)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        MiuixManagedPackagesWidget(
+                            noContentTitle = stringResource(R.string.config_no_managed_blacklist),
+                            packages = uiState.managedBlacklistPackages,
+                            onAddPackage = { viewModel.dispatch(InstallerSettingsAction.AddManagedBlacklistPackage(it)) },
+                            onRemovePackage = {
+                                viewModel.dispatch(
+                                    InstallerSettingsAction.RemoveManagedBlacklistPackage(it),
+                                )
+                            },
+                        )
+                    }
+                }
+
+                item { SmallTitle(stringResource(R.string.config_managed_blacklist_by_shared_user_id_title)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 16.dp),
+                    ) {
+                        MiuixManagedUidsWidget(
+                            noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_blacklist),
+                            uids = uiState.managedSharedUserIdBlacklist,
+                            onAddUid = {
+                                viewModel.dispatch(InstallerSettingsAction.AddManagedSharedUserIdBlacklist(it))
+                            },
+                            onRemoveUid = {
+                                viewModel.dispatch(InstallerSettingsAction.RemoveManagedSharedUserIdBlacklist(it))
+                            },
+                        )
+                        AnimatedVisibility(
+                            visible = uiState.managedSharedUserIdBlacklist.isNotEmpty(),
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically(),
+                        ) {
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                            MiuixManagedPackagesWidget(
+                                noContentTitle = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                                noContentDescription = stringResource(R.string.config_shared_uid_prior_to_pkgname_desc),
+                                packages = uiState.managedSharedUserIdExemptedPackages,
+                                infoText = stringResource(R.string.config_no_managed_shared_user_id_exempted_packages),
+                                isInfoVisible = uiState.managedSharedUserIdExemptedPackages.isNotEmpty(),
+                                onAddPackage = {
+                                    viewModel.dispatch(
+                                        InstallerSettingsAction.AddManagedSharedUserIdExemptedPackages(it),
+                                    )
+                                },
+                                onRemovePackage = {
+                                    viewModel.dispatch(
+                                        InstallerSettingsAction.RemoveManagedSharedUserIdExemptedPackages(it),
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+                item { Spacer(Modifier.navigationBarsPadding()) }
             }
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

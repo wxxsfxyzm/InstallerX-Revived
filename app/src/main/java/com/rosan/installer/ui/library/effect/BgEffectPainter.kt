@@ -8,8 +8,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Brush
 import kotlin.math.cos
 import kotlin.math.sin
-import top.yukonga.miuix.kmp.blur.RuntimeShader
-import top.yukonga.miuix.kmp.blur.asBrush
+import top.yukonga.miuix.kmp.material.RuntimeShader
+import top.yukonga.miuix.kmp.material.asBrush
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class BgEffectPainter(private val isOs3: Boolean = true) {

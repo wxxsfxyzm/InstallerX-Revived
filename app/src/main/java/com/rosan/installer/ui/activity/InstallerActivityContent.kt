@@ -34,6 +34,7 @@ fun InstallerActivityContent(session: InstallerSessionRepository, themeStateProv
 
     InstallerTheme(
         useMiuix = uiState.useMiuix,
+        useMiuixOs4 = false, // Do not use OS4 style in installation
         themeMode = uiState.themeMode,
         paletteStyle = uiState.paletteStyle,
         colorSpec = uiState.colorSpec,

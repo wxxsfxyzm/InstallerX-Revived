@@ -85,6 +85,7 @@ data class AppPreferences(
     val paletteStyle: PaletteStyle,
     val colorSpec: ThemeColorSpec,
     val useDynamicColor: Boolean,
+    val useMiuixOs4: Boolean = false,
     val useMiuixMonet: Boolean,
     val useAppleFloatingBar: Boolean,
     val seedColorInt: Int, // Stored as raw Int from DataStore

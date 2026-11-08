@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +25,7 @@ import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.framework.packageupdate.SelfUpdateRecoveryManager
 import com.rosan.installer.ui.navigation.InstallerNavContainer
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixComponentHost
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.LocalWindowLayoutInfo
 import com.rosan.installer.ui.theme.rememberWindowLayoutInfo
@@ -76,6 +79,7 @@ class SettingsActivity :
             ) {
                 InstallerTheme(
                     useMiuix = uiState.useMiuix,
+                    useMiuixOs4 = uiState.useMiuixOs4,
                     themeMode = uiState.themeMode,
                     paletteStyle = uiState.paletteStyle,
                     colorSpec = uiState.colorSpec,
@@ -84,18 +88,34 @@ class SettingsActivity :
                     seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor),
                     useAmoled = uiState.useAmoled,
                 ) {
-                    val backgroundColor =
-                        if (uiState.useMiuix) {
-                            MiuixTheme.colorScheme.surface
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainer
+                    // Keep the navigation tree alive when the popup host changes with the UI family.
+                    val navigationContent = remember {
+                        movableContentOf<ThemeState, Modifier> { themeState, recordingModifier ->
+                            val backgroundColor = if (themeState.useMiuix) {
+                                MiuixTheme.colorScheme.surface
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainer
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(backgroundColor)
+                                    .then(recordingModifier),
+                            ) {
+                                InstallerNavContainer(themeState)
+                            }
                         }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(backgroundColor),
-                    ) {
-                        InstallerNavContainer(uiState)
+                    }
+                    if (uiState.useMiuix) {
+                        InstallerMiuixComponentHost(
+                            useOs4 = InstallerTheme.useMiuixOs4,
+                            useBlur = uiState.useBlur,
+                            modifier = Modifier.fillMaxSize(),
+                        ) { scope ->
+                            navigationContent(uiState, scope.pageBackdropModifier)
+                        }
+                    } else {
+                        navigationContent(uiState, Modifier)
                     }
                 }
             }
