@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,11 +54,11 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewEvent
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import com.rosan.installer.ui.util.readBackupText
 import com.rosan.installer.ui.util.writeBackupText
@@ -75,8 +77,6 @@ import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.SnackbarResult
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -85,6 +85,7 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 @Composable
 fun MiuixPreferredPage(
     enableBlur: Boolean,
+    useOs4: Boolean = false,
     viewModel: PreferredViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues,
@@ -104,6 +105,8 @@ fun MiuixPreferredPage(
         Level.PREVIEW -> stringResource(id = R.string.preview)
         Level.UNSTABLE -> stringResource(id = R.string.unstable)
     }
+    val listState = rememberLazyListState()
+    val isContentScrolled by remember { derivedStateOf { listState.canScrollBackward } }
     val scrollBehavior = MiuixScrollBehavior()
 
     var errorDialogInfo by remember {
@@ -209,171 +212,177 @@ fun MiuixPreferredPage(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
+            InstallerMiuixTopAppBar(
+                useOs4 = useOs4,
+                backdrop = topBarBackdrop,
+                isContentScrolled = isContentScrolled,
                 title = title,
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                // Safely add horizontal paddings to avoid notches in landscape
-                start = innerPadding.calculateStartPadding(layoutDirection),
-                top = innerPadding.calculateTopPadding(),
-                end = innerPadding.calculateEndPadding(layoutDirection),
-                bottom = outerPadding.calculateBottomPadding(),
-            ),
-            overscrollEffect = null,
+        InstallerMiuixBackdropSurface(
+            backdrop = topBarBackdrop,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { SmallTitle(stringResource(R.string.personalization)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixNavigationItemWidget(
-                        icon = AppIcons.Theme,
-                        title = stringResource(R.string.theme_settings),
-                        description = stringResource(R.string.theme_settings_desc),
-                        onClick = {
-                            navigator.push(Route.Theme)
-                        },
-                    )
-                    MiuixNavigationItemWidget(
-                        icon = AppIcons.InstallMode,
-                        title = stringResource(R.string.installer_settings),
-                        description = stringResource(R.string.installer_settings_desc),
-                        onClick = {
-                            navigator.push(Route.InstallerGlobal)
-                        },
-                    )
-                    MiuixNavigationItemWidget(
-                        icon = AppIcons.InstallMode,
-                        title = stringResource(R.string.uninstaller_settings),
-                        description = stringResource(R.string.uninstaller_settings_desc),
-                        onClick = {
-                            navigator.push(Route.UninstallerGlobal)
-                        },
-                    )
-                }
-            }
-            if (uiState.authorizer == Authorizer.None) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(
+                    // Safely add horizontal paddings to avoid notches in landscape
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    top = innerPadding.calculateTopPadding(),
+                    end = innerPadding.calculateEndPadding(layoutDirection),
+                    bottom = outerPadding.calculateBottomPadding(),
+                ),
+                overscrollEffect = null,
+            ) {
+                item { Spacer(modifier = Modifier.size(12.dp)) }
+                item { SmallTitle(stringResource(R.string.personalization)) }
                 item {
-                    val tip =
-                        if (capabilityProvider.isSystemApp) {
-                            stringResource(R.string.config_authorizer_none_system_app_tips)
-                        } else {
-                            stringResource(R.string.config_authorizer_none_tips)
-                        }
-                    MiuixSettingsTipCard(text = tip)
-                }
-            }
-            item { SmallTitle(stringResource(R.string.basic)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    BasicComponent(
-                        title = stringResource(R.string.network_settings),
-                        summary = stringResource(
-                            if (uiState.allowInternetAccess) {
-                                R.string.network_settings_internet_access_enabled_desc
-                            } else {
-                                R.string.network_settings_internet_access_disabled_desc
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        MiuixNavigationItemWidget(
+                            icon = AppIcons.Theme,
+                            title = stringResource(R.string.theme_settings),
+                            description = stringResource(R.string.theme_settings_desc),
+                            onClick = {
+                                navigator.push(Route.Theme)
                             },
-                        ),
-                        onClick = { navigator.push(Route.Network) },
-                    )
-                    MiuixDisableAdbVerify(
-                        checked = !uiState.adbVerifyEnabled,
-                        isError = uiState.authorizer == Authorizer.Dhizuku,
-                        enabled = uiState.authorizer != Authorizer.Dhizuku &&
-                            uiState.authorizer != Authorizer.None,
-                        onCheckedChange = { isDisabled ->
-                            viewModel.dispatch(
-                                PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled),
-                            )
-                        },
-                    )
-                    MiuixIgnoreBatteryOptimizationSetting(
-                        checked = uiState.isIgnoringBatteryOptimizations,
-                        enabled = !uiState.isIgnoringBatteryOptimizations,
-                    ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
-                    MiuixSwitchWidget(
-                        title = stringResource(R.string.theme_settings_hide_launcher_icon),
-                        description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
-                        checked = !uiState.showLauncherIcon,
-                        onCheckedChange = { newCheckedState ->
-                            if (newCheckedState) {
-                                showHideLauncherIconDialog.value = true
+                        )
+                        MiuixNavigationItemWidget(
+                            icon = AppIcons.InstallMode,
+                            title = stringResource(R.string.installer_settings),
+                            description = stringResource(R.string.installer_settings_desc),
+                            onClick = {
+                                navigator.push(Route.InstallerGlobal)
+                            },
+                        )
+                        MiuixNavigationItemWidget(
+                            icon = AppIcons.InstallMode,
+                            title = stringResource(R.string.uninstaller_settings),
+                            description = stringResource(R.string.uninstaller_settings_desc),
+                            onClick = {
+                                navigator.push(Route.UninstallerGlobal)
+                            },
+                        )
+                    }
+                }
+                if (uiState.authorizer == Authorizer.None) {
+                    item {
+                        val tip =
+                            if (capabilityProvider.isSystemApp) {
+                                stringResource(R.string.config_authorizer_none_system_app_tips)
                             } else {
-                                viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                                stringResource(R.string.config_authorizer_none_tips)
                             }
-                        },
-                    )
+                        MiuixSettingsTipCard(text = tip)
+                    }
                 }
-            }
-            item { SmallTitle(stringResource(R.string.backup_settings)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    BasicComponent(
-                        title = stringResource(R.string.backup_settings_export),
-                        summary = stringResource(R.string.backup_settings_export_desc),
-                        enabled = !uiState.backupBusy,
-                        onClick = { viewModel.dispatch(PreferredViewAction.RequestExportBackup) },
-                    )
-                    BasicComponent(
-                        title = stringResource(R.string.backup_settings_restore),
-                        summary = stringResource(R.string.backup_settings_restore_desc),
-                        enabled = !uiState.backupBusy,
-                        onClick = { restoreLauncher.launch(arrayOf("application/json", "text/json", "*/*")) },
-                    )
+                item { SmallTitle(stringResource(R.string.basic)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        BasicComponent(
+                            title = stringResource(R.string.network_settings),
+                            summary = stringResource(
+                                if (uiState.allowInternetAccess) {
+                                    R.string.network_settings_internet_access_enabled_desc
+                                } else {
+                                    R.string.network_settings_internet_access_disabled_desc
+                                },
+                            ),
+                            onClick = { navigator.push(Route.Network) },
+                        )
+                        MiuixDisableAdbVerify(
+                            checked = !uiState.adbVerifyEnabled,
+                            isError = uiState.authorizer == Authorizer.Dhizuku,
+                            enabled = uiState.authorizer != Authorizer.Dhizuku &&
+                                uiState.authorizer != Authorizer.None,
+                            onCheckedChange = { isDisabled ->
+                                viewModel.dispatch(
+                                    PreferredViewAction.SetAdbVerifyEnabledState(!isDisabled),
+                                )
+                            },
+                        )
+                        MiuixIgnoreBatteryOptimizationSetting(
+                            checked = uiState.isIgnoringBatteryOptimizations,
+                            enabled = !uiState.isIgnoringBatteryOptimizations,
+                        ) { viewModel.dispatch(PreferredViewAction.RequestIgnoreBatteryOptimization) }
+                        MiuixSwitchWidget(
+                            title = stringResource(R.string.theme_settings_hide_launcher_icon),
+                            description = stringResource(R.string.theme_settings_hide_launcher_icon_desc),
+                            checked = !uiState.showLauncherIcon,
+                            onCheckedChange = { newCheckedState ->
+                                if (newCheckedState) {
+                                    showHideLauncherIconDialog.value = true
+                                } else {
+                                    viewModel.dispatch(PreferredViewAction.ChangeShowLauncherIcon(true))
+                                }
+                            },
+                        )
+                    }
                 }
-            }
-            item { SmallTitle(stringResource(R.string.other)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    BasicComponent(
-                        title = stringResource(R.string.lab),
-                        summary = stringResource(R.string.lab_desc),
-                        onClick = { navigator.push(Route.Lab) },
-                    )
-                    BasicComponent(
-                        title = stringResource(R.string.about_detail),
-                        summary = if (uiState.hasUpdate) {
-                            stringResource(
-                                R.string.update_available,
-                                uiState.remoteVersion,
-                            )
-                        } else {
-                            "$revLevel ${AppConfig.VERSION_NAME}"
-                        },
-                        summaryColor = BasicComponentColors(
-                            color = if (uiState.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                            disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
-                        ),
-                        onClick = { navigator.push(Route.About) },
-                    )
+                item { SmallTitle(stringResource(R.string.backup_settings)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        BasicComponent(
+                            title = stringResource(R.string.backup_settings_export),
+                            summary = stringResource(R.string.backup_settings_export_desc),
+                            enabled = !uiState.backupBusy,
+                            onClick = { viewModel.dispatch(PreferredViewAction.RequestExportBackup) },
+                        )
+                        BasicComponent(
+                            title = stringResource(R.string.backup_settings_restore),
+                            summary = stringResource(R.string.backup_settings_restore_desc),
+                            enabled = !uiState.backupBusy,
+                            onClick = { restoreLauncher.launch(arrayOf("application/json", "text/json", "*/*")) },
+                        )
+                    }
+                }
+                item { SmallTitle(stringResource(R.string.other)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        BasicComponent(
+                            title = stringResource(R.string.lab),
+                            summary = stringResource(R.string.lab_desc),
+                            onClick = { navigator.push(Route.Lab) },
+                        )
+                        BasicComponent(
+                            title = stringResource(R.string.about_detail),
+                            summary = if (uiState.hasUpdate) {
+                                stringResource(
+                                    R.string.update_available,
+                                    uiState.remoteVersion,
+                                )
+                            } else {
+                                "$revLevel ${AppConfig.VERSION_NAME}"
+                            },
+                            summaryColor = BasicComponentColors(
+                                color = if (uiState.hasUpdate) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                disabledColor = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                            ),
+                            onClick = { navigator.push(Route.About) },
+                        )
+                    }
                 }
             }
         }

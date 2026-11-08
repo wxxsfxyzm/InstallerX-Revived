@@ -40,6 +40,7 @@ import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewState
 import com.rosan.installer.ui.page.main.settings.config.edit.dhizukuAwareDescription
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixSpinnerPreference
 import com.rosan.installer.ui.page.miuix.widgets.MiuixHintTextField
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.util.isSystemPackageInstallerActive
@@ -50,7 +51,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
-import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
 
@@ -148,7 +148,7 @@ fun MiuixDataAuthorizerWidget(state: EditViewState, dispatch: (EditViewAction) -
         authorizers.indexOf(stateAuthorizer).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         title = stringResource(R.string.config_authorizer),
         summary = stringResource(R.string.config_install_authorizer_desc),
         items = spinnerEntries,
@@ -200,7 +200,7 @@ fun MiuixDataInstallModeWidget(state: EditViewState, dispatch: (EditViewAction) 
         data.keys.toList().indexOf(stateInstallMode).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         title = stringResource(R.string.config_install_mode),
         items = spinnerEntries,
         selectedIndex = selectedIndex,
@@ -260,7 +260,7 @@ fun MiuixToastModeWidget(state: EditViewState, dispatch: (EditViewAction) -> Uni
         data.keys.toList().indexOf(currentMode).coerceAtLeast(0)
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         title = stringResource(R.string.config_install_show_toast),
         summary = stringResource(R.string.config_install_show_toast_desc),
         items = spinnerEntries,
@@ -325,7 +325,7 @@ fun MiuixInstallReasonWidget(state: EditViewState, dispatch: (EditViewAction) ->
                 data.keys.toList().indexOf(currentInstallReason).coerceAtLeast(0)
             }
 
-            WindowSpinnerPreference(
+            InstallerMiuixSpinnerPreference(
                 title = stringResource(R.string.config_install_reason),
                 items = spinnerEntries,
                 enabled = enabled,
@@ -385,7 +385,7 @@ fun MiuixDataPackageSourceWidget(state: EditViewState, dispatch: (EditViewAction
                 data.keys.toList().indexOf(currentSource).coerceAtLeast(0)
             }
 
-            WindowSpinnerPreference(
+            InstallerMiuixSpinnerPreference(
                 title = stringResource(R.string.config_package_source),
                 items = spinnerEntries,
                 enabled = enabled,
@@ -432,7 +432,7 @@ fun MiuixDataInstallRequesterWidget(state: EditViewState, dispatch: (EditViewAct
         data[currentMode]
     }
 
-    WindowSpinnerPreference(
+    InstallerMiuixSpinnerPreference(
         title = stringResource(id = R.string.config_declare_install_requester),
         summary = description,
         items = spinnerEntries,
@@ -541,7 +541,7 @@ fun MiuixDataDeclareInstallerWidget(state: EditViewState, dispatch: (EditViewAct
             data.keys.toList().indexOf(currentMode).coerceAtLeast(0)
         }
 
-        WindowSpinnerPreference(
+        InstallerMiuixSpinnerPreference(
             title = stringResource(id = R.string.config_declare_installer),
             summary = description,
             items = spinnerEntries,
@@ -635,7 +635,7 @@ fun MiuixDataUserWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
                 availableUsers.keys.toList().indexOf(targetUserId).coerceAtLeast(0)
             }
 
-            WindowSpinnerPreference(
+            InstallerMiuixSpinnerPreference(
                 title = stringResource(R.string.config_target_user),
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,
@@ -698,7 +698,7 @@ fun MiuixDataManualDexoptWidget(state: EditViewState, dispatch: (EditViewAction)
                 data.keys.toList().indexOf(currentMode).coerceAtLeast(0)
             }
 
-            WindowSpinnerPreference(
+            InstallerMiuixSpinnerPreference(
                 title = stringResource(R.string.config_dexopt_mode),
                 items = spinnerEntries,
                 selectedIndex = selectedIndex,

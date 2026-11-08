@@ -22,7 +22,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -39,10 +41,9 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
 import com.rosan.installer.ui.page.main.settings.config.all.AllViewState
 import com.rosan.installer.ui.page.main.widget.util.AllViewEventCollector
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
 import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
@@ -55,7 +56,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.SnackbarResult
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -67,6 +67,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 @Composable
 fun MiuixAllPage(
     enableBlur: Boolean,
+    useOs4: Boolean = false,
     viewModel: AllViewModel = koinViewModel(),
     title: String,
     outerPadding: PaddingValues,
@@ -75,6 +76,7 @@ fun MiuixAllPage(
     val navigator = LocalNavigator.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyGridState()
+    val isContentScrolled by remember { derivedStateOf { listState.canScrollBackward } }
     val scrollBehavior = MiuixScrollBehavior()
 
     AllViewEventCollector(
@@ -97,74 +99,81 @@ fun MiuixAllPage(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
+            InstallerMiuixTopAppBar(
+                useOs4 = useOs4,
+                backdrop = topBarBackdrop,
+                isContentScrolled = isContentScrolled,
+                persistentProgressiveBlur = true,
                 title = title,
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { innerPadding ->
-        when (uiState.data.progress) {
-            is AllViewState.Data.Progress.Loading if uiState.data.configs.isEmpty() -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            top = innerPadding.calculateTopPadding(),
-                            bottom = outerPadding.calculateBottomPadding(),
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
+        ) {
+            when (uiState.data.progress) {
+                is AllViewState.Data.Progress.Loading if uiState.data.configs.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                bottom = outerPadding.calculateBottomPadding(),
+                            ),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        InfiniteProgressIndicator()
-                        Text(
-                            text = stringResource(id = R.string.loading),
-                            style = MiuixTheme.textStyles.main,
-                        )
-                    }
-                }
-            }
-
-            is AllViewState.Data.Progress.Loaded if uiState.data.configs.isEmpty() -> {
-                // Since we don't allow removing default profile,
-                // There is no need to handle an empty state.
-            }
-
-            else -> {
-                val configs = uiState.data.configs
-                val minId = configs.minByOrNull { it.id }?.id
-
-                LazyVerticalGrid(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                        .overScrollVertical()
-                        .nestedScroll(scrollBehavior.nestedScrollConnection),
-                    columns = GridCells.Adaptive(350.dp),
-                    contentPadding = PaddingValues(
-                        start = innerPadding.calculateStartPadding(layoutDirection) + 16.dp,
-                        end = innerPadding.calculateEndPadding(layoutDirection) + 16.dp,
-                        top = innerPadding.calculateTopPadding() + 16.dp,
-                        bottom = outerPadding.calculateBottomPadding() + 16.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    overscrollEffect = null,
-                    state = listState,
-                ) {
-                    if (!uiState.userReadScopeTips) {
-                        item {
-                            MiuixScopeTipCard(viewModel = viewModel)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            InfiniteProgressIndicator()
+                            Text(
+                                text = stringResource(id = R.string.loading),
+                                style = MiuixTheme.textStyles.main,
+                            )
                         }
                     }
-                    /*else item { Spacer(modifier = Modifier.size(6.dp)) }*/
+                }
 
-                    items(configs) {
-                        DataItemWidget(viewModel, it, it.id == minId)
+                is AllViewState.Data.Progress.Loaded if uiState.data.configs.isEmpty() -> {
+                    // Since we don't allow removing default profile,
+                    // There is no need to handle an empty state.
+                }
+
+                else -> {
+                    val configs = uiState.data.configs
+                    val minId = configs.minByOrNull { it.id }?.id
+
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .overScrollVertical()
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        columns = GridCells.Adaptive(350.dp),
+                        contentPadding = PaddingValues(
+                            start = innerPadding.calculateStartPadding(layoutDirection) + 16.dp,
+                            end = innerPadding.calculateEndPadding(layoutDirection) + 16.dp,
+                            top = innerPadding.calculateTopPadding() + 16.dp,
+                            bottom = outerPadding.calculateBottomPadding() + 16.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        overscrollEffect = null,
+                        state = listState,
+                    ) {
+                        if (!uiState.userReadScopeTips) {
+                            item {
+                                MiuixScopeTipCard(viewModel = viewModel)
+                            }
+                        }
+                        /*else item { Spacer(modifier = Modifier.size(6.dp)) }*/
+
+                        items(configs) {
+                            DataItemWidget(viewModel, it, it.id == minId)
+                        }
                     }
                 }
             }

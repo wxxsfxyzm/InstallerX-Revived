@@ -45,11 +45,13 @@ import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewAction
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewEvent
 import com.rosan.installer.ui.page.main.settings.config.edit.EditViewModel
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopBarIconButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUnsavedChangesDialog
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import com.rosan.installer.ui.util.isNoneActive
 import kotlinx.coroutines.flow.collectLatest
@@ -66,11 +68,10 @@ import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Ok
+import top.yukonga.miuix.kmp.icon.glass.Ok
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -188,129 +189,145 @@ fun MiuixEditPage(id: Long? = null, viewModel: EditViewModel = koinViewModel { p
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
+            InstallerMiuixTopAppBar(
+                backdrop = topBarBackdrop,
                 scrollBehavior = scrollBehavior,
                 title = stringResource(id?.let { R.string.update } ?: R.string.add),
                 navigationIcon = {
-                    MiuixBackButton(
+                    InstallerMiuixBackButton(
                         icon = MiuixIcons.Regular.Close,
                         onClick = { navigator.pop() },
                     )
                 },
                 actions = {
-                    IconButton(
-                        onClick = { dispatch(EditViewAction.SaveData) },
-                    ) {
-                        Icon(
-                            imageVector = MiuixIcons.Regular.Ok,
-                            contentDescription = stringResource(R.string.save),
-                        )
+                    if (InstallerTheme.useMiuixOs4) {
+                        InstallerMiuixTopBarIconButton(
+                            onClick = { dispatch(EditViewAction.SaveData) },
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Glass.Ok,
+                                contentDescription = stringResource(R.string.save),
+                                modifier = Modifier.size(24.dp),
+                                tint = MiuixTheme.colorScheme.onSurface,
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { dispatch(EditViewAction.SaveData) },
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Regular.Ok,
+                                contentDescription = stringResource(R.string.save),
+                            )
+                        }
                     }
                 },
             )
         },
         snackbarHost = { SnackbarHost(state = snackBarHostState) },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-            ),
-            overscrollEffect = null,
+        InstallerMiuixBackdropSurface(
+            backdrop = topBarBackdrop,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            item { Spacer(modifier = Modifier.size(12.dp)) }
-            item { MiuixDataNameWidget(state = state, dispatch = dispatch) }
-            item { MiuixDataDescriptionWidget(state = state, dispatch = dispatch) }
-            item { SmallTitle(stringResource(R.string.config)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixDataAuthorizerWidget(state = state, dispatch = dispatch)
-                    MiuixDataCustomizeAuthorizerWidget(state = state, dispatch = dispatch)
-                    MiuixDataInstallModeWidget(state = state, dispatch = dispatch)
-                    MiuixDataAutoApproveSessionWidget(
-                        state = state,
-                        dispatch = dispatch,
-                        onEnableRequest = {
-                            showAutoApproveSessionDialogState.value = true
-                        },
-                    )
-                    if (state.globalInstallerBiometricAuthMode == BiometricAuthMode.FollowConfig) {
-                        MiuixDataRequireBiometricAuthWidget(state = state, dispatch = dispatch)
-                    }
-                    MiuixToastModeWidget(state = state, dispatch = dispatch)
-                }
-            }
-            if (isNoneActive(stateAuthorizer, globalAuthorizer)) {
-                item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
-            }
-            item { SmallTitle(stringResource(R.string.config_label_installer_settings)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    MiuixDataUserWidget(state = state, dispatch = dispatch)
-                    MiuixInstallReasonWidget(state = state, dispatch = dispatch)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        MiuixDataPackageSourceWidget(state = state, dispatch = dispatch)
-                    }
-                    MiuixDataInstallRequesterWidget(state = state, dispatch = dispatch)
-                    MiuixDataDeclareInstallerWidget(state = state, dispatch = dispatch)
-                    MiuixDataManualDexoptWidget(state = state, dispatch = dispatch)
-                    MiuixDataAutoDeleteWidget(state = state, dispatch = dispatch)
-                    MiuixDisplaySdkWidget(state = state, dispatch = dispatch)
-                    MiuixDisplaySizeWidget(state = state, dispatch = dispatch)
-                }
-            }
-            item { SmallTitle(stringResource(R.string.config_label_install_options)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 16.dp),
-                ) {
-                    MiuixDataForAllUserWidget(state = state, dispatch = dispatch)
-                    MiuixDataAllowTestOnlyWidget(state = state, dispatch = dispatch)
-                    MiuixDataAllowDowngradeWidget(state = state, dispatch = dispatch)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        MiuixDataBypassLowTargetSdkWidget(state = state, dispatch = dispatch)
-                    }
-                    MiuixDataAllowAllRequestedPermissionsWidget(state = state, dispatch = dispatch)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        MiuixRequestUpdateOwnershipWidget(state = state, dispatch = dispatch)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(
+                    start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                ),
+                overscrollEffect = null,
+            ) {
+                item { Spacer(modifier = Modifier.size(12.dp)) }
+                item { MiuixDataNameWidget(state = state, dispatch = dispatch) }
+                item { MiuixDataDescriptionWidget(state = state, dispatch = dispatch) }
+                item { SmallTitle(stringResource(R.string.config)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        MiuixDataAuthorizerWidget(state = state, dispatch = dispatch)
+                        MiuixDataCustomizeAuthorizerWidget(state = state, dispatch = dispatch)
+                        MiuixDataInstallModeWidget(state = state, dispatch = dispatch)
+                        MiuixDataAutoApproveSessionWidget(
+                            state = state,
+                            dispatch = dispatch,
+                            onEnableRequest = {
+                                showAutoApproveSessionDialogState.value = true
+                            },
+                        )
+                        if (state.globalInstallerBiometricAuthMode == BiometricAuthMode.FollowConfig) {
+                            MiuixDataRequireBiometricAuthWidget(state = state, dispatch = dispatch)
+                        }
+                        MiuixToastModeWidget(state = state, dispatch = dispatch)
                     }
                 }
-            }
-            item { SmallTitle(stringResource(R.string.config_label_preferences)) }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 16.dp),
-                ) {
-                    MiuixDataSplitChooseAllWidget(state = state, dispatch = dispatch)
-                    MiuixDataApkChooseAllWidget(state = state, dispatch = dispatch)
-                    if (state.checkAppSignature) {
-                        MiuixDataAllowSigMismatchWidget(state = state, dispatch = dispatch)
-                        MiuixDataAllowSigUnknownWidget(state = state, dispatch = dispatch)
+                if (isNoneActive(stateAuthorizer, globalAuthorizer)) {
+                    item { MiuixSettingsTipCard(stringResource(R.string.config_authorizer_none_tips)) }
+                }
+                item { SmallTitle(stringResource(R.string.config_label_installer_settings)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 12.dp),
+                    ) {
+                        MiuixDataUserWidget(state = state, dispatch = dispatch)
+                        MiuixInstallReasonWidget(state = state, dispatch = dispatch)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            MiuixDataPackageSourceWidget(state = state, dispatch = dispatch)
+                        }
+                        MiuixDataInstallRequesterWidget(state = state, dispatch = dispatch)
+                        MiuixDataDeclareInstallerWidget(state = state, dispatch = dispatch)
+                        MiuixDataManualDexoptWidget(state = state, dispatch = dispatch)
+                        MiuixDataAutoDeleteWidget(state = state, dispatch = dispatch)
+                        MiuixDisplaySdkWidget(state = state, dispatch = dispatch)
+                        MiuixDisplaySizeWidget(state = state, dispatch = dispatch)
                     }
                 }
+                item { SmallTitle(stringResource(R.string.config_label_install_options)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 16.dp),
+                    ) {
+                        MiuixDataForAllUserWidget(state = state, dispatch = dispatch)
+                        MiuixDataAllowTestOnlyWidget(state = state, dispatch = dispatch)
+                        MiuixDataAllowDowngradeWidget(state = state, dispatch = dispatch)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            MiuixDataBypassLowTargetSdkWidget(state = state, dispatch = dispatch)
+                        }
+                        MiuixDataAllowAllRequestedPermissionsWidget(state = state, dispatch = dispatch)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            MiuixRequestUpdateOwnershipWidget(state = state, dispatch = dispatch)
+                        }
+                    }
+                }
+                item { SmallTitle(stringResource(R.string.config_label_preferences)) }
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 16.dp),
+                    ) {
+                        MiuixDataSplitChooseAllWidget(state = state, dispatch = dispatch)
+                        MiuixDataApkChooseAllWidget(state = state, dispatch = dispatch)
+                        if (state.checkAppSignature) {
+                            MiuixDataAllowSigMismatchWidget(state = state, dispatch = dispatch)
+                            MiuixDataAllowSigUnknownWidget(state = state, dispatch = dispatch)
+                        }
+                    }
+                }
+                item { Spacer(Modifier.navigationBarsPadding()) }
             }
-            item { Spacer(Modifier.navigationBarsPadding()) }
         }
     }
 }

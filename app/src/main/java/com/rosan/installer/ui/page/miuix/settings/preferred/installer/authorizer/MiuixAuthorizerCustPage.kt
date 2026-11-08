@@ -30,11 +30,11 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer.AuthorizerCustAction
 import com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer.AuthorizerCustViewModel
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixIntNumberPickerWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -42,8 +42,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -66,90 +64,93 @@ fun MiuixAuthorizerCustPage(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                modifier = Modifier.installerMiuixBlurEffect(topBarBackdrop),
-                color = topBarBackdrop.getMiuixAppBarColor(),
+            InstallerMiuixTopAppBar(
+                backdrop = topBarBackdrop,
                 title = stringResource(R.string.authorizer_customization),
                 navigationIcon = {
-                    MiuixBackButton(onClick = { navigator.pop() })
+                    InstallerMiuixBackButton(onClick = { navigator.pop() })
                 },
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
-            ),
-            overscrollEffect = null,
+        InstallerMiuixBackdropSurface(
+            backdrop = topBarBackdrop,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            item { Spacer(modifier = Modifier.size(12.dp)) }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(
+                    start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = horizontalSafeInsets.calculateEndPadding(layoutDirection),
+                ),
+                overscrollEffect = null,
+            ) {
+                item { Spacer(modifier = Modifier.size(12.dp)) }
 
-            item {
-                SmallTitle(
-                    text = if (isSystemApp) {
-                        stringResource(R.string.working_status_system_installer)
-                    } else {
-                        stringResource(R.string.config_authorizer_none)
-                    },
-                )
-            }
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 12.dp),
-                ) {
-                    if (isSystemApp) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.config_always_use_root_in_system),
-                            description = stringResource(R.string.config_always_use_root_in_system_desc),
-                            checked = uiState.alwaysUseRootInSystem,
-                            onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAlwaysUseRootInSystem(it)) },
-                        )
-                    }
-                    if (!isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        MiuixSwitchWidget(
-                            title = stringResource(R.string.lab_install_without_user_action),
-                            description = stringResource(R.string.lab_install_without_user_action_desc),
-                            checked = uiState.allowInstallWithoutUserAction,
-                            onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAllowInstallWithoutUserAction(it)) },
-                        )
-                    }
+                item {
+                    SmallTitle(
+                        text = if (isSystemApp) {
+                            stringResource(R.string.working_status_system_installer)
+                        } else {
+                            stringResource(R.string.config_authorizer_none)
+                        },
+                    )
                 }
-            }
-
-            if (!isSystemApp) {
-                item { SmallTitle(stringResource(R.string.extras)) }
                 item {
                     Card(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
                             .padding(bottom = 12.dp),
                     ) {
-                        MiuixIntNumberPickerWidget(
-                            title = stringResource(R.string.close_session_countdown),
-                            description = stringResource(R.string.close_session_countdown_desc),
-                            value = uiState.closeSessionCountDown,
-                            startInt = 1,
-                            endInt = 10,
-                            onValueChange = {
-                                viewModel.dispatch(AuthorizerCustAction.ChangeCloseSessionCountDown(it))
-                            },
-                        )
+                        if (isSystemApp) {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.config_always_use_root_in_system),
+                                description = stringResource(R.string.config_always_use_root_in_system_desc),
+                                checked = uiState.alwaysUseRootInSystem,
+                                onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAlwaysUseRootInSystem(it)) },
+                            )
+                        }
+                        if (!isSystemApp && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            MiuixSwitchWidget(
+                                title = stringResource(R.string.lab_install_without_user_action),
+                                description = stringResource(R.string.lab_install_without_user_action_desc),
+                                checked = uiState.allowInstallWithoutUserAction,
+                                onCheckedChange = { viewModel.dispatch(AuthorizerCustAction.ChangeAllowInstallWithoutUserAction(it)) },
+                            )
+                        }
                     }
                 }
-            }
 
-            item { Spacer(Modifier.navigationBarsPadding()) }
+                if (!isSystemApp) {
+                    item { SmallTitle(stringResource(R.string.extras)) }
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                        ) {
+                            MiuixIntNumberPickerWidget(
+                                title = stringResource(R.string.close_session_countdown),
+                                description = stringResource(R.string.close_session_countdown_desc),
+                                value = uiState.closeSessionCountDown,
+                                startInt = 1,
+                                endInt = 10,
+                                onValueChange = {
+                                    viewModel.dispatch(AuthorizerCustAction.ChangeCloseSessionCountDown(it))
+                                },
+                            )
+                        }
+                    }
+                }
+
+                item { Spacer(Modifier.navigationBarsPadding()) }
+            }
         }
     }
 }

@@ -43,6 +43,7 @@ enum class BooleanSetting {
     ThemeUseAmoled,
     ThemeUseDynamicColor,
     UiUseMiuix,
+    UiUseMiuixOs4,
     UiUseMiuixMonet,
     UiUseAppleFloatingBar,
     UiDynColorFollowPkgIcon,

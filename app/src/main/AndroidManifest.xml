@@ -51,7 +51,8 @@
         rikka.shizuku.shared,
         rikka.shizuku.aidl,
         com.xzakota.hyper.notification.focus,
-        top.yukonga.miuix.kmp.blur
+        top.yukonga.miuix.kmp.blur,
+        top.yukonga.miuix.kmp.glass
     " />
 
     <application

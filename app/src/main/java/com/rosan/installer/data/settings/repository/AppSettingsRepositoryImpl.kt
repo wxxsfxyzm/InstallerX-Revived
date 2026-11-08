@@ -161,14 +161,19 @@ class AppSettingsRepositoryImpl(
             ),
             colorSpec = ThemeColorSpec.fromValueOrDefault(prefs[AppDataStore.THEME_COLOR_SPEC] ?: ThemeColorSpec.SPEC_2025.name),
             useDynamicColor = prefs[AppDataStore.THEME_USE_DYNAMIC_COLOR] ?: true,
+            useMiuixOs4 = prefs[AppDataStore.UI_USE_MIUIX_OS4] ?: false,
             useMiuixMonet = prefs[AppDataStore.UI_USE_MIUIX_MONET] ?: false,
             useAppleFloatingBar = prefs[AppDataStore.UI_USE_APPLE_FLOATING_BAR] ?: false,
             seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: DEFAULT_SEED_COLOR,
             wallpaperSeedColorInt = prefs[AppDataStore.THEME_WALLPAPER_SEED_COLOR] ?: 0,
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useDynColorFollowPkgIconForLiveActivity = prefs[AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
+            // OS4 always uses blur; retain the stored preference for OS3 and Material 3.
             useBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                (prefs[AppDataStore.UI_USE_BLUR] ?: true),
+                (
+                    (prefs[AppDataStore.UI_USE_MIUIX] == true && prefs[AppDataStore.UI_USE_MIUIX_OS4] == true) ||
+                        (prefs[AppDataStore.UI_USE_BLUR] ?: true)
+                    ),
             predictiveBackAnimation = PredictiveBackAnimation.fromValueOrDefault(
                 prefs[AppDataStore.PREDICTIVE_BACK_ANIMATION] ?: PredictiveBackAnimation.MIUIX.value,
             ),
@@ -260,6 +265,8 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
 
         BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX
+
+        BooleanSetting.UiUseMiuixOs4 -> AppDataStore.UI_USE_MIUIX_OS4
 
         BooleanSetting.UiUseMiuixMonet -> AppDataStore.UI_USE_MIUIX_MONET
 

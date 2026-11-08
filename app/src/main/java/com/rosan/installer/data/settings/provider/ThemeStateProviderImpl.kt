@@ -56,6 +56,7 @@ class ThemeStateProviderImpl(appSettingsRepo: AppSettingsRepository, appScope: C
             paletteStyle = prefs.paletteStyle,
             colorSpec = prefs.colorSpec,
             useDynamicColor = prefs.useDynamicColor,
+            useMiuixOs4 = prefs.useMiuixOs4,
             useMiuixMonet = prefs.useMiuixMonet,
             useAppleFloatingBar = prefs.useAppleFloatingBar,
             seedColor = effectiveSeedColor,
