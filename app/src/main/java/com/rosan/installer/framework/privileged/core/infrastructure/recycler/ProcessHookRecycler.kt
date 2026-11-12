@@ -41,9 +41,8 @@ class ProcessHookRecycler(
         // If the process was previously closed/recycled, its context/manager might be null.
         // init() checks state internally and is safe to call multiple times.
         if (!appProcessHandle.entity.init(context)) {
-            // If init fails, we might want to recycle it and try fresh or throw,
-            // but usually init() will re-create the manager.
-            // If it fails returning false, it usually means binder connection failed.
+            // Release the handle so AppProcessRecycler's refCount can drop to zero and recycle the entity.
+            appProcessHandle.recycle()
             throw IllegalStateException("Failed to initialize AppProcess for Hook Mode.")
         }
 
