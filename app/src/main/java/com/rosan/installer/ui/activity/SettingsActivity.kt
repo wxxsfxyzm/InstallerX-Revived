@@ -14,9 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -88,34 +87,30 @@ class SettingsActivity :
                     seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor),
                     useAmoled = uiState.useAmoled,
                 ) {
-                    // Keep the navigation tree alive when the popup host changes with the UI family.
-                    val navigationContent = remember {
-                        movableContentOf<ThemeState, Modifier> { themeState, recordingModifier ->
-                            val backgroundColor = if (themeState.useMiuix) {
-                                MiuixTheme.colorScheme.surface
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainer
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(backgroundColor)
-                                    .then(recordingModifier),
-                            ) {
-                                InstallerNavContainer(themeState)
-                            }
+                    // Keep the host in every UI family and Miuix style, even though only Miuix uses it.
+                    // The host's Scaffold composes content in a SubcomposeLayout; making it conditional
+                    // forces the navigation tree to move out of a subcomposition disposed in the same
+                    // frame, which crashes with "Could not resolve state for movable content".
+                    InstallerMiuixComponentHost(
+                        useOs4 = InstallerTheme.useMiuixOs4,
+                        useBlur = uiState.useMiuix && uiState.useBlur,
+                        modifier = Modifier.fillMaxSize(),
+                        // The Box below paints the themed background, so skip the Scaffold's overdraw.
+                        containerColor = Color.Transparent,
+                    ) { scope ->
+                        val backgroundColor = if (uiState.useMiuix) {
+                            MiuixTheme.colorScheme.surface
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
                         }
-                    }
-                    if (uiState.useMiuix) {
-                        InstallerMiuixComponentHost(
-                            useOs4 = InstallerTheme.useMiuixOs4,
-                            useBlur = uiState.useBlur,
-                            modifier = Modifier.fillMaxSize(),
-                        ) { scope ->
-                            navigationContent(uiState, scope.pageBackdropModifier)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(backgroundColor)
+                                .then(scope.pageBackdropModifier),
+                        ) {
+                            InstallerNavContainer(uiState)
                         }
-                    } else {
-                        navigationContent(uiState, Modifier)
                     }
                 }
             }

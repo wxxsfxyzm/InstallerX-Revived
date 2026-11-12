@@ -77,6 +77,7 @@ internal fun InstallerMiuixComponentHost(
     useBlur: Boolean,
     modifier: Modifier = Modifier,
     popupInRootScaffold: Boolean = true,
+    containerColor: Color = MiuixTheme.colorScheme.surface,
     content: @Composable (MiuixComponentScope) -> Unit,
 ) {
     val useGlass = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && useOs4 && isRenderEffectSupported()
@@ -89,6 +90,7 @@ internal fun InstallerMiuixComponentHost(
     CompositionLocalProvider(LocalMiuixComponentScope provides scope) {
         Scaffold(
             modifier = modifier,
+            containerColor = containerColor,
             contentWindowInsets = WindowInsets(0),
         ) {
             content(scope)
