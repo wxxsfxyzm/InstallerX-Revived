@@ -28,7 +28,7 @@ import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpe
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
 import com.rosan.installer.ui.theme.material.animateAsState
 import com.rosan.installer.ui.theme.material.dynamicColorScheme
-import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
+import top.yukonga.miuix.kmp.material.isRenderEffectSupported
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeColorSpec as MiuixColorSpec

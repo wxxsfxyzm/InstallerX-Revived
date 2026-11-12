@@ -19,7 +19,7 @@ plugins {
     dependencySubstitution {
         substitute(module("top.yukonga.miuix.kmp:miuix-core-android")).using(project(":miuix-core"))
         substitute(module("top.yukonga.miuix.kmp:miuix-ui-android")).using(project(":miuix-ui"))
-        substitute(module("top.yukonga.miuix.kmp:miuix-shader-android")).using(project(":miuix-shader"))
+        substitute(module("top.yukonga.miuix.kmp:miuix-material-android")).using(project(":miuix-material"))
         substitute(module("top.yukonga.miuix.kmp:miuix-blur-android")).using(project(":miuix-blur"))
         substitute(module("top.yukonga.miuix.kmp:miuix-preference-android")).using(project(":miuix-preference"))
         substitute(module("top.yukonga.miuix.kmp:miuix-icons-android")).using(project(":miuix-icons"))

@@ -19,7 +19,7 @@ import com.rosan.installer.ui.theme.LocalWindowLayoutInfo
 import kotlin.math.floor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable

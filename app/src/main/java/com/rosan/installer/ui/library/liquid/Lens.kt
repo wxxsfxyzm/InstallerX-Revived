@@ -9,8 +9,8 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastCoerceAtMost
 import top.yukonga.miuix.kmp.blur.BackdropEffectScope
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
+import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 
 /**
  * Rounded-rect refraction lens with optional chromatic dispersion.
@@ -44,7 +44,7 @@ fun BackdropEffectScope.lens(
         }
     val key = if (dispersionEnabled) "LiquidGlassLensDispersion" else "LiquidGlassLens"
 
-    val sf = downscaleFactor.coerceAtLeast(1).toFloat()
+    val sf = downscaleFactor.coerceAtLeast(1f)
     val scaledSizeW = size.width / sf
     val scaledSizeH = size.height / sf
     val scaledPadding = padding / sf

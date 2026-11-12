@@ -14,13 +14,13 @@ import androidx.compose.ui.unit.Constraints
 import com.rosan.installer.ui.theme.InstallerTheme
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.glass.GlassDefaults
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassMotion
 import top.yukonga.miuix.kmp.glass.GlassNavigationBar
 import top.yukonga.miuix.kmp.glass.GlassNavigationBarDefaults
 import top.yukonga.miuix.kmp.glass.GlassNavigationItem
-import top.yukonga.miuix.kmp.glass.GlassShadows
+import top.yukonga.miuix.kmp.material.GlassDefaults
+import top.yukonga.miuix.kmp.material.GlassShadows
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable

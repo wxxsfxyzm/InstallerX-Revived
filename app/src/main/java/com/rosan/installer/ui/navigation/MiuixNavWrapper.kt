@@ -31,7 +31,7 @@ import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
+import top.yukonga.miuix.kmp.material.isRenderEffectSupported
 
 // Centralized complex layout logic to keep provider clean and readable
 @Composable
