@@ -832,9 +832,12 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         Timber.d("[id=$sessionId] uninstall: Starting for $packageName. Emitting ProgressEntity.Uninstalling.")
         session.progress.emit(ProgressEntity.Uninstalling)
 
+        val uninstallInfo = checkNotNull(session.uninstallInfo.value) { "Uninstall request has not been resolved" }
+        check(uninstallInfo.packageName == packageName) { "Uninstall package does not match the resolved request" }
         processUninstall(
             config = session.config,
             packageName = packageName,
+            userId = uninstallInfo.userId,
         )
         Timber.d("[id=$sessionId] uninstall: Succeeded for $packageName. Emitting ProgressEntity.UninstallSuccess.")
         session.progress.emit(ProgressEntity.UninstallSuccess)

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.pm.IPackageInstaller
 import android.content.pm.IPackageInstallerSession
 import android.content.pm.IPackageManager
+import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.Session
 import android.content.pm.PackageManager
@@ -207,8 +208,20 @@ abstract class IBinderAppInstallerRepoImpl(
         }
     }
 
+    override suspend fun getUninstallPackageInfo(config: ConfigModel, packageName: String, userId: Int, flags: Long): PackageInfo {
+        require(userId >= 0) { "Invalid uninstall user: $userId" }
+        val pm = IPackageManager.Stub.asInterface(iBinderWrapper(ServiceManager.getService("package")))
+        return (
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getPackageInfo(packageName, flags, userId)
+            } else {
+                pm.getPackageInfo(packageName, flags.toInt(), userId)
+            }
+            ) ?: throw PackageManager.NameNotFoundException(packageName)
+    }
+
     @SuppressLint("MissingPermission")
-    override suspend fun doUninstallWork(config: ConfigModel, packageName: String) {
+    override suspend fun doUninstallWork(config: ConfigModel, packageName: String, userId: Int) {
         val packageInstaller = resolvePackageInstallerBinder()
 
         // Prepare parameters for the direct AIDL call.
@@ -220,11 +233,8 @@ abstract class IBinderAppInstallerRepoImpl(
             else -> context.packageName
         }
 
-        // Uninstall targets the current user by default. Profile target-user settings are for
-        // installs and can otherwise make launcher-visible apps appear unchanged after uninstall.
-        val currentUserId = AndroidProcess.myUid() / 100000
-
-        Timber.d("Directly calling IPackageInstaller.uninstall with flags: $flags, userId: $currentUserId")
+        require(userId >= 0) { "Invalid uninstall user: $userId" }
+        Timber.d("Directly calling IPackageInstaller.uninstall with flags: $flags, userId: $userId")
 
         // Directly call the method from the stub interface.
         packageInstaller.uninstall(
@@ -232,7 +242,7 @@ abstract class IBinderAppInstallerRepoImpl(
             callerPackageName,
             flags,
             receiver.getIntentSender(),
-            currentUserId,
+            userId,
         )
 
         // The result verification logic remains the same.

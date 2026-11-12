@@ -26,10 +26,10 @@ class ProcessUninstallUseCase(
     /**
      * Executes the uninstallation work.
      */
-    suspend operator fun invoke(config: ConfigModel, packageName: String) {
+    suspend operator fun invoke(config: ConfigModel, packageName: String, userId: Int) {
         val installed = installedAppInfoProvider.getByPackageName(packageName)
         val result = runCatching {
-            appInstaller.doUninstallWork(config, packageName)
+            appInstaller.doUninstallWork(config, packageName, userId)
         }
 
         runCatching {

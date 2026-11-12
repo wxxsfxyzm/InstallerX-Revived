@@ -4,6 +4,7 @@ package com.rosan.installer.data.session.repository
 
 import android.app.Activity
 import android.content.IntentSender
+import android.os.Process
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -95,7 +96,15 @@ class InstallerSessionRepositoryImpl(override val id: String, private val onClos
 
     override fun uninstall(packageName: String) {
         // Store the info for handlers like ForegroundInfoHandler to access
-        this.uninstallInfo.value = UninstallInfo(packageName)
+        uninstallInfo.update { current ->
+            if (current != null) {
+                check(current.packageName == packageName) { "Uninstall package does not match the resolved request" }
+                current
+            } else {
+                // In-app uninstall-and-retry requests have no external user extra.
+                UninstallInfo(packageName, userId = Process.myUid() / 100000)
+            }
+        }
         Timber.d("[id=$id] uninstall() called for $packageName. Emitting Action.Uninstall.")
         // Emit the action for the ActionHandler to process
         sendAction(Action.Uninstall(packageName))

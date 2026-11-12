@@ -4,10 +4,14 @@ package com.rosan.installer.data.session.resolver
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageInstallerHidden
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Process
+import android.os.UserHandle
 import com.rosan.installer.domain.engine.model.install.UninstallFlags
+import com.rosan.installer.domain.engine.repository.AppInstallerRepository
 import com.rosan.installer.domain.engine.usecase.GetAppIconColorUseCase
 import com.rosan.installer.domain.session.model.UninstallInfo
 import com.rosan.installer.domain.settings.model.config.ConfigModel
@@ -20,49 +24,26 @@ class UninstallResolver(
     private val configResolver: ConfigResolver,
     private val appSettingsRepo: AppSettingsRepository,
     private val getAppColor: GetAppIconColorUseCase,
+    private val appInstaller: AppInstallerRepository,
 ) {
     data class Result(val config: ConfigModel, val uninstallInfo: UninstallInfo)
 
     suspend fun resolve(activity: Activity, sessionId: String, packageName: String): Result {
+        val userId = resolveUninstallUser(activity.intent)
         val resolvedConfig = configResolver.resolve(activity)
         val pm = context.packageManager
-        var isArchived = false
-        val appInfo = runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                pm.getApplicationInfo(
-                    packageName,
-                    PackageManager.ApplicationInfoFlags.of(0),
-                )
+        val packageInfo = appInstaller.getUninstallPackageInfo(
+            config = resolvedConfig,
+            packageName = packageName,
+            userId = userId,
+            flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                PackageManager.MATCH_ARCHIVED_PACKAGES
             } else {
-                @Suppress("DEPRECATION")
-                pm.getApplicationInfo(packageName, 0)
-            }
-        }.getOrElse {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) throw it
-
-            pm.getApplicationInfo(
-                packageName,
-                PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES),
-            ).also { archivedInfo ->
-                if (!archivedInfo.isArchived) throw it
-                isArchived = true
-            }
-        }
-        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getPackageInfo(
-                packageName,
-                PackageManager.PackageInfoFlags.of(
-                    if (isArchived && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                        PackageManager.MATCH_ARCHIVED_PACKAGES
-                    } else {
-                        0
-                    },
-                ),
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            pm.getPackageInfo(packageName, 0)
-        }
+                0L
+            },
+        )
+        val appInfo = checkNotNull(packageInfo.applicationInfo) { "Missing application info for $packageName" }
+        val isArchived = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && appInfo.isArchived
 
         val requestedUninstallFlags = resolveRequestedUninstallFlags(activity)
         val config = if (requestedUninstallFlags != 0) {
@@ -87,6 +68,7 @@ class UninstallResolver(
             config = config,
             uninstallInfo = UninstallInfo(
                 packageName = packageName,
+                userId = userId,
                 appLabel = pm.getApplicationLabel(appInfo).toString(),
                 versionName = packageInfo.versionName,
                 versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -108,4 +90,24 @@ class UninstallResolver(
         val allowedRequestFlags = UninstallFlags.DELETE_ARCHIVE or UninstallFlags.DELETE_KEEP_DATA
         return requestDeleteFlags and allowedRequestFlags
     }
+}
+
+/** The requested user takes precedence over the process user, never the installation profile. */
+internal fun resolveUninstallUser(intent: Intent): Int {
+    val hasUserExtra = intent.hasExtra(Intent.EXTRA_USER)
+
+    val user = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        intent.getParcelableExtra<UserHandle>(Intent.EXTRA_USER)
+    }
+    // UserHandle.hashCode() returns its user ID, including on older platform versions.
+    return resolveUninstallUserId(Process.myUid() / 100000, hasUserExtra, user?.hashCode())
+}
+
+internal fun resolveUninstallUserId(currentUserId: Int, hasUserExtra: Boolean, requestedUserId: Int?): Int {
+    val userId = if (hasUserExtra) requireNotNull(requestedUserId) { "Invalid uninstall user extra" } else currentUserId
+    require(userId >= 0) { "Invalid uninstall user: $userId" }
+    return userId
 }

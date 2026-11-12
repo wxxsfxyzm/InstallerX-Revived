@@ -3,6 +3,7 @@
 package com.rosan.installer.data.engine.repository
 
 import android.content.Context
+import android.content.pm.PackageInfo
 import android.os.Build
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.core.reflection.ReflectionProvider
@@ -163,8 +164,12 @@ class AppInstallerRepositoryImpl(
         const val TAG = "AppInstallerRepository"
     }
 
-    override suspend fun doUninstallWork(config: ConfigModel, packageName: String) = executeWithRepo(config) { repo ->
-        repo.doUninstallWork(config, packageName)
+    override suspend fun getUninstallPackageInfo(config: ConfigModel, packageName: String, userId: Int, flags: Long): PackageInfo = executeWithRepo(config) { repo ->
+        repo.getUninstallPackageInfo(config, packageName, userId, flags)
+    }
+
+    override suspend fun doUninstallWork(config: ConfigModel, packageName: String, userId: Int) = executeWithRepo(config) { repo ->
+        repo.doUninstallWork(config, packageName, userId)
     }
 
     override suspend fun approveSession(config: ConfigModel, sessionId: Int, granted: Boolean) = executeWithRepo(config, resolveSessionApprovalRepo(config)) { repo ->

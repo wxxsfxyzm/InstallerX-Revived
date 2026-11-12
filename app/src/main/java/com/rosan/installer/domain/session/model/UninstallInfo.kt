@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 
 data class UninstallInfo(
     val packageName: String,
+    val userId: Int,
     val appLabel: String? = null,
     val versionName: String? = null,
     val versionCode: Long? = null,

@@ -2,6 +2,7 @@
 // Copyright (C) 2023-2026 iamr0s, InstallerX Revived contributors
 package com.rosan.installer.domain.engine.repository
 
+import android.content.pm.PackageInfo
 import com.rosan.installer.domain.engine.model.install.InstallEntity
 import com.rosan.installer.domain.engine.model.install.InstallMetadata
 import com.rosan.installer.domain.engine.model.install.InstallPhase
@@ -48,8 +49,12 @@ interface AppInstallerRepository {
      *
      * @param config The configuration model.
      * @param packageName The name of the package to uninstall.
+     * @param userId The target from the uninstall request, independent of installation settings.
      */
-    suspend fun doUninstallWork(config: ConfigModel, packageName: String)
+    suspend fun doUninstallWork(config: ConfigModel, packageName: String, userId: Int)
+
+    /** Queries package metadata in the same user that the uninstall request targets. */
+    suspend fun getUninstallPackageInfo(config: ConfigModel, packageName: String, userId: Int, flags: Long): PackageInfo
 
     /**
      * Approve or deny a session.

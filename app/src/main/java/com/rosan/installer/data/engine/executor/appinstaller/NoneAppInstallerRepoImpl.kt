@@ -4,10 +4,12 @@ package com.rosan.installer.data.engine.executor.appinstaller
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.content.pm.VersionedPackage
 import android.os.Build
+import android.os.Process
 import com.rosan.installer.core.reflection.ReflectionProvider
 import com.rosan.installer.data.engine.executor.PackageManagerUtil
 import com.rosan.installer.domain.engine.exception.InstallException
@@ -179,7 +181,18 @@ class NoneAppInstallerRepoImpl(
         }
     }
 
-    override suspend fun doUninstallWork(config: ConfigModel, packageName: String) {
+    override suspend fun getUninstallPackageInfo(config: ConfigModel, packageName: String, userId: Int, flags: Long): PackageInfo {
+        validateUninstallUser(Process.myUid() / 100000, userId)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags))
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(packageName, flags.toInt())
+        }
+    }
+
+    override suspend fun doUninstallWork(config: ConfigModel, packageName: String, userId: Int) {
+        validateUninstallUser(Process.myUid() / 100000, userId)
         val result = runCatching {
             // Get the standard PackageInstaller
             val packageInstaller = context.packageManager.packageInstaller
