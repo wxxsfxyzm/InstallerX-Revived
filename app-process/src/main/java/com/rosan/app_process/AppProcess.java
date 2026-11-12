@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
 public abstract class AppProcess implements Closeable {
@@ -36,6 +38,9 @@ public abstract class AppProcess implements Closeable {
     protected volatile IProcessManager mManager = null;
 
     protected final ConcurrentMap<String, IBinder> mChildProcess = new ConcurrentHashMap<>();
+
+    // Processes started locally (e.g. the su shell hosting the manager); they must be released on close.
+    private final Queue<Process> mLocalProcesses = new ConcurrentLinkedQueue<>();
 
     public static ProcessParams generateProcessParams(@NonNull String classPath, @NonNull String entryClassName, @NonNull List<String> args) {
         return generateProcessParams(classPath, entryClassName, args, null);
@@ -87,6 +92,35 @@ public abstract class AppProcess implements Closeable {
         }
     }
 
+    /*
+     * Releases a process that may run as another uid (e.g. root via su).
+     * destroy() cannot signal such a process, so stdin is closed first: the shell exits on EOF,
+     * and NewProcess's orphan watchdog terminates app_process when its stdin is closed.
+     * */
+    static void terminateProcess(@NonNull Process process) {
+        closeQuietly(process::getOutputStream);
+        closeQuietly(process::getInputStream);
+        closeQuietly(process::getErrorStream);
+        try {
+            process.destroy();
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Failed to destroy process", e);
+        }
+    }
+
+    private static void closeQuietly(@NonNull Callable<? extends Closeable> supplier) {
+        try {
+            supplier.call().close();
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to close process stream", e);
+        }
+    }
+
+    private void terminateLocalProcesses() {
+        Process process;
+        while ((process = mLocalProcesses.poll()) != null) terminateProcess(process);
+    }
+
     public @NonNull Process start(@NonNull String classPath, @NonNull String entryClassName, @NonNull List<String> args) throws IOException {
         return startProcess(generateProcessParams(classPath, entryClassName, args));
     }
@@ -128,6 +162,7 @@ public abstract class AppProcess implements Closeable {
                 if (current == null || managerBinder != current.asBinder()) return;
                 mManager = null;
                 mChildProcess.clear();
+                terminateLocalProcesses();
             }, 0);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to link process manager death recipient", e);
@@ -155,12 +190,12 @@ public abstract class AppProcess implements Closeable {
         mContext = null;
         mManager = null;
         mChildProcess.clear();
-        if (manager == null || !manager.asBinder().pingBinder()) return;
         try {
-            manager.exit(0);
-        } catch (RuntimeException rethrown) {
-            throw rethrown;
+            if (manager != null && manager.asBinder().pingBinder()) manager.exit(0);
         } catch (Exception ignored) {
+            // exit() kills the remote process before replying, so a dead binder is expected here.
+        } finally {
+            terminateLocalProcesses();
         }
     }
 
@@ -178,7 +213,11 @@ public abstract class AppProcess implements Closeable {
     }
 
     private @NonNull Process startProcess(@NonNull ProcessParams params) throws IOException {
-        if (!initialized()) return newProcess(params);
+        if (!initialized()) {
+            Process process = newProcess(params);
+            mLocalProcesses.add(process);
+            return process;
+        }
         return remoteProcess(params.getCmdList(), params.getEnv(), params.getDirectory());
     }
 
@@ -282,14 +321,13 @@ public abstract class AppProcess implements Closeable {
             ProcessParams newParams = new ProcessParams(params).setCmdList(newTerminal());
             Process process = super.newProcess(newParams);
             PrintWriter printWriter = new PrintWriter(process.getOutputStream(), true);
-            int count = 0;
-            StringBuilder buffer = new StringBuilder();
+            // exec replaces the shell, so no shell is left blocking on stdin after app_process exits.
+            // A trailing "exit $?" is not reliable: app_process shares stdin and its orphan watchdog consumes it.
+            StringBuilder buffer = new StringBuilder("exec");
             for (String element : params.getCmdList()) {
-                if (++count > 1) buffer.append(" ");
-                buffer.append(element);
+                buffer.append(" ").append(element);
             }
             printWriter.println(buffer);
-            printWriter.println("exit $?");
             return process;
         }
     }

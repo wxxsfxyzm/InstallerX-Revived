@@ -29,8 +29,8 @@ class AppProcessRecycler(private val terminal: AppProcessTerminal) : Recycler<Ap
             } else {
                 val process = super.newProcess(ProcessParams(params).setCmdList(shell.parts))
                 val printWriter = PrintWriter(process.outputStream, true)
-                printWriter.println(command)
-                printWriter.println("exit $?")
+                // exec so the shell does not linger on stdin; app_process' orphan watchdog consumes a trailing "exit $?".
+                printWriter.println("exec $command")
                 process
             }
         }
