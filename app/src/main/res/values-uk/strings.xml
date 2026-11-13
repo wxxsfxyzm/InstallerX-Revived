@@ -1002,4 +1002,7 @@
     <string name="network_app_name_resources">APK ресурси</string>
     <string name="network_app_name_server_desc">Використовуйте ім\'я файлу сервера для швидшого аналізу.</string>
     <string name="network_app_name_resources_desc">Зчитати назву програми з ресурсів APK. Аналіз може бути повільнішим.</string>
+    <string name="theme_settings_miuix_os_version">Miuix UI версія</string>
+    <string name="theme_settings_miuix_os3">OS3</string>
+    <string name="theme_settings_miuix_os4">OS4</string>
 </resources>

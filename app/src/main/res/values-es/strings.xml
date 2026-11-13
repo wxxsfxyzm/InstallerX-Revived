@@ -1012,4 +1012,7 @@
     <string name="network_app_name_resources">Recursos del APK</string>
     <string name="network_app_name_server_desc">Utilizar el nombre de archivo del servidor para un análisis más rápido.</string>
     <string name="network_app_name_resources_desc">Leer el nombre de la aplicación desde los recursos del APK. El análisis puede ser más lento.</string>
+    <string name="theme_settings_miuix_os_version">Versión de la interfaz de usuario de Miuix</string>
+    <string name="theme_settings_miuix_os3">OS3</string>
+    <string name="theme_settings_miuix_os4">OS4</string>
 </resources>
