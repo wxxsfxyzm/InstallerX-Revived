@@ -4,7 +4,7 @@ import org.gradle.api.Project
 
 object BuildConfig {
     const val COMPILE_SDK = 37
-    const val COMPILE_SDK_MINOR = 0
+    const val COMPILE_SDK_MINOR = 2
     const val TARGET_SDK = 37
     const val MIN_SDK = 26
     const val JDK_VERSION = 25
