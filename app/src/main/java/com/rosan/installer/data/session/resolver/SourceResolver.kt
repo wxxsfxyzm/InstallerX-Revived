@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.data.session.resolver
 
+import android.content.ContentProviderClient
 import android.content.Context
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
@@ -16,8 +17,12 @@ import android.system.OsConstants
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import com.rosan.installer.data.session.util.copyToWithProgress
-import com.rosan.installer.data.session.util.getRealPathFromUri
-import com.rosan.installer.data.session.util.pathUnify
+import com.rosan.installer.data.session.util.descriptorEntityPath
+import com.rosan.installer.data.session.util.isScopedExternalAppDataPath
+import com.rosan.installer.data.session.util.providerFileFallbackPath
+import com.rosan.installer.data.session.util.resolveDirectFilePath
+import com.rosan.installer.data.session.util.resolveProviderBackedPath
+import com.rosan.installer.data.session.util.sourceIdentityPath
 import com.rosan.installer.data.session.util.transferWithProgress
 import com.rosan.installer.domain.engine.model.source.DataEntity
 import com.rosan.installer.domain.session.exception.ResolveException
@@ -29,6 +34,7 @@ import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import java.io.Closeable
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
@@ -204,8 +210,9 @@ class SourceResolver(
         return when (scheme) {
             "file" -> {
                 val path = uri.path ?: throw Exception("Invalid file URI: $uri")
-                Timber.d("Resolving direct file URI: $path")
-                listOf(DataEntity.FileEntity(path).apply { source = DataEntity.FileEntity(path) })
+                val filePath = path.resolveDirectFilePath().filePath ?: throw Exception("Invalid file URI: $uri")
+                Timber.d("Resolving direct file URI: $filePath")
+                listOf(DataEntity.FileEntity(filePath).apply { source = DataEntity.FileEntity(filePath) })
             }
 
             "content" -> resolveContentUri(uri)
@@ -254,6 +261,8 @@ class SourceResolver(
 
             // Rethrow if it doesn't match the signature or initiator is unknown
             throw e
+        } catch (e: IOException) {
+            return resolveProviderFileFallback(uri, e)
         }
 
         var retainProviderAsset = false
@@ -261,13 +270,19 @@ class SourceResolver(
             val afd = providerAsset.descriptor
             val fd = afd.parcelFileDescriptor.fd
             val procPath = "/proc/${Os.getpid()}/fd/$fd"
-            val realPath = runCatching {
-                Os.readlink(procPath).getRealPathFromUri(uri).pathUnify()
-            }.getOrDefault("")
+            val fdPath = runCatching { Os.readlink(procPath) }.getOrDefault("")
+            val resolved = fdPath.resolveProviderBackedPath(uri.path)
+            val contentUri = uri.toString()
+            val displayPath = resolved.descriptorEntityPath(contentUri).ifBlank {
+                uri.lastPathSegment ?: contentUri
+            }
+            val sourcePath = resolved.sourceIdentityPath(contentUri).ifBlank { displayPath }
+            if (resolved.filePath == null && resolved.displayPath.isScopedExternalAppDataPath()) {
+                Timber.d("Keeping content descriptor for scoped external path: ${resolved.displayPath}")
+            }
 
             val range = resolveDescriptorRange(providerAsset)
             if (range != null) {
-                val displayPath = realPath.ifBlank { uri.lastPathSegment ?: uri.toString() }
                 val entity = DataEntity.FileDescriptorEntity(
                     path = displayPath,
                     startOffset = range.offset,
@@ -275,10 +290,10 @@ class SourceResolver(
                     channelFactory = { providerAsset.openChannel(range) },
                     descriptorFactory = providerAsset::duplicateDescriptor,
                 ).apply {
-                    // Keep the provider-derived display path as source identity. It may represent a
-                    // virtual provider path rather than a real file, so path-only consumers must
-                    // validate it or materialize the descriptor before use.
-                    source = DataEntity.FileEntity(displayPath)
+                    // Provider, SMB, and scoped external paths stay descriptor-backed. A filesystem
+                    // path is recorded only when it is safe for path-only consumers to open.
+                    source = DataEntity.FileEntity(sourcePath)
+                    sourceDisplayPath = displayPath
                 }
                 closeables += providerAsset
                 retainProviderAsset = true
@@ -289,8 +304,8 @@ class SourceResolver(
                 return listOf(entity)
             }
 
-            Timber.d("Content descriptor is not seekable ($realPath). Falling back to cache.")
-            return cacheStream(uri, afd, realPath)
+            Timber.d("Content descriptor is not seekable ($sourcePath). Falling back to cache.")
+            return cacheStream(uri, afd, sourcePath, displayPath)
         } finally {
             if (!retainProviderAsset) providerAsset.close()
         }
@@ -304,7 +319,7 @@ class SourceResolver(
             ?: throw IOException("Cannot acquire content provider: $uri")
 
         return try {
-            val descriptor = client.openAssetFile(uri, "r", null)
+            val descriptor = openProviderAssetDescriptor(client, uri)
                 ?: throw IOException("Cannot open file descriptor: $uri")
             ProviderAsset(descriptor)
         } catch (e: Exception) {
@@ -313,6 +328,41 @@ class SourceResolver(
         } finally {
             client.close()
         }
+    }
+
+    private fun openProviderAssetDescriptor(client: ContentProviderClient, uri: Uri): AssetFileDescriptor? {
+        val asset = try {
+            client.openAssetFile(uri, "r", null)
+        } catch (error: FileNotFoundException) {
+            return openWholeProviderFile(client, uri, error)
+        }
+        if (asset != null) return asset
+        return openWholeProviderFile(client, uri, IOException("Cannot open file descriptor: $uri"))
+    }
+
+    private fun openWholeProviderFile(
+        client: ContentProviderClient,
+        uri: Uri,
+        assetFailure: Exception,
+    ): AssetFileDescriptor? = try {
+        val file = client.openFile(uri, "r", null) ?: return null
+        AssetFileDescriptor(file, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+    } catch (error: FileNotFoundException) {
+        error.addSuppressed(assetFailure)
+        throw error
+    }
+
+    private fun resolveProviderFileFallback(uri: Uri, error: Exception): List<DataEntity> {
+        val fallback = providerFileFallbackPath(uri.path) { path ->
+            try {
+                val file = File(path)
+                file.isFile && file.canRead()
+            } catch (_: SecurityException) {
+                false
+            }
+        } ?: throw error
+        Timber.d("Provider descriptor unavailable; using direct file path: $fallback")
+        return listOf(DataEntity.FileEntity(fallback).apply { source = DataEntity.FileEntity(fallback) })
     }
 
     private fun resolveDescriptorRange(providerAsset: ProviderAsset): ContentRange? {
@@ -451,7 +501,12 @@ class SourceResolver(
         }
     }
 
-    private suspend fun cacheStream(uri: Uri, afd: AssetFileDescriptor, sourcePath: String): List<DataEntity> = withContext(Dispatchers.IO) {
+    private suspend fun cacheStream(
+        uri: Uri,
+        afd: AssetFileDescriptor,
+        sourcePath: String,
+        displayPath: String,
+    ): List<DataEntity> = withContext(Dispatchers.IO) {
         val tempFile = File.createTempFile(UUID.randomUUID().toString(), ".cache", File(cacheDirectory))
         val knownLength =
             if (afd.declaredLength != AssetFileDescriptor.UNKNOWN_LENGTH) {
@@ -495,7 +550,12 @@ class SourceResolver(
             }
         }
 
-        listOf(DataEntity.FileEntity(tempFile.absolutePath).apply { source = DataEntity.FileEntity(sourcePath) })
+        listOf(
+            DataEntity.FileEntity(tempFile.absolutePath).apply {
+                source = DataEntity.FileEntity(sourcePath)
+                sourceDisplayPath = displayPath
+            },
+        )
     }
 
     /**
