@@ -439,16 +439,10 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
      */
     private suspend fun requestUserBiometricAuthentication(isInstall: Boolean) {
         val requireBiometricAuth = if (isInstall) {
-            val globalMode = appSettingsRepo.getString(
-                StringSetting.InstallerBiometricAuthMode,
-                BiometricAuthMode.FollowConfig.value,
-            ).first().let { BiometricAuthMode.fromValueOrDefault(it) }
-
-            when (globalMode) {
-                BiometricAuthMode.Disable -> false
-                BiometricAuthMode.Enable -> true
-                BiometricAuthMode.FollowConfig -> session.config.requireBiometricAuth
-            }
+            shouldRequireInstallBiometricAuth(
+                globalMode = getInstallerBiometricAuthMode(),
+                configRequireBiometricAuth = session.config.requireBiometricAuth,
+            )
         } else {
             appSettingsRepo.getBoolean(BooleanSetting.UninstallerRequireBiometricAuth, false).first()
         }
@@ -466,6 +460,11 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
             ),
         )
     }
+
+    private suspend fun getInstallerBiometricAuthMode(): BiometricAuthMode = appSettingsRepo.getString(
+        StringSetting.InstallerBiometricAuthMode,
+        BiometricAuthMode.FollowConfig.value,
+    ).first().let { BiometricAuthMode.fromValueOrDefault(it) }
 
     private suspend fun handleSingleInstall(triggerAuth: Boolean) {
         if (triggerAuth) {
@@ -746,7 +745,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
             Timber.w("[id=$sessionId] resolveConfirmInstall: Session $sysSessionId is not requesting pre-approval. Rejecting.")
             session.confirmationDetails.value = details
             session.confirmationState.value = ConfirmationState.AwaitingDecision(details)
-            handleConfirm(sysSessionId, false)
+            handleConfirm(sysSessionId, false, triggerAuth = false)
             return
         }
 
@@ -760,7 +759,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
 
         if (canAutoApproveSession) {
             Timber.d("[id=$sessionId] resolveConfirmInstall: Auto approving system session $sysSessionId.")
-            handleConfirm(sysSessionId, true)
+            handleConfirm(sysSessionId, true, triggerAuth = false)
             return
         }
 
@@ -843,7 +842,7 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         session.progress.emit(ProgressEntity.UninstallSuccess)
     }
 
-    private suspend fun handleConfirm(sessionId: Int, granted: Boolean) {
+    private suspend fun handleConfirm(sessionId: Int, granted: Boolean, triggerAuth: Boolean = granted) {
         val detailsBeforeApprove = when (val state = session.confirmationState.value) {
             is ConfirmationState.AwaitingDecision -> state.details.takeIf {
                 it.sessionId == sessionId
@@ -870,12 +869,28 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         session.confirmationState.value = ConfirmationState.Submitting(detailsBeforeApprove, granted)
         Timber.d("[id=${this.sessionId}] ApproveSession: $granted for session $sessionId")
         try {
+            val requireAuth = shouldRequireSessionConfirmationBiometricAuth(
+                granted = granted,
+                triggerAuth = triggerAuth,
+                isSelfSession = detailsBeforeApprove.isSelfSession,
+                globalMode = getInstallerBiometricAuthMode(),
+                configRequireBiometricAuth = session.config.requireBiometricAuth,
+            )
+            if (requireAuth) {
+                requestUserBiometricAuthentication(true)
+            }
             approveSession(
                 sessionId = sessionId,
                 granted = granted,
                 config = session.config,
                 details = detailsBeforeApprove,
             )
+        } catch (error: AuthenticationFailedException) {
+            Timber.w("[id=${this.sessionId}] Biometric auth failed for platform session $sessionId.")
+            session.confirmationState.value = ConfirmationState.AwaitingDecision(detailsBeforeApprove)
+            val emitted = session.toastEvents.tryEmit(error.getErrorMessage(context))
+            Timber.d("[id=${this.sessionId}] Auth failure toast emitted=$emitted")
+            return
         } catch (error: CancellationException) {
             session.confirmationState.value = ConfirmationState.AwaitingDecision(detailsBeforeApprove)
             throw error
@@ -1023,3 +1038,27 @@ class ActionHandler(override val scope: CoroutineScope, override val session: In
         const val INVALID_UID = -1
     }
 }
+
+internal fun shouldRequireInstallBiometricAuth(
+    globalMode: BiometricAuthMode,
+    configRequireBiometricAuth: Boolean,
+): Boolean = when (globalMode) {
+    BiometricAuthMode.Disable -> false
+    BiometricAuthMode.Enable -> true
+    BiometricAuthMode.FollowConfig -> configRequireBiometricAuth
+}
+
+/**
+ * Session confirmation requires biometric auth only for manual approvals of external sessions.
+ * Self sessions were already authenticated when InstallerX started the install.
+ */
+internal fun shouldRequireSessionConfirmationBiometricAuth(
+    granted: Boolean,
+    triggerAuth: Boolean,
+    isSelfSession: Boolean,
+    globalMode: BiometricAuthMode,
+    configRequireBiometricAuth: Boolean,
+): Boolean = granted &&
+    triggerAuth &&
+    !isSelfSession &&
+    shouldRequireInstallBiometricAuth(globalMode, configRequireBiometricAuth)
