@@ -86,7 +86,7 @@ abstract class NewProcessReceiver extends BroadcastReceiver {
             long elapsed = SystemClock.elapsedRealtime() - startedAt;
             if (binder == null) {
                 Log.w(TAG, "Failed to receive app_process binder for " + componentName.flattenToShortString() + " after " + elapsed + "ms");
-                process.destroy();
+                AppProcess.terminateProcess(process);
             } else {
                 Log.d(TAG, "Received app_process binder for " + componentName.flattenToShortString() + " in " + elapsed + "ms");
             }
@@ -99,7 +99,7 @@ abstract class NewProcessReceiver extends BroadcastReceiver {
             Thread.currentThread().interrupt();
             long elapsed = SystemClock.elapsedRealtime() - startedAt;
             Log.w(TAG, "Interrupted while waiting for app_process binder after " + elapsed + "ms", e);
-            process.destroy();
+            AppProcess.terminateProcess(process);
             return null;
         } finally {
             context.unregisterReceiver(receiver);

@@ -109,6 +109,7 @@ internal fun InstallerMiuixTopAppBar(
     persistentProgressiveBlur: Boolean = true,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
+    bottomContent: @Composable () -> Unit = {},
 ) {
     val hasContentScroll by remember(scrollBehavior) {
         derivedStateOf { (scrollBehavior?.state?.contentOffset ?: 0f) < 0f }
@@ -126,6 +127,7 @@ internal fun InstallerMiuixTopAppBar(
                     backgroundAlpha = { 0f },
                     navigationIcon = navigationIcon,
                     actions = actions,
+                    bottomContent = bottomContent,
                 )
             }
         } else {
@@ -139,6 +141,7 @@ internal fun InstallerMiuixTopAppBar(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = navigationIcon,
                 actions = actions,
+                bottomContent = bottomContent,
             )
         }
     } else {
@@ -149,6 +152,7 @@ internal fun InstallerMiuixTopAppBar(
             scrollBehavior = scrollBehavior,
             navigationIcon = navigationIcon,
             actions = actions,
+            bottomContent = bottomContent,
         )
     }
 }
