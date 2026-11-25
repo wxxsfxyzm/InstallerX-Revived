@@ -8,7 +8,7 @@
 # https://mvnrepository.com/
 
 [versions]
-agp = "9.5.2"
+agp = "9.5.3"
 biometric = "1.4.0-rc01"
 focusApi = "1.4"
 kotlin = "2.4.21"
