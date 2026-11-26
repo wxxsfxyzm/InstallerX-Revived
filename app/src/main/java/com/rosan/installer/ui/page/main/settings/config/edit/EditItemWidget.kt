@@ -585,7 +585,7 @@ fun DataInstallerWidget(state: EditViewState, dispatch: (EditViewAction) -> Unit
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.exposedDropdownSize(),
                 properties = PopupProperties(
-                    focusable = true,
+                    focusable = false,
                     clippingEnabled = false,
                 ),
             ) {
