@@ -30,7 +30,7 @@ timber = "5.0.1"
 miuix = "0.9.5-beta02"
 okhttp = "5.5.1"
 monetcompat = "0.4.1"
-materialKolor = "6.0.0"
+materialKolor = "6.1.0"
 lifecycle = "2.11.1"
 junit = "1.3.0"
 espressoCore = "3.7.0"
@@ -120,7 +120,7 @@ appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", ve
 
 # Dhizuku-API
 # https://github.com/iamr0s/Dhizuku-API
-iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version = "2.7.0" }
+iamr0s-dhizuku-api = { group = "io.github.iamr0s", name = "Dhizuku-API", version = "2.8.0" }
 
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
