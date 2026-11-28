@@ -2,6 +2,8 @@ package com.rosan.installer
 
 import android.app.Application
 import android.os.Build
+import com.itos.coui.material3.CouiMaterial3Style
+import com.itos.coui.theme.Coui
 import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.core.crash.CrashHandler
 import com.rosan.installer.core.env.AppConfig
@@ -43,5 +45,7 @@ class App : Application() {
             // use modules
             modules(appModules)
         }
+
+        Coui.initialize(defaultStyle = CouiMaterial3Style())
     }
 }

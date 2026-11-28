@@ -112,6 +112,12 @@
     <string name="theme_settings_miuix_ui_desc">类 HyperOS 风格界面</string>
     <string name="theme_settings_miuix_custom_colors">自定义颜色</string>
     <string name="theme_settings_miuix_custom_colors_desc">在 Miuix 主题风格下自定义主题颜色</string>
+    <string name="theme_settings_coui_ui">COUI</string>
+    <string name="theme_settings_coui_ui_desc">类 ColorOS 风格界面</string>
+    <string name="theme_settings_coui_custom_colors">自定义颜色</string>
+    <string name="theme_settings_coui_custom_colors_desc">在 COUI 主题风格下自定义主题颜色</string>
+    <string name="theme_settings_coui_contour_glow">流光轮廓</string>
+    <string name="theme_settings_coui_contour_glow_desc">为悬浮控件启用 ColorOS 流光轮廓光效</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">标准 Material Design 界面</string>
     <string name="theme_settings_miuix_os_version">Miuix UI 版本</string>
@@ -122,6 +128,11 @@
     <string name="theme_settings_use_apple_floating_bar_desc">在屏幕底部使用悬浮样式的导航栏</string>
     <string name="theme_settings_use_blur">启用模糊</string>
     <string name="theme_settings_use_blur_desc">为应用启用模糊效果</string>
+    <string name="theme_settings_coui_blur_radius">安装弹窗模糊程度</string>
+    <string name="theme_settings_coui_blur_radius_desc">调整悬浮安装弹窗的背景模糊半径</string>
+    <string name="theme_settings_coui_glass_opacity">安装弹窗磨砂不透明度</string>
+    <string name="theme_settings_coui_glass_opacity_desc">调整悬浮安装弹窗的毛玻璃遮罩浓度</string>
+    <string name="theme_settings_coui_blur_off">关闭</string>
     <string name="theme_settings_theme_mode">主题模式</string>
     <string name="theme_settings_theme_mode_desc">选择主题模式</string>
     <string name="theme_settings_theme_mode_light">浅色主题</string>

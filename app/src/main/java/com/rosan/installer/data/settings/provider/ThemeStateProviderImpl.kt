@@ -50,7 +50,7 @@ class ThemeStateProviderImpl(appSettingsRepo: AppSettingsRepository, appScope: C
 
         ThemeState(
             isLoaded = true,
-            useMiuix = prefs.showMiuixUI,
+            uiStyle = prefs.uiStyle,
             themeMode = prefs.themeMode,
             useAmoled = prefs.useAmoled,
             paletteStyle = prefs.paletteStyle,
@@ -58,6 +58,8 @@ class ThemeStateProviderImpl(appSettingsRepo: AppSettingsRepository, appScope: C
             useDynamicColor = prefs.useDynamicColor,
             useMiuixOs4 = prefs.useMiuixOs4,
             useMiuixMonet = prefs.useMiuixMonet,
+            useCouiMonet = prefs.useCouiMonet,
+            useCouiContourGlow = prefs.useCouiContourGlow,
             useAppleFloatingBar = prefs.useAppleFloatingBar,
             seedColor = effectiveSeedColor,
             useBlur = prefs.useBlur,

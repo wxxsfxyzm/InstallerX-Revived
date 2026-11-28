@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CouiInstallerDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/coui_installer_dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/coui_installer_dialog_exit</item>
+    </style>
+</resources>

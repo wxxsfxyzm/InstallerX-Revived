@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
+import com.rosan.installer.ui.page.coui.installer.CouiInstallerPage
 import com.rosan.installer.ui.page.main.installer.InstallerPage
 import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
 import com.rosan.installer.ui.theme.InstallerTheme
@@ -34,19 +36,22 @@ fun InstallerActivityContent(session: InstallerSessionRepository, themeStateProv
 
     InstallerTheme(
         useMiuix = uiState.useMiuix,
+        uiStyle = uiState.uiStyle,
         useMiuixOs4 = false, // Do not use OS4 style in installation
         themeMode = uiState.themeMode,
         paletteStyle = uiState.paletteStyle,
         colorSpec = uiState.colorSpec,
         useDynamicColor = uiState.useDynamicColor,
         useMiuixMonet = uiState.useMiuixMonet,
+        useCouiMonet = uiState.useCouiMonet,
+        useCouiContourGlow = uiState.useCouiContourGlow,
         seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (uiState.useMiuix) {
-                MiuixInstallerPage(session)
-            } else {
-                InstallerPage(session)
+            when (uiState.uiStyle) {
+                UiStyle.MIUIX -> MiuixInstallerPage(session)
+                UiStyle.COUI -> CouiInstallerPage(session)
+                UiStyle.MATERIAL3 -> InstallerPage(session)
             }
         }
     }

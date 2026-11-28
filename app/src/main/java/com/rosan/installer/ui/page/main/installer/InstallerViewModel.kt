@@ -92,6 +92,8 @@ class InstallerViewModel(
         local.copy(
             viewSettings = local.viewSettings.copy(
                 useBlur = prefs.useBlur,
+                couiBlurRadius = prefs.couiBlurRadius,
+                couiGlassOpacity = prefs.couiGlassOpacity,
                 closeSessionCountDown = prefs.closeSessionCountDown,
                 hideIdenticalComparisons = prefs.hideIdenticalInstallComparisons,
                 showExtendedMenu = prefs.showDialogInstallExtendedMenu,

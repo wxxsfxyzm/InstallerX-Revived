@@ -4,6 +4,8 @@ package com.rosan.installer.ui.page.main.installer
 
 data class InstallerViewSettings(
     val useBlur: Boolean = true,
+    val couiBlurRadius: Int = 120,
+    val couiGlassOpacity: Int = 88,
     val preferSystemIconForUpdates: Boolean = false,
     val closeSessionCountDown: Int = 3,
     val hideIdenticalComparisons: Boolean = true,

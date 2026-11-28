@@ -8,6 +8,7 @@ import com.rosan.installer.domain.settings.model.preferences.AppPreferences
 import kotlinx.coroutines.flow.Flow
 
 enum class StringSetting {
+    UiStyle,
     ThemeMode,
     ThemePaletteStyle,
     ThemeColorSpec,
@@ -29,6 +30,8 @@ enum class StringSetting {
 enum class IntSetting {
     ThemeSeedColor,
     ThemeWallpaperSeedColor,
+    UiCouiBlurRadius,
+    UiCouiGlassOpacity,
     ShowMiIslandBlockingInterval,
     NotificationSuccessAutoClearSeconds,
     CloseSessionCountdown,
@@ -45,6 +48,8 @@ enum class BooleanSetting {
     UiUseMiuix,
     UiUseMiuixOs4,
     UiUseMiuixMonet,
+    UiUseCouiMonet,
+    UiUseCouiContourGlow,
     UiUseAppleFloatingBar,
     UiDynColorFollowPkgIcon,
     LiveActivityDynColorFollowPkgIcon,

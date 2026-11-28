@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.domain.settings.provider.SystemEnvProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
@@ -69,7 +70,7 @@ class ThemeSettingsViewModel(
             }
 
         ThemeSettingsState(
-            showMiuixUI = prefs.showMiuixUI,
+            uiStyle = prefs.uiStyle,
             useBlur = prefs.useBlur,
             themeMode = prefs.themeMode,
             useAmoled = prefs.useAmoled,
@@ -78,6 +79,10 @@ class ThemeSettingsViewModel(
             useDynamicColor = prefs.useDynamicColor,
             useMiuixOs4 = prefs.useMiuixOs4,
             useMiuixMonet = prefs.useMiuixMonet,
+            useCouiMonet = prefs.useCouiMonet,
+            useCouiContourGlow = prefs.useCouiContourGlow,
+            couiBlurRadius = prefs.couiBlurRadius,
+            couiGlassOpacity = prefs.couiGlassOpacity,
             useAppleFloatingBar = prefs.useAppleFloatingBar,
             seedColor = effectiveSeedColor,
             availableColors = availableColors,
@@ -96,7 +101,14 @@ class ThemeSettingsViewModel(
 
     fun dispatch(action: ThemeSettingsAction) {
         when (action) {
+            is ThemeSettingsAction.SetUiStyle -> viewModelScope.launch {
+                updateSetting(StringSetting.UiStyle, action.style.name)
+                updateSetting(BooleanSetting.UiUseMiuix, action.style == UiStyle.MIUIX)
+            }
+
             is ThemeSettingsAction.ChangeUseMiuix -> viewModelScope.launch {
+                val style = if (action.useMiuix) UiStyle.MIUIX else UiStyle.MATERIAL3
+                updateSetting(StringSetting.UiStyle, style.name)
                 updateSetting(BooleanSetting.UiUseMiuix, action.useMiuix)
             }
 
@@ -128,6 +140,22 @@ class ThemeSettingsViewModel(
 
             is ThemeSettingsAction.SetUseMiuixMonet -> viewModelScope.launch {
                 updateSetting(BooleanSetting.UiUseMiuixMonet, action.use)
+            }
+
+            is ThemeSettingsAction.SetUseCouiMonet -> viewModelScope.launch {
+                updateSetting(BooleanSetting.UiUseCouiMonet, action.use)
+            }
+
+            is ThemeSettingsAction.SetUseCouiContourGlow -> viewModelScope.launch {
+                updateSetting(BooleanSetting.UiUseCouiContourGlow, action.use)
+            }
+
+            is ThemeSettingsAction.SetCouiBlurRadius -> viewModelScope.launch {
+                updateSetting(IntSetting.UiCouiBlurRadius, action.radius.coerceIn(0, 200))
+            }
+
+            is ThemeSettingsAction.SetCouiGlassOpacity -> viewModelScope.launch {
+                updateSetting(IntSetting.UiCouiGlassOpacity, action.opacity.coerceIn(40, 100))
             }
 
             is ThemeSettingsAction.SetUseAppleFloatingBar -> viewModelScope.launch {

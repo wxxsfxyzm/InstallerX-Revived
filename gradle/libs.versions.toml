@@ -15,9 +15,9 @@ kotlin = "2.4.21"
 kotlinxCoroutines = "1.11.0"
 ksp = "2.3.13"
 composeBom = "2026.09.00"
-compose = "1.12.1"
+compose = "1.13.0"
 splashScreen = "1.2.0"
-material3 = "1.5.0-rc01"
+material3 = "1.5.0"
 room = "3.0.3"
 ktx-serialization = "1.13.0"
 rikka-shizuku = "13.1.5"
@@ -27,7 +27,8 @@ aboutLibraries = "15.3.0"
 appiconloader = "1.5.0"
 androidx-annotation = "1.11.0"
 timber = "5.0.1"
-miuix = "0.9.4-9d4b9c85-SNAPSHOT"
+miuix = "0.9.5-rc02"
+coui = "0.0.1-alpha21"
 okhttp = "5.5.1"
 monetcompat = "0.4.1"
 materialKolor = "6.0.0"
@@ -140,6 +141,11 @@ miuix-glass-icons = { group = "top.yukonga.miuix.kmp", name = "miuix-glass-icons
 miuix-preference = { group = "top.yukonga.miuix.kmp", name = "miuix-preference-android", version.ref = "miuix" }
 miuix-icons = { group = "top.yukonga.miuix.kmp", name = "miuix-icons-android", version.ref = "miuix" }
 miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-nav-android", version.ref = "miuix" }
+
+# coui
+coui-core = { group = "com.github.itoseo.coui-kit", name = "coui", version.ref = "coui" }
+coui-material3 = { group = "com.github.itoseo.coui-kit", name = "coui-material3", version.ref = "coui" }
+coui-icons = { group = "com.github.itoseo.coui-kit", name = "coui-icons", version.ref = "coui" }
 
 # okhttp
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp" }

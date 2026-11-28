@@ -23,9 +23,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
+import com.itos.coui.effect.LocalCouiContourGlowEnabled
+import com.itos.coui.theme.CouiPresets
+import com.itos.coui.theme.CouiTheme
+import com.itos.coui.theme.LocalCouiDarkTheme
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.ui.theme.material.animateAsState
 import com.rosan.installer.ui.theme.material.dynamicColorScheme
 import top.yukonga.miuix.kmp.material.isRenderEffectSupported
@@ -35,6 +40,7 @@ import top.yukonga.miuix.kmp.theme.ThemeColorSpec as MiuixColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle as MiuixPaletteStyle
 
+private val LocalUiStyle = staticCompositionLocalOf { UiStyle.MATERIAL3 }
 private val LocalUseMiuixOs4 = staticCompositionLocalOf { false }
 private val LocalIsDark = staticCompositionLocalOf { false }
 private val LocalPaletteStyle = staticCompositionLocalOf { PaletteStyle.Expressive }
@@ -42,11 +48,17 @@ private val LocalThemeColorSpec = staticCompositionLocalOf { ThemeColorSpec.SPEC
 private val LocalSeedColor = staticCompositionLocalOf { Color.Unspecified }
 private val LocalThemeMode = staticCompositionLocalOf { ThemeMode.SYSTEM }
 private val LocalUseMiuixMonet = staticCompositionLocalOf { false }
+private val LocalUseCouiMonet = staticCompositionLocalOf { false }
+private val LocalUseCouiContourGlow = staticCompositionLocalOf { true }
 private val LocalUseDynamicColor = staticCompositionLocalOf { false }
 
 val LocalInstallerColorScheme = staticCompositionLocalOf<ColorScheme> { error("No ColorScheme provided") }
 
 object InstallerTheme {
+    val uiStyle: UiStyle
+        @Composable @ReadOnlyComposable
+        get() = LocalUiStyle.current
+
     val useMiuixOs4: Boolean
         @Composable @ReadOnlyComposable
         get() = LocalUseMiuixOs4.current
@@ -79,6 +91,14 @@ object InstallerTheme {
         @Composable @ReadOnlyComposable
         get() = LocalUseMiuixMonet.current
 
+    val useCouiMonet: Boolean
+        @Composable @ReadOnlyComposable
+        get() = LocalUseCouiMonet.current
+
+    val useCouiContourGlow: Boolean
+        @Composable @ReadOnlyComposable
+        get() = LocalUseCouiContourGlow.current
+
     val useDynamicColor: Boolean
         @Composable @ReadOnlyComposable
         get() = LocalUseDynamicColor.current
@@ -87,11 +107,14 @@ object InstallerTheme {
 @Composable
 fun InstallerTheme(
     useMiuix: Boolean,
+    uiStyle: UiStyle = if (useMiuix) UiStyle.MIUIX else UiStyle.MATERIAL3,
     themeMode: ThemeMode,
     paletteStyle: PaletteStyle,
     colorSpec: ThemeColorSpec,
     useDynamicColor: Boolean,
     useMiuixMonet: Boolean,
+    useCouiMonet: Boolean = false,
+    useCouiContourGlow: Boolean = true,
     seedColor: Color,
     useAmoled: Boolean = false,
     useMiuixOs4: Boolean = false,
@@ -140,8 +163,9 @@ fun InstallerTheme(
     val animatedColorScheme = colorScheme.animateAsState()
 
     CompositionLocalProvider(
+        LocalUiStyle provides uiStyle,
         LocalUseMiuixOs4 provides (
-            useMiuix && useMiuixOs4 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && isRenderEffectSupported()
+            uiStyle == UiStyle.MIUIX && useMiuixOs4 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && isRenderEffectSupported()
             ),
         LocalIsDark provides isDark,
         LocalPaletteStyle provides paletteStyle,
@@ -149,38 +173,104 @@ fun InstallerTheme(
         LocalInstallerColorScheme provides animatedColorScheme,
         LocalThemeMode provides themeMode,
         LocalUseMiuixMonet provides useMiuixMonet,
+        LocalUseCouiMonet provides useCouiMonet,
+        LocalUseCouiContourGlow provides useCouiContourGlow,
         LocalUseDynamicColor provides useDynamicColor,
         LocalThemeColorSpec provides colorSpec,
+        LocalCouiDarkTheme provides isDark,
+        LocalCouiContourGlowEnabled provides useCouiContourGlow,
     ) {
         // Disable navigation bar contrast enforced for Android 10 and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             NavigationBarContrastHandler()
         }
 
-        if (useMiuix) {
-            InstallerMiuixTheme(
-                darkTheme = isDark,
-                themeMode = themeMode,
-                useDynamicColor = useDynamicColor,
-                useMiuixMonet = useMiuixMonet,
-                seedColor = seedColor,
-                paletteStyle = paletteStyle,
-                colorSpec = colorSpec,
-            ) {
-                val colors = MiuixTheme.colorScheme
-                // Keep the controller's dynamic-color mode and the card palette intact.
-                MiuixTheme(
-                    colors = if (useAmoled && isDark) colors.copy(surface = Color.Black) else colors,
+        when (uiStyle) {
+            UiStyle.MIUIX -> {
+                InstallerMiuixTheme(
+                    darkTheme = isDark,
+                    themeMode = themeMode,
+                    useDynamicColor = useDynamicColor,
+                    useMiuixMonet = useMiuixMonet,
+                    seedColor = seedColor,
+                    paletteStyle = paletteStyle,
+                    colorSpec = colorSpec,
+                ) {
+                    val colors = MiuixTheme.colorScheme
+                    // Keep the controller's dynamic-color mode and the card palette intact.
+                    MiuixTheme(
+                        colors = if (useAmoled && isDark) colors.copy(surface = Color.Black) else colors,
+                    ) {
+                        preservedContent(content)
+                    }
+                }
+            }
+
+            UiStyle.COUI -> {
+                InstallerCouiTheme(
+                    darkTheme = isDark,
+                    colorScheme = animatedColorScheme,
+                    useCouiMonet = useCouiMonet,
+                    useAmoled = useAmoled,
                 ) {
                     preservedContent(content)
                 }
             }
-        } else {
-            InstallerMaterialExpressiveTheme(
-                darkTheme = isDark,
-                colorScheme = animatedColorScheme,
-            ) {
-                preservedContent(content)
+
+            UiStyle.MATERIAL3 -> {
+                InstallerMaterialExpressiveTheme(
+                    darkTheme = isDark,
+                    colorScheme = animatedColorScheme,
+                ) {
+                    preservedContent(content)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InstallerCouiTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    colorScheme: ColorScheme,
+    useCouiMonet: Boolean = false,
+    useAmoled: Boolean = false,
+    compatStatusBarColor: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    if (compatStatusBarColor) {
+        val view = LocalView.current
+        if (!view.isInEditMode) {
+            SideEffect {
+                val window = (view.context as ComponentActivity).window
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            }
+        }
+    }
+
+    MaterialExpressiveTheme(
+        colorScheme = colorScheme,
+        motionScheme = MotionScheme.expressive(),
+        typography = Typography,
+    ) {
+        CompositionLocalProvider(LocalCouiDarkTheme provides darkTheme) {
+            if (useCouiMonet) {
+                content()
+            } else {
+                val preset = if (darkTheme) {
+                    if (useAmoled) {
+                        CouiPresets.Dark.copy(background = Color.Black, surface = Color(0xFF141414))
+                    } else {
+                        CouiPresets.Dark
+                    }
+                } else {
+                    CouiPresets.Light
+                }
+                CouiTheme(
+                    darkTheme = darkTheme,
+                    colorScheme = preset,
+                    content = content,
+                )
             }
         }
     }

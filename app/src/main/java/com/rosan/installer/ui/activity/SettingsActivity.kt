@@ -19,8 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.itos.coui.menu.ProvideCouiMenuBackdrop
+import com.itos.coui.theme.CouiTheme
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.framework.packageupdate.SelfUpdateRecoveryManager
 import com.rosan.installer.ui.navigation.InstallerNavContainer
@@ -78,38 +81,42 @@ class SettingsActivity :
             ) {
                 InstallerTheme(
                     useMiuix = uiState.useMiuix,
+                    uiStyle = uiState.uiStyle,
                     useMiuixOs4 = uiState.useMiuixOs4,
                     themeMode = uiState.themeMode,
                     paletteStyle = uiState.paletteStyle,
                     colorSpec = uiState.colorSpec,
                     useDynamicColor = uiState.useDynamicColor,
                     useMiuixMonet = uiState.useMiuixMonet,
+                    useCouiMonet = uiState.useCouiMonet,
+                    useCouiContourGlow = uiState.useCouiContourGlow,
                     seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor),
                     useAmoled = uiState.useAmoled,
                 ) {
-                    // Keep the host in every UI family and Miuix style, even though only Miuix uses it.
-                    // The host's Scaffold composes content in a SubcomposeLayout; making it conditional
-                    // forces the navigation tree to move out of a subcomposition disposed in the same
-                    // frame, which crashes with "Could not resolve state for movable content".
-                    InstallerMiuixComponentHost(
-                        useOs4 = InstallerTheme.useMiuixOs4,
-                        useBlur = uiState.useMiuix && uiState.useBlur,
-                        modifier = Modifier.fillMaxSize(),
-                        // The Box below paints the themed background, so skip the Scaffold's overdraw.
-                        containerColor = Color.Transparent,
-                    ) { scope ->
-                        val backgroundColor = if (uiState.useMiuix) {
-                            MiuixTheme.colorScheme.surface
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainer
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(backgroundColor)
-                                .then(scope.pageBackdropModifier),
-                        ) {
-                            InstallerNavContainer(uiState)
+                    // Keep both hosts in every UI family so live switching never moves the
+                    // navigation tree across SubcomposeLayout boundaries.
+                    ProvideCouiMenuBackdrop(isolateContent = false) { couiWindowSource ->
+                        InstallerMiuixComponentHost(
+                            useOs4 = InstallerTheme.useMiuixOs4,
+                            useBlur = uiState.useMiuix && uiState.useBlur,
+                            modifier = Modifier.fillMaxSize(),
+                            // The Box below paints the themed background, so skip the Scaffold's overdraw.
+                            containerColor = Color.Transparent,
+                        ) { scope ->
+                            val backgroundColor = when (uiState.uiStyle) {
+                                UiStyle.MIUIX -> MiuixTheme.colorScheme.surface
+                                UiStyle.COUI -> CouiTheme.colorScheme.background
+                                UiStyle.MATERIAL3 -> MaterialTheme.colorScheme.surfaceContainer
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .then(if (uiState.useCoui) couiWindowSource else Modifier)
+                                    .background(backgroundColor)
+                                    .then(scope.pageBackdropModifier),
+                            ) {
+                                InstallerNavContainer(uiState)
+                            }
                         }
                     }
                 }

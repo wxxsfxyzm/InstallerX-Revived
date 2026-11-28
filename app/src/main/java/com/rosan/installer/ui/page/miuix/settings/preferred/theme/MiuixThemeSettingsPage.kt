@@ -50,6 +50,7 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitD
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsAction
 import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsViewModel
@@ -134,9 +135,9 @@ fun MiuixThemeSettingsPage(
                                 .padding(bottom = 12.dp),
                         ) {
                             MiuixThemeEngineWidget(
-                                currentThemeIsMiuix = uiState.showMiuixUI,
-                                onThemeChange = { useMiuix ->
-                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(useMiuix))
+                                currentUiStyle = uiState.uiStyle,
+                                onThemeChange = { style ->
+                                    viewModel.dispatch(ThemeSettingsAction.SetUiStyle(style))
                                 },
                             )
                             if (supportsOs4) {
@@ -503,45 +504,40 @@ private fun MiuixOsVersionWidget(
 @Composable
 private fun MiuixThemeEngineWidget(
     modifier: Modifier = Modifier,
-    currentThemeIsMiuix: Boolean,
-    onThemeChange: (Boolean) -> Unit,
+    currentUiStyle: UiStyle,
+    onThemeChange: (UiStyle) -> Unit,
 ) {
     val context = LocalContext.current
 
     val themeOptions = remember {
-        mapOf(
-            true to R.string.theme_settings_miuix_ui, // Key = true -> MIUIX UI string resource
-            false to R.string.theme_settings_google_ui, // Key = false -> Google UI string resource
+        listOf(
+            UiStyle.MIUIX to R.string.theme_settings_miuix_ui,
+            UiStyle.COUI to R.string.theme_settings_coui_ui,
+            UiStyle.MATERIAL3 to R.string.theme_settings_google_ui,
         )
     }
 
-    // Convert map entries to List<DropdownItem> for WindowSpinnerPreference.
-    // Ensure the order matches the keys: index 0 = true, index 1 = false.
     val spinnerEntries = remember(themeOptions) {
-        themeOptions.entries.sortedByDescending { it.key }.map { entry ->
+        themeOptions.map { (_, resId) ->
             DropdownItem(
-                title = context.getString(entry.value),
+                title = context.getString(resId),
             )
         }
     }
 
-    // Determine selected index based on currentThemeIsMiuix state.
-    // Index 0 corresponds to true (MIUIX), Index 1 corresponds to false (Google).
-    val selectedIndex = remember(currentThemeIsMiuix) {
-        if (currentThemeIsMiuix) 0 else 1
+    val selectedIndex = remember(currentUiStyle, themeOptions) {
+        themeOptions.indexOfFirst { it.first == currentUiStyle }.coerceAtLeast(0)
     }
 
     InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_ui_engine),
-        // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { newIndex ->
-            // Convert index back to boolean key (0 -> true, 1 -> false)
-            val newModeIsMiuix = themeOptions.keys.sortedDescending().elementAt(newIndex)
-            if (currentThemeIsMiuix != newModeIsMiuix) {
-                onThemeChange(newModeIsMiuix)
+            val newStyle = themeOptions[newIndex].first
+            if (currentUiStyle != newStyle) {
+                onThemeChange(newStyle)
             }
         },
     )

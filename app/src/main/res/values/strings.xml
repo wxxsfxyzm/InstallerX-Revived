@@ -117,6 +117,12 @@
     <string name="theme_settings_miuix_ui_desc">Similar to HyperOS</string>
     <string name="theme_settings_miuix_custom_colors">Custom Colors</string>
     <string name="theme_settings_miuix_custom_colors_desc">Customize theme colors in Miuix theme style</string>
+    <string name="theme_settings_coui_ui">COUI</string>
+    <string name="theme_settings_coui_ui_desc">Similar to ColorOS</string>
+    <string name="theme_settings_coui_custom_colors">Custom Colors</string>
+    <string name="theme_settings_coui_custom_colors_desc">Customize theme colors in COUI theme style</string>
+    <string name="theme_settings_coui_contour_glow">Contour Glow</string>
+    <string name="theme_settings_coui_contour_glow_desc">Enable ColorOS luminous contour glow on floating controls</string>
     <string name="theme_settings_google_ui">Google Material 3</string>
     <string name="theme_settings_google_ui_desc">Standard Material Design UI</string>
     <string name="theme_settings_miuix_os_version">Miuix UI version</string>
@@ -127,6 +133,11 @@
     <string name="theme_settings_use_apple_floating_bar_desc">Display a floating style navigation bar at the bottom of the screen</string>
     <string name="theme_settings_use_blur">Enable Blur</string>
     <string name="theme_settings_use_blur_desc">Enable blur for the app</string>
+    <string name="theme_settings_coui_blur_radius">Dialog Blur Intensity</string>
+    <string name="theme_settings_coui_blur_radius_desc">Adjust background blur radius of the floating install dialog</string>
+    <string name="theme_settings_coui_glass_opacity">Dialog Frosted Opacity</string>
+    <string name="theme_settings_coui_glass_opacity_desc">Adjust frosted glass surface opacity of the floating install dialog</string>
+    <string name="theme_settings_coui_blur_off">Off</string>
     <string name="theme_settings_theme_mode">Theme Mode</string>
     <string name="theme_settings_theme_mode_desc">Select theme mode</string>
     <string name="theme_settings_theme_mode_light">Light theme</string>
