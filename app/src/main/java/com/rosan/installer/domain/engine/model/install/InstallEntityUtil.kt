@@ -22,6 +22,9 @@ fun DataEntity.sourcePath(): String? = when (val source = this.getSourceTop()) {
     else -> null
 }
 
+/** A scoped `.zip` may have an extensionless URI as identity, so the display path counts too. */
+fun DataEntity.hasZipSource(): Boolean = listOfNotNull(sourcePath(), sourceDisplayPath).any { it.endsWith(".zip", ignoreCase = true) }
+
 fun ConfigModel.shouldAutoDeleteSource(sourceType: DataType?): Boolean {
     val requiresArchiveOptIn = when (sourceType) {
         DataType.MULTI_APK_ZIP,
