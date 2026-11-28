@@ -33,7 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -62,6 +61,8 @@ import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopBarIconButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
+import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
+import com.rosan.installer.ui.page.miuix.widgets.rememberMiuixPopupBackdropActive
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import com.rosan.installer.util.toast
@@ -93,7 +94,7 @@ import top.yukonga.miuix.kmp.menu.OverlayIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import top.yukonga.miuix.kmp.window.WindowDialog
 
@@ -107,13 +108,16 @@ fun MiuixHistoryPage(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
-    val isContentScrolled by remember { derivedStateOf { listState.canScrollBackward } }
     val scrollBehavior = MiuixScrollBehavior()
+    val isContentScrolled by remember(listState, scrollBehavior) {
+        derivedStateOf { listState.canScrollBackward || scrollBehavior.state.overscrollOffset < -1f }
+    }
     val layoutDirection = LocalLayoutDirection.current
     val topBarBackdrop = rememberMiuixBlurBackdrop(enableBlur)
     val menuBackdrop = rememberMiuixBlurBackdrop(useOs4)
     val historyMenuAnchor = rememberGlassPopupAnchor()
     var showHistoryMenu by remember { mutableStateOf(false) }
+    val historyMenuActive = rememberMiuixPopupBackdropActive(showHistoryMenu)
     var selectedRecord by remember { mutableStateOf<OperationHistoryModel?>(null) }
     var showRecordDetailSheet by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
@@ -164,7 +168,7 @@ fun MiuixHistoryPage(
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .then(menuBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
+                .then(if (menuBackdrop != null && historyMenuActive) Modifier.layerBackdrop(menuBackdrop) else Modifier),
             topBar = {
                 InstallerMiuixTopAppBar(
                     useOs4 = useOs4,
@@ -274,8 +278,8 @@ fun MiuixHistoryPage(
                         state = listState,
                         modifier = Modifier
                             .fillMaxSize()
-                            .overScrollVertical()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                            .then(if (useOs4) Modifier.scrollEndHaptic() else Modifier)
+                            .installerMiuixTopBarScroll(scrollBehavior),
                         contentPadding = PaddingValues(
                             start = innerPadding.calculateStartPadding(layoutDirection) + outerPadding.calculateStartPadding(
                                 layoutDirection,
@@ -287,6 +291,7 @@ fun MiuixHistoryPage(
                             bottom = outerPadding.calculateBottomPadding() + 16.dp,
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
+                        overscrollEffect = null,
                     ) {
                         if (!state.isHistoryEnabled || state.records.isEmpty()) {
                             item {

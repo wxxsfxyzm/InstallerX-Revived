@@ -32,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
@@ -58,6 +57,7 @@ import com.rosan.installer.ui.page.main.settings.home.HomePageViewState
 import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
+import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.miuixHomeStatusCardColorActivated
 import com.rosan.installer.ui.theme.miuixHomeStatusCardColorDeactivated
@@ -74,7 +74,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
@@ -139,8 +138,7 @@ fun MiuixHomePage(
                 modifier = Modifier
                     .fillMaxSize()
                     .scrollEndHaptic()
-                    .overScrollVertical()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                    .installerMiuixTopBarScroll(scrollBehavior),
                 contentPadding = PaddingValues(
                     start = innerPadding.calculateStartPadding(layoutDirection) + 12.dp,
                     top = innerPadding.calculateTopPadding() + 12.dp,

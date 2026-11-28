@@ -8,19 +8,21 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
@@ -29,30 +31,25 @@ import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
+import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
-import top.yukonga.miuix.kmp.blur.BlendColorEntry
-import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
-import top.yukonga.miuix.kmp.blur.ProgressiveBlur
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.glass.GlassIconButton
 import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
 import top.yukonga.miuix.kmp.glass.GlassTopAppBar
-import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
 import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.isRenderEffectSupported
 import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 internal data class MiuixComponentScope(
     val useOs4: Boolean = false,
@@ -68,7 +65,6 @@ internal data class MiuixComponentScope(
 }
 
 private val LocalMiuixComponentScope = compositionLocalOf { MiuixComponentScope() }
-private val LocalMiuixTopBarBackdrop = compositionLocalOf<LayerBackdrop?> { null }
 
 /** Keeps the root popup host outside both the page and scroll-content recordings. */
 @Composable
@@ -106,44 +102,39 @@ internal fun InstallerMiuixTopAppBar(
     useOs4: Boolean = LocalMiuixComponentScope.current.useOs4 || InstallerTheme.useMiuixOs4,
     backdrop: LayerBackdrop? = LocalMiuixComponentScope.current.contentBackdrop,
     scrollBehavior: ScrollBehavior? = null,
-    persistentProgressiveBlur: Boolean = true,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
-    val hasContentScroll by remember(scrollBehavior) {
-        derivedStateOf { (scrollBehavior?.state?.contentOffset ?: 0f) < 0f }
-    }
-    val materialVisible = isContentScrolled ?: hasContentScroll
     if (useOs4) {
-        if (persistentProgressiveBlur && backdrop != null) {
-            InstallerMiuixProgressiveAppBarSurface(backdrop = backdrop, modifier = modifier) {
-                GlassTopAppBar(
-                    title = title,
-                    isContentScrolled = materialVisible,
-                    backdrop = backdrop,
-                    style = GlassDefaults.style(InstallerTheme.isDark),
-                    scrollBehavior = scrollBehavior,
-                    backgroundAlpha = { 0f },
-                    navigationIcon = navigationIcon,
-                    actions = actions,
-                    bottomContent = bottomContent,
-                )
-            }
-        } else {
-            GlassTopAppBar(
-                title = title,
-                isContentScrolled = materialVisible,
-                modifier = modifier,
-                progressiveBlur = true,
-                backdrop = backdrop,
-                style = GlassDefaults.style(InstallerTheme.isDark),
-                scrollBehavior = scrollBehavior,
-                navigationIcon = navigationIcon,
-                actions = actions,
-                bottomContent = bottomContent,
-            )
+        val hasContentScroll by remember(scrollBehavior) {
+            derivedStateOf { (scrollBehavior?.state?.contentOffset ?: 0f) < -1f }
         }
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val isWide by remember(windowInfo, density) {
+            derivedStateOf {
+                val windowSize = windowInfo.containerSize
+                with(density) {
+                    val width = windowSize.width.toDp()
+                    val height = windowSize.height.toDp()
+                    width >= 840.dp || (width >= 600.dp && height < width * 1.2f)
+                }
+            }
+        }
+        GlassTopAppBar(
+            title = title,
+            isContentScrolled = isContentScrolled ?: hasContentScroll,
+            modifier = modifier,
+            expandable = !isWide,
+            progressiveBlur = true,
+            backdrop = backdrop,
+            style = GlassDefaults.style(InstallerTheme.isDark),
+            scrollBehavior = scrollBehavior,
+            navigationIcon = navigationIcon,
+            actions = actions,
+            bottomContent = bottomContent,
+        )
     } else {
         TopAppBar(
             title = title,
@@ -157,6 +148,34 @@ internal fun InstallerMiuixTopAppBar(
     }
 }
 
+@Composable
+internal fun Modifier.installerMiuixTopBarScroll(scrollBehavior: ScrollBehavior): Modifier {
+    val state = scrollBehavior.state
+    val onOffsetChanged: ((Float) -> Unit)? = if (InstallerTheme.useMiuixOs4) {
+        remember(state) { { offset: Float -> state.overscrollOffset = offset } }
+    } else {
+        null
+    }
+    return this
+        .overScrollVertical(onOffsetChanged = onOffsetChanged)
+        .nestedScroll(scrollBehavior.nestedScrollConnection)
+}
+
+@Composable
+internal fun rememberMiuixPopupBackdropActive(show: Boolean): Boolean {
+    var active by remember { mutableStateOf(show) }
+    LaunchedEffect(show) {
+        if (show) {
+            active = true
+        } else if (active) {
+            // The public popup APIs have no dismissal-complete callback. Use the example's exit interval.
+            delay(350)
+            active = false
+        }
+    }
+    return show || active
+}
+
 /** Fixed sampling viewport: overscroll moves inside this layer, while bars and popups stay outside. */
 @Composable
 internal fun InstallerMiuixBackdropSurface(
@@ -166,49 +185,6 @@ internal fun InstallerMiuixBackdropSurface(
 ) {
     Box(modifier = modifier.then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)) {
         content()
-    }
-}
-
-/** A spatial gradient over the sampled scene; it never fades out just because a list cannot scroll. */
-@Composable
-internal fun InstallerMiuixProgressiveAppBarSurface(
-    backdrop: LayerBackdrop?,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    val renderedBackdrop = rememberLayerBackdrop()
-    val density = LocalDensity.current
-    val topInset = WindowInsets.statusBars.getTop(density)
-    val blurColors = BlurColors(
-        blendColors = listOf(BlendColorEntry(MiuixTheme.colorScheme.surface.copy(alpha = 0.3f))),
-    )
-    Box(modifier = modifier) {
-        if (backdrop != null) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .layout { measurable, constraints ->
-                        val bandHeight = (topInset + TopAppBarDefaults.CollapsedHeight.toPx() + 20.dp.toPx()) * 1.2f
-                        val placeable = measurable.measure(
-                            constraints.copy(minHeight = bandHeight.toInt(), maxHeight = bandHeight.toInt()),
-                        )
-                        layout(constraints.maxWidth, constraints.maxHeight) { placeable.placeRelative(0, 0) }
-                    }
-                    .layerBackdrop(renderedBackdrop)
-                    .progressiveTextureBlur(
-                        backdrop = backdrop,
-                        shape = RectangleShape,
-                        gradient = ProgressiveBlur.Top.copy(curve = 0.5f),
-                        blurRadius = GlassTopAppBarDefaults.ProgressiveBlurRadius.value,
-                        colors = blurColors,
-                    ),
-            )
-        }
-        CompositionLocalProvider(
-            LocalMiuixTopBarBackdrop provides renderedBackdrop.takeIf { backdrop != null },
-        ) {
-            content()
-        }
     }
 }
 
@@ -234,7 +210,6 @@ internal fun InstallerMiuixBackButton(
     }
 }
 
-/** Sample the rendered bar band without reapplying the library's raw-content underlay. */
 @Composable
 internal fun InstallerMiuixTopBarIconButton(
     onClick: () -> Unit,
@@ -242,12 +217,9 @@ internal fun InstallerMiuixTopBarIconButton(
     surfaceAlpha: Float = 1f,
     content: @Composable () -> Unit,
 ) {
-    val backdrop = LocalMiuixTopBarBackdrop.current
     GlassIconButton(
         onClick = onClick,
         modifier = modifier,
-        inheritTopBarMaterial = backdrop == null,
-        backdrop = backdrop,
         surfaceAlpha = surfaceAlpha,
         content = content,
     )

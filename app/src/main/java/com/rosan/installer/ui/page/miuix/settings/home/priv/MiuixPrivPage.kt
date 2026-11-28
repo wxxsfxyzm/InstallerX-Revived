@@ -21,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -39,6 +38,7 @@ import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixCustomAuthorizerDialog
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSettingsTipCard
+import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
@@ -47,7 +47,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.preference.CheckboxLocation
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
@@ -108,8 +107,7 @@ fun MiuixPrivPage(useBlur: Boolean, viewModel: HomePageViewModel = koinViewModel
                 modifier = Modifier
                     .fillMaxSize()
                     .scrollEndHaptic()
-                    .overScrollVertical()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                    .installerMiuixTopBarScroll(scrollBehavior),
                 contentPadding = PaddingValues(
                     start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
                     top = paddingValues.calculateTopPadding(),

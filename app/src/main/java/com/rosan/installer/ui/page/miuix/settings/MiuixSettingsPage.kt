@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,7 +92,7 @@ private fun SettingsFloatingBottomBar(
             val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
             val bottomMargin = maxOf(
                 24.dp,
-                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 8.dp,
+                WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues().calculateBottomPadding() + 8.dp,
             )
             InstallerMiuixGlassNavigationBar(
                 items = navigationItems,
@@ -120,9 +119,7 @@ private fun SettingsFloatingBottomBar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(horizontalSafeInsets)
-                    .widthIn(max = 440.dp)
-                    .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = bottomMargin),
+                    .padding(start = 24.dp, end = 24.dp, bottom = bottomMargin),
             )
         } else {
             FloatingBottomBar(

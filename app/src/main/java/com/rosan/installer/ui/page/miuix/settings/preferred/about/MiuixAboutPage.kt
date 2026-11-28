@@ -16,6 +16,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,9 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -59,7 +58,6 @@ import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -72,7 +70,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,17 +90,18 @@ import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixComponentHost
-import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixProgressiveAppBarSurface
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixSpinnerPreference
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
+import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.DropdownArrowEndAction
 import top.yukonga.miuix.kmp.basic.DropdownDefaults
@@ -120,22 +118,21 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
-import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
-import top.yukonga.miuix.kmp.glass.GlassTopAppBarDefaults
+import top.yukonga.miuix.kmp.glass.GlassCard
+import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import top.yukonga.miuix.kmp.window.WindowDialog
@@ -258,11 +255,18 @@ private fun MiuixAboutPageInternal(
     Scaffold(
         topBar = {
             if (useOs4) {
-                MiuixAboutGlassTopBar(
+                GlassTopAppBar(
                     title = stringResource(R.string.about),
+                    isContentScrolled = lazyListState.canScrollBackward,
+                    expandable = false,
+                    progressiveBlur = true,
                     backdrop = topBarBackdrop,
-                    titleProgress = { scrollProgress },
-                    onBack = { navigator.pop() },
+                    scrollBehavior = topAppBarScrollBehavior,
+                    style = GlassDefaults.style(InstallerTheme.isDark),
+                    titleAlpha = { scrollProgress },
+                    navigationIcon = {
+                        InstallerMiuixBackButton(onClick = { navigator.pop() }, surfaceAlpha = scrollProgress)
+                    },
                 )
             } else {
                 SmallTopAppBar(
@@ -302,53 +306,6 @@ private fun MiuixAboutPageInternal(
                 uriHandler = uriHandler,
                 context = context,
             )
-        }
-    }
-}
-
-/** About keeps a compact bar; its controls need to draw shadows beyond the bar bounds. */
-@Composable
-private fun MiuixAboutGlassTopBar(
-    title: String,
-    backdrop: LayerBackdrop?,
-    titleProgress: () -> Float,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    InstallerMiuixProgressiveAppBarSurface(backdrop = backdrop, modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-                .height(TopAppBarDefaults.CollapsedHeight)
-                .pointerInput(Unit) { detectTapGestures { } },
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(TopAppBarDefaults.SmallTopAppBarCenterHeight),
-            ) {
-                InstallerMiuixBackButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = TopAppBarDefaults.NavigationIconPadding),
-                    surfaceAlpha = titleProgress(),
-                )
-                Text(
-                    text = title,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(horizontal = TopAppBarDefaults.NavigationIconPadding * 2 + GlassTopAppBarDefaults.ButtonSize)
-                        .graphicsLayer { alpha = titleProgress() },
-                    color = MiuixTheme.colorScheme.onSurface,
-                    fontSize = MiuixTheme.textStyles.title3.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
         }
     }
 }
@@ -574,9 +531,9 @@ private fun AboutContentBody(
             modifier = Modifier
                 .fillMaxSize()
                 .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+                .installerMiuixTopBarScroll(topAppBarScrollBehavior),
             contentPadding = listContentPadding,
+            overscrollEffect = null,
         ) {
             // Transparent spacer matching logo height
             item(key = "logoSpacer") {
@@ -602,6 +559,28 @@ private fun AboutContentBody(
             }
 
             item(key = "about_content") {
+                val useOs4 = InstallerTheme.useMiuixOs4
+                val cardBlur = if (!useOs4 && backdrop != null) {
+                    Modifier.textureBlur(
+                        backdrop = backdrop,
+                        shape = RoundedCornerShape(16.dp),
+                        blurRadius = blurRadius,
+                        noiseCoefficient = noiseCoefficient,
+                        colors = BlurColors(
+                            blendColors = currentConfigValue,
+                            brightness = brightness,
+                            contrast = contrast,
+                            saturation = saturation,
+                        ),
+                        enabled = blurEnable,
+                    )
+                } else {
+                    Modifier
+                }
+                val cardColors = CardDefaults.defaultColors(
+                    if (backdrop != null && blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
+                    Color.Transparent,
+                )
                 Column(
                     modifier = Modifier
                         .fillParentMaxHeight()
@@ -609,33 +588,10 @@ private fun AboutContentBody(
                 ) {
                     SmallTitle(stringResource(R.string.about))
 
-                    Card(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .padding(bottom = 12.dp)
-                            .then(
-                                if (backdrop != null) {
-                                    Modifier.textureBlur(
-                                        backdrop = backdrop,
-                                        shape = RoundedCornerShape(16.dp),
-                                        blurRadius = blurRadius,
-                                        noiseCoefficient = noiseCoefficient,
-                                        colors = BlurColors(
-                                            blendColors = currentConfigValue,
-                                            brightness = brightness,
-                                            contrast = contrast,
-                                            saturation = saturation,
-                                        ),
-                                        enabled = blurEnable,
-                                    )
-                                } else {
-                                    Modifier
-                                },
-                            ),
-                        colors = CardDefaults.defaultColors(
-                            if (backdrop != null && blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                            Color.Transparent,
-                        ),
+                    AboutContentCard(
+                        useOs4 = useOs4,
+                        legacyBlur = cardBlur,
+                        legacyColors = cardColors,
                     ) {
                         MiuixNavigationItemWidget(
                             title = stringResource(R.string.get_source_code),
@@ -663,33 +619,10 @@ private fun AboutContentBody(
 
                     if (AppConfig.isLogEnabled && context.packageName == BuildConfig.APPLICATION_ID) {
                         SmallTitle(stringResource(R.string.debug))
-                        Card(
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp)
-                                .padding(bottom = 12.dp)
-                                .then(
-                                    if (backdrop != null) {
-                                        Modifier.textureBlur(
-                                            backdrop = backdrop,
-                                            shape = RoundedCornerShape(16.dp),
-                                            blurRadius = blurRadius,
-                                            noiseCoefficient = noiseCoefficient,
-                                            colors = BlurColors(
-                                                blendColors = currentConfigValue,
-                                                brightness = brightness,
-                                                contrast = contrast,
-                                                saturation = saturation,
-                                            ),
-                                            enabled = blurEnable,
-                                        )
-                                    } else {
-                                        Modifier
-                                    },
-                                ),
-                            colors = CardDefaults.defaultColors(
-                                if (backdrop != null && blurEnable) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
-                                Color.Transparent,
-                            ),
+                        AboutContentCard(
+                            useOs4 = useOs4,
+                            legacyBlur = cardBlur,
+                            legacyColors = cardColors,
                         ) {
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.save_logs),
@@ -973,4 +906,21 @@ private fun ValueText(text: String) {
         fontSize = MiuixTheme.textStyles.body2.fontSize,
         color = MiuixTheme.colorScheme.onSurfaceVariantActions,
     )
+}
+
+@Composable
+private fun AboutContentCard(
+    useOs4: Boolean,
+    legacyBlur: Modifier,
+    legacyColors: CardColors,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val modifier = Modifier
+        .padding(horizontal = 12.dp)
+        .padding(bottom = 12.dp)
+    if (useOs4) {
+        GlassCard(modifier = modifier, content = content)
+    } else {
+        Card(modifier = modifier.then(legacyBlur), colors = legacyColors, content = content)
+    }
 }

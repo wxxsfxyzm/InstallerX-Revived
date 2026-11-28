@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +43,7 @@ import com.rosan.installer.ui.page.main.widget.util.AllViewEventCollector
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
 import com.rosan.installer.ui.page.miuix.widgets.MiuixScopeTipCard
+import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
@@ -62,7 +62,6 @@ import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
 import top.yukonga.miuix.kmp.icon.extended.SelectAll
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Composable
 fun MiuixAllPage(
@@ -103,7 +102,6 @@ fun MiuixAllPage(
                 useOs4 = useOs4,
                 backdrop = topBarBackdrop,
                 isContentScrolled = isContentScrolled,
-                persistentProgressiveBlur = true,
                 title = title,
                 scrollBehavior = scrollBehavior,
             )
@@ -150,8 +148,7 @@ fun MiuixAllPage(
                     LazyVerticalGrid(
                         modifier = Modifier
                             .fillMaxSize()
-                            .overScrollVertical()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                            .installerMiuixTopBarScroll(scrollBehavior),
                         columns = GridCells.Adaptive(350.dp),
                         contentPadding = PaddingValues(
                             start = innerPadding.calculateStartPadding(layoutDirection) + 16.dp,

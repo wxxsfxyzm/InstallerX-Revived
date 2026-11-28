@@ -56,6 +56,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -64,7 +66,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -92,6 +93,8 @@ import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopBarIconButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixDropdown
+import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
+import com.rosan.installer.ui.page.miuix.widgets.rememberMiuixPopupBackdropActive
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.getMiuixAppBarColor
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
@@ -104,12 +107,12 @@ import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SearchClearButton
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
@@ -140,7 +143,6 @@ import top.yukonga.miuix.kmp.material.GlassShape
 import top.yukonga.miuix.kmp.material.drawGlassShadow
 import top.yukonga.miuix.kmp.menu.WindowIconDropdownMenu
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 private val SearchListTopGap = 8.dp
@@ -168,7 +170,9 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
             lazyListState.firstVisibleItemIndex > 0 || lazyListState.firstVisibleItemScrollOffset > 0
         }
     }
-    val isContentScrolled by remember { derivedStateOf { lazyListState.canScrollBackward } }
+    val isContentScrolled by remember(lazyListState, scrollBehavior) {
+        derivedStateOf { lazyListState.canScrollBackward || scrollBehavior.state.overscrollOffset < -1f }
+    }
     // The list starts SearchListTopGap below the bar, so the search pill is only overlapped past that gap.
     val searchGapPx = with(LocalDensity.current) { SearchListTopGap.toPx() }
     val searchHasOverlap by remember(searchGapPx) {
@@ -188,6 +192,7 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
     val orderMenuAnchor = rememberGlassPopupAnchor()
     var orderSelectorBounds by remember { mutableStateOf(Rect.Zero) }
     var showOrderMenu by remember { mutableStateOf(false) }
+    val menuBackdropActive = rememberMiuixPopupBackdropActive(showMoreMenu || showOrderMenu)
 
     val orderItems = orderOptions.map { stringResource(it.labelResId) }
     val selectedOrderIndex = orderOptions.indexOfFirst { it.type == uiState.orderType }.coerceAtLeast(0)
@@ -200,17 +205,14 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .then(menuBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
+                .then(if (menuBackdrop != null && menuBackdropActive) Modifier.layerBackdrop(menuBackdrop) else Modifier),
             topBar = {
                 if (useOs4) {
-                    // The library bar sizes its progressive band to include the pinned search field;
-                    // the persistent surface only covers the collapsed title area.
                     InstallerMiuixTopAppBar(
                         useOs4 = true,
                         backdrop = topBarBackdrop,
                         isContentScrolled = isContentScrolled,
                         scrollBehavior = scrollBehavior,
-                        persistentProgressiveBlur = false,
                         title = stringResource(R.string.config_scope),
                         navigationIcon = {
                             InstallerMiuixBackButton(
@@ -321,6 +323,10 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
                     val scrollToTop: () -> Unit = {
                         coroutineScope.launch {
                             lazyListState.animateScrollToItem(0)
+                            if (useOs4) {
+                                scrollBehavior.state.heightOffset = 0f
+                                scrollBehavior.state.contentOffset = 0f
+                            }
                         }
                     }
                     if (useOs4) {
@@ -402,8 +408,7 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
                                     .fillMaxSize()
                                     .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                                     .scrollEndHaptic()
-                                    .overScrollVertical()
-                                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                                    .installerMiuixTopBarScroll(scrollBehavior),
                                 state = lazyListState,
                                 contentPadding = PaddingValues(
                                     start = horizontalSafeInsets.calculateStartPadding(layoutDirection),
@@ -595,6 +600,7 @@ private fun GlassSearchBar(
     val colors = MiuixTheme.colorScheme
     val mutedColor = if (MiuixTheme.isDynamicColor) colors.onSurfaceVariantSummary else colors.disabledOnSurface
     val keyboard = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
     val shape = remember { GlassShape(GlassSearchOverlayDefaults.BarHeight / 2) }
     val style = GlassDefaults.style(InstallerTheme.isDark)
     val material = GlassSearchOverlayDefaults.material()
@@ -612,7 +618,8 @@ private fun GlassSearchBar(
         onValueChange = onQueryChange,
         modifier = modifier
             .fillMaxWidth()
-            .height(GlassSearchOverlayDefaults.BarHeight),
+            .height(GlassSearchOverlayDefaults.BarHeight)
+            .focusRequester(focusRequester),
         singleLine = true,
         textStyle = MiuixTheme.textStyles.body1.copy(color = colors.onSurface),
         cursorBrush = SolidColor(colors.primary),
@@ -660,17 +667,14 @@ private fun GlassSearchBar(
                         field()
                     }
                     if (query.isNotEmpty()) {
-                        IconButton(
-                            onClick = { onQueryChange("") },
+                        SearchClearButton(
+                            onClick = {
+                                onQueryChange("")
+                                focusRequester.requestFocus()
+                            },
                             modifier = Modifier.size(24.dp),
-                        ) {
-                            Icon(
-                                imageVector = MiuixIcons.Glass.Close,
-                                contentDescription = stringResource(R.string.clear),
-                                modifier = Modifier.size(16.dp * (7f / 6f)),
-                                tint = mutedColor,
-                            )
-                        }
+                            contentDescription = stringResource(R.string.clear),
+                        )
                     }
                 }
             }
