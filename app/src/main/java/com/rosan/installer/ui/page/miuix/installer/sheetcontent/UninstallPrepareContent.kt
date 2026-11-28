@@ -22,11 +22,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.engine.model.install.UninstallFlags
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
+import com.rosan.installer.ui.miuix.widgets.MiuixCheckboxWidget
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoSlot
 import com.rosan.installer.ui.page.miuix.installer.components.AppInfoState
-import com.rosan.installer.ui.page.miuix.widgets.MiuixCheckboxWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.ButtonDefaults

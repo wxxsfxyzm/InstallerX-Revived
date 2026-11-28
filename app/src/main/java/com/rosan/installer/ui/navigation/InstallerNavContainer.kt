@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -21,35 +24,8 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.ui.animation.predictiveback.installerNavTransition
-import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyPage
-import com.rosan.installer.ui.page.main.settings.config.edit.EditPage
-import com.rosan.installer.ui.page.main.settings.home.installer.DefaultInstallerPage
-import com.rosan.installer.ui.page.main.settings.home.priv.PrivPage
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutPage
-import com.rosan.installer.ui.page.main.settings.preferred.about.OpenSourceLicensePage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.InstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.authorizer.AuthorizerCustPage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.dialog.DialogSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.installer.notification.NotificationSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.lab.LabPage
-import com.rosan.installer.ui.page.main.settings.preferred.network.NetworkPage
-import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsPage
-import com.rosan.installer.ui.page.main.settings.preferred.uninstaller.UninstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.miuix.settings.config.apply.MiuixApplyPage
-import com.rosan.installer.ui.page.miuix.settings.config.edit.MiuixEditPage
-import com.rosan.installer.ui.page.miuix.settings.home.installer.MiuixDefaultInstallerPage
-import com.rosan.installer.ui.page.miuix.settings.home.priv.MiuixPrivPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.about.MiuixAboutPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.about.ossLicensePage.MiuixOpenSourceLicensePage
-import com.rosan.installer.ui.page.miuix.settings.preferred.installer.MiuixInstallerGlobalSettingsPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.installer.authorizer.MiuixAuthorizerCustPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.installer.dialog.MiuixDialogSettingsPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.installer.notification.MiuixNotificationSettingsPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.lab.MiuixLabPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.network.MiuixNetworkPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.theme.MiuixThemeSettingsPage
-import com.rosan.installer.ui.page.miuix.settings.preferred.uninstaller.MiuixUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.family.host
+import com.rosan.installer.ui.feature.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixComponentHost
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.SettingsPageTheme
@@ -70,7 +46,7 @@ internal fun InstallerNavContainer(uiState: ThemeState, backdropColor: Color, pa
     val backStack = rememberNavBackStack<Route>(Route.Main)
     val navigator = remember(backStack) { Navigator(backStack) }
     val onBack = remember(navigator) { { navigator.pop() } }
-    val useBlur = uiState.useBlur
+    val host = uiState.uiFamily.host()
 
     CompositionLocalProvider(
         LocalNavigator provides navigator,
@@ -109,147 +85,79 @@ internal fun InstallerNavContainer(uiState: ThemeState, backdropColor: Color, pa
             transition = transition,
             effects = effects,
         ) {
-            entry<Route.Main> {
+            entry<Route.Main> { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixMainPageWrapper(uiState, sharedViewModel)
-                    } else {
-                        Material3MainPageWrapper(uiState, sharedViewModel)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
             entry<Route.EditConfig>(swipeDismiss = NavSwipeDirection.None) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    val id = key.id
-                    if (uiState.useMiuix) {
-                        MiuixEditPage(
-                            id = if (id != -1L) id else null,
-                            useBlur = useBlur,
-                        )
-                    } else {
-                        EditPage(
-                            id = if (id != -1L) id else null,
-                            useBlur = useBlur,
-                        )
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
             entry<Route.ApplyConfig>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    val id = key.id
-                    if (uiState.useMiuix) {
-                        MiuixApplyPage(id, useBlur)
-                    } else {
-                        ApplyPage(id, useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.About>(swipeDismiss = swipeBackDirection) {
+            entry<Route.About>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixAboutPage(useBlur)
-                    } else {
-                        AboutPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.OpenSourceLicense>(swipeDismiss = swipeBackDirection) {
+            entry<Route.OpenSourceLicense>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixOpenSourceLicensePage(useBlur)
-                    } else {
-                        OpenSourceLicensePage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.Theme>(swipeDismiss = swipeBackDirection) {
+            entry<Route.Theme>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixThemeSettingsPage()
-                    } else {
-                        ThemeSettingsPage()
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.Network>(swipeDismiss = swipeBackDirection) {
+            entry<Route.Network>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixNetworkPage(useBlur)
-                    } else {
-                        NetworkPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.InstallerGlobal>(swipeDismiss = swipeBackDirection) {
+            entry<Route.InstallerGlobal>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixInstallerGlobalSettingsPage(useBlur)
-                    } else {
-                        InstallerGlobalSettingsPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.AuthorizerCust>(swipeDismiss = swipeBackDirection) {
+            entry<Route.AuthorizerCust>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixAuthorizerCustPage(useBlur)
-                    } else {
-                        AuthorizerCustPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.DialogSettings>(swipeDismiss = swipeBackDirection) {
+            entry<Route.DialogSettings>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixDialogSettingsPage(useBlur)
-                    } else {
-                        DialogSettingsPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.NotificationSettings>(swipeDismiss = swipeBackDirection) {
+            entry<Route.NotificationSettings>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixNotificationSettingsPage(useBlur)
-                    } else {
-                        NotificationSettingsPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.UninstallerGlobal>(swipeDismiss = swipeBackDirection) {
+            entry<Route.UninstallerGlobal>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixUninstallerGlobalSettingsPage(useBlur)
-                    } else {
-                        UninstallerGlobalSettingsPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.Lab>(swipeDismiss = swipeBackDirection) {
+            entry<Route.Lab>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixLabPage(useBlur)
-                    } else {
-                        LabPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.DefaultInstaller>(swipeDismiss = swipeBackDirection) {
+            entry<Route.DefaultInstaller>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixDefaultInstallerPage(useBlur)
-                    } else {
-                        DefaultInstallerPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
-            entry<Route.Priv>(swipeDismiss = swipeBackDirection) {
+            entry<Route.Priv>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixPrivPage(useBlur)
-                    } else {
-                        PrivPage(useBlur)
-                    }
+                    host.RouteContent(key, uiState, sharedViewModel)
                 }
             }
         }
@@ -270,6 +178,9 @@ private fun InstallerNavEntry(
         isBackEnabled = interceptPredictiveBack,
         onBackCompleted = onBack,
     )
+    // Move the page between the glass host and the plain container so OS4 changes keep its state.
+    val currentContent by rememberUpdatedState(content)
+    val movableContent = remember { movableContentOf { currentContent() } }
     pageTheme {
         if (hostGlassDropdowns && InstallerTheme.useMiuixOs4) {
             InstallerMiuixComponentHost(
@@ -279,11 +190,11 @@ private fun InstallerNavEntry(
                 containerColor = Color.Transparent,
             ) { scope ->
                 Box(modifier = Modifier.fillMaxSize().then(scope.pageBackdropModifier)) {
-                    content()
+                    movableContent()
                 }
             }
         } else {
-            content()
+            movableContent()
         }
     }
 }

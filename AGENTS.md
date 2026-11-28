@@ -58,7 +58,7 @@ Several product behaviors are intentionally flow-specific. Do **not** assume a f
 * `app/` — main Android application.
 * `app-process/` — privileged helper process bridge used by Root/Shizuku-style workflows.
 * `hidden-api/` — hidden API declarations/helpers consumed by the app.
-* `ui-components/` — reusable Compose components and rendering effects. App screens, navigation, and theme policy live in `app/`.
+* `ui-color/`, `ui-core/`, `ui-effects/`, `ui-md3/`, and `ui-miuix/` — reusable Compose libraries. App screens, navigation, and theme policy live in `app/`. See `docs/UI-components.md` for publication and consumption.
 * `build-plugins/` — shared Gradle convention plugins.
 * `baselineprofile/` — Android baseline profile generation.
 * `docs/` — localized project README files and user-facing repository documentation.
@@ -279,6 +279,8 @@ Do not:
 * change shared logic while checking only one UI family.
 
 When a feature exists in both design systems, preserve semantic consistency while allowing implementation details to remain native to each UI family.
+
+The selected family is the persisted `UiFamily` setting. Each family implements `ui/family/UiFamilyHost` to supply its theme, installer page, and a screen for every navigation `Route`. Keep view models, state, and actions shared in `ui/feature/` instead of branching on the family in shared code. A new family adds a `UiFamily` entry, a host, and its own pages.
 
 ### Reusable UI components
 

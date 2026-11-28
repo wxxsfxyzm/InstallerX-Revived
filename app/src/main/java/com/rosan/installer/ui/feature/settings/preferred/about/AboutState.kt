@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.ui.feature.settings.preferred.about
+
+import androidx.compose.ui.graphics.ImageBitmap
+import com.rosan.installer.domain.settings.model.config.Authorizer
+
+data class AboutState(
+    val authorizer: Authorizer = Authorizer.None,
+    val hasUpdate: Boolean = false,
+    val remoteVersion: String = "",
+    val enableFileLogging: Boolean = false,
+    val appIcon: ImageBitmap? = null,
+)

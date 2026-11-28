@@ -18,14 +18,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.repository.ConfigRepository
+import com.rosan.installer.ui.effects.FloatingBottomBarMode
+import com.rosan.installer.ui.feature.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.library.FloatingBottomBarMode
-import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
+import com.rosan.installer.ui.miuix.theme.rememberMiuixBlurBackdrop
 import com.rosan.installer.ui.page.miuix.settings.SettingsCompactLayout
 import com.rosan.installer.ui.page.miuix.settings.SettingsWideScreenLayout
 import com.rosan.installer.ui.theme.LocalWindowLayoutInfo
 import com.rosan.installer.ui.theme.WindowLayoutType
-import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.NavigationItem
@@ -39,7 +39,7 @@ fun MiuixMainPageWrapper(uiState: ThemeState, sharedViewModel: SettingsSharedVie
     val layoutInfo = LocalWindowLayoutInfo.current
     val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
     val useBlur = uiState.useBlur
-    val useOs4 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && uiState.useMiuixOs4 && isRenderEffectSupported()
+    val useOs4 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && uiState.miuixOptions.useOs4 && isRenderEffectSupported()
     val useFloatingBottomBar = useOs4 || uiState.useAppleFloatingBar
     val floatingBottomBarMode = when {
         useBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> FloatingBottomBarMode.LiquidGlass

@@ -10,8 +10,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutEvent
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutEvent
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutViewModel
+import com.rosan.installer.ui.md3.widgets.setting.BlockingLoadingIndicator
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 
 @Composable

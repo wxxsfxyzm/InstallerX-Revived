@@ -5,6 +5,7 @@ package com.rosan.installer.domain.settings.repository
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.model.preferences.AppPreferences
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
 import kotlinx.coroutines.flow.Flow
 
 enum class StringSetting {
@@ -42,7 +43,6 @@ enum class BooleanSetting {
     UiUseBlur,
     ThemeUseAmoled,
     ThemeUseDynamicColor,
-    UiUseMiuix,
     UiUseMiuixOs4,
     UiUseMiuixMonet,
     UiUseAppleFloatingBar,
@@ -127,4 +127,6 @@ interface AppSettingsRepository {
     fun getSharedUidList(setting: SharedUidListSetting, default: List<SharedUid> = emptyList()): Flow<List<SharedUid>>
 
     suspend fun updateUninstallFlags(transform: (Int) -> Int)
+
+    suspend fun putUiFamily(family: UiFamily)
 }

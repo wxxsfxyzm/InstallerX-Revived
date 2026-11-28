@@ -51,21 +51,21 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.PackageAnalysisResult
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.session.model.SelectInstallEntity
+import com.rosan.installer.ui.core.theme.bottomShape
+import com.rosan.installer.ui.core.theme.middleShape
+import com.rosan.installer.ui.core.theme.singleShape
+import com.rosan.installer.ui.core.theme.topShape
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.md3.widgets.setting.NavigationItemWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
-import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
-import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.theme.bottomShape
-import com.rosan.installer.ui.theme.middleShape
-import com.rosan.installer.ui.theme.singleShape
-import com.rosan.installer.ui.theme.topShape
+import com.rosan.installer.ui.page.main.widget.card.AppInfoTipCard
 import com.rosan.installer.ui.util.getSupportSubtitle
 import com.rosan.installer.ui.util.getSupportTitle
 
@@ -183,7 +183,7 @@ private fun ChoiceContent(
 ) {
     Column(modifier = modifier) {
         AnimatedVisibility(visible = errorMessage != null) {
-            InfoTipCard(
+            AppInfoTipCard(
                 text = errorMessage ?: "",
                 icon = null,
                 noPadding = false,

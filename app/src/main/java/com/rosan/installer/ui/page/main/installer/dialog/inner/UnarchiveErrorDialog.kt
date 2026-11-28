@@ -10,9 +10,9 @@ import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.domain.archive.model.UnarchiveErrorAction
 import com.rosan.installer.domain.archive.model.UnarchiveStatus
-import com.rosan.installer.ui.page.main.installer.InstallerStage
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerStage
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.components.ErrorTextBlock
 import com.rosan.installer.ui.page.main.installer.components.failedIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton

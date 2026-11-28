@@ -9,8 +9,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
+import com.rosan.installer.ui.feature.settings.config.all.AllViewAction
+import com.rosan.installer.ui.feature.settings.config.all.AllViewModel
+import com.rosan.installer.ui.miuix.widgets.MiuixErrorDetails
+import com.rosan.installer.ui.miuix.widgets.MiuixTipCard
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.util.help
 import top.yukonga.miuix.kmp.basic.Card

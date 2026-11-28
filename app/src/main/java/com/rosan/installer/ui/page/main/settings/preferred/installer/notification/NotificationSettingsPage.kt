@@ -31,17 +31,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
+import com.rosan.installer.ui.feature.settings.preferred.installer.notification.NotificationSettingsAction
+import com.rosan.installer.ui.feature.settings.preferred.installer.notification.NotificationSettingsViewModel
+import com.rosan.installer.ui.feature.settings.preferred.installer.notification.NotificationStyle
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.BaseItemContainer
+import com.rosan.installer.ui.md3.widgets.setting.DropDownMenuWidget
+import com.rosan.installer.ui.md3.widgets.setting.IntNumberPickerWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
-import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.IntNumberPickerWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -101,7 +104,7 @@ fun NotificationSettingsPage(useBlur: Boolean, viewModel: NotificationSettingsVi
                 },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },

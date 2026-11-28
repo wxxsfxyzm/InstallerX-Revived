@@ -6,6 +6,8 @@ import android.os.Build
 import androidx.datastore.preferences.core.Preferences
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.data.settings.local.datastore.AppDataStore
+import com.rosan.installer.data.settings.mapper.resolveUiFamily
+import com.rosan.installer.data.settings.mapper.toLegacyUseMiuix
 import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
@@ -20,9 +22,11 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnima
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerPreferences
+import com.rosan.installer.domain.settings.model.preferences.theme.MiuixOptions
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
@@ -53,6 +57,8 @@ class AppSettingsRepositoryImpl(
         } else {
             rawGithubUpdateChannel
         }
+
+        val uiFamily = resolveUiFamily(prefs[AppDataStore.UI_FAMILY], prefs[AppDataStore.UI_USE_MIUIX])
 
         // Map all preferences explicitly by key. Order no longer matters.
         AppPreferences(
@@ -93,7 +99,7 @@ class AppSettingsRepositoryImpl(
                 value = prefs[AppDataStore.SMART_AUTHORIZER_CANDIDATES].orEmpty(),
                 isSessionInstallSupported = capabilityProvider.isSessionInstallSupported,
             ),
-            showMiuixUI = prefs[AppDataStore.UI_USE_MIUIX] ?: false,
+            uiFamily = uiFamily,
             preferSystemIcon = prefs[AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL] ?: false,
             showLauncherIcon = prefs[AppDataStore.SHOW_LAUNCHER_ICON] ?: true,
             userSetLSPosedActive = prefs[AppDataStore.USER_SET_LSPOSED_ACTIVE] ?: false,
@@ -161,8 +167,10 @@ class AppSettingsRepositoryImpl(
             ),
             colorSpec = ThemeColorSpec.fromValueOrDefault(prefs[AppDataStore.THEME_COLOR_SPEC] ?: ThemeColorSpec.SPEC_2025.name),
             useDynamicColor = prefs[AppDataStore.THEME_USE_DYNAMIC_COLOR] ?: true,
-            useMiuixOs4 = prefs[AppDataStore.UI_USE_MIUIX_OS4] ?: false,
-            useMiuixMonet = prefs[AppDataStore.UI_USE_MIUIX_MONET] ?: false,
+            miuixOptions = MiuixOptions(
+                useMonet = prefs[AppDataStore.UI_USE_MIUIX_MONET] ?: false,
+                useOs4 = prefs[AppDataStore.UI_USE_MIUIX_OS4] ?: false,
+            ),
             useAppleFloatingBar = prefs[AppDataStore.UI_USE_APPLE_FLOATING_BAR] ?: false,
             seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: DEFAULT_SEED_COLOR,
             wallpaperSeedColorInt = prefs[AppDataStore.THEME_WALLPAPER_SEED_COLOR] ?: 0,
@@ -171,7 +179,7 @@ class AppSettingsRepositoryImpl(
             // OS4 always uses blur; retain the stored preference for OS3 and Material 3.
             useBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 (
-                    (prefs[AppDataStore.UI_USE_MIUIX] == true && prefs[AppDataStore.UI_USE_MIUIX_OS4] == true) ||
+                    (uiFamily == UiFamily.MIUIX && prefs[AppDataStore.UI_USE_MIUIX_OS4] == true) ||
                         (prefs[AppDataStore.UI_USE_BLUR] ?: true)
                     ),
             predictiveBackAnimation = PredictiveBackAnimation.fromValueOrDefault(
@@ -222,6 +230,8 @@ class AppSettingsRepositoryImpl(
 
     override suspend fun updateUninstallFlags(transform: (Int) -> Int) = appDataStore.updateUninstallFlags(transform)
 
+    override suspend fun putUiFamily(family: UiFamily) = appDataStore.putUiFamily(family.name, family.toLegacyUseMiuix())
+
     private fun stringKey(setting: StringSetting): Preferences.Key<String> = when (setting) {
         StringSetting.ThemeMode -> AppDataStore.THEME_MODE
         StringSetting.ThemePaletteStyle -> AppDataStore.THEME_PALETTE_STYLE
@@ -263,8 +273,6 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.ThemeUseAmoled -> AppDataStore.THEME_USE_AMOLED
 
         BooleanSetting.ThemeUseDynamicColor -> AppDataStore.THEME_USE_DYNAMIC_COLOR
-
-        BooleanSetting.UiUseMiuix -> AppDataStore.UI_USE_MIUIX
 
         BooleanSetting.UiUseMiuixOs4 -> AppDataStore.UI_USE_MIUIX_OS4
 

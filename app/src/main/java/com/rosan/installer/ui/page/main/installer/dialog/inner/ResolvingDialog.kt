@@ -9,8 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.components.workingIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams

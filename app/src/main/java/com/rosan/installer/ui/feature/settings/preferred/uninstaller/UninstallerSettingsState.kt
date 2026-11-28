@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.ui.feature.settings.preferred.uninstaller
+
+import com.rosan.installer.domain.settings.model.config.Authorizer
+
+data class UninstallerSettingsState(
+    val authorizer: Authorizer = Authorizer.None,
+    val uninstallFlags: Int = 0,
+    val uninstallerRequireBiometricAuth: Boolean = false,
+)

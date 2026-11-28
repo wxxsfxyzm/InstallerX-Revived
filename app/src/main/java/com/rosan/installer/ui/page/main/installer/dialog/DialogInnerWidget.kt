@@ -6,8 +6,8 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rosan.installer.ui.page.main.installer.InstallerStage
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerStage
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analyseFailedDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.analysingDialog
 import com.rosan.installer.ui.page.main.installer.dialog.inner.installChoiceDialog

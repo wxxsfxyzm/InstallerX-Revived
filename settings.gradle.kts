@@ -1,3 +1,5 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     includeBuild("build-plugins")
     repositories {
@@ -79,6 +81,10 @@ include(
     ":app",
     ":app-process",
     ":hidden-api",
-    ":ui-components",
+    ":ui-color",
+    ":ui-core",
+    ":ui-effects",
+    ":ui-md3",
+    ":ui-miuix",
 )
 include(":baselineprofile")

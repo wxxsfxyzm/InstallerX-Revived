@@ -11,9 +11,6 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
-import com.materialkolor.PaletteStyle as MaterialKolorPaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
-import com.materialkolor.material3.dynamicColorScheme
 import com.rosan.installer.R
 import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.engine.model.packageinfo.getInfo
@@ -21,8 +18,10 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.session.model.ProgressEntity
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.config.InstallMode
-import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.framework.notification.NotificationHelper
+import com.rosan.installer.ui.color.ColorPaletteStyle
+import com.rosan.installer.ui.color.ColorSpecVersion
+import com.rosan.installer.ui.color.dynamicColorScheme as generateColorScheme
 import com.rosan.installer.util.getErrorMessage
 import kotlin.reflect.KClass
 
@@ -144,7 +143,7 @@ class ModernNotificationBuilder(
         val seedColorInt = getCurrentSeedColor(progress)
         val dynamicColorScheme = if (preferDynamicColor) {
             seedColorInt?.let { color ->
-                dynamicNotificationColorScheme(keyColor = Color(color), isDark = isDarkTheme, style = PaletteStyle.TonalSpot)
+                generateColorScheme(keyColor = Color(color), isDark = isDarkTheme, style = ColorPaletteStyle.TonalSpot, specVersion = ColorSpecVersion.Spec2025)
             }
         } else {
             null
@@ -423,28 +422,6 @@ class ModernNotificationBuilder(
             }
         }
         segment
-    }
-
-    private fun dynamicNotificationColorScheme(keyColor: Color, isDark: Boolean, style: PaletteStyle): ColorScheme {
-        val mkStyle = when (style) {
-            PaletteStyle.TonalSpot -> MaterialKolorPaletteStyle.TonalSpot
-            PaletteStyle.Neutral -> MaterialKolorPaletteStyle.Neutral
-            PaletteStyle.Vibrant -> MaterialKolorPaletteStyle.Vibrant
-            PaletteStyle.Expressive -> MaterialKolorPaletteStyle.Expressive
-            PaletteStyle.Rainbow -> MaterialKolorPaletteStyle.Rainbow
-            PaletteStyle.FruitSalad -> MaterialKolorPaletteStyle.FruitSalad
-            PaletteStyle.Monochrome -> MaterialKolorPaletteStyle.Monochrome
-            PaletteStyle.Fidelity -> MaterialKolorPaletteStyle.Fidelity
-            PaletteStyle.Content -> MaterialKolorPaletteStyle.Content
-            PaletteStyle.Cmf -> MaterialKolorPaletteStyle.Cmf()
-        }
-
-        return dynamicColorScheme(
-            seedColor = keyColor,
-            isDark = isDark,
-            style = mkStyle,
-            specVersion = ColorSpec.SpecVersion.SPEC_2025,
-        )
     }
 
     private fun getCurrentSeedColor(progress: ProgressEntity): Int? {

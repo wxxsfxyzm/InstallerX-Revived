@@ -18,12 +18,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.rosan.installer.R
+import com.rosan.installer.ui.miuix.theme.rememberMiuixBlurBackdrop
+import com.rosan.installer.ui.miuix.widgets.InstallerMiuixBackdropSurface
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
-import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic

@@ -55,17 +55,19 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.components.rememberInstallOptions
+import com.rosan.installer.ui.feature.installer.menu.ExtendedMenuEntity
+import com.rosan.installer.ui.feature.installer.menu.ExtendedMenuItemEntity
+import com.rosan.installer.ui.feature.installer.menu.InstallExtendedMenuAction
+import com.rosan.installer.ui.feature.installer.menu.InstallExtendedSubMenuId
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.components.permissionIcon
-import com.rosan.installer.ui.page.main.installer.components.rememberInstallOptions
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
-import com.rosan.installer.ui.page.main.installer.dialog.ExtendedMenuEntity
-import com.rosan.installer.ui.page.main.installer.dialog.ExtendedMenuItemEntity
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
 import com.rosan.installer.util.pm.getBestPermissionLabel
 

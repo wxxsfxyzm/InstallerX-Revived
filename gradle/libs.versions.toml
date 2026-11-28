@@ -47,6 +47,9 @@ composeKtlintRules = "0.6.8"
 [plugins]
 installerx-application = { id = "installerx.android.application" }
 installerx-library = { id = "installerx.android.library" }
+installerx-compose = { id = "installerx.android.compose" }
+installerx-compose-library = { id = "installerx.android.compose-library" }
+installerx-publication = { id = "installerx.publication" }
 installerx-test = { id = "installerx.android.test" }
 installerx-spotless = { id = "installerx.spotless" }
 
@@ -63,6 +66,7 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
 compose-ktlint-rules = { module = "io.nlopez.compose.rules:ktlint", version.ref = "composeKtlintRules" }

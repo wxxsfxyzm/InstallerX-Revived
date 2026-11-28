@@ -210,7 +210,7 @@ class InstallerSessionRepositoryImpl(override val id: String, private val onClos
          * **This usually call from viewModel**
          *
          * @param triggerAuth request or not request user biometric auth
-         * @see com.rosan.installer.ui.page.main.installer.InstallerViewAction.Install
+         * @see com.rosan.installer.ui.feature.installer.InstallerViewAction.Install
          * @see com.rosan.installer.data.session.handler.ActionHandler.handleSingleInstall
          */
         data class Install(val triggerAuth: Boolean) : Action
@@ -219,7 +219,7 @@ class InstallerSessionRepositoryImpl(override val id: String, private val onClos
          * Install multiple module/apk
          *
          * **This usually call from viewModel**
-         * @see com.rosan.installer.ui.page.main.installer.InstallerViewAction.InstallMultiple
+         * @see com.rosan.installer.ui.feature.installer.InstallerViewAction.InstallMultiple
          * @see com.rosan.installer.data.session.handler.ActionHandler.handleMultiInstall
          */
         data class InstallMultiple(val triggerAuth: Boolean) : Action

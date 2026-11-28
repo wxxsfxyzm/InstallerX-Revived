@@ -52,12 +52,12 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantColors
 import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryDetailMode
 import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryRow
 import com.rosan.installer.R
+import com.rosan.installer.ui.core.theme.CornerRadius
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.theme.CornerRadius
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -89,7 +89,7 @@ fun OpenSourceLicensePage(useBlur: Boolean) {
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },

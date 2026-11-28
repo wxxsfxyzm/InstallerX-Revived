@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.ui.miuix.widgets.MiuixErrorMessageSheet
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card

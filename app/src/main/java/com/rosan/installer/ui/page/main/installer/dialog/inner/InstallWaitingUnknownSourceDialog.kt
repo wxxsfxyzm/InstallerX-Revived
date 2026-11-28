@@ -18,15 +18,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.rememberUnknownSourcePermissionActionVisible
 import com.rosan.installer.ui.page.main.installer.components.workingIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
-import com.rosan.installer.ui.page.main.installer.rememberUnknownSourcePermissionActionVisible
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

@@ -53,10 +53,11 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rosan.installer.ui.effects.FloatingBottomBar
+import com.rosan.installer.ui.effects.FloatingBottomBarMode
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.library.FloatingBottomBar
-import com.rosan.installer.ui.library.FloatingBottomBarDefaults
-import com.rosan.installer.ui.library.FloatingBottomBarMode
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.widgets.material3FloatingBottomBarColors
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.NavigationTab
 import com.rosan.installer.ui.page.main.settings.config.all.AllPage
@@ -64,7 +65,6 @@ import com.rosan.installer.ui.page.main.settings.history.HistoryPage
 import com.rosan.installer.ui.page.main.settings.home.HomePage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredPage
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -219,12 +219,8 @@ private fun Material3FloatingBottomBar(
             backdrop = floatingBackdrop,
             isInDark = InstallerTheme.isDark,
             mode = if (backdrop != null) FloatingBottomBarMode.Blur else FloatingBottomBarMode.None,
-            colors = FloatingBottomBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                indicatorColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-            iconContent = { tab, index ->
+            colors = material3FloatingBottomBarColors(),
+            iconContent = { tab, index, contentColor ->
                 val showBadge = index == 1 && configCount > 1
 
                 BadgedBox(
@@ -236,12 +232,14 @@ private fun Material3FloatingBottomBar(
                     Icon(
                         imageVector = tab.icon,
                         contentDescription = null,
+                        tint = contentColor,
                     )
                 }
             },
-            labelContent = { tab, _ ->
+            labelContent = { tab, _, contentColor ->
                 Text(
                     text = tab.label,
+                    color = contentColor,
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     maxLines = 1,

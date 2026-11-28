@@ -64,18 +64,20 @@ import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.settings.model.app.NamedPackage
 import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.ui.feature.settings.preferred.installer.InstallerSettingsAction
+import com.rosan.installer.ui.feature.settings.preferred.installer.InstallerSettingsViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.DraggableList
+import com.rosan.installer.ui.md3.widgets.setting.DropDownMenuWidget
+import com.rosan.installer.ui.md3.widgets.setting.NavigationItemWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
-import com.rosan.installer.ui.page.main.widget.setting.DraggableList
-import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
@@ -109,7 +111,7 @@ fun InstallerGlobalSettingsPage(useBlur: Boolean, viewModel: InstallerSettingsVi
                 },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },

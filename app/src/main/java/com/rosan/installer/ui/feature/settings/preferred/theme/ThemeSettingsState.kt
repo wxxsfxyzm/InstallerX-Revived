@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.ui.feature.settings.preferred.theme
+
+import android.os.Build
+import androidx.compose.ui.graphics.Color
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
+import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
+import com.rosan.installer.domain.settings.model.preferences.theme.MiuixOptions
+import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
+import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
+import com.rosan.installer.ui.color.PresetColors
+import com.rosan.installer.ui.color.RawColor
+
+data class ThemeSettingsState(
+    val uiFamily: UiFamily = UiFamily.MATERIAL3,
+    val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val useAmoled: Boolean = false,
+    val paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
+    val colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2025,
+    val useDynamicColor: Boolean = true,
+    val miuixOptions: MiuixOptions = MiuixOptions(),
+    val useAppleFloatingBar: Boolean = false,
+    val seedColor: Color = PresetColors[0].color,
+    val availableColors: List<RawColor> = PresetColors,
+    val useDynColorFollowPkgIcon: Boolean = false,
+    val useDynColorFollowPkgIconForLiveActivity: Boolean = false,
+    val preferSystemIcon: Boolean = false,
+    val showLiveActivity: Boolean = false,
+    val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.None,
+    val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FOLLOW_GESTURE,
+)

@@ -21,7 +21,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutViewModel
+import com.rosan.installer.ui.md3.widgets.card.FluidStatusCard
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

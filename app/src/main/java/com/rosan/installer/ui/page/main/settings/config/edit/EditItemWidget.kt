@@ -49,11 +49,14 @@ import com.rosan.installer.domain.settings.model.config.InstallRequesterMode
 import com.rosan.installer.domain.settings.model.config.InstallerMode
 import com.rosan.installer.domain.settings.model.config.PackageSource
 import com.rosan.installer.domain.settings.model.config.ToastMode
+import com.rosan.installer.ui.feature.settings.config.edit.EditViewAction
+import com.rosan.installer.ui.feature.settings.config.edit.EditViewState
+import com.rosan.installer.ui.feature.settings.config.edit.dhizukuAwareDescription
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
-import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumnScope
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.ui.md3.widgets.setting.BaseItemContainer
+import com.rosan.installer.ui.md3.widgets.setting.DropDownMenuWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumnScope
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.util.isSystemPackageInstallerActive
 import org.koin.compose.koinInject
 

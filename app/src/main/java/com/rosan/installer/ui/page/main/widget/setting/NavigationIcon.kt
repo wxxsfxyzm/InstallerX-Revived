@@ -10,10 +10,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.library.widgets.material3.ExpressiveBackButton as LibraryExpressiveBackButton
+import com.rosan.installer.ui.md3.widgets.setting.ExpressiveBackButton
 
 @Composable
-fun ExpressiveBackButton(
+fun AppExpressiveBackButton(
     modifier: Modifier = Modifier,
     icon: ImageVector = AppIcons.ArrowBack,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
@@ -21,7 +21,7 @@ fun ExpressiveBackButton(
     contentDescription: String = stringResource(id = R.string.back),
     onClick: () -> Unit,
 ) {
-    LibraryExpressiveBackButton(
+    ExpressiveBackButton(
         modifier = modifier,
         icon = icon,
         containerColor = containerColor,

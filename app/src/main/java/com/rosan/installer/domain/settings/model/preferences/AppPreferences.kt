@@ -7,9 +7,11 @@ import com.rosan.installer.domain.settings.model.app.SharedUid
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
 import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
+import com.rosan.installer.domain.settings.model.preferences.theme.MiuixOptions
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
 
 /**
  * The aggregated state of all application preferences.
@@ -44,7 +46,7 @@ data class AppPreferences(
     val longClickBackgroundInstall: Boolean,
     val tryMultipleAuthorizersOnInstall: Boolean,
     val smartAuthorizerCandidates: List<SmartAuthorizerCandidate>,
-    val showMiuixUI: Boolean,
+    val uiFamily: UiFamily,
     val preferSystemIcon: Boolean,
     val showLauncherIcon: Boolean,
     val userSetLSPosedActive: Boolean,
@@ -85,8 +87,7 @@ data class AppPreferences(
     val paletteStyle: PaletteStyle,
     val colorSpec: ThemeColorSpec,
     val useDynamicColor: Boolean,
-    val useMiuixOs4: Boolean = false,
-    val useMiuixMonet: Boolean,
+    val miuixOptions: MiuixOptions,
     val useAppleFloatingBar: Boolean,
     val seedColorInt: Int, // Stored as raw Int from DataStore
     val wallpaperSeedColorInt: Int,

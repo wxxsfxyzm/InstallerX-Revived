@@ -49,17 +49,21 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitD
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
+import com.rosan.installer.ui.color.PresetColors
+import com.rosan.installer.ui.feature.settings.preferred.theme.ThemeSettingsAction
+import com.rosan.installer.ui.feature.settings.preferred.theme.ThemeSettingsViewModel
+import com.rosan.installer.ui.feature.settings.preferred.theme.rememberPreviewColorScheme
+import com.rosan.installer.ui.md3.widgets.card.ColorSwatch
+import com.rosan.installer.ui.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsAction
-import com.rosan.installer.ui.page.main.settings.preferred.theme.ThemeSettingsViewModel
-import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixComponentHost
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixSpinnerPreference
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
-import com.rosan.installer.ui.theme.material.PresetColors
+import com.rosan.installer.ui.util.getDisplayName
+import com.rosan.installer.ui.util.titleRes
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownItem
@@ -79,7 +83,7 @@ fun MiuixThemeSettingsPage(
     val listState = rememberLazyListState()
     val isContentScrolled by remember { derivedStateOf { listState.canScrollBackward } }
     val supportsOs4 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-    val useOs4 = supportsOs4 && uiState.useMiuixOs4
+    val useOs4 = supportsOs4 && uiState.miuixOptions.useOs4
 
     val layoutDirection = LocalLayoutDirection.current
     val horizontalSafeInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -131,14 +135,14 @@ fun MiuixThemeSettingsPage(
                                 .padding(bottom = 12.dp),
                         ) {
                             MiuixThemeEngineWidget(
-                                currentThemeIsMiuix = uiState.showMiuixUI,
-                                onThemeChange = { useMiuix ->
-                                    viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(useMiuix))
+                                currentFamily = uiState.uiFamily,
+                                onFamilyChange = { family ->
+                                    viewModel.dispatch(ThemeSettingsAction.SetUiFamily(family))
                                 },
                             )
                             if (supportsOs4) {
                                 MiuixOsVersionWidget(
-                                    useOs4 = uiState.useMiuixOs4,
+                                    useOs4 = uiState.miuixOptions.useOs4,
                                     onUseOs4Change = { viewModel.dispatch(ThemeSettingsAction.SetUseMiuixOs4(it)) },
                                 )
                             }
@@ -184,13 +188,13 @@ fun MiuixThemeSettingsPage(
                             MiuixSwitchWidget(
                                 title = stringResource(R.string.theme_settings_miuix_custom_colors),
                                 description = stringResource(R.string.theme_settings_miuix_custom_colors_desc),
-                                checked = uiState.useMiuixMonet,
+                                checked = uiState.miuixOptions.useMonet,
                                 onCheckedChange = {
                                     viewModel.dispatch(ThemeSettingsAction.SetUseMiuixMonet(it))
                                 },
                             )
                             AnimatedVisibility(
-                                visible = uiState.useMiuixMonet,
+                                visible = uiState.miuixOptions.useMonet,
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically(),
                             ) {
@@ -204,7 +208,7 @@ fun MiuixThemeSettingsPage(
                                 )
                             }
                             AnimatedVisibility(
-                                visible = uiState.useMiuixMonet,
+                                visible = uiState.miuixOptions.useMonet,
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically(),
                             ) {
@@ -216,7 +220,7 @@ fun MiuixThemeSettingsPage(
                                 )
                             }
                             AnimatedVisibility(
-                                visible = uiState.useMiuixMonet,
+                                visible = uiState.miuixOptions.useMonet,
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically(),
                             ) {
@@ -229,7 +233,7 @@ fun MiuixThemeSettingsPage(
                                 )
                             }
                             AnimatedVisibility(
-                                visible = uiState.useMiuixMonet,
+                                visible = uiState.miuixOptions.useMonet,
                                 enter = fadeIn() + expandVertically(),
                                 exit = fadeOut() + shrinkVertically(),
                             ) {
@@ -257,7 +261,7 @@ fun MiuixThemeSettingsPage(
 
                     item {
                         AnimatedVisibility(
-                            visible = uiState.useMiuixMonet && (!uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S),
+                            visible = uiState.miuixOptions.useMonet && (!uiState.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S),
                             enter = fadeIn(animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)) +
                                 expandVertically(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
                             exit = fadeOut(animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)) +
@@ -293,25 +297,26 @@ fun MiuixThemeSettingsPage(
                                                             modifier = Modifier.weight(1f),
                                                             contentAlignment = Alignment.Center,
                                                         ) {
-                                                            ColorSwatchPreview(
-                                                                rawColor = rawColor,
-                                                                currentStyle = uiState.paletteStyle,
-                                                                colorSpec = uiState.colorSpec,
-                                                                textStyle = MiuixTheme.textStyles.footnote1,
-                                                                textColor = MiuixTheme.colorScheme.onSurface,
+                                                            ColorSwatch(
+                                                                baseColor = rawColor.color,
+                                                                scheme = rememberPreviewColorScheme(rawColor, uiState.paletteStyle, uiState.colorSpec),
                                                                 isSelected =
                                                                     uiState.seedColor == rawColor.color,
-                                                            ) {
-                                                                viewModel.dispatch(
-                                                                    ThemeSettingsAction.SetSeedColor(
-                                                                        rawColor.color,
-                                                                        uiState.useDynamicColor &&
-                                                                            Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
-                                                                            // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
-                                                                            uiState.availableColors != PresetColors,
-                                                                    ),
-                                                                )
-                                                            }
+                                                                label = rawColor.getDisplayName().takeUnless { it === rawColor.key },
+                                                                textStyle = MiuixTheme.textStyles.footnote1,
+                                                                textColor = MiuixTheme.colorScheme.onSurface,
+                                                                onClick = {
+                                                                    viewModel.dispatch(
+                                                                        ThemeSettingsAction.SetSeedColor(
+                                                                            rawColor.color,
+                                                                            uiState.useDynamicColor &&
+                                                                                Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                                                                // If useDynamicColor is true but availableColors is PresetColors, the wallpaperColors have no valid values
+                                                                                uiState.availableColors != PresetColors,
+                                                                        ),
+                                                                    )
+                                                                },
+                                                            )
                                                         }
                                                     }
 
@@ -490,55 +495,34 @@ private fun MiuixOsVersionWidget(
 }
 
 /**
- * Theme Engine selection widget using WindowSpinnerPreference, following the provided pattern.
- * Simplified version without data class and icons.
+ * UI family selection widget using WindowSpinnerPreference.
  *
- * @param currentThemeIsMiuix True if MIUIX theme is selected, false if Google theme is selected.
- * @param onThemeChange Callback when the selection changes. Boolean parameter indicates new selection (true = MIUIX).
+ * @param currentFamily The selected UI family.
+ * @param onFamilyChange Callback with the newly selected UI family.
  */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 private fun MiuixThemeEngineWidget(
     modifier: Modifier = Modifier,
-    currentThemeIsMiuix: Boolean,
-    onThemeChange: (Boolean) -> Unit,
+    currentFamily: UiFamily,
+    onFamilyChange: (UiFamily) -> Unit,
 ) {
     val context = LocalContext.current
-
-    val themeOptions = remember {
-        mapOf(
-            true to R.string.theme_settings_miuix_ui, // Key = true -> MIUIX UI string resource
-            false to R.string.theme_settings_google_ui, // Key = false -> Google UI string resource
-        )
-    }
-
-    // Convert map entries to List<DropdownItem> for WindowSpinnerPreference.
-    // Ensure the order matches the keys: index 0 = true, index 1 = false.
-    val spinnerEntries = remember(themeOptions) {
-        themeOptions.entries.sortedByDescending { it.key }.map { entry ->
-            DropdownItem(
-                title = context.getString(entry.value),
-            )
-        }
-    }
-
-    // Determine selected index based on currentThemeIsMiuix state.
-    // Index 0 corresponds to true (MIUIX), Index 1 corresponds to false (Google).
-    val selectedIndex = remember(currentThemeIsMiuix) {
-        if (currentThemeIsMiuix) 0 else 1
+    // Keep Miuix first in this UI family's own picker.
+    val families = remember { listOf(UiFamily.MIUIX) + UiFamily.entries.filter { it != UiFamily.MIUIX } }
+    val spinnerEntries = remember(families) {
+        families.map { family -> DropdownItem(title = context.getString(family.titleRes())) }
     }
 
     InstallerMiuixSpinnerPreference(
         modifier = modifier,
         title = stringResource(id = R.string.theme_settings_ui_engine),
-        // summary = spinnerEntries[selectedIndex].title,
         items = spinnerEntries,
-        selectedIndex = selectedIndex,
+        selectedIndex = families.indexOf(currentFamily),
         onSelectedIndexChange = { newIndex ->
-            // Convert index back to boolean key (0 -> true, 1 -> false)
-            val newModeIsMiuix = themeOptions.keys.sortedDescending().elementAt(newIndex)
-            if (currentThemeIsMiuix != newModeIsMiuix) {
-                onThemeChange(newModeIsMiuix)
+            val newFamily = families[newIndex]
+            if (currentFamily != newFamily) {
+                onFamilyChange(newFamily)
             }
         },
     )

@@ -2,12 +2,14 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.ui.util
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.model.install.MmzSelectionMode
 import com.rosan.installer.domain.engine.model.source.DataType
-import com.rosan.installer.ui.theme.material.RawColor
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
+import com.rosan.installer.ui.color.RawColor
 
 @Composable
 fun DataType.getSupportTitle() = when (this) {
@@ -172,4 +174,16 @@ fun String.toAndroidVersionName(): String {
         // return the original string.
         else -> this
     }
+}
+
+@StringRes
+fun UiFamily.titleRes(): Int = when (this) {
+    UiFamily.MATERIAL3 -> R.string.theme_settings_google_ui
+    UiFamily.MIUIX -> R.string.theme_settings_miuix_ui
+}
+
+@StringRes
+fun UiFamily.descriptionRes(): Int = when (this) {
+    UiFamily.MATERIAL3 -> R.string.theme_settings_google_ui_desc
+    UiFamily.MIUIX -> R.string.theme_settings_miuix_ui_desc
 }

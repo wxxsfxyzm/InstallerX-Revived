@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.rosan.installer.ui.feature.settings.config.apply.ApplyViewApp
 import com.rosan.installer.ui.icons.AppIcons
 
 /**

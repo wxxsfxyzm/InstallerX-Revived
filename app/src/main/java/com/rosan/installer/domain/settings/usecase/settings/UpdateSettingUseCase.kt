@@ -2,6 +2,7 @@
 // Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.domain.settings.usecase.settings
 
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
@@ -18,5 +19,9 @@ class UpdateSettingUseCase(private val appSettingsRepo: AppSettingsRepository) {
 
     suspend operator fun invoke(setting: IntSetting, value: Int) {
         appSettingsRepo.putInt(setting, value)
+    }
+
+    suspend operator fun invoke(family: UiFamily) {
+        appSettingsRepo.putUiFamily(family)
     }
 }

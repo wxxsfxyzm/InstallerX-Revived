@@ -54,19 +54,21 @@ import com.rosan.installer.domain.device.provider.DeviceCapabilityProvider
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerCandidate
+import com.rosan.installer.ui.feature.settings.preferred.lab.LabSettingsAction
+import com.rosan.installer.ui.feature.settings.preferred.lab.LabSettingsViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.BaseWidget
+import com.rosan.installer.ui.md3.widgets.setting.DraggableList
+import com.rosan.installer.ui.md3.widgets.setting.DropDownMenuWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
+import com.rosan.installer.ui.page.main.widget.card.AppInfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.RootImplementationSelectionDialog
-import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.DraggableList
-import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -155,7 +157,7 @@ fun LabPage(useBlur: Boolean, viewModel: LabSettingsViewModel = koinViewModel())
                 },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },
@@ -174,7 +176,7 @@ fun LabPage(useBlur: Boolean, viewModel: LabSettingsViewModel = koinViewModel())
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
             contentPadding = paddingValues,
         ) {
-            item { InfoTipCard(text = stringResource(R.string.lab_tip)) }
+            item { AppInfoTipCard(text = stringResource(R.string.lab_tip)) }
             item {
                 SegmentedColumn(
                     title = stringResource(R.string.config_authorizer),
@@ -380,7 +382,7 @@ private fun SmartAuthorizerBottomSheet(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             style = MaterialTheme.typography.headlineSmall,
         )
-        InfoTipCard(
+        AppInfoTipCard(
             text = stringResource(R.string.config_smart_authorizer_fallback_list_tip),
             noPadding = true,
         )

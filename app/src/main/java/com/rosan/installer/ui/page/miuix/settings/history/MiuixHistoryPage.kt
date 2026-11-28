@@ -48,23 +48,23 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.history.model.InstallMethod
 import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
+import com.rosan.installer.ui.feature.settings.history.HistoryBadgeType
+import com.rosan.installer.ui.feature.settings.history.HistoryViewAction
+import com.rosan.installer.ui.feature.settings.history.HistoryViewModel
+import com.rosan.installer.ui.feature.settings.history.formatHistoryTime
+import com.rosan.installer.ui.feature.settings.history.historyAuthorizerText
+import com.rosan.installer.ui.feature.settings.history.historyBadgeType
+import com.rosan.installer.ui.feature.settings.history.labelRes
 import com.rosan.installer.ui.icons.AppMiuixIcons
-import com.rosan.installer.ui.page.main.settings.history.HistoryBadgeType
-import com.rosan.installer.ui.page.main.settings.history.HistoryViewAction
-import com.rosan.installer.ui.page.main.settings.history.HistoryViewModel
-import com.rosan.installer.ui.page.main.settings.history.formatHistoryTime
-import com.rosan.installer.ui.page.main.settings.history.historyAuthorizerText
-import com.rosan.installer.ui.page.main.settings.history.historyBadgeType
-import com.rosan.installer.ui.page.main.settings.history.labelRes
-import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.miuix.theme.rememberMiuixBlurBackdrop
+import com.rosan.installer.ui.miuix.widgets.InstallerMiuixBackdropSurface
+import com.rosan.installer.ui.miuix.widgets.MiuixBadge
+import com.rosan.installer.ui.miuix.widgets.rememberMiuixPopupBackdropActive
+import com.rosan.installer.ui.page.miuix.widgets.AppMiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopBarIconButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBadge
 import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
-import com.rosan.installer.ui.page.miuix.widgets.rememberMiuixPopupBackdropActive
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -372,7 +372,7 @@ fun MiuixHistoryPage(
             backgroundColor = MiuixTheme.colorScheme.surfaceContainerHigh,
             startAction = {
                 val dismissState = LocalDismissState.current
-                MiuixBackButton(
+                AppMiuixBackButton(
                     icon = AppMiuixIcons.Close,
                     iconTint = MiuixTheme.colorScheme.onSurface,
                     onClick = { dismissState?.invoke() ?: run { showRecordDetailSheet = false } },

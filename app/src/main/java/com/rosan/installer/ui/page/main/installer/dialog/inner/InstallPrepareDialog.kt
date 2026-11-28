@@ -36,9 +36,13 @@ import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.engine.usecase.AnalyzeInstallStateUseCase
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.mapper.InstallNoticeResources
+import com.rosan.installer.ui.feature.installer.mapper.InstallStateUiMapper
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.md3.widgets.chip.Chip
+import com.rosan.installer.ui.md3.widgets.chip.InstallInfoChipGroup
 import com.rosan.installer.ui.page.main.installer.components.WarningTextBlock
 import com.rosan.installer.ui.page.main.installer.components.failedIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton
@@ -46,10 +50,6 @@ import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType
 import com.rosan.installer.ui.page.main.installer.dialog.dialogButtons
-import com.rosan.installer.ui.page.main.installer.mapper.InstallNoticeResources
-import com.rosan.installer.ui.page.main.installer.mapper.InstallStateUiMapper
-import com.rosan.installer.ui.page.main.widget.chip.Chip
-import com.rosan.installer.ui.page.main.widget.chip.InstallInfoChipGroup
 import org.koin.compose.koinInject
 
 @Composable

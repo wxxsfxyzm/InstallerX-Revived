@@ -8,7 +8,7 @@ import com.kieronquinn.monetcompat.core.MonetCompat
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
-import com.rosan.installer.ui.theme.material.PresetColors
+import com.rosan.installer.ui.color.PresetColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -50,14 +50,13 @@ class ThemeStateProviderImpl(appSettingsRepo: AppSettingsRepository, appScope: C
 
         ThemeState(
             isLoaded = true,
-            useMiuix = prefs.showMiuixUI,
+            uiFamily = prefs.uiFamily,
             themeMode = prefs.themeMode,
             useAmoled = prefs.useAmoled,
             paletteStyle = prefs.paletteStyle,
             colorSpec = prefs.colorSpec,
             useDynamicColor = prefs.useDynamicColor,
-            useMiuixOs4 = prefs.useMiuixOs4,
-            useMiuixMonet = prefs.useMiuixMonet,
+            miuixOptions = prefs.miuixOptions,
             useAppleFloatingBar = prefs.useAppleFloatingBar,
             seedColor = effectiveSeedColor,
             useBlur = prefs.useBlur,

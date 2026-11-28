@@ -17,12 +17,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
+import com.rosan.installer.ui.feature.settings.config.all.AllViewAction
+import com.rosan.installer.ui.feature.settings.config.all.AllViewModel
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.library.widgets.material3.TipCard
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewAction
-import com.rosan.installer.ui.page.main.settings.config.all.AllViewModel
-import com.rosan.installer.ui.library.widgets.material3.InfoTipCard as LibraryInfoTipCard
-import com.rosan.installer.ui.library.widgets.material3.TitleTipCard as LibraryTitleTipCard
+import com.rosan.installer.ui.md3.widgets.card.InfoTipCard
+import com.rosan.installer.ui.md3.widgets.card.TipCard
+import com.rosan.installer.ui.md3.widgets.card.TitleTipCard
 
 @Composable
 fun ScopeTipCard(
@@ -67,17 +67,17 @@ fun ScopeTipCard(
 }
 
 @Composable
-fun InfoTipCard(text: String, modifier: Modifier = Modifier, icon: ImageVector? = AppIcons.Tip, noPadding: Boolean = false) {
-    LibraryInfoTipCard(text = text, modifier = modifier, icon = icon, noPadding = noPadding)
+fun AppInfoTipCard(text: String, modifier: Modifier = Modifier, icon: ImageVector? = AppIcons.Tip, noPadding: Boolean = false) {
+    InfoTipCard(text = text, modifier = modifier, icon = icon, noPadding = noPadding)
 }
 
 @Composable
-fun TitleTipCard(
+fun AppTitleTipCard(
     title: String,
     text: String,
     modifier: Modifier = Modifier,
     icon: ImageVector? = AppIcons.Tip,
     noPadding: Boolean = false,
 ) {
-    LibraryTitleTipCard(title = title, text = text, modifier = modifier, icon = icon, noPadding = noPadding)
+    TitleTipCard(title = title, text = text, modifier = modifier, icon = icon, noPadding = noPadding)
 }

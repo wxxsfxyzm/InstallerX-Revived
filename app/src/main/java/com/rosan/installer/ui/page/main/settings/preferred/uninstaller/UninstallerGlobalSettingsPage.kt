@@ -38,17 +38,20 @@ import com.rosan.installer.R
 import com.rosan.installer.core.bitmask.hasFlag
 import com.rosan.installer.domain.engine.model.install.UninstallFlags
 import com.rosan.installer.ui.activity.UninstallerActivity
+import com.rosan.installer.ui.feature.settings.preferred.uninstaller.UninstallerSettingsAction
+import com.rosan.installer.ui.feature.settings.preferred.uninstaller.UninstallerSettingsEvent
+import com.rosan.installer.ui.feature.settings.preferred.uninstaller.UninstallerSettingsViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.NavigationItemWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
+import com.rosan.installer.ui.page.main.widget.card.AppInfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UninstallPackageDialog
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import com.rosan.installer.util.toast
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -105,7 +108,7 @@ fun UninstallerGlobalSettingsPage(useBlur: Boolean, viewModel: UninstallerSettin
                 },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },
@@ -124,7 +127,7 @@ fun UninstallerGlobalSettingsPage(useBlur: Boolean, viewModel: UninstallerSettin
                 .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
             contentPadding = paddingValues,
         ) {
-            item { InfoTipCard(text = stringResource(R.string.uninstall_authorizer_tip)) }
+            item { AppInfoTipCard(text = stringResource(R.string.uninstall_authorizer_tip)) }
             // --- Group 1: Global Settings ---
             item {
                 SegmentedColumn(

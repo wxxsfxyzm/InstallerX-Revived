@@ -66,10 +66,10 @@ import com.rosan.installer.domain.engine.model.packageinfo.InstalledAppInfo
 import com.rosan.installer.domain.engine.model.packageinfo.InstalledModuleInfo
 import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
 import com.rosan.installer.domain.engine.model.source.DataType
+import com.rosan.installer.ui.feature.installer.InstallerStage
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.InstallerStage
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType

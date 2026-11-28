@@ -37,9 +37,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.ui.feature.installer.InstallerStage
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.InstallerStage
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogInnerParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParamsType

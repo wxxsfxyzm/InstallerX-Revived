@@ -12,9 +12,12 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
+import com.rosan.installer.ui.feature.settings.preferred.theme.ThemeSettingsAction
+import com.rosan.installer.ui.feature.settings.preferred.theme.ThemeSettingsState
+import com.rosan.installer.ui.feature.settings.preferred.theme.ThemeSettingsViewModel
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.DropDownMenuWidget
+import com.rosan.installer.ui.md3.widgets.setting.BaseWidget
+import com.rosan.installer.ui.md3.widgets.setting.DropDownMenuWidget
 
 @Composable
 fun ColorSpecSelector(viewModel: ThemeSettingsViewModel) {

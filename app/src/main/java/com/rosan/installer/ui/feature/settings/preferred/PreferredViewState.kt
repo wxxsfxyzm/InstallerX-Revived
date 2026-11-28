@@ -1,0 +1,17 @@
+package com.rosan.installer.ui.feature.settings.preferred
+
+import com.rosan.installer.domain.settings.model.config.Authorizer
+
+data class PreferredViewState(
+    val authorizer: Authorizer = Authorizer.Shizuku,
+    val customizeAuthorizer: String = "",
+    val adbVerifyEnabled: Boolean = true,
+    val isIgnoringBatteryOptimizations: Boolean = false,
+    val showLauncherIcon: Boolean = true,
+    val allowInternetAccess: Boolean = true,
+    val hasUpdate: Boolean = false,
+    val remoteVersion: String = "",
+    val backupBusy: Boolean = false,
+) {
+    val authorizerCustomize = authorizer == Authorizer.Customize
+}

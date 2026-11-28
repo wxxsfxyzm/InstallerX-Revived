@@ -39,12 +39,14 @@ import com.rosan.installer.domain.engine.model.source.DataType
 import com.rosan.installer.domain.session.model.ConfirmationRequestType
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.ui.feature.common.InstallerEventCollector
+import com.rosan.installer.ui.feature.installer.InstallerStage
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.rememberUnknownSourcePermissionActionVisible
 import com.rosan.installer.ui.icons.AppMiuixIcons
-import com.rosan.installer.ui.page.main.installer.InstallerStage
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.main.installer.rememberUnknownSourcePermissionActionVisible
-import com.rosan.installer.ui.page.main.widget.util.InstallerEventCollector
+import com.rosan.installer.ui.miuix.theme.rememberMiuixThemeController
+import com.rosan.installer.ui.miuix.widgets.DropdownItem
 import com.rosan.installer.ui.page.miuix.installer.components.rememberAppInfoState
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallChoiceContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.InstallCompletedContent
@@ -67,12 +69,10 @@ import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallPrepare
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallSuccessContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.UninstallingContent
 import com.rosan.installer.ui.page.miuix.installer.sheetcontent.unarchiveErrorTitle
-import com.rosan.installer.ui.page.miuix.widgets.DropdownItem
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.theme.InstallerMiuixTheme
+import com.rosan.installer.ui.page.miuix.widgets.AppMiuixBackButton
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.LocalInstallerColorScheme
-import com.rosan.installer.ui.theme.material.dynamicColorScheme
+import com.rosan.installer.ui.theme.dynamicColorScheme
 import com.rosan.installer.ui.theme.miuixSheetColorDark
 import com.rosan.installer.ui.theme.miuixSheetColorLight
 import com.rosan.installer.ui.util.WindowBlurEffect
@@ -110,7 +110,6 @@ fun MiuixInstallerPage(
     val error = uiState.error
 
     val globalSeedColor = InstallerTheme.seedColor
-    val themeMode = InstallerTheme.themeMode
     val useMiuixMonet = InstallerTheme.useMiuixMonet
     val useDynamicColor = InstallerTheme.useDynamicColor
     val isDark = InstallerTheme.isDark
@@ -248,15 +247,14 @@ fun MiuixInstallerPage(
     CompositionLocalProvider(
         LocalInstallerColorScheme provides activeMd3ColorScheme,
     ) {
-        InstallerMiuixTheme(
-            seedColor = activeSeedColor,
-            paletteStyle = paletteStyle,
-            colorSpec = colorSpec,
-            darkTheme = isDark,
-            themeMode = themeMode,
-            useMiuixMonet = useMiuixMonet,
-            useDynamicColor = useDynamicColor && temporarySeedColor == null,
-            compatStatusBarColor = false,
+        MiuixTheme(
+            controller = rememberMiuixThemeController(
+                config = InstallerTheme.colorConfig.copy(
+                    seedColor = activeSeedColor,
+                    useDynamicColor = useDynamicColor && temporarySeedColor == null,
+                ),
+                useMonet = useMiuixMonet,
+            ),
         ) {
             WindowBottomSheet(
                 show = showBottomSheet.value, // Always true as long as this page is composed.
@@ -272,7 +270,7 @@ fun MiuixInstallerPage(
                         is InstallerStage.Preparing,
                         is InstallerStage.InstallWaitingUnknownSource,
                         -> {
-                            MiuixBackButton(
+                            AppMiuixBackButton(
                                 icon = AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
@@ -285,20 +283,20 @@ fun MiuixInstallerPage(
 
                         is InstallerStage.InstallChoice -> {
                             if (isApkChoice) {
-                                MiuixBackButton(
+                                AppMiuixBackButton(
                                     iconTint = MiuixTheme.colorScheme.onSurface,
                                     onClick = backToTypeChoice,
                                 )
                             } else if (uiState.navigatedFromPrepareToChoice && !returnedToTypeChoice) {
                                 // Came from Prepare (re-selecting splits) -> Show Back icon, go back to Prepare
-                                MiuixBackButton(
+                                AppMiuixBackButton(
                                     icon = AppMiuixIcons.Back,
                                     iconTint = MiuixTheme.colorScheme.onSurface,
                                     onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) },
                                 )
                             } else {
                                 // Initial choice or other origin -> Show Cancel icon, force close
-                                MiuixBackButton(
+                                AppMiuixBackButton(
                                     icon = AppMiuixIcons.Close,
                                     iconTint = MiuixTheme.colorScheme.onSurface,
                                     onClick = closeSheet,
@@ -307,7 +305,7 @@ fun MiuixInstallerPage(
                         }
 
                         is InstallerStage.InstallConfirm -> {
-                            MiuixBackButton(
+                            AppMiuixBackButton(
                                 icon = AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
@@ -334,7 +332,7 @@ fun MiuixInstallerPage(
                         is InstallerStage.AnalyseFailed,
                         is InstallerStage.ResolveFailed,
                         -> {
-                            MiuixBackButton(
+                            AppMiuixBackButton(
                                 icon = AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
@@ -348,7 +346,7 @@ fun MiuixInstallerPage(
                         }
 
                         is InstallerStage.InstallPrepare -> {
-                            MiuixBackButton(
+                            AppMiuixBackButton(
                                 icon = if (showSettings || showPermissions || preparedFromTypeChoice) AppMiuixIcons.Back else AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
@@ -368,7 +366,7 @@ fun MiuixInstallerPage(
                         }
 
                         is InstallerStage.InstallExtendedMenu -> {
-                            MiuixBackButton(
+                            AppMiuixBackButton(
                                 icon = AppMiuixIcons.Back,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = { viewModel.dispatch(InstallerViewAction.InstallPrepare) },

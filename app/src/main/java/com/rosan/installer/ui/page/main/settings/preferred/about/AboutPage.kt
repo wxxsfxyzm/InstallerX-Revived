@@ -45,20 +45,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
+import com.rosan.installer.ui.feature.common.LogEventCollector
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutAction
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.BaseWidget
+import com.rosan.installer.ui.md3.widgets.setting.NavigationItemWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
-import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.NavigationItemWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
-import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.nav.gesture.WindowNavigationEventBridge
@@ -93,7 +95,7 @@ fun AboutPage(useBlur: Boolean, viewModel: AboutViewModel = koinViewModel()) {
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },

@@ -14,8 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.rosan.installer.domain.session.repository.InstallerSessionRepository
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.provider.ThemeStateProvider
-import com.rosan.installer.ui.page.main.installer.InstallerPage
-import com.rosan.installer.ui.page.miuix.installer.MiuixInstallerPage
+import com.rosan.installer.ui.family.host
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.isPhoneDevice
 import com.rosan.installer.ui.util.requestPortraitOrientationOnPhoneSafely
@@ -33,21 +32,17 @@ fun InstallerActivityContent(session: InstallerSessionRepository, themeStateProv
     }
 
     InstallerTheme(
-        useMiuix = uiState.useMiuix,
-        useMiuixOs4 = false, // Do not use OS4 style in installation
+        uiFamily = uiState.uiFamily,
+        // Do not use OS4 style in installation
+        miuixOptions = uiState.miuixOptions.copy(useOs4 = false),
         themeMode = uiState.themeMode,
         paletteStyle = uiState.paletteStyle,
         colorSpec = uiState.colorSpec,
         useDynamicColor = uiState.useDynamicColor,
-        useMiuixMonet = uiState.useMiuixMonet,
         seedColor = androidx.compose.ui.graphics.Color(uiState.seedColor),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (uiState.useMiuix) {
-                MiuixInstallerPage(session)
-            } else {
-                InstallerPage(session)
-            }
+            uiState.uiFamily.host().InstallerPage(session)
         }
     }
 }

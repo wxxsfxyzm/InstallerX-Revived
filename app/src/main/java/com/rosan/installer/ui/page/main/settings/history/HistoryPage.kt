@@ -66,17 +66,24 @@ import com.rosan.installer.R
 import com.rosan.installer.domain.history.model.InstallMethod
 import com.rosan.installer.domain.history.model.OperationHistoryModel
 import com.rosan.installer.domain.history.model.OperationStatus
-import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.ui.core.theme.bottomShape
+import com.rosan.installer.ui.core.theme.middleShape
+import com.rosan.installer.ui.core.theme.singleShape
+import com.rosan.installer.ui.core.theme.topShape
+import com.rosan.installer.ui.feature.settings.history.HistoryBadgeType
+import com.rosan.installer.ui.feature.settings.history.HistoryViewAction
+import com.rosan.installer.ui.feature.settings.history.HistoryViewModel
+import com.rosan.installer.ui.feature.settings.history.HistoryViewState
+import com.rosan.installer.ui.feature.settings.history.formatHistoryTime
+import com.rosan.installer.ui.feature.settings.history.historyAuthorizerText
+import com.rosan.installer.ui.feature.settings.history.historyBadgeType
+import com.rosan.installer.ui.feature.settings.history.labelRes
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.widget.chip.CapsuleTag
-import com.rosan.installer.ui.page.main.widget.menu.GroupedDropdownMenuPopup
-import com.rosan.installer.ui.theme.bottomShape
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.middleShape
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
-import com.rosan.installer.ui.theme.singleShape
-import com.rosan.installer.ui.theme.topShape
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.chip.CapsuleTag
+import com.rosan.installer.ui.md3.widgets.menu.GroupedDropdownMenuPopup
 import com.rosan.installer.util.toast
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -568,13 +575,6 @@ fun HistoryRecordDetailContent(record: OperationHistoryModel, isSystemApp: Boole
             Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
         }
     }
-}
-
-@Composable
-fun historyAuthorizerText(authorizer: Authorizer, isSystemApp: Boolean): String = if (authorizer == Authorizer.None && isSystemApp) {
-    stringResource(R.string.working_status_system_installer)
-} else {
-    stringResource(authorizer.displayNameRes)
 }
 
 @Composable

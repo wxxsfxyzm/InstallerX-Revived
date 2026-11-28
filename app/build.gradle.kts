@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.installerx.compose)
     alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.baselineprofile)
 }
@@ -126,7 +126,6 @@ android {
 
     buildFeatures {
         buildConfig = true
-        compose = true
         aidl = true
     }
 
@@ -206,8 +205,8 @@ dependencies {
     implementation(libs.xz)
     implementation(libs.androidx.profileinstaller)
     implementation(files(apksignerJar))
-    "baselineProfile"(project(":baselineprofile"))
-    compileOnly(project(":hidden-api"))
+    "baselineProfile"(projects.baselineprofile)
+    compileOnly(projects.hiddenApi)
     implementation(libs.androidx.core)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle)
@@ -251,8 +250,10 @@ dependencies {
 
     implementation(libs.iamr0s.dhizuku.api)
 
-    implementation(project(":app-process"))
-    implementation(project(":ui-components"))
+    implementation(projects.appProcess)
+    implementation(projects.uiColor)
+    implementation(projects.uiMd3)
+    implementation(projects.uiMiuix)
 
     // aboutlibraries
     implementation(libs.aboutlibraries.core)

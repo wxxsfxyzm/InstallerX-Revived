@@ -25,7 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.engine.model.packageinfo.AppEntity
 import com.rosan.installer.domain.engine.model.packageinfo.sortedBest
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
 import com.rosan.installer.util.pm.getBestPermissionLabel

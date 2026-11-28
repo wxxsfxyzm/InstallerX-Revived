@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
+package com.rosan.installer.ui.feature.settings.preferred.installer
+
+import com.rosan.installer.domain.settings.model.app.NamedPackage
+import com.rosan.installer.domain.settings.model.app.SharedUid
+import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.domain.settings.model.config.InstallMode
+
+data class InstallerSettingsState(
+    val authorizer: Authorizer = Authorizer.Shizuku,
+    val alwaysUseRootInSystem: Boolean = false,
+    val closeSessionCountDown: Int = 5,
+    val installerRequireBiometricAuth: BiometricAuthMode = BiometricAuthMode.FollowConfig,
+    val showOPPOSpecial: Boolean = false,
+    val checkAppSignature: Boolean = true,
+    val checkSourceStamp: Boolean = true,
+    val showSignatureInfoOnMatch: Boolean = false,
+    val showSignatureDetails: Boolean = false,
+    val detectXposedModule: Boolean = true,
+    val quickOpenLSPosed: Boolean = true,
+    val managedInstallerPackages: List<NamedPackage> = emptyList(),
+    val managedBlacklistPackages: List<NamedPackage> = emptyList(),
+    val managedSharedUserIdBlacklist: List<SharedUid> = emptyList(),
+    val managedSharedUserIdExemptedPackages: List<NamedPackage> = emptyList(),
+)

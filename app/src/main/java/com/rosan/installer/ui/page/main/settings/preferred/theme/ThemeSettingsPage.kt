@@ -62,19 +62,24 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnima
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiFamily
+import com.rosan.installer.ui.color.PresetColors
+import com.rosan.installer.ui.feature.settings.preferred.theme.ThemeSettingsAction
+import com.rosan.installer.ui.feature.settings.preferred.theme.ThemeSettingsViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.BaseItemContainer
+import com.rosan.installer.ui.md3.widgets.setting.BaseWidget
+import com.rosan.installer.ui.md3.widgets.setting.RadioButtonWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
-import com.rosan.installer.ui.page.main.widget.setting.BaseItemContainer
-import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.RadioButtonWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.material.PresetColors
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
+import com.rosan.installer.ui.util.descriptionRes
+import com.rosan.installer.ui.util.titleRes
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
@@ -152,7 +157,7 @@ fun ThemeSettingsPage(viewModel: ThemeSettingsViewModel = koinViewModel()) {
                 },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },
@@ -176,37 +181,20 @@ fun ThemeSettingsPage(viewModel: ThemeSettingsViewModel = koinViewModel()) {
                 SegmentedColumn(
                     title = stringResource(R.string.theme_settings_ui_style),
                 ) {
-                    // Option 1: Google UI
-                    item {
-                        val selected = !uiState.showMiuixUI
-                        val onClick = {
-                            if (uiState.showMiuixUI) {
-                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
-                            }
+                    UiFamily.entries.forEach { family ->
+                        item {
+                            RadioButtonWidget(
+                                title = stringResource(family.titleRes()),
+                                description = stringResource(family.descriptionRes()),
+                                iconPlaceholder = false,
+                                selected = uiState.uiFamily == family,
+                                onClick = {
+                                    if (uiState.uiFamily != family) {
+                                        viewModel.dispatch(ThemeSettingsAction.SetUiFamily(family))
+                                    }
+                                },
+                            )
                         }
-                        RadioButtonWidget(
-                            title = stringResource(R.string.theme_settings_google_ui),
-                            description = stringResource(R.string.theme_settings_google_ui_desc),
-                            iconPlaceholder = false,
-                            selected = selected,
-                            onClick = onClick,
-                        )
-                    }
-                    // Option 2: MIUIX UI
-                    item {
-                        val selected = uiState.showMiuixUI
-                        val onClick = {
-                            if (!uiState.showMiuixUI) {
-                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
-                            }
-                        }
-                        RadioButtonWidget(
-                            title = stringResource(R.string.theme_settings_miuix_ui),
-                            description = stringResource(R.string.theme_settings_miuix_ui_desc),
-                            iconPlaceholder = false,
-                            selected = selected,
-                            onClick = onClick,
-                        )
                     }
                     // Option 3: Floating Bottom Bar
                     item {

@@ -8,8 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.components.ErrorTextBlock
 import com.rosan.installer.ui.page.main.installer.components.failedIcon
 import com.rosan.installer.ui.page.main.installer.dialog.DialogButton

@@ -7,18 +7,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppMiuixIcons
-import com.rosan.installer.ui.library.widgets.miuix.MiuixBackButton as LibraryMiuixBackButton
+import com.rosan.installer.ui.miuix.widgets.MiuixBackButton
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 @Composable
-fun MiuixBackButton(
+fun AppMiuixBackButton(
     modifier: Modifier = Modifier,
     icon: ImageVector = AppMiuixIcons.Back,
     iconTint: Color = LocalContentColor.current,
     contentDescription: String = stringResource(id = R.string.back),
     onClick: () -> Unit,
 ) {
-    LibraryMiuixBackButton(
+    MiuixBackButton(
         modifier = modifier,
         icon = icon,
         iconTint = iconTint,

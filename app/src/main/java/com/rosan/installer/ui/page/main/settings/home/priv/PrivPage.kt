@@ -36,19 +36,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.ui.core.widgets.util.OnLifecycleEvent
+import com.rosan.installer.ui.feature.settings.home.HomePageViewAction
+import com.rosan.installer.ui.feature.settings.home.HomePageViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.RadioButtonWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
-import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
-import com.rosan.installer.ui.page.main.widget.card.TitleTipCard
+import com.rosan.installer.ui.page.main.widget.card.AppTitleTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.CustomAuthorizerDialog
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.RadioButtonWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
@@ -104,7 +104,7 @@ fun PrivPage(useBlur: Boolean, viewModel: HomePageViewModel = koinViewModel()) {
                 },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },
@@ -250,13 +250,13 @@ fun PrivPage(useBlur: Boolean, viewModel: HomePageViewModel = koinViewModel()) {
                 }
             }
             item {
-                TitleTipCard(
+                AppTitleTipCard(
                     title = stringResource(R.string.priv_page_what_is_this_title),
                     text = stringResource(R.string.priv_page_what_is_this_desc),
                 )
             }
             item {
-                TitleTipCard(
+                AppTitleTipCard(
                     title = stringResource(R.string.priv_page_notice_title),
                     text = stringResource(R.string.priv_page_notice_desc),
                 )

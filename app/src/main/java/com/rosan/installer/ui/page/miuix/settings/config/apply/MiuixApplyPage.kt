@@ -81,24 +81,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
+import com.rosan.installer.ui.feature.settings.config.apply.ApplyViewAction
+import com.rosan.installer.ui.feature.settings.config.apply.ApplyViewApp
+import com.rosan.installer.ui.feature.settings.config.apply.ApplyViewModel
+import com.rosan.installer.ui.feature.settings.config.apply.ApplyViewState
+import com.rosan.installer.ui.feature.settings.config.apply.ViewContent
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.miuix.theme.getMiuixAppBarColor
+import com.rosan.installer.ui.miuix.theme.installerMiuixBlurEffect
+import com.rosan.installer.ui.miuix.theme.rememberMiuixBlurBackdrop
+import com.rosan.installer.ui.miuix.widgets.MiuixDropdown
+import com.rosan.installer.ui.miuix.widgets.rememberMiuixPopupBackdropActive
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewAction
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewApp
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewModel
-import com.rosan.installer.ui.page.main.settings.config.apply.ApplyViewState
-import com.rosan.installer.ui.page.main.settings.config.apply.ViewContent
+import com.rosan.installer.ui.page.miuix.widgets.AppMiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopAppBar
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixTopBarIconButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
-import com.rosan.installer.ui.page.miuix.widgets.MiuixDropdown
 import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
-import com.rosan.installer.ui.page.miuix.widgets.rememberMiuixPopupBackdropActive
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
-import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -269,7 +269,7 @@ fun MiuixApplyPage(id: Long, useBlur: Boolean, viewModel: ApplyViewModel = koinV
                             scrollBehavior = scrollBehavior,
                             title = stringResource(R.string.config_scope),
                             navigationIcon = {
-                                MiuixBackButton(
+                                AppMiuixBackButton(
                                     icon = MiuixIcons.Regular.Close,
                                     onClick = { navigator.pop() },
                                 )

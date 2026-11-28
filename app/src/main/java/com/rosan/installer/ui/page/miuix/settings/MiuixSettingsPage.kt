@@ -39,9 +39,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rosan.installer.R
+import com.rosan.installer.ui.effects.FloatingBottomBar
+import com.rosan.installer.ui.effects.FloatingBottomBarMode
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.library.FloatingBottomBar
-import com.rosan.installer.ui.library.FloatingBottomBarMode
+import com.rosan.installer.ui.miuix.widgets.MiuixGlassNavigationAction
+import com.rosan.installer.ui.miuix.widgets.MiuixGlassNavigationBar
+import com.rosan.installer.ui.miuix.widgets.miuixFloatingBottomBarColors
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.MainPagerState
 import com.rosan.installer.ui.navigation.Route
@@ -49,8 +52,6 @@ import com.rosan.installer.ui.page.miuix.settings.config.all.MiuixAllPage
 import com.rosan.installer.ui.page.miuix.settings.history.MiuixHistoryPage
 import com.rosan.installer.ui.page.miuix.settings.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
-import com.rosan.installer.ui.page.miuix.widgets.MiuixGlassNavigationAction
-import com.rosan.installer.ui.page.miuix.widgets.MiuixGlassNavigationBar
 import com.rosan.installer.ui.theme.InstallerTheme
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
@@ -140,15 +141,18 @@ private fun SettingsFloatingBottomBar(
                 backdrop = floatingBackdrop,
                 isInDark = InstallerTheme.isDark,
                 mode = floatingBottomBarMode,
-                iconContent = { item, _ ->
+                colors = miuixFloatingBottomBarColors(),
+                iconContent = { item, _, contentColor ->
                     Icon(
                         imageVector = item.icon,
                         contentDescription = null,
+                        tint = contentColor,
                     )
                 },
-                labelContent = { item, _ ->
+                labelContent = { item, _, contentColor ->
                     Text(
                         text = item.label,
+                        color = contentColor,
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
                         maxLines = 1,

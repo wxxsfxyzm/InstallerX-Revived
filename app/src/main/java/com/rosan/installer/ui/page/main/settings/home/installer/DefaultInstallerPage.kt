@@ -48,23 +48,23 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.config.Authorizer
+import com.rosan.installer.ui.feature.settings.home.HomePageViewAction
+import com.rosan.installer.ui.feature.settings.home.HomePageViewEvent
+import com.rosan.installer.ui.feature.settings.home.HomePageViewModel
+import com.rosan.installer.ui.feature.settings.home.delayDefaultInstallerProgressIfNeeded
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.BaseWidget
+import com.rosan.installer.ui.md3.widgets.setting.BlockingLoadingIndicator
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.setting.SwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.settings.home.HomePageViewAction
-import com.rosan.installer.ui.page.main.settings.home.HomePageViewEvent
-import com.rosan.installer.ui.page.main.settings.home.HomePageViewModel
-import com.rosan.installer.ui.page.main.settings.home.delayDefaultInstallerProgressIfNeeded
-import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
-import com.rosan.installer.ui.page.main.widget.card.TitleTipCard
+import com.rosan.installer.ui.page.main.widget.card.AppInfoTipCard
+import com.rosan.installer.ui.page.main.widget.card.AppTitleTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.ErrorDisplayDialog
-import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.BlockingLoadingIndicator
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.setting.SwitchWidget
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 
@@ -138,7 +138,7 @@ fun DefaultInstallerPage(useBlur: Boolean, viewModel: HomePageViewModel = koinVi
                 },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },
@@ -158,14 +158,14 @@ fun DefaultInstallerPage(useBlur: Boolean, viewModel: HomePageViewModel = koinVi
             contentPadding = paddingValues,
         ) {
             when {
-                uiState.isSystemApp -> item { InfoTipCard(stringResource(R.string.config_authorizer_none_system_app_tips)) }
+                uiState.isSystemApp -> item { AppInfoTipCard(stringResource(R.string.config_authorizer_none_system_app_tips)) }
 
                 uiState.globalAuthorizer == Authorizer.None -> item {
-                    InfoTipCard(stringResource(R.string.config_authorizer_none_tips))
+                    AppInfoTipCard(stringResource(R.string.config_authorizer_none_tips))
                 }
 
                 else -> item {
-                    TitleTipCard(
+                    AppTitleTipCard(
                         title = stringResource(R.string.priv_page_what_is_this_title),
                         text = stringResource(R.string.working_status_default_installer_tip),
                     )

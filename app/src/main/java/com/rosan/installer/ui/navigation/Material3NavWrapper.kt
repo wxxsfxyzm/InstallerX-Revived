@@ -15,12 +15,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.repository.ConfigRepository
+import com.rosan.installer.ui.feature.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
 import com.rosan.installer.ui.page.main.settings.Material3SettingsCompactLayout
 import com.rosan.installer.ui.page.main.settings.Material3SettingsWideScreenLayout
-import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.theme.LocalWindowLayoutInfo
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
 

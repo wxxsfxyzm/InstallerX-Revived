@@ -19,10 +19,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.device.model.Manufacturer
 import com.rosan.installer.core.env.DeviceConfig
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
-import com.rosan.installer.ui.page.miuix.widgets.MiuixInstallerTipCard
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
+import com.rosan.installer.ui.miuix.widgets.MiuixInstallerTipCard
+import com.rosan.installer.ui.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.theme.miuixSheetCardColors
 import com.rosan.installer.ui.util.isGestureNavigation
 import top.yukonga.miuix.kmp.basic.Card

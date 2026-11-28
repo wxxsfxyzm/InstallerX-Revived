@@ -12,7 +12,7 @@ android {
 }
 
 dependencies {
-    compileOnly(project(":hidden-api"))
+    compileOnly(projects.hiddenApi)
     compileOnly(libs.androidx.annotation)
 
     implementation(libs.commons.cli)

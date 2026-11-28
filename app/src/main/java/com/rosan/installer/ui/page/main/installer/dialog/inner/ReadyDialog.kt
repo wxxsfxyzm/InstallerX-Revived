@@ -3,7 +3,7 @@
 package com.rosan.installer.ui.page.main.installer.dialog.inner
 
 import androidx.compose.runtime.Composable
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.page.main.installer.dialog.DialogParams
 
 @Composable

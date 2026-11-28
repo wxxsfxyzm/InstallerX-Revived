@@ -49,17 +49,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rosan.installer.R
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.domain.settings.model.config.BiometricAuthMode
+import com.rosan.installer.ui.feature.settings.config.edit.EditViewAction
+import com.rosan.installer.ui.feature.settings.config.edit.EditViewModel
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
+import com.rosan.installer.ui.md3.widgets.snackbar.SwipeableSnackbarHost
 import com.rosan.installer.ui.navigation.LocalNavigator
-import com.rosan.installer.ui.page.main.widget.card.InfoTipCard
+import com.rosan.installer.ui.page.main.widget.card.AppInfoTipCard
 import com.rosan.installer.ui.page.main.widget.dialog.UnsavedChangesDialog
-import com.rosan.installer.ui.page.main.widget.setting.ExpressiveBackButton
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.snackbar.SwipeableSnackbarHost
+import com.rosan.installer.ui.page.main.widget.setting.AppExpressiveBackButton
 import com.rosan.installer.ui.page.main.widget.util.EditEventCollector
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import com.rosan.installer.ui.util.isNoneActive
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -165,7 +167,7 @@ fun EditPage(id: Long? = null, viewModel: EditViewModel = koinViewModel { parame
                 title = { Text(text = stringResource(id = if (id == null) R.string.add else R.string.update)) },
                 navigationIcon = {
                     Row {
-                        ExpressiveBackButton { navigator.pop() }
+                        AppExpressiveBackButton { navigator.pop() }
                         Spacer(modifier = Modifier.size(16.dp))
                     }
                 },
@@ -237,7 +239,7 @@ fun EditPage(id: Long? = null, viewModel: EditViewModel = koinViewModel { parame
             }
 
             if (isNoneActive(stateAuthorizer, globalAuthorizer)) {
-                item { InfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
+                item { AppInfoTipCard(text = stringResource(R.string.config_authorizer_none_tips)) }
             }
 
             // --- Group 2: Installer Settings ---

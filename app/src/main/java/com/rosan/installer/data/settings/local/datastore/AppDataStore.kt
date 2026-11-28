@@ -47,6 +47,9 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
         val THEME_USE_DYNAMIC_COLOR = register(booleanPreferencesKey("theme_use_dynamic_color"), PreferenceValueType.BOOLEAN)
         val THEME_SEED_COLOR = register(intPreferencesKey("theme_seed_color"), PreferenceValueType.INT)
         val THEME_WALLPAPER_SEED_COLOR = register(intPreferencesKey("theme_wallpaper_seed_color"), PreferenceValueType.INT)
+        val UI_FAMILY = register(stringPreferencesKey("ui_family"), PreferenceValueType.STRING)
+
+        /** Legacy UI family key. Older versions only read this key, so it is still written alongside [UI_FAMILY]. */
         val UI_USE_MIUIX = register(booleanPreferencesKey("ui_use_miui_x"), PreferenceValueType.BOOLEAN)
         val UI_USE_MIUIX_OS4 = register(booleanPreferencesKey("ui_use_miuix_os4"), PreferenceValueType.BOOLEAN)
         val UI_USE_MIUIX_MONET = register(booleanPreferencesKey("ui_use_miui_x_monet"), PreferenceValueType.BOOLEAN)
@@ -317,6 +320,15 @@ class AppDataStore(private val dataStore: DataStore<Preferences>, private val js
     /**
      * Updates the uninstall flags in DataStore using the provided transform function.
      */
+
+    /** Write the UI family and its legacy key in one transaction. */
+    suspend fun putUiFamily(value: String, legacyUseMiuix: Boolean) {
+        dataStore.edit {
+            it[UI_FAMILY] = value
+            it[UI_USE_MIUIX] = legacyUseMiuix
+        }
+    }
+
     suspend fun updateUninstallFlags(transform: (Int) -> Int) {
         dataStore.edit { preferences ->
             val current = preferences[UNINSTALL_FLAGS] ?: 0

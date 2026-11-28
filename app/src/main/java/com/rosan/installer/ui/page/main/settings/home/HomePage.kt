@@ -50,15 +50,17 @@ import com.rosan.installer.R
 import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.preferences.RootMode
+import com.rosan.installer.ui.core.widgets.card.AnimatedFluidBackground
+import com.rosan.installer.ui.core.widgets.util.OnLifecycleEvent
+import com.rosan.installer.ui.feature.settings.home.HomePageViewAction
+import com.rosan.installer.ui.feature.settings.home.HomePageViewModel
+import com.rosan.installer.ui.md3.theme.getMaterial3AppBarColor
+import com.rosan.installer.ui.md3.theme.installerMaterial3BlurEffect
+import com.rosan.installer.ui.md3.theme.rememberMaterial3BlurBackdrop
+import com.rosan.installer.ui.md3.widgets.setting.BaseWidget
+import com.rosan.installer.ui.md3.widgets.setting.SegmentedColumn
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
-import com.rosan.installer.ui.page.main.widget.card.AnimatedFluidBackground
-import com.rosan.installer.ui.page.main.widget.setting.BaseWidget
-import com.rosan.installer.ui.page.main.widget.setting.SegmentedColumn
-import com.rosan.installer.ui.page.main.widget.util.OnLifecycleEvent
-import com.rosan.installer.ui.theme.getMaterial3AppBarColor
-import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
-import com.rosan.installer.ui.theme.rememberMaterial3BlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 

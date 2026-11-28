@@ -78,28 +78,28 @@ import com.rosan.installer.BuildConfig
 import com.rosan.installer.R
 import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
-import com.rosan.installer.ui.library.blend.ColorBlendToken
-import com.rosan.installer.ui.library.effect.BgEffectBackground
-import com.rosan.installer.ui.library.effect.DeviceType
+import com.rosan.installer.ui.effects.blend.ColorBlendToken
+import com.rosan.installer.ui.feature.common.LogEventCollector
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutAction
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutEvent
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutState
+import com.rosan.installer.ui.feature.settings.preferred.about.AboutViewModel
+import com.rosan.installer.ui.miuix.effect.BgEffectBackground
+import com.rosan.installer.ui.miuix.effect.DeviceType
+import com.rosan.installer.ui.miuix.theme.installerMiuixBlurEffect
+import com.rosan.installer.ui.miuix.theme.rememberMiuixBlurBackdrop
+import com.rosan.installer.ui.miuix.widgets.MiuixNavigationItemWidget
+import com.rosan.installer.ui.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutAction
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutEvent
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutState
-import com.rosan.installer.ui.page.main.settings.preferred.about.AboutViewModel
-import com.rosan.installer.ui.page.main.widget.util.LogEventCollector
 import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixComponentHost
 import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixSpinnerPreference
-import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
-import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
 import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
 import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.LocalWindowLayoutInfo
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
-import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -915,7 +915,7 @@ private fun ValueText(text: String) {
 @Composable
 private fun AboutContentCard(
     useOs4: Boolean,
-    legacyBlur: Modifier,
+    legacyBlur: Modifier = Modifier,
     legacyColors: CardColors,
     content: @Composable ColumnScope.() -> Unit,
 ) {

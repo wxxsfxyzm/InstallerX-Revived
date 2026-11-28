@@ -18,8 +18,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppMiuixIcons
+import com.rosan.installer.ui.miuix.theme.rememberMiuixBlurBackdrop
+import com.rosan.installer.ui.miuix.widgets.MiuixAdaptiveSpinnerPreference
+import com.rosan.installer.ui.miuix.widgets.MiuixAdaptiveTopAppBar
+import com.rosan.installer.ui.miuix.widgets.miuixTopBarScroll
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -102,8 +105,7 @@ internal fun InstallerMiuixTopAppBar(
 }
 
 @Composable
-internal fun Modifier.installerMiuixTopBarScroll(scrollBehavior: ScrollBehavior): Modifier =
-    miuixTopBarScroll(scrollBehavior, reportOverscroll = InstallerTheme.useMiuixOs4)
+internal fun Modifier.installerMiuixTopBarScroll(scrollBehavior: ScrollBehavior): Modifier = miuixTopBarScroll(scrollBehavior, reportOverscroll = InstallerTheme.useMiuixOs4)
 
 @Composable
 internal fun InstallerMiuixBackButton(
@@ -123,7 +125,7 @@ internal fun InstallerMiuixBackButton(
             )
         }
     } else {
-        MiuixBackButton(onClick = onClick, modifier = modifier, icon = icon ?: AppMiuixIcons.Back, iconTint = iconTint)
+        AppMiuixBackButton(onClick = onClick, modifier = modifier, icon = icon ?: AppMiuixIcons.Back, iconTint = iconTint)
     }
 }
 

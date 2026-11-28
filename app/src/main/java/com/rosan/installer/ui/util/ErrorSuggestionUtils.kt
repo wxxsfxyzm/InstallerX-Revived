@@ -25,9 +25,9 @@ import com.rosan.installer.domain.engine.model.install.InstallOption
 import com.rosan.installer.domain.privileged.model.PrivilegedErrorType
 import com.rosan.installer.domain.settings.model.config.Authorizer
 import com.rosan.installer.domain.settings.model.config.InstallerMode
+import com.rosan.installer.ui.feature.installer.InstallerViewAction
+import com.rosan.installer.ui.feature.installer.InstallerViewModel
 import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.page.main.installer.InstallerViewAction
-import com.rosan.installer.ui.page.main.installer.InstallerViewModel
 import com.rosan.installer.util.hasErrorType
 import org.koin.compose.koinInject
 

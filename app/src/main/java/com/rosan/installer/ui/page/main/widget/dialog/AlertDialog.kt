@@ -34,6 +34,7 @@ import com.rosan.installer.core.env.DeviceConfig
 import com.rosan.installer.domain.settings.model.preferences.GithubUpdateChannel
 import com.rosan.installer.domain.settings.model.preferences.RootMode
 import com.rosan.installer.ui.icons.AppIcons
+import com.rosan.installer.ui.md3.widgets.dialog.ErrorMessageDialog
 import com.rosan.installer.util.help
 
 /**
