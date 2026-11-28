@@ -311,6 +311,7 @@ fun MiuixInstallerPage(
                                 icon = AppMiuixIcons.Close,
                                 iconTint = MiuixTheme.colorScheme.onSurface,
                                 onClick = {
+                                    if (uiState.isConfirmationSubmitting) return@MiuixBackButton
                                     if (stage.isSelfSession) {
                                         viewModel.dispatch(InstallerViewAction.ApproveSession(stage.sessionId, false))
                                     } else {
@@ -513,18 +514,11 @@ fun MiuixInstallerPage(
                                     }
                                 },
                                 onConfirm = {
-                                    if (stage.isSelfSession) {
-                                        // INTERNAL INSTALL: Do not close the bottom sheet!
-                                        viewModel.dispatch(
-                                            InstallerViewAction.ApproveSession(stage.sessionId, true),
-                                        )
-                                    } else {
-                                        dismissSheet {
-                                            viewModel.dispatch(
-                                                InstallerViewAction.ApproveSession(stage.sessionId, true),
-                                            )
-                                        }
-                                    }
+                                    // Do not close the bottom sheet here: external sessions may require
+                                    // biometric auth first, and the backend closes the session on success.
+                                    viewModel.dispatch(
+                                        InstallerViewAction.ApproveSession(stage.sessionId, true),
+                                    )
                                 },
                             )
                         }
