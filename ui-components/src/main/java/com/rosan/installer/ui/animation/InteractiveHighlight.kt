@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 import org.intellij.lang.annotations.Language
 
 @SuppressLint("NewApi")
-class InteractiveHighlight(
+internal class InteractiveHighlight(
     val animationScope: CoroutineScope,
     val position: (size: Size, offset: Offset) -> Offset = { _, offset -> offset },
 ) {

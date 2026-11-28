@@ -80,6 +80,7 @@ import com.rosan.installer.core.device.model.Level
 import com.rosan.installer.core.env.AppConfig
 import com.rosan.installer.ui.library.blend.ColorBlendToken
 import com.rosan.installer.ui.library.effect.BgEffectBackground
+import com.rosan.installer.ui.library.effect.DeviceType
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.navigation.Route
 import com.rosan.installer.ui.page.main.settings.preferred.about.AboutAction
@@ -96,6 +97,7 @@ import com.rosan.installer.ui.page.miuix.widgets.MiuixSwitchWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
 import com.rosan.installer.ui.page.miuix.widgets.installerMiuixTopBarScroll
 import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.theme.LocalWindowLayoutInfo
 import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
 import org.koin.androidx.compose.koinViewModel
@@ -411,6 +413,8 @@ private fun AboutContentBody(
 
     BgEffectBackground(
         dynamicBackground = dynamicBackground.value,
+        deviceType = if (LocalWindowLayoutInfo.current.showNavigationRail) DeviceType.PAD else DeviceType.PHONE,
+        isDarkTheme = isDark,
         isOs3Effect = isOs3Effect,
         modifier = Modifier.fillMaxSize(),
         bgModifier = backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier,

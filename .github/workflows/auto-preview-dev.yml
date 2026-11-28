@@ -12,6 +12,7 @@ on:
       - 'baselineprofile/**'
       - 'build-plugins/**'
       - 'hidden-api/**'
+      - 'ui-components/**'
       - '.editorconfig'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'

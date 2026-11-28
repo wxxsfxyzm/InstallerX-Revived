@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import com.rosan.installer.ui.theme.InstallerTheme
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.glass.GlassIconButton
@@ -19,11 +18,12 @@ import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.GlassShadows
 
 @Composable
-internal fun InstallerMiuixGlassNavigationBar(
+fun MiuixGlassNavigationBar(
     items: List<NavigationItem>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     backdrop: Backdrop,
+    isDark: Boolean,
     modifier: Modifier = Modifier,
     trailingAction: (@Composable () -> Unit)? = null,
 ) {
@@ -47,15 +47,16 @@ internal fun InstallerMiuixGlassNavigationBar(
             val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
             layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
         },
-        style = GlassDefaults.style(InstallerTheme.isDark),
+        style = GlassDefaults.style(isDark),
         trailingAction = trailingAction,
     )
 }
 
 @Composable
-internal fun InstallerMiuixGlassNavigationAction(
+fun MiuixGlassNavigationAction(
     onClick: () -> Unit,
     backdrop: Backdrop,
+    isDark: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -64,7 +65,7 @@ internal fun InstallerMiuixGlassNavigationAction(
         backdrop = backdrop,
         modifier = modifier,
         size = GlassNavigationBarDefaults.Height,
-        style = GlassDefaults.style(InstallerTheme.isDark),
+        style = GlassDefaults.style(isDark),
         shadow = GlassShadows.Float,
         content = content,
     )

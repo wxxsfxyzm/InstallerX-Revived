@@ -252,6 +252,7 @@ dependencies {
     implementation(libs.iamr0s.dhizuku.api)
 
     implementation(project(":app-process"))
+    implementation(project(":ui-components"))
 
     // aboutlibraries
     implementation(libs.aboutlibraries.core)

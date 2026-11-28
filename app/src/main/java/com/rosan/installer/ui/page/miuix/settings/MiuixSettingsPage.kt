@@ -49,8 +49,9 @@ import com.rosan.installer.ui.page.miuix.settings.config.all.MiuixAllPage
 import com.rosan.installer.ui.page.miuix.settings.history.MiuixHistoryPage
 import com.rosan.installer.ui.page.miuix.settings.home.MiuixHomePage
 import com.rosan.installer.ui.page.miuix.settings.preferred.MiuixPreferredPage
-import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixGlassNavigationAction
-import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixGlassNavigationBar
+import com.rosan.installer.ui.page.miuix.widgets.MiuixGlassNavigationAction
+import com.rosan.installer.ui.page.miuix.widgets.MiuixGlassNavigationBar
+import com.rosan.installer.ui.theme.InstallerTheme
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
@@ -94,16 +95,18 @@ private fun SettingsFloatingBottomBar(
                 24.dp,
                 WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues().calculateBottomPadding() + 8.dp,
             )
-            InstallerMiuixGlassNavigationBar(
+            MiuixGlassNavigationBar(
                 items = navigationItems,
                 selectedIndex = mainPagerState.selectedPage,
                 onSelect = { mainPagerState.animateToPage(it) },
                 backdrop = floatingBackdrop,
+                isDark = InstallerTheme.isDark,
                 trailingAction = if (mainPagerState.selectedPage == 1) {
                     {
-                        InstallerMiuixGlassNavigationAction(
+                        MiuixGlassNavigationAction(
                             onClick = { navigator.push(Route.EditConfig(-1)) },
                             backdrop = floatingBackdrop,
+                            isDark = InstallerTheme.isDark,
                         ) {
                             Icon(
                                 imageVector = MiuixIcons.Glass.Add,
@@ -135,6 +138,7 @@ private fun SettingsFloatingBottomBar(
                     mainPagerState.animateToPage(index)
                 },
                 backdrop = floatingBackdrop,
+                isInDark = InstallerTheme.isDark,
                 mode = floatingBottomBarMode,
                 iconContent = { item, _ ->
                     Icon(

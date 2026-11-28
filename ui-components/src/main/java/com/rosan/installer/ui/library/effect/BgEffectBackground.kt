@@ -14,8 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.LocalWindowLayoutInfo
 import kotlin.math.floor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -25,6 +23,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun BgEffectBackground(
     dynamicBackground: Boolean,
+    deviceType: DeviceType,
+    isDarkTheme: Boolean,
     modifier: Modifier = Modifier,
     bgModifier: Modifier = Modifier,
     isFullSize: Boolean = false,
@@ -42,10 +42,6 @@ fun BgEffectBackground(
         modifier = modifier,
     ) {
         val surface = MiuixTheme.colorScheme.surface
-
-        val windowLayoutInfo = LocalWindowLayoutInfo.current
-        val deviceType = if (windowLayoutInfo.showNavigationRail) DeviceType.PAD else DeviceType.PHONE
-        val isDarkTheme = InstallerTheme.isDark
 
         val painter = remember(isOs3Effect) { BgEffectPainter(isOs3Effect) }
 

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
+import com.rosan.installer.domain.settings.model.preferences.ThemeState
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
@@ -103,6 +104,102 @@ fun InstallerTheme(
         }
     }
 
+    ProvideInstallerTheme(
+        useMiuix = useMiuix,
+        useMiuixOs4 = useMiuixOs4,
+        themeMode = themeMode,
+        paletteStyle = paletteStyle,
+        colorSpec = colorSpec,
+        useDynamicColor = useDynamicColor,
+        useMiuixMonet = useMiuixMonet,
+        seedColor = seedColor,
+        useAmoled = useAmoled,
+    ) {
+        val isDark = InstallerTheme.isDark
+        UpdateStatusBarAppearance(isDark)
+        val controller = if (useMiuix) rememberInstallerMiuixThemeController() else null
+        InstallerPageTheme(controller, useAmoled) {
+            preservedContent(content)
+        }
+    }
+}
+
+internal typealias SettingsPageTheme = @Composable (content: @Composable () -> Unit) -> Unit
+
+/** Keep theme preferences and the palette above navigation, and apply the UI family inside each entry. */
+@Composable
+internal fun InstallerSettingsTheme(
+    settings: ThemeState,
+    content: @Composable (backdropColor: Color, pageTheme: SettingsPageTheme) -> Unit,
+) {
+    ProvideInstallerTheme(
+        useMiuix = settings.useMiuix,
+        useMiuixOs4 = settings.useMiuixOs4,
+        themeMode = settings.themeMode,
+        paletteStyle = settings.paletteStyle,
+        colorSpec = settings.colorSpec,
+        useDynamicColor = settings.useDynamicColor,
+        useMiuixMonet = settings.useMiuixMonet,
+        seedColor = Color(settings.seedColor),
+        useAmoled = settings.useAmoled,
+    ) {
+        val isDark = InstallerTheme.isDark
+        UpdateStatusBarAppearance(isDark)
+        val controller = if (settings.useMiuix) rememberInstallerMiuixThemeController() else null
+        val backdropColor = when {
+            controller == null -> InstallerTheme.colorScheme.surfaceContainer
+            settings.useAmoled && isDark -> Color.Black
+            else -> controller.currentColors().surface
+        }
+        content(backdropColor) { page ->
+            InstallerPageTheme(controller, settings.useAmoled, page)
+        }
+    }
+}
+
+@Composable
+private fun InstallerPageTheme(controller: ThemeController?, useAmoled: Boolean, content: @Composable () -> Unit) {
+    val isDark = InstallerTheme.isDark
+    if (controller != null) {
+        MiuixTheme(controller = controller) {
+            val colors = MiuixTheme.colorScheme
+            // Keep the controller's dynamic-color mode and the card palette intact.
+            MiuixTheme(colors = if (useAmoled && isDark) colors.copy(surface = Color.Black) else colors, content = content)
+        }
+    } else {
+        InstallerMaterialExpressiveTheme(
+            darkTheme = isDark,
+            colorScheme = InstallerTheme.colorScheme,
+            compatStatusBarColor = false,
+            content = content,
+        )
+    }
+}
+
+@Composable
+private fun rememberInstallerMiuixThemeController(): ThemeController = rememberMiuixThemeController(
+    darkTheme = InstallerTheme.isDark,
+    themeMode = InstallerTheme.themeMode,
+    useMiuixMonet = InstallerTheme.useMiuixMonet,
+    useDynamicColor = InstallerTheme.useDynamicColor,
+    seedColor = InstallerTheme.seedColor,
+    paletteStyle = InstallerTheme.paletteStyle,
+    colorSpec = InstallerTheme.colorSpec,
+)
+
+@Composable
+private fun ProvideInstallerTheme(
+    useMiuix: Boolean,
+    themeMode: ThemeMode,
+    paletteStyle: PaletteStyle,
+    colorSpec: ThemeColorSpec,
+    useDynamicColor: Boolean,
+    useMiuixMonet: Boolean,
+    seedColor: Color,
+    useAmoled: Boolean = false,
+    useMiuixOs4: Boolean = false,
+    content: @Composable () -> Unit,
+) {
     val isDark = when (themeMode) {
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
@@ -156,33 +253,7 @@ fun InstallerTheme(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             NavigationBarContrastHandler()
         }
-
-        if (useMiuix) {
-            InstallerMiuixTheme(
-                darkTheme = isDark,
-                themeMode = themeMode,
-                useDynamicColor = useDynamicColor,
-                useMiuixMonet = useMiuixMonet,
-                seedColor = seedColor,
-                paletteStyle = paletteStyle,
-                colorSpec = colorSpec,
-            ) {
-                val colors = MiuixTheme.colorScheme
-                // Keep the controller's dynamic-color mode and the card palette intact.
-                MiuixTheme(
-                    colors = if (useAmoled && isDark) colors.copy(surface = Color.Black) else colors,
-                ) {
-                    preservedContent(content)
-                }
-            }
-        } else {
-            InstallerMaterialExpressiveTheme(
-                darkTheme = isDark,
-                colorScheme = animatedColorScheme,
-            ) {
-                preservedContent(content)
-            }
-        }
+        content()
     }
 }
 
@@ -193,15 +264,7 @@ fun InstallerMaterialExpressiveTheme(
     compatStatusBarColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    if (compatStatusBarColor) {
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                val window = (view.context as ComponentActivity).window
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            }
-        }
-    }
+    if (compatStatusBarColor) UpdateStatusBarAppearance(darkTheme)
 
     // Applies Material 3 Expressive defaults including the expressive MotionScheme
     MaterialExpressiveTheme(
@@ -224,17 +287,23 @@ fun InstallerMiuixTheme(
     colorSpec: ThemeColorSpec,
     content: @Composable () -> Unit,
 ) {
-    if (compatStatusBarColor) {
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                val window = (view.context as ComponentActivity).window
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            }
-        }
-    }
+    if (compatStatusBarColor) UpdateStatusBarAppearance(darkTheme)
 
-    val controller = if (useMiuixMonet) {
+    val controller = rememberMiuixThemeController(darkTheme, themeMode, useMiuixMonet, useDynamicColor, seedColor, paletteStyle, colorSpec)
+    MiuixTheme(controller = controller, content = content)
+}
+
+@Composable
+private fun rememberMiuixThemeController(
+    darkTheme: Boolean,
+    themeMode: ThemeMode,
+    useMiuixMonet: Boolean,
+    useDynamicColor: Boolean,
+    seedColor: Color,
+    paletteStyle: PaletteStyle,
+    colorSpec: ThemeColorSpec,
+): ThemeController =
+    if (useMiuixMonet) {
         // --- Monet Engine Path ---
         val keyColor = if (useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             colorResource(id = android.R.color.system_accent1_500)
@@ -293,10 +362,15 @@ fun InstallerMiuixTheme(
         }
     }
 
-    MiuixTheme(
-        controller = controller,
-        content = content,
-    )
+@Composable
+private fun UpdateStatusBarAppearance(darkTheme: Boolean) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as ComponentActivity).window
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)

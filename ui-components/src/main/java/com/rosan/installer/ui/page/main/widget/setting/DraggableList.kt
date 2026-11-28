@@ -36,10 +36,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.rosan.installer.R
 
 /**
  * A draggable list widget that supports item reordering.
@@ -78,7 +76,7 @@ fun <T> DraggableList(
     onDragStateChange: (Boolean) -> Unit = {},
     onItemClick: ((T) -> Unit)? = null,
     noContentTitle: String,
-    noContentDescription: String? = stringResource(R.string.config_add_one_to_get_started),
+    noContentDescription: String? = null,
     trailingContent: (@Composable (item: T) -> Unit)? = null,
     bottomBarContent: (@Composable () -> Unit)? = null,
 ) {

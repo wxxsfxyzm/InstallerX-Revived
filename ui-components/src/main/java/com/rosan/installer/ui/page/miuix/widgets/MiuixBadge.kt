@@ -28,12 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rosan.installer.R
 import com.rosan.installer.ui.page.main.widget.chip.NoticeModel
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
@@ -75,7 +73,7 @@ fun MiuixBadge(
 }
 
 @Composable
-fun MiuixInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeModel>) {
+fun MiuixInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeModel>, confirmLabel: String) {
     var selectedNotice by remember { mutableStateOf<NoticeModel?>(null) }
     val showDialog = remember { mutableStateOf(false) }
 
@@ -134,7 +132,7 @@ fun MiuixInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeModel>
                     ) {
                         TextButton(
                             modifier = Modifier.weight(1f),
-                            text = stringResource(R.string.confirm),
+                            text = confirmLabel,
                             onClick = { showDialog.value = false },
                         )
                     }

@@ -376,6 +376,7 @@ fun installPrepareDialog(viewModel: InstallerViewModel): DialogParams {
             LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 item {
                     InstallInfoChipGroup(
+                        confirmLabel = stringResource(R.string.confirm),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         notices = notices,
                     )

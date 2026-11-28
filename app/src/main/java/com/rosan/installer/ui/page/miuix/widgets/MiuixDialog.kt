@@ -41,9 +41,7 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import top.yukonga.miuix.kmp.window.WindowDialog
 
 /**
@@ -257,62 +255,19 @@ fun ErrorDisplaySheet(
     onRetry: (() -> Unit)? = null,
     title: String,
 ) {
-    WindowBottomSheet(
+    MiuixErrorMessageSheet(
         show = showState.value,
+        title = title,
+        closeIcon = MiuixIcons.Regular.Close,
+        closeLabel = stringResource(R.string.close),
+        closeContentDescription = stringResource(R.string.back),
+        cancelLabel = stringResource(R.string.cancel),
+        retryLabel = stringResource(R.string.retry),
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
-        title = title,
-        startAction = {
-            val dismissState = LocalDismissState.current
-            MiuixBackButton(
-                icon = MiuixIcons.Regular.Close,
-                onClick = { dismissState?.invoke() ?: onDismissRequest() },
-            )
-        },
-    ) {
-        val dismissState = LocalDismissState.current
-        val dismissSheet = { dismissState?.invoke() ?: onDismissRequest() }
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            MiuixErrorTextBlock(
-                error = exception,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f, fill = false),
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 40.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (onRetry != null) {
-                    TextButton(
-                        text = stringResource(R.string.cancel),
-                        onClick = dismissSheet,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(
-                        text = stringResource(R.string.retry),
-                        onClick = onRetry,
-                        modifier = Modifier.weight(1f),
-                    )
-                } else {
-                    TextButton(
-                        text = stringResource(R.string.close),
-                        onClick = dismissSheet,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
-        }
-    }
+        onRetry = onRetry,
+        errorContent = { modifier -> MiuixErrorTextBlock(error = exception, modifier = modifier) },
+    )
 }
 
 /**

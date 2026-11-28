@@ -235,7 +235,6 @@ object AppIcons {
     val Menu = Icons.Filled.Menu
     val MenuOpen = Icons.AutoMirrored.TwoTone.MenuOpen
     val MoreVert = Icons.TwoTone.MoreVert
-    val DragHandle = R.drawable.ic_navigation_rearrange
     // --- Menu icons end ---
 
     // --- Permission icons set ---

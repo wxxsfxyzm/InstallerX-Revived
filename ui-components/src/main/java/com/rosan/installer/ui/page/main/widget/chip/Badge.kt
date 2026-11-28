@@ -29,11 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.rosan.installer.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -72,7 +70,7 @@ data class NoticeModel(
 )
 
 @Composable
-fun InstallInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeModel>) {
+fun InstallInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeModel>, confirmLabel: String) {
     // State to track which notice is currently being viewed
     var selectedNotice by remember { mutableStateOf<NoticeModel?>(null) }
 
@@ -102,7 +100,7 @@ fun InstallInfoChipGroup(modifier: Modifier = Modifier, notices: List<NoticeMode
             onDismissRequest = { selectedNotice = null },
             confirmButton = {
                 TextButton(onClick = { selectedNotice = null }) {
-                    Text(stringResource(R.string.confirm)) // Or use a common "OK" string
+                    Text(confirmLabel)
                 }
             },
             title = {

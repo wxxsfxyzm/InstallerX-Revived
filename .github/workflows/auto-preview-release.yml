@@ -11,6 +11,8 @@ on:
       - 'app-process/build.gradle.kts'
       - 'hidden-api/src/**'
       - 'hidden-api/build.gradle.kts'
+      - 'ui-components/src/**'
+      - 'ui-components/build.gradle.kts'
       - 'baselineprofile/src/**'
       - 'baselineprofile/build.gradle.kts'
       - 'build-plugins/src/**'

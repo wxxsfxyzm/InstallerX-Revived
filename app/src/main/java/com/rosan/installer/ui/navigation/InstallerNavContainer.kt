@@ -4,10 +4,14 @@ package com.rosan.installer.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -46,6 +50,9 @@ import com.rosan.installer.ui.page.miuix.settings.preferred.lab.MiuixLabPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.network.MiuixNetworkPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.theme.MiuixThemeSettingsPage
 import com.rosan.installer.ui.page.miuix.settings.preferred.uninstaller.MiuixUninstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.miuix.widgets.InstallerMiuixComponentHost
+import com.rosan.installer.ui.theme.InstallerTheme
+import com.rosan.installer.ui.theme.SettingsPageTheme
 import com.rosan.installer.ui.util.rememberDeviceCornerRadius
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.nav.core.NavCornerClipMode
@@ -53,10 +60,9 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun InstallerNavContainer(uiState: ThemeState) {
+internal fun InstallerNavContainer(uiState: ThemeState, backdropColor: Color, pageTheme: SettingsPageTheme) {
     val sharedViewModel: SettingsSharedViewModel = koinViewModel(
         viewModelStoreOwner = LocalActivity.current as ComponentActivity,
     )
@@ -73,11 +79,6 @@ fun InstallerNavContainer(uiState: ThemeState) {
         val roundAllCorners = uiState.predictiveBackAnimation == PredictiveBackAnimation.AOSP ||
             uiState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
             uiState.predictiveBackAnimation == PredictiveBackAnimation.Classic
-        val backdropColor = if (uiState.useMiuix) {
-            MiuixTheme.colorScheme.surface
-        } else {
-            MaterialTheme.colorScheme.surfaceContainer
-        }
         val effects = remember(navCornerRadius, roundAllCorners, backdropColor) {
             NavDisplayEffects(
                 enableCornerClip = true,
@@ -103,12 +104,13 @@ fun InstallerNavContainer(uiState: ThemeState) {
 
         NavDisplay(
             backStack = backStack,
+            modifier = Modifier.fillMaxSize().background(backdropColor),
             onBack = onBack,
             transition = transition,
             effects = effects,
         ) {
             entry<Route.Main> {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixMainPageWrapper(uiState, sharedViewModel)
                     } else {
@@ -117,7 +119,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.EditConfig>(swipeDismiss = NavSwipeDirection.None) { key ->
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
                     val id = key.id
                     if (uiState.useMiuix) {
                         MiuixEditPage(
@@ -133,7 +135,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.ApplyConfig>(swipeDismiss = swipeBackDirection) { key ->
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     val id = key.id
                     if (uiState.useMiuix) {
                         MiuixApplyPage(id, useBlur)
@@ -143,7 +145,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.About>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixAboutPage(useBlur)
                     } else {
@@ -152,7 +154,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.OpenSourceLicense>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixOpenSourceLicensePage(useBlur)
                     } else {
@@ -161,7 +163,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.Theme>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixThemeSettingsPage()
                     } else {
@@ -170,7 +172,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.Network>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
                     if (uiState.useMiuix) {
                         MiuixNetworkPage(useBlur)
                     } else {
@@ -179,7 +181,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.InstallerGlobal>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
                     if (uiState.useMiuix) {
                         MiuixInstallerGlobalSettingsPage(useBlur)
                     } else {
@@ -188,7 +190,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.AuthorizerCust>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixAuthorizerCustPage(useBlur)
                     } else {
@@ -197,7 +199,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.DialogSettings>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
                     if (uiState.useMiuix) {
                         MiuixDialogSettingsPage(useBlur)
                     } else {
@@ -206,7 +208,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.NotificationSettings>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
                     if (uiState.useMiuix) {
                         MiuixNotificationSettingsPage(useBlur)
                     } else {
@@ -215,7 +217,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.UninstallerGlobal>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixUninstallerGlobalSettingsPage(useBlur)
                     } else {
@@ -224,7 +226,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.Lab>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
                     if (uiState.useMiuix) {
                         MiuixLabPage(useBlur)
                     } else {
@@ -233,7 +235,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.DefaultInstaller>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixDefaultInstallerPage(useBlur)
                     } else {
@@ -242,7 +244,7 @@ fun InstallerNavContainer(uiState: ThemeState) {
                 }
             }
             entry<Route.Priv>(swipeDismiss = swipeBackDirection) {
-                InstallerNavEntry(interceptPredictiveBack, onBack) {
+                InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     if (uiState.useMiuix) {
                         MiuixPrivPage(useBlur)
                     } else {
@@ -255,12 +257,33 @@ fun InstallerNavContainer(uiState: ThemeState) {
 }
 
 @Composable
-private fun InstallerNavEntry(interceptPredictiveBack: Boolean, onBack: () -> Unit, content: @Composable () -> Unit) {
+private fun InstallerNavEntry(
+    pageTheme: SettingsPageTheme,
+    interceptPredictiveBack: Boolean,
+    onBack: () -> Unit,
+    hostGlassDropdowns: Boolean = false,
+    content: @Composable () -> Unit,
+) {
     val navigationEventState = rememberNavigationEventState(NavigationEventInfo.None)
     NavigationBackHandler(
         state = navigationEventState,
         isBackEnabled = interceptPredictiveBack,
         onBackCompleted = onBack,
     )
-    content()
+    pageTheme {
+        if (hostGlassDropdowns && InstallerTheme.useMiuixOs4) {
+            InstallerMiuixComponentHost(
+                useOs4 = true,
+                useBlur = true,
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+            ) { scope ->
+                Box(modifier = Modifier.fillMaxSize().then(scope.pageBackdropModifier)) {
+                    content()
+                }
+            }
+        } else {
+            content()
+        }
+    }
 }

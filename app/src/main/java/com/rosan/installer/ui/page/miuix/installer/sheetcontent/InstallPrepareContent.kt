@@ -365,6 +365,7 @@ fun InstallPrepareContent(
         item { Spacer(modifier = Modifier.height(4.dp)) }
         item {
             MiuixInfoChipGroup(
+                confirmLabel = stringResource(R.string.confirm),
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
                 notices = notices,
             )

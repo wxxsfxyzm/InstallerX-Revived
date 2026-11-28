@@ -530,6 +530,7 @@ private fun ManagedPackagesWidget(
         onMove = onMovePackage,
         onDragStateChange = onDragStateChange,
         noContentTitle = noContentTitle,
+        noContentDescription = stringResource(R.string.config_add_one_to_get_started),
         trailingContent = { item ->
             IconButton(onClick = { deleteTarget = item }) {
                 Icon(
@@ -615,6 +616,7 @@ private fun ManagedUidsWidget(
         onMove = onMoveUid,
         onDragStateChange = onDragStateChange,
         noContentTitle = noContentTitle,
+        noContentDescription = stringResource(R.string.config_add_one_to_get_started),
         trailingContent = { item ->
             IconButton(onClick = { deleteTarget = item }) {
                 Icon(

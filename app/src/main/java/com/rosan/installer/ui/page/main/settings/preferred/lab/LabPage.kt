@@ -410,6 +410,7 @@ private fun SmartAuthorizerBottomSheet(
                 toggleCandidate(candidate, !candidate.enabled)
             },
             noContentTitle = stringResource(R.string.config_authorizer),
+            noContentDescription = stringResource(R.string.config_add_one_to_get_started),
             trailingContent = { candidate ->
                 Checkbox(
                     checked = candidate.enabled,

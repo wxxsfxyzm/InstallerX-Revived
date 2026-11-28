@@ -7,19 +7,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppMiuixIcons
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
+import com.rosan.installer.ui.library.widgets.miuix.MiuixBackButton as LibraryMiuixBackButton
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
-/**
- * A standardized back button for the application, styled for MIUIX.
- *
- * @param onClick The lambda to be executed when the button is clicked.
- * @param modifier The Modifier to be applied to this button.
- * @param icon The vector asset to be displayed inside the button. Defaults to a back arrow.
- * @param iconTint The tint to be applied to the icon. Defaults to the current content color.
- * @param contentDescription The content description for accessibility.
- */
 @Composable
 fun MiuixBackButton(
     modifier: Modifier = Modifier,
@@ -28,14 +18,11 @@ fun MiuixBackButton(
     contentDescription: String = stringResource(id = R.string.back),
     onClick: () -> Unit,
 ) {
-    IconButton(
-        onClick = onClick,
+    LibraryMiuixBackButton(
         modifier = modifier,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = iconTint,
-        )
-    }
+        icon = icon,
+        iconTint = iconTint,
+        contentDescription = contentDescription,
+        onClick = onClick,
+    )
 }

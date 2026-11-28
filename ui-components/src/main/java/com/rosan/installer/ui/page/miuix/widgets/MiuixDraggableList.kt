@@ -27,11 +27,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.rosan.installer.ui.icons.AppIcons
-import com.rosan.installer.ui.theme.miuixSheetCardColors
+import com.rosan.installer.ui.components.R
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -47,14 +47,14 @@ fun <T> MiuixDraggableList(
     cardColors: CardColors? = null,
     startAction: @Composable (() -> Unit)? = {
         Icon(
-            imageVector = ImageVector.vectorResource(AppIcons.DragHandle),
+            imageVector = ImageVector.vectorResource(R.drawable.ic_navigation_rearrange),
             contentDescription = null,
             tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
         )
     },
     trailingContent: @Composable RowScope.(item: T) -> Unit,
 ) {
-    val resolvedCardColors = cardColors ?: miuixSheetCardColors()
+    val resolvedCardColors = cardColors ?: CardDefaults.defaultColors()
     var isWaitingForUpdate by remember { mutableStateOf(false) }
     var localItems by remember { mutableStateOf(items) }
 

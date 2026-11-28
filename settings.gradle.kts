@@ -79,5 +79,6 @@ include(
     ":app",
     ":app-process",
     ":hidden-api",
+    ":ui-components",
 )
 include(":baselineprofile")

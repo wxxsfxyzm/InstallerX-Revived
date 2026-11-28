@@ -3,53 +3,34 @@
 package com.rosan.installer.ui.page.miuix.widgets
 
 import android.os.Build
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rosan.installer.R
 import com.rosan.installer.ui.icons.AppMiuixIcons
 import com.rosan.installer.ui.theme.InstallerTheme
-import com.rosan.installer.ui.theme.getMiuixAppBarColor
-import com.rosan.installer.ui.theme.installerMiuixBlurEffect
 import com.rosan.installer.ui.theme.rememberMiuixBlurBackdrop
-import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.glass.GlassDropdownPreference
 import top.yukonga.miuix.kmp.glass.GlassIconButton
-import top.yukonga.miuix.kmp.glass.GlassPopupDefaults
-import top.yukonga.miuix.kmp.glass.GlassTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.glass.ChevronBackward
-import top.yukonga.miuix.kmp.material.GlassDefaults
 import top.yukonga.miuix.kmp.material.isRenderEffectSupported
-import top.yukonga.miuix.kmp.preference.WindowSpinnerPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 internal data class MiuixComponentScope(
     val useOs4: Boolean = false,
@@ -106,87 +87,23 @@ internal fun InstallerMiuixTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable () -> Unit = {},
 ) {
-    if (useOs4) {
-        val hasContentScroll by remember(scrollBehavior) {
-            derivedStateOf { (scrollBehavior?.state?.contentOffset ?: 0f) < -1f }
-        }
-        val windowInfo = LocalWindowInfo.current
-        val density = LocalDensity.current
-        val isWide by remember(windowInfo, density) {
-            derivedStateOf {
-                val windowSize = windowInfo.containerSize
-                with(density) {
-                    val width = windowSize.width.toDp()
-                    val height = windowSize.height.toDp()
-                    width >= 840.dp || (width >= 600.dp && height < width * 1.2f)
-                }
-            }
-        }
-        GlassTopAppBar(
-            title = title,
-            isContentScrolled = isContentScrolled ?: hasContentScroll,
-            modifier = modifier,
-            expandable = !isWide,
-            progressiveBlur = true,
-            backdrop = backdrop,
-            style = GlassDefaults.style(InstallerTheme.isDark),
-            scrollBehavior = scrollBehavior,
-            navigationIcon = navigationIcon,
-            actions = actions,
-            bottomContent = bottomContent,
-        )
-    } else {
-        TopAppBar(
-            title = title,
-            modifier = modifier.installerMiuixBlurEffect(backdrop),
-            color = backdrop.getMiuixAppBarColor(),
-            scrollBehavior = scrollBehavior,
-            navigationIcon = navigationIcon,
-            actions = actions,
-            bottomContent = bottomContent,
-        )
-    }
+    MiuixAdaptiveTopAppBar(
+        title = title,
+        useGlass = useOs4,
+        isDark = InstallerTheme.isDark,
+        isContentScrolled = isContentScrolled,
+        modifier = modifier,
+        backdrop = backdrop,
+        scrollBehavior = scrollBehavior,
+        navigationIcon = navigationIcon,
+        actions = actions,
+        bottomContent = bottomContent,
+    )
 }
 
 @Composable
-internal fun Modifier.installerMiuixTopBarScroll(scrollBehavior: ScrollBehavior): Modifier {
-    val state = scrollBehavior.state
-    val onOffsetChanged: ((Float) -> Unit)? = if (InstallerTheme.useMiuixOs4) {
-        remember(state) { { offset: Float -> state.overscrollOffset = offset } }
-    } else {
-        null
-    }
-    return this
-        .overScrollVertical(onOffsetChanged = onOffsetChanged)
-        .nestedScroll(scrollBehavior.nestedScrollConnection)
-}
-
-@Composable
-internal fun rememberMiuixPopupBackdropActive(show: Boolean): Boolean {
-    var active by remember { mutableStateOf(show) }
-    LaunchedEffect(show) {
-        if (show) {
-            active = true
-        } else if (active) {
-            // The public popup APIs have no dismissal-complete callback. Use the example's exit interval.
-            delay(350)
-            active = false
-        }
-    }
-    return show || active
-}
-
-/** Fixed sampling viewport: overscroll moves inside this layer, while bars and popups stay outside. */
-@Composable
-internal fun InstallerMiuixBackdropSurface(
-    backdrop: LayerBackdrop?,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Box(modifier = modifier.then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)) {
-        content()
-    }
-}
+internal fun Modifier.installerMiuixTopBarScroll(scrollBehavior: ScrollBehavior): Modifier =
+    miuixTopBarScroll(scrollBehavior, reportOverscroll = InstallerTheme.useMiuixOs4)
 
 @Composable
 internal fun InstallerMiuixBackButton(
@@ -239,38 +156,19 @@ internal fun InstallerMiuixSpinnerPreference(
     insideMargin: PaddingValues = top.yukonga.miuix.kmp.basic.BasicComponentDefaults.InsideMargin,
 ) {
     val scope = LocalMiuixComponentScope.current
-    val plainOptions = items.all {
-        it.enabled && it.icon == null && it.summary == null && it.children.isNullOrEmpty()
-    }
-    if (scope.useOs4 && plainOptions) {
-        GlassDropdownPreference(
-            onSelectedIndexChange = { index ->
-                onSelectedIndexChange(index)
-                items[index].onClick?.invoke()
-            },
-            items = items.map { it.text },
-            selectedIndex = selectedIndex,
-            title = title,
-            backdrop = scope.pageBackdrop,
-            visuals = GlassPopupDefaults.visuals(style = GlassDefaults.style(InstallerTheme.isDark)),
-            modifier = modifier,
-            enabled = enabled,
-            showValue = showValue,
-            insideMargin = insideMargin,
-            renderInRootScaffold = scope.popupInRootScaffold,
-            summary = summary,
-        )
-    } else {
-        WindowSpinnerPreference(
-            items = items,
-            selectedIndex = selectedIndex,
-            title = title,
-            modifier = modifier,
-            summary = summary,
-            enabled = enabled,
-            showValue = showValue,
-            insideMargin = insideMargin,
-            onSelectedIndexChange = onSelectedIndexChange,
-        )
-    }
+    MiuixAdaptiveSpinnerPreference(
+        items = items,
+        selectedIndex = selectedIndex,
+        title = title,
+        useGlass = scope.useOs4,
+        isDark = InstallerTheme.isDark,
+        onSelectedIndexChange = onSelectedIndexChange,
+        modifier = modifier,
+        backdrop = scope.pageBackdrop,
+        renderInRootScaffold = scope.popupInRootScaffold,
+        summary = summary,
+        enabled = enabled,
+        showValue = showValue,
+        insideMargin = insideMargin,
+    )
 }

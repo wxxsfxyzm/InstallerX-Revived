@@ -63,6 +63,7 @@ import com.rosan.installer.ui.page.main.settings.config.all.AllPage
 import com.rosan.installer.ui.page.main.settings.history.HistoryPage
 import com.rosan.installer.ui.page.main.settings.home.HomePage
 import com.rosan.installer.ui.page.main.settings.preferred.PreferredPage
+import com.rosan.installer.ui.theme.InstallerTheme
 import com.rosan.installer.ui.theme.installerMaterial3BlurEffect
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
@@ -216,6 +217,7 @@ private fun Material3FloatingBottomBar(
                 mainPagerState.animateToPage(index)
             },
             backdrop = floatingBackdrop,
+            isInDark = InstallerTheme.isDark,
             mode = if (backdrop != null) FloatingBottomBarMode.Blur else FloatingBottomBarMode.None,
             colors = FloatingBottomBarDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,

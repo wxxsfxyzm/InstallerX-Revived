@@ -58,6 +58,7 @@ Several product behaviors are intentionally flow-specific. Do **not** assume a f
 * `app/` — main Android application.
 * `app-process/` — privileged helper process bridge used by Root/Shizuku-style workflows.
 * `hidden-api/` — hidden API declarations/helpers consumed by the app.
+* `ui-components/` — reusable Compose components and rendering effects. App screens, navigation, and theme policy live in `app/`.
 * `build-plugins/` — shared Gradle convention plugins.
 * `baselineprofile/` — Android baseline profile generation.
 * `docs/` — localized project README files and user-facing repository documentation.

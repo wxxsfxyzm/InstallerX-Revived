@@ -76,7 +76,6 @@ import com.rosan.installer.ui.library.liquid.innerShadow
 import com.rosan.installer.ui.library.liquid.lens
 import com.rosan.installer.ui.library.liquid.rememberCombinedBackdrop
 import com.rosan.installer.ui.library.liquid.vibrancy
-import com.rosan.installer.ui.theme.InstallerTheme
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -214,13 +213,13 @@ fun <T> FloatingBottomBar(
     selectedIndex: () -> Int,
     onSelected: (index: Int) -> Unit,
     backdrop: Backdrop,
+    isInDark: Boolean,
     modifier: Modifier = Modifier,
     mode: FloatingBottomBarMode = FloatingBottomBarMode.LiquidGlass,
     colors: FloatingBottomBarColors = FloatingBottomBarDefaults.colors(),
     iconContent: @Composable (item: T, index: Int) -> Unit,
     labelContent: @Composable (item: T, index: Int) -> Unit,
 ) {
-    val isInDark = InstallerTheme.isDark
     val pillShape = remember { CircleShape }
     val isLiquidGlassMode = mode == FloatingBottomBarMode.LiquidGlass
     val isBlurMode = mode == FloatingBottomBarMode.Blur

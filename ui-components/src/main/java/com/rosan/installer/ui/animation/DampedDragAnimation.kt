@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class DampedDragAnimation(
+internal class DampedDragAnimation(
     private val animationScope: CoroutineScope,
     val initialValue: Float,
     val valueRange: ClosedRange<Float>,
