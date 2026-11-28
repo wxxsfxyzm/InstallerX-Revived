@@ -18,9 +18,26 @@ import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import com.itos.coui.menu.ProvideCouiMenuBackdrop
+import com.itos.coui.theme.CouiTheme
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnimation
 import com.rosan.installer.domain.settings.model.preferences.ThemeState
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.ui.animation.predictiveback.installerNavTransition
+import com.rosan.installer.ui.page.coui.settings.config.apply.CouiApplyPage
+import com.rosan.installer.ui.page.coui.settings.config.edit.CouiEditPage
+import com.rosan.installer.ui.page.coui.settings.home.installer.CouiDefaultInstallerPage
+import com.rosan.installer.ui.page.coui.settings.home.priv.CouiPrivPage
+import com.rosan.installer.ui.page.coui.settings.preferred.about.CouiAboutPage
+import com.rosan.installer.ui.page.coui.settings.preferred.about.CouiOpenSourceLicensePage
+import com.rosan.installer.ui.page.coui.settings.preferred.installer.CouiInstallerGlobalSettingsPage
+import com.rosan.installer.ui.page.coui.settings.preferred.installer.authorizer.CouiAuthorizerCustPage
+import com.rosan.installer.ui.page.coui.settings.preferred.installer.dialog.CouiDialogSettingsPage
+import com.rosan.installer.ui.page.coui.settings.preferred.installer.notification.CouiNotificationSettingsPage
+import com.rosan.installer.ui.page.coui.settings.preferred.lab.CouiLabPage
+import com.rosan.installer.ui.page.coui.settings.preferred.network.CouiNetworkPage
+import com.rosan.installer.ui.page.coui.settings.preferred.theme.CouiThemeSettingsPage
+import com.rosan.installer.ui.page.coui.settings.preferred.uninstaller.CouiUninstallerGlobalSettingsPage
 import com.rosan.installer.ui.page.main.settings.SettingsSharedViewModel
 import com.rosan.installer.ui.page.main.settings.config.apply.ApplyPage
 import com.rosan.installer.ui.page.main.settings.config.edit.EditPage
@@ -111,144 +128,138 @@ internal fun InstallerNavContainer(uiState: ThemeState, backdropColor: Color, pa
         ) {
             entry<Route.Main> {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixMainPageWrapper(uiState, sharedViewModel)
-                    } else {
-                        Material3MainPageWrapper(uiState, sharedViewModel)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiMainPageWrapper(uiState, sharedViewModel)
+                        UiStyle.MIUIX -> MiuixMainPageWrapper(uiState, sharedViewModel)
+                        UiStyle.MATERIAL3 -> Material3MainPageWrapper(uiState, sharedViewModel)
                     }
                 }
             }
             entry<Route.EditConfig>(swipeDismiss = NavSwipeDirection.None) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    val id = key.id
-                    if (uiState.useMiuix) {
-                        MiuixEditPage(
-                            id = if (id != -1L) id else null,
-                            useBlur = useBlur,
-                        )
-                    } else {
-                        EditPage(
-                            id = if (id != -1L) id else null,
-                            useBlur = useBlur,
-                        )
+                    val id = if (key.id != -1L) key.id else null
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiEditPage(id = id, useBlur = useBlur)
+                        UiStyle.MIUIX -> MiuixEditPage(id = id, useBlur = useBlur)
+                        UiStyle.MATERIAL3 -> EditPage(id = id, useBlur = useBlur)
                     }
                 }
             }
             entry<Route.ApplyConfig>(swipeDismiss = swipeBackDirection) { key ->
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
                     val id = key.id
-                    if (uiState.useMiuix) {
-                        MiuixApplyPage(id, useBlur)
-                    } else {
-                        ApplyPage(id, useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiApplyPage(id, useBlur)
+                        UiStyle.MIUIX -> MiuixApplyPage(id, useBlur)
+                        UiStyle.MATERIAL3 -> ApplyPage(id, useBlur)
                     }
                 }
             }
             entry<Route.About>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixAboutPage(useBlur)
-                    } else {
-                        AboutPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiAboutPage(useBlur)
+                        UiStyle.MIUIX -> MiuixAboutPage(useBlur)
+                        UiStyle.MATERIAL3 -> AboutPage(useBlur)
                     }
                 }
             }
             entry<Route.OpenSourceLicense>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixOpenSourceLicensePage(useBlur)
-                    } else {
-                        OpenSourceLicensePage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiOpenSourceLicensePage(useBlur)
+                        UiStyle.MIUIX -> MiuixOpenSourceLicensePage(useBlur)
+                        UiStyle.MATERIAL3 -> OpenSourceLicensePage(useBlur)
                     }
                 }
             }
             entry<Route.Theme>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixThemeSettingsPage()
-                    } else {
-                        ThemeSettingsPage()
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiThemeSettingsPage()
+                        UiStyle.MIUIX -> MiuixThemeSettingsPage()
+                        UiStyle.MATERIAL3 -> ThemeSettingsPage()
                     }
                 }
             }
             entry<Route.Network>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixNetworkPage(useBlur)
-                    } else {
-                        NetworkPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiNetworkPage(useBlur)
+                        UiStyle.MIUIX -> MiuixNetworkPage(useBlur)
+                        UiStyle.MATERIAL3 -> NetworkPage(useBlur)
                     }
                 }
             }
             entry<Route.InstallerGlobal>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixInstallerGlobalSettingsPage(useBlur)
-                    } else {
-                        InstallerGlobalSettingsPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiInstallerGlobalSettingsPage(useBlur)
+                        UiStyle.MIUIX -> MiuixInstallerGlobalSettingsPage(useBlur)
+                        UiStyle.MATERIAL3 -> InstallerGlobalSettingsPage(useBlur)
                     }
                 }
             }
             entry<Route.AuthorizerCust>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixAuthorizerCustPage(useBlur)
-                    } else {
-                        AuthorizerCustPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiAuthorizerCustPage(useBlur)
+                        UiStyle.MIUIX -> MiuixAuthorizerCustPage(useBlur)
+                        UiStyle.MATERIAL3 -> AuthorizerCustPage(useBlur)
                     }
                 }
             }
             entry<Route.DialogSettings>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixDialogSettingsPage(useBlur)
-                    } else {
-                        DialogSettingsPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiDialogSettingsPage(useBlur)
+                        UiStyle.MIUIX -> MiuixDialogSettingsPage(useBlur)
+                        UiStyle.MATERIAL3 -> DialogSettingsPage(useBlur)
                     }
                 }
             }
             entry<Route.NotificationSettings>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixNotificationSettingsPage(useBlur)
-                    } else {
-                        NotificationSettingsPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiNotificationSettingsPage(useBlur)
+                        UiStyle.MIUIX -> MiuixNotificationSettingsPage(useBlur)
+                        UiStyle.MATERIAL3 -> NotificationSettingsPage(useBlur)
                     }
                 }
             }
             entry<Route.UninstallerGlobal>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixUninstallerGlobalSettingsPage(useBlur)
-                    } else {
-                        UninstallerGlobalSettingsPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiUninstallerGlobalSettingsPage(useBlur)
+                        UiStyle.MIUIX -> MiuixUninstallerGlobalSettingsPage(useBlur)
+                        UiStyle.MATERIAL3 -> UninstallerGlobalSettingsPage(useBlur)
                     }
                 }
             }
             entry<Route.Lab>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack, hostGlassDropdowns = true) {
-                    if (uiState.useMiuix) {
-                        MiuixLabPage(useBlur)
-                    } else {
-                        LabPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiLabPage(useBlur)
+                        UiStyle.MIUIX -> MiuixLabPage(useBlur)
+                        UiStyle.MATERIAL3 -> LabPage(useBlur)
                     }
                 }
             }
             entry<Route.DefaultInstaller>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixDefaultInstallerPage(useBlur)
-                    } else {
-                        DefaultInstallerPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiDefaultInstallerPage(useBlur)
+                        UiStyle.MIUIX -> MiuixDefaultInstallerPage(useBlur)
+                        UiStyle.MATERIAL3 -> DefaultInstallerPage(useBlur)
                     }
                 }
             }
             entry<Route.Priv>(swipeDismiss = swipeBackDirection) {
                 InstallerNavEntry(pageTheme, interceptPredictiveBack, onBack) {
-                    if (uiState.useMiuix) {
-                        MiuixPrivPage(useBlur)
-                    } else {
-                        PrivPage(useBlur)
+                    when (uiState.uiStyle) {
+                        UiStyle.COUI -> CouiPrivPage(useBlur)
+                        UiStyle.MIUIX -> MiuixPrivPage(useBlur)
+                        UiStyle.MATERIAL3 -> PrivPage(useBlur)
                     }
                 }
             }
@@ -271,7 +282,18 @@ private fun InstallerNavEntry(
         onBackCompleted = onBack,
     )
     pageTheme {
-        if (hostGlassDropdowns && InstallerTheme.useMiuixOs4) {
+        if (InstallerTheme.uiStyle == UiStyle.COUI) {
+            ProvideCouiMenuBackdrop(isolateContent = false) { windowSource ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(windowSource)
+                        .background(CouiTheme.colorScheme.background),
+                ) {
+                    content()
+                }
+            }
+        } else if (hostGlassDropdowns && InstallerTheme.useMiuixOs4) {
             InstallerMiuixComponentHost(
                 useOs4 = true,
                 useBlur = true,

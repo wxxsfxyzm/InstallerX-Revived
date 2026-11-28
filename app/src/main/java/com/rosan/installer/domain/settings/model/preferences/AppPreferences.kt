@@ -10,6 +10,7 @@ import com.rosan.installer.domain.settings.model.config.NetworkSourceMode
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 
 /**
  * The aggregated state of all application preferences.
@@ -45,6 +46,7 @@ data class AppPreferences(
     val tryMultipleAuthorizersOnInstall: Boolean,
     val smartAuthorizerCandidates: List<SmartAuthorizerCandidate>,
     val showMiuixUI: Boolean,
+    val uiStyle: UiStyle = if (showMiuixUI) UiStyle.MIUIX else UiStyle.MATERIAL3,
     val preferSystemIcon: Boolean,
     val showLauncherIcon: Boolean,
     val userSetLSPosedActive: Boolean,
@@ -87,6 +89,10 @@ data class AppPreferences(
     val useDynamicColor: Boolean,
     val useMiuixOs4: Boolean = false,
     val useMiuixMonet: Boolean,
+    val useCouiMonet: Boolean = false,
+    val useCouiContourGlow: Boolean = true,
+    val couiBlurRadius: Int = 120,
+    val couiGlassOpacity: Int = 88,
     val useAppleFloatingBar: Boolean,
     val seedColorInt: Int, // Stored as raw Int from DataStore
     val wallpaperSeedColorInt: Int,

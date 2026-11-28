@@ -23,6 +23,7 @@ import com.rosan.installer.domain.settings.model.preferences.SmartAuthorizerPref
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.domain.settings.repository.AppSettingsRepository
 import com.rosan.installer.domain.settings.repository.BooleanSetting
 import com.rosan.installer.domain.settings.repository.IntSetting
@@ -53,6 +54,11 @@ class AppSettingsRepositoryImpl(
         } else {
             rawGithubUpdateChannel
         }
+
+        val uiStyle = UiStyle.fromValueOrDefault(
+            value = prefs[AppDataStore.UI_STYLE],
+            fallbackMiuix = prefs[AppDataStore.UI_USE_MIUIX] ?: false,
+        )
 
         // Map all preferences explicitly by key. Order no longer matters.
         AppPreferences(
@@ -93,7 +99,8 @@ class AppSettingsRepositoryImpl(
                 value = prefs[AppDataStore.SMART_AUTHORIZER_CANDIDATES].orEmpty(),
                 isSessionInstallSupported = capabilityProvider.isSessionInstallSupported,
             ),
-            showMiuixUI = prefs[AppDataStore.UI_USE_MIUIX] ?: false,
+            showMiuixUI = uiStyle == UiStyle.MIUIX,
+            uiStyle = uiStyle,
             preferSystemIcon = prefs[AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL] ?: false,
             showLauncherIcon = prefs[AppDataStore.SHOW_LAUNCHER_ICON] ?: true,
             userSetLSPosedActive = prefs[AppDataStore.USER_SET_LSPOSED_ACTIVE] ?: false,
@@ -163,15 +170,19 @@ class AppSettingsRepositoryImpl(
             useDynamicColor = prefs[AppDataStore.THEME_USE_DYNAMIC_COLOR] ?: true,
             useMiuixOs4 = prefs[AppDataStore.UI_USE_MIUIX_OS4] ?: false,
             useMiuixMonet = prefs[AppDataStore.UI_USE_MIUIX_MONET] ?: false,
+            useCouiMonet = prefs[AppDataStore.UI_USE_COUI_MONET] ?: false,
+            useCouiContourGlow = prefs[AppDataStore.UI_USE_COUI_CONTOUR_GLOW] ?: true,
+            couiBlurRadius = (prefs[AppDataStore.UI_COUI_BLUR_RADIUS] ?: 120).coerceIn(0, 200),
+            couiGlassOpacity = (prefs[AppDataStore.UI_COUI_GLASS_OPACITY] ?: 88).coerceIn(40, 100),
             useAppleFloatingBar = prefs[AppDataStore.UI_USE_APPLE_FLOATING_BAR] ?: false,
             seedColorInt = prefs[AppDataStore.THEME_SEED_COLOR] ?: DEFAULT_SEED_COLOR,
             wallpaperSeedColorInt = prefs[AppDataStore.THEME_WALLPAPER_SEED_COLOR] ?: 0,
             useDynColorFollowPkgIcon = prefs[AppDataStore.UI_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
             useDynColorFollowPkgIconForLiveActivity = prefs[AppDataStore.LIVE_ACTIVITY_DYN_COLOR_FOLLOW_PKG_ICON] ?: false,
-            // OS4 always uses blur; retain the stored preference for OS3 and Material 3.
+            // OS4 always uses blur; retain the stored preference for OS3, COUI, and Material 3.
             useBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 (
-                    (prefs[AppDataStore.UI_USE_MIUIX] == true && prefs[AppDataStore.UI_USE_MIUIX_OS4] == true) ||
+                    (uiStyle == UiStyle.MIUIX && prefs[AppDataStore.UI_USE_MIUIX_OS4] == true) ||
                         (prefs[AppDataStore.UI_USE_BLUR] ?: true)
                     ),
             predictiveBackAnimation = PredictiveBackAnimation.fromValueOrDefault(
@@ -223,6 +234,7 @@ class AppSettingsRepositoryImpl(
     override suspend fun updateUninstallFlags(transform: (Int) -> Int) = appDataStore.updateUninstallFlags(transform)
 
     private fun stringKey(setting: StringSetting): Preferences.Key<String> = when (setting) {
+        StringSetting.UiStyle -> AppDataStore.UI_STYLE
         StringSetting.ThemeMode -> AppDataStore.THEME_MODE
         StringSetting.ThemePaletteStyle -> AppDataStore.THEME_PALETTE_STYLE
         StringSetting.ThemeColorSpec -> AppDataStore.THEME_COLOR_SPEC
@@ -244,6 +256,8 @@ class AppSettingsRepositoryImpl(
     private fun intKey(setting: IntSetting): Preferences.Key<Int> = when (setting) {
         IntSetting.ThemeSeedColor -> AppDataStore.THEME_SEED_COLOR
         IntSetting.ThemeWallpaperSeedColor -> AppDataStore.THEME_WALLPAPER_SEED_COLOR
+        IntSetting.UiCouiBlurRadius -> AppDataStore.UI_COUI_BLUR_RADIUS
+        IntSetting.UiCouiGlassOpacity -> AppDataStore.UI_COUI_GLASS_OPACITY
         IntSetting.ShowMiIslandBlockingInterval -> AppDataStore.SHOW_MI_ISLAND_BLOCKING_INTERVAL_MS
         IntSetting.NotificationSuccessAutoClearSeconds -> AppDataStore.NOTIFICATION_SUCCESS_AUTO_CLEAR_SECONDS
         IntSetting.CloseSessionCountdown -> AppDataStore.CLOSE_SESSION_COUNTDOWN
@@ -269,6 +283,10 @@ class AppSettingsRepositoryImpl(
         BooleanSetting.UiUseMiuixOs4 -> AppDataStore.UI_USE_MIUIX_OS4
 
         BooleanSetting.UiUseMiuixMonet -> AppDataStore.UI_USE_MIUIX_MONET
+
+        BooleanSetting.UiUseCouiMonet -> AppDataStore.UI_USE_COUI_MONET
+
+        BooleanSetting.UiUseCouiContourGlow -> AppDataStore.UI_USE_COUI_CONTOUR_GLOW
 
         BooleanSetting.UiUseAppleFloatingBar -> AppDataStore.UI_USE_APPLE_FLOATING_BAR
 

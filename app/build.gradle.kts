@@ -272,6 +272,11 @@ dependencies {
     implementation(libs.miuix.icons)
     implementation(libs.miuix.navigation)
 
+    // coui
+    implementation(libs.coui.core)
+    implementation(libs.coui.material3)
+    implementation(libs.coui.icons)
+
     // okhttp
     implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)

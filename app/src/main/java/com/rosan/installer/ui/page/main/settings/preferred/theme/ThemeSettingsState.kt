@@ -9,11 +9,12 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitD
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.ui.theme.material.PresetColors
 import com.rosan.installer.ui.theme.material.RawColor
 
 data class ThemeSettingsState(
-    val showMiuixUI: Boolean = false,
+    val uiStyle: UiStyle = UiStyle.MATERIAL3,
     val useBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val useAmoled: Boolean = false,
@@ -22,6 +23,10 @@ data class ThemeSettingsState(
     val useDynamicColor: Boolean = true,
     val useMiuixOs4: Boolean = false,
     val useMiuixMonet: Boolean = false,
+    val useCouiMonet: Boolean = false,
+    val useCouiContourGlow: Boolean = true,
+    val couiBlurRadius: Int = 120,
+    val couiGlassOpacity: Int = 88,
     val useAppleFloatingBar: Boolean = false,
     val seedColor: Color = PresetColors[0].color,
     val availableColors: List<RawColor> = PresetColors,
@@ -31,4 +36,6 @@ data class ThemeSettingsState(
     val showLiveActivity: Boolean = false,
     val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.None,
     val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FOLLOW_GESTURE,
-)
+) {
+    val showMiuixUI: Boolean get() = uiStyle == UiStyle.MIUIX
+}

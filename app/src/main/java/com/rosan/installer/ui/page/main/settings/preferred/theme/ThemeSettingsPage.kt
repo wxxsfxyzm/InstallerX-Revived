@@ -62,6 +62,7 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackAnima
 import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitDirection
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 import com.rosan.installer.ui.icons.AppIcons
 import com.rosan.installer.ui.navigation.LocalNavigator
 import com.rosan.installer.ui.page.main.widget.card.ColorSwatchPreview
@@ -178,10 +179,10 @@ fun ThemeSettingsPage(viewModel: ThemeSettingsViewModel = koinViewModel()) {
                 ) {
                     // Option 1: Google UI
                     item {
-                        val selected = !uiState.showMiuixUI
+                        val selected = uiState.uiStyle == UiStyle.MATERIAL3
                         val onClick = {
-                            if (uiState.showMiuixUI) {
-                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(false))
+                            if (!selected) {
+                                viewModel.dispatch(ThemeSettingsAction.SetUiStyle(UiStyle.MATERIAL3))
                             }
                         }
                         RadioButtonWidget(
@@ -194,15 +195,31 @@ fun ThemeSettingsPage(viewModel: ThemeSettingsViewModel = koinViewModel()) {
                     }
                     // Option 2: MIUIX UI
                     item {
-                        val selected = uiState.showMiuixUI
+                        val selected = uiState.uiStyle == UiStyle.MIUIX
                         val onClick = {
-                            if (!uiState.showMiuixUI) {
-                                viewModel.dispatch(ThemeSettingsAction.ChangeUseMiuix(true))
+                            if (!selected) {
+                                viewModel.dispatch(ThemeSettingsAction.SetUiStyle(UiStyle.MIUIX))
                             }
                         }
                         RadioButtonWidget(
                             title = stringResource(R.string.theme_settings_miuix_ui),
                             description = stringResource(R.string.theme_settings_miuix_ui_desc),
+                            iconPlaceholder = false,
+                            selected = selected,
+                            onClick = onClick,
+                        )
+                    }
+                    // Option 3: COUI UI
+                    item {
+                        val selected = uiState.uiStyle == UiStyle.COUI
+                        val onClick = {
+                            if (!selected) {
+                                viewModel.dispatch(ThemeSettingsAction.SetUiStyle(UiStyle.COUI))
+                            }
+                        }
+                        RadioButtonWidget(
+                            title = stringResource(R.string.theme_settings_coui_ui),
+                            description = stringResource(R.string.theme_settings_coui_ui_desc),
                             iconPlaceholder = false,
                             selected = selected,
                             onClick = onClick,

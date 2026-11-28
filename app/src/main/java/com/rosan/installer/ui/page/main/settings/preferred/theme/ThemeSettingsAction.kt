@@ -8,8 +8,10 @@ import com.rosan.installer.domain.settings.model.preferences.PredictiveBackExitD
 import com.rosan.installer.domain.settings.model.preferences.theme.PaletteStyle
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeColorSpec
 import com.rosan.installer.domain.settings.model.preferences.theme.ThemeMode
+import com.rosan.installer.domain.settings.model.preferences.theme.UiStyle
 
 sealed interface ThemeSettingsAction {
+    data class SetUiStyle(val style: UiStyle) : ThemeSettingsAction
     data class ChangeUseMiuix(val useMiuix: Boolean) : ThemeSettingsAction
     data class SetUseBlur(val enable: Boolean) : ThemeSettingsAction
     data class SetThemeMode(val mode: ThemeMode) : ThemeSettingsAction
@@ -19,6 +21,10 @@ sealed interface ThemeSettingsAction {
     data class SetUseDynamicColor(val use: Boolean) : ThemeSettingsAction
     data class SetUseMiuixOs4(val use: Boolean) : ThemeSettingsAction
     data class SetUseMiuixMonet(val use: Boolean) : ThemeSettingsAction
+    data class SetUseCouiMonet(val use: Boolean) : ThemeSettingsAction
+    data class SetUseCouiContourGlow(val use: Boolean) : ThemeSettingsAction
+    data class SetCouiBlurRadius(val radius: Int) : ThemeSettingsAction
+    data class SetCouiGlassOpacity(val opacity: Int) : ThemeSettingsAction
     data class SetUseAppleFloatingBar(val use: Boolean) : ThemeSettingsAction
     data class SetDynColorFollowPkgIcon(val follow: Boolean) : ThemeSettingsAction
     data class SetDynColorFollowPkgIconForLiveActivity(val follow: Boolean) : ThemeSettingsAction
