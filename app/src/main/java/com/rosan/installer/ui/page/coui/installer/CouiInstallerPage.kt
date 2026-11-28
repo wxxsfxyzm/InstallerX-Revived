@@ -6,17 +6,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Outline
 import android.graphics.Paint
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.Gravity
-import android.view.View
-import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -37,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.tappableElementIgnoringVisibility
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Refresh
@@ -47,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -755,9 +752,10 @@ private fun CouiFloatingInstallerDialog(
         base.copy(alpha = resolvedGlassAlpha)
     }
     val solidSurfaceColor = dialogColors.surface
-    // Exact 45dp circular radius is strictly tangent to and inside CouiShape(45.dp, 3f) at all angles.
-    val windowBlurCornerRadiusPx = with(density) { CouiDialogDefaults.cornerRadius.toPx() }
-    val contourRadiusPx = windowBlurCornerRadiusPx
+    val cornerRadius = CouiDialogDefaults.cornerRadius
+    val contourRadiusPx = with(density) { cornerRadius.toPx() }
+    // Android's background blur reads a round-rect outline. The COUI squircle is a path.
+    val windowShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
 
     ComposeDialog(
         onDismissRequest = onDismissRequest,
@@ -766,88 +764,33 @@ private fun CouiFloatingInstallerDialog(
             dismissOnClickOutside = dismissible,
             usePlatformDefaultWidth = false,
             decorFitsSystemWindows = false,
+            backgroundBlurRadius = with(density) { effectiveBlurRadius.toDp() },
+            scrimAlpha = if (dark) 0.48f else 0.22f,
+            windowShape = windowShape,
         ),
     ) {
         val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
-        DisposableEffect(
-            dialogWindow,
-            dark,
-            effectiveBlurRadius,
-            cardWidthPx,
-            bottomMarginPx,
-            windowBlurCornerRadiusPx,
-        ) {
-            var layoutListener: View.OnLayoutChangeListener? = null
-            dialogWindow?.let { window ->
-                window.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
-                window.setWindowAnimations(R.style.CouiInstallerDialogAnimation)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-                }
-                window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-                window.setDimAmount(if (dark) 0.48f else 0.22f)
-                window.attributes = window.attributes.apply {
+        SideEffect {
+            val window = dialogWindow ?: return@SideEffect
+            val attributes = window.attributes
+            val gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            val flags = (attributes.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND) and
+                WindowManager.LayoutParams.FLAG_BLUR_BEHIND.inv()
+            val animation = R.style.CouiInstallerDialogAnimation
+            if (attributes.gravity != gravity || attributes.windowAnimations != animation ||
+                attributes.flags != flags || attributes.width != cardWidthPx ||
+                attributes.height != WindowManager.LayoutParams.WRAP_CONTENT || attributes.y != bottomMarginPx
+            ) {
+                window.attributes = attributes.apply {
+                    this.gravity = gravity
+                    windowAnimations = animation
+                    this.flags = flags
                     width = cardWidthPx
                     height = WindowManager.LayoutParams.WRAP_CONTENT
                     y = bottomMarginPx
                 }
-                val decor = window.decorView
-                decor.setPadding(0, 0, 0, 0)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && effectiveBlurRadius > 0) {
-                    val fallbackHeight = (windowBlurCornerRadiusPx * 2f).toInt().coerceAtLeast(1)
-                    fun buildBlurDrawable(w: Int, h: Int): RoundedBlurWindowDrawable {
-                        val safeW = w.coerceAtLeast(1)
-                        val safeH = h.coerceAtLeast(1)
-                        val r = minOf(windowBlurCornerRadiusPx, safeW / 2f, safeH / 2f)
-                        return RoundedBlurWindowDrawable(r, safeW, safeH).apply {
-                            setBounds(0, 0, safeW, safeH)
-                        }
-                    }
-
-                    decor.outlineProvider = object : ViewOutlineProvider() {
-                        override fun getOutline(view: View, outline: Outline) {
-                            if (view.width > 0 && view.height > 0) {
-                                val r = minOf(windowBlurCornerRadiusPx, view.width / 2f, view.height / 2f)
-                                outline.setRoundRect(0, 0, view.width, view.height, r)
-                            }
-                        }
-                    }
-                    decor.clipToOutline = true
-
-                    val initW = decor.width.takeIf { it > 0 } ?: cardWidthPx.coerceAtLeast(1)
-                    val initH = decor.height.takeIf { it > 0 } ?: fallbackHeight
-                    window.setBackgroundDrawable(buildBlurDrawable(initW, initH))
-                    window.setBackgroundBlurRadius(effectiveBlurRadius)
-
-                    var appliedW = decor.width
-                    var appliedH = decor.height
-                    val listener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-                        if (v.width > 0 && v.height > 0 && (v.width != appliedW || v.height != appliedH)) {
-                            appliedW = v.width
-                            appliedH = v.height
-                            // Pass a fresh drawable with real layout bounds so DecorView.updateBackgroundBlurCorners()
-                            // reads MODE_ROUND_RECT with the exact 45dp radius instead of an empty initial outline.
-                            window.setBackgroundDrawable(buildBlurDrawable(v.width, v.height))
-                            v.invalidateOutline()
-                        }
-                    }
-                    decor.addOnLayoutChangeListener(listener)
-                    layoutListener = listener
-                } else {
-                    decor.clipToOutline = false
-                    decor.outlineProvider = ViewOutlineProvider.BACKGROUND
-                    window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        window.setBackgroundBlurRadius(0)
-                    }
-                }
             }
-            onDispose {
-                val listener = layoutListener
-                if (listener != null) {
-                    dialogWindow?.decorView?.removeOnLayoutChangeListener(listener)
-                }
-            }
+            window.decorView.setPadding(0, 0, 0, 0)
         }
 
         val contour = remember(contourEnabled, useGlassSurface) {
@@ -1055,31 +998,6 @@ private fun CouiDialogCornerButton(
             modifier = Modifier.size(19.dp),
             tint = CouiTheme.colorScheme.onSurface,
         )
-    }
-}
-
-/**
- * Window background drawable whose [getOutline] always supplies a valid [Outline.setRoundRect]
- * even before the first layout pass, preventing [android.view.Window.setBackgroundBlurRadius]
- * from falling back to a 0-radius rectangular blur behind rounded dialogs.
- */
-private class RoundedBlurWindowDrawable(
-    private val radiusPx: Float,
-    private val fallbackWidthPx: Int,
-    private val fallbackHeightPx: Int,
-) : GradientDrawable() {
-    init {
-        shape = RECTANGLE
-        cornerRadius = radiusPx
-        setColor(android.graphics.Color.argb(1, 255, 255, 255))
-    }
-
-    override fun getOutline(outline: Outline) {
-        val w = bounds.width().takeIf { it > 0 } ?: fallbackWidthPx.coerceAtLeast(1)
-        val h = bounds.height().takeIf { it > 0 } ?: fallbackHeightPx.coerceAtLeast(1)
-        val r = minOf(radiusPx, w / 2f, h / 2f)
-        outline.setRoundRect(0, 0, w, h, r)
-        outline.alpha = 1f
     }
 }
 
